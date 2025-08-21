@@ -82,12 +82,29 @@ def check_mysql():
     """检查MySQL"""
     print("\n🗄️ 检查MySQL...")
     try:
+        # 检查MySQL版本
         result = subprocess.run(['mysql', '--version'], 
                               capture_output=True, text=True)
         if result.returncode == 0:
             mysql_version = result.stdout.strip()
             print(f"✅ {mysql_version}")
-            return True
+            
+            # 检查项目数据库连接
+            try:
+                db_result = subprocess.run([
+                    'mysql', '-u', 'coderwiki_user', 
+                    '-pcoderwiki_password', 'coderwiki', 
+                    '-e', 'SELECT 1;'
+                ], capture_output=True, text=True)
+                if db_result.returncode == 0:
+                    print("✅ 项目数据库连接成功")
+                    return True
+                else:
+                    print("❌ 项目数据库连接失败")
+                    return False
+            except Exception as e:
+                print(f"❌ 项目数据库连接失败: {e}")
+                return False
         else:
             print("❌ MySQL未安装或未在PATH中")
             return False
