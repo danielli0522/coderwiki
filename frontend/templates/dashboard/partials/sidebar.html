@@ -1,0 +1,58 @@
+<aside class="dashboard-sidebar">
+    <div class="sidebar-content">
+        <div class="user-profile">
+            <div class="user-avatar">
+                <i class="fas fa-user-circle fa-3x"></i>
+            </div>
+            <div class="user-info">
+                <h6>{{ current_user.username }}</h6>
+                <small class="text-muted">{{ current_user.email }}</small>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" href="/dashboard">
+                        <i class="fas fa-tachometer-alt me-2"></i>仪表板
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/repositories">
+                        <i class="fas fa-folder me-2"></i>仓库管理
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/documents">
+                        <i class="fas fa-file-alt me-2"></i>文档管理
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/analysis">
+                        <i class="fas fa-chart-bar me-2"></i>代码分析
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/tasks">
+                        <i class="fas fa-tasks me-2"></i>任务管理
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/settings">
+                        <i class="fas fa-cog me-2"></i>系统设置
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <div class="system-status">
+                <div class="status-indicator">
+                    <span class="status-dot" id="systemStatusDot"></span>
+                    <span id="systemStatusText">系统正常</span>
+                </div>
+                <small class="text-muted">最后更新: <span id="lastUpdate">刚刚</span></small>
+            </div>
+        </div>
+    </div>
+</aside>

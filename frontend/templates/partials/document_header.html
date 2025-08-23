@@ -1,0 +1,158 @@
+<!-- Document Header Component -->
+<div class="document-header">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <!-- Document Title and Info -->
+            <div class="col-md-6">
+                <div class="document-title-section">
+                    <h1 class="document-title" id="documentTitle">{{ document.title }}</h1>
+                    <div class="document-meta">
+                        <span class="meta-item">
+                            <i class="fas fa-file-alt"></i>
+                            <span id="documentType">技术文档</span>
+                        </span>
+                        <span class="meta-item">
+                            <i class="fas fa-code-branch"></i>
+                            <span id="documentVersion">{{ document.version }}</span>
+                        </span>
+                        <span class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            <span id="documentTime">{{ document.created_at }}</span>
+                        </span>
+                        <span class="meta-item">
+                            <i class="fas fa-user"></i>
+                            <span id="documentAuthor">{{ document.author }}</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="col-md-6">
+                <div class="document-actions">
+                    <!-- Version Selector -->
+                    <div class="version-selector">
+                        <label for="versionSelect" class="form-label">版本:</label>
+                        <select class="form-select form-select-sm" id="versionSelect" onchange="documentViewer.changeVersion(this.value)">
+                            <option value="{{ document.version }}" selected>v{{ document.version }}</option>
+                            <!-- Additional versions will be loaded dynamically -->
+                        </select>
+                    </div>
+                    
+                    <!-- Action Buttons Group -->
+                    <div class="action-buttons-group">
+                        <!-- Export Button -->
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-download"></i> 导出
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+                                <li><a class="dropdown-item" href="#" onclick="documentViewer.exportDocument('pdf')">
+                                    <i class="fas fa-file-pdf"></i> PDF
+                                </a></li>
+                                <li><a class="dropdown-item" href="#" onclick="documentViewer.exportDocument('word')">
+                                    <i class="fas fa-file-word"></i> Word
+                                </a></li>
+                                <li><a class="dropdown-item" href="#" onclick="documentViewer.exportDocument('markdown')">
+                                    <i class="fas fa-file-code"></i> Markdown
+                                </a></li>
+                                <li><a class="dropdown-item" href="#" onclick="documentViewer.exportDocument('html')">
+                                    <i class="fas fa-file-code"></i> HTML
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" onclick="documentViewer.showExportModal()">
+                                    <i class="fas fa-cog"></i> 高级选项
+                                </a></li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Share Button -->
+                        <button class="btn btn-outline-primary" onclick="documentViewer.showShareModal()">
+                            <i class="fas fa-share-alt"></i> 分享
+                        </button>
+                        
+                        <!-- Print Button -->
+                        <button class="btn btn-outline-secondary" onclick="documentViewer.printDocument()">
+                            <i class="fas fa-print"></i> 打印
+                        </button>
+                        
+                        <!-- More Actions -->
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="moreActionsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="moreActionsDropdown">
+                                <li><a class="dropdown-item" href="#" onclick="documentViewer.showVersionHistory()">
+                                    <i class="fas fa-history"></i> 版本历史
+                                </a></li>
+                                <li><a class="dropdown-item" href="#" onclick="documentViewer.toggleLineNumbers()">
+                                    <i class="fas fa-list-ol"></i> 行号
+                                </a></li>
+                                <li><a class="dropdown-item" href="#" onclick="documentViewer.toggleDarkMode()">
+                                    <i class="fas fa-moon"></i> 暗色模式
+                                </a></li>
+                                <li><a class="dropdown-item" href="#" onclick="documentViewer.increaseFontSize()">
+                                    <i class="fas fa-search-plus"></i> 放大字体
+                                </a></li>
+                                <li><a class="dropdown-item" href="#" onclick="documentViewer.decreaseFontSize()">
+                                    <i class="fas fa-search-minus"></i> 缩小字体
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" onclick="documentViewer.reloadDocument()">
+                                    <i class="fas fa-sync"></i> 重新加载
+                                </a></li>
+                                <li><a class="dropdown-item" href="#" onclick="documentViewer.downloadOriginal()">
+                                    <i class="fas fa-download"></i> 下载源文件
+                                </a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Progress Bar (for loading/exporting) -->
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="progress-container" id="progressContainer" style="display: none;">
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" id="progressBar" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">处理中...</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Breadcrumb Navigation -->
+        <div class="row mt-2">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ url_for('main.dashboard') }}">首页</a></li>
+                        <li class="breadcrumb-item"><a href="{{ url_for('main.repositories') }}">仓库</a></li>
+                        <li class="breadcrumb-item">{{ document.repository.name if document.repository else '仓库' }}</li>
+                        <li class="breadcrumb-item active" aria-current="page">{{ document.title }}</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Actions (for small screens) -->
+<div class="mobile-actions">
+    <div class="mobile-action-bar">
+        <button class="btn btn-sm btn-outline-primary" onclick="documentViewer.toggleMobileSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="documentViewer.toggleMobileSearch()">
+            <i class="fas fa-search"></i>
+        </button>
+        <button class="btn btn-sm btn-outline-info" onclick="documentViewer.exportDocument('pdf')">
+            <i class="fas fa-download"></i>
+        </button>
+        <button class="btn btn-sm btn-outline-warning" onclick="documentViewer.showShareModal()">
+            <i class="fas fa-share"></i>
+        </button>
+    </div>
+</div>

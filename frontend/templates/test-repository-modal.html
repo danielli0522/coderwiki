@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}仓库模态框测试 - CoderWiki{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1>仓库模态框交互测试</h1>
+            <p>这个页面用于测试仓库添加模态框的交互功能是否正常工作。</p>
+
+            <div class="mb-4">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#testRepositoryModal">
+                    打开仓库添加模态框
+                </button>
+            </div>
+
+            <div class="alert alert-info">
+                <h5>测试说明：</h5>
+                <ul>
+                    <li>点击"打开仓库添加模态框"按钮</li>
+                    <li>尝试在模态框中输入仓库URL</li>
+                    <li>尝试输入仓库名称</li>
+                    <li>尝试输入描述</li>
+                    <li>尝试点击验证URL按钮</li>
+                    <li>如果所有操作都正常，说明修复成功</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 测试仓库模态框 -->
+<div class="modal fade" id="testRepositoryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">添加仓库</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="testRepositoryForm">
+                    <div class="mb-3">
+                        <label for="testRepoUrl" class="form-label">仓库 URL *</label>
+                        <input type="url" class="form-control" id="testRepoUrl" placeholder="https://github.com/username/repository" required>
+                        <div class="form-text">支持 GitHub 仓库或 Git 仓库 URL</div>
+                        <div class="invalid-feedback" id="testUrlError"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="testRepoName" class="form-label">仓库名称</label>
+                        <input type="text" class="form-control" id="testRepoName" placeholder="留空自动从 URL 提取">
+                        <div class="form-text">如果不填写，将自动从 URL 中提取</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="testRepoDescription" class="form-label">描述</label>
+                        <textarea class="form-control" id="testRepoDescription" rows="3" placeholder="仓库描述（可选）"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="testValidateUrlBtn">
+                            <i class="fas fa-check-circle"></i> 验证 URL
+                        </button>
+                        <span id="testValidationResult" class="ms-2"></span>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="testAddRepoBtn">
+                    <i class="fas fa-plus"></i> 添加仓库
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 测试仓库模态框功能
+document.addEventListener('DOMContentLoaded', function() {
+    // 测试添加仓库按钮
+    document.getElementById('testAddRepoBtn').addEventListener('click', function() {
+        const url = document.getElementById('testRepoUrl').value;
+        const name = document.getElementById('testRepoName').value;
+        const description = document.getElementById('testRepoDescription').value;
+
+        alert(`测试成功！\n仓库URL: ${url}\n仓库名称: ${name}\n描述: ${description}`);
+    });
+
+    // 测试验证URL按钮
+    document.getElementById('testValidateUrlBtn').addEventListener('click', function() {
+        const url = document.getElementById('testRepoUrl').value;
+        const result = document.getElementById('testValidationResult');
+
+        if (url) {
+            result.innerHTML = '<span class="text-success"><i class="fas fa-check"></i> URL格式正确</span>';
+        } else {
+            result.innerHTML = '<span class="text-danger"><i class="fas fa-times"></i> 请输入URL</span>';
+        }
+    });
+
+    // 模态框显示时的额外测试
+    document.getElementById('testRepositoryModal').addEventListener('shown.bs.modal', function() {
+        console.log('仓库模态框已显示，开始测试交互...');
+
+        // 自动聚焦到URL输入框
+        setTimeout(() => {
+            const urlInput = document.getElementById('testRepoUrl');
+            if (urlInput) {
+                urlInput.focus();
+                console.log('URL输入框已获得焦点');
+            }
+        }, 200);
+    });
+
+    // 测试输入框交互
+    const inputs = ['testRepoUrl', 'testRepoName', 'testRepoDescription'];
+    inputs.forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+            input.addEventListener('input', function() {
+                console.log(`输入框 ${id} 值变化: ${this.value}`);
+            });
+
+            input.addEventListener('focus', function() {
+                console.log(`输入框 ${id} 获得焦点`);
+            });
+
+            input.addEventListener('blur', function() {
+                console.log(`输入框 ${id} 失去焦点`);
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

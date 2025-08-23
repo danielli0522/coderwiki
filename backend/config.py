@@ -50,10 +50,13 @@ class Config:
 
     # Claude Code服务配置
     CLAUDE_CODE_ENABLED = os.environ.get('CLAUDE_CODE_ENABLED', 'false').lower() == 'true'
-    BMAD_DOCS_PATH = os.environ.get('BMAD_DOCS_PATH', '/Users/lshl124/Documents/daniel/git/code/aigc/BMAD-METHOD/expansion-packs/bmad-docs-generator/')
+    BMAD_DOCS_PATH = os.environ.get('BMAD_DOCS_PATH', '../bmad-docs-generator/')
 
     # Git配置
     GIT_REPOS_PATH = Path(__file__).parent / 'repos'
+
+    # 文档生成配置 - 与Git仓库路径保持一致
+    REPOSITORY_BASE_PATH = GIT_REPOS_PATH
 
     # 日志配置
     LOG_LEVEL = os.environ.get('LOG_LEVEL', 'INFO')
@@ -96,7 +99,7 @@ class DevelopmentConfig(Config):
 
     # 开发环境数据库 - 使用MySQL
     SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or \
-        'mysql+pymysql://coderwiki_user:coderwiki_password@localhost:3306/coderwiki_dev'
+        'mysql+pymysql://coderwiki_user:coderwiki_password@localhost:3306/coderwiki'
 
     # 开发环境LLM配置
     LLM_MODEL = os.environ.get('DEV_LLM_MODEL', 'gpt-3.5-turbo')

@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+
+{% block title %}任务进度监控 - CoderWiki{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- 页面标题和控制 -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-1">任务进度监控</h1>
+                    <p class="text-muted mb-0">实时监控所有正在运行的任务进度</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="autoRefreshToggle" checked>
+                        <label class="form-check-label" for="autoRefreshToggle">自动刷新</label>
+                    </div>
+                    <button class="btn btn-primary" id="refreshAllBtn">
+                        <i class="fas fa-sync-alt"></i> 刷新全部
+                    </button>
+                    <button class="btn btn-outline-secondary" id="settingsBtn">
+                        <i class="fas fa-cog"></i> 设置
+                    </button>
+                </div>
+            </div>
+
+            <!-- 总体统计 -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">总任务数</h4>
+                                    <h2 class="mb-0" id="totalTasksCount">0</h2>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-tasks fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">运行中</h4>
+                                    <h2 class="mb-0" id="runningTasksCount">0</h2>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-play fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">平均进度</h4>
+                                    <h2 class="mb-0" id="averageProgress">0%</h2>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-chart-line fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">成功率</h4>
+                                    <h2 class="mb-0" id="successRate">0%</h2>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-check-circle fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 进度图表 -->
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">任务进度趋势</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="progressChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">任务类型分布</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="taskTypeChart" width="300" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 活跃任务列表 -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">活跃任务</h5>
+                                <div class="d-flex gap-2">
+                                    <select class="form-select form-select-sm" id="taskTypeFilter" style="width: 150px;">
+                                        <option value="">全部类型</option>
+                                        <option value="analysis">代码分析</option>
+                                        <option value="generation">文档生成</option>
+                                        <option value="processing">数据处理</option>
+                                        <option value="maintenance">系统维护</option>
+                                    </select>
+                                    <select class="form-select form-select-sm" id="sortBy" style="width: 120px;">
+                                        <option value="progress">按进度</option>
+                                        <option value="time">按时间</option>
+                                        <option value="priority">按优先级</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div id="activeTasksList">
+                                <div class="text-center text-muted">
+                                    <i class="fas fa-spinner fa-spin me-2"></i>
+                                    正在加载活跃任务...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 任务队列状态 -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">队列状态</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="queueStatus">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>待处理任务</span>
+                                    <span class="fw-bold" id="pendingQueueCount">0</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>运行中队列</span>
+                                    <span class="fw-bold" id="runningQueueCount">0</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>完成队列</span>
+                                    <span class="fw-bold" id="completedQueueCount">0</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span>失败队列</span>
+                                    <span class="fw-bold" id="failedQueueCount">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">系统性能</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="systemPerformance">
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span>CPU 使用率</span>
+                                        <span class="fw-bold" id="cpuUsage">0%</span>
+                                    </div>
+                                    <div class="progress" style="height: 8px;">
+                                        <div class="progress-bar bg-info" id="cpuProgressBar" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span>内存使用率</span>
+                                        <span class="fw-bold" id="memoryUsage">0%</span>
+                                    </div>
+                                    <div class="progress" style="height: 8px;">
+                                        <div class="progress-bar bg-warning" id="memoryProgressBar" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span>磁盘使用率</span>
+                                        <span class="fw-bold" id="diskUsage">0%</span>
+                                    </div>
+                                    <div class="progress" style="height: 8px;">
+                                        <div class="progress-bar bg-success" id="diskProgressBar" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 设置模态框 -->
+<div class="modal fade" id="settingsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">监控设置</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">刷新间隔 (秒)</label>
+                    <select class="form-select" id="refreshInterval">
+                        <option value="1000">1 秒</option>
+                        <option value="3000" selected>3 秒</option>
+                        <option value="5000">5 秒</option>
+                        <option value="10000">10 秒</option>
+                        <option value="30000">30 秒</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">最大显示任务数</label>
+                    <input type="number" class="form-control" id="maxTasksDisplay" value="50" min="10" max="200">
+                </div>
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="enableNotifications" checked>
+                        <label class="form-check-label" for="enableNotifications">
+                            启用通知
+                        </label>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="enableSound" checked>
+                        <label class="form-check-label" for="enableSound">
+                            启用声音提醒
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="saveSettingsBtn">保存设置</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 任务详情模态框 -->
+<div class="modal fade" id="taskDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">任务详情</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="taskDetailModalBody">
+                <!-- 动态内容 -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/task_progress.js') }}"></script>
+{% endblock %}

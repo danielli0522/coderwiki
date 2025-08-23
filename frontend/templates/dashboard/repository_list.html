@@ -1,0 +1,242 @@
+<!-- 仓库列表项模板 -->
+<template id="repositoryItemTemplate">
+    <div class="repository-item" data-repository-id="">
+        <div class="card repository-card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="d-flex align-items-start">
+                            <div class="repository-icon">
+                                <i class="fab fa-github fa-2x text-primary"></i>
+                            </div>
+                            <div class="repository-info flex-grow-1">
+                                <h5 class="repository-name mb-1">
+                                    <a href="#" class="text-decoration-none repository-link"></a>
+                                </h5>
+                                <p class="repository-description text-muted mb-2"></p>
+                                <div class="repository-meta">
+                                    <span class="badge bg-secondary repository-language me-2"></span>
+                                    <span class="text-muted repository-status me-3"></span>
+                                    <span class="text-muted repository-size"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="repository-stats d-flex justify-content-end align-items-center">
+                            <div class="stat-item me-3">
+                                <i class="fas fa-star text-warning"></i>
+                                <span class="stat-value star-count">0</span>
+                            </div>
+                            <div class="stat-item me-3">
+                                <i class="fas fa-code-branch text-info"></i>
+                                <span class="stat-value fork-count">0</span>
+                            </div>
+                            <div class="stat-item me-3">
+                                <i class="fas fa-file-code text-success"></i>
+                                <span class="stat-value file-count">0</span>
+                            </div>
+                        </div>
+                        <div class="repository-actions mt-2">
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-sm btn-outline-primary sync-btn" title="同步仓库">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-success analyze-btn" title="分析仓库">
+                                    <i class="fas fa-chart-line"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-info docs-btn" title="查看文档">
+                                    <i class="fas fa-file-alt"></i>
+                                </button>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item edit-btn" href="#">编辑</a></li>
+                                        <li><a class="dropdown-item settings-btn" href="#">设置</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item text-danger delete-btn" href="#">删除</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 仓库状态进度条 -->
+                <div class="repository-progress mt-3" style="display: none;">
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-analyzed" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <small class="text-muted mt-1 d-block progress-text"></small>
+                </div>
+                
+                <!-- 仓库错误信息 -->
+                <div class="repository-error alert alert-danger mt-3" style="display: none;">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span class="error-message"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<!-- 仓库列表样式 -->
+<style>
+.repository-item {
+    margin-bottom: 1rem;
+}
+
+.repository-card {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.repository-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.repository-icon {
+    margin-right: 1rem;
+    margin-top: 0.25rem;
+}
+
+.repository-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.repository-description {
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.repository-meta {
+    font-size: 0.85rem;
+}
+
+.repository-stats {
+    font-size: 0.9rem;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.stat-value {
+    font-weight: 600;
+}
+
+.repository-actions .btn-group .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.progress-bar-analyzed {
+    background: linear-gradient(45deg, #28a745, #20c997);
+}
+
+.repository-progress {
+    background: #f8f9fa;
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+.repository-error {
+    margin-bottom: 0;
+    padding: 0.75rem;
+    font-size: 0.875rem;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .repository-stats {
+        justify-content: flex-start !important;
+        margin-top: 1rem;
+    }
+    
+    .repository-actions {
+        margin-top: 1rem;
+    }
+    
+    .stat-item {
+        margin-right: 1rem;
+    }
+}
+
+/* 状态标签样式 */
+.status-active {
+    color: #28a745;
+}
+
+.status-inactive {
+    color: #6c757d;
+}
+
+.status-error {
+    color: #dc3545;
+}
+
+.status-cloning {
+    color: #ffc107;
+}
+
+.status-analyzing {
+    color: #17a2b8;
+}
+
+/* 语言标签颜色 */
+.language-python {
+    background-color: #3776ab;
+}
+
+.language-javascript {
+    background-color: #f7df1e;
+    color: #000;
+}
+
+.language-java {
+    background-color: #007396;
+}
+
+.language-typescript {
+    background-color: #3178c6;
+}
+
+.language-cpp {
+    background-color: #00599c;
+}
+
+.language-go {
+    background-color: #00add8;
+}
+
+.language-rust {
+    background-color: #ce422b;
+}
+
+.language-php {
+    background-color: #777bb4;
+}
+
+.language-ruby {
+    background-color: #cc342d;
+}
+
+.language-swift {
+    background-color: #fa7343;
+}
+
+.language-kotlin {
+    background-color: #7f52ff;
+}
+
+.language-default {
+    background-color: #6c757d;
+}
+</style>

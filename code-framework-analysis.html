@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoderWiki 项目代码框架分析 - BMAD文档生成器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            text-align: center;
+            font-size: 1.2em;
+        }
+
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .analysis-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .analysis-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .card-icon {
+            font-size: 2em;
+            margin-right: 15px;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .card-title {
+            font-size: 1.4em;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .card-subtitle {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .analysis-content {
+            color: #34495e;
+        }
+
+        .analysis-content h3 {
+            color: #2c3e50;
+            margin: 15px 0 10px 0;
+            font-size: 1.2em;
+        }
+
+        .analysis-content ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .analysis-content li {
+            margin-bottom: 8px;
+        }
+
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .stat-item {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+
+        .workflow-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .workflow-diagram {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        .agent-info {
+            background: #e8f4fd;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .progress-bar {
+            background: #ecf0f1;
+            border-radius: 10px;
+            height: 20px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            height: 100%;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .analysis-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 CoderWiki 项目代码框架分析</h1>
+            <p>基于 BMAD 文档生成器的智能代码分析系统</p>
+        </div>
+
+        <div class="analysis-grid">
+            <!-- 代码分析专家 -->
+            <div class="analysis-card">
+                <div class="card-header">
+                    <div class="card-icon">🔍</div>
+                    <div>
+                        <div class="card-title">代码分析专家</div>
+                        <div class="card-subtitle">Code Analyst - Alex</div>
+                    </div>
+                </div>
+                <div class="analysis-content">
+                    <h3>核心能力</h3>
+                    <ul>
+                        <li>深度代码库扫描</li>
+                        <li>技术栈识别与分析</li>
+                        <li>复杂流程发现</li>
+                        <li>架构模式识别</li>
+                        <li>依赖关系映射</li>
+                    </ul>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number">15+</div>
+                            <div class="stat-label">复杂流程</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">100%</div>
+                            <div class="stat-label">技术栈覆盖</div>
+                        </div>
+                    </div>
+
+                    <div class="agent-info">
+                        <strong>分析方法:</strong> 基于证据的系统化分析，每个结论都有具体的代码文件和行号支持
+                    </div>
+                </div>
+            </div>
+
+            <!-- 技术架构师 -->
+            <div class="analysis-card">
+                <div class="card-header">
+                    <div class="card-icon">🏗️</div>
+                    <div>
+                        <div class="card-title">技术架构师</div>
+                        <div class="card-subtitle">Tech Architect</div>
+                    </div>
+                </div>
+                <div class="analysis-content">
+                    <h3>架构视图</h3>
+                    <ul>
+                        <li>逻辑架构视图</li>
+                        <li>开发架构视图</li>
+                        <li>部署架构视图</li>
+                        <li>运行时架构视图</li>
+                        <li>数据架构视图</li>
+                    </ul>
+                    
+                    <div class="code-block">
+# 五视图架构分析
+- 逻辑视图: 功能模块划分
+- 开发视图: 代码组织结构
+- 部署视图: 环境配置
+- 运行时视图: 组件交互
+- 数据视图: 数据流设计
+                    </div>
+
+                    <div class="agent-info">
+                        <strong>输出格式:</strong> 包含 Mermaid 图表的技术总览文档
+                    </div>
+                </div>
+            </div>
+
+            <!-- 流程分析师 -->
+            <div class="analysis-card">
+                <div class="card-header">
+                    <div class="card-icon">🔄</div>
+                    <div>
+                        <div class="card-title">流程分析师</div>
+                        <div class="card-subtitle">Flow Analyst</div>
+                    </div>
+                </div>
+                <div class="analysis-content">
+                    <h3>流程分析</h3>
+                    <ul>
+                        <li>复杂业务流程识别</li>
+                        <li>序列图生成</li>
+                        <li>配置依赖分析</li>
+                        <li>性能瓶颈识别</li>
+                        <li>跨流程关系分析</li>
+                    </ul>
+                    
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 75%">
+                            分析进度: 75%
+                        </div>
+                    </div>
+
+                    <div class="agent-info">
+                        <strong>重点关注:</strong> 高复杂度和中等重要性的业务流程
+                    </div>
+                </div>
+            </div>
+
+            <!-- 问题诊断专家 -->
+            <div class="analysis-card">
+                <div class="card-header">
+                    <div class="card-icon">🔧</div>
+                    <div>
+                        <div class="card-title">问题诊断专家</div>
+                        <div class="card-subtitle">Problem Solver</div>
+                    </div>
+                </div>
+                <div class="analysis-content">
+                    <h3>SRE 视角分析</h3>
+                    <ul>
+                        <li>潜在问题预测</li>
+                        <li>用户视角问题</li>
+                        <li>系统视角问题</li>
+                        <li>监控建议</li>
+                        <li>故障处理流程</li>
+                    </ul>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number">90%+</div>
+                            <div class="stat-label">问题预测准确率</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">3天</div>
+                            <div class="stat-label">快速理解目标</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="workflow-section">
+            <h2>🚀 BMAD 文档生成工作流</h2>
+            
+            <div class="workflow-diagram">
+                <pre style="font-family: monospace; margin: 0;">
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   代码分析专家   │───▶│   技术架构师    │───▶│   流程分析师    │
+│   扫描代码库     │    │   生成架构视图  │    │   分析复杂流程  │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         ▼                       ▼                       ▼
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   用户确认 1    │    │   用户确认 2    │    │   问题诊断专家  │
+│  技术总览文档   │    │  流程分析文档   │    │   预测潜在问题  │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                                                                │
+                                                                ▼
+                                                    ┌─────────────────┐
+                                                    │   文档工程师    │
+                                                    │   生成最终文档  │
+                                                    └─────────────────┘
+                </pre>
+            </div>
+
+            <h3>工作流特点</h3>
+            <ul>
+                <li><strong>交互式验证:</strong> 每个关键阶段都有用户确认环节</li>
+                <li><strong>质量门控:</strong> 严格的质量检查确保文档准确性</li>
+                <li><strong>渐进式分析:</strong> 从宏观到微观，逐步深入</li>
+                <li><strong>多维度覆盖:</strong> 技术、流程、问题全方位分析</li>
+            </ul>
+
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number">8-12h</div>
+                    <div class="stat-label">完整工作流</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">4-6h</div>
+                    <div class="stat-label">快速工作流</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">95%+</div>
+                    <div class="stat-label">技术准确率</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">3天</div>
+                    <div class="stat-label">理解周期</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="analysis-grid">
+            <!-- 当前项目分析 -->
+            <div class="analysis-card">
+                <div class="card-header">
+                    <div class="card-icon">📊</div>
+                    <div>
+                        <div class="card-title">当前项目分析</div>
+                        <div class="card-subtitle">CoderWiki 项目概览</div>
+                    </div>
+                </div>
+                <div class="analysis-content">
+                    <h3>项目结构</h3>
+                    <ul>
+                        <li><strong>后端:</strong> Flask + SQLAlchemy + MySQL</li>
+                        <li><strong>前端:</strong> 原生 JavaScript + HTML/CSS</li>
+                        <li><strong>文档:</strong> BMAD 文档生成器集成</li>
+                        <li><strong>配置:</strong> 多环境配置管理</li>
+                    </ul>
+                    
+                    <h3>关键模块</h3>
+                    <ul>
+                        <li>用户认证系统</li>
+                        <li>代码仓库管理</li>
+                        <li>文档生成引擎</li>
+                        <li>任务队列系统</li>
+                        <li>实时通信 (WebSocket)</li>
+                    </ul>
+
+                    <div class="code-block">
+# 配置文件结构
+├── config/
+│   ├── development.py  # 开发环境
+│   ├── production.py   # 生产环境
+│   └── testing.py      # 测试环境
+├── backend/app/
+│   ├── api/           # API 接口
+│   ├── services/      # 业务逻辑
+│   ├── utils/         # 工具函数
+│   └── models/        # 数据模型
+                    </div>
+                </div>
+            </div>
+
+            <!-- BMAD 集成状态 -->
+            <div class="analysis-card">
+                <div class="card-header">
+                    <div class="card-icon">🔗</div>
+                    <div>
+                        <div class="card-title">BMAD 集成状态</div>
+                        <div class="card-subtitle">文档生成器集成</div>
+                    </div>
+                </div>
+                <div class="analysis-content">
+                    <h3>已集成组件</h3>
+                    <ul>
+                        <li>✅ BMAD 文档生成器框架</li>
+                        <li>✅ 多智能体协作系统</li>
+                        <li>✅ 代码分析引擎</li>
+                        <li>✅ 文档格式化工具</li>
+                        <li>✅ 任务队列管理</li>
+                    </ul>
+                    
+                    <h3>工作流配置</h3>
+                    <div class="code-block">
+# BMAD 配置
+bmad_docs_generator:
+  version: "1.0.0"
+  analysis_depth: "detailed"
+  enable_interactive_validation: true
+  enable_pattern_recognition: true
+  min_complex_flows: 15
+                    </div>
+
+                    <button class="btn" onclick="startAnalysis()">开始分析</button>
+                    <button class="btn" onclick="viewReports()">查看报告</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>🤖 基于 BMAD-Method 框架构建 | 让代码文档生成变得简单高效</p>
+        </div>
+    </div>
+
+    <script>
+        function startAnalysis() {
+            alert('正在启动 BMAD 代码分析工作流...\n\n这将调用多个专业代理来分析您的代码库并生成技术文档。');
+        }
+
+        function viewReports() {
+            alert('正在加载生成的分析报告...\n\n包括技术总览、复杂流程分析和问题诊断文档。');
+        }
+
+        // 添加一些交互效果
+        document.addEventListener('DOMContentLoaded', function() {
+            // 为卡片添加点击效果
+            const cards = document.querySelectorAll('.analysis-card');
+            cards.forEach(card => {
+                card.addEventListener('click', function() {
+                    this.style.transform = 'scale(1.02)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 200);
+                });
+            });
+
+            // 模拟进度条动画
+            const progressFill = document.querySelector('.progress-fill');
+            if (progressFill) {
+                setTimeout(() => {
+                    progressFill.style.width = '85%';
+                    progressFill.textContent = '分析进度: 85%';
+                }, 1000);
+            }
+        });
+    </script>
+</body>
+</html>

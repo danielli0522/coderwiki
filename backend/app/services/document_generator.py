@@ -534,6 +534,62 @@ class DocumentGenerator:
             if not doc_title:
                 doc_title = f"{repository.name}_{doc_type}_documentation"
 
+            # 检查是否有Claude Code生成的文件
+            claude_generated_files = []
+            if generation_metadata and isinstance(generation_metadata, dict):
+                claude_generated_files = generation_metadata.get('generated_files', [])
+                is_claude_code_generated = generation_metadata.get('claude_code_generated', False)
+            else:
+                is_claude_code_generated = False
+
+            # 创建文档存储目录
+            import os
+            from pathlib import Path
+
+            # 创建文档存储目录
+            docs_dir = Path(__file__).parent.parent.parent / 'docs' / 'generated'
+            docs_dir.mkdir(parents=True, exist_ok=True)
+
+            # 确定文件路径
+            file_path = None
+
+            # 如果有Claude Code生成的文件，使用第一个作为主要文件
+            if claude_generated_files and is_claude_code_generated:
+                # 使用Claude Code生成的文件路径
+                claude_file_path = claude_generated_files[0]
+                if os.path.exists(claude_file_path):
+                    # 复制Claude Code生成的文件到我们的文档目录
+                    claude_path = Path(claude_file_path)
+                    safe_title = "".join(c for c in doc_title if c.isalnum() or c in (' ', '-', '_')).rstrip()
+                    safe_title = safe_title.replace(' ', '_')
+                    filename = f"{safe_title}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.md"
+                    file_path = docs_dir / filename
+
+                    # 复制文件内容
+                    with open(claude_path, 'r', encoding='utf-8') as src:
+                        claude_content = src.read()
+
+                    # 写入到我们的文档目录
+                    with open(file_path, 'w', encoding='utf-8') as dst:
+                        dst.write(claude_content)
+
+                    logger.info(f"Using Claude Code generated file: {claude_file_path} -> {file_path}")
+                else:
+                    logger.warning(f"Claude Code generated file not found: {claude_file_path}")
+                    file_path = None
+
+            # 如果没有Claude Code生成的文件或文件不存在，创建新文件
+            if file_path is None:
+                # 生成文件名
+                safe_title = "".join(c for c in doc_title if c.isalnum() or c in (' ', '-', '_')).rstrip()
+                safe_title = safe_title.replace(' ', '_')
+                filename = f"{safe_title}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.md"
+                file_path = docs_dir / filename
+
+                # 写入文件
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    f.write(content)
+
             # 创建文档对象
             document = Document(
                 repository_id=repository.id,
@@ -543,6 +599,10 @@ class DocumentGenerator:
                 version="1.0",
                 status="published",
                 language="markdown",
+                document_type=doc_type,
+                format="markdown",
+                file_path=str(file_path),
+                generated_at=datetime.utcnow(),
                 llm_config_id=llm_config.id
             )
 
@@ -556,13 +616,19 @@ class DocumentGenerator:
 
             # 设置生成元数据
             if generation_metadata:
+                # 添加Claude Code文件信息到元数据
+                if claude_generated_files:
+                    generation_metadata['claude_generated_files'] = claude_generated_files
+                    generation_metadata['primary_file'] = str(file_path)
                 document.set_generation_metadata(generation_metadata)
 
             # 保存到数据库
             db.session.add(document)
             db.session.commit()
 
-            logger.info(f"Document saved: {document.title} (ID: {document.id})")
+            logger.info(f"Document saved: {document.title} (ID: {document.id}, File: {file_path})")
+            if claude_generated_files:
+                logger.info(f"Claude Code generated files: {claude_generated_files}")
 
             return document
 

@@ -1,0 +1,146 @@
+<!-- 侧边栏组件 -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h5 class="sidebar-title">
+            <i class="fas fa-bars"></i> 功能菜单
+        </h5>
+        <button class="btn btn-sm btn-outline-secondary d-lg-none" type="button" id="sidebarToggle">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    
+    <nav class="sidebar-nav">
+        <ul class="nav flex-column">
+            {% if current_user.is_authenticated %}
+            <!-- 仪表板 -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('main.dashboard') }}">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>仪表板</span>
+                </a>
+            </li>
+            
+            <!-- 仓库管理 -->
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="alert('仓库管理功能即将推出'); return false;">
+                    <i class="fas fa-folder"></i>
+                    <span>仓库管理</span>
+                </a>
+            </li>
+            
+            <!-- 文档管理 -->
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="alert('文档管理功能即将推出'); return false;">
+                    <i class="fas fa-file-alt"></i>
+                    <span>文档管理</span>
+                </a>
+            </li>
+            
+            <!-- 任务管理 -->
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="alert('任务管理功能即将推出'); return false;">
+                    <i class="fas fa-tasks"></i>
+                    <span>任务管理</span>
+                </a>
+            </li>
+            
+            <!-- 分析报告 -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('main.profile') }}">
+                    <i class="fas fa-user-cog"></i>
+                    <span>个人设置</span>
+                </a>
+            </li>
+            
+            <li class="nav-divider"></li>
+            
+            <!-- 系统设置 -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('main.help') }}">
+                    <i class="fas fa-cog"></i>
+                    <span>帮助中心</span>
+                </a>
+            </li>
+            
+            <!-- 用户管理 -->
+            {% if current_user.is_admin %}
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin.users') }}">
+                    <i class="fas fa-users"></i>
+                    <span>用户管理</span>
+                </a>
+            </li>
+            {% endif %}
+            
+            <li class="nav-divider"></li>
+            
+            <!-- 帮助支持 -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('main.help') }}">
+                    <i class="fas fa-question-circle"></i>
+                    <span>帮助中心</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('main.contact') }}">
+                    <i class="fas fa-envelope"></i>
+                    <span>联系我们</span>
+                </a>
+            </li>
+            {% else %}
+            <!-- 未登录用户显示的菜单 -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('main.about') }}">
+                    <i class="fas fa-info-circle"></i>
+                    <span>关于我们</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('main.help') }}">
+                    <i class="fas fa-question-circle"></i>
+                    <span>帮助中心</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('main.contact') }}">
+                    <i class="fas fa-envelope"></i>
+                    <span>联系我们</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    
+    <!-- 侧边栏底部 -->
+    <div class="sidebar-footer">
+        {% if current_user.is_authenticated %}
+        <div class="user-info">
+            <div class="user-avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="user-details">
+                <div class="user-name">{{ current_user.username }}</div>
+                <div class="user-role">
+                    {% if current_user.is_admin %}
+                    管理员
+                    {% else %}
+                    普通用户
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="sidebar-actions">
+            <button class="btn btn-sm btn-outline-primary w-100" id="toggleTheme">
+                <i class="fas fa-moon"></i> 深色模式
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 侧边栏遮罩层 (移动端) -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>

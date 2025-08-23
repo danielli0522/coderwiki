@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}代码分析 - CoderWiki{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">代码分析</h1>
+                <button class="btn btn-primary" id="newAnalysisBtn">
+                    <i class="fas fa-plus"></i> 新建分析
+                </button>
+            </div>
+
+            <!-- 分析统计 -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">总分析</h4>
+                                    <h2 class="mb-0">0</h2>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-chart-line fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">成功</h4>
+                                    <h2 class="mb-0">0</h2>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-check-circle fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">进行中</h4>
+                                    <h2 class="mb-0">0</h2>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-clock fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-danger text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">失败</h4>
+                                    <h2 class="mb-0">0</h2>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-exclamation-triangle fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 分析列表 -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">分析历史</h5>
+                        <div class="d-flex gap-2">
+                            <input type="text" class="form-control form-control-sm" placeholder="搜索分析..." id="analysisSearch">
+                            <select class="form-select form-select-sm" id="analysisStatusFilter">
+                                <option value="">全部状态</option>
+                                <option value="pending">待处理</option>
+                                <option value="running">进行中</option>
+                                <option value="completed">已完成</option>
+                                <option value="failed">失败</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>仓库</th>
+                                    <th>分析类型</th>
+                                    <th>状态</th>
+                                    <th>创建时间</th>
+                                    <th>完成时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="analysisTableBody">
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted">
+                                        <i class="fas fa-chart-bar fa-2x mb-2"></i>
+                                        <p>暂无分析记录</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 新建分析模态框 -->
+<div class="modal fade" id="newAnalysisModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">新建代码分析</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="newAnalysisForm">
+                    <div class="mb-3">
+                        <label for="analysisRepo" class="form-label">选择仓库</label>
+                        <select class="form-select" id="analysisRepo" required>
+                            <option value="">请选择仓库</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="analysisType" class="form-label">分析类型</label>
+                        <select class="form-select" id="analysisType" required>
+                            <option value="">请选择分析类型</option>
+                            <option value="complexity">代码复杂度分析</option>
+                            <option value="quality">代码质量分析</option>
+                            <option value="security">安全漏洞分析</option>
+                            <option value="performance">性能分析</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="analysisConfig" class="form-label">分析配置</label>
+                        <textarea class="form-control" id="analysisConfig" rows="3" placeholder="可选的分析配置参数（JSON格式）"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="startAnalysisBtn">开始分析</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/analysis.js') }}"></script>
+{% endblock %}
+
+

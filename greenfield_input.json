@@ -1,0 +1,10 @@
+{
+  "project_name": "绿地项目",
+  "project_type": "enterprise-app",
+  "requirements": ["用户管理", "权限控制", "数据分析"],
+  "timeline": "6个月",
+  "description": "一个企业级绿地项目，包含完整的用户管理系统、权限控制和数据分析功能",
+  "stakeholders": ["产品经理", "开发团队", "测试团队", "运维团队"],
+  "budget": "100万",
+  "team_size": 10
+}

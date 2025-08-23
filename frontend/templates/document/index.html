@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}文档管理 - CoderWiki{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">文档管理</h1>
+                <button class="btn btn-primary" id="addDocumentBtn">
+                    <i class="fas fa-plus"></i> 新建文档
+                </button>
+            </div>
+            
+            <!-- 文档统计 -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-file-alt text-primary fa-2x"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="card-title mb-0">总文档数</h6>
+                                    <h4 class="mb-0" id="totalDocuments">0</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-clock text-warning fa-2x"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="card-title mb-0">处理中</h6>
+                                    <h4 class="mb-0" id="processingDocuments">0</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-check-circle text-success fa-2x"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="card-title mb-0">已完成</h6>
+                                    <h4 class="mb-0" id="completedDocuments">0</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-exclamation-triangle text-danger fa-2x"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="card-title mb-0">错误</h6>
+                                    <h4 class="mb-0" id="errorDocuments">0</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 文档列表 -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h5 class="mb-0">文档列表</h5>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex gap-2">
+                                <input type="text" class="form-control" id="searchDocuments" placeholder="搜索文档...">
+                                <select class="form-select" id="statusFilter" style="width: auto;">
+                                    <option value="">所有状态</option>
+                                    <option value="processing">处理中</option>
+                                    <option value="completed">已完成</option>
+                                    <option value="error">错误</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>文档名称</th>
+                                    <th>仓库</th>
+                                    <th>状态</th>
+                                    <th>创建时间</th>
+                                    <th>更新时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="documentsTableBody">
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted">
+                                        <i class="fas fa-spinner fa-spin"></i> 加载中...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 新建文档模态框 -->
+<div class="modal fade" id="addDocumentModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">新建文档</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addDocumentForm">
+                    <div class="mb-3">
+                        <label for="documentName" class="form-label">文档名称</label>
+                        <input type="text" class="form-control" id="documentName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="repositorySelect" class="form-label">选择仓库</label>
+                        <select class="form-select" id="repositorySelect" required>
+                            <option value="">请选择仓库</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="documentType" class="form-label">文档类型</label>
+                        <select class="form-select" id="documentType" required>
+                            <option value="readme">README文档</option>
+                            <option value="api">API文档</option>
+                            <option value="architecture">架构文档</option>
+                            <option value="deployment">部署文档</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="documentDescription" class="form-label">描述</label>
+                        <textarea class="form-control" id="documentDescription" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="createDocumentBtn">创建文档</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/document.js') }}"></script>
+{% endblock %}

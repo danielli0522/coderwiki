@@ -1,0 +1,102 @@
+team:
+  id: enhanced-docs-generation-team
+  name: Enhanced Documentation Generation Team
+  description: Advanced team for generating comprehensive technical documentation using BMAD-Method framework
+  version: "1.0.0"
+
+  agents:
+    - id: code-analyst
+      name: "Code Analyst (Alex)"
+      role: "Code Analysis Expert"
+      capabilities:
+        - "Code Structure Analysis"
+        - "Pattern Recognition"
+        - "Technology Stack Analysis"
+        - "Dependency Analysis"
+        - "Code Quality Assessment"
+      primary_tasks:
+        - "scan-codebase"
+        - "validate-analysis"
+
+    - id: tech-architect
+      name: "Tech Architect (Sarah)"
+      role: "Technical Architecture Expert"
+      capabilities:
+        - "System Architecture Design"
+        - "Technology Stack Evaluation"
+        - "Architecture Pattern Analysis"
+        - "Integration Point Analysis"
+      primary_tasks:
+        - "create-architecture-views"
+        - "generate-technical-overview"
+
+    - id: flow-analyst
+      name: "Flow Analyst (Jordan)"
+      role: "Complex Flow Analysis Expert"
+      capabilities:
+        - "Workflow Analysis"
+        - "Process Mapping"
+        - "Data Flow Analysis"
+        - "Integration Flow Analysis"
+      primary_tasks:
+        - "analyze-complex-flows"
+        - "validate-flow-analysis"
+
+    - id: problem-solver
+      name: "Problem Solver (Dr. Morgan)"
+      role: "Technical Problem Diagnosis Expert"
+      capabilities:
+        - "Issue Identification"
+        - "Root Cause Analysis"
+        - "Solution Design"
+        - "Risk Assessment"
+      primary_tasks:
+        - "diagnose-potential-problems"
+        - "validate-problem-diagnosis"
+
+    - id: doc-engineer
+      name: "Doc Engineer (Maya)"
+      role: "Technical Documentation Expert"
+      capabilities:
+        - "Documentation Planning"
+        - "Content Organization"
+        - "Quality Assurance"
+        - "Format Standardization"
+      primary_tasks:
+        - "generate-flow-analysis-doc"
+        - "generate-problem-diagnosis-doc"
+        - "final-quality-validation"
+
+  coordination:
+    workflow_sequence:
+      - agent: code-analyst
+        task: scan-codebase
+        output: "codebase-analysis-report.md"
+
+      - agent: tech-architect
+        task: generate-technical-overview
+        output: "{{project_name}}-Technical-Overview.md"
+
+      - agent: flow-analyst
+        task: analyze-complex-flows
+        output: "complex-flows-analysis.md"
+
+      - agent: problem-solver
+        task: diagnose-potential-problems
+        output: "problem-diagnosis-analysis.md"
+
+      - agent: doc-engineer
+        task: final-document-generation
+        output: "{{project_name}}-Complete-Documentation.md"
+
+  quality_standards:
+    analysis_depth: "comprehensive"
+    evidence_driven: true
+    interactive_validation: true
+    documentation_completeness: "comprehensive"
+
+  output_format:
+    primary: "markdown"
+    diagrams: true
+    code_examples: true
+    troubleshooting: true

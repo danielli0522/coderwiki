@@ -1,0 +1,187 @@
+expansion-pack:
+  id: bmad-docs-generator
+  name: "BMAD Documentation Generator"
+  short-title: "Docs Generator"
+  version: "1.0.0"
+  description: "Advanced documentation generation using BMAD-Method framework"
+
+  author: "BMAD Team"
+  license: "MIT"
+
+  # 扩展包类型
+  type: "documentation"
+  category: "development-tools"
+
+  # 依赖关系
+  dependencies:
+    bmad-core: ">=1.0.0"
+
+  # 安装配置
+  install:
+    # 安装目录
+    directory: ".bmad-docs-generator"
+
+    # 要复制的文件和目录
+    copy:
+      - "agents/"
+      - "agent-teams/"
+      - "workflows/"
+      - "tasks/"
+      - "templates/"
+      - "checklists/"
+      - "data/"
+      - "utils/"
+
+    # 要创建的文件
+    create:
+      - ".claude/settings.json"
+      - "README.md"
+      - "config.yaml"
+
+  # IDE集成配置
+  ide-integration:
+    claude-code:
+      enabled: true
+      config:
+        add_dirs:
+          - ".bmad-docs-generator"
+        allowed_tools:
+          - "Read"
+          - "Grep"
+          - "WebSearch"
+          - "Task"
+        system_prompt: |
+          你是一个专业的技术文档生成专家，专门负责生成高质量的技术文档。
+          你可以使用BMAD文档生成器中的子代理团队来完成任务。
+
+          BMAD文档生成器已添加到你的工作空间，包含以下功能：
+          - 代码分析代理
+          - 技术架构代理
+          - 流程分析代理
+          - 问题诊断代理
+          - 文档工程师代理
+
+          使用Task工具调用BMAD子代理团队和工作流程。
+
+    cursor:
+      enabled: true
+      config:
+        # Cursor特定配置
+        pass
+
+    # 其他IDE配置...
+
+  # 子代理配置
+  subagents:
+    teams:
+      - id: enhanced-docs-generation-team
+        name: "Enhanced Documentation Generation Team"
+        path: "agent-teams/enhanced-docs-generation-team.yaml"
+        description: "Advanced team for generating comprehensive technical documentation"
+
+      - id: docs-generation-team
+        name: "Documentation Generation Team"
+        path: "agent-teams/docs-generation-team.yaml"
+        description: "Core team for basic documentation generation"
+
+    agents:
+      - id: code-analyst
+        name: "Code Analyst"
+        path: "agents/code-analyst.md"
+        description: "Analyzes codebase structure and patterns"
+
+      - id: tech-architect
+        name: "Tech Architect"
+        path: "agents/tech-architect.md"
+        description: "Designs and analyzes technical architecture"
+
+      - id: flow-analyst
+        name: "Flow Analyst"
+        path: "agents/flow-analyst.md"
+        description: "Analyzes complex workflows and processes"
+
+      - id: problem-solver
+        name: "Problem Solver"
+        path: "agents/problem-solver.md"
+        description: "Identifies and solves technical problems"
+
+      - id: doc-engineer
+        name: "Documentation Engineer"
+        path: "agents/doc-engineer.md"
+        description: "Creates and maintains technical documentation"
+
+  # 工作流程配置
+  workflows:
+    - id: enhanced-docs-generation
+      name: "Enhanced Documentation Generation"
+      path: "workflows/enhanced-docs-generation.yaml"
+      description: "Comprehensive documentation generation workflow"
+
+    - id: docs-generation
+      name: "Documentation Generation"
+      path: "workflows/docs-generation-workflow.yaml"
+      description: "Basic documentation generation workflow"
+
+  # 任务配置
+  tasks:
+    - id: scan-codebase
+      name: "Scan Codebase"
+      path: "tasks/scan-codebase.md"
+      description: "Perform comprehensive codebase analysis"
+
+    - id: analyze-architecture
+      name: "Analyze Architecture"
+      path: "tasks/analyze-architecture.md"
+      description: "Analyze system architecture"
+
+    - id: generate-arch-documentation
+      name: "Generate Architecture Documentation"
+      path: "tasks/generate-arch-documentation.md"
+      description: "Generate comprehensive architecture documentation"
+
+    - id: comprehensive-architecture-analysis
+      name: "Comprehensive Architecture Analysis"
+      path: "tasks/comprehensive-architecture-analysis.md"
+      description: "Perform comprehensive architecture analysis"
+
+  # 模板配置
+  templates:
+    - id: technical-overview
+      name: "Technical Overview Template"
+      path: "templates/technical-overview-tmpl.yaml"
+      description: "Template for technical overview documents"
+
+    - id: architecture-patterns
+      name: "Architecture Patterns Template"
+      path: "templates/architecture-patterns-tmpl.yaml"
+      description: "Template for architecture pattern documentation"
+
+  # 检查清单配置
+  checklists:
+    - id: codebase-analysis
+      name: "Codebase Analysis Checklist"
+      path: "checklists/codebase-analysis-checklist.md"
+      description: "Checklist for comprehensive codebase analysis"
+
+    - id: documentation-quality
+      name: "Documentation Quality Checklist"
+      path: "checklists/documentation-quality-checklist.md"
+      description: "Checklist for documentation quality assurance"
+
+  # 环境变量
+  env:
+    BMAD_DOCS_GENERATOR_PATH: ".bmad-docs-generator"
+    BMAD_DOCS_ENABLED: "true"
+
+  # 元数据
+  metadata:
+    tags:
+      - "documentation"
+      - "architecture"
+      - "analysis"
+      - "bmad"
+    keywords:
+      - "technical documentation"
+      - "architecture analysis"
+      - "code analysis"
+      - "documentation generation"

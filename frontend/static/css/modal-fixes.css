@@ -1,0 +1,264 @@
+/* 模态框修复样式 - 强力解决无法输入问题 */
+
+/* 重置所有可能的干扰样式 */
+.modal {
+    z-index: 99999 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    overflow: auto !important;
+    pointer-events: auto !important;
+    display: block !important;
+}
+
+.modal-backdrop {
+    z-index: 99998 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    pointer-events: auto !important;
+}
+
+/* 确保模态框内容可以正常交互 */
+.modal-content {
+    z-index: 99999 !important;
+    position: relative !important;
+    background-color: #fff !important;
+    border-radius: 0.375rem !important;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    pointer-events: auto !important;
+}
+
+.modal-dialog {
+    z-index: 99999 !important;
+    position: relative !important;
+    margin: 1.75rem auto !important;
+    pointer-events: auto !important;
+}
+
+/* 强制修复输入框在模态框中的问题 */
+.modal input,
+.modal textarea,
+.modal select {
+    z-index: 100000 !important;
+    position: relative !important;
+    pointer-events: auto !important;
+    background-color: #fff !important;
+    border: 1px solid #ced4da !important;
+    border-radius: 0.375rem !important;
+    padding: 0.375rem 0.75rem !important;
+    font-size: 1rem !important;
+    line-height: 1.5 !important;
+    color: #495057 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
+}
+
+/* 确保模态框内的按钮可以正常点击 */
+.modal .btn {
+    z-index: 100000 !important;
+    position: relative !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: inline-block !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+}
+
+/* 确保模态框内的表单元素可以正常交互 */
+.modal form {
+    position: relative !important;
+    z-index: 100000 !important;
+    pointer-events: auto !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+}
+
+/* 修复可能的背景覆盖问题 */
+.modal.show {
+    display: block !important;
+    pointer-events: auto !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* 确保模态框内的所有交互元素都可以正常工作 */
+.modal * {
+    pointer-events: auto !important;
+}
+
+/* 修复可能的焦点问题 */
+.modal:focus-within {
+    outline: none !important;
+}
+
+/* 确保模态框内的输入框可以获得焦点 */
+.modal input:focus,
+.modal textarea:focus,
+.modal select:focus {
+    outline: 2px solid #007bff !important;
+    outline-offset: 2px !important;
+    z-index: 100001 !important;
+    border-color: #007bff !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
+    background-color: #fff !important;
+    color: #495057 !important;
+}
+
+/* 修复模态框头部和底部 */
+.modal-header {
+    z-index: 100000 !important;
+    position: relative !important;
+    pointer-events: auto !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.modal-body {
+    z-index: 100000 !important;
+    position: relative !important;
+    pointer-events: auto !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    max-height: calc(100vh - 210px) !important;
+    overflow-y: auto !important;
+}
+
+.modal-footer {
+    z-index: 100000 !important;
+    position: relative !important;
+    pointer-events: auto !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* 修复关闭按钮 */
+.modal .btn-close {
+    z-index: 100001 !important;
+    position: relative !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* 确保模态框内的标签可以正常显示 */
+.modal label {
+    z-index: 100000 !important;
+    position: relative !important;
+    pointer-events: auto !important;
+    color: #212529 !important;
+    font-weight: 500 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+}
+
+/* 修复可能的表单验证样式 */
+.modal .form-control:invalid {
+    border-color: #dc3545 !important;
+}
+
+.modal .form-control:valid {
+    border-color: #198754 !important;
+}
+
+/* 确保模态框内的下拉菜单正常工作 */
+.modal .dropdown-menu {
+    z-index: 100002 !important;
+    position: absolute !important;
+    pointer-events: auto !important;
+}
+
+/* 修复可能的工具提示 */
+.modal .tooltip {
+    z-index: 100003 !important;
+}
+
+/* 确保模态框内的所有文本都可以正常显示 */
+.modal * {
+    color: inherit !important;
+}
+
+/* 修复可能的滚动问题 */
+.modal-body {
+    max-height: calc(100vh - 210px) !important;
+    overflow-y: auto !important;
+}
+
+/* 确保模态框在所有情况下都能正常工作 */
+@media (max-width: 576px) {
+    .modal-dialog {
+        margin: 0.5rem !important;
+        max-width: calc(100% - 1rem) !important;
+    }
+}
+
+/* 强制覆盖任何可能的禁用状态 */
+.modal input:disabled,
+.modal textarea:disabled,
+.modal select:disabled {
+    background-color: #fff !important;
+    color: #495057 !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    cursor: text !important;
+}
+
+.modal input[readonly],
+.modal textarea[readonly],
+.modal select[readonly] {
+    background-color: #fff !important;
+    color: #495057 !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    cursor: text !important;
+}
+
+/* 修复可能的Bootstrap样式冲突 */
+.modal .form-control:focus {
+    border-color: #007bff !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
+    background-color: #fff !important;
+    color: #495057 !important;
+}
+
+/* 确保模态框内的所有元素都可以正常交互 */
+.modal * {
+    pointer-events: auto !important;
+    user-select: auto !important;
+    -webkit-user-select: auto !important;
+    -moz-user-select: auto !important;
+    -ms-user-select: auto !important;
+}
+
+/* 修复可能的CSS重置问题 */
+.modal input,
+.modal textarea,
+.modal select {
+    margin: 0 !important;
+    font-family: inherit !important;
+    font-size: inherit !important;
+    line-height: inherit !important;
+    box-sizing: border-box !important;
+}

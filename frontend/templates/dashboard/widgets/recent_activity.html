@@ -1,0 +1,53 @@
+<div class="recent-activity-container">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-clock me-2"></i>最近活动
+            </h5>
+            <div class="d-flex gap-2">
+                <select class="form-select" id="activityFilter" style="width: 150px;">
+                    <option value="">全部活动</option>
+                    <option value="repository">仓库相关</option>
+                    <option value="document">文档相关</option>
+                    <option value="task">任务相关</option>
+                    <option value="system">系统相关</option>
+                </select>
+                <button class="btn btn-outline-secondary" id="refreshActivityBtn">
+                    <i class="fas fa-sync-alt me-2"></i>刷新
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="timeline" id="activityTimeline">
+                <!-- 活动时间轴将由JavaScript动态生成 -->
+                <div class="text-center py-5" id="emptyActivityState">
+                    <i class="fas fa-history fa-4x text-muted mb-3"></i>
+                    <h5 class="text-muted">暂无活动</h5>
+                    <p class="text-muted">暂无最近的活动记录</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 活动项模板 -->
+<template id="activityItemTemplate">
+    <div class="timeline-item">
+        <div class="timeline-badge">
+            <i class="activity-icon"></i>
+        </div>
+        <div class="timeline-content">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h6 class="activity-title mb-1"></h6>
+                    <p class="activity-description text-muted mb-1"></p>
+                    <div class="activity-meta">
+                        <span class="badge activity-type-badge me-2"></span>
+                        <small class="text-muted me-2"></small>
+                    </div>
+                </div>
+                <small class="activity-time text-muted"></small>
+            </div>
+        </div>
+    </div>
+</template>

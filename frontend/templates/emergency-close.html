@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>紧急关闭模态框 - CoderWiki</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .emergency-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .emergency-btn:hover {
+            background-color: #c82333;
+        }
+        .info {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .keyboard-shortcuts {
+            background-color: #d1ecf1;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚨 紧急关闭模态框</h1>
+
+        <div class="info">
+            <h3>如果模态框无法正常关闭，请使用以下方法：</h3>
+        </div>
+
+        <div class="keyboard-shortcuts">
+            <h4>键盘快捷键：</h4>
+            <p><strong>ESC 键</strong> - 关闭当前模态框</p>
+            <p><strong>Ctrl/Cmd + W</strong> - 关闭所有模态框</p>
+        </div>
+
+        <button class="emergency-btn" onclick="closeAllModals()">
+            🔥 强制关闭所有模态框
+        </button>
+
+        <button class="emergency-btn" onclick="forceCloseAndRedirect()">
+            🚪 关闭模态框并返回主页
+        </button>
+
+        <button class="emergency-btn" onclick="refreshPage()">
+            🔄 刷新页面
+        </button>
+
+        <div class="info">
+            <h4>如果以上方法都不起作用：</h4>
+            <p>1. 按 F12 打开开发者工具</p>
+            <p>2. 在控制台中输入：<code>closeAllModals()</code></p>
+            <p>3. 或者输入：<code>document.querySelectorAll('.modal').forEach(m => m.style.display = 'none')</code></p>
+        </div>
+    </div>
+
+    <script>
+        function closeAllModals() {
+            try {
+                // 方法1: 使用我们的修复脚本
+                if (window.closeAllModals) {
+                    window.closeAllModals();
+                    alert('已尝试关闭所有模态框');
+                    return;
+                }
+
+                // 方法2: 直接操作DOM
+                const modals = document.querySelectorAll('.modal');
+                modals.forEach(modal => {
+                    modal.classList.remove('show');
+                    modal.style.display = 'none';
+                    modal.setAttribute('aria-hidden', 'true');
+                });
+
+                // 移除背景
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                backdrops.forEach(backdrop => backdrop.remove());
+
+                // 恢复body样式
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+
+                alert('模态框已强制关闭');
+            } catch (error) {
+                console.error('关闭模态框失败:', error);
+                alert('关闭失败，请尝试刷新页面');
+            }
+        }
+
+        function forceCloseAndRedirect() {
+            closeAllModals();
+            setTimeout(() => {
+                window.location.href = '/dashboard';
+            }, 500);
+        }
+
+        function refreshPage() {
+            if (confirm('确定要刷新页面吗？未保存的数据可能会丢失。')) {
+                window.location.reload();
+            }
+        }
+
+        // 页面加载时自动尝试关闭模态框
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const visibleModals = document.querySelectorAll('.modal.show');
+                if (visibleModals.length > 0) {
+                    console.log('检测到打开的模态框，尝试自动关闭...');
+                    closeAllModals();
+                }
+            }, 1000);
+        });
+
+        // 添加键盘快捷键
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeAllModals();
+            }
+        });
+    </script>
+</body>
+</html>

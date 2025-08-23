@@ -1,0 +1,543 @@
+{% extends "base.html" %}
+
+{% block title %}代码分析结果 - CoderWiki{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- 页面标题和操作按钮 -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">代码分析结果</h1>
+            <p class="text-muted mb-0">
+                <i class="fas fa-folder me-1"></i>
+                <a href="{{ url_for('repository.index') }}" class="text-decoration-none">{{ repository.name }}</a>
+                <i class="fas fa-chevron-right mx-2"></i>
+                分析结果
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary" id="refreshAnalysisBtn">
+                <i class="fas fa-sync-alt me-1"></i>刷新分析
+            </button>
+            <button class="btn btn-outline-secondary" id="exportResultsBtn">
+                <i class="fas fa-download me-1"></i>导出结果
+            </button>
+            <button class="btn btn-outline-warning" id="clearCacheBtn">
+                <i class="fas fa-trash me-1"></i>清除缓存
+            </button>
+        </div>
+    </div>
+
+    <!-- 分析状态卡片 -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">分析状态</h6>
+                            <h3 class="mb-0" id="analysisStatus">-</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-chart-line fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">完成的分析</h6>
+                            <h3 class="mb-0" id="completedAnalyses">-</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">分析类型</h6>
+                            <h3 class="mb-0" id="analysisTypesCount">-</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-cogs fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">最后更新</h6>
+                            <h3 class="mb-0" id="lastUpdated">-</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-clock fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 分析控制面板 -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-cogs me-2"></i>
+                分析控制
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <h6>选择分析类型</h6>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="structureAnalysis" checked>
+                                <label class="form-check-label" for="structureAnalysis">
+                                    <i class="fas fa-sitemap me-1"></i>结构分析
+                                </label>
+                                <small class="form-text text-muted">文件结构和组织</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="dependenciesAnalysis" checked>
+                                <label class="form-check-label" for="dependenciesAnalysis">
+                                    <i class="fas fa-project-diagram me-1"></i>依赖分析
+                                </label>
+                                <small class="form-text text-muted">依赖关系和包管理</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="complexityAnalysis" checked>
+                                <label class="form-check-label" for="complexityAnalysis">
+                                    <i class="fas fa-brain me-1"></i>复杂度分析
+                                </label>
+                                <small class="form-text text-muted">代码复杂度指标</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="techStackAnalysis" checked>
+                                <label class="form-check-label" for="techStackAnalysis">
+                                    <i class="fas fa-layer-group me-1"></i>技术栈分析
+                                </label>
+                                <small class="form-text text-muted">技术栈和框架</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="securityAnalysis">
+                                <label class="form-check-label" for="securityAnalysis">
+                                    <i class="fas fa-shield-alt me-1"></i>安全分析
+                                </label>
+                                <small class="form-text text-muted">安全漏洞检测</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="patternsAnalysis">
+                                <label class="form-check-label" for="patternsAnalysis">
+                                    <i class="fas fa-puzzle-piece me-1"></i>模式分析
+                                </label>
+                                <small class="form-text text-muted">设计模式识别</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="qualityAnalysis">
+                                <label class="form-check-label" for="qualityAnalysis">
+                                    <i class="fas fa-star me-1"></i>质量分析
+                                </label>
+                                <small class="form-text text-muted">代码质量评估</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <h6>分析配置</h6>
+                    <div class="mb-3">
+                        <label for="maxFileSize" class="form-label">最大文件大小 (MB)</label>
+                        <input type="number" class="form-control" id="maxFileSize" value="10" min="1" max="100">
+                    </div>
+                    <div class="mb-3">
+                        <label for="timeout" class="form-label">超时时间 (秒)</label>
+                        <input type="number" class="form-control" id="timeout" value="300" min="60" max="1800">
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="enableCache" checked>
+                        <label class="form-check-label" for="enableCache">
+                            启用缓存
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12">
+                    <button class="btn btn-primary" id="startAnalysisBtn">
+                        <i class="fas fa-play me-1"></i>开始分析
+                    </button>
+                    <button class="btn btn-outline-danger" id="stopAnalysisBtn" style="display: none;">
+                        <i class="fas fa-stop me-1"></i>停止分析
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 分析结果展示区 -->
+    <div id="analysisResultsContainer">
+        <!-- 加载状态 -->
+        <div id="analysisLoading" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">加载分析结果中...</span>
+            </div>
+            <p class="mt-2">正在加载分析结果...</p>
+        </div>
+
+        <!-- 空状态 -->
+        <div id="analysisEmpty" class="text-center py-5" style="display: none;">
+            <i class="fas fa-chart-line fa-4x text-muted mb-3"></i>
+            <h5 class="text-muted">暂无分析结果</h5>
+            <p class="text-muted">点击"开始分析"按钮来分析此仓库</p>
+            <button class="btn btn-primary" id="startFirstAnalysisBtn">
+                <i class="fas fa-play me-1"></i>开始分析
+            </button>
+        </div>
+
+        <!-- 分析结果内容 -->
+        <div id="analysisResults" style="display: none;">
+            <!-- 结构分析结果 -->
+            <div class="card mb-4" id="structureResults">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-sitemap me-2"></i>
+                        结构分析
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>文件统计</h6>
+                            <div id="structureStats"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>目录结构</h6>
+                            <div id="directoryTree" style="max-height: 400px; overflow-y: auto;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 依赖分析结果 -->
+            <div class="card mb-4" id="dependenciesResults">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-project-diagram me-2"></i>
+                        依赖分析
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>包管理器</h6>
+                            <div id="packageManagers"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>依赖关系图</h6>
+                            <div id="dependencyGraph" style="height: 300px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 复杂度分析结果 -->
+            <div class="card mb-4" id="complexityResults">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-brain me-2"></i>
+                        复杂度分析
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>复杂度指标</h6>
+                            <div id="complexityMetrics"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>复杂度分布</h6>
+                            <div id="complexityChart" style="height: 300px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 技术栈分析结果 -->
+            <div class="card mb-4" id="techStackResults">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-layer-group me-2"></i>
+                        技术栈分析
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>编程语言</h6>
+                            <div id="programmingLanguages"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>框架和工具</h6>
+                            <div id="frameworksTools"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 安全分析结果 -->
+            <div class="card mb-4" id="securityResults">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        安全分析
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="securityIssues"></div>
+                </div>
+            </div>
+
+            <!-- 模式分析结果 -->
+            <div class="card mb-4" id="patternsResults">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-puzzle-piece me-2"></i>
+                        模式分析
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="designPatterns"></div>
+                </div>
+            </div>
+
+            <!-- 质量分析结果 -->
+            <div class="card mb-4" id="qualityResults">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-star me-2"></i>
+                        质量分析
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>质量指标</h6>
+                            <div id="qualityMetrics"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>质量评分</h6>
+                            <div id="qualityScore"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 分析历史 -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-history me-2"></i>
+                分析历史
+            </h5>
+        </div>
+        <div class="card-body">
+            <div id="analysisHistory"></div>
+        </div>
+    </div>
+</div>
+
+<!-- 分析进度模态框 -->
+<div class="modal fade" id="analysisProgressModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">分析进度</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="progress mb-3">
+                    <div class="progress-bar" id="analysisProgressBar" role="progressbar" style="width: 0%"></div>
+                </div>
+                <p id="analysisProgressText">准备开始分析...</p>
+                <div id="analysisProgressDetails"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-danger" id="cancelAnalysisBtn">取消分析</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/analysis.js') }}"></script>
+<script>
+    // 初始化分析管理器
+    const analysisManager = new AnalysisManager({
+        repositoryId: {{ repository.id }},
+        repositoryName: '{{ repository.name }}'
+    });
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.analysis-result-card {
+    transition: all 0.3s ease;
+}
+
+.analysis-result-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.progress-details {
+    font-size: 0.9em;
+    color: #6c757d;
+}
+
+.analysis-type-checkbox {
+    margin-bottom: 1rem;
+}
+
+.analysis-type-checkbox .form-check-input:checked + .form-check-label {
+    font-weight: 600;
+    color: #007bff;
+}
+
+#directoryTree {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+}
+
+.tree-item {
+    margin-left: 1rem;
+}
+
+.tree-item::before {
+    content: '├── ';
+    color: #6c757d;
+}
+
+.tree-item:last-child::before {
+    content: '└── ';
+}
+
+.metric-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.metric-value {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.metric-label {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.dependency-node {
+    fill: #007bff;
+    stroke: #fff;
+    stroke-width: 2px;
+}
+
+.dependency-link {
+    stroke: #6c757d;
+    stroke-width: 2px;
+}
+
+.quality-score-gauge {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+}
+
+.security-issue {
+    border-left: 4px solid #dc3545;
+    padding-left: 1rem;
+    margin-bottom: 1rem;
+}
+
+.security-issue.high {
+    border-left-color: #dc3545;
+}
+
+.security-issue.medium {
+    border-left-color: #ffc107;
+}
+
+.security-issue.low {
+    border-left-color: #28a745;
+}
+
+.pattern-card {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.pattern-card h6 {
+    color: #007bff;
+    margin-bottom: 0.5rem;
+}
+
+.history-item {
+    border-bottom: 1px solid #e9ecef;
+    padding: 1rem 0;
+}
+
+.history-item:last-child {
+    border-bottom: none;
+}
+
+.history-item .timestamp {
+    color: #6c757d;
+    font-size: 0.9em;
+}
+
+.history-item .analysis-types {
+    margin-top: 0.5rem;
+}
+
+.history-item .badge {
+    margin-right: 0.25rem;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,19 @@
+{
+  "cwd": "/Users/lshl124/Documents/daniel/git/code/aigc/coderwiki/backend",
+  "add_dirs": [
+    "/Users/lshl124/Documents/daniel/git/code/aigc/coderwiki/bmad-docs-generator",
+    "/Users/lshl124/Documents/daniel/git/code/aigc/coderwiki"
+  ],
+  "allowed_tools": [
+    "Read",
+    "Grep",
+    "WebSearch",
+    "Task"
+  ],
+  "max_turns": 10,
+  "system_prompt": "你是一个专业的技术文档生成专家，专门负责生成高质量的技术文档。你可以使用BMAD文档生成器中的子代理团队来完成任务。",
+  "env": {
+    "BMAD_DOCS_PATH": "/Users/lshl124/Documents/daniel/git/code/aigc/coderwiki/bmad-docs-generator",
+    "CLAUDE_CODE_ENABLED": "true"
+  }
+}

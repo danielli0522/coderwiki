@@ -1,0 +1,28 @@
+bmad_docs_generator:
+  version: "1.0.0"
+  name: "BMAD Documentation Generator"
+  description: "Advanced documentation generation using BMAD-Method framework"
+  
+  settings:
+    default_analysis_depth: "detailed"
+    enable_interactive_validation: true
+    enable_evidence_driven_analysis: true
+    enable_pattern_recognition: true
+    
+  paths:
+    agents_dir: "agents/"
+    tasks_dir: "tasks/"
+    workflows_dir: "workflows/"
+    templates_dir: "templates/"
+    
+  output:
+    format: "markdown"
+    include_diagrams: true
+    include_code_examples: true
+    include_troubleshooting: true
+    
+  quality:
+    min_complex_flows: 15
+    enable_quality_gates: true
+    validation_required: true
+

@@ -1,0 +1,100 @@
+<div class="system-status-container">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-heartbeat me-2"></i>系统状态
+            </h5>
+            <button class="btn btn-outline-secondary" id="refreshSystemStatusBtn">
+                <i class="fas fa-sync-alt me-2"></i>刷新
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- 系统概览 -->
+                <div class="col-md-6">
+                    <div class="system-overview">
+                        <h6 class="mb-3">系统概览</h6>
+                        <div class="system-info">
+                            <div class="info-item">
+                                <span class="info-label">系统状态:</span>
+                                <span class="info-value">
+                                    <span class="badge system-status-badge" id="systemOverallStatus">正常</span>
+                                </span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">运行时间:</span>
+                                <span class="info-value" id="systemUptime">0天 0小时 0分钟</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">CPU使用率:</span>
+                                <span class="info-value">
+                                    <span id="cpuUsage">0%</span>
+                                    <div class="progress ms-2" style="width: 100px; height: 10px;">
+                                        <div class="progress-bar" id="cpuProgressBar" role="progressbar" style="width: 0%"></div>
+                                    </div>
+                                </span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">内存使用率:</span>
+                                <span class="info-value">
+                                    <span id="memoryUsage">0%</span>
+                                    <div class="progress ms-2" style="width: 100px; height: 10px;">
+                                        <div class="progress-bar" id="memoryProgressBar" role="progressbar" style="width: 0%"></div>
+                                    </div>
+                                </span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">磁盘使用率:</span>
+                                <span class="info-value">
+                                    <span id="diskUsage">0%</span>
+                                    <div class="progress ms-2" style="width: 100px; height: 10px;">
+                                        <div class="progress-bar" id="diskProgressBar" role="progressbar" style="width: 0%"></div>
+                                    </div>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 服务状态 -->
+                <div class="col-md-6">
+                    <div class="service-status">
+                        <h6 class="mb-3">服务状态</h6>
+                        <div class="service-list" id="serviceList">
+                            <!-- 服务状态将由JavaScript动态生成 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 系统告警 -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="system-alerts">
+                        <h6 class="mb-3">系统告警</h6>
+                        <div id="systemAlerts">
+                            <div class="alert alert-info" role="alert">
+                                <i class="fas fa-info-circle me-2"></i>
+                                系统运行正常，暂无告警信息
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 服务项模板 -->
+<template id="serviceItemTemplate">
+    <div class="service-item d-flex justify-content-between align-items-center mb-2">
+        <div class="service-info">
+            <i class="service-icon me-2"></i>
+            <span class="service-name"></span>
+        </div>
+        <div class="service-status">
+            <span class="badge service-status-badge"></span>
+            <small class="text-muted ms-2 service-response-time"></small>
+        </div>
+    </div>
+</template>

@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI组件测试 - CoderWiki</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+    <link href="/static/css/components.css" rel="stylesheet">
+    
+    <style>
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .test-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+        
+        .test-section {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .test-results {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .test-passed {
+            color: #28a745;
+        }
+        
+        .test-failed {
+            color: #dc3545;
+        }
+        
+        .test-warning {
+            color: #ffc107;
+        }
+        
+        .test-log {
+            max-height: 400px;
+            overflow-y: auto;
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .performance-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .metric-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .metric-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .browser-info {
+            background: #e3f2fd;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <!-- 测试头部 -->
+        <div class="test-header">
+            <h1 class="mb-0">
+                <i class="fas fa-flask me-2"></i>
+                UI组件测试套件
+            </h1>
+            <p class="mb-0 mt-2">CoderWiki 前端组件功能与性能测试</p>
+        </div>
+        
+        <!-- 测试控制面板 -->
+        <div class="test-section">
+            <h3><i class="fas fa-cogs me-2"></i>测试控制面板</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <button id="runUITests" class="btn btn-primary me-2">
+                        <i class="fas fa-play me-2"></i>运行UI测试
+                    </button>
+                    <button id="runPerformanceTests" class="btn btn-success me-2">
+                        <i class="fas fa-tachometer-alt me-2"></i>运行性能测试
+                    </button>
+                    <button id="runAllTests" class="btn btn-info">
+                        <i class="fas fa-rocket me-2"></i>运行所有测试
+                    </button>
+                </div>
+                <div class="col-md-6">
+                    <button id="clearResults" class="btn btn-outline-danger me-2">
+                        <i class="fas fa-trash me-2"></i>清除结果
+                    </button>
+                    <button id="exportResults" class="btn btn-outline-secondary">
+                        <i class="fas fa-download me-2"></i>导出结果
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 浏览器信息 -->
+        <div class="browser-info">
+            <h5><i class="fas fa-info-circle me-2"></i>浏览器信息</h5>
+            <div id="browserInfo">正在检测浏览器信息...</div>
+        </div>
+        
+        <!-- UI测试结果 -->
+        <div class="test-section">
+            <h3><i class="fas fa-check-circle me-2"></i>UI组件测试</h3>
+            <div id="uiTestResults">
+                <p class="text-muted">点击"运行UI测试"开始测试</p>
+            </div>
+        </div>
+        
+        <!-- 性能测试结果 -->
+        <div class="test-section">
+            <h3><i class="fas fa-chart-line me-2"></i>性能测试</h3>
+            <div id="performanceTestResults">
+                <p class="text-muted">点击"运行性能测试"开始测试</p>
+            </div>
+        </div>
+        
+        <!-- 性能指标 -->
+        <div class="test-section">
+            <h3><i class="fas fa-tachometer-alt me-2"></i>性能指标</h3>
+            <div id="performanceMetrics" class="performance-metrics">
+                <!-- 性能指标将在这里显示 -->
+            </div>
+        </div>
+        
+        <!-- 测试日志 -->
+        <div class="test-section">
+            <h3><i class="fas fa-terminal me-2"></i>测试日志</h3>
+            <div id="testLog" class="test-log">
+                <div>测试日志将在这里显示...</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 引入测试脚本 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/components.js"></script>
+    <script src="/static/js/performance.js"></script>
+    <script src="/static/js/browser-compatibility.js"></script>
+    <script src="/static/js/ui-tests.js"></script>
+    <script src="/static/js/performance-tests.js"></script>
+    
+    <script>
+        // 测试日志管理
+        const TestLogger = {
+            logs: [],
+            
+            log: function(message, type = 'info') {
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = {
+                    timestamp,
+                    message,
+                    type
+                };
+                
+                this.logs.push(logEntry);
+                this.displayLog(logEntry);
+                console.log(`[${timestamp}] ${message}`);
+            },
+            
+            displayLog: function(logEntry) {
+                const logContainer = document.getElementById('testLog');
+                const logElement = document.createElement('div');
+                
+                let icon = '';
+                let colorClass = '';
+                
+                switch (logEntry.type) {
+                    case 'success':
+                        icon = '✅';
+                        colorClass = 'text-success';
+                        break;
+                    case 'error':
+                        icon = '❌';
+                        colorClass = 'text-danger';
+                        break;
+                    case 'warning':
+                        icon = '⚠️';
+                        colorClass = 'text-warning';
+                        break;
+                    default:
+                        icon = 'ℹ️';
+                        colorClass = 'text-info';
+                }
+                
+                logElement.innerHTML = `<span class="${colorClass}">[${logEntry.timestamp}] ${icon} ${logEntry.message}</span>`;
+                logContainer.appendChild(logElement);
+                logContainer.scrollTop = logContainer.scrollHeight;
+            },
+            
+            clear: function() {
+                this.logs = [];
+                document.getElementById('testLog').innerHTML = '<div>测试日志将在这里显示...</div>';
+            }
+        };
+        
+        // 显示浏览器信息
+        function displayBrowserInfo() {
+            const browserInfo = document.getElementById('browserInfo');
+            const browser = BrowserCompatibility.browser;
+            const features = BrowserCompatibility.features;
+            
+            browserInfo.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>浏览器:</strong> ${browser.name} ${browser.version}<br>
+                        <strong>用户代理:</strong> ${browser.userAgent.substring(0, 100)}...<br>
+                        <strong>移动设备:</strong> ${browser.isMobile ? '是' : '否'}<br>
+                        <strong>平板设备:</strong> ${browser.isTablet ? '是' : '否'}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>关键功能支持:</strong><br>
+                        CSS Grid: ${features.cssGrid ? '✅' : '❌'} | 
+                        CSS Flexbox: ${features.cssFlexbox ? '✅' : '❌'}<br>
+                        Fetch API: ${features.fetch ? '✅' : '❌'} | 
+                        Promise: ${features.promise ? '✅' : '❌'}<br>
+                        Service Worker: ${features.serviceWorker ? '✅' : '❌'} | 
+                        Intersection Observer: ${features.intersectionObserver ? '✅' : '❌'}
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 运行UI测试
+        async function runUITests() {
+            const resultsContainer = document.getElementById('uiTestResults');
+            resultsContainer.innerHTML = '<div class="text-center"><div class="loading-spinner"></div> 正在运行UI测试...</div>';
+            
+            TestLogger.log('开始运行UI测试...', 'info');
+            
+            try {
+                const results = runTests();
+                
+                let html = `
+                    <div class="alert ${results.success ? 'alert-success' : 'alert-warning'}">
+                        <h5>测试结果: ${results.passed}/${results.total} 通过</h5>
+                        <p>成功率: ${((results.passed / results.total) * 100).toFixed(1)}%</p>
+                    </div>
+                    <div class="test-results">
+                `;
+                
+                TestSuite.tests.forEach((test, index) => {
+                    const testResult = results.passed > index ? 'passed' : 'failed';
+                    const icon = testResult === 'passed' ? '✅' : '❌';
+                    const colorClass = testResult === 'passed' ? 'test-passed' : 'test-failed';
+                    
+                    html += `<div class="${colorClass}">${icon} ${test.name}</div>`;
+                });
+                
+                html += '</div>';
+                resultsContainer.innerHTML = html;
+                
+                TestLogger.log(`UI测试完成: ${results.passed}/${results.total} 通过`, results.success ? 'success' : 'warning');
+                
+            } catch (error) {
+                resultsContainer.innerHTML = `
+                    <div class="alert alert-danger">
+                        <h5>测试失败</h5>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+                TestLogger.log(`UI测试失败: ${error.message}`, 'error');
+            }
+        }
+        
+        // 运行性能测试
+        async function runPerformanceTests() {
+            const resultsContainer = document.getElementById('performanceTestResults');
+            resultsContainer.innerHTML = '<div class="text-center"><div class="loading-spinner"></div> 正在运行性能测试...</div>';
+            
+            TestLogger.log('开始运行性能测试...', 'info');
+            
+            try {
+                const { results, report } = await runPerformanceTests();
+                
+                let html = `
+                    <div class="alert ${report.success ? 'alert-success' : 'alert-warning'}">
+                        <h5>性能测试结果: ${report.passed}/${report.total} 通过</h5>
+                        <p>成功率: ${((report.passed / report.total) * 100).toFixed(1)}%</p>
+                    </div>
+                    <div class="test-results">
+                `;
+                
+                results.forEach(result => {
+                    let icon = '✅';
+                    let colorClass = 'test-passed';
+                    
+                    if (result.error) {
+                        icon = '❌';
+                        colorClass = 'test-failed';
+                    } else if (result.threshold && result.result > result.threshold) {
+                        icon = '⚠️';
+                        colorClass = 'test-warning';
+                    }
+                    
+                    if (result.result) {
+                        html += `<div class="${colorClass}">${icon} ${result.name}: ${result.result.toFixed(2)}ms`;
+                        if (result.threshold) {
+                            html += ` (阈值: ${result.threshold}ms)`;
+                        }
+                        html += '</div>';
+                    } else {
+                        html += `<div class="${colorClass}">${icon} ${result.name}</div>`;
+                    }
+                });
+                
+                html += '</div>';
+                resultsContainer.innerHTML = html;
+                
+                TestLogger.log(`性能测试完成: ${report.passed}/${report.total} 通过`, report.success ? 'success' : 'warning');
+                
+                // 更新性能指标
+                updatePerformanceMetrics();
+                
+            } catch (error) {
+                resultsContainer.innerHTML = `
+                    <div class="alert alert-danger">
+                        <h5>性能测试失败</h5>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+                TestLogger.log(`性能测试失败: ${error.message}`, 'error');
+            }
+        }
+        
+        // 更新性能指标
+        function updatePerformanceMetrics() {
+            const metricsContainer = document.getElementById('performanceMetrics');
+            const metrics = PerformanceMonitor.metrics;
+            
+            let html = '';
+            
+            if (metrics.navigationTiming) {
+                html += `
+                    <div class="metric-card">
+                        <div class="metric-value">${metrics.navigationTiming.pageLoad.toFixed(0)}ms</div>
+                        <div class="metric-label">页面加载时间</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${metrics.navigationTiming.domReady.toFixed(0)}ms</div>
+                        <div class="metric-label">DOM就绪时间</div>
+                    </div>
+                `;
+            }
+            
+            if (metrics.resourceTiming) {
+                html += `
+                    <div class="metric-card">
+                        <div class="metric-value">${metrics.resourceTiming.totalResources}</div>
+                        <div class="metric-label">资源数量</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${metrics.resourceTiming.slowResources}</div>
+                        <div class="metric-label">慢速资源</div>
+                    </div>
+                `;
+            }
+            
+            // 添加内存使用信息
+            if (window.performance && window.performance.memory) {
+                const memory = window.performance.memory;
+                const usedMB = (memory.usedJSHeapSize / 1024 / 1024).toFixed(1);
+                const totalMB = (memory.totalJSHeapSize / 1024 / 1024).toFixed(1);
+                
+                html += `
+                    <div class="metric-card">
+                        <div class="metric-value">${usedMB}MB</div>
+                        <div class="metric-label">内存使用</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${totalMB}MB</div>
+                        <div class="metric-label">总内存</div>
+                    </div>
+                `;
+            }
+            
+            metricsContainer.innerHTML = html;
+        }
+        
+        // 运行所有测试
+        async function runAllTests() {
+            TestLogger.log('开始运行所有测试...', 'info');
+            await runUITests();
+            await runPerformanceTests();
+            TestLogger.log('所有测试完成!', 'success');
+        }
+        
+        // 清除测试结果
+        function clearResults() {
+            document.getElementById('uiTestResults').innerHTML = '<p class="text-muted">点击"运行UI测试"开始测试</p>';
+            document.getElementById('performanceTestResults').innerHTML = '<p class="text-muted">点击"运行性能测试"开始测试</p>';
+            document.getElementById('performanceMetrics').innerHTML = '';
+            TestLogger.clear();
+        }
+        
+        // 导出测试结果
+        function exportResults() {
+            const results = {
+                timestamp: new Date().toISOString(),
+                browser: BrowserCompatibility.browser,
+                features: BrowserCompatibility.features,
+                performance: PerformanceMonitor.metrics,
+                testLogs: TestLogger.logs
+            };
+            
+            const blob = new Blob([JSON.stringify(results, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `test-results-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            TestLogger.log('测试结果已导出', 'success');
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化组件
+            BrowserCompatibility.init();
+            PerformanceMonitor.init();
+            
+            // 显示浏览器信息
+            displayBrowserInfo();
+            
+            // 绑定事件
+            document.getElementById('runUITests').addEventListener('click', runUITests);
+            document.getElementById('runPerformanceTests').addEventListener('click', runPerformanceTests);
+            document.getElementById('runAllTests').addEventListener('click', runAllTests);
+            document.getElementById('clearResults').addEventListener('click', clearResults);
+            document.getElementById('exportResults').addEventListener('click', exportResults);
+            
+            TestLogger.log('测试环境初始化完成', 'success');
+        });
+    </script>
+</body>
+</html>

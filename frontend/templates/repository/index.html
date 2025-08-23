@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+
+{% block title %}仓库管理 - CoderWiki{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- 页面标题和操作按钮 -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">仓库管理</h1>
+            <p class="text-muted mb-0">管理您的代码仓库并生成文档</p>
+        </div>
+        <div>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRepositoryModal">
+                <i class="fas fa-plus"></i> 添加仓库
+            </button>
+        </div>
+    </div>
+
+    <!-- 统计卡片 -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">总仓库数</h6>
+                            <h3 class="mb-0" id="totalRepos">-</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-folder fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">活跃仓库</h6>
+                            <h3 class="mb-0" id="activeRepos">-</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">克隆成功</h6>
+                            <h3 class="mb-0" id="clonedRepos">-</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-download fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">总文件数</h6>
+                            <h3 class="mb-0" id="totalFiles">-</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-file fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 仓库列表 -->
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">我的仓库</h5>
+                <div class="d-flex gap-2">
+                    <input type="text" class="form-control form-control-sm" id="searchRepo" placeholder="搜索仓库..." style="width: 200px;">
+                    <select class="form-select form-select-sm" id="statusFilter" style="width: 150px;">
+                        <option value="">所有状态</option>
+                        <option value="active">活跃</option>
+                        <option value="cloning">克隆中</option>
+                        <option value="completed">已完成</option>
+                        <option value="error">错误</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>名称</th>
+                            <th>URL</th>
+                            <th>状态</th>
+                            <th>克隆状态</th>
+                            <th>文件数</th>
+                            <th>大小</th>
+                            <th>创建时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="repositoriesTable">
+                        <!-- 仓库列表将在这里动态加载 -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 加载状态 -->
+            <div id="loadingState" class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">加载中...</span>
+                </div>
+                <p class="mt-2">正在加载仓库列表...</p>
+            </div>
+
+            <!-- 空状态 -->
+            <div id="emptyState" class="text-center py-4" style="display: none;">
+                <i class="fas fa-folder-open fa-3x text-muted"></i>
+                <p class="mt-2 text-muted">还没有添加任何仓库</p>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRepositoryModal">
+                    <i class="fas fa-plus"></i> 添加第一个仓库
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 添加仓库模态框 -->
+<div class="modal fade" id="addRepositoryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">添加仓库</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addRepositoryForm">
+                    <div class="mb-3">
+                        <label for="repoUrl" class="form-label">仓库 URL *</label>
+                        <input type="url" class="form-control" id="repoUrl" placeholder="https://github.com/username/repository" required>
+                        <div class="form-text">支持 GitHub 仓库或 Git 仓库 URL</div>
+                        <div class="invalid-feedback" id="urlError"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="repoName" class="form-label">仓库名称</label>
+                        <input type="text" class="form-control" id="repoName" placeholder="留空自动从 URL 提取">
+                        <div class="form-text">如果不填写，将自动从 URL 中提取</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="repoDescription" class="form-label">描述</label>
+                        <textarea class="form-control" id="repoDescription" rows="3" placeholder="仓库描述（可选）"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="validateUrlBtn">
+                            <i class="fas fa-check-circle"></i> 验证 URL
+                        </button>
+                        <span id="validationResult" class="ms-2"></span>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="addRepoBtn">
+                    <i class="fas fa-plus"></i> 添加仓库
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 仓库详情模态框 -->
+<div class="modal fade" id="repositoryDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">仓库详情</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="repositoryDetailContent">
+                    <!-- 仓库详情将在这里动态加载 -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 分析结果模态框 -->
+<div class="modal fade" id="analysisResultModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">仓库分析结果</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="analysisResultContent">
+                    <!-- 分析结果将在这里动态加载 -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 包含删除确认模态框 -->
+{% include "repository/partials/delete_modal.html" %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/disable-delete-modal.js') }}"></script>
+<script src="{{ url_for('static', filename='js/modal-close-fix.js') }}"></script>
+<script src="{{ url_for('static', filename='js/repository.js') }}"></script>
+{% endblock %}

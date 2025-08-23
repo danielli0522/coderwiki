@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}简单模态框测试 - CoderWiki{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1>简单模态框测试</h1>
+            <p>这个页面用于测试最基本的模态框交互功能。</p>
+
+            <div class="mb-4">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#simpleModal">
+                    打开简单模态框
+                </button>
+            </div>
+
+            <div class="alert alert-info">
+                <h5>测试说明：</h5>
+                <ul>
+                    <li>点击"打开简单模态框"按钮</li>
+                    <li>尝试在模态框中输入文字</li>
+                    <li>尝试点击按钮</li>
+                    <li>检查浏览器控制台的日志信息</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 简单模态框 -->
+<div class="modal fade" id="simpleModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">简单测试</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="simpleInput" class="form-label">测试输入框</label>
+                    <input type="text" class="form-control" id="simpleInput" placeholder="请在这里输入文字...">
+                </div>
+                <div class="mb-3">
+                    <label for="simpleTextarea" class="form-label">测试文本区域</label>
+                    <textarea class="form-control" id="simpleTextarea" rows="3" placeholder="请在这里输入多行文字..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" id="simpleTestBtn">测试按钮</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('简单模态框测试页面加载完成');
+
+    // 测试按钮点击
+    document.getElementById('simpleTestBtn').addEventListener('click', function() {
+        const input = document.getElementById('simpleInput').value;
+        const textarea = document.getElementById('simpleTextarea').value;
+        alert(`测试成功！\n输入框: ${input}\n文本区域: ${textarea}`);
+    });
+
+    // 模态框显示事件
+    document.getElementById('simpleModal').addEventListener('shown.bs.modal', function() {
+        console.log('简单模态框已显示');
+
+        // 强制聚焦到输入框
+        setTimeout(() => {
+            const input = document.getElementById('simpleInput');
+            if (input) {
+                input.focus();
+                console.log('尝试聚焦简单输入框');
+            }
+        }, 200);
+    });
+
+    // 输入框事件监听
+    const inputs = ['simpleInput', 'simpleTextarea'];
+    inputs.forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+            input.addEventListener('focus', function() {
+                console.log(`输入框 ${id} 获得焦点`);
+            });
+
+            input.addEventListener('blur', function() {
+                console.log(`输入框 ${id} 失去焦点`);
+            });
+
+            input.addEventListener('input', function() {
+                console.log(`输入框 ${id} 值变化: ${this.value}`);
+            });
+
+            input.addEventListener('click', function() {
+                console.log(`输入框 ${id} 被点击`);
+            });
+        }
+    });
+
+    // 手动触发修复
+    setTimeout(() => {
+        if (window.fixModalInteractions) {
+            console.log('手动触发模态框修复');
+            window.fixModalInteractions();
+        }
+    }, 1000);
+});
+</script>
+{% endblock %}

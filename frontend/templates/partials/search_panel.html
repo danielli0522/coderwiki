@@ -1,0 +1,176 @@
+<!-- Search Panel Component -->
+<div class="search-panel" id="searchPanel">
+    <div class="search-header">
+        <h5><i class="fas fa-search"></i> 文档搜索</h5>
+        <button class="btn btn-sm btn-outline-secondary" onclick="searchPanel.togglePanel()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    
+    <!-- Search Form -->
+    <div class="search-form">
+        <div class="input-group">
+            <input type="text" 
+                   class="form-control" 
+                   id="searchInput" 
+                   placeholder="搜索文档内容..." 
+                   onkeyup="searchPanel.handleSearchInput(event)"
+                   onkeydown="searchPanel.handleKeyDown(event)">
+            <button class="btn btn-primary" type="button" onclick="searchPanel.performSearch()">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+        
+        <!-- Search Options -->
+        <div class="search-options">
+            <div class="search-option">
+                <label class="form-label">搜索范围:</label>
+                <select class="form-select form-select-sm" id="searchScope">
+                    <option value="all">全部内容</option>
+                    <option value="titles">标题</option>
+                    <option value="content">正文内容</option>
+                    <option value="code">代码块</option>
+                    <option value="tables">表格</option>
+                </select>
+            </div>
+            
+            <div class="search-option">
+                <label class="form-label">搜索模式:</label>
+                <div class="search-mode-group">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="searchMode" id="modeExact" value="exact">
+                        <label class="form-check-label" for="modeExact">精确匹配</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="searchMode" id="modeFuzzy" value="fuzzy" checked>
+                        <label class="form-check-label" for="modeFuzzy">模糊匹配</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="searchMode" id="modeRegex" value="regex">
+                        <label class="form-check-label" for="modeRegex">正则表达式</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="search-option">
+                <label class="form-label">高级选项:</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="caseSensitive">
+                    <label class="form-check-label" for="caseSensitive">区分大小写</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="wholeWord">
+                    <label class="form-check-label" for="wholeWord">全词匹配</label>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Search Buttons -->
+        <div class="search-buttons">
+            <button class="btn btn-primary" onclick="searchPanel.performSearch()">
+                <i class="fas fa-search"></i> 搜索
+            </button>
+            <button class="btn btn-outline-secondary" onclick="searchPanel.clearSearch()">
+                <i class="fas fa-times"></i> 清除
+            </button>
+            <button class="btn btn-outline-info" onclick="searchPanel.showAdvancedOptions()">
+                <i class="fas fa-cog"></i> 高级选项
+            </button>
+        </div>
+    </div>
+    
+    <!-- Search Results -->
+    <div class="search-results" id="searchResults">
+        <div class="search-loading" id="searchLoading" style="display: none;">
+            <div class="spinner-border spinner-border-sm" role="status">
+                <span class="visually-hidden">搜索中...</span>
+            </div>
+            <span>正在搜索...</span>
+        </div>
+        
+        <div class="search-stats" id="searchStats" style="display: none;">
+            <small class="text-muted">
+                找到 <span id="resultCount">0</span> 个结果，用时 <span id="searchTime">0</span>ms
+            </small>
+        </div>
+        
+        <div class="results-container" id="resultsContainer">
+            <!-- Search results will be displayed here -->
+        </div>
+        
+        <div class="no-results" id="noResults" style="display: none;">
+            <div class="text-center text-muted">
+                <i class="fas fa-search fa-3x mb-3"></i>
+                <h6>未找到相关结果</h6>
+                <p>请尝试使用不同的关键词或调整搜索选项</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Search History -->
+    <div class="search-history">
+        <div class="history-header">
+            <h6>搜索历史</h6>
+            <button class="btn btn-sm btn-outline-secondary" onclick="searchPanel.clearHistory()">
+                <i class="fas fa-trash"></i> 清除
+            </button>
+        </div>
+        <div class="history-items" id="searchHistory">
+            <!-- Search history will be displayed here -->
+        </div>
+    </div>
+    
+    <!-- Advanced Search Options (Collapsible) -->
+    <div class="advanced-search" id="advancedSearch" style="display: none;">
+        <div class="advanced-options">
+            <h6>高级搜索选项</h6>
+            
+            <div class="advanced-option">
+                <label class="form-label">日期范围:</label>
+                <div class="date-range">
+                    <input type="date" class="form-control form-control-sm" id="dateFrom" placeholder="开始日期">
+                    <span>至</span>
+                    <input type="date" class="form-control form-control-sm" id="dateTo" placeholder="结束日期">
+                </div>
+            </div>
+            
+            <div class="advanced-option">
+                <label class="form-label">文件类型:</label>
+                <div class="file-types">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="typeMarkdown" checked>
+                        <label class="form-check-label" for="typeMarkdown">Markdown</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="typeCode" checked>
+                        <label class="form-check-label" for="typeCode">代码</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="typeTables" checked>
+                        <label class="form-check-label" for="typeTables">表格</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="advanced-option">
+                <label class="form-label">结果排序:</label>
+                <select class="form-select form-select-sm" id="sortBy">
+                    <option value="relevance">相关度</option>
+                    <option value="date">日期</option>
+                    <option value="title">标题</option>
+                    <option value="location">位置</option>
+                </select>
+            </div>
+            
+            <div class="advanced-option">
+                <label class="form-label">每页结果数:</label>
+                <select class="form-select form-select-sm" id="resultsPerPage">
+                    <option value="10">10</option>
+                    <option value="20" selected>20</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>

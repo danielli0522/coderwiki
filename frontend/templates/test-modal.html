@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}模态框测试 - CoderWiki{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1>模态框交互测试</h1>
+            <p>这个页面用于测试模态框的交互功能是否正常工作。</p>
+
+            <div class="mb-4">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#testModal">
+                    打开测试模态框
+                </button>
+            </div>
+
+            <div class="alert alert-info">
+                <h5>测试说明：</h5>
+                <ul>
+                    <li>点击"打开测试模态框"按钮</li>
+                    <li>尝试在模态框中输入文字</li>
+                    <li>尝试选择下拉菜单</li>
+                    <li>尝试点击按钮</li>
+                    <li>如果所有操作都正常，说明修复成功</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 测试模态框 -->
+<div class="modal fade" id="testModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">测试模态框</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="testInput" class="form-label">测试输入框</label>
+                        <input type="text" class="form-control" id="testInput" placeholder="请在这里输入文字...">
+                    </div>
+                    <div class="mb-3">
+                        <label for="testSelect" class="form-label">测试下拉菜单</label>
+                        <select class="form-select" id="testSelect">
+                            <option value="">请选择...</option>
+                            <option value="1">选项 1</option>
+                            <option value="2">选项 2</option>
+                            <option value="3">选项 3</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="testTextarea" class="form-label">测试文本区域</label>
+                        <textarea class="form-control" id="testTextarea" rows="3" placeholder="请在这里输入多行文字..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="testButtonClick()">测试按钮</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function testButtonClick() {
+    const input = document.getElementById('testInput');
+    const select = document.getElementById('testSelect');
+    const textarea = document.getElementById('testTextarea');
+
+    alert(`测试成功！\n输入框: ${input.value}\n下拉菜单: ${select.value}\n文本区域: ${textarea.value}`);
+}
+
+// 模态框显示时的额外测试
+document.getElementById('testModal').addEventListener('shown.bs.modal', function() {
+    console.log('模态框已显示，开始测试交互...');
+
+    // 自动聚焦到输入框
+    setTimeout(() => {
+        const input = document.getElementById('testInput');
+        if (input) {
+            input.focus();
+            console.log('输入框已获得焦点');
+        }
+    }, 200);
+});
+</script>
+{% endblock %}

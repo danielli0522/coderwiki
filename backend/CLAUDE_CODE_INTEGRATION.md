@@ -21,7 +21,7 @@
 ### 3. Claude Code 编排引擎处理
 
 - 使用指定的 sub agent: `/bmad//bmadDocs:teams:docs-generation-team`
-- 完整文件路径: `/Users/lshl124/Documents/daniel/git/code/aigc/BMAD-METHOD/expansion-packs/bmad-docs-generator/`
+- 相对文件路径: `../bmad-docs-generator/`
 - 生成高质量的技术设计文档
 
 ## 配置
@@ -42,7 +42,7 @@ BMAD_DOCS_PATH = os.environ.get('BMAD_DOCS_PATH', '/Users/lshl124/Documents/dani
 ```bash
 # Claude Code服务配置
 export CLAUDE_CODE_ENABLED=true
-export BMAD_DOCS_PATH=/Users/lshl124/Documents/daniel/git/code/aigc/BMAD-METHOD/expansion-packs/bmad-docs-generator/
+export BMAD_DOCS_PATH=../bmad-docs-generator/
 ```
 
 ## 服务架构

@@ -1,108 +1,159 @@
 #!/usr/bin/env python3
 """
-简化的Claude Code测试
+简单的Claude Code子代理配置测试
 """
 
-import os
-import sys
 import asyncio
-from pathlib import Path
-
-# 添加项目路径
+import sys
+import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-async def test_claude_code_simple():
-    """简化的Claude Code测试"""
-    print("=== 简化Claude Code测试 ===")
-    
+from app.services.claude_code_service import ClaudeCodeService
+from app.services.bmad_subagent_config import BMADSubagentConfig
+
+async def test_basic_config():
+    """测试基本配置"""
+    print("=" * 60)
+    print("Claude Code子代理基本配置测试")
+    print("=" * 60)
+
+    # 创建服务实例
+    service = ClaudeCodeService()
+
+    # 1. 测试BMAD配置
+    print("\n1. 测试BMAD配置...")
+    bmad_config = service.bmad_config
+
+    # 验证配置
+    validation = bmad_config.validate_configuration()
+    print(f"配置验证结果: {'成功' if validation['success'] else '失败'}")
+
+    if not validation['success']:
+        print("错误:")
+        for error in validation['errors']:
+            print(f"  - {error}")
+
+    if validation['warnings']:
+        print("警告:")
+        for warning in validation['warnings']:
+            print(f"  - {warning}")
+
+    # 2. 测试子代理信息
+    print("\n2. 测试子代理信息...")
+    subagent_info = service.get_bmad_subagent_info()
+    if subagent_info['success']:
+        print(f"✅ 子代理信息获取成功")
+        print(f"  团队数量: {subagent_info['teams_count']}")
+        print(f"  代理数量: {subagent_info['agents_count']}")
+        print(f"  配置路径: {subagent_info['config_path']}")
+    else:
+        print(f"❌ 子代理信息获取失败: {subagent_info['error']}")
+
+    # 3. 测试系统提示词生成
+    print("\n3. 测试系统提示词生成...")
     try:
-        # 导入Claude Code服务
-        from app.services.claude_code_service import ClaudeCodeService
-        
+        system_prompt = service._prepare_system_prompt(
+            doc_type="technical_design",
+            doc_title="测试技术设计文档",
+            additional_params={"detailed": True}
+        )
+        print(f"✅ 系统提示词生成成功")
+        print(f"  长度: {len(system_prompt)} 字符")
+
+        # 检查是否包含BMAD相关信息
+        if "BMAD" in system_prompt:
+            print("✅ 包含BMAD相关信息")
+        else:
+            print("❌ 缺少BMAD相关信息")
+
+    except Exception as e:
+        print(f"❌ 系统提示词生成失败: {e}")
+
+    # 4. 测试Claude Code SDK可用性
+    print("\n4. 测试Claude Code SDK可用性...")
+    sdk_check = service.check_claude_code_availability()
+    if sdk_check['available']:
+        print("✅ Claude Code SDK可用")
+    else:
+        print(f"❌ Claude Code SDK不可用: {sdk_check['error']}")
+
+    # 5. 测试BMAD文档生成器可用性
+    print("\n5. 测试BMAD文档生成器可用性...")
+    bmad_check = service.check_bmad_docs_generator()
+    if bmad_check['available']:
+        print("✅ BMAD文档生成器可用")
+        print(f"  团队数量: {bmad_check['teams_count']}")
+        print(f"  代理数量: {bmad_check['agents_count']}")
+    else:
+        print(f"❌ BMAD文档生成器不可用: {bmad_check['error']}")
+
+async def test_claude_code_connection():
+    """测试Claude Code连接"""
+    print("\n" + "=" * 60)
+    print("Claude Code连接测试")
+    print("=" * 60)
+
+    try:
+        from claude_code_sdk import ClaudeSDKClient, ClaudeCodeOptions
+        from pathlib import Path
+
         # 创建服务实例
         service = ClaudeCodeService()
-        
-        print("✅ Claude Code服务创建成功")
-        
-        # 测试SDK可用性
-        availability = service.check_claude_code_availability()
-        print(f"SDK可用性: {availability['success']}")
-        
-        # 测试BMAD文档生成器
-        bmad_status = service.check_bmad_docs_generator()
-        print(f"BMAD文档生成器状态: {bmad_status['success']}")
-        
-        # 测试支持的文档类型
-        doc_types = service.get_supported_doc_types()
-        print(f"支持的文档类型: {len(doc_types.get('doc_types', []))} 个")
-        
-        # 测试文档生成（使用当前目录作为测试仓库）
-        test_repo_path = os.path.dirname(os.path.abspath(__file__))
-        print(f"测试仓库路径: {test_repo_path}")
-        
-        print("\n开始生成测试文档...")
-        result = await service.generate_technical_document(
-            repository_path=test_repo_path,
-            doc_type='technical_design',
-            doc_title='简化测试技术设计文档',
-            additional_params={
-                'detailed': True,
-                'include_examples': True
-            }
+
+        # 获取BMAD文档生成器的绝对路径
+        bmad_docs_abs_path = Path(service.bmad_docs_path).resolve()
+        print(f"BMAD文档生成器路径: {bmad_docs_abs_path}")
+        print(f"路径存在: {bmad_docs_abs_path.exists()}")
+
+        # 配置Claude Code选项
+        options = ClaudeCodeOptions(
+            system_prompt="你是一个测试助手，请简单回答我的问题。",
+            max_turns=3,
+            allowed_tools=["Read"],
+            add_dirs=[bmad_docs_abs_path],
+            cwd=bmad_docs_abs_path
         )
-        
-        if result['success']:
-            print("✅ 文档生成成功！")
-            print(f"文档长度: {len(result.get('content', ''))} 字符")
-            print(f"生成时间: {result.get('generation_time', 0):.2f} 秒")
-            print(f"成本估算: ${result.get('cost_estimate', 0):.4f}")
-            
-            # 保存生成的文档
-            output_file = "simple_test_document.md"
-            with open(output_file, 'w', encoding='utf-8') as f:
-                f.write(result.get('content', ''))
-            print(f"文档已保存到: {output_file}")
-            
-            # 显示文档前500字符
-            content = result.get('content', '')
-            if len(content) > 500:
-                print(f"文档预览:\n{content[:500]}...")
-            else:
-                print(f"文档内容:\n{content}")
-        else:
-            print("❌ 文档生成失败")
-            print(f"错误: {result.get('error', 'Unknown error')}")
-        
-        return result['success']
-        
+
+        print("✅ Claude Code选项配置成功")
+
+        # 测试简单连接
+        print("\n测试简单连接...")
+        async with ClaudeSDKClient(options=options) as client:
+            await client.query("请说'Hello World'")
+
+            # 接收响应
+            async for message in client.receive_response():
+                if hasattr(message, 'content'):
+                    for block in message.content:
+                        if hasattr(block, 'text'):
+                            text_content = block.text
+                            if text_content and text_content.strip():
+                                print(f"✅ 收到响应: {text_content[:100]}...")
+                                return  # 成功收到响应，退出测试
+                                break
+                break
+
+        print("❌ 未收到有效响应")
+
     except Exception as e:
-        print(f"❌ 测试失败: {e}")
+        print(f"❌ Claude Code连接测试失败: {e}")
         import traceback
         traceback.print_exc()
-        return False
 
 async def main():
     """主函数"""
-    print("简化Claude Code测试")
-    print("=" * 50)
-    
-    # 设置环境变量
-    os.environ['CLAUDE_CODE_ENABLED'] = 'true'
-    os.environ['BMAD_DOCS_PATH'] = '/Users/lshl124/Documents/daniel/git/code/aigc/BMAD-METHOD/expansion-packs/bmad-docs-generator/'
-    
-    print(f"CLAUDE_CODE_ENABLED: {os.environ.get('CLAUDE_CODE_ENABLED')}")
-    print(f"BMAD_DOCS_PATH: {os.environ.get('BMAD_DOCS_PATH')}")
-    print()
-    
-    # 运行测试
-    success = await test_claude_code_simple()
-    
-    print("\n" + "=" * 50)
-    if success:
-        print("🎉 简化Claude Code测试成功！")
-    else:
-        print("⚠️  简化Claude Code测试失败")
-    print("=" * 50)
+    try:
+        await test_basic_config()
+        await test_claude_code_connection()
+
+        print("\n" + "=" * 60)
+        print("测试完成!")
+        print("=" * 60)
+
+    except Exception as e:
+        print(f"\n测试过程中出现错误: {str(e)}")
+        import traceback
+        traceback.print_exc()
 
 if __name__ == "__main__":
     asyncio.run(main())

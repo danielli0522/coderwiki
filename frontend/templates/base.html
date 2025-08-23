@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CoderWiki{% endblock %}</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/components.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/modal-fixes.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/navigation-fixes.css') }}" rel="stylesheet">
+
+    <!-- Modal Fixes JavaScript -->
+    <script src="{{ url_for('static', filename='js/modal-fixes.js') }}"></script>
+    <!-- Modal Close Fix JavaScript -->
+    <script src="{{ url_for('static', filename='js/modal-close-fix.js') }}"></script>
+    <!-- Navigation Fix JavaScript -->
+    <script src="{{ url_for('static', filename='js/navigation-fix.js') }}"></script>
+    <!-- URL Fix JavaScript -->
+    <script src="{{ url_for('static', filename='js/url-fix.js') }}"></script>
+    <!-- Repository API Fix JavaScript -->
+    <script src="{{ url_for('static', filename='js/repository-fix.js') }}"></script>
+    <!-- API Error Handler JavaScript -->
+    <script src="{{ url_for('static', filename='js/api-error-handler.js') }}"></script>
+
+    <!-- 内联导航修复脚本 -->
+    <script>
+        // 确保导航链接正常工作
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('内联导航修复脚本加载');
+
+            // 修复导航链接
+            const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+            navLinks.forEach(function(link) {
+                // 确保链接可以点击
+                link.style.pointerEvents = 'auto';
+                link.style.cursor = 'pointer';
+                link.style.userSelect = 'auto';
+
+                // 添加点击事件监听器
+                link.addEventListener('click', function(e) {
+                    console.log('导航链接被点击:', this.textContent.trim(), this.href);
+
+                    // 如果链接有效，允许正常跳转
+                    if (this.href && this.href !== '#' && this.href !== window.location.href) {
+                        console.log('正在跳转到:', this.href);
+                        // 不阻止默认行为，允许正常跳转
+                    }
+                });
+            });
+
+            console.log('导航修复完成，找到', navLinks.length, '个导航链接');
+        });
+    </script>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- 主要内容区域 -->
+    <div class="main-content">
+        <!-- 顶部导航 -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
+                <i class="fas fa-code"></i> CoderWiki
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.dashboard') }}">
+                            <i class="fas fa-tachometer-alt"></i> 仪表板
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.repositories') }}">
+                            <i class="fas fa-folder"></i> 仓库管理
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.documents') }}">
+                            <i class="fas fa-file-alt"></i> 文档管理
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.analysis') }}">
+                            <i class="fas fa-chart-line"></i> 代码分析
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.tasks') }}">
+                            <i class="fas fa-tasks"></i> 任务管理
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.settings') }}">
+                            <i class="fas fa-cog"></i> 系统设置
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+
+                <ul class="navbar-nav">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i> {{ current_user.username }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('main.profile') }}">
+                                <i class="fas fa-user-cog"></i> 个人设置
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">
+                                <i class="fas fa-sign-out-alt"></i> 退出登录
+                            </a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth.login') }}">
+                            <i class="fas fa-sign-in-alt"></i> 登录
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth.register') }}">
+                            <i class="fas fa-user-plus"></i> 注册
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container-fluid mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white mt-5 py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>CoderWiki</h5>
+                    <p>智能代码文档生成与管理平台</p>
+                </div>
+                <div class="col-md-6">
+                    <h5>快速链接</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{{ url_for('main.about') }}" class="text-white">关于我们</a></li>
+                        <li><a href="{{ url_for('main.contact') }}" class="text-white">联系我们</a></li>
+                        <li><a href="{{ url_for('main.help') }}" class="text-white">帮助文档</a></li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="bg-white">
+            <div class="text-center">
+                <p>&copy; 2024 CoderWiki. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+      </div><!-- /.main-content -->
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/api_client.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/realtime_updates_fixed.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/components/stats.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/components/repository_list.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/components/task_progress.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/components/recent_activity.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/components/system_status.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/components.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/performance.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/browser-compatibility.js') }}"></script>
+
+    {% block extra_js %}{% endblock %}
+
+    <!-- 性能优化 - 预连接关键资源 -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+
+    <!-- 性能优化 - DNS预解析 -->
+    <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+
+    <!-- 性能优化 - 预加载关键CSS -->
+    <link rel="preload" href="{{ url_for('static', filename='css/style.css') }}" as="style">
+    <link rel="preload" href="{{ url_for('static', filename='css/components.css') }}" as="style">
+
+    <!-- 性能优化 - 预加载关键JS -->
+    <link rel="preload" href="{{ url_for('static', filename='js/components.js') }}" as="script">
+    <link rel="preload" href="{{ url_for('static', filename='js/performance.js') }}" as="script">
+
+    <!-- 性能优化 - 禁用不必要的功能 -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+
+    <!-- PWA支持 -->
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="theme-color" content="#007bff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="CoderWiki">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/icon-192x192.png') }}">
+</body>
+</html>

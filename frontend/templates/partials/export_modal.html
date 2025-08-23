@@ -1,0 +1,217 @@
+<!-- Export Modal Component -->
+<div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exportModalLabel">
+                    <i class="fas fa-download"></i> 导出文档
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Export Format Selection -->
+                <div class="export-section">
+                    <h6>选择导出格式</h6>
+                    <div class="format-options">
+                        <div class="format-option" onclick="exportModal.selectFormat('pdf')">
+                            <div class="format-icon">
+                                <i class="fas fa-file-pdf"></i>
+                            </div>
+                            <div class="format-info">
+                                <div class="format-name">PDF</div>
+                                <div class="format-desc">便携式文档格式，适合打印和分发</div>
+                            </div>
+                            <div class="format-selected">
+                                <i class="fas fa-check"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="format-option" onclick="exportModal.selectFormat('word')">
+                            <div class="format-icon">
+                                <i class="fas fa-file-word"></i>
+                            </div>
+                            <div class="format-info">
+                                <div class="format-name">Word</div>
+                                <div class="format-desc">Microsoft Word文档，可编辑</div>
+                            </div>
+                            <div class="format-selected">
+                                <i class="fas fa-check"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="format-option" onclick="exportModal.selectFormat('markdown')">
+                            <div class="format-icon">
+                                <i class="fas fa-file-code"></i>
+                            </div>
+                            <div class="format-info">
+                                <div class="format-name">Markdown</div>
+                                <div class="format-desc">原始Markdown格式</div>
+                            </div>
+                            <div class="format-selected">
+                                <i class="fas fa-check"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="format-option" onclick="exportModal.selectFormat('html')">
+                            <div class="format-icon">
+                                <i class="fas fa-file-code"></i>
+                            </div>
+                            <div class="format-info">
+                                <div class="format-name">HTML</div>
+                                <div class="format-desc">网页格式，保留样式</div>
+                            </div>
+                            <div class="format-selected">
+                                <i class="fas fa-check"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Export Options -->
+                <div class="export-section">
+                    <h6>导出选项</h6>
+                    <div class="export-options-grid">
+                        <!-- Basic Options -->
+                        <div class="option-group">
+                            <h7>基本选项</h7>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="includeToc" checked>
+                                <label class="form-check-label" for="includeToc">
+                                    包含目录
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="includePageNumbers" checked>
+                                <label class="form-check-label" for="includePageNumbers">
+                                    包含页码
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="includeHeaderFooter" checked>
+                                <label class="form-check-label" for="includeHeaderFooter">
+                                    包含页眉页脚
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="includeMetadata" checked>
+                                <label class="form-check-label" for="includeMetadata">
+                                    包含元信息
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Content Options -->
+                        <div class="option-group">
+                            <h7>内容选项</h7>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="includeCodeHighlighting" checked>
+                                <label class="form-check-label" for="includeCodeHighlighting">
+                                    代码高亮
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="includeLineNumbers">
+                                <label class="form-check-label" for="includeLineNumbers">
+                                    代码行号
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="includeImages" checked>
+                                <label class="form-check-label" for="includeImages">
+                                    包含图片
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="includeLinks" checked>
+                                <label class="form-check-label" for="includeLinks">
+                                    保留链接
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Style Options -->
+                        <div class="option-group">
+                            <h7>样式选项</h7>
+                            <div class="mb-2">
+                                <label class="form-label">主题:</label>
+                                <select class="form-select form-select-sm" id="exportTheme">
+                                    <option value="light">浅色主题</option>
+                                    <option value="dark">深色主题</option>
+                                    <option value="auto">自动</option>
+                                </select>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">字体大小:</label>
+                                <select class="form-select form-select-sm" id="fontSize">
+                                    <option value="12">12px</option>
+                                    <option value="14" selected>14px</option>
+                                    <option value="16">16px</option>
+                                    <option value="18">18px</option>
+                                </select>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="customStyles">
+                                <label class="form-check-label" for="customStyles">
+                                    自定义样式
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Advanced Options -->
+                        <div class="option-group">
+                            <h7>高级选项</h7>
+                            <div class="mb-2">
+                                <label class="form-label">页面大小:</label>
+                                <select class="form-select form-select-sm" id="pageSize">
+                                    <option value="A4" selected>A4</option>
+                                    <option value="A3">A3</option>
+                                    <option value="Letter">Letter</option>
+                                    <option value="Legal">Legal</option>
+                                </select>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">页面方向:</label>
+                                <select class="form-select form-select-sm" id="pageOrientation">
+                                    <option value="portrait" selected>纵向</option>
+                                    <option value="landscape">横向</option>
+                                </select>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">边距 (mm):</label>
+                                <input type="number" class="form-control form-control-sm" id="pageMargins" value="20" min="10" max="50">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Export Progress -->
+                <div class="export-progress" id="exportProgress" style="display: none;">
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" id="exportProgressBar" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-text" id="exportProgressText">准备导出...</div>
+                </div>
+                
+                <!-- Export Preview -->
+                <div class="export-preview" id="exportPreview" style="display: none;">
+                    <h6>导出预览</h6>
+                    <div class="preview-container">
+                        <div class="preview-content" id="previewContent">
+                            <!-- Preview will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-outline-info" onclick="exportModal.previewExport()">
+                    <i class="fas fa-eye"></i> 预览
+                </button>
+                <button type="button" class="btn btn-primary" onclick="exportModal.startExport()">
+                    <i class="fas fa-download"></i> 开始导出
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

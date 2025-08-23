@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}文档查看器 - {{ document.title }}{% endblock %}
+
+{% block head %}
+<!-- Document Viewer CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/document_viewer.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/navigation.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/search.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/export.css') }}">
+
+<!-- Markdown and Code Highlighting -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+
+<!-- Document Viewer JS -->
+<script src="{{ url_for('static', filename='js/viewer_utils.js') }}"></script>
+<script src="{{ url_for('static', filename='js/navigation.js') }}"></script>
+<script src="{{ url_for('static', filename='js/search.js') }}"></script>
+<script src="{{ url_for('static', filename='js/export.js') }}"></script>
+<script src="{{ url_for('static', filename='js/document_viewer.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="document-viewer-container">
+    <!-- Document Header -->
+    {% include "partials/document_header.html" %}
+    
+    <!-- Main Content Area -->
+    <div class="document-main-content">
+        <!-- Navigation Sidebar -->
+        {% include "partials/navigation_sidebar.html" %}
+        
+        <!-- Document Content -->
+        <div class="document-content-area">
+            <div class="document-content" id="documentContent">
+                <!-- Loading State -->
+                <div class="loading-spinner" id="loadingSpinner">
+                    <div class="spinner"></div>
+                    <p>正在加载文档...</p>
+                </div>
+                
+                <!-- Content will be loaded here -->
+            </div>
+        </div>
+        
+        <!-- Right Sidebar (Tools) -->
+        <div class="document-tools-sidebar">
+            <!-- Search Panel -->
+            {% include "partials/search_panel.html" %}
+            
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <h3>快速操作</h3>
+                <div class="action-buttons">
+                    <button class="btn btn-sm btn-outline-primary" onclick="documentViewer.toggleFullscreen()">
+                        <i class="fas fa-expand"></i> 全屏
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="documentViewer.toggleTheme()">
+                        <i class="fas fa-moon"></i> 主题
+                    </button>
+                    <button class="btn btn-sm btn-outline-info" onclick="documentViewer.printDocument()">
+                        <i class="fas fa-print"></i> 打印
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Document Info -->
+            <div class="document-info">
+                <h3>文档信息</h3>
+                <div class="info-item">
+                    <span class="label">字数:</span>
+                    <span class="value" id="wordCount">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">阅读时间:</span>
+                    <span class="value" id="readingTime">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">最后更新:</span>
+                    <span class="value" id="lastUpdated">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">生成时间:</span>
+                    <span class="value" id="generatedAt">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Export Modal -->
+{% include "partials/export_modal.html" %}
+
+<!-- Share Modal -->
+<div class="modal fade" id="shareModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">分享文档</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="share-options">
+                    <div class="share-option">
+                        <label for="shareLink">分享链接:</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="shareLink" readonly>
+                            <button class="btn btn-outline-secondary" onclick="documentViewer.copyShareLink()">
+                                <i class="fas fa-copy"></i> 复制
+                            </button>
+                        </div>
+                    </div>
+                    <div class="share-option">
+                        <label for="shareExpiry">有效期:</label>
+                        <select class="form-select" id="shareExpiry">
+                            <option value="1">1小时</option>
+                            <option value="24">1天</option>
+                            <option value="168">1周</option>
+                            <option value="720">1个月</option>
+                            <option value="0">永久</option>
+                        </select>
+                    </div>
+                    <div class="share-option">
+                        <label for="sharePassword">访问密码:</label>
+                        <input type="password" class="form-control" id="sharePassword" placeholder="可选，留空则无需密码">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="documentViewer.generateShareLink()">生成链接</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Version History Modal -->
+<div class="modal fade" id="versionHistoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">版本历史</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="version-history" id="versionHistory">
+                    <!-- Version history will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Initialize document viewer when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Configure marked options
+    marked.setOptions({
+        highlight: function(code, lang) {
+            if (lang && hljs.getLanguage(lang)) {
+                try {
+                    return hljs.highlight(code, { language: lang }).value;
+                } catch (err) {}
+            }
+            return hljs.highlightAuto(code).value;
+        },
+        breaks: true,
+        gfm: true,
+        tables: true,
+        sanitize: false
+    });
+    
+    // Initialize document viewer
+    window.documentViewer = new DocumentViewer({
+        documentId: '{{ document.id }}',
+        initialVersion: '{{ document.version }}',
+        autoLoad: true
+    });
+});
+</script>
+{% endblock %}

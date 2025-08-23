@@ -1,0 +1,545 @@
+{% extends "base.html" %}
+
+{% block title %}UI组件展示 - CoderWiki{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card card-enhanced">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-palette me-2"></i>
+                    UI组件展示
+                </h4>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">展示CoderWiki平台的所有UI组件和交互效果</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 按钮组件 -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card card-enhanced">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-mouse-pointer me-2"></i>
+                    按钮组件
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>基础按钮</h6>
+                        <div class="d-flex gap-2 flex-wrap mb-3">
+                            <button class="btn btn-primary btn-enhanced">Primary</button>
+                            <button class="btn btn-secondary btn-enhanced">Secondary</button>
+                            <button class="btn btn-success btn-enhanced">Success</button>
+                            <button class="btn btn-danger btn-enhanced">Danger</button>
+                            <button class="btn btn-warning btn-enhanced">Warning</button>
+                            <button class="btn btn-info btn-enhanced">Info</button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>轮廓按钮</h6>
+                        <div class="d-flex gap-2 flex-wrap mb-3">
+                            <button class="btn btn-outline-primary btn-enhanced">Primary</button>
+                            <button class="btn btn-outline-secondary btn-enhanced">Secondary</button>
+                            <button class="btn btn-outline-success btn-enhanced">Success</button>
+                            <button class="btn btn-outline-danger btn-enhanced">Danger</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>按钮尺寸</h6>
+                        <div class="d-flex gap-2 flex-wrap align-items-center mb-3">
+                            <button class="btn btn-primary btn-enhanced btn-lg">大按钮</button>
+                            <button class="btn btn-primary btn-enhanced">默认按钮</button>
+                            <button class="btn btn-primary btn-enhanced btn-sm">小按钮</button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>按钮状态</h6>
+                        <div class="d-flex gap-2 flex-wrap mb-3">
+                            <button class="btn btn-primary btn-enhanced" disabled>禁用</button>
+                            <button class="btn btn-primary btn-enhanced active">活动</button>
+                            <button class="btn btn-primary btn-enhanced">
+                                <span class="loading-enhanced"></span> 加载中
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 表单组件 -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card card-enhanced">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-edit me-2"></i>
+                    表单组件
+                </h5>
+            </div>
+            <div class="card-body">
+                <form class="form-enhanced">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label-enhanced">文本输入</label>
+                                <input type="text" class="form-control form-control-enhanced" placeholder="请输入文本">
+                                <div class="invalid-feedback">请输入有效的文本</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label-enhanced">邮箱输入</label>
+                                <input type="email" class="form-control form-control-enhanced" placeholder="请输入邮箱">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label-enhanced">选择框</label>
+                                <select class="form-select form-control-enhanced">
+                                    <option>请选择</option>
+                                    <option>选项1</option>
+                                    <option>选项2</option>
+                                    <option>选项3</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label-enhanced">文本域</label>
+                                <textarea class="form-control form-control-enhanced" rows="3" placeholder="请输入详细描述"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label-enhanced">文件上传</label>
+                                <div class="upload-area">
+                                    <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
+                                    <h6>拖拽文件到这里或点击上传</h6>
+                                    <p class="text-muted mb-0">支持 PDF, DOC, TXT 格式，最大 10MB</p>
+                                    <input type="file" class="d-none" id="fileUpload">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label-enhanced">开关</label>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="switch1">
+                                    <label class="form-check-label" for="switch1">启用通知</label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="switch2" checked>
+                                    <label class="form-check-label" for="switch2">自动保存</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary btn-enhanced">提交表单</button>
+                        <button type="reset" class="btn btn-secondary btn-enhanced">重置</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 通知组件 -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card card-enhanced">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-bell me-2"></i>
+                    通知组件
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>增强通知</h6>
+                        <div class="d-flex flex-column gap-2">
+                            <div class="alert alert-enhanced alert-enhanced-success">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    <div>操作成功完成！</div>
+                                </div>
+                            </div>
+                            <div class="alert alert-enhanced alert-enhanced-danger">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <div>操作失败，请重试</div>
+                                </div>
+                            </div>
+                            <div class="alert alert-enhanced alert-enhanced-warning">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <div>请注意检查输入内容</div>
+                                </div>
+                            </div>
+                            <div class="alert alert-enhanced alert-enhanced-info">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <div>这是一条信息提示</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>标准通知</h6>
+                        <div class="d-flex flex-column gap-2">
+                            <div class="alert alert-success d-flex align-items-center" role="alert">
+                                <i class="fas fa-check-circle me-2"></i>
+                                <div>操作成功完成！</div>
+                            </div>
+                            <div class="alert alert-danger d-flex align-items-center" role="alert">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <div>操作失败，请重试</div>
+                            </div>
+                            <div class="alert alert-warning d-flex align-items-center" role="alert">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <div>请注意检查输入内容</div>
+                            </div>
+                            <div class="alert alert-info d-flex align-items-center" role="alert">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <div>这是一条信息提示</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-primary btn-enhanced" onclick="showTestNotification()">测试通知</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 模态框组件 -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card card-enhanced">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-window-maximize me-2"></i>
+                    模态框组件
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex gap-2 flex-wrap">
+                    <button type="button" class="btn btn-primary btn-enhanced" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                        基础模态框
+                    </button>
+                    <button type="button" class="btn btn-success btn-enhanced" data-bs-toggle="modal" data-bs-target="#enhancedModal">
+                        增强模态框
+                    </button>
+                    <button type="button" class="btn btn-info btn-enhanced" onclick="showConfirmDialog()">
+                        确认对话框
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 表格组件 -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card card-enhanced">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-table me-2"></i>
+                    表格组件
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-enhanced">
+                        <thead>
+                            <tr>
+                                <th data-sortable="true">ID</th>
+                                <th data-sortable="true">名称</th>
+                                <th data-sortable="true">状态</th>
+                                <th data-sortable="true">创建时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>项目A</td>
+                                <td><span class="badge badge-enhanced badge-enhanced-primary">进行中</span></td>
+                                <td>2024-01-15</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary me-1">编辑</button>
+                                    <button class="btn btn-sm btn-outline-danger">删除</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>项目B</td>
+                                <td><span class="badge badge-enhanced badge-enhanced-success">已完成</span></td>
+                                <td>2024-01-14</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary me-1">编辑</button>
+                                    <button class="btn btn-sm btn-outline-danger">删除</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>项目C</td>
+                                <td><span class="badge badge-enhanced badge-enhanced-warning">待审核</span></td>
+                                <td>2024-01-13</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary me-1">编辑</button>
+                                    <button class="btn btn-sm btn-outline-danger">删除</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 进度条组件 -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card card-enhanced">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-tasks me-2"></i>
+                    进度条组件
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>基础进度条</h6>
+                        <div class="progress progress-enhanced mb-3">
+                            <div class="progress-bar progress-bar-enhanced" style="width: 25%"></div>
+                        </div>
+                        <div class="progress progress-enhanced mb-3">
+                            <div class="progress-bar progress-bar-enhanced" style="width: 50%"></div>
+                        </div>
+                        <div class="progress progress-enhanced mb-3">
+                            <div class="progress-bar progress-bar-enhanced" style="width: 75%"></div>
+                        </div>
+                        <div class="progress progress-enhanced mb-3">
+                            <div class="progress-bar progress-bar-enhanced" style="width: 100%"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>带标签的进度条</h6>
+                        <div class="progress progress-enhanced mb-3">
+                            <div class="progress-bar progress-bar-enhanced" style="width: 25%">25%</div>
+                        </div>
+                        <div class="progress progress-enhanced mb-3">
+                            <div class="progress-bar progress-bar-enhanced bg-success" style="width: 50%">50%</div>
+                        </div>
+                        <div class="progress progress-enhanced mb-3">
+                            <div class="progress-bar progress-bar-enhanced bg-warning" style="width: 75%">75%</div>
+                        </div>
+                        <div class="progress progress-enhanced mb-3">
+                            <div class="progress-bar progress-bar-enhanced bg-danger" style="width: 100%">100%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 分页组件 -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card card-enhanced">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>
+                    分页组件
+                </h5>
+            </div>
+            <div class="card-body">
+                <nav>
+                    <ul class="pagination pagination-enhanced">
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1">上一页</a>
+                        </li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item"><a class="page-link" href="#">4</a></li>
+                        <li class="page-item"><a class="page-link" href="#">5</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">下一页</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 列表组组件 -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card card-enhanced">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-list-ul me-2"></i>
+                    列表组组件
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>基础列表</h6>
+                        <div class="list-group list-group-enhanced">
+                            <div class="list-group-item active">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">活动项目</h6>
+                                        <small class="text-muted">当前选中的项目</small>
+                                    </div>
+                                    <span class="badge badge-enhanced badge-enhanced-primary">5</span>
+                                </div>
+                            </div>
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">已完成项目</h6>
+                                        <small class="text-muted">查看已完成的项目</small>
+                                    </div>
+                                    <span class="badge badge-enhanced badge-enhanced-success">12</span>
+                                </div>
+                            </div>
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">待审核项目</h6>
+                                        <small class="text-muted">需要审核的项目</small>
+                                    </div>
+                                    <span class="badge badge-enhanced badge-enhanced-warning">3</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>面包屑导航</h6>
+                        <nav>
+                            <ol class="breadcrumb breadcrumb-enhanced">
+                                <li class="breadcrumb-item"><a href="#">首页</a></li>
+                                <li class="breadcrumb-item"><a href="#">组件</a></li>
+                                <li class="breadcrumb-item active">列表组</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<!-- 基础模态框 -->
+<div class="modal fade" id="exampleModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">基础模态框</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>这是一个基础的模态框示例。</p>
+                <p>模态框可以用来显示重要信息、确认操作或收集用户输入。</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary">保存更改</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 增强模态框 -->
+<div class="modal modal-enhanced fade" id="enhancedModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-star me-2"></i>
+                    增强模态框
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                    <h4>操作成功</h4>
+                    <p class="text-muted">您的操作已经成功完成，系统正在处理您的请求。</p>
+                </div>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    这是一个增强版的模态框，具有更好的视觉效果和用户体验。
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary btn-enhanced">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+function showTestNotification() {
+    const types = ['success', 'danger', 'warning', 'info'];
+    const messages = [
+        '操作成功完成！',
+        '操作失败，请重试',
+        '请注意检查输入内容',
+        '这是一条信息提示'
+    ];
+    
+    const randomType = types[Math.floor(Math.random() * types.length)];
+    const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+    
+    ComponentManager.showEnhancedNotification(randomMessage, randomType);
+}
+
+function showConfirmDialog() {
+    ComponentManager.utils.confirmDialog('确定要执行此操作吗？', function() {
+        ComponentManager.showEnhancedNotification('操作已确认', 'success');
+    });
+}
+
+// 初始化表单验证
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('.form-enhanced');
+    if (form) {
+        ComponentManager.forms.initValidation('form-enhanced', {
+            'text': { required: true, minLength: 2, maxLength: 50 },
+            'email': { required: true, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ }
+        });
+    }
+});
+</script>
+{% endblock %}

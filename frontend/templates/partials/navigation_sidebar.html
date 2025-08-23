@@ -1,0 +1,130 @@
+<!-- Navigation Sidebar Component -->
+<div class="navigation-sidebar" id="navigationSidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-title">
+            <i class="fas fa-list"></i>
+            <span>文档目录</span>
+        </div>
+        <div class="sidebar-actions">
+            <button class="btn btn-sm btn-outline-secondary" onclick="navigationSidebar.toggleExpandAll()" title="展开/折叠全部">
+                <i class="fas fa-expand-arrows-alt"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-secondary" onclick="navigationSidebar.refreshToc()" title="刷新目录">
+                <i class="fas fa-sync"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-secondary d-md-none" onclick="navigationSidebar.closeMobile()" title="关闭">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Search in TOC -->
+    <div class="toc-search">
+        <div class="input-group">
+            <input type="text" class="form-control form-control-sm" id="tocSearchInput" 
+                   placeholder="搜索目录..." onkeyup="navigationSidebar.searchToc(this.value)">
+            <button class="btn btn-outline-secondary btn-sm" type="button" onclick="navigationSidebar.clearTocSearch()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Table of Contents -->
+    <div class="table-of-contents" id="tableOfContents">
+        <!-- TOC items will be dynamically generated here -->
+        <div class="toc-loading">
+            <div class="spinner-border spinner-border-sm" role="status">
+                <span class="visually-hidden">加载中...</span>
+            </div>
+            <span>正在生成目录...</span>
+        </div>
+    </div>
+    
+    <!-- Document Navigation -->
+    <div class="document-navigation">
+        <div class="nav-section">
+            <h6>快速导航</h6>
+            <div class="nav-buttons">
+                <button class="btn btn-sm btn-outline-primary w-100 mb-2" onclick="navigationSidebar.scrollToTop()">
+                    <i class="fas fa-arrow-up"></i> 返回顶部
+                </button>
+                <button class="btn btn-sm btn-outline-primary w-100 mb-2" onclick="navigationSidebar.scrollToBottom()">
+                    <i class="fas fa-arrow-down"></i> 跳转到底部
+                </button>
+                <button class="btn btn-sm btn-outline-primary w-100" onclick="navigationSidebar.goToNextSection()">
+                    <i class="fas fa-chevron-down"></i> 下一节
+                </button>
+                <button class="btn btn-sm btn-outline-primary w-100 mb-2" onclick="navigationSidebar.goToPreviousSection()">
+                    <i class="fas fa-chevron-up"></i> 上一节
+                </button>
+            </div>
+        </div>
+        
+        <!-- Reading Progress -->
+        <div class="nav-section">
+            <h6>阅读进度</h6>
+            <div class="reading-progress">
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" id="readingProgressBar" style="width: 0%"></div>
+                </div>
+                <div class="progress-text">
+                    <span id="progressPercentage">0%</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bookmarks -->
+        <div class="nav-section">
+            <div class="section-header">
+                <h6>书签</h6>
+                <button class="btn btn-sm btn-outline-secondary" onclick="navigationSidebar.addBookmark()" title="添加书签">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+            <div class="bookmarks-list" id="bookmarksList">
+                <!-- Bookmarks will be loaded here -->
+                <div class="no-bookmarks">
+                    <small class="text-muted">暂无书签</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Document Info -->
+        <div class="nav-section">
+            <h6>文档信息</h6>
+            <div class="document-stats">
+                <div class="stat-item">
+                    <span class="stat-label">章节:</span>
+                    <span class="stat-value" id="chapterCount">-</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">代码块:</span>
+                    <span class="stat-value" id="codeBlockCount">-</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">表格:</span>
+                    <span class="stat-value" id="tableCount">-</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">图片:</span>
+                    <span class="stat-value" id="imageCount">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Mobile Footer -->
+    <div class="mobile-footer d-md-none">
+        <div class="mobile-nav-buttons">
+            <button class="btn btn-sm btn-outline-primary" onclick="navigationSidebar.scrollToTop()">
+                <i class="fas fa-arrow-up"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-primary" onclick="navigationSidebar.goToNextSection()">
+                <i class="fas fa-chevron-down"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-primary" onclick="navigationSidebar.addBookmark()">
+                <i class="fas fa-bookmark"></i>
+            </button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,36 @@
+<footer class="bg-dark text-white mt-5 py-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <h5>CoderWiki</h5>
+                <p>智能代码文档生成与管理平台</p>
+                <div class="social-links">
+                    <a href="#" class="text-white me-2"><i class="fab fa-github"></i></a>
+                    <a href="#" class="text-white me-2"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="text-white me-2"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <h5>快速链接</h5>
+                <ul class="list-unstyled">
+                    <li><a href="{{ url_for('main.about') }}" class="text-white">关于我们</a></li>
+                    <li><a href="{{ url_for('main.contact') }}" class="text-white">联系我们</a></li>
+                    <li><a href="{{ url_for('main.help') }}" class="text-white">帮助文档</a></li>
+                    <li><a href="{{ url_for('main.privacy') }}" class="text-white">隐私政策</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h5>联系我们</h5>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-envelope"></i> contact@coderwiki.com</li>
+                    <li><i class="fas fa-phone"></i> +86 123-456-7890</li>
+                    <li><i class="fas fa-map-marker-alt"></i> 北京市朝阳区</li>
+                </ul>
+            </div>
+        </div>
+        <hr class="bg-white">
+        <div class="text-center">
+            <p>&copy; 2024 CoderWiki. All rights reserved.</p>
+        </div>
+    </div>
+</footer>

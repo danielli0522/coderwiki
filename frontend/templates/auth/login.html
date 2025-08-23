@@ -1,0 +1,481 @@
+{% extends "base.html" %}
+
+{% block title %}登录 - CoderWiki{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-sign-in-alt"></i> 用户登录
+                </h4>
+            </div>
+            <div class="card-body">
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">用户名或邮箱</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-user"></i>
+                            </span>
+                            <input type="text" class="form-control" id="username" name="username"
+                                   placeholder="请输入用户名或邮箱" required>
+                        </div>
+                        <div class="invalid-feedback"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">密码</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                            <input type="password" class="form-control" id="password" name="password"
+                                   placeholder="请输入密码" required>
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="invalid-feedback"></div>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                        <label class="form-check-label" for="remember">
+                            记住我
+                        </label>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary" id="loginBtn">
+                            <i class="fas fa-sign-in-alt"></i> 登录
+                        </button>
+                    </div>
+                </form>
+
+                <hr>
+
+                <div class="text-center">
+                    <p class="mb-2">
+                        还没有账号？
+                        <a href="{{ url_for('auth.register') }}" class="text-decoration-none">
+                            立即注册
+                        </a>
+                    </p>
+                    <!-- 忘记密码功能已完全禁用 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div class="text-center mt-3" id="loadingSpinner" style="display: none;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">加载中...</span>
+            </div>
+            <p class="mt-2">正在登录...</p>
+        </div>
+    </div>
+</div>
+
+<!-- 忘记密码模态框已完全移除 -->
+{% endblock %}
+
+{% block extra_js %}
+<!-- Login Modal Fix -->
+<script src="{{ url_for('static', filename='js/login-modal-fix.js') }}"></script>
+<script>
+// Login form handling
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const form = e.target;
+    const submitBtn = document.getElementById('loginBtn');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+
+    // Reset form validation
+    form.classList.remove('was-validated');
+
+    // Get form data
+    const formData = new FormData(form);
+    const loginData = {
+        username: formData.get('username'),
+        password: formData.get('password'),
+        remember: formData.get('remember') === 'on'
+    };
+
+    // Validate form
+    if (!loginData.username || !loginData.password) {
+        showToast('请填写所有必填字段', 'error');
+        return;
+    }
+
+    // Show loading state
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 登录中...';
+    loadingSpinner.style.display = 'block';
+
+    try {
+        const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(loginData)
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+            showToast('登录成功！', 'success');
+            // Redirect to dashboard after successful login
+            setTimeout(() => {
+                window.location.href = '/dashboard';
+            }, 1000);
+        } else {
+            showToast(result.error || '登录失败，请检查用户名和密码', 'error');
+        }
+    } catch (error) {
+        console.error('Login error:', error);
+        showToast('网络错误，请稍后重试', 'error');
+    } finally {
+        // Hide loading state
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> 登录';
+        loadingSpinner.style.display = 'none';
+    }
+});
+
+// Toggle password visibility
+document.getElementById('togglePassword').addEventListener('click', function() {
+    const passwordInput = document.getElementById('password');
+    const icon = this.querySelector('i');
+
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+});
+
+// Forgot password modal - 修复版本 (功能已禁用)
+/*
+let forgotPasswordModal = null;
+
+document.getElementById('forgotPasswordLink').addEventListener('click', function(e) {
+    e.preventDefault();
+
+    // 确保模态框实例存在
+    if (!forgotPasswordModal) {
+        const modalElement = document.getElementById('forgotPasswordModal');
+        forgotPasswordModal = new bootstrap.Modal(modalElement, {
+            backdrop: true,
+            keyboard: true,
+            focus: true
+        });
+    }
+
+    // 显示模态框
+    forgotPasswordModal.show();
+});
+*/
+
+// 修复模态框关闭问题 (功能已禁用)
+/*
+document.getElementById('forgotPasswordModal').addEventListener('shown.bs.modal', function() {
+    console.log('忘记密码模态框已显示');
+    // 聚焦到邮箱输入框
+    const emailInput = document.getElementById('resetEmail');
+    if (emailInput) {
+        setTimeout(() => emailInput.focus(), 100);
+    }
+});
+
+document.getElementById('forgotPasswordModal').addEventListener('hidden.bs.modal', function() {
+    console.log('忘记密码模态框已隐藏');
+    // 重置表单
+    const form = document.getElementById('forgotPasswordForm');
+    if (form) {
+        form.reset();
+    }
+
+    // 确保模态框完全关闭
+    this.classList.remove('show');
+    this.style.display = 'none';
+    this.setAttribute('aria-hidden', 'true');
+
+    // 移除背景遮罩
+    const backdrop = document.querySelector('.modal-backdrop');
+    if (backdrop) {
+        backdrop.remove();
+    }
+
+    // 恢复body滚动
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+});
+*/
+
+// 添加强制关闭功能 (功能已禁用)
+/*
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const modal = document.getElementById('forgotPasswordModal');
+        if (modal && modal.classList.contains('show')) {
+            if (forgotPasswordModal) {
+                forgotPasswordModal.hide();
+            } else {
+                // 强制关闭
+                modal.classList.remove('show');
+                modal.style.display = 'none';
+                modal.setAttribute('aria-hidden', 'true');
+
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) {
+                    backdrop.remove();
+                }
+
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+            }
+        }
+    }
+});
+*/
+
+// Forgot password form handling (功能已禁用)
+/*
+document.getElementById('forgotPasswordForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const form = e.target;
+    const email = form.email.value;
+
+    if (!email) {
+        showToast('请输入邮箱地址', 'error');
+        return;
+    }
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+
+    // Show loading state
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 发送中...';
+
+    try {
+        // This is a placeholder - implement actual password reset functionality
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        showToast('密码重置链接已发送到您的邮箱', 'success');
+
+        // Close modal
+        if (forgotPasswordModal) {
+            forgotPasswordModal.hide();
+        } else {
+            // 备用关闭方法
+            const modalElement = document.getElementById('forgotPasswordModal');
+            modalElement.classList.remove('show');
+            modalElement.style.display = 'none';
+            modalElement.setAttribute('aria-hidden', 'true');
+
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) {
+                backdrop.remove();
+            }
+
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+        }
+
+        // Reset form
+        form.reset();
+    } catch (error) {
+        console.error('Password reset error:', error);
+        showToast('发送失败，请稍后重试', 'error');
+    } finally {
+        // Hide loading state
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+    }
+});
+*/
+
+// Form validation
+document.getElementById('username').addEventListener('input', function() {
+    validateField(this, this.value.trim().length >= 3, '用户名至少需要3个字符');
+});
+
+document.getElementById('password').addEventListener('input', function() {
+    validateField(this, this.value.length >= 6, '密码至少需要6个字符');
+});
+
+function validateField(field, isValid, message) {
+    if (field.value.trim() === '') {
+        field.classList.remove('is-valid', 'is-invalid');
+        return;
+    }
+
+    const feedbackElement = field.parentElement.nextElementSibling;
+    
+    if (isValid) {
+        field.classList.add('is-valid');
+        field.classList.remove('is-invalid');
+        if (feedbackElement && feedbackElement.classList.contains('invalid-feedback')) {
+            feedbackElement.textContent = '';
+        }
+    } else {
+        field.classList.add('is-invalid');
+        field.classList.remove('is-valid');
+        if (feedbackElement && feedbackElement.classList.contains('invalid-feedback')) {
+            feedbackElement.textContent = message;
+        }
+    }
+}
+
+// Toast notification function
+function showToast(message, type = 'info') {
+    const toastContainer = document.getElementById('toastContainer') || createToastContainer();
+
+    const toast = document.createElement('div');
+    toast.className = `toast align-items-center text-white bg-${type === 'error' ? 'danger' : type === 'success' ? 'success' : 'primary'} border-0`;
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', 'assertive');
+    toast.setAttribute('aria-atomic', 'true');
+
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">
+                ${message}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    `;
+
+    toastContainer.appendChild(toast);
+
+    const bsToast = new bootstrap.Toast(toast, {
+        autohide: true,
+        delay: 5000
+    });
+
+    bsToast.show();
+
+    // Remove toast element after it's hidden
+    toast.addEventListener('hidden.bs.toast', () => {
+        toast.remove();
+    });
+}
+
+function createToastContainer() {
+    const container = document.createElement('div');
+    container.id = 'toastContainer';
+    container.className = 'toast-container position-fixed top-0 end-0 p-3';
+    container.style.zIndex = '1055';
+    document.body.appendChild(container);
+    return container;
+}
+
+// Check login status on page load
+document.addEventListener('DOMContentLoaded', async function() {
+    try {
+        const response = await fetch('/api/auth/status');
+        const result = await response.json();
+
+        if (result.logged_in) {
+            // User is already logged in, redirect to dashboard
+            window.location.href = '/dashboard';
+        }
+    } catch (error) {
+        console.error('Error checking login status:', error);
+    }
+
+    // 确保页面加载时没有模态框显示 (功能已禁用)
+    // ensureModalNotShown();
+});
+
+// 确保模态框不显示的函数 (功能已禁用)
+/*
+function ensureModalNotShown() {
+    console.log('🔧 确保忘记密码模态框在页面加载时不显示');
+
+    const modal = document.getElementById('forgotPasswordModal');
+    if (modal) {
+        // 强制隐藏模态框
+        modal.classList.remove('show');
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden', 'true');
+        modal.removeAttribute('aria-modal');
+        modal.removeAttribute('role');
+
+        // 确保没有Bootstrap实例
+        try {
+            const modalInstance = bootstrap.Modal.getInstance(modal);
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+        } catch (error) {
+            console.log('Bootstrap实例不存在，继续强制隐藏');
+        }
+    }
+
+    // 清理任何可能的背景遮罩
+    const backdrops = document.querySelectorAll('.modal-backdrop');
+    backdrops.forEach(backdrop => backdrop.remove());
+
+    // 恢复body样式
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+
+    console.log('✅ 忘记密码模态框已确保隐藏');
+}
+*/
+
+// 页面加载完成后立即执行 (功能已禁用)
+/*
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', ensureModalNotShown);
+} else {
+    ensureModalNotShown();
+}
+*/
+
+// 强制禁用忘记密码模态框
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔒 强制禁用忘记密码模态框');
+    
+    // 移除忘记密码链接
+    const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+    if (forgotPasswordLink) {
+        forgotPasswordLink.style.display = 'none';
+        forgotPasswordLink.remove();
+    }
+    
+    // 移除忘记密码模态框
+    const forgotPasswordModal = document.getElementById('forgotPasswordModal');
+    if (forgotPasswordModal) {
+        forgotPasswordModal.remove();
+    }
+    
+    // 阻止任何可能的模态框显示
+    const originalShow = bootstrap.Modal.prototype.show;
+    bootstrap.Modal.prototype.show = function() {
+        if (this._element && this._element.id === 'forgotPasswordModal') {
+            console.log('🚫 阻止忘记密码模态框显示');
+            return;
+        }
+        return originalShow.call(this);
+    };
+    
+    console.log('✅ 忘记密码模态框已强制禁用');
+});
+</script>
+{% endblock %}

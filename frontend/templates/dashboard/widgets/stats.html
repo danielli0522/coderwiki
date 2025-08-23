@@ -1,0 +1,108 @@
+<div class="stats-container">
+    <div class="row g-3">
+        <!-- 仓库总数统计 -->
+        <div class="col-md-3 col-sm-6">
+            <div class="stats-card primary">
+                <div class="stats-card-content">
+                    <div class="stats-icon">
+                        <i class="fas fa-folder"></i>
+                    </div>
+                    <div class="stats-info">
+                        <h3 class="stats-number" id="totalRepositories">0</h3>
+                        <p class="stats-label">仓库总数</p>
+                        <div class="stats-change">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>12%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 文档总数统计 -->
+        <div class="col-md-3 col-sm-6">
+            <div class="stats-card success">
+                <div class="stats-card-content">
+                    <div class="stats-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="stats-info">
+                        <h3 class="stats-number" id="totalDocuments">0</h3>
+                        <p class="stats-label">文档总数</p>
+                        <div class="stats-change">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>8%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 进行中任务统计 -->
+        <div class="col-md-3 col-sm-6">
+            <div class="stats-card warning">
+                <div class="stats-card-content">
+                    <div class="stats-icon">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <div class="stats-info">
+                        <h3 class="stats-number" id="activeTasks">0</h3>
+                        <p class="stats-label">进行中任务</p>
+                        <div class="stats-change">
+                            <i class="fas fa-arrow-down"></i>
+                            <span>5%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 本月生成统计 -->
+        <div class="col-md-3 col-sm-6">
+            <div class="stats-card info">
+                <div class="stats-card-content">
+                    <div class="stats-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stats-info">
+                        <h3 class="stats-number" id="monthlyGenerated">0</h3>
+                        <p class="stats-label">本月生成</p>
+                        <div class="stats-change">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>15%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 统计图表 -->
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-area me-2"></i>生成趋势
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="generationChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>文档类型分布
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="documentTypeChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

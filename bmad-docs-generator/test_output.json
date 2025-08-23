@@ -1,0 +1,338 @@
+{
+  "workflow_id": "enhanced-docs-generation_1755928153",
+  "status": "WorkflowStatus.COMPLETED",
+  "start_time": 1755928153.457173,
+  "end_time": 1755928153.458636,
+  "agent_results": {
+    "setup-context": {
+      "agent_id": "doc-engineer",
+      "task_name": "Setup Project Context",
+      "status": "completed",
+      "result": {
+        "project_name": "CoderWiki",
+        "project_type": "Web Application",
+        "technology_stack": [
+          "Python",
+          "Flask",
+          "React",
+          "MySQL"
+        ],
+        "analysis_scope": "Comprehensive",
+        "output_format": "Markdown"
+      },
+      "execution_time": 2.193450927734375e-05,
+      "timestamp": 1755928153.457361
+    },
+    "scan-codebase": {
+      "agent_id": "code-analyst",
+      "task_name": "Scan Codebase",
+      "status": "completed",
+      "result": {
+        "codebase_structure": {
+          "total_files": 150,
+          "languages": [
+            "Python",
+            "JavaScript",
+            "HTML",
+            "CSS"
+          ],
+          "main_directories": [
+            "src",
+            "tests",
+            "docs",
+            "config"
+          ],
+          "complexity_score": 7.5
+        },
+        "dependencies": {
+          "python": [
+            "flask",
+            "sqlalchemy",
+            "requests"
+          ],
+          "javascript": [
+            "react",
+            "axios",
+            "lodash"
+          ]
+        },
+        "code_quality": {
+          "maintainability": "Good",
+          "test_coverage": "75%",
+          "documentation": "Partial"
+        }
+      },
+      "execution_time": 6.580352783203125e-05,
+      "timestamp": 1755928153.457658
+    },
+    "validate-analysis": {
+      "agent_id": "code-analyst",
+      "task_name": "Validate Analysis",
+      "status": "completed",
+      "result": {
+        "is_valid": true,
+        "confidence_score": 0.85,
+        "issues_found": [],
+        "recommendations": [
+          "Consider adding more unit tests",
+          "Improve documentation coverage"
+        ]
+      },
+      "execution_time": 5.507469177246094e-05,
+      "timestamp": 1755928153.457692
+    },
+    "create-architecture-views": {
+      "agent_id": "architecture-analyst",
+      "task_name": "Create Architecture Views",
+      "status": "completed",
+      "result": {
+        "architecture_patterns": [
+          "MVC Pattern",
+          "Repository Pattern",
+          "Factory Pattern"
+        ],
+        "component_diagram": {
+          "components": [
+            {
+              "name": "Web Layer",
+              "type": "Controller"
+            },
+            {
+              "name": "Business Logic",
+              "type": "Service"
+            },
+            {
+              "name": "Data Access",
+              "type": "Repository"
+            }
+          ],
+          "relationships": [
+            {
+              "from": "Web Layer",
+              "to": "Business Logic",
+              "type": "uses"
+            },
+            {
+              "from": "Business Logic",
+              "to": "Data Access",
+              "type": "uses"
+            }
+          ]
+        },
+        "deployment_architecture": {
+          "tiers": [
+            "Presentation",
+            "Application",
+            "Data"
+          ],
+          "technologies": [
+            "Nginx",
+            "Flask",
+            "MySQL"
+          ]
+        }
+      },
+      "execution_time": 1.4066696166992188e-05,
+      "timestamp": 1755928153.457793
+    },
+    "generate-technical-overview": {
+      "agent_id": "architecture-analyst",
+      "task_name": "Generate Technical Overview",
+      "status": "completed",
+      "result": {
+        "system_overview": "A modern web application built with Flask and React",
+        "key_technologies": [
+          "Python",
+          "Flask",
+          "React",
+          "MySQL"
+        ],
+        "architecture_style": "Layered Architecture",
+        "scalability_considerations": [
+          "Horizontal scaling with load balancers",
+          "Database sharding for large datasets",
+          "Caching strategy with Redis"
+        ]
+      },
+      "execution_time": 1.1920928955078125e-05,
+      "timestamp": 1755928153.457833
+    },
+    "analyze-complex-flows": {
+      "agent_id": "flow-analyst",
+      "task_name": "Analyze Complex Flows",
+      "status": "completed",
+      "result": {
+        "business_flows": [
+          {
+            "name": "User Registration",
+            "steps": [
+              "Input Validation",
+              "User Creation",
+              "Email Verification"
+            ],
+            "complexity": "Medium"
+          },
+          {
+            "name": "Document Generation",
+            "steps": [
+              "Request Processing",
+              "Analysis",
+              "Document Creation"
+            ],
+            "complexity": "High"
+          }
+        ],
+        "data_flows": [
+          {
+            "name": "User Data Flow",
+            "source": "Frontend",
+            "destination": "Database",
+            "transformation": "Validation and Encryption"
+          }
+        ],
+        "sequence_diagrams": [
+          {
+            "name": "Document Generation Sequence",
+            "participants": [
+              "User",
+              "API",
+              "Analysis Engine",
+              "Document Generator"
+            ],
+            "interactions": [
+              "User requests document",
+              "API validates request",
+              "Analysis Engine processes code",
+              "Document Generator creates output"
+            ]
+          }
+        ]
+      },
+      "execution_time": 4.100799560546875e-05,
+      "timestamp": 1755928153.458028
+    },
+    "validate-flow-analysis": {
+      "agent_id": "flow-analyst",
+      "task_name": "Validate Flow Analysis",
+      "status": "completed",
+      "result": {
+        "is_valid": true,
+        "coverage_score": 0.9,
+        "missing_flows": [],
+        "improvements": [
+          "Add error handling flows",
+          "Include timeout scenarios"
+        ]
+      },
+      "execution_time": 3.5762786865234375e-05,
+      "timestamp": 1755928153.4580438
+    },
+    "diagnose-potential-problems": {
+      "agent_id": "problem-solver",
+      "task_name": "Diagnose Potential Problems",
+      "status": "completed",
+      "result": {
+        "identified_problems": [
+          {
+            "category": "Security",
+            "severity": "High",
+            "description": "Missing input validation in user registration",
+            "impact": "Potential security vulnerabilities",
+            "recommendation": "Implement comprehensive input validation"
+          },
+          {
+            "category": "Performance",
+            "severity": "Medium",
+            "description": "No caching strategy for frequently accessed data",
+            "impact": "Slower response times",
+            "recommendation": "Implement Redis caching"
+          }
+        ],
+        "risk_assessment": {
+          "overall_risk": "Medium",
+          "security_risk": "High",
+          "performance_risk": "Medium",
+          "maintainability_risk": "Low"
+        }
+      },
+      "execution_time": 1.1920928955078125e-05,
+      "timestamp": 1755928153.4581451
+    },
+    "validate-problem-diagnosis": {
+      "agent_id": "problem-solver",
+      "task_name": "Validate Problem Diagnosis",
+      "status": "completed",
+      "result": {
+        "is_accurate": true,
+        "confidence_score": 0.8,
+        "false_positives": 0,
+        "missed_issues": 1,
+        "priority_recommendations": [
+          "Address security issues first",
+          "Plan performance improvements"
+        ]
+      },
+      "execution_time": 1.0013580322265625e-05,
+      "timestamp": 1755928153.458179
+    },
+    "generate-flow-analysis-doc": {
+      "agent_id": "doc-engineer",
+      "task_name": "Generate Flow Analysis Doc",
+      "status": "completed",
+      "result": {
+        "title": "Business Flow Analysis",
+        "content": "\n# Business Flow Analysis\n\n## Overview\nThis document provides a comprehensive analysis of the business flows within the system.\n\n## Key Flows\n\n### User Registration Flow\n1. User submits registration form\n2. System validates input data\n3. User account is created\n4. Verification email is sent\n5. User confirms email address\n\n### Document Generation Flow\n1. User requests document generation\n2. System analyzes codebase\n3. Multiple agents process different aspects\n4. Results are aggregated\n5. Final document is generated and delivered\n\n## Data Flow Diagrams\n[Detailed data flow information would be included here]\n\n## Recommendations\n- Implement comprehensive error handling\n- Add monitoring and logging\n- Consider performance optimization\n            ",
+        "sections": [
+          "overview",
+          "flows",
+          "diagrams",
+          "recommendations"
+        ]
+      },
+      "execution_time": 0.00015783309936523438,
+      "timestamp": 1755928153.4585128
+    },
+    "generate-problem-diagnosis-doc": {
+      "agent_id": "doc-engineer",
+      "task_name": "Generate Problem Diagnosis Doc",
+      "status": "completed",
+      "result": {
+        "title": "Problem Diagnosis Report",
+        "content": "\n# Problem Diagnosis Report\n\n## Executive Summary\nThis report identifies potential issues and provides recommendations for improvement.\n\n## Critical Issues\n\n### Security Vulnerabilities\n- **Issue**: Missing input validation\n- **Severity**: High\n- **Impact**: Potential security breaches\n- **Recommendation**: Implement comprehensive validation\n\n### Performance Concerns\n- **Issue**: No caching strategy\n- **Severity**: Medium\n- **Impact**: Slower response times\n- **Recommendation**: Implement Redis caching\n\n## Risk Assessment\n- Overall Risk: Medium\n- Security Risk: High\n- Performance Risk: Medium\n\n## Action Plan\n1. Address security issues immediately\n2. Plan performance improvements\n3. Implement monitoring solutions\n            ",
+        "sections": [
+          "summary",
+          "issues",
+          "risks",
+          "actions"
+        ]
+      },
+      "execution_time": 6.413459777832031e-05,
+      "timestamp": 1755928153.458559
+    },
+    "final-quality-validation": {
+      "agent_id": "doc-engineer",
+      "task_name": "Final Quality Validation",
+      "status": "completed",
+      "result": {
+        "quality_score": 0.85,
+        "completeness": 0.9,
+        "accuracy": 0.8,
+        "readability": 0.9,
+        "issues_found": [
+          "Some technical terms need clarification",
+          "Add more code examples"
+        ],
+        "recommendations": [
+          "Include more visual diagrams",
+          "Add troubleshooting section"
+        ],
+        "is_approved": true
+      },
+      "execution_time": 5.1975250244140625e-05,
+      "timestamp": 1755928153.4585721
+    }
+  },
+  "final_document": "# Technical Documentation Generated by BMAD Agents\n\n**Generated at:** 2025-08-23 13:49:13\n**Agents used:** code-analyst, architecture-analyst, flow-analyst, problem-solver, doc-engineer\n\n---\n\n## Code Analysis\n\n### Codebase Structure\n- Total Files: 150\n- Languages: Python, JavaScript, HTML, CSS\n- Main Directories: src, tests, docs, config\n- Complexity Score: 7.5\n\n### Dependencies\n- **Python:** flask, sqlalchemy, requests\n- **Javascript:** react, axios, lodash\n\n### Code Quality\n- Maintainability: Good\n- Test Coverage: 75%\n- Documentation: Partial\n\n## Architecture Analysis\n\n### Architecture Patterns\n- MVC Pattern\n- Repository Pattern\n- Factory Pattern\n\n### Component Diagram\n#### Components:\n- Web Layer (Controller)\n- Business Logic (Service)\n- Data Access (Repository)\n\n#### Relationships:\n- Web Layer \u2192 Business Logic (uses)\n- Business Logic \u2192 Data Access (uses)\n\n### Deployment Architecture\n- Tiers: Presentation \u2192 Application \u2192 Data\n- Technologies: Nginx, Flask, MySQL\n\n## Flow Analysis\n\n### Business Flows\n\n#### User Registration\n- Complexity: Medium\n- Steps:\n  - Input Validation\n  - User Creation\n  - Email Verification\n\n#### Document Generation\n- Complexity: High\n- Steps:\n  - Request Processing\n  - Analysis\n  - Document Creation\n\n### Data Flows\n\n#### User Data Flow\n- Source: Frontend\n- Destination: Database\n- Transformation: Validation and Encryption\n\n## Problem Diagnosis\n\n### Identified Problems\n\n#### Security - High\n- **Description:** Missing input validation in user registration\n- **Impact:** Potential security vulnerabilities\n- **Recommendation:** Implement comprehensive input validation\n\n#### Performance - Medium\n- **Description:** No caching strategy for frequently accessed data\n- **Impact:** Slower response times\n- **Recommendation:** Implement Redis caching\n\n### Risk Assessment\n- Overall Risk: Medium\n- Security Risk: High\n- Performance Risk: Medium\n- Maintainability Risk: Low\n\n## Generated Documentation\n\n## Summary\n\nThis technical documentation has been generated by the BMAD (Business Model Architecture Documentation) agent system.\nThe documentation covers code analysis, architecture patterns, business flows, problem diagnosis, and comprehensive technical overview.\n\nFor questions or improvements, please refer to the individual agent outputs and recommendations.",
+  "error_message": null,
+  "execution_time": 0.0014629364013671875
+}

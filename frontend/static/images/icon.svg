@@ -1,0 +1,8 @@
+<!-- Placeholder for CoderWiki logo -->
+<svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="192" height="192" rx="24" fill="#007bff"/>
+  <path d="M48 60L96 40L144 60V100L96 120L48 100V60Z" fill="white"/>
+  <path d="M48 100L96 120V140L48 120V100Z" fill="white" opacity="0.8"/>
+  <path d="M144 100L96 120V140L144 120V100Z" fill="white" opacity="0.8"/>
+  <path d="M60 70L96 55L132 70V90L96 105L60 90V70Z" fill="#007bff"/>
+</svg>

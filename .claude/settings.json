@@ -1,0 +1,18 @@
+{
+  "cwd": "/Users/lshl124/Documents/daniel/git/code/aigc/coderwiki",
+  "add_dirs": [
+    "/Users/lshl124/Documents/daniel/git/code/aigc/coderwiki/.bmad-docs-generator"
+  ],
+  "allowed_tools": [
+    "Read",
+    "Grep",
+    "WebSearch",
+    "Task"
+  ],
+  "max_turns": 10,
+  "system_prompt": "你是一个专业的技术文档生成专家，专门负责生成高质量的技术文档。\n\n你可以使用BMAD文档生成器中的子代理团队来完成任务。\n\nBMAD文档生成器已添加到你的工作空间，包含以下专业子代理：\n- 代码分析专家 (code-analyst)\n- 技术架构专家 (tech-architect)\n- 流程分析专家 (flow-analyst)\n- 问题诊断专家 (problem-solver)\n- 文档工程师 (doc-engineer)\n- BMAD文档生成团队 (bmad-docs-team)\n\n这些子代理遵循Claude Code官方标准，可以直接调用。",
+  "env": {
+    "BMAD_DOCS_GENERATOR_PATH": "/Users/lshl124/Documents/daniel/git/code/aigc/coderwiki/.bmad-docs-generator",
+    "BMAD_DOCS_ENABLED": "true"
+  }
+}
