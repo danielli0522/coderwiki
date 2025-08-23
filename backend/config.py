@@ -1,0 +1,136 @@
+"""
+Backend Configuration
+"""
+import os
+from pathlib import Path
+
+class Config:
+    """基础配置类"""
+
+    # 基础配置
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
+
+    # 数据库配置 - 默认使用MySQL
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+        'mysql+pymysql://coderwiki_user:coderwiki_password@localhost:3306/coderwiki'
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_recycle': 3600,
+        'pool_pre_ping': True,
+        'pool_size': 10,
+        'max_overflow': 20,
+        'pool_timeout': 30
+    }
+
+    # Flask配置
+    FLASK_APP = 'app'
+    FLASK_ENV = os.environ.get('FLASK_ENV', 'production')
+
+    # 模板配置
+    TEMPLATE_FOLDER = Path(__file__).parent.parent / 'frontend' / 'templates'
+    STATIC_FOLDER = Path(__file__).parent.parent / 'frontend' / 'static'
+
+    # 会话配置
+    PERMANENT_SESSION_LIFETIME = 1800  # 30分钟
+
+    # 文件上传配置
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB
+    UPLOAD_FOLDER = Path(__file__).parent / 'uploads'
+
+    # LLM配置
+    LLM_API_KEY = os.environ.get('LLM_API_KEY')
+    LLM_BASE_URL = os.environ.get('LLM_BASE_URL')
+    LLM_MODEL = os.environ.get('LLM_MODEL', 'gpt-3.5-turbo')
+    LLM_PROVIDER = os.environ.get('LLM_PROVIDER', 'openai')
+
+    # MCP服务配置
+    MCP_SERVER_URL = os.environ.get('MCP_SERVER_URL', 'http://localhost')
+    MCP_SERVER_PORT = int(os.environ.get('MCP_SERVER_PORT', '3000'))
+    MCP_ENABLED = os.environ.get('MCP_ENABLED', 'true').lower() == 'true'
+
+    # Git配置
+    GIT_REPOS_PATH = Path(__file__).parent / 'repos'
+
+    # 日志配置
+    LOG_LEVEL = os.environ.get('LOG_LEVEL', 'INFO')
+    LOG_FILE = Path(__file__).parent / 'logs' / 'app.log'
+
+    # 安全配置
+    WTF_CSRF_ENABLED = True
+    WTF_CSRF_SECRET_KEY = os.environ.get('WTF_CSRF_SECRET_KEY') or 'csrf-secret-key'
+
+    @classmethod
+    def init_app(cls, app):
+        """初始化应用配置"""
+        # 创建必要的目录
+        cls.UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
+        cls.GIT_REPOS_PATH.mkdir(parents=True, exist_ok=True)
+        cls.LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
+
+        # 配置日志
+        import logging
+        from logging.handlers import RotatingFileHandler
+
+        handler = RotatingFileHandler(
+            cls.LOG_FILE,
+            maxBytes=10 * 1024 * 1024,  # 10MB
+            backupCount=5
+        )
+        handler.setFormatter(logging.Formatter(
+            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+        ))
+        handler.setLevel(getattr(logging, cls.LOG_LEVEL))
+
+        app.logger.addHandler(handler)
+        app.logger.setLevel(getattr(logging, cls.LOG_LEVEL))
+        app.logger.info('CoderWiki application startup')
+
+class DevelopmentConfig(Config):
+    """开发环境配置"""
+    DEBUG = True
+    FLASK_ENV = 'development'
+
+    # 开发环境数据库 - 使用MySQL
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or \
+        'mysql+pymysql://coderwiki_user:coderwiki_password@localhost:3306/coderwiki_dev'
+
+    # 开发环境LLM配置
+    LLM_MODEL = os.environ.get('DEV_LLM_MODEL', 'gpt-3.5-turbo')
+
+    # 开发环境日志
+    LOG_LEVEL = 'DEBUG'
+
+class ProductionConfig(Config):
+    """生产环境配置"""
+    DEBUG = False
+    FLASK_ENV = 'production'
+
+    # 生产环境数据库
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+        'mysql+pymysql://coderwiki_user:coderwiki_password@localhost:3306/coderwiki'
+
+    # 生产环境日志
+    LOG_LEVEL = 'WARNING'
+
+class TestingConfig(Config):
+    """测试环境配置"""
+    TESTING = True
+    DEBUG = True
+
+    # 测试环境数据库 - 使用SQLite内存数据库
+    SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL') or \
+        'sqlite:///:memory:'
+
+    # SQLite doesn't support connection pooling
+    SQLALCHEMY_ENGINE_OPTIONS = {}
+
+    # 测试环境日志
+    LOG_LEVEL = 'DEBUG'
+
+# 配置映射
+config = {
+    'development': DevelopmentConfig,
+    'production': ProductionConfig,
+    'testing': TestingConfig,
+    'default': ProductionConfig
+}
