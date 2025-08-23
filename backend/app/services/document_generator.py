@@ -15,6 +15,7 @@ from app.services.llm_service import LLMService
 from app.services.prompt_service import PromptService
 from app.services.task_service import TaskService
 from app.services.mcp_service import MCPService
+from app.services.claude_code_service import ClaudeCodeService
 from app.utils.llm_client import LLMClientFactory, LLMMetrics
 
 logger = logging.getLogger(__name__)
@@ -22,12 +23,13 @@ logger = logging.getLogger(__name__)
 class DocumentGenerator:
     """文档生成器"""
 
-    def __init__(self, use_mcp: bool = None):
+    def __init__(self, use_mcp: bool = None, use_claude_code: bool = None):
         """
         初始化文档生成器
 
         Args:
             use_mcp: 是否使用MCP服务，如果为None则根据配置自动决定
+            use_claude_code: 是否使用Claude Code服务，如果为None则根据配置自动决定
         """
 
         self.llm_service = LLMService()
@@ -50,6 +52,23 @@ class DocumentGenerator:
             )
         else:
             self.mcp_service = None
+
+        # 根据配置决定是否使用Claude Code服务
+        if use_claude_code is None:
+            # 从环境变量或默认值获取Claude Code配置
+            import os
+            self.use_claude_code = os.environ.get('CLAUDE_CODE_ENABLED', 'false').lower() == 'true'
+        else:
+            self.use_claude_code = use_claude_code
+
+        if self.use_claude_code:
+            import os
+            self.claude_code_service = ClaudeCodeService(
+                claude_code_path=os.environ.get('CLAUDE_CODE_PATH', '/usr/local/bin/claude-code'),
+                bmad_docs_path=os.environ.get('BMAD_DOCS_PATH', '/Users/lshl124/Documents/daniel/git/code/aigc/BMAD-METHOD/expansion-packs/bmad-docs-generator/')
+            )
+        else:
+            self.claude_code_service = None
 
     def generate_document(self, repository_id: int, user_id: int, llm_config_id: int,
                          doc_type: str = 'overview', doc_title: str = None) -> Dict[str, Any]:
@@ -125,8 +144,15 @@ class DocumentGenerator:
             if not prompt_result['success']:
                 raise Exception(f"Prompt generation failed: {prompt_result['error']}")
 
-            # 步骤3: 调用LLM生成文档
-            if self.use_mcp and self.mcp_service:
+            # 步骤3: 调用文档生成服务
+            if self.use_claude_code and self.claude_code_service:
+                self.task_service.update_task_status(task.id, 'processing', 'Calling Claude Code service for document generation')
+                llm_result = self._call_claude_code_for_documentation(
+                    repository=repository,
+                    doc_type=doc_type,
+                    doc_title=doc_title
+                )
+            elif self.use_mcp and self.mcp_service:
                 self.task_service.update_task_status(task.id, 'processing', 'Calling MCP service for document generation')
                 llm_result = self._call_mcp_for_documentation(
                     repository=repository,
@@ -237,6 +263,52 @@ class DocumentGenerator:
                 'line_count': 0,
                 'analysis_time': datetime.utcnow().isoformat(),
                 'analysis_error': str(e)
+            }
+
+    def _call_claude_code_for_documentation(self, repository: Repository,
+                                          doc_type: str, doc_title: str) -> Dict[str, Any]:
+        """通过Claude Code服务生成文档"""
+        try:
+            # 准备额外参数
+            additional_params = {
+                'language': 'zh-CN',  # 使用中文
+                'format': 'markdown',
+                'detailed': True,     # 生成详细文档
+                'include_examples': True  # 包含示例
+            }
+
+            # 根据文档类型调整参数
+            if doc_type in ['api', 'database', 'architecture']:
+                additional_params['comprehensive'] = True
+            elif doc_type == 'overview':
+                additional_params['summary'] = True
+
+            # 调用Claude Code服务
+            claude_result = self.claude_code_service.generate_technical_document(
+                repository_path=repository.local_path,
+                doc_type=doc_type,
+                doc_title=doc_title,
+                additional_params=additional_params
+            )
+
+            if claude_result['success']:
+                return {
+                    'success': True,
+                    'content': claude_result['content'],
+                    'metrics': claude_result.get('metrics'),
+                    'cost_estimate': claude_result.get('cost_estimate', 0)
+                }
+            else:
+                return {
+                    'success': False,
+                    'error': claude_result.get('error', 'Unknown Claude Code error')
+                }
+
+        except Exception as e:
+            logger.error(f"Error calling Claude Code service: {str(e)}")
+            return {
+                'success': False,
+                'error': str(e)
             }
 
     def _call_mcp_for_documentation(self, repository: Repository, llm_config: LLMConfig,
@@ -569,6 +641,35 @@ class DocumentGenerator:
             logger.error(f"Error getting document: {str(e)}")
             return None
 
+    def check_claude_code_service_status(self) -> Dict[str, Any]:
+        """检查Claude Code服务状态"""
+        if not self.use_claude_code or not self.claude_code_service:
+            return {
+                'success': False,
+                'error': 'Claude Code service is not enabled',
+                'enabled': False
+            }
+
+        try:
+            claude_availability = self.claude_code_service.check_claude_code_availability()
+            bmad_availability = self.claude_code_service.check_bmad_docs_generator()
+
+            return {
+                'success': True,
+                'enabled': True,
+                'claude_code': claude_availability,
+                'bmad_docs_generator': bmad_availability,
+                'claude_code_path': self.claude_code_service.claude_code_path,
+                'bmad_docs_path': self.claude_code_service.bmad_docs_path
+            }
+        except Exception as e:
+            logger.error(f"Error checking Claude Code service status: {str(e)}")
+            return {
+                'success': False,
+                'error': str(e),
+                'enabled': True
+            }
+
     def check_mcp_service_status(self) -> Dict[str, Any]:
         """检查MCP服务状态"""
         if not self.use_mcp or not self.mcp_service:
@@ -599,31 +700,51 @@ class DocumentGenerator:
 
     def get_available_doc_types(self) -> Dict[str, Any]:
         """获取可用的文档类型"""
-        if not self.use_mcp or not self.mcp_service:
+        if self.use_claude_code and self.claude_code_service:
+            try:
+                result = self.claude_code_service.get_supported_doc_types()
+                if result['success']:
+                    result['source'] = 'claude_code_bmad'
+                return result
+            except Exception as e:
+                logger.error(f"Error getting Claude Code doc types: {str(e)}")
+                return {
+                    'success': False,
+                    'error': str(e),
+                    'source': 'claude_code_bmad'
+                }
+        elif self.use_mcp and self.mcp_service:
+            try:
+                result = self.mcp_service.list_available_doc_types()
+                if result['success']:
+                    result['source'] = 'mcp_service'
+                return result
+            except Exception as e:
+                logger.error(f"Error getting MCP doc types: {str(e)}")
+                return {
+                    'success': False,
+                    'error': str(e),
+                    'source': 'mcp_service'
+                }
+        else:
             # 返回默认的文档类型
             return {
                 'success': True,
                 'doc_types': [
                     'overview',
                     'api',
-                    'database',
+                    'database', 
                     'architecture',
                     'deployment',
                     'user_guide',
-                    'developer_guide'
+                    'developer_guide',
+                    'technical_design',
+                    'api_docs',
+                    'database_design',
+                    'deployment_guide',
+                    'user_manual',
+                    'developer_guide',
+                    'system_overview'
                 ],
                 'source': 'default'
-            }
-
-        try:
-            result = self.mcp_service.list_available_doc_types()
-            if result['success']:
-                result['source'] = 'mcp_service'
-            return result
-        except Exception as e:
-            logger.error(f"Error getting available doc types: {str(e)}")
-            return {
-                'success': False,
-                'error': str(e),
-                'source': 'mcp_service'
             }

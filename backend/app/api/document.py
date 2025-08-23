@@ -100,6 +100,22 @@ def get_document(document_id):
         return jsonify({'error': '获取文档失败'}), 500
 
 
+@document_bp.route('/claude-code/status', methods=['GET'])
+@login_required
+def get_claude_code_status():
+    """获取Claude Code服务状态"""
+    try:
+        status = doc_generator.check_claude_code_service_status()
+        return jsonify(status)
+    except Exception as e:
+        logger.error(f"获取Claude Code服务状态失败: {e}")
+        return jsonify({
+            'success': False,
+            'error': '获取Claude Code服务状态失败',
+            'details': str(e)
+        }), 500
+
+
 @document_bp.route('/mcp/status', methods=['GET'])
 @login_required
 def get_mcp_status():
@@ -112,6 +128,22 @@ def get_mcp_status():
         return jsonify({
             'success': False,
             'error': '获取MCP服务状态失败',
+            'details': str(e)
+        }), 500
+
+
+@document_bp.route('/doc-types', methods=['GET'])
+@login_required
+def get_doc_types():
+    """获取支持的文档类型"""
+    try:
+        doc_types = doc_generator.get_available_doc_types()
+        return jsonify(doc_types)
+    except Exception as e:
+        logger.error(f"获取文档类型失败: {e}")
+        return jsonify({
+            'success': False,
+            'error': '获取文档类型失败',
             'details': str(e)
         }), 500
 

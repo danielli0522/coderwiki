@@ -48,6 +48,11 @@ class Config:
     MCP_SERVER_PORT = int(os.environ.get('MCP_SERVER_PORT', '3000'))
     MCP_ENABLED = os.environ.get('MCP_ENABLED', 'true').lower() == 'true'
 
+    # Claude Code服务配置
+    CLAUDE_CODE_ENABLED = os.environ.get('CLAUDE_CODE_ENABLED', 'false').lower() == 'true'
+    CLAUDE_CODE_PATH = os.environ.get('CLAUDE_CODE_PATH', '/usr/local/bin/claude-code')
+    BMAD_DOCS_PATH = os.environ.get('BMAD_DOCS_PATH', '/Users/lshl124/Documents/daniel/git/code/aigc/BMAD-METHOD/expansion-packs/bmad-docs-generator/')
+
     # Git配置
     GIT_REPOS_PATH = Path(__file__).parent / 'repos'
 
