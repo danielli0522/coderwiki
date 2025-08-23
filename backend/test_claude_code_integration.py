@@ -93,15 +93,15 @@ def test_document_generation():
 def test_claude_code_sdk_direct():
     """直接测试Claude Code SDK"""
     print("\n=== 直接测试Claude Code SDK ===")
-    
+
     try:
         # 尝试导入Claude Code SDK
         from claude_code_sdk import ClaudeSDKClient, ClaudeCodeOptions
-        
+
         print("✅ Claude Code SDK导入成功")
         print("✅ Claude Code SDK可用")
         return True
-            
+
     except ImportError:
         print("❌ Claude Code SDK未安装")
         print("请安装: pip install claude-code-sdk")
@@ -124,7 +124,7 @@ def test_bmad_docs_generator():
         print(f"✅ BMAD文档生成器路径存在: {bmad_docs_path}")
 
         # 检查关键文件
-        key_files = ['package.json', 'README.md', 'src/']
+        key_files = ['README.md', 'config.yaml', 'tasks/']
         missing_files = []
 
         for file_name in key_files:
@@ -157,7 +157,7 @@ def main():
     print("=== 环境变量检查 ===")
     claude_code_enabled = os.environ.get('CLAUDE_CODE_ENABLED', 'false').lower() == 'true'
     bmad_docs_path = os.environ.get('BMAD_DOCS_PATH', '/Users/lshl124/Documents/daniel/git/code/aigc/BMAD-METHOD/expansion-packs/bmad-docs-generator/')
-    
+
     print(f"CLAUDE_CODE_ENABLED: {claude_code_enabled}")
     print(f"BMAD_DOCS_PATH: {bmad_docs_path}")
     print()

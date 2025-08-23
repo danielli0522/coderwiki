@@ -153,7 +153,7 @@ class DocumentGenerator:
                 except RuntimeError:
                     loop = asyncio.new_event_loop()
                     asyncio.set_event_loop(loop)
-                
+
                 llm_result = loop.run_until_complete(
                     self._call_claude_code_for_documentation(
                         repository=repository,
@@ -668,7 +668,6 @@ class DocumentGenerator:
                 'enabled': True,
                 'claude_code': claude_availability,
                 'bmad_docs_generator': bmad_availability,
-                'claude_code_path': self.claude_code_service.claude_code_path,
                 'bmad_docs_path': self.claude_code_service.bmad_docs_path
             }
         except Exception as e:
