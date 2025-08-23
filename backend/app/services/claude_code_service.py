@@ -6,8 +6,7 @@ import os
 import json
 import logging
 import time
-import subprocess
-import tempfile
+import asyncio
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 from pathlib import Path
@@ -26,17 +25,13 @@ class ClaudeCodeMetrics:
 class ClaudeCodeService:
     """Claude Code服务类，用于调用Claude Code SDK和指定的sub agent"""
     
-    def __init__(self, claude_code_path: str = None, bmad_docs_path: str = None):
+    def __init__(self, bmad_docs_path: str = None):
         """
         初始化Claude Code服务
         
         Args:
-            claude_code_path: Claude Code SDK路径
             bmad_docs_path: BMAD文档生成器路径
         """
-        # Claude Code SDK路径
-        self.claude_code_path = claude_code_path or "/usr/local/bin/claude-code"
-        
         # BMAD文档生成器路径
         self.bmad_docs_path = bmad_docs_path or "/Users/lshl124/Documents/daniel/git/code/aigc/BMAD-METHOD/expansion-packs/bmad-docs-generator/"
         
@@ -50,19 +45,15 @@ class ClaudeCodeService:
     
     def _validate_paths(self):
         """验证必要的路径是否存在"""
-        if not os.path.exists(self.claude_code_path):
-            logger.warning(f"Claude Code SDK not found at: {self.claude_code_path}")
-            logger.info("Please install Claude Code SDK or set correct path")
-        
         if not os.path.exists(self.bmad_docs_path):
             logger.warning(f"BMAD docs generator not found at: {self.bmad_docs_path}")
             logger.info("Please check the BMAD docs generator path")
     
-    def generate_technical_document(self, 
-                                   repository_path: str,
-                                   doc_type: str = 'technical_design',
-                                   doc_title: str = None,
-                                   additional_params: Dict[str, Any] = None) -> Dict[str, Any]:
+    async def generate_technical_document(self, 
+                                        repository_path: str,
+                                        doc_type: str = 'technical_design',
+                                        doc_title: str = None,
+                                        additional_params: Dict[str, Any] = None) -> Dict[str, Any]:
         """
         通过Claude Code SDK生成技术设计文档
         
@@ -86,18 +77,16 @@ class ClaudeCodeService:
                     'error_type': 'path_not_found'
                 }
             
-            # 准备Claude Code命令参数
-            command_args = self._prepare_claude_code_command(
-                repository_path=repository_path,
-                doc_type=doc_type,
-                doc_title=doc_title,
-                additional_params=additional_params
-            )
+            # 准备系统提示词
+            system_prompt = self._prepare_system_prompt(doc_type, doc_title, additional_params)
             
-            logger.info(f"Executing Claude Code command: {' '.join(command_args)}")
+            # 准备查询内容
+            query_content = self._prepare_query_content(repository_path, doc_type, doc_title)
             
-            # 执行Claude Code命令
-            result = self._execute_claude_code_command(command_args)
+            logger.info(f"Generating document for repository: {repository_path}, type: {doc_type}")
+            
+            # 使用Claude Code SDK生成文档
+            result = await self._execute_claude_code_sdk(system_prompt, query_content)
             
             if result['success']:
                 response_time = time.time() - start_time
@@ -105,8 +94,8 @@ class ClaudeCodeService:
                 # 创建指标对象
                 metrics = ClaudeCodeMetrics(
                     response_time=response_time,
-                    cost_estimate=0.0,  # Claude Code可能不提供成本信息
-                    tokens_used=0,      # Claude Code可能不提供token信息
+                    cost_estimate=result.get('cost_estimate', 0.0),
+                    tokens_used=result.get('tokens_used', 0),
                     model="claude-code",
                     provider="claude-code"
                 )
@@ -117,8 +106,7 @@ class ClaudeCodeService:
                     'metadata': result.get('metadata', {}),
                     'metrics': metrics.__dict__,
                     'cost_estimate': metrics.cost_estimate,
-                    'generation_time': response_time,
-                    'output_file': result.get('output_file', '')
+                    'generation_time': response_time
                 }
             else:
                 return {
@@ -135,188 +123,149 @@ class ClaudeCodeService:
                 'error_type': 'claude_code_service_error'
             }
     
-    def _prepare_claude_code_command(self, repository_path: str, doc_type: str, 
-                                   doc_title: str, additional_params: Dict[str, Any]) -> List[str]:
-        """准备Claude Code命令参数"""
-        # 基础命令
-        command = [self.claude_code_path]
-        
-        # 指定sub agent
-        command.extend(['--sub-agent', '/bmad//bmadDocs:teams:docs-generation-team'])
-        
-        # 指定BMAD文档生成器路径
-        command.extend(['--bmad-path', self.bmad_docs_path])
-        
-        # 指定仓库路径
-        command.extend(['--repository', repository_path])
-        
-        # 指定文档类型
-        command.extend(['--doc-type', doc_type])
-        
-        # 指定文档标题
-        if doc_title:
-            command.extend(['--doc-title', doc_title])
-        
-        # 添加额外参数
+    def _prepare_system_prompt(self, doc_type: str, doc_title: str, additional_params: Dict[str, Any]) -> str:
+        """准备系统提示词"""
+        base_prompt = f"""你是一个专业的技术文档生成专家，专门负责生成高质量的{self._get_doc_type_description(doc_type)}。
+
+你的任务是：
+1. 分析代码仓库的结构和内容
+2. 理解项目的技术架构和设计模式
+3. 生成结构清晰、内容详实的技术文档
+4. 使用中文编写，保持专业性和可读性
+5. 包含代码示例、架构图和最佳实践建议
+
+文档要求：
+- 使用Markdown格式
+- 包含目录结构
+- 提供详细的说明和示例
+- 遵循技术文档的最佳实践
+- 确保内容的准确性和完整性
+
+BMAD文档生成器路径: {self.bmad_docs_path}
+文档类型: {doc_type}
+文档标题: {doc_title or f'{doc_type}_documentation'}"""
+
+        # 添加额外参数到系统提示词
         if additional_params:
-            for key, value in additional_params.items():
-                if isinstance(value, (str, int, float, bool)):
-                    command.extend([f'--{key}', str(value)])
-                elif isinstance(value, list):
-                    for item in value:
-                        command.extend([f'--{key}', str(item)])
+            if additional_params.get('detailed', False):
+                base_prompt += "\n\n要求：生成详细的文档，包含深入的技术分析。"
+            if additional_params.get('include_examples', False):
+                base_prompt += "\n\n要求：包含丰富的代码示例和用例。"
+            if additional_params.get('comprehensive', False):
+                base_prompt += "\n\n要求：生成全面的文档，涵盖所有重要方面。"
+            if additional_params.get('summary', False):
+                base_prompt += "\n\n要求：生成简洁的概览文档，突出重点。"
         
-        # 指定输出格式
-        command.extend(['--output-format', 'markdown'])
-        
-        # 指定语言
-        command.extend(['--language', 'zh-CN'])
-        
-        return command
+        return base_prompt
     
-    def _execute_claude_code_command(self, command_args: List[str]) -> Dict[str, Any]:
-        """执行Claude Code命令"""
-        for attempt in range(self.max_retries):
-            try:
-                logger.info(f"Attempt {attempt + 1}/{self.max_retries}: Executing Claude Code command")
-                
-                # 创建临时文件用于输出
-                with tempfile.NamedTemporaryFile(mode='w+', suffix='.md', delete=False) as temp_file:
-                    temp_output = temp_file.name
-                
-                # 添加输出文件参数
-                command_with_output = command_args + ['--output', temp_output]
-                
-                # 执行命令
-                process = subprocess.Popen(
-                    command_with_output,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True,
-                    timeout=self.timeout
-                )
-                
-                stdout, stderr = process.communicate()
-                
-                if process.returncode == 0:
-                    # 读取生成的文档内容
-                    try:
-                        with open(temp_output, 'r', encoding='utf-8') as f:
-                            content = f.read()
-                        
-                        # 清理临时文件
-                        os.unlink(temp_output)
-                        
-                        logger.info(f"Claude Code command successful (attempt {attempt + 1})")
-                        
-                        return {
-                            'success': True,
-                            'content': content,
-                            'metadata': {
-                                'command': ' '.join(command_args),
-                                'stdout': stdout,
-                                'stderr': stderr,
-                                'return_code': process.returncode
-                            },
-                            'output_file': temp_output
-                        }
-                        
-                    except Exception as e:
-                        logger.error(f"Error reading output file: {str(e)}")
-                        return {
-                            'success': False,
-                            'error': f'Error reading output file: {str(e)}',
-                            'error_type': 'output_read_error'
-                        }
-                else:
-                    logger.warning(f"Claude Code command failed with return code {process.returncode} (attempt {attempt + 1})")
-                    logger.warning(f"STDOUT: {stdout}")
-                    logger.warning(f"STDERR: {stderr}")
-                    
-                    if attempt == self.max_retries - 1:
-                        return {
-                            'success': False,
-                            'error': f'Claude Code command failed: {stderr}',
-                            'error_type': 'claude_code_command_failed',
-                            'stdout': stdout,
-                            'stderr': stderr,
-                            'return_code': process.returncode
-                        }
-                    
-                    time.sleep(self.retry_delay)
-                    
-            except subprocess.TimeoutExpired:
-                logger.warning(f"Claude Code command timeout (attempt {attempt + 1})")
-                if attempt == self.max_retries - 1:
-                    return {
-                        'success': False,
-                        'error': 'Claude Code command timeout',
-                        'error_type': 'claude_code_timeout'
-                    }
-                time.sleep(self.retry_delay)
-                
-            except subprocess.SubprocessError as e:
-                logger.error(f"Claude Code subprocess error (attempt {attempt + 1}): {str(e)}")
-                if attempt == self.max_retries - 1:
-                    return {
-                        'success': False,
-                        'error': f'Claude Code subprocess error: {str(e)}',
-                        'error_type': 'claude_code_subprocess_error'
-                    }
-                time.sleep(self.retry_delay)
-        
-        return {
-            'success': False,
-            'error': 'Claude Code command failed after all retries',
-            'error_type': 'claude_code_max_retries_exceeded'
+    def _prepare_query_content(self, repository_path: str, doc_type: str, doc_title: str) -> str:
+        """准备查询内容"""
+        return f"""请为以下代码仓库生成{self._get_doc_type_description(doc_type)}：
+
+仓库路径: {repository_path}
+文档类型: {doc_type}
+文档标题: {doc_title or f'{doc_type}_documentation'}
+
+请分析仓库中的代码文件，理解项目结构，并生成相应的技术文档。"""
+    
+    def _get_doc_type_description(self, doc_type: str) -> str:
+        """获取文档类型的中文描述"""
+        doc_type_map = {
+            'technical_design': '技术设计文档',
+            'api_docs': 'API文档',
+            'architecture': '架构文档',
+            'database_design': '数据库设计文档',
+            'deployment_guide': '部署指南',
+            'user_manual': '用户手册',
+            'developer_guide': '开发者指南',
+            'system_overview': '系统概览文档'
         }
+        return doc_type_map.get(doc_type, '技术文档')
+
+    async def _execute_claude_code_sdk(self, system_prompt: str, query_content: str) -> Dict[str, Any]:
+        """使用Claude Code SDK执行文档生成"""
+        try:
+            # 导入Claude Code SDK
+            from claude_code_sdk import ClaudeSDKClient, ClaudeCodeOptions
+            
+            async with ClaudeSDKClient(
+                options=ClaudeCodeOptions(
+                    system_prompt=system_prompt,
+                    max_turns=3,
+                    allowed_tools=["Read", "Grep", "WebSearch"]
+                )
+            ) as client:
+                # 发送查询
+                await client.query(query_content)
+                
+                # 收集响应
+                content_parts = []
+                cost_estimate = 0.0
+                tokens_used = 0
+                
+                async for message in client.receive_response():
+                    if hasattr(message, 'content'):
+                        for block in message.content:
+                            if hasattr(block, 'text'):
+                                content_parts.append(block.text)
+                    
+                    # 获取成本信息
+                    if type(message).__name__ == "ResultMessage":
+                        cost_estimate = getattr(message, 'total_cost_usd', 0.0)
+                        tokens_used = getattr(message, 'total_tokens', 0)
+                
+                return {
+                    'success': True,
+                    'content': ''.join(content_parts),
+                    'cost_estimate': cost_estimate,
+                    'tokens_used': tokens_used,
+                    'metadata': {
+                        'system_prompt': system_prompt,
+                        'query_content': query_content
+                    }
+                }
+                
+        except ImportError:
+            logger.error("Claude Code SDK not installed. Please install: pip install claude-code-sdk")
+            return {
+                'success': False,
+                'error': 'Claude Code SDK not installed',
+                'error_type': 'sdk_not_installed'
+            }
+        except Exception as e:
+            logger.error(f"Error executing Claude Code SDK: {str(e)}")
+            return {
+                'success': False,
+                'error': f'SDK execution error: {str(e)}',
+                'error_type': 'sdk_execution_error'
+            }
     
     def check_claude_code_availability(self) -> Dict[str, Any]:
         """检查Claude Code SDK是否可用"""
         try:
-            # 检查Claude Code SDK是否安装
-            result = subprocess.run(
-                [self.claude_code_path, '--version'],
-                capture_output=True,
-                text=True,
-                timeout=10
-            )
+            # 尝试导入Claude Code SDK
+            from claude_code_sdk import ClaudeSDKClient, ClaudeCodeOptions
             
-            if result.returncode == 0:
-                return {
-                    'success': True,
-                    'available': True,
-                    'version': result.stdout.strip(),
-                    'claude_code_path': self.claude_code_path
-                }
-            else:
-                return {
-                    'success': False,
-                    'available': False,
-                    'error': f'Claude Code SDK not available: {result.stderr}',
-                    'claude_code_path': self.claude_code_path
-                }
-                
-        except FileNotFoundError:
             return {
-                'success': False,
-                'available': False,
-                'error': f'Claude Code SDK not found at: {self.claude_code_path}',
-                'claude_code_path': self.claude_code_path
+                'success': True,
+                'available': True,
+                'version': 'claude-code-sdk',
+                'message': 'Claude Code SDK is available'
             }
-        except subprocess.TimeoutExpired:
+                
+        except ImportError:
             return {
                 'success': False,
                 'available': False,
-                'error': 'Claude Code SDK version check timeout',
-                'claude_code_path': self.claude_code_path
+                'error': 'Claude Code SDK not installed. Please install: pip install claude-code-sdk',
+                'message': 'Please install Claude Code SDK'
             }
         except Exception as e:
             return {
                 'success': False,
                 'available': False,
                 'error': f'Error checking Claude Code SDK: {str(e)}',
-                'claude_code_path': self.claude_code_path
+                'message': 'Error checking SDK availability'
             }
     
     def check_bmad_docs_generator(self) -> Dict[str, Any]:

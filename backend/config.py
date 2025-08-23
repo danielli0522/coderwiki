@@ -50,7 +50,6 @@ class Config:
 
     # Claude Code服务配置
     CLAUDE_CODE_ENABLED = os.environ.get('CLAUDE_CODE_ENABLED', 'false').lower() == 'true'
-    CLAUDE_CODE_PATH = os.environ.get('CLAUDE_CODE_PATH', '/usr/local/bin/claude-code')
     BMAD_DOCS_PATH = os.environ.get('BMAD_DOCS_PATH', '/Users/lshl124/Documents/daniel/git/code/aigc/BMAD-METHOD/expansion-packs/bmad-docs-generator/')
 
     # Git配置

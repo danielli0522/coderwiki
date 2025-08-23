@@ -64,7 +64,6 @@ class DocumentGenerator:
         if self.use_claude_code:
             import os
             self.claude_code_service = ClaudeCodeService(
-                claude_code_path=os.environ.get('CLAUDE_CODE_PATH', '/usr/local/bin/claude-code'),
                 bmad_docs_path=os.environ.get('BMAD_DOCS_PATH', '/Users/lshl124/Documents/daniel/git/code/aigc/BMAD-METHOD/expansion-packs/bmad-docs-generator/')
             )
         else:
@@ -147,10 +146,20 @@ class DocumentGenerator:
             # 步骤3: 调用文档生成服务
             if self.use_claude_code and self.claude_code_service:
                 self.task_service.update_task_status(task.id, 'processing', 'Calling Claude Code service for document generation')
-                llm_result = self._call_claude_code_for_documentation(
-                    repository=repository,
-                    doc_type=doc_type,
-                    doc_title=doc_title
+                # 使用asyncio运行异步函数
+                import asyncio
+                try:
+                    loop = asyncio.get_event_loop()
+                except RuntimeError:
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                
+                llm_result = loop.run_until_complete(
+                    self._call_claude_code_for_documentation(
+                        repository=repository,
+                        doc_type=doc_type,
+                        doc_title=doc_title
+                    )
                 )
             elif self.use_mcp and self.mcp_service:
                 self.task_service.update_task_status(task.id, 'processing', 'Calling MCP service for document generation')
@@ -265,8 +274,8 @@ class DocumentGenerator:
                 'analysis_error': str(e)
             }
 
-    def _call_claude_code_for_documentation(self, repository: Repository,
-                                          doc_type: str, doc_title: str) -> Dict[str, Any]:
+    async def _call_claude_code_for_documentation(self, repository: Repository,
+                                                doc_type: str, doc_title: str) -> Dict[str, Any]:
         """通过Claude Code服务生成文档"""
         try:
             # 准备额外参数
@@ -284,7 +293,7 @@ class DocumentGenerator:
                 additional_params['summary'] = True
 
             # 调用Claude Code服务
-            claude_result = self.claude_code_service.generate_technical_document(
+            claude_result = await self.claude_code_service.generate_technical_document(
                 repository_path=repository.local_path,
                 doc_type=doc_type,
                 doc_title=doc_title,
@@ -733,7 +742,7 @@ class DocumentGenerator:
                 'doc_types': [
                     'overview',
                     'api',
-                    'database', 
+                    'database',
                     'architecture',
                     'deployment',
                     'user_guide',
