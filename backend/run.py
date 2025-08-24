@@ -11,18 +11,25 @@ current_dir = Path(__file__).parent
 sys.path.insert(0, str(current_dir))
 
 from app import create_app
-from config import DevelopmentConfig
+from config import Config, ProductionConfig, DevelopmentConfig
+
+# 默认使用生产环境配置
+config_class = ProductionConfig
+if os.environ.get('FLASK_ENV') == 'development':
+    config_class = DevelopmentConfig
 
 # 创建Flask应用
-app = create_app(DevelopmentConfig)
+app = create_app(config_class)
 
 if __name__ == '__main__':
-    # 开发环境运行 - 使用端口5001避免与AirPlay冲突
+    # 生产环境运行 - 使用端口5001
     port = int(os.environ.get('PORT', 5001))
-    debug = os.environ.get('FLASK_DEBUG', 'True').lower() == 'true'
+    flask_env = os.environ.get('FLASK_ENV', 'production')
+    debug = flask_env == 'development'
 
     print(f"Starting CoderWiki application on port {port}")
+    print(f"Environment: {flask_env}")
     print(f"Debug mode: {debug}")
-    print(f"Environment: {os.environ.get('FLASK_ENV', 'development')}")
+    print(f"Using config: {config_class.__name__}")
 
     app.run(host='0.0.0.0', port=port, debug=debug)

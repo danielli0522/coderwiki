@@ -2,6 +2,10 @@
 
 {% block title %}文档管理 - CoderWiki{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/document-modal-fix.css') }}">
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid">
     <div class="row">

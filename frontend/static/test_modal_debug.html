@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modal Debug Test</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        .debug-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .debug-info h5 {
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+        .debug-info pre {
+            background: #e9ecef;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>Modal Debug Test</h1>
+        <p>This page is used to test and debug the repository modal functionality.</p>
+
+        <!-- Debug Information -->
+        <div class="debug-info">
+            <h5>Debug Information</h5>
+            <div id="debugOutput">
+                <p>Loading debug information...</p>
+            </div>
+        </div>
+
+        <!-- Test Button -->
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRepositoryModal">
+            <i class="fas fa-plus"></i> 添加仓库 (Bootstrap)
+        </button>
+
+        <button class="btn btn-success" onclick="testCustomModal()">
+            <i class="fas fa-plus"></i> 添加仓库 (Custom)
+        </button>
+
+        <button class="btn btn-info" onclick="runModalTests()">
+            <i class="fas fa-search"></i> 运行模态框测试
+        </button>
+    </div>
+
+    <!-- 添加仓库模态框 -->
+    <div class="modal fade" id="addRepositoryModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">添加仓库</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addRepositoryForm">
+                        <div class="mb-3">
+                            <label for="repoUrl" class="form-label">仓库 URL *</label>
+                            <input type="url" class="form-control" id="repoUrl" placeholder="https://github.com/username/repository" required>
+                            <div class="form-text">支持 GitHub 仓库或 Git 仓库 URL</div>
+                            <div class="invalid-feedback" id="urlError"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="repoName" class="form-label">仓库名称</label>
+                            <input type="text" class="form-control" id="repoName" placeholder="留空自动从 URL 提取">
+                            <div class="form-text">如果不填写，将自动从 URL 中提取</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="repoDescription" class="form-label">描述</label>
+                            <textarea class="form-control" id="repoDescription" rows="3" placeholder="仓库描述（可选）"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-outline-primary btn-sm" id="validateUrlBtn">
+                                <i class="fas fa-check-circle"></i> 验证 URL
+                            </button>
+                            <span id="validationResult" class="ms-2"></span>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="addRepoBtn">
+                        <i class="fas fa-plus"></i> 添加仓库
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Test Scripts -->
+    <script src="js/modal-test.js"></script>
+    <script src="js/repository-modal-fix.js"></script>
+
+    <script>
+        // 页面加载完成后运行测试
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Modal Debug Test: 页面加载完成');
+            updateDebugInfo();
+        });
+
+        function updateDebugInfo() {
+            const debugOutput = document.getElementById('debugOutput');
+            const modal = document.getElementById('addRepositoryModal');
+            const form = document.getElementById('addRepositoryForm');
+            const buttons = document.querySelectorAll('[data-bs-target="#addRepositoryModal"]');
+
+            const info = {
+                pageReady: document.readyState,
+                modalExists: !!modal,
+                formExists: !!form,
+                buttonsCount: buttons.length,
+                bootstrapAvailable: typeof bootstrap !== 'undefined',
+                modalClassAvailable: typeof bootstrap !== 'undefined' && typeof bootstrap.Modal !== 'undefined',
+                modalTestAvailable: typeof window.ModalTest !== 'undefined',
+                repositoryModalFixAvailable: typeof window.RepositoryModalFix !== 'undefined'
+            };
+
+            debugOutput.innerHTML = `
+                <h6>页面状态:</h6>
+                <pre>${JSON.stringify(info, null, 2)}</pre>
+
+                <h6>模态框详情:</h6>
+                <pre>${modal ? `ID: ${modal.id}
+类名: ${modal.className}
+子元素数量: ${modal.children.length}
+可见性: ${modal.style.display || 'default'}` : '模态框不存在'}</pre>
+
+                <h6>表单详情:</h6>
+                <pre>${form ? `ID: ${form.id}
+输入框数量: ${form.querySelectorAll('input, textarea').length}` : '表单不存在'}</pre>
+            `;
+        }
+
+        function testCustomModal() {
+            console.log('测试自定义模态框打开...');
+
+            if (window.RepositoryModalFix) {
+                window.RepositoryModalFix.openAddRepositoryModal();
+            } else {
+                console.error('RepositoryModalFix 不可用');
+                alert('RepositoryModalFix 不可用');
+            }
+        }
+
+        function runModalTests() {
+            console.log('运行模态框测试...');
+
+            if (window.ModalTest) {
+                window.ModalTest.runTests();
+                updateDebugInfo();
+            } else {
+                console.error('ModalTest 不可用');
+                alert('ModalTest 不可用');
+            }
+        }
+
+        // 监听模态框事件
+        document.addEventListener('shown.bs.modal', function(event) {
+            console.log('模态框显示:', event.target.id);
+            updateDebugInfo();
+        });
+
+        document.addEventListener('hidden.bs.modal', function(event) {
+            console.log('模态框隐藏:', event.target.id);
+            updateDebugInfo();
+        });
+    </script>
+</body>
+</html>

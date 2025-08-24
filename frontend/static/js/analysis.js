@@ -12,6 +12,8 @@ class AnalysisManager {
         this.analysisHistory = [];
         this.pollingInterval = null;
         this.isInitialized = false;
+        this.apiClient = new ApiClient('/api');
+        this.userRepositories = []; // 存储用户可访问的仓库列表
         this.init();
     }
 
@@ -44,10 +46,11 @@ class AnalysisManager {
 
         // 仓库选择事件
         this.bindElement('analysisRepoSelect', 'change', (e) => {
-            this.repositoryId = e.target.value;
-            if (this.repositoryId) {
-                this.loadAnalysisResults();
-                this.loadAnalysisHistory();
+            const selectedRepoId = e.target.value;
+            if (selectedRepoId) {
+                this.selectRepository(selectedRepoId);
+            } else {
+                this.clearRepositorySelection();
             }
         });
 
@@ -67,26 +70,21 @@ class AnalysisManager {
 
     async loadRepositories() {
         try {
-            const response = await fetch('/api/repositories', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to load repositories');
-            }
-
-            const data = await response.json();
+            console.log('Loading user repositories...');
+            const data = await this.apiClient.get('/repositories');
 
             if (data.success && data.repositories) {
+                this.userRepositories = data.repositories;
                 this.populateRepositorySelect(data.repositories);
+                console.log(`Loaded ${data.repositories.length} repositories`);
+            } else {
+                console.error('Failed to load repositories:', data.message);
+                this.showError('加载仓库列表失败: ' + (data.message || '未知错误'));
             }
 
         } catch (error) {
             console.error('Error loading repositories:', error);
-            this.showError('加载仓库列表失败');
+            this.showError('加载仓库列表失败: ' + error.message);
         }
     }
 
@@ -100,6 +98,14 @@ class AnalysisManager {
                 const option = document.createElement('option');
                 option.value = repo.id;
                 option.textContent = repo.name;
+                // 添加仓库状态信息
+                if (repo.clone_status === 'completed' && repo.local_path) {
+                    option.textContent += ' (已克隆)';
+                } else if (repo.clone_status === 'cloning') {
+                    option.textContent += ' (克隆中)';
+                } else if (repo.clone_status === 'failed') {
+                    option.textContent += ' (克隆失败)';
+                }
                 select.appendChild(option);
             });
         }
@@ -110,25 +116,70 @@ class AnalysisManager {
                 const option = document.createElement('option');
                 option.value = repo.id;
                 option.textContent = repo.name;
+                // 添加仓库状态信息
+                if (repo.clone_status === 'completed' && repo.local_path) {
+                    option.textContent += ' (已克隆)';
+                } else if (repo.clone_status === 'cloning') {
+                    option.textContent += ' (克隆中)';
+                } else if (repo.clone_status === 'failed') {
+                    option.textContent += ' (克隆失败)';
+                }
                 modalSelect.appendChild(option);
             });
         }
     }
 
+    selectRepository(repositoryId) {
+        // 验证仓库是否存在且可访问
+        const repository = this.userRepositories.find(repo => repo.id == repositoryId);
+        if (!repository) {
+            this.showError('选择的仓库不存在或您没有访问权限');
+            return;
+        }
+
+        // 检查仓库是否已克隆
+        if (repository.clone_status !== 'completed' || !repository.local_path) {
+            this.showError(`仓库 "${repository.name}" 尚未克隆完成，无法进行分析。请等待克隆完成后再试。`);
+            return;
+        }
+
+        this.repositoryId = repositoryId;
+        this.repositoryName = repository.name;
+
+        console.log(`Selected repository: ${repository.name} (ID: ${repositoryId})`);
+
+        // 加载分析结果和历史
+        this.loadAnalysisResults();
+        this.loadAnalysisHistory();
+
+        // 更新UI状态
+        this.updateRepositorySelectionUI();
+    }
+
+    clearRepositorySelection() {
+        this.repositoryId = null;
+        this.repositoryName = '';
+        this.analysisResults = null;
+        this.showEmptyState();
+        this.updateRepositorySelectionUI();
+    }
+
+    updateRepositorySelectionUI() {
+        // 更新仓库选择相关的UI元素
+        const repoInfoElement = document.getElementById('selectedRepoInfo');
+        if (repoInfoElement) {
+            if (this.repositoryName) {
+                repoInfoElement.textContent = `当前仓库: ${this.repositoryName}`;
+                repoInfoElement.style.display = 'block';
+            } else {
+                repoInfoElement.style.display = 'none';
+            }
+        }
+    }
+
     async loadAnalysisStatistics() {
         try {
-            const response = await fetch('/api/analysis/statistics', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to load analysis statistics');
-            }
-
-            const data = await response.json();
+            const data = await this.apiClient.get('/analysis/statistics');
 
             if (data.success && data.statistics) {
                 this.updateStatistics(data.statistics);
@@ -162,32 +213,39 @@ class AnalysisManager {
         }
 
         try {
+            console.log(`Loading analysis results for repository ${this.repositoryId}...`);
             document.getElementById('analysisLoading').style.display = 'block';
 
-            const response = await fetch(`/api/analysis/results/${this.repositoryId}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to load analysis results');
-            }
-
-            const data = await response.json();
+            const data = await this.apiClient.get(`/analysis/results/${this.repositoryId}`);
 
             if (data.success) {
                 this.analysisResults = data.results;
                 this.renderAnalysisResults();
                 this.updateAnalysisStatus();
+                console.log('Analysis results loaded successfully');
             } else {
+                console.warn('No analysis results found:', data.message);
                 this.showEmptyState();
+                // 显示友好的提示信息
+                if (data.message && data.message.includes('No analyses found')) {
+                    this.showInfo('该仓库尚未进行过代码分析，请点击"开始分析"按钮开始第一次分析。');
+                }
             }
 
         } catch (error) {
             console.error('Error loading analysis results:', error);
-            this.showError('加载分析结果失败');
+
+            // 根据错误类型显示不同的消息
+            if (error.message && error.message.includes('404')) {
+                this.showError('仓库不存在或您没有访问权限');
+            } else if (error.message && error.message.includes('401')) {
+                this.showError('请先登录后再访问分析功能');
+            } else if (error.message && error.message.includes('403')) {
+                this.showError('您没有权限访问此仓库的分析结果');
+            } else {
+                this.showError('加载分析结果失败: ' + error.message);
+            }
+
             this.showEmptyState();
         } finally {
             document.getElementById('analysisLoading').style.display = 'none';
@@ -198,18 +256,7 @@ class AnalysisManager {
         if (!this.repositoryId) return;
 
         try {
-            const response = await fetch(`/api/analysis/history/${this.repositoryId}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to load analysis history');
-            }
-
-            const data = await response.json();
+            const data = await this.apiClient.get(`/analysis/history/${this.repositoryId}`);
 
             if (data.success) {
                 this.analysisHistory = data.history;
@@ -430,9 +477,65 @@ class AnalysisManager {
         }
     }
 
+    // 认证检查辅助方法
+    async checkAuthentication() {
+        try {
+            const authResponse = await fetch('/api/auth/status', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include'
+            });
+
+            if (!authResponse.ok || authResponse.status === 302) {
+                this.showError('请先登录后再开始分析');
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 2000);
+                return false;
+            }
+
+            const authData = await authResponse.json();
+            if (!authData.logged_in) {
+                this.showError('请先登录后再开始分析');
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 2000);
+                return false;
+            }
+
+            return true;
+        } catch (error) {
+            console.error('认证检查失败:', error);
+            this.showError('认证检查失败，请重新登录');
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 2000);
+            return false;
+        }
+    }
+
     async startAnalysis() {
+        // 检查用户是否已登录
+        if (!(await this.checkAuthentication())) {
+            return;
+        }
+
         if (!this.repositoryId) {
             this.showError('请先选择一个仓库');
+            return;
+        }
+
+        // 验证仓库状态
+        const repository = this.userRepositories.find(repo => repo.id == this.repositoryId);
+        if (!repository) {
+            this.showError('选择的仓库不存在或您没有访问权限');
+            return;
+        }
+
+        if (repository.clone_status !== 'completed' || !repository.local_path) {
+            this.showError(`仓库 "${repository.name}" 尚未克隆完成，无法进行分析。请等待克隆完成后再试。`);
             return;
         }
 
@@ -445,37 +548,59 @@ class AnalysisManager {
         }
 
         try {
-            const response = await fetch('/api/analysis/start', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    repository_id: this.repositoryId,
-                    analysis_types: analysisTypes,
-                    config: config
-                })
-            });
+            console.log(`Starting analysis for repository ${this.repositoryId} with types: ${analysisTypes.join(', ')}`);
 
-            const data = await response.json();
+            const data = await this.apiClient.post('/analysis/start', {
+                repository_id: parseInt(this.repositoryId), // 确保是整数
+                analysis_types: analysisTypes,
+                config: config
+            });
 
             if (data.success) {
                 this.showProgressModal();
                 this.currentAnalysis = data.analysis_ids[0];
                 this.startPolling();
                 this.updateAnalysisButtons(true);
-                this.showSuccess('分析已开始');
+                this.showSuccess(`分析已开始，正在分析 ${analysisTypes.length} 个方面...`);
+                console.log('Analysis started successfully:', data);
             } else {
+                console.error('Failed to start analysis:', data.message);
                 this.showError(data.message || '开始分析失败');
             }
 
         } catch (error) {
             console.error('Error starting analysis:', error);
-            this.showError('开始分析失败');
+
+            // 根据错误类型显示不同的消息
+            if (error.message && error.message.includes('Authentication required')) {
+                this.showError('请先登录后再开始分析');
+                // 延迟重定向到登录页面
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 2000);
+            } else if (error.message && error.message.includes('400')) {
+                this.showError('请求参数错误，请检查分析配置');
+            } else if (error.message && error.message.includes('401')) {
+                this.showError('请先登录后再开始分析');
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 2000);
+            } else if (error.message && error.message.includes('403')) {
+                this.showError('您没有权限对此仓库进行分析');
+            } else if (error.message && error.message.includes('404')) {
+                this.showError('仓库不存在或已被删除');
+            } else {
+                this.showError('开始分析失败: ' + error.message);
+            }
         }
     }
 
     async startAnalysisFromModal() {
+        // 检查用户是否已登录
+        if (!(await this.checkAuthentication())) {
+            return;
+        }
+
         const modalRepoSelect = document.getElementById('analysisRepo');
         const repositoryId = modalRepoSelect.value;
 
@@ -506,14 +631,7 @@ class AnalysisManager {
         if (!this.currentAnalysis) return;
 
         try {
-            const response = await fetch(`/api/analysis/cancel/${this.currentAnalysis}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            const data = await response.json();
+            const data = await this.apiClient.post(`/analysis/cancel/${this.currentAnalysis}`);
 
             if (data.success) {
                 this.stopPolling();
@@ -551,14 +669,7 @@ class AnalysisManager {
         if (!this.currentAnalysis) return;
 
         try {
-            const response = await fetch(`/api/analysis/status/${this.currentAnalysis}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            const data = await response.json();
+            const data = await this.apiClient.get(`/analysis/status/${this.currentAnalysis}`);
 
             if (data.success) {
                 this.updateProgress(data);
@@ -610,8 +721,57 @@ class AnalysisManager {
     }
 
     showNewAnalysisModal() {
-        const modal = new bootstrap.Modal(document.getElementById('newAnalysisModal'));
-        modal.show();
+        console.log('显示新建分析模态框');
+
+        // 使用全局模态框管理器
+        if (window.modalManager) {
+            window.modalManager.showModal('newAnalysisModal', {
+                beforeShow: (modalElement) => {
+                    // 重新加载仓库列表
+                    this.loadRepositories();
+                },
+                onShown: () => {
+                    // 绑定开始分析按钮事件
+                    const startBtn = document.getElementById('modalStartAnalysisBtn');
+                    if (startBtn) {
+                        startBtn.onclick = () => this.startAnalysisFromModal();
+                    }
+                }
+            });
+        } else {
+            // 降级处理：使用原始方法
+            const modalElement = document.getElementById('newAnalysisModal');
+            if (!modalElement) {
+                console.error('新建分析模态框元素不存在');
+                return;
+            }
+
+            // 创建并显示模态框
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+
+            // 重新加载仓库列表
+            this.loadRepositories();
+
+            // 确保模态框可以正常交互
+            setTimeout(() => {
+                // 强制启用所有输入框
+                const inputs = modalElement.querySelectorAll('input, textarea, select');
+                inputs.forEach(input => {
+                    input.disabled = false;
+                    input.readOnly = false;
+                    input.style.pointerEvents = 'auto';
+                    input.style.opacity = '1';
+                    input.style.visibility = 'visible';
+                });
+
+                // 绑定开始分析按钮事件
+                const startBtn = document.getElementById('modalStartAnalysisBtn');
+                if (startBtn) {
+                    startBtn.onclick = () => this.startAnalysisFromModal();
+                }
+            }, 300);
+        }
     }
 
     updateAnalysisButtons(isAnalyzing) {
@@ -674,14 +834,7 @@ class AnalysisManager {
         }
 
         try {
-            const response = await fetch(`/api/analysis/cache/clear/${this.repositoryId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            const data = await response.json();
+            const data = await this.apiClient.post(`/analysis/cache/clear/${this.repositoryId}`);
 
             if (data.success) {
                 this.showSuccess('缓存已清除');
@@ -808,58 +961,74 @@ class AnalysisManager {
     }
 
     showSuccess(message) {
-        // 使用Bootstrap toast或alert
+        console.log('Success:', message);
         if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
-            // 创建toast通知
             this.createToast('success', message);
         } else {
-            alert(message);
+            alert('成功: ' + message);
         }
     }
 
     showError(message) {
+        console.error('Error:', message);
+        if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
+            this.createToast('error', message);
+        } else {
+            alert('错误: ' + message);
+        }
+    }
+
+    showInfo(message) {
         // 使用Bootstrap toast或alert
         if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
             // 创建toast通知
-            this.createToast('danger', message);
+            this.createToast('info', message);
         } else {
             alert(message);
         }
     }
 
     createToast(type, message) {
-        const toastContainer = document.getElementById('toastContainer') || this.createToastContainer();
+        // 创建toast容器（如果不存在）
+        let toastContainer = document.getElementById('toastContainer');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.id = 'toastContainer';
+            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+            toastContainer.style.zIndex = '9999';
+            document.body.appendChild(toastContainer);
+        }
 
+        // 创建toast元素
+        const toastId = 'toast-' + Date.now();
         const toastHtml = `
-            <div class="toast align-items-center text-white bg-${type} border-0" role="alert">
-                <div class="d-flex">
-                    <div class="toast-body">
-                        ${message}
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <strong class="me-auto">${type === 'error' ? '错误' : type === 'success' ? '成功' : '信息'}</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
                 </div>
             </div>
         `;
 
         toastContainer.insertAdjacentHTML('beforeend', toastHtml);
 
-        const toastElement = toastContainer.lastElementChild;
-        const toast = new bootstrap.Toast(toastElement);
-        toast.show();
+        // 显示toast
+        const toastElement = document.getElementById(toastId);
+        if (toastElement && typeof bootstrap !== 'undefined' && bootstrap.Toast) {
+            const toast = new bootstrap.Toast(toastElement, {
+                autohide: true,
+                delay: type === 'error' ? 5000 : 3000
+            });
+            toast.show();
 
-        // 自动移除toast元素
-        toastElement.addEventListener('hidden.bs.toast', () => {
-            toastElement.remove();
-        });
-    }
-
-    createToastContainer() {
-        const container = document.createElement('div');
-        container.id = 'toastContainer';
-        container.className = 'toast-container position-fixed top-0 end-0 p-3';
-        container.style.zIndex = '9999';
-        document.body.appendChild(container);
-        return container;
+            // 自动移除toast元素
+            toastElement.addEventListener('hidden.bs.toast', () => {
+                toastElement.remove();
+            });
+        }
     }
 }
 

@@ -152,18 +152,62 @@ class DocumentManager {
     }
 
     showAddDocumentModal() {
-        const modal = new bootstrap.Modal(document.getElementById('addDocumentModal'));
-        modal.show();
+        console.log('显示新建文档模态框');
 
-        // 重新加载仓库列表
-        this.loadRepositories();
-
-        // 确保模态框可以正常交互
-        setTimeout(() => {
-            if (window.fixModalInteractions) {
-                window.fixModalInteractions();
+        // 使用全局模态框管理器
+        if (window.modalManager) {
+            window.modalManager.showModal('addDocumentModal', {
+                beforeShow: (modalElement) => {
+                    // 重新加载仓库列表
+                    this.loadRepositories();
+                },
+                onShown: () => {
+                    // 绑定创建文档按钮事件
+                    const createBtn = document.getElementById('createDocumentBtn');
+                    if (createBtn) {
+                        createBtn.onclick = () => this.createDocument();
+                    }
+                }
+            });
+        } else {
+            // 降级处理：使用原始方法
+            const modalElement = document.getElementById('addDocumentModal');
+            if (!modalElement) {
+                console.error('新建文档模态框元素不存在');
+                return;
             }
-        }, 100);
+
+            // 创建并显示模态框
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+
+            // 重新加载仓库列表
+            this.loadRepositories();
+
+            // 确保模态框可以正常交互
+            setTimeout(() => {
+                // 强制启用所有输入框
+                const inputs = modalElement.querySelectorAll('input, textarea, select');
+                inputs.forEach(input => {
+                    input.disabled = false;
+                    input.readOnly = false;
+                    input.style.pointerEvents = 'auto';
+                    input.style.opacity = '1';
+                    input.style.visibility = 'visible';
+
+                    // 尝试聚焦到第一个输入框
+                    if (input.id === 'documentName') {
+                        input.focus();
+                    }
+                });
+
+                // 绑定创建文档按钮事件
+                const createBtn = document.getElementById('createDocumentBtn');
+                if (createBtn) {
+                    createBtn.onclick = () => this.createDocument();
+                }
+            }, 300);
+        }
     }
 
     async createDocument() {

@@ -1,52 +1,41 @@
 /**
- * 导航链接修复脚本
+ * 导航链接修复脚本 - 重构版本
  * 解决顶部导航按钮点击无响应的问题
  */
 
+// 全局变量防止重复初始化
+let navigationFixInitialized = false;
+
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Navigation fix script loaded');
-
-    // 修复导航链接点击问题
-    fixNavigationLinks();
-
-    // 添加调试信息
-    addNavigationDebugInfo();
+    
+    if (!navigationFixInitialized) {
+        navigationFixInitialized = true;
+        
+        // 仅修复CSS样式，不破坏现有事件绑定
+        forceFixNavigationStyles();
+        
+        // 添加调试功能（可选）
+        addNavigationDebugInfo();
+        
+        console.log('Navigation fix completed - preserving original event handlers');
+    }
 });
 
+// 移除危险的DOM操作，仅通过CSS修复
 function fixNavigationLinks() {
-    // 获取所有导航链接
+    // 仅确保链接样式正确，不修改DOM或事件
     const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
-
     console.log('Found navigation links:', navLinks.length);
 
     navLinks.forEach(function(link, index) {
         console.log(`Link ${index + 1}:`, link.textContent.trim(), link.href);
 
-        // 确保链接可以点击
+        // 仅修复CSS样式，保留原始事件处理
         link.style.pointerEvents = 'auto';
         link.style.cursor = 'pointer';
-        link.style.userSelect = 'auto';
-
-        // 添加点击事件监听器（不替换原始链接）
-        link.addEventListener('click', function(e) {
-            console.log('Navigation link clicked:', this.textContent.trim(), this.href);
-
-            // 确保链接正常工作 - 允许默认行为
-            if (this.href && this.href !== '#') {
-                console.log('Navigating to:', this.href);
-                // 不阻止默认行为，让链接自然跳转
-                // 如果需要强制刷新，可以使用 window.location.href = this.href
-            }
-        });
-
-        // 添加鼠标悬停效果
-        link.addEventListener('mouseenter', function() {
-            this.style.opacity = '0.8';
-        });
-
-        link.addEventListener('mouseleave', function() {
-            this.style.opacity = '1';
-        });
+        link.style.visibility = 'visible';
+        link.style.opacity = '1';
     });
 }
 
@@ -138,9 +127,5 @@ function forceFixNavigationStyles() {
     document.head.appendChild(style);
 }
 
-// 页面加载完成后执行修复
-document.addEventListener('DOMContentLoaded', function() {
-    forceFixNavigationStyles();
-    console.log('Navigation styles fixed');
-});
+// 页面加载完成后执行修复 - 已整合到主初始化函数中
 

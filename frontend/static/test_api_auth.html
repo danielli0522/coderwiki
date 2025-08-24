@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Authentication Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 3px;
+            white-space: pre-wrap;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>API Authentication Test</h1>
+
+    <div class="test-section">
+        <h3>Test 1: Unauthenticated API Call</h3>
+        <p>This test will call the /api/tasks endpoint without authentication, which should trigger a redirect to login.</p>
+        <button class="btn-primary" onclick="testUnauthenticatedCall()">Test Unauthenticated Call</button>
+        <div id="result1" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Test 2: Authentication Error Handling</h3>
+        <p>This test will verify that the API client properly handles authentication errors and redirects to login.</p>
+        <button class="btn-secondary" onclick="testAuthErrorHandling()">Test Auth Error Handling</button>
+        <div id="result2" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Test 3: Manual Redirect Test</h3>
+        <p>This test will manually check if the server returns a 302 redirect for unauthenticated requests.</p>
+        <button class="btn-secondary" onclick="testManualRedirect()">Test Manual Redirect</button>
+        <div id="result3" class="result" style="display: none;"></div>
+    </div>
+
+    <script src="js/api_client.js"></script>
+    <script>
+        function showResult(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `result ${type}`;
+            element.style.display = 'block';
+        }
+
+        async function testUnauthenticatedCall() {
+            try {
+                showResult('result1', 'Testing unauthenticated API call...', 'warning');
+
+                const response = await fetch('/api/tasks', {
+                    method: 'GET',
+                    credentials: 'include',
+                    redirect: 'manual'
+                });
+
+                let result = `Status: ${response.status}\n`;
+                result += `Status Text: ${response.statusText}\n`;
+
+                if (response.status === 302) {
+                    const location = response.headers.get('location');
+                    result += `Redirect Location: ${location}\n`;
+                    result += '\n✅ SUCCESS: Server correctly returns 302 redirect for unauthenticated request';
+                    showResult('result1', result, 'success');
+                } else {
+                    result += '\n❌ FAILED: Expected 302 redirect but got different status';
+                    showResult('result1', result, 'error');
+                }
+            } catch (error) {
+                showResult('result1', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAuthErrorHandling() {
+            try {
+                showResult('result2', 'Testing authentication error handling...', 'warning');
+
+                // Override the handleAuthError method to prevent actual redirect
+                const originalHandleAuthError = api.handleAuthError;
+                let authErrorHandled = false;
+
+                api.handleAuthError = function() {
+                    authErrorHandled = true;
+                    console.log('Authentication error handled correctly');
+                };
+
+                try {
+                    await api.get('/tasks');
+                } catch (error) {
+                    if (authErrorHandled) {
+                        showResult('result2', '✅ SUCCESS: Authentication error was properly handled and redirected to login', 'success');
+                    } else {
+                        showResult('result2', `❌ FAILED: Authentication error was not handled properly. Error: ${error.message}`, 'error');
+                    }
+                } finally {
+                    // Restore original method
+                    api.handleAuthError = originalHandleAuthError;
+                }
+            } catch (error) {
+                showResult('result2', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testManualRedirect() {
+            try {
+                showResult('result3', 'Testing manual redirect detection...', 'warning');
+
+                const response = await fetch('/api/tasks', {
+                    method: 'GET',
+                    credentials: 'include',
+                    redirect: 'manual'
+                });
+
+                let result = `Response Status: ${response.status}\n`;
+                result += `Response Headers:\n`;
+
+                for (const [key, value] of response.headers.entries()) {
+                    result += `  ${key}: ${value}\n`;
+                }
+
+                if (response.status === 302) {
+                    result += '\n✅ SUCCESS: Manual redirect detection works correctly';
+                    showResult('result3', result, 'success');
+                } else {
+                    result += '\n❌ FAILED: Expected 302 status code';
+                    showResult('result3', result, 'error');
+                }
+            } catch (error) {
+                showResult('result3', `Error: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>
+

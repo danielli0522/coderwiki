@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模态框输入测试</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/document-modal-fix.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>模态框输入测试</h1>
+        <button class="btn btn-primary" id="testModalBtn">测试模态框</button>
+        
+        <!-- 测试模态框 -->
+        <div class="modal fade" id="testModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">测试模态框</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="testForm">
+                            <div class="mb-3">
+                                <label for="testInput" class="form-label">测试输入框</label>
+                                <input type="text" class="form-control" id="testInput" placeholder="请输入内容">
+                            </div>
+                            <div class="mb-3">
+                                <label for="testTextarea" class="form-label">测试文本域</label>
+                                <textarea class="form-control" id="testTextarea" rows="3"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="testSelect" class="form-label">测试下拉框</label>
+                                <select class="form-select" id="testSelect">
+                                    <option value="">请选择</option>
+                                    <option value="1">选项1</option>
+                                    <option value="2">选项2</option>
+                                    <option value="3">选项3</option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" id="testSubmitBtn">提交</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/modal-fixes.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const testModalBtn = document.getElementById('testModalBtn');
+            const testModal = document.getElementById('testModal');
+            const testSubmitBtn = document.getElementById('testSubmitBtn');
+            
+            testModalBtn.addEventListener('click', function() {
+                const modal = new bootstrap.Modal(testModal);
+                modal.show();
+                
+                // 测试输入功能
+                setTimeout(() => {
+                    const testInput = document.getElementById('testInput');
+                    if (testInput) {
+                        testInput.focus();
+                        console.log('尝试聚焦输入框');
+                        
+                        // 测试输入
+                        testInput.value = '测试输入';
+                        console.log('设置输入值:', testInput.value);
+                    }
+                }, 300);
+            });
+            
+            testSubmitBtn.addEventListener('click', function() {
+                const testInput = document.getElementById('testInput');
+                const testTextarea = document.getElementById('testTextarea');
+                const testSelect = document.getElementById('testSelect');
+                
+                console.log('输入框值:', testInput.value);
+                console.log('文本域值:', testTextarea.value);
+                console.log('下拉框值:', testSelect.value);
+                
+                alert('输入框值: ' + testInput.value + '\n文本域值: ' + testTextarea.value + '\n下拉框值: ' + testSelect.value);
+            });
+        });
+    </script>
+</body>
+</html>

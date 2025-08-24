@@ -3,6 +3,10 @@ Backend Configuration
 """
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 class Config:
     """基础配置类"""
@@ -66,12 +70,6 @@ class Config:
     WTF_CSRF_ENABLED = True
     WTF_CSRF_SECRET_KEY = os.environ.get('WTF_CSRF_SECRET_KEY') or 'csrf-secret-key'
 
-    # 微信登录配置
-    WECHAT_APP_ID = os.environ.get('WECHAT_APP_ID')
-    WECHAT_APP_SECRET = os.environ.get('WECHAT_APP_SECRET')
-    WECHAT_REDIRECT_URI = os.environ.get('WECHAT_REDIRECT_URI', 'http://localhost:5001/api/auth/wechat/callback')
-    WECHAT_ENABLED = os.environ.get('WECHAT_ENABLED', 'false').lower() == 'true'
-
     # CORS Configuration
     CORS_ORIGINS = ['http://localhost:5001', 'http://127.0.0.1:5001', 'http://localhost:5002']
     CORS_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD']
@@ -108,9 +106,9 @@ class DevelopmentConfig(Config):
     DEBUG = True
     FLASK_ENV = 'development'
 
-    # 开发环境数据库 - 使用MySQL
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or \
-        'mysql+pymysql://coderwiki_user:coderwiki_password@localhost:3306/coderwiki'
+    # 开发环境数据库 - 使用SQLite
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+        'sqlite:///coderwiki.db'
 
     # 开发环境LLM配置
     LLM_MODEL = os.environ.get('DEV_LLM_MODEL', 'gpt-3.5-turbo')
@@ -123,7 +121,7 @@ class ProductionConfig(Config):
     DEBUG = False
     FLASK_ENV = 'production'
 
-    # 生产环境数据库
+    # 生产环境数据库 - 默认使用MySQL
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'mysql+pymysql://coderwiki_user:coderwiki_password@localhost:3306/coderwiki'
 
@@ -144,6 +142,21 @@ class TestingConfig(Config):
 
     # 测试环境日志
     LOG_LEVEL = 'DEBUG'
+
+
+class TestConfig(TestingConfig):
+    """集成测试专用配置"""
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    WTF_CSRF_ENABLED = False
+    
+    # 测试用的模拟凭证
+    CLAUDE_API_KEY = 'sk-test-key-for-testing'
+    CLAUDE_WORKSPACE_ID = 'test-workspace-id'
+    
+    # 禁用一些不需要的功能
+    PRESERVE_CONTEXT_ON_EXCEPTION = False
+    LOGIN_DISABLED = False
 
 # 配置映射
 config = {

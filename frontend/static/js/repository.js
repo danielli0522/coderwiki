@@ -18,6 +18,26 @@ class RepositoryManager {
 
     // 添加模态框修复方法 - 现在由RepositoryModalFix处理
     fixModalInteractions() {
+        // 使用全局模态框管理器进行统一管理
+        if (window.modalManager) {
+            console.log('使用ModalManager管理仓库模态框');
+            // 注册模态框，在需要时才会真正初始化
+            window.modalManager.registerModal('addRepositoryModal', {
+                onShown: () => {
+                    console.log('仓库模态框已显示');
+                    // 确保表单验证正常工作
+                    const form = document.getElementById('addRepositoryForm');
+                    if (form) {
+                        form.onsubmit = (e) => {
+                            e.preventDefault();
+                            this.addRepository();
+                        };
+                    }
+                }
+            });
+            return;
+        }
+
         // 检查是否有RepositoryModalFix可用
         if (window.RepositoryModalFix) {
             console.log('RepositoryModalFix已可用，跳过本地修复');
@@ -306,42 +326,31 @@ class RepositoryManager {
         resultSpan.innerHTML = '';
 
         try {
-            // 临时禁用API调用，使用模拟验证
-            // const response = await fetch('/api/repositories/validate-url', {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json'
-            //     },
-            //     body: JSON.stringify({ url: url })
-            // });
+            const response = await fetch('/api/repositories/validate-url', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ url: url })
+            });
 
-            // const data = await response.json();
+            const data = await response.json();
 
-            // if (data.success) {
-            //     if (data.valid) {
-            //         resultSpan.innerHTML = '<span class="text-success"><i class="fas fa-check-circle"></i> URL 有效且可访问</span>';
-            //         this.clearUrlError();
+            if (data.success) {
+                if (data.valid) {
+                    resultSpan.innerHTML = '<span class="text-success"><i class="fas fa-check-circle"></i> URL 有效且可访问</span>';
+                    this.clearUrlError();
 
-            //         // 自动提取仓库名称
-            //         if (!document.getElementById('repoName').value) {
-            //             const repoName = this.extractRepoName(url);
-            //             document.getElementById('repoName').value = repoName;
-            //         }
-            //     } else {
-            //         resultSpan.innerHTML = '<span class="text-warning"><i class="fas fa-exclamation-triangle"></i> URL 格式正确但无法访问</span>';
-            //     }
-            // } else {
-            //     this.showUrlError(data.message);
-            // }
-
-            // 临时模拟验证成功
-            resultSpan.innerHTML = '<span class="text-success"><i class="fas fa-check-circle"></i> URL 验证功能已禁用（开发模式）</span>';
-            this.clearUrlError();
-
-            // 自动提取仓库名称
-            if (!document.getElementById('repoName').value) {
-                const repoName = this.extractRepoName(url);
-                document.getElementById('repoName').value = repoName;
+                    // 自动提取仓库名称
+                    if (!document.getElementById('repoName').value) {
+                        const repoName = this.extractRepoName(url);
+                        document.getElementById('repoName').value = repoName;
+                    }
+                } else {
+                    resultSpan.innerHTML = '<span class="text-warning"><i class="fas fa-exclamation-triangle"></i> URL 格式正确但无法访问</span>';
+                }
+            } else {
+                this.showUrlError(data.message);
             }
 
         } catch (error) {
@@ -368,52 +377,40 @@ class RepositoryManager {
         addBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 添加中...';
 
         try {
-            // 临时禁用API调用
-            // const response = await fetch('/api/repositories', {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json'
-            //     },
-            //     body: JSON.stringify({
-            //         url: url,
-            //         name: name || undefined,
-            //         description: description || undefined
-            //     })
-            // });
+            const response = await fetch('/api/repositories', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    url: url,
+                    name: name || undefined,
+                    description: description || undefined
+                })
+            });
 
-            // const data = await response.json();
+            const data = await response.json();
 
-            // if (data.success) {
-            //     // 关闭模态框
-            //     const modal = bootstrap.Modal.getInstance(document.getElementById('addRepositoryModal'));
-            //     modal.hide();
+            if (data.success) {
+                // 关闭模态框
+                this.closeAddRepositoryModal();
 
-            //     // 重置表单
-            //     document.getElementById('addRepositoryForm').reset();
-            //     document.getElementById('validationResult').innerHTML = '';
+                // 重置表单
+                document.getElementById('addRepositoryForm').reset();
+                document.getElementById('validationResult').innerHTML = '';
 
-            //     // 重新加载仓库列表和统计数据
-            //     this.loadRepositories();
-            //     this.loadStatistics();
+                // 重新加载仓库列表和统计数据
+                this.loadRepositories();
+                this.loadStatistics();
 
-            //     this.showSuccess('仓库添加成功，正在克隆中...');
+                this.showSuccess('仓库添加成功，正在克隆中...');
 
-            //     // 开始轮询克隆状态
-            //     this.pollCloneStatus(data.repository.id);
+                // 开始轮询克隆状态
+                this.pollCloneStatus(data.repository.id);
 
-            // } else {
-            //     this.showUrlError(data.error);
-            // }
-
-            // 临时模拟成功
-            // 关闭模态框 - 使用安全的关闭方法
-            this.closeAddRepositoryModal();
-
-            // 重置表单
-            document.getElementById('addRepositoryForm').reset();
-            document.getElementById('validationResult').innerHTML = '';
-
-            this.showSuccess('仓库添加功能已禁用（开发模式）');
+            } else {
+                this.showUrlError(data.error);
+            }
 
         } catch (error) {
             console.error('Error adding repository:', error);
@@ -426,7 +423,7 @@ class RepositoryManager {
 
     // 安全的模态框关闭方法
     closeAddRepositoryModal() {
-        const modal = document.getElementById('addRepositoryModal');
+        const modal = this.findAddRepositoryModal();
         if (!modal) {
             console.warn('找不到添加仓库模态框');
             return;
@@ -463,6 +460,32 @@ class RepositoryManager {
             const backdrops = document.querySelectorAll('.modal-backdrop');
             backdrops.forEach(backdrop => backdrop.remove());
         }
+    }
+
+    // 查找添加仓库模态框的多种方法
+    findAddRepositoryModal() {
+        // 多种方式查找模态框
+        let modal = document.getElementById('addRepositoryModal');
+
+        if (!modal) {
+            // 尝试通过类名查找
+            const modals = document.querySelectorAll('.modal');
+            modal = Array.from(modals).find(m =>
+                m.id === 'addRepositoryModal' ||
+                m.querySelector('[data-bs-target="#addRepositoryModal"]') ||
+                m.querySelector('#addRepositoryForm')
+            );
+        }
+
+        if (!modal) {
+            // 尝试通过表单查找
+            const form = document.getElementById('addRepositoryForm');
+            if (form) {
+                modal = form.closest('.modal');
+            }
+        }
+
+        return modal;
     }
 
     async pollCloneStatus(repositoryId, maxAttempts = 30) {

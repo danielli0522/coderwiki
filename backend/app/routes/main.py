@@ -2,7 +2,7 @@
 Main routes for the application.
 """
 
-from flask import Blueprint, render_template, redirect, url_for, flash
+from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 
 main_bp = Blueprint('main', __name__)
@@ -91,6 +91,55 @@ def edit_repository(repository_id):
         flash('您没有权限编辑此仓库', 'danger')
         return redirect(url_for('main.repositories'))
     return render_template('repository/edit.html', repository=repository)
+
+@main_bp.route('/repositories/<int:repository_id>/update', methods=['POST'])
+@login_required
+def update_repository(repository_id):
+    """Update repository information."""
+    from app.models.repository import Repository
+    from app import db
+
+    repository = Repository.query.get_or_404(repository_id)
+    if repository.user_id != current_user.id:
+        flash('您没有权限编辑此仓库', 'danger')
+        return redirect(url_for('main.repositories'))
+
+    try:
+        # Get form data
+        name = request.form.get('name')
+        description = request.form.get('description')
+        url = request.form.get('url')
+        language = request.form.get('language')
+        branch = request.form.get('branch')
+        status = request.form.get('status')
+        visibility = request.form.get('visibility')
+        tags = request.form.get('tags')
+
+        # Validate required fields
+        if not name or not url:
+            flash('仓库名称和地址为必填项', 'danger')
+            return redirect(url_for('main.edit_repository', repository_id=repository_id))
+
+        # Update repository fields
+        repository.name = name
+        repository.description = description
+        repository.url = url
+        repository.language = language if language else None
+        repository.branch = branch if branch else 'main'
+        repository.status = status if status else 'active'
+        repository.visibility = visibility if visibility else 'public'
+        repository.tags = tags if tags else None
+
+        # Save changes
+        db.session.commit()
+
+        flash('仓库信息更新成功', 'success')
+        return redirect(url_for('main.repository_detail', repository_id=repository_id))
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f'更新失败: {str(e)}', 'danger')
+        return redirect(url_for('main.edit_repository', repository_id=repository_id))
 
 @main_bp.route('/tasks')
 @login_required
@@ -191,7 +240,7 @@ def document_viewer(document_id):
     # 获取文档对象用于模板渲染
     document = Document.query.get(document_id)
 
-    return render_template('document/viewer.html', document=document)
+    return render_template('document/viewer.html', document=document, document_data=document_data)
 
 @main_bp.route('/about')
 def about():

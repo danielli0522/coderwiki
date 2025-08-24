@@ -2,7 +2,16 @@
  * 统计信息组件
  * 负责统计数据获取、展示和图表渲染
  */
-class StatsComponent {
+
+// 使用立即执行函数表达式避免全局作用域污染
+(function() {
+    // 检查组件是否已注册
+    if (window.ComponentRegistry && window.ComponentRegistry.isRegistered('StatsComponent')) {
+        console.log('StatsComponent already registered, reusing existing component');
+        return;
+    }
+
+    class StatsComponent {
     constructor() {
         this.charts = {};
         this.cache = new Map();
@@ -31,7 +40,7 @@ class StatsComponent {
                 },
                 redirect: 'manual'
             });
-            
+
             if (response.ok) {
                 const data = await response.json();
                 this.isAuthenticated = data.logged_in || false;
@@ -74,7 +83,7 @@ class StatsComponent {
     async fetchStats(forceRefresh = false) {
         const cacheKey = 'dashboard-stats';
         const cached = this.cache.get(cacheKey);
-        
+
         if (!forceRefresh && cached && Date.now() - cached.timestamp < this.cacheExpiry) {
             return cached.data;
         }
@@ -82,15 +91,15 @@ class StatsComponent {
         const response = await fetch('/api/users/stats', {
             redirect: 'manual'
         });
-        
+
         if (response.status === 302 || response.status === 303) {
             throw new Error('需要登录');
         }
-        
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
         this.cache.set(cacheKey, { data, timestamp: Date.now() });
         return data;
@@ -116,19 +125,19 @@ class StatsComponent {
         const startValue = parseInt(element.textContent) || 0;
         const duration = 1000;
         const startTime = Date.now();
-        
+
         const animate = () => {
             const elapsed = Date.now() - startTime;
             const progress = Math.min(elapsed / duration, 1);
             const currentValue = Math.floor(startValue + (targetValue - startValue) * progress);
-            
+
             element.textContent = this.formatNumber(currentValue);
-            
+
             if (progress < 1) {
                 requestAnimationFrame(animate);
             }
         };
-        
+
         animate();
     }
 
@@ -234,11 +243,11 @@ class StatsComponent {
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         `;
-        
+
         const statsContainer = document.querySelector('.stats-container');
         if (statsContainer) {
             statsContainer.insertAdjacentHTML('afterbegin', alertHtml);
-            
+
             // 5秒后自动关闭
             setTimeout(() => {
                 const alert = statsContainer.querySelector('.alert');
@@ -258,7 +267,21 @@ class StatsComponent {
         });
         this.charts = {};
     }
-}
+    }
 
-// 导出组件
-window.StatsComponent = StatsComponent;
+    // 注册组件到注册表
+    if (window.ComponentRegistry) {
+        window.ComponentRegistry.register('StatsComponent', StatsComponent);
+    } else {
+        // 降级方案
+        window.StatsComponent = StatsComponent;
+    }
+
+    // 确保组件实例被创建
+    if (typeof window.statsComponent === 'undefined') {
+        window.statsComponent = new StatsComponent();
+        console.log('StatsComponent instance created');
+    } else {
+        console.log('StatsComponent instance already exists, reusing');
+    }
+})();

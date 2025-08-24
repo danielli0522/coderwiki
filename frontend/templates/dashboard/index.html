@@ -241,18 +241,7 @@ body {
 {% endblock %}
 
 {% block extra_js %}
-<!-- Load utility scripts first -->
-<script src="{{ url_for('static', filename='js/performance.js') }}"></script>
-<script src="{{ url_for('static', filename='js/components.js') }}"></script>
-<!-- Then load component scripts -->
-<script src="{{ url_for('static', filename='js/components/stats.js') }}"></script>
-<script src="{{ url_for('static', filename='js/components/repository_list.js') }}"></script>
-<script src="{{ url_for('static', filename='js/components/task_progress.js') }}"></script>
-<script src="{{ url_for('static', filename='js/components/recent_activity.js') }}"></script>
-<script src="{{ url_for('static', filename='js/components/system_status.js') }}"></script>
-<!-- Finally load main dashboard script -->
-<script src="{{ url_for('static', filename='js/api_client.js') }}"></script>
-<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<!-- Dashboard specific scripts will be loaded after components in base.html -->
 <script>
 // 确保dashboard页面全屏显示，隐藏任何侧边栏
 document.addEventListener('DOMContentLoaded', function() {

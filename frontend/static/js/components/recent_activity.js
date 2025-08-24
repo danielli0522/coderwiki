@@ -2,7 +2,17 @@
  * 最近活动组件
  * 负责活动时间轴的展示和数据获取
  */
-class RecentActivityComponent {
+
+// 使用组件注册表防止重复声明
+// 使用立即执行函数表达式避免全局作用域污染
+(function() {
+    // 检查组件是否已注册
+    if (window.ComponentRegistry && window.ComponentRegistry.isRegistered('RecentActivityComponent')) {
+        console.log('RecentActivityComponent already registered, reusing existing component');
+        return;
+    }
+
+    class RecentActivityComponent {
     constructor() {
         this.activities = [];
         this.filters = {
@@ -301,5 +311,19 @@ class RecentActivityComponent {
     }
 }
 
-// 导出组件
-window.RecentActivityComponent = RecentActivityComponent;
+    // 注册组件到注册表
+    if (window.ComponentRegistry) {
+        window.ComponentRegistry.register('RecentActivityComponent', RecentActivityComponent);
+    } else {
+        // 降级方案
+        window.RecentActivityComponent = RecentActivityComponent;
+    }
+
+    // 确保组件实例被创建
+    if (typeof window.recentActivityComponent === 'undefined') {
+        window.recentActivityComponent = new RecentActivityComponent();
+        console.log('RecentActivityComponent instance created');
+    } else {
+        console.log('RecentActivityComponent instance already exists, reusing');
+    }
+})();

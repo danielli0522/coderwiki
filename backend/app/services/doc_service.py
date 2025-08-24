@@ -143,6 +143,8 @@ class DocumentService:
                 'document_type': document.document_type,
                 'repository_id': document.repository_id,
                 'repository_name': document.repository.name if document.repository else None,
+                'file_path': document.file_path,
+                'repository_local_path': document.repository.local_path if document.repository else None,
                 'created_at': document.created_at.isoformat() if document.created_at else None,
                 'updated_at': document.updated_at.isoformat() if document.updated_at else None
             }

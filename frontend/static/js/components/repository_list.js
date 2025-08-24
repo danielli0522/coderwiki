@@ -1,8 +1,18 @@
 /**
  * 仓库列表组件
  * 负责仓库数据的获取、展示和操作
+ * 版本: 2.0 - 增强版
  */
-class RepositoryListComponent {
+
+// 使用立即执行函数表达式避免全局作用域污染
+(function() {
+    // 检查组件是否已注册
+    if (window.ComponentRegistry && window.ComponentRegistry.isRegistered('RepositoryListComponent')) {
+        console.log('RepositoryListComponent already registered, reusing existing component');
+        return;
+    }
+
+    class RepositoryListComponent {
     constructor() {
         this.repositories = [];
         this.currentPage = 1;
@@ -14,6 +24,12 @@ class RepositoryListComponent {
         this.selectedRepositories = new Set();
         this.bulkMode = false;
         this.isAuthenticated = false;
+        this.isLoading = false;
+        this.retryCount = 0;
+        this.maxRetries = 3;
+        this.retryDelay = 1000;
+        this.lastUpdateTime = null;
+        this.updateInterval = null;
         this.init();
     }
 
@@ -22,6 +38,7 @@ class RepositoryListComponent {
         if (this.isAuthenticated) {
             this.bindEvents();
             this.loadRepositories();
+            this.startAutoRefresh();
         } else {
             console.log('用户未登录，跳过仓库列表组件初始化');
         }
@@ -34,6 +51,7 @@ class RepositoryListComponent {
                 headers: {
                     'Content-Type': 'application/json'
                 },
+                credentials: 'include',
                 redirect: 'manual'
             });
 
@@ -119,6 +137,14 @@ class RepositoryListComponent {
             });
         }
 
+        // 刷新按钮
+        const refreshBtn = document.getElementById('refreshRepoBtn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => {
+                this.refreshRepositories();
+            });
+        }
+
         // 仓库操作按钮（事件委托）
         const container = document.getElementById('repositoryListContainer');
         if (container) {
@@ -144,10 +170,33 @@ class RepositoryListComponent {
                         this.editRepository(repoId);
                     } else if (e.target.closest('.delete-repo-btn')) {
                         this.deleteRepository(repoId);
+                    } else if (e.target.closest('.refresh-repo-btn')) {
+                        this.refreshSingleRepository(repoId);
                     }
                 }
             });
         }
+
+        // 键盘快捷键
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch (e.key) {
+                    case 'r':
+                        e.preventDefault();
+                        this.refreshRepositories();
+                        break;
+                    case 'f':
+                        e.preventDefault();
+                        const searchInput = document.getElementById('repoSearchInput');
+                        if (searchInput) searchInput.focus();
+                        break;
+                    case 'b':
+                        e.preventDefault();
+                        this.toggleBulkMode();
+                        break;
+                }
+            }
+        });
     }
 
     async loadRepositories() {
@@ -155,6 +204,14 @@ class RepositoryListComponent {
             console.log('用户未登录，跳过仓库数据加载');
             return;
         }
+
+        if (this.isLoading) {
+            console.log('正在加载中，跳过重复请求');
+            return;
+        }
+
+        this.isLoading = true;
+        this.showLoadingState();
 
         try {
             console.log('开始加载仓库列表...');
@@ -173,6 +230,7 @@ class RepositoryListComponent {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json'
                 },
+                credentials: 'include',
                 redirect: 'manual'
             });
 
@@ -191,14 +249,124 @@ class RepositoryListComponent {
 
             this.repositories = data.repositories || [];
             this.totalItems = data.total || 0;
+            this.lastUpdateTime = new Date();
+            this.retryCount = 0; // 重置重试计数
 
             console.log(`加载到 ${this.repositories.length} 个仓库`);
 
             this.renderRepositories();
             this.renderPagination();
+            this.updateLastUpdateTime();
+            this.hideLoadingState();
+
         } catch (error) {
             console.error('加载仓库列表失败:', error);
-            this.showError('加载仓库列表失败: ' + error.message);
+            this.hideLoadingState();
+
+            // 重试机制
+            if (this.retryCount < this.maxRetries) {
+                this.retryCount++;
+                console.log(`重试第 ${this.retryCount} 次...`);
+                setTimeout(() => {
+                    this.loadRepositories();
+                }, this.retryDelay * this.retryCount);
+            } else {
+                this.showError('加载仓库列表失败: ' + error.message);
+                this.showRetryButton();
+            }
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    showLoadingState() {
+        const container = document.getElementById('repositoryListContainer');
+        if (container) {
+            container.innerHTML = `
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">加载中...</span>
+                    </div>
+                    <p class="mt-3 text-muted">正在加载仓库列表...</p>
+                </div>
+            `;
+        }
+    }
+
+    hideLoadingState() {
+        // 加载状态会在 renderRepositories 中被清除
+    }
+
+    showRetryButton() {
+        const container = document.getElementById('repositoryListContainer');
+        if (container) {
+            container.innerHTML = `
+                <div class="text-center py-5">
+                    <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                    <h5>加载失败</h5>
+                    <p class="text-muted mb-3">无法加载仓库列表，请检查网络连接</p>
+                    <button class="btn btn-primary" onclick="repositoryListComponent.retryLoad()">
+                        <i class="fas fa-redo me-2"></i>重试
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+    retryLoad() {
+        this.retryCount = 0;
+        this.loadRepositories();
+    }
+
+    refreshRepositories() {
+        this.currentPage = 1;
+        this.loadRepositories();
+        this.showSuccess('仓库列表已刷新');
+    }
+
+    async refreshSingleRepository(repoId) {
+        try {
+            const response = await fetch(`/api/repositories/${repoId}/refresh`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                this.showSuccess('仓库信息已刷新');
+                this.loadRepositories(); // 重新加载列表
+            } else {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+        } catch (error) {
+            console.error('刷新仓库失败:', error);
+            this.showError('刷新仓库失败: ' + error.message);
+        }
+    }
+
+    startAutoRefresh() {
+        // 每5分钟自动刷新一次
+        this.updateInterval = setInterval(() => {
+            if (this.isAuthenticated && !this.isLoading) {
+                console.log('自动刷新仓库列表...');
+                this.loadRepositories();
+            }
+        }, 5 * 60 * 1000);
+    }
+
+    stopAutoRefresh() {
+        if (this.updateInterval) {
+            clearInterval(this.updateInterval);
+            this.updateInterval = null;
+        }
+    }
+
+    updateLastUpdateTime() {
+        const timeElement = document.getElementById('lastUpdateTime');
+        if (timeElement && this.lastUpdateTime) {
+            timeElement.textContent = `最后更新: ${this.lastUpdateTime.toLocaleTimeString()}`;
         }
     }
 
@@ -212,6 +380,17 @@ class RepositoryListComponent {
             container.innerHTML = '';
             if (emptyState) {
                 container.appendChild(emptyState.cloneNode(true));
+            } else {
+                container.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+                        <h5>暂无仓库</h5>
+                        <p class="text-muted mb-3">您还没有添加任何仓库</p>
+                        <button class="btn btn-primary" onclick="repositoryListComponent.showAddRepositoryModal()">
+                            <i class="fas fa-plus me-2"></i>添加第一个仓库
+                        </button>
+                    </div>
+                `;
             }
             return;
         }
@@ -291,6 +470,12 @@ class RepositoryListComponent {
             }
         }
 
+        // 添加刷新按钮
+        const refreshBtn = element.querySelector('.refresh-repo-btn');
+        if (refreshBtn) {
+            refreshBtn.title = '刷新仓库信息';
+        }
+
         return element;
     }
 
@@ -347,23 +532,19 @@ class RepositoryListComponent {
 
     async generateDocument(repoId) {
         try {
-            // 临时禁用API调用
-            // const response = await fetch(`/api/repositories/${repoId}/generate`, {
-            //     method: 'POST'
-            // });
+            const response = await fetch(`/api/repositories/${repoId}/generate`, {
+                method: 'POST'
+            });
 
-            // if (!response.ok) {
-            //     throw new Error(`HTTP error! status: ${response.status}`);
-            // }
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
 
-            // const data = await response.json();
-            // this.showSuccess('文档生成任务已创建');
+            const data = await response.json();
+            this.showSuccess('文档生成任务已创建');
 
             // 触发任务列表刷新
-            // window.dispatchEvent(new CustomEvent('task:refresh'));
-
-            // 临时显示成功消息
-            this.showSuccess('文档生成功能已禁用（开发模式）');
+            window.dispatchEvent(new CustomEvent('task:refresh'));
         } catch (error) {
             console.error('生成文档失败:', error);
             this.showError('生成文档失败');
@@ -608,7 +789,31 @@ class RepositoryListComponent {
             this.showError('批量删除失败: ' + error.message);
         }
     }
-}
 
-// 导出组件
-window.RepositoryListComponent = RepositoryListComponent;
+    // 清理资源
+    destroy() {
+        this.stopAutoRefresh();
+        // 移除事件监听器
+        const container = document.getElementById('repositoryListContainer');
+        if (container) {
+            container.replaceWith(container.cloneNode(true));
+        }
+    }
+    }
+
+    // 注册组件到注册表
+    if (window.ComponentRegistry) {
+        window.ComponentRegistry.register('RepositoryListComponent', RepositoryListComponent);
+    } else {
+        // 降级方案
+        window.RepositoryListComponent = RepositoryListComponent;
+    }
+
+    // 确保组件实例被创建
+    if (typeof window.repositoryListComponent === 'undefined') {
+        window.repositoryListComponent = new RepositoryListComponent();
+        console.log('RepositoryListComponent instance created');
+    } else {
+        console.log('RepositoryListComponent instance already exists, reusing');
+    }
+})();

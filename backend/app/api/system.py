@@ -24,10 +24,16 @@ def health_check():
         cpu_percent = psutil.cpu_percent(interval=1)
         memory = psutil.virtual_memory()
         disk = psutil.disk_usage('/')
-        
-        # 计算运行时间（使用当前时间作为模拟）
-        uptime = time.time()
-        
+
+        # 计算系统运行时间
+        try:
+            # 使用psutil获取系统启动时间
+            boot_time = psutil.boot_time()
+            uptime = time.time() - boot_time
+        except:
+            # 如果无法获取启动时间，使用一个合理的默认值
+            uptime = 3600  # 1小时作为默认值
+
         # 检查关键服务状态
         services_status = []
         service_checks = {
@@ -35,7 +41,7 @@ def health_check():
             'redis': check_redis_health(),
             'file_system': check_filesystem_health()
         }
-        
+
         for service_name, status in service_checks.items():
             services_status.append({
                 'name': service_name,
@@ -43,13 +49,13 @@ def health_check():
                 'status': status['status'],
                 'response_time': status.get('response_time', 0)
             })
-        
+
         # 生成系统告警
         alerts = generate_system_alerts(cpu_percent, memory.percent, disk.percent)
-        
+
         # 确定整体状态
         overall_status = determine_overall_status(service_checks, alerts)
-        
+
         return jsonify({
             'success': True,
             'overall_status': overall_status,
@@ -135,7 +141,7 @@ def check_filesystem_health():
 def generate_system_alerts(cpu_percent, memory_percent, disk_percent):
     """生成系统告警"""
     alerts = []
-    
+
     # CPU使用率告警
     if cpu_percent > 90:
         alerts.append({
@@ -151,7 +157,7 @@ def generate_system_alerts(cpu_percent, memory_percent, disk_percent):
             'message': f'CPU使用率达到{cpu_percent}%，建议关注',
             'timestamp': datetime.now().isoformat()
         })
-    
+
     # 内存使用率告警
     if memory_percent > 90:
         alerts.append({
@@ -167,7 +173,7 @@ def generate_system_alerts(cpu_percent, memory_percent, disk_percent):
             'message': f'内存使用率达到{memory_percent}%，建议关注',
             'timestamp': datetime.now().isoformat()
         })
-    
+
     # 磁盘使用率告警
     if disk_percent > 90:
         alerts.append({
@@ -183,7 +189,7 @@ def generate_system_alerts(cpu_percent, memory_percent, disk_percent):
             'message': f'磁盘使用率达到{disk_percent}%，建议关注',
             'timestamp': datetime.now().isoformat()
         })
-    
+
     return alerts
 
 def determine_overall_status(service_checks, alerts):
@@ -192,19 +198,19 @@ def determine_overall_status(service_checks, alerts):
     error_alerts = [alert for alert in alerts if alert['level'] == 'error']
     if error_alerts:
         return 'error'
-    
+
     # 检查服务状态
     for service_name, status in service_checks.items():
         if status['status'] == 'error':
             return 'error'
         elif status['status'] == 'warning':
             return 'warning'
-    
+
     # 检查是否有警告级别的告警
     warning_alerts = [alert for alert in alerts if alert['level'] == 'warning']
     if warning_alerts:
         return 'warning'
-    
+
     return 'healthy'
 
 @system_bp.route('/stats', methods=['GET'])

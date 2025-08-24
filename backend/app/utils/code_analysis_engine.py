@@ -30,7 +30,7 @@ class AnalysisConfig:
     timeout: int
     enable_cache: bool
     parallel_processing: bool
-    
+
 @dataclass
 class AnalysisResult:
     """分析结果"""
@@ -42,18 +42,18 @@ class AnalysisResult:
     metadata: Dict[str, Any]
     execution_time: float
     error_message: Optional[str] = None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """转换为字典"""
         return asdict(self)
 
 class CodeAnalysisEngine:
     """代码分析引擎主类"""
-    
+
     def __init__(self, config: Optional[AnalysisConfig] = None):
         """初始化分析引擎"""
         self.config = config or self._get_default_config()
-        
+
         # 初始化各个分析器
         self.structure_analyzer = StructureAnalyzer
         self.dependency_analyzer = DependencyAnalyzer
@@ -62,7 +62,7 @@ class CodeAnalysisEngine:
         self.security_scanner = SecurityScanner
         self.pattern_recognizer = ProjectPatternRecognizer
         self.repository_optimizer = LargeRepositoryOptimizer
-        
+
         # 分析器映射
         self.analyzers = {
             'structure': self._analyze_structure,
@@ -73,9 +73,9 @@ class CodeAnalysisEngine:
             'patterns': self._analyze_patterns,
             'quality': self._analyze_quality
         }
-        
+
         logger.info("Code analysis engine initialized")
-    
+
     def _get_default_config(self) -> AnalysisConfig:
         """获取默认配置"""
         return AnalysisConfig(
@@ -87,38 +87,38 @@ class CodeAnalysisEngine:
             enable_cache=True,
             parallel_processing=True
         )
-    
-    def analyze_repository(self, repository_path: str, 
+
+    def analyze_repository(self, repository_path: str,
                          analysis_types: Optional[List[str]] = None,
                          config: Optional[AnalysisConfig] = None) -> AnalysisResult:
         """分析整个代码仓库"""
         start_time = time.time()
         analysis_id = f"analysis_{int(time.time())}"
-        
+
         try:
             logger.info(f"Starting repository analysis: {repository_path}")
-            
+
             # 验证仓库路径
             if not os.path.exists(repository_path):
                 raise ValueError(f"Repository path does not exist: {repository_path}")
-            
+
             # 使用提供的配置或默认配置
             analysis_config = config or self.config
             analysis_types = analysis_types or analysis_config.analysis_types
-            
+
             # 验证分析类型
             valid_types = set(self.analyzers.keys())
             invalid_types = set(analysis_types) - valid_types
             if invalid_types:
                 raise ValueError(f"Invalid analysis types: {invalid_types}")
-            
+
             # 对于大型仓库，应用优化
             repo_size = self._get_repository_size(repository_path)
             if repo_size > analysis_config.max_file_size * 10:  # 如果仓库大小超过文件大小限制的10倍
                 logger.info(f"Large repository detected ({repo_size} bytes), applying optimizations")
                 optimizer = self.repository_optimizer(repository_path)
                 repository_path = optimizer.optimize_for_analysis()
-            
+
             # 执行分析
             results = {}
             metadata = {
@@ -127,7 +127,7 @@ class CodeAnalysisEngine:
                 'analysis_types': analysis_types,
                 'config_used': asdict(analysis_config)
             }
-            
+
             for analysis_type in analysis_types:
                 if analysis_type in self.analyzers:
                     logger.info(f"Running {analysis_type} analysis")
@@ -139,10 +139,10 @@ class CodeAnalysisEngine:
                         logger.error(f"Error in {analysis_type} analysis: {str(e)}")
                         results[analysis_type] = {'error': str(e)}
                         metadata[f'{analysis_type}_status'] = 'failed'
-            
+
             # 计算执行时间
             execution_time = time.time() - start_time
-            
+
             # 生成分析结果
             analysis_result = AnalysisResult(
                 success=True,
@@ -153,14 +153,14 @@ class CodeAnalysisEngine:
                 metadata=metadata,
                 execution_time=execution_time
             )
-            
+
             logger.info(f"Repository analysis completed successfully in {execution_time:.2f}s")
             return analysis_result
-            
+
         except Exception as e:
             execution_time = time.time() - start_time
             logger.error(f"Repository analysis failed: {str(e)}")
-            
+
             return AnalysisResult(
                 success=False,
                 analysis_id=analysis_id,
@@ -171,15 +171,15 @@ class CodeAnalysisEngine:
                 execution_time=execution_time,
                 error_message=str(e)
             )
-    
+
     def analyze_file(self, file_path: str, analysis_types: Optional[List[str]] = None) -> Dict[str, Any]:
         """分析单个文件"""
         if not os.path.exists(file_path):
             raise ValueError(f"File does not exist: {file_path}")
-        
+
         analysis_types = analysis_types or ['complexity', 'security']
         results = {}
-        
+
         for analysis_type in analysis_types:
             if analysis_type in self.analyzers:
                 try:
@@ -191,17 +191,17 @@ class CodeAnalysisEngine:
                         result = analyzer.scan_file(file_path)
                     else:
                         result = {'message': f'File-level analysis not supported for {analysis_type}'}
-                    
+
                     results[analysis_type] = result
                 except Exception as e:
                     results[analysis_type] = {'error': str(e)}
-        
+
         return results
-    
+
     def get_supported_analysis_types(self) -> List[str]:
         """获取支持的分析类型"""
         return list(self.analyzers.keys())
-    
+
     def get_analysis_capabilities(self) -> Dict[str, Any]:
         """获取分析能力描述"""
         return {
@@ -234,65 +234,65 @@ class CodeAnalysisEngine:
                 'capabilities': ['代码规范检查', '重复代码检测', '可维护性评估']
             }
         }
-    
+
     def validate_analysis_config(self, config: AnalysisConfig) -> List[str]:
         """验证分析配置"""
         errors = []
-        
+
         # 验证分析类型
         valid_types = set(self.analyzers.keys())
         invalid_types = set(config.analysis_types) - valid_types
         if invalid_types:
             errors.append(f"Invalid analysis types: {invalid_types}")
-        
+
         # 验证文件大小限制
         if config.max_file_size <= 0:
             errors.append("Max file size must be positive")
-        
+
         # 验证超时设置
         if config.timeout <= 0:
             errors.append("Timeout must be positive")
-        
+
         return errors
-    
+
     def _analyze_structure(self, repository_path: str, config: AnalysisConfig) -> Dict[str, Any]:
         """分析文件结构"""
         analyzer = self.structure_analyzer(repository_path)
-        return analyzer.analyze()
-    
+        return analyzer.analyze_structure()
+
     def _analyze_dependencies(self, repository_path: str, config: AnalysisConfig) -> Dict[str, Any]:
         """分析依赖关系"""
         analyzer = self.dependency_analyzer(repository_path)
-        return analyzer.analyze()
-    
+        return analyzer.analyze_dependencies()
+
     def _analyze_complexity(self, repository_path: str, config: AnalysisConfig) -> Dict[str, Any]:
         """分析代码复杂度"""
         analyzer = self.complexity_analyzer(repository_path)
-        return analyzer.analyze()
-    
+        return analyzer.analyze_complexity()
+
     def _analyze_tech_stack(self, repository_path: str, config: AnalysisConfig) -> Dict[str, Any]:
         """分析技术栈"""
         analyzer = self.tech_stack_analyzer(repository_path)
         return analyzer.analyze()
-    
+
     def _analyze_security(self, repository_path: str, config: AnalysisConfig) -> Dict[str, Any]:
         """分析安全性"""
         analyzer = self.security_scanner(repository_path)
         scan_result = analyzer.scan_repository()
         # 转换为字典格式以确保一致性
         return scan_result.to_dict() if hasattr(scan_result, 'to_dict') else scan_result.__dict__
-    
+
     def _analyze_patterns(self, repository_path: str, config: AnalysisConfig) -> Dict[str, Any]:
         """分析项目模式"""
         analyzer = self.pattern_recognizer(repository_path)
         return analyzer.analyze_patterns()
-    
+
     def _analyze_quality(self, repository_path: str, config: AnalysisConfig) -> Dict[str, Any]:
         """分析代码质量"""
         # 综合多个分析器的结果来评估代码质量
         complexity_result = self._analyze_complexity(repository_path, config)
         structure_result = self._analyze_structure(repository_path, config)
-        
+
         quality_metrics = {
             'complexity_score': complexity_result.get('overall_complexity', 0),
             'maintainability_index': self._calculate_maintainability(complexity_result),
@@ -301,12 +301,12 @@ class CodeAnalysisEngine:
             'test_coverage': self._calculate_test_coverage(structure_result),
             'overall_quality_score': 0
         }
-        
+
         # 计算总体质量分数
         quality_metrics['overall_quality_score'] = self._calculate_overall_quality(quality_metrics)
-        
+
         return quality_metrics
-    
+
     def _calculate_maintainability(self, complexity_result: Dict[str, Any]) -> float:
         """计算可维护性指数"""
         overall_complexity = complexity_result.get('overall_complexity', 0)
@@ -318,37 +318,37 @@ class CodeAnalysisEngine:
             return 55.0
         else:
             return 40.0
-    
+
     def _calculate_duplication(self, structure_result: Dict[str, Any]) -> float:
         """计算代码重复率（简化版本）"""
         # 这里可以集成更复杂的重复代码检测算法
         return 5.0  # 默认值
-    
+
     def _calculate_documentation_coverage(self, structure_result: Dict[str, Any]) -> float:
         """计算文档覆盖率"""
         file_stats = structure_result.get('file_statistics', {})
         total_files = file_stats.get('total_files', 0)
-        
+
         if total_files == 0:
             return 0.0
-        
+
         # 简化的文档覆盖率计算
-        documented_files = sum(1 for stats in file_stats.get('by_language', {}).values() 
+        documented_files = sum(1 for stats in file_stats.get('by_language', {}).values()
                             if isinstance(stats, dict) and stats.get('documented_files', 0))
-        
+
         return (documented_files / total_files) * 100 if total_files > 0 else 0.0
-    
+
     def _calculate_test_coverage(self, structure_result: Dict[str, Any]) -> float:
         """计算测试覆盖率"""
         file_stats = structure_result.get('file_statistics', {})
         test_files = file_stats.get('test_files', 0)
         total_files = file_stats.get('total_files', 0)
-        
+
         if total_files == 0:
             return 0.0
-        
+
         return (test_files / total_files) * 100
-    
+
     def _calculate_overall_quality(self, quality_metrics: Dict[str, Any]) -> float:
         """计算总体质量分数"""
         weights = {
@@ -358,7 +358,7 @@ class CodeAnalysisEngine:
             'documentation_coverage': 0.2,
             'test_coverage': 0.1
         }
-        
+
         # 将各指标标准化到0-100范围
         normalized_metrics = {
             'complexity_score': max(0, 100 - quality_metrics['complexity_score'] * 2),
@@ -367,14 +367,14 @@ class CodeAnalysisEngine:
             'documentation_coverage': quality_metrics['documentation_coverage'],
             'test_coverage': quality_metrics['test_coverage']
         }
-        
+
         overall_score = sum(
-            normalized_metrics[key] * weights[key] 
+            normalized_metrics[key] * weights[key]
             for key in weights.keys()
         )
-        
+
         return min(100, max(0, overall_score))
-    
+
     def _get_repository_size(self, repository_path: str) -> int:
         """获取仓库大小"""
         total_size = 0
@@ -386,7 +386,7 @@ class CodeAnalysisEngine:
                 except OSError:
                     continue
         return total_size
-    
+
     def _count_files(self, repository_path: str) -> int:
         """统计文件数量"""
         count = 0
@@ -395,12 +395,12 @@ class CodeAnalysisEngine:
             dirs[:] = [d for d in dirs if not d.startswith('.') and d not in ['node_modules', '__pycache__', '.git']]
             count += len(files)
         return count
-    
+
     def generate_summary_report(self, analysis_result: AnalysisResult) -> str:
         """生成分析摘要报告"""
         if not analysis_result.success:
             return f"Analysis failed: {analysis_result.error_message}"
-        
+
         report = []
         report.append("=" * 60)
         report.append("代码分析报告摘要")
@@ -410,48 +410,48 @@ class CodeAnalysisEngine:
         report.append(f"分析类型: {analysis_result.analysis_type}")
         report.append(f"执行时间: {analysis_result.execution_time:.2f}s")
         report.append("")
-        
+
         # 添加元数据
         metadata = analysis_result.metadata
         if 'repository_size' in metadata:
             size_mb = metadata['repository_size'] / (1024 * 1024)
             report.append(f"仓库大小: {size_mb:.2f} MB")
-        
+
         if 'file_count' in metadata:
             report.append(f"文件数量: {metadata['file_count']}")
-        
+
         report.append("")
-        
+
         # 添加各类型分析结果摘要
         for analysis_type, result in analysis_result.results.items():
             if isinstance(result, dict) and 'error' not in result:
                 report.append(f"=== {analysis_type.upper()} 分析结果 ===")
-                
+
                 if analysis_type == 'structure':
                     stats = result.get('file_statistics', {})
                     report.append(f"  总文件数: {stats.get('total_files', 0)}")
                     report.append(f"  主要语言: {list(stats.get('by_language', {}).keys())[:3]}")
-                
+
                 elif analysis_type == 'dependencies':
                     deps = result.get('dependencies', {})
                     report.append(f"  检测到 {len(deps)} 个依赖项")
-                
+
                 elif analysis_type == 'complexity':
                     report.append(f"  整体复杂度: {result.get('overall_complexity', 0)}")
-                
+
                 elif analysis_type == 'tech_stack':
                     languages = result.get('languages', [])
                     frameworks = result.get('frameworks', [])
                     report.append(f"  主要语言: {languages[:3] if languages else 'Unknown'}")
                     report.append(f"  主要框架: {frameworks[:3] if frameworks else 'None'}")
-                
+
                 elif analysis_type == 'security':
                     issues = result.get('security_issues', [])
                     report.append(f"  发现 {len(issues)} 个安全问题")
-                
+
                 elif analysis_type == 'quality':
                     report.append(f"  总体质量分数: {result.get('overall_quality_score', 0):.1f}/100")
-                
+
                 report.append("")
-        
+
         return "\n".join(report)

@@ -13,12 +13,19 @@ sys.path.insert(0, str(project_root))
 
 from app import create_app, db
 from app.models.user import User
-from config import DevelopmentConfig
+from config import ProductionConfig, DevelopmentConfig
 from werkzeug.security import generate_password_hash
+import os
 
 def create_default_users():
     """创建默认用户账户"""
-    app = create_app(DevelopmentConfig)
+    # 使用与run.py相同的配置逻辑
+    config_class = ProductionConfig
+    if os.environ.get('FLASK_ENV') == 'development':
+        config_class = DevelopmentConfig
+    
+    print(f"Creating users with {config_class.__name__}")
+    app = create_app(config_class)
 
     with app.app_context():
         # 检查是否已存在用户

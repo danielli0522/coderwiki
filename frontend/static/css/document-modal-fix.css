@@ -1,0 +1,113 @@
+/**
+ * 文档管理页面模态框修复样式
+ */
+
+/* 确保模态框输入框完全可交互 */
+#addDocumentModal input,
+#addDocumentModal textarea,
+#addDocumentModal select {
+    pointer-events: auto !important;
+    z-index: 100000 !important;
+    position: relative !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    background-color: #fff !important;
+    color: #495057 !important;
+    border: 1px solid #ced4da !important;
+    border-radius: 0.375rem !important;
+    padding: 0.375rem 0.75rem !important;
+    font-size: 1rem !important;
+    line-height: 1.5 !important;
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
+}
+
+/* 确保模态框按钮可点击 */
+#addDocumentModal button,
+#addDocumentModal .btn {
+    pointer-events: auto !important;
+    z-index: 100000 !important;
+    position: relative !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    cursor: pointer !important;
+}
+
+/* 确保模态框标签可点击 */
+#addDocumentModal label {
+    pointer-events: auto !important;
+    z-index: 100000 !important;
+    position: relative !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    cursor: pointer !important;
+}
+
+/* 确保模态框内容区域可交互 */
+#addDocumentModal .modal-content,
+#addDocumentModal .modal-body,
+#addDocumentModal .modal-header,
+#addDocumentModal .modal-footer {
+    pointer-events: auto !important;
+    z-index: 99999 !important;
+    position: relative !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* 确保模态框对话框可交互 */
+#addDocumentModal .modal-dialog {
+    pointer-events: auto !important;
+    z-index: 99999 !important;
+    position: relative !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* 确保模态框本身可交互 */
+#addDocumentModal {
+    pointer-events: auto !important;
+    z-index: 99999 !important;
+    position: relative !important;
+}
+
+/* 输入框聚焦状态 */
+#addDocumentModal input:focus,
+#addDocumentModal textarea:focus,
+#addDocumentModal select:focus {
+    outline: 2px solid #007bff !important;
+    outline-offset: 2px !important;
+    border-color: #007bff !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
+    z-index: 100001 !important;
+}
+
+/* 移除可能的禁用状态 */
+#addDocumentModal input:not([disabled]),
+#addDocumentModal textarea:not([disabled]),
+#addDocumentModal select:not([disabled]) {
+    disabled: false !important;
+    readonly: false !important;
+}
+
+/* 确保模态框背景正确显示 */
+#addDocumentModal .modal-backdrop {
+    z-index: 99998 !important;
+    pointer-events: auto !important;
+}
+
+/* 确保模态框在显示时正确堆叠 */
+#addDocumentModal.show {
+    z-index: 99999 !important;
+}
+
+/* 修复可能的层级问题 */
+#addDocumentModal.show .modal-dialog {
+    z-index: 100000 !important;
+}
+
+#addDocumentModal.show .modal-content {
+    z-index: 100001 !important;
+}

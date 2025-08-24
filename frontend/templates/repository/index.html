@@ -4,10 +4,50 @@
 
 {% block extra_css %}
 <link href="{{ url_for('static', filename='css/repository-modal-fixes.css') }}" rel="stylesheet">
+<style>
+/* 确保隐藏的模态框不会阻止导航点击 */
+.modal:not(.show) {
+    pointer-events: none !important;
+    z-index: -1 !important;
+}
+
+.modal.show {
+    pointer-events: auto !important;
+    z-index: 1050 !important;
+}
+</style>
 {% endblock %}
 
 {% block content %}
 <div class="container-fluid">
+    <!-- 紧急导航修复 - 临时解决方案 -->
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <div class="flex-grow-1">
+                <strong>导航临时修复:</strong> 如果顶部导航无响应，请使用下面的快捷导航按钮
+            </div>
+            <div class="btn-group me-3">
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="window.location.href='{{ url_for('main.dashboard') }}'">
+                    <i class="fas fa-tachometer-alt"></i> 仪表板
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.location.href='{{ url_for('main.documents') }}'">
+                    <i class="fas fa-file-alt"></i> 文档
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-info" onclick="window.location.href='{{ url_for('main.analysis') }}'">
+                    <i class="fas fa-chart-line"></i> 分析
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-success" onclick="window.location.href='{{ url_for('main.tasks') }}'">
+                    <i class="fas fa-tasks"></i> 任务
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-dark" onclick="window.location.href='{{ url_for('main.settings') }}'">
+                    <i class="fas fa-cog"></i> 设置
+                </button>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+
     <!-- 页面标题和操作按钮 -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -233,10 +273,82 @@
 {% include "repository/partials/delete_modal.html" %}
 {% endblock %}
 
+
 {% block extra_js %}
-<!-- 模态框修复脚本 - 必须在其他脚本之前加载 -->
-<script src="{{ url_for('static', filename='js/repository-modal-fix.js') }}"></script>
-<script src="{{ url_for('static', filename='js/disable-delete-modal.js') }}"></script>
-<script src="{{ url_for('static', filename='js/modal-close-fix.js') }}"></script>
-<script src="{{ url_for('static', filename='js/repository.js') }}"></script>
+<!-- 暂时禁用所有问题脚本直到完全修复导航问题 -->
+<!-- <script src="{{ url_for('static', filename='js/repository-modal-fix.js') }}"></script> -->
+<!-- <script src="{{ url_for('static', filename='js/disable-delete-modal.js') }}"></script> -->
+<!-- <script src="{{ url_for('static', filename='js/modal-close-fix.js') }}"></script> -->
+<!-- <script src="{{ url_for('static', filename='js/repository.js') }}"></script> -->
+<script>
+// 临时导航修复 - 强制JavaScript导航
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Repository page loaded - applying navigation fix');
+    
+    // 修复所有隐藏模态框的干扰
+    const allModals = document.querySelectorAll('.modal');
+    allModals.forEach(modal => {
+        if (!modal.classList.contains('show')) {
+            modal.style.display = 'none';
+            modal.style.pointerEvents = 'none';
+            modal.style.zIndex = '-1';
+        }
+    });
+    
+    // 强制导航链接使用JavaScript导航而不是默认点击
+    const navLinks = document.querySelectorAll('.navbar-nav .nav-link, .navbar-brand');
+    navLinks.forEach(link => {
+        if (link.href && link.href !== window.location.href) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('强制导航到:', this.href);
+                window.location.href = this.href;
+            }, true);
+        }
+    });
+    
+    // 强化紧急导航修复 - 使用多种事件类型和强制处理
+    setTimeout(function() {
+        const emergencyButtons = document.querySelectorAll('.btn-group button[onclick]');
+        console.log('Found emergency buttons:', emergencyButtons.length);
+        
+        emergencyButtons.forEach((button, index) => {
+            const originalOnclick = button.getAttribute('onclick');
+            console.log(`Button ${index} original onclick:`, originalOnclick);
+            
+            // 移除原有的onclick属性
+            button.removeAttribute('onclick');
+            
+            // 添加多种事件监听器，使用捕获阶段和最高优先级
+            ['click', 'mousedown', 'touchstart'].forEach(eventType => {
+                button.addEventListener(eventType, function(e) {
+                    console.log(`Emergency navigation triggered via ${eventType}:`, originalOnclick);
+                    
+                    // 阻止所有其他事件处理
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    
+                    // 立即执行导航
+                    eval(originalOnclick);
+                }, true); // 使用捕获阶段
+            });
+            
+            // 添加额外的安全层 - 直接监听鼠标和触摸事件
+            button.addEventListener('pointerdown', function(e) {
+                console.log('Emergency navigation via pointer event:', originalOnclick);
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                eval(originalOnclick);
+            }, true);
+        });
+        
+        console.log('Emergency navigation reinforcement applied');
+    }, 500);
+    
+    console.log('Navigation fix applied successfully');
+});
+</script>
 {% endblock %}

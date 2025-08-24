@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>组件加载测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>组件加载测试</h1>
+        <p>这个页面用于测试组件是否能够正确加载，避免重复声明错误。</p>
+
+        <div id="status-container">
+            <div class="status warning">正在检查组件加载状态...</div>
+        </div>
+
+        <div>
+            <button onclick="testComponentLoading()">测试组件加载</button>
+            <button onclick="checkComponentStatus()">检查组件状态</button>
+            <button onclick="clearStatus()">清除状态</button>
+        </div>
+
+        <div id="component-list">
+            <h3>组件列表：</h3>
+            <ul id="components">
+                <li>正在加载...</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // 模拟认证状态
+        window.isAuthenticated = true;
+
+        function addStatus(message, type = 'success') {
+            const container = document.getElementById('status-container');
+            const status = document.createElement('div');
+            status.className = `status ${type}`;
+            status.textContent = message;
+            container.appendChild(status);
+        }
+
+        function clearStatus() {
+            const container = document.getElementById('status-container');
+            container.innerHTML = '<div class="status warning">状态已清除</div>';
+        }
+
+        function testComponentLoading() {
+            addStatus('开始测试组件加载...', 'warning');
+
+            // 模拟加载组件脚本
+            const componentScripts = [
+                '/static/js/components.js',
+                '/static/js/performance.js',
+                '/static/js/components/stats.js',
+                '/static/js/components/repository_list.js',
+                '/static/js/components/task_progress.js',
+                '/static/js/components/recent_activity.js',
+                '/static/js/components/system_status.js'
+            ];
+
+            let loadedCount = 0;
+            const totalScripts = componentScripts.length;
+
+            componentScripts.forEach((src, index) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = () => {
+                    loadedCount++;
+                    addStatus(`✅ 成功加载: ${src}`, 'success');
+
+                    if (loadedCount === totalScripts) {
+                        addStatus('🎉 所有组件加载完成！', 'success');
+                        checkComponentStatus();
+                    }
+                };
+                script.onerror = () => {
+                    addStatus(`❌ 加载失败: ${src}`, 'error');
+                };
+                document.head.appendChild(script);
+            });
+        }
+
+        function checkComponentStatus() {
+            const components = [
+                'ComponentManager',
+                'PerformanceMonitor',
+                'StatsComponent',
+                'RepositoryListComponent',
+                'TaskProgressComponent',
+                'RecentActivityComponent',
+                'SystemStatusComponent',
+                'KeyboardNavigation',
+                'DragDropManager',
+                'StorageManager',
+                'AppInitializer'
+            ];
+
+            const componentList = document.getElementById('components');
+            componentList.innerHTML = '';
+
+            components.forEach(componentName => {
+                const li = document.createElement('li');
+                if (window[componentName]) {
+                    li.innerHTML = `✅ ${componentName} - 已加载`;
+                    li.style.color = 'green';
+                } else {
+                    li.innerHTML = `❌ ${componentName} - 未加载`;
+                    li.style.color = 'red';
+                }
+                componentList.appendChild(li);
+            });
+
+            const loadedCount = components.filter(name => window[name]).length;
+            addStatus(`组件状态检查完成: ${loadedCount}/${components.length} 个组件已加载`,
+                     loadedCount === components.length ? 'success' : 'warning');
+        }
+
+        // 页面加载完成后自动检查
+        document.addEventListener('DOMContentLoaded', function() {
+            addStatus('页面加载完成，准备测试组件', 'success');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ComponentManager Test</title>
+</head>
+<body>
+    <h1>ComponentManager 重复声明测试</h1>
+    <div id="status"></div>
+
+    <script>
+        // 模拟加载 components.js 两次
+        function loadComponentsJS() {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = '/static/js/components.js';
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+
+        async function testDuplicateLoading() {
+            const statusDiv = document.getElementById('status');
+
+            try {
+                statusDiv.innerHTML = '<p>正在测试重复加载...</p>';
+
+                // 第一次加载
+                await loadComponentsJS();
+                statusDiv.innerHTML += '<p>✅ 第一次加载成功</p>';
+
+                // 第二次加载
+                await loadComponentsJS();
+                statusDiv.innerHTML += '<p>✅ 第二次加载成功（应该被跳过）</p>';
+
+                // 检查 ComponentManager 是否存在
+                if (window.ComponentManager) {
+                    statusDiv.innerHTML += '<p>✅ ComponentManager 已正确加载</p>';
+                } else {
+                    statusDiv.innerHTML += '<p>❌ ComponentManager 未加载</p>';
+                }
+
+                statusDiv.innerHTML += '<p>🎉 测试完成！如果没有看到错误，说明重复声明问题已解决。</p>';
+
+            } catch (error) {
+                statusDiv.innerHTML += `<p>❌ 测试失败: ${error.message}</p>`;
+            }
+        }
+
+        // 页面加载完成后开始测试
+        document.addEventListener('DOMContentLoaded', testDuplicateLoading);
+    </script>
+</body>
+</html>

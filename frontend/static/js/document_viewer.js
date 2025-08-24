@@ -9,6 +9,8 @@ class DocumentViewer {
         this.documentId = options.documentId || null;
         this.initialVersion = options.initialVersion || '1.0';
         this.autoLoad = options.autoLoad || false;
+        this.filePath = options.filePath || '';
+        this.repositoryLocalPath = options.repositoryLocalPath || '';
         this.currentVersion = this.initialVersion;
         this.currentContent = '';
         this.currentToc = [];
@@ -26,6 +28,7 @@ class DocumentViewer {
         this.setupEventListeners();
         this.applyTheme();
         this.applyFontSize();
+        this.updateFilePathDisplay();
 
         if (this.autoLoad && this.documentId) {
             this.loadDocument();
@@ -98,7 +101,9 @@ class DocumentViewer {
 
         try {
             // Load document content
-            const contentResponse = await fetch(`/api/documents/${this.documentId}/content?version=${targetVersion}`);
+            const contentResponse = await fetch(`/api/documents/${this.documentId}/content?version=${targetVersion}`, {
+                credentials: 'include'
+            });
             if (!contentResponse.ok) {
                 throw new Error(`Failed to load document: ${contentResponse.status}`);
             }
@@ -107,7 +112,9 @@ class DocumentViewer {
             this.currentContent = contentData.content;
 
             // Load table of contents
-            const tocResponse = await fetch(`/api/documents/${this.documentId}/toc?version=${targetVersion}`);
+            const tocResponse = await fetch(`/api/documents/${this.documentId}/toc?version=${targetVersion}`, {
+                credentials: 'include'
+            });
             if (tocResponse.ok) {
                 const tocData = await tocResponse.json();
                 this.currentToc = tocData.toc || [];
@@ -289,6 +296,49 @@ class DocumentViewer {
             if (metadata.updated_at) {
                 document.getElementById('lastUpdated').textContent = new Date(metadata.updated_at).toLocaleString();
             }
+        }
+    }
+
+    updateFilePathDisplay() {
+        const filePathElement = document.getElementById('filePath');
+        if (!filePathElement) return;
+
+        let displayPath = '';
+
+        if (this.filePath) {
+            // If we have a specific file path, show it
+            displayPath = this.filePath;
+        } else if (this.repositoryLocalPath) {
+            // If we only have repository path, show that
+            displayPath = this.repositoryLocalPath;
+        } else {
+            // No path information available
+            displayPath = '路径信息不可用';
+        }
+
+        // Format the path for better display
+        if (displayPath && displayPath !== '路径信息不可用') {
+            // Truncate long paths and show the most relevant part
+            const maxLength = 50;
+            if (displayPath.length > maxLength) {
+                const parts = displayPath.split('/');
+                if (parts.length > 2) {
+                    // Show the last two parts of the path
+                    displayPath = '.../' + parts.slice(-2).join('/');
+                } else {
+                    displayPath = displayPath.substring(0, maxLength) + '...';
+                }
+            }
+
+            // Create a clickable element that shows full path on hover
+            filePathElement.innerHTML = `
+                <span title="${this.filePath || this.repositoryLocalPath || ''}"
+                      style="cursor: help; text-decoration: underline dotted;">
+                    ${displayPath}
+                </span>
+            `;
+        } else {
+            filePathElement.innerHTML = '<small class="text-muted">路径信息不可用</small>';
         }
     }
 

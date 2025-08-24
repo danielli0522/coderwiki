@@ -2,7 +2,17 @@
  * 系统状态组件
  * 负责系统监控和状态展示
  */
-class SystemStatusComponent {
+
+// 使用组件注册表防止重复声明
+// 使用立即执行函数表达式避免全局作用域污染
+(function() {
+    // 检查组件是否已注册
+    if (window.ComponentRegistry && window.ComponentRegistry.isRegistered('SystemStatusComponent')) {
+        console.log('SystemStatusComponent already registered, reusing existing component');
+        return;
+    }
+
+    class SystemStatusComponent {
     constructor() {
         this.systemData = {};
         this.refreshInterval = null;
@@ -336,5 +346,19 @@ class SystemStatusComponent {
     }
 }
 
-// 导出组件
-window.SystemStatusComponent = SystemStatusComponent;
+    // 注册组件到注册表
+    if (window.ComponentRegistry) {
+        window.ComponentRegistry.register('SystemStatusComponent', SystemStatusComponent);
+    } else {
+        // 降级方案
+        window.SystemStatusComponent = SystemStatusComponent;
+    }
+
+    // 确保组件实例被创建
+    if (typeof window.systemStatusComponent === 'undefined') {
+        window.systemStatusComponent = new SystemStatusComponent();
+        console.log('SystemStatusComponent instance created');
+    } else {
+        console.log('SystemStatusComponent instance already exists, reusing');
+    }
+})();

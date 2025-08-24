@@ -17,18 +17,18 @@
             </button>
         </div>
     </div>
-    
+
     <!-- Search in TOC -->
     <div class="toc-search">
         <div class="input-group">
-            <input type="text" class="form-control form-control-sm" id="tocSearchInput" 
+            <input type="text" class="form-control form-control-sm" id="tocSearchInput"
                    placeholder="搜索目录..." onkeyup="navigationSidebar.searchToc(this.value)">
             <button class="btn btn-outline-secondary btn-sm" type="button" onclick="navigationSidebar.clearTocSearch()">
                 <i class="fas fa-times"></i>
             </button>
         </div>
     </div>
-    
+
     <!-- Table of Contents -->
     <div class="table-of-contents" id="tableOfContents">
         <!-- TOC items will be dynamically generated here -->
@@ -39,7 +39,7 @@
             <span>正在生成目录...</span>
         </div>
     </div>
-    
+
     <!-- Document Navigation -->
     <div class="document-navigation">
         <div class="nav-section">
@@ -59,7 +59,7 @@
                 </button>
             </div>
         </div>
-        
+
         <!-- Reading Progress -->
         <div class="nav-section">
             <h6>阅读进度</h6>
@@ -72,7 +72,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Bookmarks -->
         <div class="nav-section">
             <div class="section-header">
@@ -88,7 +88,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Document Info -->
         <div class="nav-section">
             <h6>文档信息</h6>
@@ -111,8 +111,21 @@
                 </div>
             </div>
         </div>
+
+        <!-- Document Details -->
+        <div class="nav-section">
+            <h6>文档详情</h6>
+            <div class="document-details">
+                <div class="detail-item">
+                    <span class="detail-label">本地路径:</span>
+                    <div class="detail-value" id="filePath">
+                        <small class="text-muted">加载中...</small>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    
+
     <!-- Mobile Footer -->
     <div class="mobile-footer d-md-none">
         <div class="mobile-nav-buttons">

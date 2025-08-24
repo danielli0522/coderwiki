@@ -1,0 +1,174 @@
+team:
+  id: architecture-docs-generation-team
+  name: 架构文档生成团队
+  description: 专门为代码仓库生成完整技术架构文档的AI代理团队
+  version: "1.0.0"
+  
+  agents:
+    - id: architecture-doc-generator
+      name: "架构文档生成专家 (Dr. Chen Wei)"
+      role: "AI驱动的架构设计文档生成专家"
+      capabilities:
+        - "基于代码仓库生成标准化技术文档"
+        - "创建架构五视图分析"
+        - "识别复杂业务流程并深度分析"
+        - "预测系统问题并提供解决方案"
+        - "生成SRE应急响应手册"
+      primary_tasks:
+        - "generate-architecture-documentation-sequence"
+        - "get-project-info"
+        - "generate-technical-overview"
+        - "generate-flow-analysis"
+        - "generate-problem-diagnosis"
+      specialization: "综合性架构文档生成，按序列化流程完成三个核心文档"
+      interaction_style: "交互式确认，逐步推进"
+      
+    - id: code-analyst
+      name: "代码分析专家 (Alex)"
+      role: "深度代码分析与架构侦探"
+      capabilities:
+        - "深度代码库扫描和分析"
+        - "技术栈识别和依赖映射"
+        - "架构模式识别"
+        - "复杂流程发现和分类"
+        - "证据驱动的分析结果"
+      primary_tasks:
+        - "scan-codebase"
+        - "identify-tech-stack"
+        - "map-architecture-views"
+        - "identify-complex-flows"
+      specialization: "为架构文档生成提供基础代码分析数据"
+      interaction_style: "系统化分析，提供详细证据"
+
+  coordination:
+    workflow_sequence:
+      - phase: "项目信息收集"
+        agent: architecture-doc-generator
+        task: get-project-info
+        output: "project_metadata.json"
+        description: "收集项目名称和基本信息，确认文档生成需求"
+        
+      - phase: "代码基础分析"
+        agent: code-analyst
+        task: scan-codebase
+        output: "codebase_analysis_report.md"
+        dependencies: ["project_metadata.json"]
+        description: "深度扫描代码库，识别技术栈和架构模式"
+        
+      - phase: "技术总览文档生成"
+        agent: architecture-doc-generator
+        task: generate-technical-overview
+        output: "{{project_name}}-Technical-Overview.md"
+        dependencies: ["codebase_analysis_report.md"]
+        description: "生成项目技术总览，包含架构五视图和复杂流程识别"
+        user_confirmation_required: true
+        
+      - phase: "复杂流程深度分析"
+        agent: architecture-doc-generator
+        task: generate-flow-analysis
+        output: "{{project_name}}-Complex-Flow-Analysis.md"
+        dependencies: ["{{project_name}}-Technical-Overview.md"]
+        description: "针对高/中重要性流程生成详细分析，包含时序图和配置分析"
+        user_confirmation_required: true
+        
+      - phase: "问题诊断方案生成"
+        agent: architecture-doc-generator
+        task: generate-problem-diagnosis
+        output: "{{project_name}}-Problem-Diagnosis-Solution.md"
+        dependencies: ["{{project_name}}-Complex-Flow-Analysis.md"]
+        description: "基于流程分析生成SRE级别的问题诊断和解决方案"
+        user_confirmation_required: true
+
+  quality_standards:
+    analysis_depth: "comprehensive"
+    evidence_driven: true
+    interactive_validation: true
+    documentation_completeness: "full_sequence"
+    mermaid_diagram_validation: true
+    chinese_content_preservation: true
+    user_confirmation_mandatory: true
+    
+  output_requirements:
+    document_count: 3
+    naming_convention: "{{project_name}}-{{document_type}}.md"
+    language: "中文为主，英文技术术语保留"
+    format: "markdown_with_mermaid"
+    diagram_count_minimum: 8
+    flow_analysis_minimum: 10
+    problem_solution_pairs_minimum: 30
+    
+  success_criteria:
+    - 完成全部三个文档的生成
+    - 每个文档都通过用户确认
+    - 所有Mermaid图表语法正确且可渲染
+    - 识别的复杂流程数量满足要求
+    - 问题诊断表格结构完整
+    - 分析结论都有代码证据支撑
+    - 整个流程在90分钟内完成
+    
+  interaction_protocol:
+    - 必须按照三个文档的固定顺序执行
+    - 每个文档生成后必须等待用户确认
+    - 用户可以要求修改已生成的文档
+    - 如果用户取消，需保存已完成的工作
+    - 提供进度反馈和预计完成时间
+    
+  error_handling:
+    - 代码访问权限问题：提供手动信息输入选项
+    - Mermaid语法错误：自动修复或降级为文字描述  
+    - 用户反馈不准确：重新分析并更新文档
+    - 流程中断：保存已完成工作，支持恢复
+    
+  monitoring_metrics:
+    - 文档生成成功率
+    - 用户确认通过率
+    - 每个阶段的平均耗时
+    - 用户反馈的准确性评分
+    - Mermaid图表渲染成功率
+    
+  templates_used:
+    - technical-overview-tmpl.yaml
+    - complex-flow-analysis-tmpl.yaml
+    - problem-diagnosis-tmpl.yaml
+    - architecture-patterns-tmpl.yaml
+    
+  dependencies:
+    external_tools:
+      - mermaid_validator: "验证图表语法"
+      - markdown_formatter: "格式化文档输出"  
+      - code_scanner: "扫描代码库结构"
+    
+    internal_resources:
+      - bmad-kb.md: "BMAD方法论知识库"
+      - common-frameworks.md: "常见技术框架模式"
+      - architecture-patterns.md: "架构模式库"
+      
+  configuration:
+    max_execution_time: "90 minutes"
+    max_document_size: "50 MB per document"
+    max_diagram_count: "50 per document"
+    supported_languages: ["JavaScript", "Python", "Java", "Go", "TypeScript", "C#", "PHP", "Ruby"]
+    
+  team_lead: architecture-doc-generator
+  
+  usage_scenarios:
+    - 新项目架构文档生成
+    - 现有项目文档补全
+    - 代码库交接文档创建
+    - 系统重构前的现状分析
+    - 技术债务评估文档
+    - 新团队成员onboarding材料
+    
+  best_practices:
+    - 在生成文档前确保代码库是最新版本
+    - 准备好项目相关的README和配置文件
+    - 确保有足够的时间进行交互式确认
+    - 建议在相对稳定的代码版本上进行分析
+    - 生成后及时将文档加入版本控制
+    
+  limitations:
+    - 分析质量依赖于代码质量和注释完整性
+    - 无法分析加密或混淆的代码
+    - 对于微服务架构需要访问所有相关代码库
+    - 生成的问题预测基于静态分析，需要运行时验证
+    - 中文术语翻译可能需要人工调整

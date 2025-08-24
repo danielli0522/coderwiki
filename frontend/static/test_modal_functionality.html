@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模态框功能测试 - CoderWiki</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .test-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .test-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .test-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>模态框功能测试</h1>
+        <p class="text-muted">测试新建文档、新建仓库、新建分析功能的模态框</p>
+
+        <!-- 测试按钮区域 -->
+        <div class="test-section">
+            <h3>功能测试按钮</h3>
+            <div class="row">
+                <div class="col-md-4">
+                    <button class="btn btn-primary w-100" id="testNewDocumentBtn">
+                        <i class="fas fa-file-plus"></i> 测试新建文档
+                    </button>
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-success w-100" id="testNewRepositoryBtn">
+                        <i class="fas fa-folder-plus"></i> 测试新建仓库
+                    </button>
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-info w-100" id="testNewAnalysisBtn">
+                        <i class="fas fa-chart-line"></i> 测试新建分析
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 测试结果区域 -->
+        <div class="test-section">
+            <h3>测试结果</h3>
+            <div id="testResults"></div>
+        </div>
+
+        <!-- 功能状态区域 -->
+        <div class="test-section">
+            <h3>功能状态</h3>
+            <div id="functionStatus"></div>
+        </div>
+    </div>
+
+    <!-- 新建文档模态框 -->
+    <div class="modal fade" id="addDocumentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">新建文档</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addDocumentForm">
+                        <div class="mb-3">
+                            <label for="documentName" class="form-label">文档名称</label>
+                            <input type="text" class="form-control" id="documentName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="repositorySelect" class="form-label">选择仓库</label>
+                            <select class="form-select" id="repositorySelect" required>
+                                <option value="">请选择仓库</option>
+                                <option value="1">测试仓库 1</option>
+                                <option value="2">测试仓库 2</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="documentType" class="form-label">文档类型</label>
+                            <select class="form-select" id="documentType" required>
+                                <option value="readme">README文档</option>
+                                <option value="api">API文档</option>
+                                <option value="architecture">架构文档</option>
+                                <option value="deployment">部署文档</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="documentDescription" class="form-label">描述</label>
+                            <textarea class="form-control" id="documentDescription" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="createDocumentBtn">创建文档</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新建仓库模态框 -->
+    <div class="modal fade" id="addRepositoryModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">添加仓库</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addRepositoryForm">
+                        <div class="mb-3">
+                            <label for="repoUrl" class="form-label">仓库 URL *</label>
+                            <input type="url" class="form-control" id="repoUrl" placeholder="https://github.com/username/repository" required>
+                            <div class="form-text">支持 GitHub 仓库或 Git 仓库 URL</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="repoName" class="form-label">仓库名称</label>
+                            <input type="text" class="form-control" id="repoName" placeholder="留空自动从 URL 提取">
+                            <div class="form-text">如果不填写，将自动从 URL 中提取</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="repoDescription" class="form-label">描述</label>
+                            <textarea class="form-control" id="repoDescription" rows="3" placeholder="仓库描述（可选）"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="addRepoBtn">
+                        <i class="fas fa-plus"></i> 添加仓库
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新建分析模态框 -->
+    <div class="modal fade" id="newAnalysisModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">新建代码分析</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="newAnalysisForm">
+                        <div class="mb-3">
+                            <label for="analysisRepo" class="form-label">选择仓库</label>
+                            <select class="form-select" id="analysisRepo" required>
+                                <option value="">请选择仓库</option>
+                                <option value="1">测试仓库 1</option>
+                                <option value="2">测试仓库 2</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">分析类型</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="modalStructureAnalysis" checked>
+                                <label class="form-check-label" for="modalStructureAnalysis">结构分析</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="modalComplexityAnalysis" checked>
+                                <label class="form-check-label" for="modalComplexityAnalysis">复杂度分析</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="modalQualityAnalysis">
+                                <label class="form-check-label" for="modalQualityAnalysis">质量分析</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="modalStartAnalysisBtn">开始分析</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- 测试脚本 -->
+    <script>
+        class ModalTest {
+            constructor() {
+                this.testResults = [];
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.runInitialTests();
+            }
+
+            bindEvents() {
+                // 测试新建文档
+                document.getElementById('testNewDocumentBtn').addEventListener('click', () => {
+                    this.testNewDocumentModal();
+                });
+
+                // 测试新建仓库
+                document.getElementById('testNewRepositoryBtn').addEventListener('click', () => {
+                    this.testNewRepositoryModal();
+                });
+
+                // 测试新建分析
+                document.getElementById('testNewAnalysisBtn').addEventListener('click', () => {
+                    this.testNewAnalysisModal();
+                });
+
+                // 绑定模态框事件
+                this.bindModalEvents();
+            }
+
+            bindModalEvents() {
+                // 监听模态框显示事件
+                document.addEventListener('shown.bs.modal', (e) => {
+                    this.logTestResult('模态框显示', `模态框 ${e.target.id} 已显示`, 'success');
+                    this.testModalInteractions(e.target);
+                });
+
+                // 监听模态框隐藏事件
+                document.addEventListener('hidden.bs.modal', (e) => {
+                    this.logTestResult('模态框隐藏', `模态框 ${e.target.id} 已隐藏`, 'success');
+                });
+            }
+
+            testNewDocumentModal() {
+                this.logTestResult('测试开始', '开始测试新建文档模态框', 'warning');
+
+                try {
+                    const modal = new bootstrap.Modal(document.getElementById('addDocumentModal'));
+                    modal.show();
+
+                    // 测试表单交互
+                    setTimeout(() => {
+                        const inputs = document.querySelectorAll('#addDocumentModal input, #addDocumentModal select, #addDocumentModal textarea');
+                        inputs.forEach(input => {
+                            if (input.disabled) {
+                                this.logTestResult('输入框状态', `输入框 ${input.id} 被禁用`, 'error');
+                            } else {
+                                this.logTestResult('输入框状态', `输入框 ${input.id} 正常工作`, 'success');
+                            }
+                        });
+                    }, 500);
+                } catch (error) {
+                    this.logTestResult('模态框错误', `新建文档模态框错误: ${error.message}`, 'error');
+                }
+            }
+
+            testNewRepositoryModal() {
+                this.logTestResult('测试开始', '开始测试新建仓库模态框', 'warning');
+
+                try {
+                    const modal = new bootstrap.Modal(document.getElementById('addRepositoryModal'));
+                    modal.show();
+
+                    // 测试表单交互
+                    setTimeout(() => {
+                        const inputs = document.querySelectorAll('#addRepositoryModal input, #addRepositoryModal textarea');
+                        inputs.forEach(input => {
+                            if (input.disabled) {
+                                this.logTestResult('输入框状态', `输入框 ${input.id} 被禁用`, 'error');
+                            } else {
+                                this.logTestResult('输入框状态', `输入框 ${input.id} 正常工作`, 'success');
+                            }
+                        });
+                    }, 500);
+                } catch (error) {
+                    this.logTestResult('模态框错误', `新建仓库模态框错误: ${error.message}`, 'error');
+                }
+            }
+
+            testNewAnalysisModal() {
+                this.logTestResult('测试开始', '开始测试新建分析模态框', 'warning');
+
+                try {
+                    const modal = new bootstrap.Modal(document.getElementById('newAnalysisModal'));
+                    modal.show();
+
+                    // 测试表单交互
+                    setTimeout(() => {
+                        const inputs = document.querySelectorAll('#newAnalysisModal input, #newAnalysisModal select');
+                        inputs.forEach(input => {
+                            if (input.disabled) {
+                                this.logTestResult('输入框状态', `输入框 ${input.id} 被禁用`, 'error');
+                            } else {
+                                this.logTestResult('输入框状态', `输入框 ${input.id} 正常工作`, 'success');
+                            }
+                        });
+                    }, 500);
+                } catch (error) {
+                    this.logTestResult('模态框错误', `新建分析模态框错误: ${error.message}`, 'error');
+                }
+            }
+
+            testModalInteractions(modalElement) {
+                // 测试模态框交互
+                const inputs = modalElement.querySelectorAll('input, textarea, select');
+                let interactiveCount = 0;
+
+                inputs.forEach(input => {
+                    if (!input.disabled && input.style.pointerEvents !== 'none') {
+                        interactiveCount++;
+                    }
+                });
+
+                this.logTestResult('交互测试', `模态框中有 ${interactiveCount}/${inputs.length} 个可交互元素`,
+                    interactiveCount === inputs.length ? 'success' : 'warning');
+            }
+
+            runInitialTests() {
+                // 检查模态框元素是否存在
+                const modals = ['addDocumentModal', 'addRepositoryModal', 'newAnalysisModal'];
+                modals.forEach(modalId => {
+                    const modal = document.getElementById(modalId);
+                    if (modal) {
+                        this.logTestResult('元素检查', `模态框 ${modalId} 存在`, 'success');
+                    } else {
+                        this.logTestResult('元素检查', `模态框 ${modalId} 不存在`, 'error');
+                    }
+                });
+
+                // 检查Bootstrap是否加载
+                if (window.bootstrap && window.bootstrap.Modal) {
+                    this.logTestResult('Bootstrap检查', 'Bootstrap Modal 已加载', 'success');
+                } else {
+                    this.logTestResult('Bootstrap检查', 'Bootstrap Modal 未加载', 'error');
+                }
+            }
+
+            logTestResult(test, message, type) {
+                const timestamp = new Date().toLocaleTimeString();
+                const resultDiv = document.createElement('div');
+                resultDiv.className = `test-result test-${type}`;
+                resultDiv.innerHTML = `
+                    <strong>[${timestamp}] ${test}:</strong> ${message}
+                `;
+
+                document.getElementById('testResults').appendChild(resultDiv);
+
+                // 保存测试结果
+                this.testResults.push({
+                    timestamp,
+                    test,
+                    message,
+                    type
+                });
+
+                // 更新功能状态
+                this.updateFunctionStatus();
+            }
+
+            updateFunctionStatus() {
+                const statusDiv = document.getElementById('functionStatus');
+                const successCount = this.testResults.filter(r => r.type === 'success').length;
+                const errorCount = this.testResults.filter(r => r.type === 'error').length;
+                const warningCount = this.testResults.filter(r => r.type === 'warning').length;
+
+                statusDiv.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card text-white bg-success">
+                                <div class="card-body text-center">
+                                    <h5>${successCount}</h5>
+                                    <small>成功</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-white bg-warning">
+                                <div class="card-body text-center">
+                                    <h5>${warningCount}</h5>
+                                    <small>警告</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-white bg-danger">
+                                <div class="card-body text-center">
+                                    <h5>${errorCount}</h5>
+                                    <small>错误</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-white bg-info">
+                                <div class="card-body text-center">
+                                    <h5>${this.testResults.length}</h5>
+                                    <small>总计</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // 页面加载完成后初始化测试
+        document.addEventListener('DOMContentLoaded', () => {
+            window.modalTest = new ModalTest();
+        });
+    </script>
+</body>
+</html>

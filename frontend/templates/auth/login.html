@@ -2,6 +2,8 @@
 
 {% block title %}登录 - CoderWiki{% endblock %}
 
+
+
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-6 col-lg-5">
@@ -47,11 +49,11 @@
                         </label>
                     </div>
 
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary" id="loginBtn">
-                            <i class="fas fa-sign-in-alt"></i> 登录
-                        </button>
-                    </div>
+                                    <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary" id="loginBtn">
+                        <i class="fas fa-sign-in-alt"></i> 登录
+                    </button>
+                </div>
                 </form>
 
                 <hr>
@@ -82,6 +84,9 @@
 {% endblock %}
 
 {% block extra_js %}
+<!-- QR Code Library -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+
 <!-- Login Modal Fix -->
 <script src="{{ url_for('static', filename='js/login-modal-fix.js') }}"></script>
 <script>
@@ -324,7 +329,7 @@ function validateField(field, isValid, message) {
     }
 
     const feedbackElement = field.parentElement.nextElementSibling;
-    
+
     if (isValid) {
         field.classList.add('is-valid');
         field.classList.remove('is-invalid');
@@ -451,20 +456,20 @@ if (document.readyState === 'loading') {
 // 强制禁用忘记密码模态框
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🔒 强制禁用忘记密码模态框');
-    
+
     // 移除忘记密码链接
     const forgotPasswordLink = document.getElementById('forgotPasswordLink');
     if (forgotPasswordLink) {
         forgotPasswordLink.style.display = 'none';
         forgotPasswordLink.remove();
     }
-    
+
     // 移除忘记密码模态框
     const forgotPasswordModal = document.getElementById('forgotPasswordModal');
     if (forgotPasswordModal) {
         forgotPasswordModal.remove();
     }
-    
+
     // 阻止任何可能的模态框显示
     const originalShow = bootstrap.Modal.prototype.show;
     bootstrap.Modal.prototype.show = function() {
@@ -474,7 +479,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         return originalShow.call(this);
     };
-    
+
     console.log('✅ 忘记密码模态框已强制禁用');
 });
 </script>

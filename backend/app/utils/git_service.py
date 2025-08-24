@@ -144,13 +144,11 @@ class GitService:
             )
             branch = result.stdout.strip() if result.returncode == 0 else 'main'
 
-            # Get repository size and file count
-            file_count = 0
-            repo_size = 0
-            for f in local_path.rglob('*'):
-                if f.is_file():
-                    file_count += 1
-                    repo_size += f.stat().st_size
+            # Get repository size
+            repo_size = sum(f.stat().st_size for f in local_path.rglob('*') if f.is_file())
+
+            # Get file count
+            file_count = len(list(local_path.rglob('*')))
 
             # Get repository metadata
             metadata = self._get_repository_metadata(local_path)

@@ -1,7 +1,11 @@
 // UI组件JavaScript功能 - 性能优化
 
 // 性能优化 - 使用 requestAnimationFrame 和防抖
-const ComponentManager = {
+// Prevent duplicate declaration
+if (typeof ComponentManager !== 'undefined') {
+    console.warn('ComponentManager already declared, skipping...');
+} else {
+    const ComponentManager = {
     // 性能优化 - 缓存DOM元素
     cache: {},
 
@@ -680,74 +684,14 @@ const ComponentManager = {
     }
 };
 
-// 性能监控
-const ComponentPerformanceMonitor = {
-    metrics: {},
-
-    init: function() {
-        this.measurePageLoad();
-        this.measureInteraction();
-        this.setupPerformanceObserver();
-    },
-
-    measurePageLoad: function() {
-        window.addEventListener('load', function() {
-            const navigation = performance.getEntriesByType('navigation')[0];
-            this.metrics.pageLoad = {
-                domComplete: navigation.domComplete,
-                loadEventEnd: navigation.loadEventEnd,
-                firstPaint: performance.getEntriesByType('paint')[0]?.startTime,
-                firstContentfulPaint: performance.getEntriesByType('paint')[1]?.startTime
-            };
-
-            console.log('页面加载性能:', this.metrics.pageLoad);
-        }.bind(this));
-    },
-
-    measureInteraction: function() {
-        document.addEventListener('click', function(e) {
-            const startTime = performance.now();
-
-            setTimeout(() => {
-                const endTime = performance.now();
-                const interactionTime = endTime - startTime;
-
-                if (!this.metrics.interactions) {
-                    this.metrics.interactions = [];
-                }
-
-                this.metrics.interactions.push({
-                    target: e.target.tagName,
-                    time: interactionTime,
-                    timestamp: Date.now()
-                });
-            }, 0);
-        }.bind(this));
-    },
-
-    setupPerformanceObserver: function() {
-        if ('PerformanceObserver' in window) {
-            const observer = new PerformanceObserver((list) => {
-                for (const entry of list.getEntries()) {
-                    if (entry.entryType === 'largest-contentful-paint') {
-                        this.metrics.lcp = entry.startTime;
-                    } else if (entry.entryType === 'first-input') {
-                        this.metrics.fid = entry.processingStart - entry.startTime;
-                    }
-                }
-            });
-
-            observer.observe({ entryTypes: ['largest-contentful-paint', 'first-input'] });
-        }
-    },
-
-    getMetrics: function() {
-        return this.metrics;
-    }
-};
+// 性能监控 - 已移至独立的 performance.js 文件
 
 // 键盘导航增强
-const KeyboardNavigation = {
+// Prevent duplicate declaration
+if (typeof KeyboardNavigation !== 'undefined') {
+    console.warn('KeyboardNavigation already declared, skipping...');
+} else {
+    const KeyboardNavigation = {
     init: function() {
         this.setupKeyboardShortcuts();
         this.setupFocusManagement();
@@ -882,8 +826,16 @@ const KeyboardNavigation = {
     }
 };
 
+// 导出 KeyboardNavigation
+window.KeyboardNavigation = KeyboardNavigation;
+}
+
 // 拖拽功能增强
-const DragDropManager = {
+// Prevent duplicate declaration
+if (typeof DragDropManager !== 'undefined') {
+    console.warn('DragDropManager already declared, skipping...');
+} else {
+    const DragDropManager = {
     init: function() {
         this.setupFileDragDrop();
         this.setupElementDragDrop();
@@ -1016,8 +968,15 @@ const DragDropManager = {
     }
 };
 
+// 导出 DragDropManager
+window.DragDropManager = DragDropManager;
+}
+
 // 本地存储管理
-const StorageManager = {
+// StorageManager - 本地存储管理
+// Only declare if not already defined
+if (typeof StorageManager === 'undefined') {
+    const StorageManager = {
     init: function() {
         this.setupAutoSave();
         this.setupThemePersistence();
@@ -1133,11 +1092,18 @@ const StorageManager = {
     }
 };
 
+// 导出 StorageManager
+window.StorageManager = StorageManager;
+}
+
 // 应用初始化
-const AppInitializer = {
+// Prevent duplicate declaration
+if (typeof AppInitializer !== 'undefined') {
+    console.warn('AppInitializer already declared, skipping...');
+} else {
+    const AppInitializer = {
     init: function() {
-        // 初始化性能监控
-        ComponentPerformanceMonitor.init();
+        // 性能监控已移至独立的 performance.js 文件
 
         // 初始化键盘导航
         KeyboardNavigation.init();
@@ -1235,18 +1201,16 @@ const AppInitializer = {
     }
 };
 
+// 导出 AppInitializer
+window.AppInitializer = AppInitializer;
+}
+
 // 页面加载完成后初始化应用
 document.addEventListener('DOMContentLoaded', function() {
     AppInitializer.init();
 });
 
-// 导出到全局
-window.ComponentManager = ComponentManager;
-// Only set PerformanceMonitor if it doesn't already exist
-if (!window.PerformanceMonitor) {
-    window.PerformanceMonitor = ComponentPerformanceMonitor;
+    // 导出 ComponentManager
+    window.ComponentManager = ComponentManager;
+    // PerformanceMonitor 已移至独立的 performance.js 文件
 }
-window.KeyboardNavigation = KeyboardNavigation;
-window.DragDropManager = DragDropManager;
-window.StorageManager = StorageManager;
-window.AppInitializer = AppInitializer;

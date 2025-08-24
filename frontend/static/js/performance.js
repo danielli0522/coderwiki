@@ -1,7 +1,9 @@
 // 性能优化脚本
 
 // 性能监控
-const PerformanceMonitor = {
+// Only declare if not already defined
+if (typeof PerformanceMonitor === 'undefined') {
+    const PerformanceMonitor = {
     // 页面加载性能指标
     metrics: {
         navigationTiming: {},
@@ -311,6 +313,10 @@ const OfflineCacheManager = {
     }
 };
 
+// 导出 PerformanceMonitor
+window.PerformanceMonitor = PerformanceMonitor;
+}
+
 // 初始化所有性能优化
 document.addEventListener('DOMContentLoaded', function() {
     // 初始化性能监控
@@ -334,9 +340,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 30000); // 每30秒检查一次
 });
 
-// 导出模块
-window.PerformanceMonitor = PerformanceMonitor;
-window.LazyLoadManager = LazyLoadManager;
-window.ResourcePreloader = ResourcePreloader;
-window.MemoryManager = MemoryManager;
-window.OfflineCacheManager = OfflineCacheManager;
+// 导出其他模块
+if (typeof LazyLoadManager !== 'undefined') {
+    window.LazyLoadManager = LazyLoadManager;
+}
+if (typeof ResourcePreloader !== 'undefined') {
+    window.ResourcePreloader = ResourcePreloader;
+}
+if (typeof MemoryManager !== 'undefined') {
+    window.MemoryManager = MemoryManager;
+}
+if (typeof OfflineCacheManager !== 'undefined') {
+    window.OfflineCacheManager = OfflineCacheManager;
+}

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模态框修复测试</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Modal Manager -->
+    <script src="js/modal-manager.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>模态框修复测试</h1>
+        <p class="text-muted">测试统一模态框管理器的功能</p>
+        
+        <div class="row mt-4">
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-file-plus fa-2x text-primary mb-3"></i>
+                        <h5>新建文档</h5>
+                        <button class="btn btn-primary" onclick="testNewDocument()">
+                            <i class="fas fa-plus"></i> 测试新建文档
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-folder-plus fa-2x text-success mb-3"></i>
+                        <h5>新建仓库</h5>
+                        <button class="btn btn-success" onclick="testNewRepository()">
+                            <i class="fas fa-plus"></i> 测试新建仓库
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-chart-line fa-2x text-info mb-3"></i>
+                        <h5>新建分析</h5>
+                        <button class="btn btn-info" onclick="testNewAnalysis()">
+                            <i class="fas fa-plus"></i> 测试新建分析
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>测试日志</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="testLog" style="height: 200px; overflow-y: auto; background: #f8f9fa; padding: 10px; border-radius: 4px;">
+                            <small class="text-muted">等待测试...</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        function log(message) {
+            const logElement = document.getElementById('testLog');
+            const time = new Date().toLocaleTimeString();
+            logElement.innerHTML += `<div>[${time}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        function testNewDocument() {
+            log('开始测试新建文档模态框...');
+            
+            if (window.modalManager) {
+                const modalId = window.modalManager.createDynamicModal({
+                    id: 'testDocumentModal',
+                    title: '新建文档 (测试)',
+                    size: 'modal-lg',
+                    body: `
+                        <form id="testDocumentForm">
+                            <div class="mb-3">
+                                <label for="docName" class="form-label">文档名称</label>
+                                <input type="text" class="form-control" id="docName" name="docName" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="docType" class="form-label">文档类型</label>
+                                <select class="form-select" id="docType" name="docType" required>
+                                    <option value="">请选择文档类型</option>
+                                    <option value="readme">README文档</option>
+                                    <option value="api">API文档</option>
+                                    <option value="architecture">架构文档</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="docDescription" class="form-label">描述</label>
+                                <textarea class="form-control" id="docDescription" name="docDescription" rows="3"></textarea>
+                            </div>
+                        </form>
+                    `,
+                    footer: `
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" onclick="submitTestDocument()">创建文档</button>
+                    `,
+                    onShown: () => {
+                        log('新建文档模态框显示成功');
+                        const firstInput = document.getElementById('docName');
+                        if (firstInput) {
+                            firstInput.focus();
+                            log('成功聚焦到第一个输入框');
+                        }
+                    }
+                });
+            } else {
+                log('错误: 模态框管理器不可用');
+            }
+        }
+        
+        function testNewRepository() {
+            log('开始测试新建仓库模态框...');
+            
+            if (window.modalManager) {
+                const modalId = window.modalManager.createDynamicModal({
+                    id: 'testRepositoryModal',
+                    title: '新建仓库 (测试)',
+                    body: `
+                        <form id="testRepositoryForm">
+                            <div class="mb-3">
+                                <label for="repoName" class="form-label">仓库名称</label>
+                                <input type="text" class="form-control" id="repoName" name="repoName" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="repoUrl" class="form-label">仓库URL</label>
+                                <input type="url" class="form-control" id="repoUrl" name="repoUrl" required>
+                                <div class="form-text">支持GitHub、GitLab等Git仓库地址</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="repoBranch" class="form-label">分支</label>
+                                <input type="text" class="form-control" id="repoBranch" name="repoBranch" value="main">
+                            </div>
+                        </form>
+                    `,
+                    footer: `
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-success" onclick="submitTestRepository()">添加仓库</button>
+                    `,
+                    onShown: () => {
+                        log('新建仓库模态框显示成功');
+                        const firstInput = document.getElementById('repoName');
+                        if (firstInput) {
+                            firstInput.focus();
+                            log('成功聚焦到第一个输入框');
+                        }
+                    }
+                });
+            } else {
+                log('错误: 模态框管理器不可用');
+            }
+        }
+        
+        function testNewAnalysis() {
+            log('开始测试新建分析模态框...');
+            
+            if (window.modalManager) {
+                const modalId = window.modalManager.createDynamicModal({
+                    id: 'testAnalysisModal',
+                    title: '新建分析 (测试)',
+                    size: 'modal-lg',
+                    body: `
+                        <form id="testAnalysisForm">
+                            <div class="mb-3">
+                                <label for="analysisRepo" class="form-label">选择仓库</label>
+                                <select class="form-select" id="analysisRepo" name="analysisRepo" required>
+                                    <option value="">请选择仓库</option>
+                                    <option value="1">示例仓库 1</option>
+                                    <option value="2">示例仓库 2</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">分析类型</label>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="structureAnalysis" checked>
+                                            <label class="form-check-label" for="structureAnalysis">结构分析</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="languageAnalysis">
+                                            <label class="form-check-label" for="languageAnalysis">语言分析</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="dependencyAnalysis">
+                                            <label class="form-check-label" for="dependencyAnalysis">依赖分析</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="documentAnalysis">
+                                            <label class="form-check-label" for="documentAnalysis">文档分析</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    `,
+                    footer: `
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-info" onclick="submitTestAnalysis()">开始分析</button>
+                    `,
+                    onShown: () => {
+                        log('新建分析模态框显示成功');
+                        const firstSelect = document.getElementById('analysisRepo');
+                        if (firstSelect) {
+                            firstSelect.focus();
+                            log('成功聚焦到第一个选择框');
+                        }
+                    }
+                });
+            } else {
+                log('错误: 模态框管理器不可用');
+            }
+        }
+        
+        function submitTestDocument() {
+            const form = document.getElementById('testDocumentForm');
+            if (form.checkValidity()) {
+                log('文档表单验证通过 - 模拟创建文档成功');
+                window.modalManager.hideModal('testDocumentModal');
+            } else {
+                log('文档表单验证失败');
+                form.reportValidity();
+            }
+        }
+        
+        function submitTestRepository() {
+            const form = document.getElementById('testRepositoryForm');
+            if (form.checkValidity()) {
+                log('仓库表单验证通过 - 模拟添加仓库成功');
+                window.modalManager.hideModal('testRepositoryModal');
+            } else {
+                log('仓库表单验证失败');
+                form.reportValidity();
+            }
+        }
+        
+        function submitTestAnalysis() {
+            const form = document.getElementById('testAnalysisForm');
+            if (form.checkValidity()) {
+                log('分析表单验证通过 - 模拟开始分析成功');
+                window.modalManager.hideModal('testAnalysisModal');
+            } else {
+                log('分析表单验证失败');
+                form.reportValidity();
+            }
+        }
+        
+        // 初始化日志
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.modalManager) {
+                log('模态框管理器初始化成功');
+            } else {
+                log('错误: 模态框管理器未加载');
+            }
+        });
+    </script>
+</body>
+</html>

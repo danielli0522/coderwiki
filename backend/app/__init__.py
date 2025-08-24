@@ -40,8 +40,10 @@ def create_app(config_class=Config):
         return User.query.get(int(user_id))
 
     # Register blueprints
-    from app.api import auth_bp, repository_bp, document_bp, task_bp, analysis_bp, user_bp, system_bp, activities_bp, llm_bp
+    from app.api import auth_bp, repository_bp, document_bp, task_bp, analysis_bp, user_bp, system_bp, activities_bp, llm_bp, smart_document_bp
     from app.routes import main_bp
+
+    # Register API blueprints
     app.register_blueprint(auth_bp)
     app.register_blueprint(repository_bp)
     app.register_blueprint(document_bp)
@@ -51,6 +53,18 @@ def create_app(config_class=Config):
     app.register_blueprint(system_bp)
     app.register_blueprint(activities_bp)
     app.register_blueprint(llm_bp)
+    app.register_blueprint(smart_document_bp)
+
+    # Register Serena blueprint
+    try:
+        from app.api.serena import serena_bp
+        app.register_blueprint(serena_bp)
+        app.logger.info("Serena API blueprint registered successfully")
+    except ImportError as e:
+        app.logger.warning(f"Serena API not available: {e}")
+    except Exception as e:
+        app.logger.error(f"Failed to register Serena API: {e}")
+
     app.register_blueprint(main_bp)
 
     # Register template filters
@@ -113,6 +127,33 @@ def create_app(config_class=Config):
         app.logger.warning(f"WebSocket support not available: {e}")
     except Exception as e:
         app.logger.error(f"Failed to initialize WebSocket: {e}")
+    
+    # Initialize service orchestrator
+    try:
+        from app.services.service_orchestrator import service_orchestrator
+        
+        # 在应用上下文中初始化服务
+        with app.app_context():
+            initialization_results = service_orchestrator.initialize_services()
+            
+            # 记录初始化结果
+            successful_services = [name for name, success in initialization_results.items() if success]
+            failed_services = [name for name, success in initialization_results.items() if not success]
+            
+            if successful_services:
+                app.logger.info(f"Successfully initialized services: {', '.join(successful_services)}")
+            
+            if failed_services:
+                app.logger.warning(f"Failed to initialize services: {', '.join(failed_services)}")
+                
+            # 注册关闭处理器
+            import atexit
+            atexit.register(service_orchestrator.shutdown)
+        
+        app.logger.info("Service orchestrator initialized successfully")
+        
+    except Exception as e:
+        app.logger.error(f"Failed to initialize service orchestrator: {e}")
 
     # Register main routes
     @app.route('/')

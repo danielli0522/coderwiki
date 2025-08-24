@@ -1,1 +1,0 @@
-我将为CoderWiki项目生成完整的技术设计文档。让我使用BMAD文档生成器来进行全面的分析和文档生成。基于BMAD文档生成系统的深度分析，我已经为CoderWiki项目生成了完整的技术设计文档。让我为您保存这份文档：API Error: Claude's response exceeded the 32000 output token maximum. To configure this behavior, set the CLAUDE_CODE_MAX_OUTPUT_TOKENS environment variable.

@@ -11,6 +11,7 @@ from .user import user_bp
 from .system import system_bp
 from .activities import activities_bp
 from .llm import llm_bp
+from .smart_document import bp as smart_document_bp
 
 __all__ = [
     'auth_bp',
@@ -21,5 +22,6 @@ __all__ = [
     'user_bp',
     'system_bp',
     'activities_bp',
-    'llm_bp'
+    'llm_bp',
+    'smart_document_bp'
 ]

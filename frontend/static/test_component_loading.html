@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Component Loading Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Component Loading Test</h1>
+    <div id="test-results"></div>
+
+    <script>
+        // Test component loading
+        const results = [];
+
+        function logResult(message) {
+            results.push(message);
+            document.getElementById('test-results').innerHTML = results.map(r => `<div>${r}</div>`).join('');
+            console.log(message);
+        }
+
+        // Load components in the same order as base.html
+        async function loadComponents() {
+            try {
+                logResult('开始加载组件...');
+
+                // Load individual component scripts
+                const componentScripts = [
+                    '/static/js/components/stats.js',
+                    '/static/js/components/repository_list.js',
+                    '/static/js/components/task_progress.js',
+                    '/static/js/components/recent_activity.js',
+                    '/static/js/components/system_status.js'
+                ];
+
+                for (const scriptSrc of componentScripts) {
+                    await new Promise((resolve, reject) => {
+                        const script = document.createElement('script');
+                        script.src = scriptSrc;
+                        script.onload = () => {
+                            logResult(`✅ 加载成功: ${scriptSrc}`);
+                            resolve();
+                        };
+                        script.onerror = () => {
+                            logResult(`❌ 加载失败: ${scriptSrc}`);
+                            reject();
+                        };
+                        document.head.appendChild(script);
+                    });
+                }
+
+                logResult('所有组件脚本加载完成');
+
+                // Load other scripts
+                const otherScripts = [
+                    '/static/js/components.js',
+                    '/static/js/performance.js'
+                ];
+
+                for (const scriptSrc of otherScripts) {
+                    await new Promise((resolve, reject) => {
+                        const script = document.createElement('script');
+                        script.src = scriptSrc;
+                        script.onload = () => {
+                            logResult(`✅ 加载成功: ${scriptSrc}`);
+                            resolve();
+                        };
+                        script.onerror = () => {
+                            logResult(`❌ 加载失败: ${scriptSrc}`);
+                            reject();
+                        };
+                        document.head.appendChild(script);
+                    });
+                }
+
+                logResult('所有脚本加载完成');
+
+                // Check if components are available
+                setTimeout(() => {
+                    logResult('检查组件可用性...');
+                    if (typeof StatsComponent !== 'undefined') {
+                        logResult('✅ StatsComponent 可用');
+                    } else {
+                        logResult('❌ StatsComponent 不可用');
+                    }
+
+                    if (typeof RepositoryListComponent !== 'undefined') {
+                        logResult('✅ RepositoryListComponent 可用');
+                    } else {
+                        logResult('❌ RepositoryListComponent 不可用');
+                    }
+
+                    if (typeof TaskProgressComponent !== 'undefined') {
+                        logResult('✅ TaskProgressComponent 可用');
+                    } else {
+                        logResult('❌ TaskProgressComponent 不可用');
+                    }
+
+                    if (typeof RecentActivityComponent !== 'undefined') {
+                        logResult('✅ RecentActivityComponent 可用');
+                    } else {
+                        logResult('❌ RecentActivityComponent 不可用');
+                    }
+
+                    if (typeof SystemStatusComponent !== 'undefined') {
+                        logResult('✅ SystemStatusComponent 可用');
+                    } else {
+                        logResult('❌ SystemStatusComponent 不可用');
+                    }
+
+                    if (typeof StorageManager !== 'undefined') {
+                        logResult('✅ StorageManager 可用');
+                    } else {
+                        logResult('❌ StorageManager 不可用');
+                    }
+
+                    if (typeof PerformanceMonitor !== 'undefined') {
+                        logResult('✅ PerformanceMonitor 可用');
+                    } else {
+                        logResult('❌ PerformanceMonitor 不可用');
+                    }
+                }, 1000);
+
+            } catch (error) {
+                logResult(`❌ 加载过程中出错: ${error.message}`);
+            }
+        }
+
+        // Start loading when page loads
+        document.addEventListener('DOMContentLoaded', loadComponents);
+    </script>
+</body>
+</html>

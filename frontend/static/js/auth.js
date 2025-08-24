@@ -952,6 +952,7 @@ const Auth = {
                 'Content-Type': 'application/json',
                 ...options.headers
             },
+            credentials: 'include', // 确保发送cookies用于session认证
             ...options
         };
 

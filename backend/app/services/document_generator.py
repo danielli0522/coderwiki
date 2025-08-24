@@ -560,9 +560,9 @@ class DocumentGenerator:
                 if os.path.exists(claude_file_path):
                     # 复制Claude Code生成的文件到我们的文档目录
                     claude_path = Path(claude_file_path)
-                    safe_title = "".join(c for c in doc_title if c.isalnum() or c in (' ', '-', '_')).rstrip()
-                    safe_title = safe_title.replace(' ', '_')
-                    filename = f"{safe_title}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.md"
+                    # 使用仓库名称作为文件名前缀
+                    safe_repo_name = "".join(c for c in repository.name if c.isalnum() or c in ('-', '_')).rstrip()
+                    filename = f"{safe_repo_name}_{doc_type}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.md"
                     file_path = docs_dir / filename
 
                     # 复制文件内容
@@ -580,10 +580,9 @@ class DocumentGenerator:
 
             # 如果没有Claude Code生成的文件或文件不存在，创建新文件
             if file_path is None:
-                # 生成文件名
-                safe_title = "".join(c for c in doc_title if c.isalnum() or c in (' ', '-', '_')).rstrip()
-                safe_title = safe_title.replace(' ', '_')
-                filename = f"{safe_title}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.md"
+                # 使用仓库名称作为文件名前缀
+                safe_repo_name = "".join(c for c in repository.name if c.isalnum() or c in ('-', '_')).rstrip()
+                filename = f"{safe_repo_name}_{doc_type}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.md"
                 file_path = docs_dir / filename
 
                 # 写入文件

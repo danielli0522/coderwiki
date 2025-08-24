@@ -26,12 +26,12 @@
 <div class="document-viewer-container">
     <!-- Document Header -->
     {% include "partials/document_header.html" %}
-    
+
     <!-- Main Content Area -->
     <div class="document-main-content">
         <!-- Navigation Sidebar -->
         {% include "partials/navigation_sidebar.html" %}
-        
+
         <!-- Document Content -->
         <div class="document-content-area">
             <div class="document-content" id="documentContent">
@@ -40,16 +40,16 @@
                     <div class="spinner"></div>
                     <p>正在加载文档...</p>
                 </div>
-                
+
                 <!-- Content will be loaded here -->
             </div>
         </div>
-        
+
         <!-- Right Sidebar (Tools) -->
         <div class="document-tools-sidebar">
             <!-- Search Panel -->
             {% include "partials/search_panel.html" %}
-            
+
             <!-- Quick Actions -->
             <div class="quick-actions">
                 <h3>快速操作</h3>
@@ -65,7 +65,7 @@
                     </button>
                 </div>
             </div>
-            
+
             <!-- Document Info -->
             <div class="document-info">
                 <h3>文档信息</h3>
@@ -176,12 +176,14 @@ document.addEventListener('DOMContentLoaded', function() {
         tables: true,
         sanitize: false
     });
-    
+
     // Initialize document viewer
     window.documentViewer = new DocumentViewer({
         documentId: '{{ document.id }}',
         initialVersion: '{{ document.version }}',
-        autoLoad: true
+        autoLoad: true,
+        filePath: '{{ document_data.file_path or "" }}',
+        repositoryLocalPath: '{{ document_data.repository_local_path or "" }}'
     });
 });
 </script>

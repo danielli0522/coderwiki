@@ -26,34 +26,85 @@ class DashboardController {
             // 初始化实时更新
             this.realtimeUpdates = new RealtimeUpdates();
 
+            // 等待组件类加载完成后再初始化
+            this.waitForComponentsAndInitialize();
+
+        } catch (error) {
+            console.error('组件初始化失败:', error);
+            this.showError('组件初始化失败，请刷新页面重试');
+        }
+    }
+
+    waitForComponentsAndInitialize() {
+        const maxAttempts = 50; // 最多等待5秒
+        let attempts = 0;
+
+        const checkAndInitialize = () => {
+            attempts++;
+
+            // 检查所有需要的组件类是否已加载
+            const requiredComponents = [
+                'StatsComponent',
+                'RepositoryListComponent',
+                'TaskProgressComponent',
+                'RecentActivityComponent',
+                'SystemStatusComponent'
+            ];
+
+            const allComponentsLoaded = requiredComponents.every(component => {
+                return typeof window[component] !== 'undefined';
+            });
+
+            if (allComponentsLoaded) {
+                console.log('所有组件类已加载，开始初始化...');
+                this.initializeIndividualComponents();
+            } else if (attempts < maxAttempts) {
+                console.log(`等待组件加载... (${attempts}/${maxAttempts})`);
+                setTimeout(checkAndInitialize, 100);
+            } else {
+                console.error('组件加载超时，尝试初始化可用组件');
+                this.initializeIndividualComponents();
+            }
+        };
+
+        checkAndInitialize();
+    }
+
+    initializeIndividualComponents() {
+        try {
             // 初始化统计组件
-            if (document.querySelector('.stats-container')) {
+            if (document.querySelector('.stats-container') && typeof StatsComponent !== 'undefined') {
                 this.components.stats = new StatsComponent();
                 window.statsComponent = this.components.stats;
+                console.log('统计组件初始化完成');
             }
 
             // 初始化仓库列表组件
-            if (document.querySelector('.repository-list-container')) {
+            if (document.querySelector('.repository-list-container') && typeof RepositoryListComponent !== 'undefined') {
                 this.components.repositoryList = new RepositoryListComponent();
                 window.repositoryListComponent = this.components.repositoryList;
+                console.log('仓库列表组件初始化完成');
             }
 
             // 初始化任务进度组件
-            if (document.querySelector('.task-progress-container')) {
+            if (document.querySelector('.task-progress-container') && typeof TaskProgressComponent !== 'undefined') {
                 this.components.taskProgress = new TaskProgressComponent();
                 window.taskProgressComponent = this.components.taskProgress;
+                console.log('任务进度组件初始化完成');
             }
 
             // 初始化最近活动组件
-            if (document.querySelector('.recent-activity-container')) {
+            if (document.querySelector('.recent-activity-container') && typeof RecentActivityComponent !== 'undefined') {
                 this.components.recentActivity = new RecentActivityComponent();
                 window.recentActivityComponent = this.components.recentActivity;
+                console.log('最近活动组件初始化完成');
             }
 
             // 初始化系统状态组件
-            if (document.querySelector('.system-status-container')) {
+            if (document.querySelector('.system-status-container') && typeof SystemStatusComponent !== 'undefined') {
                 this.components.systemStatus = new SystemStatusComponent();
                 window.systemStatusComponent = this.components.systemStatus;
+                console.log('系统状态组件初始化完成');
             }
 
             console.log('所有组件初始化完成');
@@ -173,64 +224,107 @@ class DashboardController {
     }
 
     showAddRepositoryModal() {
-        // 创建添加仓库模态框
-        const modalHtml = `
-            <div class="modal fade" id="addRepositoryModal" tabindex="-1">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">添加仓库</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        // 使用全局模态框管理器创建动态模态框
+        if (window.modalManager) {
+            const modalId = window.modalManager.createDynamicModal({
+                id: 'addRepositoryModal',
+                title: '添加仓库',
+                body: `
+                    <form id="addRepositoryForm">
+                        <div class="mb-3">
+                            <label for="repoName" class="form-label">仓库名称</label>
+                            <input type="text" class="form-control" id="repoName" name="repoName" required>
                         </div>
-                        <div class="modal-body">
-                            <form id="addRepositoryForm">
-                                <div class="mb-3">
-                                    <label for="repoName" class="form-label">仓库名称</label>
-                                    <input type="text" class="form-control" id="repoName" name="repoName" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="repoUrl" class="form-label">仓库URL</label>
-                                    <input type="url" class="form-control" id="repoUrl" name="repoUrl" required>
-                                    <div class="form-text">支持GitHub、GitLab等Git仓库地址</div>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="repoDescription" class="form-label">描述</label>
-                                    <textarea class="form-control" id="repoDescription" name="repoDescription" rows="3"></textarea>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="repoBranch" class="form-label">分支</label>
-                                    <input type="text" class="form-control" id="repoBranch" name="repoBranch" value="main">
-                                </div>
-                            </form>
+                        <div class="mb-3">
+                            <label for="repoUrl" class="form-label">仓库URL</label>
+                            <input type="url" class="form-control" id="repoUrl" name="repoUrl" required>
+                            <div class="form-text">支持GitHub、GitLab等Git仓库地址</div>
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                            <button type="button" class="btn btn-primary" id="saveRepositoryBtn">保存</button>
+                        <div class="mb-3">
+                            <label for="repoDescription" class="form-label">描述</label>
+                            <textarea class="form-control" id="repoDescription" name="repoDescription" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="repoBranch" class="form-label">分支</label>
+                            <input type="text" class="form-control" id="repoBranch" name="repoBranch" value="main">
+                        </div>
+                    </form>
+                `,
+                footer: `
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="saveRepositoryBtn">保存</button>
+                `,
+                onShown: () => {
+                    // 绑定保存按钮事件
+                    const saveBtn = document.getElementById('saveRepositoryBtn');
+                    if (saveBtn) {
+                        saveBtn.onclick = () => {
+                            const modal = window.modalManager.getModal('addRepositoryModal');
+                            this.saveRepository(modal);
+                        };
+                    }
+                }
+            });
+        } else {
+            // 降级处理：使用原始方法
+            const modalHtml = `
+                <div class="modal fade" id="addRepositoryModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">添加仓库</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="addRepositoryForm">
+                                    <div class="mb-3">
+                                        <label for="repoName" class="form-label">仓库名称</label>
+                                        <input type="text" class="form-control" id="repoName" name="repoName" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="repoUrl" class="form-label">仓库URL</label>
+                                        <input type="url" class="form-control" id="repoUrl" name="repoUrl" required>
+                                        <div class="form-text">支持GitHub、GitLab等Git仓库地址</div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="repoDescription" class="form-label">描述</label>
+                                        <textarea class="form-control" id="repoDescription" name="repoDescription" rows="3"></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="repoBranch" class="form-label">分支</label>
+                                        <input type="text" class="form-control" id="repoBranch" name="repoBranch" value="main">
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                                <button type="button" class="btn btn-primary" id="saveRepositoryBtn">保存</button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        `;
+            `;
 
-        // 移除现有模态框
-        const existingModal = document.getElementById('addRepositoryModal');
-        if (existingModal) {
-            existingModal.remove();
-        }
+            // 移除现有模态框
+            const existingModal = document.getElementById('addRepositoryModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
 
-        // 添加新模态框
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
+            // 添加新模态框
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
 
-        // 显示模态框
-        const modal = new bootstrap.Modal(document.getElementById('addRepositoryModal'));
-        modal.show();
+            // 显示模态框
+            const modal = new bootstrap.Modal(document.getElementById('addRepositoryModal'));
+            modal.show();
 
-        // 绑定保存按钮事件
-        const saveBtn = document.getElementById('saveRepositoryBtn');
-        if (saveBtn) {
-            saveBtn.addEventListener('click', () => {
-                this.saveRepository(modal);
-            });
+            // 绑定保存按钮事件
+            const saveBtn = document.getElementById('saveRepositoryBtn');
+            if (saveBtn) {
+                saveBtn.addEventListener('click', () => {
+                    this.saveRepository(modal);
+                });
+            }
         }
     }
 

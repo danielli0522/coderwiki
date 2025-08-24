@@ -2,7 +2,17 @@
  * 任务进度组件
  * 负责任务列表的获取、展示和状态监控
  */
-class TaskProgressComponent {
+
+// 使用组件注册表防止重复声明
+// 使用立即执行函数表达式避免全局作用域污染
+(function() {
+    // 检查组件是否已注册
+    if (window.ComponentRegistry && window.ComponentRegistry.isRegistered('TaskProgressComponent')) {
+        console.log('TaskProgressComponent already registered, reusing existing component');
+        return;
+    }
+
+    class TaskProgressComponent {
     constructor() {
         this.tasks = [];
         this.filters = {
@@ -362,5 +372,19 @@ class TaskProgressComponent {
     }
 }
 
-// 导出组件
-window.TaskProgressComponent = TaskProgressComponent;
+    // 注册组件到注册表
+    if (window.ComponentRegistry) {
+        window.ComponentRegistry.register('TaskProgressComponent', TaskProgressComponent);
+    } else {
+        // 降级方案
+        window.TaskProgressComponent = TaskProgressComponent;
+    }
+
+    // 确保组件实例被创建
+    if (typeof window.taskProgressComponent === 'undefined') {
+        window.taskProgressComponent = new TaskProgressComponent();
+        console.log('TaskProgressComponent instance created');
+    } else {
+        console.log('TaskProgressComponent instance already exists, reusing');
+    }
+})();

@@ -1,0 +1,100 @@
+schema: 1
+story: 'analysis-ui-automated-testing'
+gate: CRITICAL_FAIL
+status_reason: 'CRITICAL: Code analysis page navigation completely broken, identical issue to repository page. System-level DOM event interception.'
+reviewer: 'Quinn'
+updated: '2025-08-24T18:45:00Z'
+top_issues:
+  - issue_id: NAV-002
+    severity: CRITICAL
+    title: 'Code analysis page navigation dead-lock'
+    description: 'Navigation links from code analysis page are completely non-functional'
+    impact: 'Users cannot navigate away from analysis page using navigation menu'
+    affected_paths:
+      - '/analysis → /dashboard'
+      - '/analysis → /repositories' 
+      - '/analysis → /documents'
+      - '/analysis → /tasks'
+      - '/analysis → /settings'
+    root_cause: 'Same DOM event interception issue as repository page - modals blocking navigation clicks'
+    recommendation: 'Emergency workaround already implemented with visible navigation buttons'
+waiver: { active: false }
+
+test_results:
+  ui_automation:
+    framework: 'Puppeteer'
+    browser: 'Chrome'
+    resolution: '1200x800'
+    execution_time: '2025-08-24T18:45:00Z'
+    
+  navigation_elements:
+    status: 'PASS'
+    details: 'All navigation elements exist and are properly styled'
+    elements_verified:
+      - brand_link: 'PASS'
+      - dashboard_link: 'PASS' 
+      - repositories_link: 'PASS'
+      - documents_link: 'PASS'
+      - analysis_link: 'PASS'
+      - tasks_link: 'PASS'
+      - settings_link: 'PASS'
+      - user_dropdown: 'PASS'
+      
+  cross_navigation_testing:
+    status: 'FAIL'
+    details: 'Analysis page navigation completely broken - identical to repository page issue'
+    test_scenarios:
+      - dashboard_to_others: 'PASS'
+      - documents_to_dashboard: 'PASS'
+      - analysis_to_dashboard: 'FAIL - No navigation occurred'
+      - analysis_to_repositories: 'FAIL - No navigation occurred'
+      
+  emergency_navigation_fix:
+    status: 'PASS'
+    details: 'Emergency navigation buttons working correctly'
+    emergency_buttons:
+      - dashboard_button: 'PASS - Successfully navigates'
+      - repositories_button: 'PASS - Successfully navigates'
+      - documents_button: 'PASS - Successfully navigates'
+      - tasks_button: 'PASS - Successfully navigates'
+      - settings_button: 'PASS - Successfully navigates'
+
+  css_analysis:
+    pointer_events: 'auto'
+    visibility: 'visible'
+    z_index: 'normal'
+    cursor: 'pointer'
+    conclusion: 'CSS properties are correct, issue is in JavaScript event handling - same as repository page'
+    
+technical_debt:
+  - item: 'Modal elements interfering with navigation on analysis page'
+  - item: 'Same event listener conflicts as repository page'  
+  - item: 'System-wide navigation architecture needs redesign'
+
+risk_assessment:
+  probability: 'HIGH'
+  impact: 'CRITICAL' 
+  user_experience: 'MAJOR_DISRUPTION'
+  business_impact: 'CORE_FEATURE_BROKEN'
+  
+blocking_issues: 1
+performance_impact: 'NONE'
+security_impact: 'NONE'
+accessibility_impact: 'MAJOR'
+
+root_cause_analysis: 'Identical to repository page - Deep system-level DOM event interception beyond JavaScript layer'
+
+emergency_workaround:
+  status: 'IMPLEMENTED'
+  details: 'Emergency navigation buttons successfully added to analysis page'
+  effectiveness: 'HIGH - Users can navigate away from analysis page using emergency buttons'
+  user_impact: 'MINIMAL - Clear instructions and prominent button placement'
+
+next_steps:
+  immediate:
+    - 'Emergency workaround successfully implemented - users can navigate'
+    - 'Monitor user feedback on emergency navigation solution'
+  architectural_fix_required:
+    - 'Complete analysis page reconstruction (same as repository page)'
+    - 'System-level DOM event debugging across all pages with modals'
+    - 'Framework-level event handling audit for entire application'

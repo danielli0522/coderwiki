@@ -19,6 +19,7 @@ class ApiClient {
                 ...options.headers
             },
             credentials: 'include', // 确保发送cookies用于session认证
+            redirect: 'manual', // 不自动跟随重定向，以便检测认证错误
             ...options
         };
 
@@ -32,6 +33,13 @@ class ApiClient {
 
         try {
             const response = await this.fetchWithRetry(url, config);
+
+            // 检查重定向状态码（认证需要）
+            if (response.status === 302 || response.status === 303) {
+                const redirectUrl = response.headers.get('location');
+                console.warn('API请求被重定向到登录页面，用户需要登录');
+                throw new Error(`Authentication required. Redirected to: ${redirectUrl}`);
+            }
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -49,7 +57,7 @@ class ApiClient {
             console.error('API请求失败:', error);
 
             // 处理认证错误
-            if (error.message.includes('401')) {
+            if (error.message.includes('401') || error.message.includes('403') || error.message.includes('Authentication required')) {
                 this.handleAuthError();
             }
 
@@ -61,8 +69,8 @@ class ApiClient {
         try {
             const response = await fetch(url, config);
 
-            // 如果响应状态码是401或403，直接抛出错误不重试
-            if (response.status === 401 || response.status === 403) {
+            // 如果响应状态码是401、403或302，直接抛出错误不重试
+            if (response.status === 401 || response.status === 403 || response.status === 302) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
@@ -74,7 +82,7 @@ class ApiClient {
 
             return response;
         } catch (error) {
-            if (retryCount > 0 && !error.message.includes('401') && !error.message.includes('403')) {
+            if (retryCount > 0 && !error.message.includes('401') && !error.message.includes('403') && !error.message.includes('302')) {
                 await this.delay(this.retryDelay);
                 return this.fetchWithRetry(url, config, retryCount - 1);
             }
@@ -263,12 +271,18 @@ class ApiClient {
     }
 
     handleAuthError() {
-        // 移除Bearer token认证，使用session认证
-        // this.removeToken();
+        console.log('认证错误，重定向到登录页面');
         this.clearCache();
-        // 临时禁用自动重定向到登录页面
-        // window.location.href = '/login';
-        console.log('认证错误，但已禁用自动重定向');
+
+        // 显示用户友好的错误消息
+        if (typeof showToast === 'function') {
+            showToast('请先登录后再进行操作', 'warning');
+        }
+
+        // 延迟重定向，让用户看到消息
+        setTimeout(() => {
+            window.location.href = '/login';
+        }, 1500);
     }
 
     // 工具方法
@@ -289,6 +303,8 @@ class ApiClient {
         const config = {
             method: 'POST',
             body: formData,
+            credentials: 'include', // 确保发送cookies用于session认证
+            redirect: 'manual', // 不自动跟随重定向，以便检测认证错误
             // 移除Bearer token认证，使用session认证
             // headers: {
             //     ...this.token ? { 'Authorization': `Bearer ${this.token}` } : {}
@@ -296,6 +312,13 @@ class ApiClient {
         };
 
         const response = await fetch(`${this.baseUrl}${endpoint}`, config);
+
+        // 检查重定向状态码（认证需要）
+        if (response.status === 302 || response.status === 303) {
+            const redirectUrl = response.headers.get('location');
+            console.warn('文件上传请求被重定向到登录页面，用户需要登录');
+            throw new Error(`Authentication required. Redirected to: ${redirectUrl}`);
+        }
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);

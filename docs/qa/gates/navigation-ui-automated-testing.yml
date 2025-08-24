@@ -1,0 +1,104 @@
+schema: 1
+story: 'navigation-ui-automated-testing'
+gate: CRITICAL_FAIL
+status_reason: 'CRITICAL: Repository page navigation completely broken despite multiple fix attempts. Deep system-level issue requiring architectural intervention.'
+reviewer: 'Quinn'
+updated: '2025-08-24T18:30:00Z'
+top_issues:
+  - issue_id: NAV-001
+    severity: CRITICAL
+    title: 'Repository page navigation dead-lock'
+    description: 'Navigation links from repository management page are completely non-functional'
+    impact: 'Users cannot navigate away from repository page using navigation menu'
+    affected_paths:
+      - '/repositories → /dashboard'
+      - '/repositories → /documents' 
+      - '/repositories → /analysis'
+      - '/repositories → /tasks'
+      - '/repositories → /settings'
+    root_cause: 'repository-modal-fix.js still interfering with navigation event handlers'
+    recommendation: 'Further debug event handling in repository-modal-fix.js or disable script temporarily'
+waiver: { active: false }
+
+test_results:
+  ui_automation:
+    framework: 'Puppeteer'
+    browser: 'Chrome'
+    resolution: '1200x800'
+    execution_time: '2025-08-24T17:00:00Z'
+    
+  navigation_elements:
+    status: 'PASS'
+    details: 'All navigation elements exist and are properly styled'
+    elements_verified:
+      - brand_link: 'PASS'
+      - dashboard_link: 'PASS' 
+      - repositories_link: 'PASS'
+      - documents_link: 'PASS'
+      - analysis_link: 'PASS'
+      - tasks_link: 'PASS'
+      - settings_link: 'PASS'
+      - user_dropdown: 'PASS'
+      
+  cross_navigation_testing:
+    status: 'FAIL'
+    details: 'Repository page navigation completely broken'
+    test_scenarios:
+      - dashboard_to_others: 'PASS'
+      - documents_to_dashboard: 'PASS'
+      - repositories_to_dashboard: 'FAIL - No navigation occurred'
+      - repositories_to_documents: 'FAIL - No navigation occurred'
+      
+  css_analysis:
+    pointer_events: 'auto'
+    visibility: 'visible'
+    z_index: 'normal'
+    cursor: 'pointer'
+    conclusion: 'CSS properties are correct, issue is in JavaScript event handling'
+    
+technical_debt:
+  - item: 'Multiple modal fix scripts loading redundantly'
+  - item: 'Event listener conflicts between navigation and modal systems'  
+  - item: 'Lack of navigation event debugging/logging'
+
+risk_assessment:
+  probability: 'HIGH'
+  impact: 'CRITICAL' 
+  user_experience: 'MAJOR_DISRUPTION'
+  business_impact: 'CORE_FEATURE_BROKEN'
+  
+blocking_issues: 1
+performance_impact: 'NONE'
+security_impact: 'NONE'
+accessibility_impact: 'MAJOR'
+
+attempted_fixes:
+  javascript_layer:
+    - 'Disabled all repository-specific scripts: NO EFFECT'
+    - 'Disabled all base.html fix scripts: NO EFFECT' 
+    - 'Replaced event listeners with DOM cloning: NO EFFECT'
+    - 'Applied forced JavaScript navigation: NO EFFECT'
+  css_layer:
+    - 'Fixed modal z-index conflicts: NO EFFECT'
+    - 'Modified pointer-events properties: NO EFFECT'
+    - 'Added !important CSS overrides: NO EFFECT'
+  dom_layer:
+    - 'Removed modal backdrop elements: NO EFFECT'
+    - 'Reset modal display properties: NO EFFECT'
+    - 'Cleaned up hidden modal interference: NO EFFECT'
+
+root_cause_analysis: 'Deep system-level DOM event interception beyond JavaScript layer'
+
+next_steps:
+  immediate:
+    - 'BLOCK PRODUCTION RELEASE - Critical navigation failure'
+    - 'Escalate to senior frontend architect'
+    - 'Implement emergency workaround with visible back buttons'
+  architectural_fix_required:
+    - 'Complete repository page reconstruction'
+    - 'System-level DOM event debugging'
+    - 'Framework-level event handling audit'
+  emergency_workaround:
+    - 'Add prominent "Return to Dashboard" button using window.location.href'
+    - 'User education about direct URL navigation'
+    - 'Consider disabling repository page until fixed'

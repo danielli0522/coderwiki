@@ -11,11 +11,18 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from app import create_app, db
-from config import DevelopmentConfig
+from config import ProductionConfig, DevelopmentConfig
+import os
 
 def init_database():
     """Initialize database tables"""
-    app = create_app(DevelopmentConfig)
+    # 使用与run.py相同的配置逻辑
+    config_class = ProductionConfig
+    if os.environ.get('FLASK_ENV') == 'development':
+        config_class = DevelopmentConfig
+    
+    print(f"Initializing database with {config_class.__name__}")
+    app = create_app(config_class)
 
     with app.app_context():
         # 创建所有表

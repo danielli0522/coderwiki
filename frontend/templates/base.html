@@ -20,16 +20,14 @@
     <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
     {% endif %}
 
-    <!-- Modal Fixes JavaScript -->
-    <script src="{{ url_for('static', filename='js/modal-fixes.js') }}"></script>
-    <!-- Modal Close Fix JavaScript -->
-    <script src="{{ url_for('static', filename='js/modal-close-fix.js') }}"></script>
-    <!-- Navigation Fix JavaScript -->
-    <script src="{{ url_for('static', filename='js/navigation-fix.js') }}"></script>
-    <!-- URL Fix JavaScript -->
-    <script src="{{ url_for('static', filename='js/url-fix.js') }}"></script>
-    <!-- API Error Handler JavaScript -->
-    <script src="{{ url_for('static', filename='js/api-error-handler.js') }}"></script>
+    <!-- 完全禁用所有修复脚本进行测试 -->
+    <!-- <script src="{{ url_for('static', filename='js/global-navigation-fix.js') }}"></script> -->
+    <!-- <script src="{{ url_for('static', filename='js/modal-manager.js') }}"></script> -->
+    <!-- <script src="{{ url_for('static', filename='js/modal-fixes.js') }}"></script> -->
+    <!-- <script src="{{ url_for('static', filename='js/modal-close-fix.js') }}"></script> -->
+    <!-- <script src="{{ url_for('static', filename='js/navigation-fix.js') }}"></script> -->
+    <!-- <script src="{{ url_for('static', filename='js/url-fix.js') }}"></script> -->
+    <!-- <script src="{{ url_for('static', filename='js/api-error-handler.js') }}"></script> -->
 
     {% block head %}{% endblock %}
 
@@ -190,7 +188,10 @@
                 // Load components only if authenticated
                 console.log('用户已登录，加载组件...');
 
-                // Load component scripts dynamically
+                // Load component registry first
+                const componentRegistryScript = '{{ url_for("static", filename="js/components/component_loader.js") }}';
+
+                // Load component scripts dynamically and sequentially
                 const componentScripts = [
                     '{{ url_for("static", filename="js/components/stats.js") }}',
                     '{{ url_for("static", filename="js/components/repository_list.js") }}',
@@ -199,26 +200,60 @@
                     '{{ url_for("static", filename="js/components/system_status.js") }}'
                 ];
 
-                for (const scriptSrc of componentScripts) {
-                    const script = document.createElement('script');
-                    script.src = scriptSrc;
-                    document.head.appendChild(script);
-                }
+                // Load components sequentially to ensure proper loading order
+                const loadComponentScripts = async () => {
+                    // First load component registry
+                    await new Promise((resolve, reject) => {
+                        const script = document.createElement('script');
+                        script.src = componentRegistryScript;
+                        script.onload = resolve;
+                        script.onerror = reject;
+                        document.head.appendChild(script);
+                    });
+                    console.log('组件注册表加载完成');
 
-                // Load other scripts
+                    // Then load individual components
+                    for (const scriptSrc of componentScripts) {
+                        await new Promise((resolve, reject) => {
+                            const script = document.createElement('script');
+                            script.src = scriptSrc;
+                            script.onload = resolve;
+                            script.onerror = reject;
+                            document.head.appendChild(script);
+                        });
+                    }
+                    console.log('所有组件脚本加载完成');
+                };
+
+                loadComponentScripts();
+
+                // Load other scripts after components
                 const otherScripts = [
                     '{{ url_for("static", filename="js/main.js") }}',
                     '{{ url_for("static", filename="js/components.js") }}',
                     '{{ url_for("static", filename="js/performance.js") }}',
                     '{{ url_for("static", filename="js/browser-compatibility.js") }}',
-                    '{{ url_for("static", filename="js/logout.js") }}'
+                    '{{ url_for("static", filename="js/logout.js") }}',
+                    '{{ url_for("static", filename="js/dashboard.js") }}'
                 ];
 
-                for (const scriptSrc of otherScripts) {
-                    const script = document.createElement('script');
-                    script.src = scriptSrc;
-                    document.head.appendChild(script);
-                }
+                // Load other scripts after components are loaded
+                const loadOtherScripts = async () => {
+                    await loadComponentScripts(); // Wait for components to load first
+
+                    for (const scriptSrc of otherScripts) {
+                        await new Promise((resolve, reject) => {
+                            const script = document.createElement('script');
+                            script.src = scriptSrc;
+                            script.onload = resolve;
+                            script.onerror = reject;
+                            document.head.appendChild(script);
+                        });
+                    }
+                    console.log('所有脚本加载完成');
+                };
+
+                loadOtherScripts();
             } else {
                 console.log('用户未登录，跳过组件加载');
                 // Only load essential scripts for non-authenticated users
