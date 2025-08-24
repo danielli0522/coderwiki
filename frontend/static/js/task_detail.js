@@ -68,7 +68,7 @@ class TaskDetailManager {
 
     async loadTaskDetails() {
         try {
-            const response = await this.apiClient.get(`/api/tasks/${this.taskId}`);
+            const response = await this.apiClient.get(`/tasks/${this.taskId}`);
             if (response.success) {
                 this.updateTaskDisplay(response.task);
             } else {
@@ -100,13 +100,8 @@ class TaskDetailManager {
         // Update execution time
         const executionTime = document.getElementById('executionTime');
         if (executionTime) {
-            executionTime.textContent = `${task.execution_time || 0} 秒`;
-        }
-
-        // Update retry count
-        const retryCount = document.getElementById('retryCount');
-        if (retryCount) {
-            retryCount.textContent = task.retry_count || 0;
+            const duration = task.duration || 0;
+            executionTime.textContent = `${duration.toFixed(1)} 秒`;
         }
 
         // Update status indicator for running tasks
@@ -132,7 +127,7 @@ class TaskDetailManager {
 
     async loadTaskLogs() {
         try {
-            const response = await this.apiClient.get(`/api/tasks/${this.taskId}/logs`);
+            const response = await this.apiClient.get(`/tasks/${this.taskId}/logs`);
             if (response.success) {
                 this.updateLogsDisplay(response.logs);
             }
@@ -164,7 +159,7 @@ class TaskDetailManager {
 
     async loadRelatedTasks() {
         try {
-            const response = await this.apiClient.get(`/api/tasks/${this.taskId}/related`);
+            const response = await this.apiClient.get(`/tasks/${this.taskId}/related`);
             if (response.success) {
                 this.updateRelatedTasksDisplay(response.related_tasks);
             }
@@ -225,11 +220,11 @@ class TaskDetailManager {
     }
 
     startRealtimeUpdates() {
-        // Update task details every 3 seconds if running
+        // Update task details every 3 minutes if running
         this.updateInterval = setInterval(() => {
             this.loadTaskDetails();
             this.loadTaskLogs();
-        }, 3000);
+        }, 180000);
     }
 
     stopRealtimeUpdates() {
@@ -278,7 +273,7 @@ class TaskDetailManager {
     showTaskResult(result) {
         const resultContainer = document.getElementById('taskResultContainer');
         const resultContent = document.getElementById('taskResult');
-        
+
         if (resultContainer && resultContent) {
             resultContainer.style.display = 'block';
             resultContent.textContent = JSON.stringify(result, null, 2);
@@ -289,11 +284,11 @@ class TaskDetailManager {
         const errorContainer = document.getElementById('taskErrorContainer');
         const errorMessageElement = document.getElementById('taskErrorMessage');
         const errorStacktraceElement = document.getElementById('taskErrorStacktrace');
-        
+
         if (errorContainer && errorMessageElement) {
             errorContainer.style.display = 'block';
             errorMessageElement.textContent = errorMessage;
-            
+
             if (errorStacktrace && errorStacktraceElement) {
                 errorStacktraceElement.textContent = errorStacktrace;
             }
@@ -303,7 +298,7 @@ class TaskDetailManager {
     showFullResultModal() {
         const resultContent = document.getElementById('taskResult');
         const modalResultContent = document.getElementById('modalResultContent');
-        
+
         if (resultContent && modalResultContent) {
             modalResultContent.textContent = resultContent.textContent;
             const modal = new bootstrap.Modal(document.getElementById('resultModal'));
@@ -315,7 +310,7 @@ class TaskDetailManager {
         if (!confirm('确定要取消这个任务吗？')) return;
 
         try {
-            const response = await this.apiClient.post(`/api/tasks/${this.taskId}/cancel`);
+            const response = await this.apiClient.post(`/tasks/${this.taskId}/cancel`);
             if (response.success) {
                 this.showSuccess('任务已取消');
                 this.loadTaskDetails();
@@ -330,7 +325,7 @@ class TaskDetailManager {
 
     async retryTask() {
         try {
-            const response = await this.apiClient.post(`/api/tasks/${this.taskId}/retry`);
+            const response = await this.apiClient.post(`/tasks/${this.taskId}/retry`);
             if (response.success) {
                 this.showSuccess('任务已重新启动');
                 this.loadTaskDetails();
@@ -347,7 +342,7 @@ class TaskDetailManager {
         if (!confirm('确定要删除这个任务吗？此操作不可恢复。')) return;
 
         try {
-            const response = await this.apiClient.delete(`/api/tasks/${this.taskId}`);
+            const response = await this.apiClient.delete(`/tasks/${this.taskId}`);
             if (response.success) {
                 this.showSuccess('任务已删除');
                 window.location.href = '/tasks';
@@ -450,15 +445,15 @@ class TaskDetailManager {
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>
         `;
-        
+
         const container = document.createElement('div');
         container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
         container.appendChild(toast);
         document.body.appendChild(container);
-        
+
         const bsToast = new bootstrap.Toast(toast);
         bsToast.show();
-        
+
         toast.addEventListener('hidden.bs.toast', () => {
             document.body.removeChild(container);
         });
@@ -473,10 +468,10 @@ class TaskDetailManager {
 // Initialize task detail manager when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     // Get task ID from URL or data attribute
-    const taskId = document.body.dataset.taskId || 
-                   window.location.pathname.split('/').pop() || 
+    const taskId = document.body.dataset.taskId ||
+                   window.location.pathname.split('/').pop() ||
                    new URLSearchParams(window.location.search).get('id');
-    
+
     if (taskId) {
         window.taskDetailManager = new TaskDetailManager(taskId);
     }

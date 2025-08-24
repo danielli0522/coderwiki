@@ -9,13 +9,43 @@ class TaskProgressComponent {
             status: ''
         };
         this.refreshInterval = null;
+        this.isAuthenticated = false;
         this.init();
     }
 
-    init() {
-        this.bindEvents();
-        this.loadTasks();
-        this.startAutoRefresh();
+    async init() {
+        await this.checkAuthentication();
+        if (this.isAuthenticated) {
+            this.bindEvents();
+            this.loadTasks();
+            this.startAutoRefresh();
+        } else {
+            console.log('用户未登录，跳过任务进度组件初始化');
+        }
+    }
+
+    async checkAuthentication() {
+        try {
+            const response = await fetch('/api/auth/status', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                redirect: 'manual'
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                this.isAuthenticated = data.logged_in || false;
+            } else if (response.status === 302 || response.status === 303) {
+                this.isAuthenticated = false;
+            } else {
+                this.isAuthenticated = false;
+            }
+        } catch (error) {
+            console.error('认证检查失败:', error);
+            this.isAuthenticated = false;
+        }
     }
 
     bindEvents() {
@@ -62,9 +92,20 @@ class TaskProgressComponent {
     }
 
     async loadTasks(forceRefresh = false) {
+        if (!this.isAuthenticated) {
+            console.log('用户未登录，跳过任务数据加载');
+            return;
+        }
+
         try {
             const params = new URLSearchParams(this.filters);
-            const response = await fetch(`/tasks?${params}`);
+            const response = await fetch(`/api/tasks?${params}`, {
+                redirect: 'manual'
+            });
+
+            if (response.status === 302 || response.status === 303) {
+                throw new Error('需要登录');
+            }
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -214,10 +255,10 @@ class TaskProgressComponent {
     }
 
     startAutoRefresh() {
-        // 每5秒自动刷新一次任务列表
+        // 每3分钟自动刷新一次任务列表
         this.refreshInterval = setInterval(() => {
             this.loadTasks();
-        }, 5000);
+        }, 180000);
     }
 
     stopAutoRefresh() {

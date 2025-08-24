@@ -1137,7 +1137,7 @@ const StorageManager = {
 const AppInitializer = {
     init: function() {
         // 初始化性能监控
-        PerformanceMonitor.init();
+        ComponentPerformanceMonitor.init();
 
         // 初始化键盘导航
         KeyboardNavigation.init();
@@ -1242,7 +1242,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // 导出到全局
 window.ComponentManager = ComponentManager;
-window.PerformanceMonitor = PerformanceMonitor;
+// Only set PerformanceMonitor if it doesn't already exist
+if (!window.PerformanceMonitor) {
+    window.PerformanceMonitor = ComponentPerformanceMonitor;
+}
 window.KeyboardNavigation = KeyboardNavigation;
 window.DragDropManager = DragDropManager;
 window.StorageManager = StorageManager;

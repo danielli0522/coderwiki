@@ -1,0 +1,12 @@
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <!-- 背景圆圈 -->
+    <circle cx="50" cy="50" r="50" fill="#e9ecef" />
+
+    <!-- 用户图标 -->
+    <circle cx="50" cy="35" r="15" fill="#6c757d" />
+    <path d="M25 75 C25 60 35 50 50 50 C65 50 75 60 75 75" fill="#6c757d" />
+
+    <!-- 用户图标内部 -->
+    <circle cx="50" cy="35" r="10" fill="#ffffff" />
+    <path d="M30 75 C30 65 38 58 50 58 C62 58 70 65 70 75" fill="#ffffff" />
+</svg>

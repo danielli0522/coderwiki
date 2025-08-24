@@ -14,10 +14,17 @@ window.fixApiUrls = function() {
         if (typeof url === 'string') {
             const needsApiPrefix = ['/auth/', '/repositories/', '/tasks/', '/documents/', '/system/', '/users/', '/analysis/'];
             const shouldAddApiPrefix = needsApiPrefix.some(prefix => url.startsWith(prefix)) && !url.startsWith('/api/');
-            
+
             if (shouldAddApiPrefix) {
                 const fixedUrl = '/api' + url;
                 console.log(`修复API URL: ${url} -> ${fixedUrl}`);
+                return originalFetch(fixedUrl, options);
+            }
+
+            // 检查是否已经有重复的/api前缀
+            if (url.includes('/api/api/')) {
+                const fixedUrl = url.replace('/api/api/', '/api/');
+                console.log(`修复重复API前缀: ${url} -> ${fixedUrl}`);
                 return originalFetch(fixedUrl, options);
             }
         }

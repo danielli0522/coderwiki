@@ -1,7 +1,7 @@
 {
   "name": "CoderWiki",
   "short_name": "CoderWiki",
-  "description": "智能代码文档生成与管理平台",
+  "description": "智能数据平台与代码文档生成管理系统",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

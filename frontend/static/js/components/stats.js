@@ -7,13 +7,43 @@ class StatsComponent {
         this.charts = {};
         this.cache = new Map();
         this.cacheExpiry = 5 * 60 * 1000; // 5分钟缓存
+        this.isAuthenticated = false;
         this.init();
     }
 
-    init() {
-        this.bindEvents();
-        this.loadStats();
-        this.startAutoRefresh();
+    async init() {
+        await this.checkAuthentication();
+        if (this.isAuthenticated) {
+            this.bindEvents();
+            this.loadStats();
+            this.startAutoRefresh();
+        } else {
+            console.log('用户未登录，跳过统计组件初始化');
+        }
+    }
+
+    async checkAuthentication() {
+        try {
+            const response = await fetch('/api/auth/status', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                redirect: 'manual'
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                this.isAuthenticated = data.logged_in || false;
+            } else if (response.status === 302 || response.status === 303) {
+                this.isAuthenticated = false;
+            } else {
+                this.isAuthenticated = false;
+            }
+        } catch (error) {
+            console.error('认证检查失败:', error);
+            this.isAuthenticated = false;
+        }
     }
 
     bindEvents() {
@@ -26,6 +56,11 @@ class StatsComponent {
     }
 
     async loadStats(forceRefresh = false) {
+        if (!this.isAuthenticated) {
+            console.log('用户未登录，跳过统计数据加载');
+            return;
+        }
+
         try {
             const stats = await this.fetchStats(forceRefresh);
             this.updateStatsDisplay(stats);
@@ -44,7 +79,14 @@ class StatsComponent {
             return cached.data;
         }
 
-        const response = await fetch('/api/users/stats');
+        const response = await fetch('/api/users/stats', {
+            redirect: 'manual'
+        });
+        
+        if (response.status === 302 || response.status === 303) {
+            throw new Error('需要登录');
+        }
+        
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }

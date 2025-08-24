@@ -1,0 +1,166 @@
+# 深度QA测试配置文件
+# 基于BMAD角色系统的自动化测试配置
+
+server:
+  host: "localhost"
+  port: 5001
+  startup_timeout: 30
+  health_check_interval: 5
+
+task_worker:
+  enabled: true
+  startup_timeout: 15
+
+tests:
+  timeout: 300
+  retry_count: 3
+  parallel_tests: 5
+
+monitoring:
+  log_analysis_interval: 10
+  performance_threshold: 2.0
+  memory_threshold: 80.0
+
+bmad_roles:
+  qa_analyst:
+    enabled: true
+    priority: 1
+    responsibilities:
+      - "分析测试结果"
+      - "生成测试报告"
+      - "识别测试覆盖缺口"
+
+  test_designer:
+    enabled: true
+    priority: 2
+    responsibilities:
+      - "设计测试用例"
+      - "分析测试覆盖"
+      - "优化测试策略"
+
+  risk_analyst:
+    enabled: true
+    priority: 3
+    responsibilities:
+      - "评估风险等级"
+      - "识别高风险问题"
+      - "提供风险缓解建议"
+
+  nfr_specialist:
+    enabled: true
+    priority: 4
+    responsibilities:
+      - "分析非功能性需求"
+      - "性能指标监控"
+      - "可用性评估"
+
+  dev_agent:
+    enabled: true
+    priority: 5
+    responsibilities:
+      - "准备修复方案"
+      - "代码质量分析"
+      - "技术债务评估"
+
+  architect:
+    enabled: true
+    priority: 6
+    responsibilities:
+      - "系统架构分析"
+      - "集成点评估"
+      - "可扩展性分析"
+
+  security_specialist:
+    enabled: true
+    priority: 7
+    responsibilities:
+      - "安全漏洞分析"
+      - "认证授权检查"
+      - "安全最佳实践验证"
+
+test_categories:
+  functional:
+    - "健康检查测试"
+    - "API功能测试"
+    - "错误处理测试"
+    - "边界条件测试"
+
+  performance:
+    - "性能测试"
+    - "并发测试"
+    - "负载测试"
+    - "压力测试"
+
+  security:
+    - "认证测试"
+    - "安全测试"
+    - "权限测试"
+    - "认证端点测试"
+
+  integration:
+    - "前端集成测试"
+    - "数据库连接测试"
+    - "任务队列测试"
+    - "第三方服务集成测试"
+
+bug_categories:
+  CRITICAL:
+    - "系统崩溃"
+    - "数据丢失"
+    - "安全漏洞"
+    - "认证绕过"
+
+  HIGH:
+    - "功能失效"
+    - "性能严重下降"
+    - "数据不一致"
+    - "API错误"
+
+  MEDIUM:
+    - "UI问题"
+    - "性能轻微下降"
+    - "用户体验问题"
+    - "兼容性问题"
+
+  LOW:
+    - "界面优化"
+    - "文档更新"
+    - "代码重构"
+    - "测试改进"
+
+performance_metrics:
+  response_time:
+    excellent: "< 0.5s"
+    good: "0.5s - 1.0s"
+    acceptable: "1.0s - 2.0s"
+    poor: "> 2.0s"
+
+  error_rate:
+    excellent: "< 0.1%"
+    good: "0.1% - 1%"
+    acceptable: "1% - 5%"
+    poor: "> 5%"
+
+  throughput:
+    excellent: "> 1000 req/s"
+    good: "500-1000 req/s"
+    acceptable: "100-500 req/s"
+    poor: "< 100 req/s"
+
+reporting:
+  output_formats:
+    - "json"
+    - "html"
+    - "markdown"
+
+  include_sections:
+    - "executive_summary"
+    - "test_results"
+    - "bug_reports"
+    - "performance_metrics"
+    - "bmad_analysis"
+    - "recommendations"
+
+  auto_fix_suggestions: true
+  priority_ranking: true
+  trend_analysis: true

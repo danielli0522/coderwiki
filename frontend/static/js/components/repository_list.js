@@ -13,12 +13,42 @@ class RepositoryListComponent {
         };
         this.selectedRepositories = new Set();
         this.bulkMode = false;
+        this.isAuthenticated = false;
         this.init();
     }
 
-    init() {
-        this.bindEvents();
-        this.loadRepositories();
+    async init() {
+        await this.checkAuthentication();
+        if (this.isAuthenticated) {
+            this.bindEvents();
+            this.loadRepositories();
+        } else {
+            console.log('用户未登录，跳过仓库列表组件初始化');
+        }
+    }
+
+    async checkAuthentication() {
+        try {
+            const response = await fetch('/api/auth/status', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                redirect: 'manual'
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                this.isAuthenticated = data.logged_in || false;
+            } else if (response.status === 302 || response.status === 303) {
+                this.isAuthenticated = false;
+            } else {
+                this.isAuthenticated = false;
+            }
+        } catch (error) {
+            console.error('认证检查失败:', error);
+            this.isAuthenticated = false;
+        }
     }
 
     bindEvents() {
@@ -121,13 +151,13 @@ class RepositoryListComponent {
     }
 
     async loadRepositories() {
+        if (!this.isAuthenticated) {
+            console.log('用户未登录，跳过仓库数据加载');
+            return;
+        }
+
         try {
-            // 检查认证状态
-            const isAuthenticated = await window.apiErrorHandler.preCheckAuth();
-            if (!isAuthenticated) {
-                console.log('用户未登录，跳过加载仓库列表');
-                return;
-            }
+            console.log('开始加载仓库列表...');
 
             const params = new URLSearchParams({
                 page: this.currentPage,
@@ -135,23 +165,40 @@ class RepositoryListComponent {
                 ...this.filters
             });
 
-            const response = await fetch(`/api/repositories?${params}`);
+            console.log('API请求参数:', params.toString());
+
+            const response = await fetch(`/api/repositories?${params}`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                redirect: 'manual'
+            });
+
+            console.log('API响应状态:', response.status);
+
+            if (response.status === 302 || response.status === 303) {
+                throw new Error('需要登录');
+            }
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const data = await response.json();
+            console.log('API响应数据:', data);
+
             this.repositories = data.repositories || [];
             this.totalItems = data.total || 0;
+
+            console.log(`加载到 ${this.repositories.length} 个仓库`);
 
             this.renderRepositories();
             this.renderPagination();
         } catch (error) {
             console.error('加载仓库列表失败:', error);
-            // 不显示认证相关的错误消息
-            if (!error.message.includes('需要登录') && !error.message.includes('跳转到登录页面')) {
-                this.showError('加载仓库列表失败');
-            }
+            this.showError('加载仓库列表失败: ' + error.message);
         }
     }
 
@@ -300,19 +347,23 @@ class RepositoryListComponent {
 
     async generateDocument(repoId) {
         try {
-            const response = await fetch(`/api/repositories/${repoId}/generate`, {
-                method: 'POST'
-            });
+            // 临时禁用API调用
+            // const response = await fetch(`/api/repositories/${repoId}/generate`, {
+            //     method: 'POST'
+            // });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+            // if (!response.ok) {
+            //     throw new Error(`HTTP error! status: ${response.status}`);
+            // }
 
-            const data = await response.json();
-            this.showSuccess('文档生成任务已创建');
+            // const data = await response.json();
+            // this.showSuccess('文档生成任务已创建');
 
             // 触发任务列表刷新
-            window.dispatchEvent(new CustomEvent('task:refresh'));
+            // window.dispatchEvent(new CustomEvent('task:refresh'));
+
+            // 临时显示成功消息
+            this.showSuccess('文档生成功能已禁用（开发模式）');
         } catch (error) {
             console.error('生成文档失败:', error);
             this.showError('生成文档失败');
@@ -521,30 +572,36 @@ class RepositoryListComponent {
         if (!confirmed) return;
 
         try {
-            const repositoryIds = Array.from(this.selectedRepositories).map(id => parseInt(id));
+            // 临时禁用API调用
+            // const repositoryIds = Array.from(this.selectedRepositories).map(id => parseInt(id));
 
-            const response = await fetch('/api/repositories/bulk-delete', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ repository_ids: repositoryIds })
-            });
+            // const response = await fetch('/api/repositories/bulk-delete', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json'
+            //     },
+            //     body: JSON.stringify({ repository_ids: repositoryIds })
+            // });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+            // if (!response.ok) {
+            //     throw new Error(`HTTP error! status: ${response.status}`);
+            // }
 
-            const data = await response.json();
+            // const data = await response.json();
 
-            if (data.success) {
-                this.showSuccess(`成功删除 ${data.deleted_count} 个仓库`);
-                this.selectedRepositories.clear();
-                this.toggleBulkMode();
-                this.loadRepositories();
-            } else {
-                throw new Error(data.message || '批量删除失败');
-            }
+            // if (data.success) {
+            //     this.showSuccess(`成功删除 ${data.deleted_count} 个仓库`);
+            //     this.selectedRepositories.clear();
+            //     this.toggleBulkMode();
+            //     this.loadRepositories();
+            // } else {
+            //     throw new Error(data.message || '批量删除失败');
+            // }
+
+            // 临时显示成功消息
+            this.showSuccess(`批量删除功能已禁用（开发模式）`);
+            this.selectedRepositories.clear();
+            this.toggleBulkMode();
 
         } catch (error) {
             console.error('批量删除仓库失败:', error);

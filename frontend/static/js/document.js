@@ -52,15 +52,12 @@ class DocumentManager {
             const search = document.getElementById('searchDocuments')?.value || '';
             const status = document.getElementById('statusFilter')?.value || '';
 
-            const response = await fetch(`/api/documents?page=${this.currentPage}&limit=${this.pageSize}&search=${search}&status=${status}`);
+            // 使用ApiClient进行请求
+            const apiClient = window.apiClient || new ApiClient();
+            const data = await apiClient.request(`/documents?page=${this.currentPage}&limit=${this.pageSize}&search=${search}&status=${status}`);
 
-            if (response.ok) {
-                const data = await response.json();
-                this.renderDocuments(data.documents || []);
-                this.updateStats(data.stats || {});
-            } else {
-                throw new Error('加载文档失败');
-            }
+            this.renderDocuments(data.documents || []);
+            this.updateStats(data.stats || {});
         } catch (error) {
             console.error('加载文档失败:', error);
             tbody.innerHTML = `
@@ -136,27 +133,30 @@ class DocumentManager {
         if (!select) return;
 
         try {
-            const response = await fetch('/api/repositories');
-            if (response.ok) {
-                const data = await response.json();
-                const repositories = data.repositories || [];
+            // 使用ApiClient进行请求
+            const apiClient = window.apiClient || new ApiClient();
+            const data = await apiClient.request('/repositories');
+            const repositories = data.repositories || [];
 
-                select.innerHTML = '<option value="">请选择仓库</option>';
-                repositories.forEach(repo => {
-                    const option = document.createElement('option');
-                    option.value = repo.id;
-                    option.textContent = repo.name;
-                    select.appendChild(option);
-                });
-            }
+            select.innerHTML = '<option value="">请选择仓库</option>';
+            repositories.forEach(repo => {
+                const option = document.createElement('option');
+                option.value = repo.id;
+                option.textContent = repo.name;
+                select.appendChild(option);
+            });
         } catch (error) {
             console.error('加载仓库失败:', error);
+            select.innerHTML = '<option value="">加载仓库失败</option>';
         }
     }
 
     showAddDocumentModal() {
         const modal = new bootstrap.Modal(document.getElementById('addDocumentModal'));
         modal.show();
+
+        // 重新加载仓库列表
+        this.loadRepositories();
 
         // 确保模态框可以正常交互
         setTimeout(() => {
@@ -185,26 +185,20 @@ class DocumentManager {
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 创建中...';
 
         try {
-            const response = await fetch('/api/documents', {
+            // 使用ApiClient进行请求
+            const apiClient = window.apiClient || new ApiClient();
+            await apiClient.request('/documents', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
                 body: JSON.stringify(formData)
             });
 
-            if (response.ok) {
-                this.showToast('文档创建成功', 'success');
-                bootstrap.Modal.getInstance(document.getElementById('addDocumentModal')).hide();
-                form.reset();
-                this.loadDocuments();
-            } else {
-                const error = await response.json();
-                throw new Error(error.message || '创建文档失败');
-            }
+            this.showToast('文档创建成功', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('addDocumentModal')).hide();
+            form.reset();
+            this.loadDocuments();
         } catch (error) {
             console.error('创建文档失败:', error);
-            this.showToast(error.message, 'error');
+            this.showToast(error.message || '创建文档失败', 'error');
         } finally {
             submitBtn.disabled = false;
             submitBtn.innerHTML = '创建文档';
@@ -231,20 +225,17 @@ class DocumentManager {
         }
 
         try {
-            const response = await fetch(`/api/documents/${id}`, {
+            // 使用ApiClient进行请求
+            const apiClient = window.apiClient || new ApiClient();
+            await apiClient.request(`/documents/${id}`, {
                 method: 'DELETE'
             });
 
-            if (response.ok) {
-                this.showToast('文档删除成功', 'success');
-                this.loadDocuments();
-            } else {
-                const error = await response.json();
-                throw new Error(error.message || '删除文档失败');
-            }
+            this.showToast('文档删除成功', 'success');
+            this.loadDocuments();
         } catch (error) {
             console.error('删除文档失败:', error);
-            this.showToast(error.message, 'error');
+            this.showToast(error.message || '删除文档失败', 'error');
         }
     }
 

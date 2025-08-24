@@ -1,0 +1,78 @@
+<!-- Comprehensive Data Platform Icon -->
+<svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background with gradient -->
+    <rect width="192" height="192" rx="24" fill="url(#bgGradient)" />
+
+    <!-- Central Data Hub -->
+    <circle cx="96" cy="96" r="25" fill="white" opacity="0.95" />
+    <circle cx="96" cy="96" r="20" fill="url(#centerGradient)" />
+
+    <!-- Data Flow Connections -->
+    <!-- Top connection -->
+    <path d="M96 71 Q96 50 96 30" stroke="white" stroke-width="3" fill="none" opacity="0.8" />
+    <circle cx="96" cy="30" r="8" fill="white" opacity="0.9" />
+
+    <!-- Bottom connection -->
+    <path d="M96 121 Q96 142 96 162" stroke="white" stroke-width="3" fill="none" opacity="0.8" />
+    <circle cx="96" cy="162" r="8" fill="white" opacity="0.9" />
+
+    <!-- Left connection -->
+    <path d="M71 96 Q50 96 30 96" stroke="white" stroke-width="3" fill="none" opacity="0.8" />
+    <circle cx="30" cy="96" r="8" fill="white" opacity="0.9" />
+
+    <!-- Right connection -->
+    <path d="M121 96 Q142 96 162 96" stroke="white" stroke-width="3" fill="none" opacity="0.8" />
+    <circle cx="162" cy="96" r="8" fill="white" opacity="0.9" />
+
+    <!-- Analytics Chart Elements -->
+    <!-- Bar Chart -->
+    <rect x="75" y="85" width="6" height="15" fill="white" opacity="0.8" />
+    <rect x="85" y="80" width="6" height="20" fill="white" opacity="0.8" />
+    <rect x="95" y="75" width="6" height="25" fill="white" opacity="0.8" />
+    <rect x="105" y="82" width="6" height="18" fill="white" opacity="0.8" />
+    <rect x="115" y="88" width="6" height="12" fill="white" opacity="0.8" />
+
+    <!-- Data Points -->
+    <circle cx="80" cy="70" r="3" fill="white" opacity="0.7" />
+    <circle cx="90" cy="65" r="3" fill="white" opacity="0.7" />
+    <circle cx="100" cy="60" r="3" fill="white" opacity="0.7" />
+    <circle cx="110" cy="68" r="3" fill="white" opacity="0.7" />
+    <circle cx="120" cy="75" r="3" fill="white" opacity="0.7" />
+
+    <!-- Connection Lines for Data Points -->
+    <path d="M80 70 Q90 65 100 60 Q110 68 120 75" stroke="white" stroke-width="2" fill="none" opacity="0.6" />
+
+    <!-- Database Storage Representation -->
+    <ellipse cx="96" cy="140" rx="35" ry="12" fill="white" opacity="0.8" />
+    <ellipse cx="96" cy="140" rx="25" ry="8" fill="url(#dbGradient)" />
+
+    <!-- Data Stream Lines -->
+    <path d="M60 120 Q96 100 132 120" stroke="white" stroke-width="2" fill="none" opacity="0.5" />
+    <path d="M65 125 Q96 105 127 125" stroke="white" stroke-width="1.5" fill="none" opacity="0.4" />
+    <path d="M70 130 Q96 110 122 130" stroke="white" stroke-width="1" fill="none" opacity="0.3" />
+
+    <!-- AI/ML Elements -->
+    <path d="M40 60 Q60 40 80 60 Q100 80 120 60 Q140 40 160 60" stroke="white" stroke-width="2" fill="none"
+        opacity="0.7" />
+    <circle cx="80" cy="60" r="4" fill="white" opacity="0.8" />
+    <circle cx="120" cy="60" r="4" fill="white" opacity="0.8" />
+
+    <!-- Gradients -->
+    <defs>
+        <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+            <stop offset="50%" style="stop-color:#764ba2;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#f093fb;stop-opacity:1" />
+        </linearGradient>
+
+        <linearGradient id="centerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#4facfe;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#00f2fe;stop-opacity:1" />
+        </linearGradient>
+
+        <linearGradient id="dbGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#a8edea;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#fed6e3;stop-opacity:1" />
+        </linearGradient>
+    </defs>
+</svg>

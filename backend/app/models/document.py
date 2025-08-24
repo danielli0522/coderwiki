@@ -2,7 +2,7 @@
 Document model definition.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from flask_sqlalchemy import SQLAlchemy
 from app import db
 import json
@@ -24,9 +24,9 @@ class Document(db.Model):
     language = db.Column(db.String(100))
     document_type = db.Column(db.String(100), default='readme')
     format = db.Column(db.String(50), default='markdown')
-    generated_at = db.Column(db.DateTime, nullable=False, index=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    generated_at = db.Column(db.DateTime, nullable=True, index=True)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False, index=True)
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
     llm_config_id = db.Column(db.Integer, db.ForeignKey('llm_configs.id'))
     prompt_tokens = db.Column(db.Integer)
     completion_tokens = db.Column(db.Integer)

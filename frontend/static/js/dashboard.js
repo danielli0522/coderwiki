@@ -186,20 +186,20 @@ class DashboardController {
                             <form id="addRepositoryForm">
                                 <div class="mb-3">
                                     <label for="repoName" class="form-label">仓库名称</label>
-                                    <input type="text" class="form-control" id="repoName" required>
+                                    <input type="text" class="form-control" id="repoName" name="repoName" required>
                                 </div>
                                 <div class="mb-3">
                                     <label for="repoUrl" class="form-label">仓库URL</label>
-                                    <input type="url" class="form-control" id="repoUrl" required>
+                                    <input type="url" class="form-control" id="repoUrl" name="repoUrl" required>
                                     <div class="form-text">支持GitHub、GitLab等Git仓库地址</div>
                                 </div>
                                 <div class="mb-3">
                                     <label for="repoDescription" class="form-label">描述</label>
-                                    <textarea class="form-control" id="repoDescription" rows="3"></textarea>
+                                    <textarea class="form-control" id="repoDescription" name="repoDescription" rows="3"></textarea>
                                 </div>
                                 <div class="mb-3">
                                     <label for="repoBranch" class="form-label">分支</label>
-                                    <input type="text" class="form-control" id="repoBranch" value="main">
+                                    <input type="text" class="form-control" id="repoBranch" name="repoBranch" value="main">
                                 </div>
                             </form>
                         </div>
@@ -236,13 +236,18 @@ class DashboardController {
 
     async saveRepository(modal) {
         const form = document.getElementById('addRepositoryForm');
-        const formData = new FormData(form);
+
+        // 验证表单
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
 
         const repoData = {
-            name: formData.get('repoName') || document.getElementById('repoName').value,
-            url: formData.get('repoUrl') || document.getElementById('repoUrl').value,
-            description: formData.get('repoDescription') || document.getElementById('repoDescription').value,
-            branch: formData.get('repoBranch') || document.getElementById('repoBranch').value
+            name: document.getElementById('repoName').value,
+            url: document.getElementById('repoUrl').value,
+            description: document.getElementById('repoDescription').value,
+            branch: document.getElementById('repoBranch').value
         };
 
         try {
@@ -335,12 +340,9 @@ class DashboardController {
 
     async loadRepositoryOptions() {
         try {
-            const response = await fetch('/api/repositories');
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
+            // 使用ApiClient进行请求
+            const apiClient = window.apiClient || new ApiClient();
+            const data = await apiClient.request('/repositories');
             const repositories = data.repositories || [];
             const select = document.getElementById('documentRepo');
 
@@ -384,8 +386,8 @@ class DashboardController {
 
         try {
             const response = await this.api.generateDocument(repoId, {
-                type: docType,
-                format: docFormat
+                document_type: docType,  // 修复：将 'type' 改为 'document_type'
+                output_format: docFormat  // 修复：将 'format' 改为 'output_format'
             });
 
             this.showSuccess('文档生成任务已创建');

@@ -1,8 +1,36 @@
-<!-- Placeholder for CoderWiki logo -->
+<!-- Data Platform Icon for CoderWiki -->
 <svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="192" height="192" rx="24" fill="#007bff"/>
-  <path d="M48 60L96 40L144 60V100L96 120L48 100V60Z" fill="white"/>
-  <path d="M48 100L96 120V140L48 120V100Z" fill="white" opacity="0.8"/>
-  <path d="M144 100L96 120V140L144 120V100Z" fill="white" opacity="0.8"/>
-  <path d="M60 70L96 55L132 70V90L96 105L60 90V70Z" fill="#007bff"/>
+  <!-- Background -->
+  <rect width="192" height="192" rx="24" fill="url(#gradient)" />
+
+  <!-- Data Platform Elements -->
+  <!-- Database/Storage Base -->
+  <ellipse cx="96" cy="140" rx="60" ry="20" fill="white" opacity="0.9" />
+
+  <!-- Data Flow Lines -->
+  <path d="M36 120 Q96 80 156 120" stroke="white" stroke-width="3" fill="none" opacity="0.8" />
+  <path d="M36 110 Q96 70 156 110" stroke="white" stroke-width="2" fill="none" opacity="0.6" />
+  <path d="M36 100 Q96 60 156 100" stroke="white" stroke-width="2" fill="none" opacity="0.4" />
+
+  <!-- Data Points/Nodes -->
+  <circle cx="96" cy="80" r="8" fill="white" />
+  <circle cx="76" cy="95" r="6" fill="white" opacity="0.8" />
+  <circle cx="116" cy="95" r="6" fill="white" opacity="0.8" />
+  <circle cx="66" cy="110" r="5" fill="white" opacity="0.7" />
+  <circle cx="126" cy="110" r="5" fill="white" opacity="0.7" />
+
+  <!-- Analytics Chart Bars -->
+  <rect x="70" y="50" width="8" height="20" fill="white" opacity="0.9" />
+  <rect x="85" y="40" width="8" height="30" fill="white" opacity="0.9" />
+  <rect x="100" y="35" width="8" height="35" fill="white" opacity="0.9" />
+  <rect x="115" y="45" width="8" height="25" fill="white" opacity="0.9" />
+
+  <!-- Gradient Definition -->
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#764ba2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f093fb;stop-opacity:1" />
+    </linearGradient>
+  </defs>
 </svg>

@@ -21,7 +21,7 @@
                             <div class="d-flex justify-content-between">
                                 <div>
                                     <h4 class="card-title">总分析</h4>
-                                    <h2 class="mb-0">0</h2>
+                                    <h2 class="mb-0" id="totalAnalyses">0</h2>
                                 </div>
                                 <div class="align-self-center">
                                     <i class="fas fa-chart-line fa-2x"></i>
@@ -36,7 +36,7 @@
                             <div class="d-flex justify-content-between">
                                 <div>
                                     <h4 class="card-title">成功</h4>
-                                    <h2 class="mb-0">0</h2>
+                                    <h2 class="mb-0" id="successAnalyses">0</h2>
                                 </div>
                                 <div class="align-self-center">
                                     <i class="fas fa-check-circle fa-2x"></i>
@@ -51,7 +51,7 @@
                             <div class="d-flex justify-content-between">
                                 <div>
                                     <h4 class="card-title">进行中</h4>
-                                    <h2 class="mb-0">0</h2>
+                                    <h2 class="mb-0" id="runningAnalyses">0</h2>
                                 </div>
                                 <div class="align-self-center">
                                     <i class="fas fa-clock fa-2x"></i>
@@ -66,7 +66,7 @@
                             <div class="d-flex justify-content-between">
                                 <div>
                                     <h4 class="card-title">失败</h4>
-                                    <h2 class="mb-0">0</h2>
+                                    <h2 class="mb-0" id="failedAnalyses">0</h2>
                                 </div>
                                 <div class="align-self-center">
                                     <i class="fas fa-exclamation-triangle fa-2x"></i>
@@ -77,8 +77,87 @@
                 </div>
             </div>
 
-            <!-- 分析列表 -->
-            <div class="card">
+            <!-- 分析控制面板 -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">分析控制</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="analysisRepoSelect" class="form-label">选择仓库</label>
+                                <select class="form-select" id="analysisRepoSelect">
+                                    <option value="">请选择仓库</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">分析类型</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="structureAnalysis" checked>
+                                    <label class="form-check-label" for="structureAnalysis">结构分析</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="complexityAnalysis" checked>
+                                    <label class="form-check-label" for="complexityAnalysis">复杂度分析</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="qualityAnalysis">
+                                    <label class="form-check-label" for="qualityAnalysis">质量分析</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="securityAnalysis">
+                                    <label class="form-check-label" for="securityAnalysis">安全分析</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <button class="btn btn-primary" id="startAnalysisBtn">
+                                <i class="fas fa-play"></i> 开始分析
+                            </button>
+                            <button class="btn btn-secondary" id="stopAnalysisBtn" style="display: none;">
+                                <i class="fas fa-stop"></i> 停止分析
+                            </button>
+                            <button class="btn btn-info" id="refreshAnalysisBtn">
+                                <i class="fas fa-sync"></i> 刷新
+                            </button>
+                            <button class="btn btn-warning" id="clearCacheBtn">
+                                <i class="fas fa-trash"></i> 清除缓存
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 加载指示器 -->
+            <div id="analysisLoading" class="text-center" style="display: none;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">加载中...</span>
+                </div>
+                <p class="mt-2">正在加载分析结果...</p>
+            </div>
+
+            <!-- 分析结果容器 -->
+            <div id="analysisResults" style="display: none;">
+                <!-- 分析结果将在这里动态加载 -->
+            </div>
+
+            <!-- 空状态容器 -->
+            <div id="analysisEmpty" class="text-center">
+                <i class="fas fa-chart-bar fa-4x text-muted mb-3"></i>
+                <h4 class="text-muted">暂无分析结果</h4>
+                <p class="text-muted">选择一个仓库并开始分析以查看结果</p>
+                <button class="btn btn-primary" id="startFirstAnalysisBtn">
+                    <i class="fas fa-plus"></i> 开始第一个分析
+                </button>
+            </div>
+
+            <!-- 分析历史 -->
+            <div class="card mt-4">
                 <div class="card-header">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">分析历史</h5>
@@ -95,29 +174,32 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>仓库</th>
-                                    <th>分析类型</th>
-                                    <th>状态</th>
-                                    <th>创建时间</th>
-                                    <th>完成时间</th>
-                                    <th>操作</th>
-                                </tr>
-                            </thead>
-                            <tbody id="analysisTableBody">
-                                <tr>
-                                    <td colspan="6" class="text-center text-muted">
-                                        <i class="fas fa-chart-bar fa-2x mb-2"></i>
-                                        <p>暂无分析记录</p>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <div id="analysisHistory">
+                        <!-- 分析历史将在这里动态加载 -->
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 分析进度模态框 -->
+<div class="modal fade" id="analysisProgressModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">分析进度</h5>
+            </div>
+            <div class="modal-body">
+                <div class="progress mb-3">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated"
+                         id="analysisProgressBar" role="progressbar" style="width: 0%"></div>
+                </div>
+                <p id="analysisProgressText">准备开始分析...</p>
+                <div id="analysisProgressDetails"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancelAnalysisBtn">取消分析</button>
             </div>
         </div>
     </div>
@@ -140,14 +222,23 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="analysisType" class="form-label">分析类型</label>
-                        <select class="form-select" id="analysisType" required>
-                            <option value="">请选择分析类型</option>
-                            <option value="complexity">代码复杂度分析</option>
-                            <option value="quality">代码质量分析</option>
-                            <option value="security">安全漏洞分析</option>
-                            <option value="performance">性能分析</option>
-                        </select>
+                        <label class="form-label">分析类型</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="modalStructureAnalysis" checked>
+                            <label class="form-check-label" for="modalStructureAnalysis">结构分析</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="modalComplexityAnalysis" checked>
+                            <label class="form-check-label" for="modalComplexityAnalysis">复杂度分析</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="modalQualityAnalysis">
+                            <label class="form-check-label" for="modalQualityAnalysis">质量分析</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="modalSecurityAnalysis">
+                            <label class="form-check-label" for="modalSecurityAnalysis">安全分析</label>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="analysisConfig" class="form-label">分析配置</label>
@@ -157,7 +248,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                <button type="button" class="btn btn-primary" id="startAnalysisBtn">开始分析</button>
+                <button type="button" class="btn btn-primary" id="modalStartAnalysisBtn">开始分析</button>
             </div>
         </div>
     </div>
@@ -166,6 +257,13 @@
 
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/analysis.js') }}"></script>
+<script>
+// 初始化分析管理器
+document.addEventListener('DOMContentLoaded', function() {
+    // 这里可以添加页面特定的初始化逻辑
+    console.log('Analysis page loaded');
+});
+</script>
 {% endblock %}
 
 

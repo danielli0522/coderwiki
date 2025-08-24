@@ -6,10 +6,11 @@ from app.models.repository import Repository
 from app.models.user import User
 from app import db
 from sqlalchemy import and_, or_
-from datetime import datetime
+from datetime import datetime, timezone
 from app.utils.logger import get_logger
 import threading
 import time
+from app.models.task import Task
 
 logger = get_logger(__name__)
 
@@ -69,16 +70,21 @@ class DocumentService:
             logger.error(f"获取文档列表失败: {e}")
             return [], {}
 
-    def create_document(self, user_id, title, repository_id, document_type, description=''):
+    def create_document(self, user_id, title, repository_id, document_type, description='', content='', skip_permission_check=False):
         """创建新文档"""
         try:
             # 验证仓库是否存在
-            repository = Repository.query.filter(
-                and_(
-                    Repository.id == repository_id,
-                    Repository.user_id == user_id
-                )
-            ).first()
+            if skip_permission_check:
+                # 系统级操作，跳过用户权限检查
+                repository = Repository.query.filter_by(id=repository_id).first()
+            else:
+                # 用户级操作，检查权限
+                repository = Repository.query.filter(
+                    and_(
+                        Repository.id == repository_id,
+                        Repository.user_id == user_id
+                    )
+                ).first()
 
             if not repository:
                 raise ValueError("仓库不存在或无权限访问")
@@ -90,8 +96,8 @@ class DocumentService:
                 document_type=document_type,
                 repository_id=repository_id,
                 user_id=user_id,
-                status='pending',
-                content='',  # 初始为空内容
+                status='completed' if content else 'pending',
+                content=content,  # 使用传入的内容
                 version='1.0.0'  # 初始版本
             )
 
@@ -220,7 +226,25 @@ class DocumentService:
             if not document:
                 return False
 
-            # 更新状态为处理中
+            # 创建任务记录
+            from app.services.task_service import TaskService
+            task_service = TaskService()
+
+            task = Task(
+                user_id=user_id,
+                repository_id=document.repository_id,
+                type='generate_document',
+                status='pending',
+                progress=0,
+                title=f"生成文档: {document.title}",
+                description=f"为仓库生成{document.document_type}文档",
+                task_type='generate_document'
+            )
+
+            db.session.add(task)
+            db.session.commit()
+
+            # 更新文档状态为处理中
             document.status = 'processing'
             document.updated_at = datetime.utcnow()
             db.session.commit()
@@ -228,12 +252,12 @@ class DocumentService:
             # 启动异步文档生成任务
             thread = threading.Thread(
                 target=self._generate_document_async,
-                args=(document_id, user_id)
+                args=(document_id, user_id, task.id)
             )
             thread.daemon = True
             thread.start()
 
-            logger.info(f"启动文档生成任务: {document_id}")
+            logger.info(f"启动文档生成任务: {document_id}, 任务ID: {task.id}")
             return True
 
         except Exception as e:
@@ -241,11 +265,26 @@ class DocumentService:
             logger.error(f"生成文档失败: {e}")
             return False
 
-    def _generate_document_async(self, document_id, user_id):
+    def _generate_document_async(self, document_id, user_id, task_id):
         """异步生成文档内容"""
         try:
+            # 更新任务状态为运行中
+            task = Task.query.get(task_id)
+            if task:
+                task.status = 'running'
+                task.progress = 10
+                task.started_at = datetime.now(timezone.utc)
+                task.updated_at = datetime.now(timezone.utc)
+                db.session.commit()
+
             # 模拟文档生成过程
-            time.sleep(2)  # 模拟处理时间
+            time.sleep(1)  # 模拟处理时间
+
+            # 更新进度
+            if task:
+                task.progress = 50
+                task.updated_at = datetime.now(timezone.utc)
+                db.session.commit()
 
             document = Document.query.get(document_id)
             if not document:
@@ -255,11 +294,26 @@ class DocumentService:
             # 生成示例文档内容
             content = self._generate_sample_content(document)
 
+            # 更新进度
+            if task:
+                task.progress = 80
+                task.updated_at = datetime.now(timezone.utc)
+                db.session.commit()
+
             # 更新文档内容
             document.content = content
             document.status = 'completed'
-            document.updated_at = datetime.utcnow()
+            document.generated_at = datetime.now(timezone.utc)
+            document.updated_at = datetime.now(timezone.utc)
             db.session.commit()
+
+            # 更新任务状态为完成
+            if task:
+                task.status = 'completed'
+                task.progress = 100
+                task.completed_at = datetime.now(timezone.utc)
+                task.updated_at = datetime.now(timezone.utc)
+                db.session.commit()
 
             logger.info(f"文档 {document_id} 生成完成")
 
@@ -270,10 +324,18 @@ class DocumentService:
                 document = Document.query.get(document_id)
                 if document:
                     document.status = 'error'
-                    document.updated_at = datetime.utcnow()
+                    document.updated_at = datetime.now(timezone.utc)
+                    db.session.commit()
+
+                # 更新任务状态为失败
+                task = Task.query.get(task_id)
+                if task:
+                    task.status = 'failed'
+                    task.error_message = str(e)
+                    task.updated_at = datetime.now(timezone.utc)
                     db.session.commit()
             except Exception as update_error:
-                logger.error(f"更新文档状态失败: {update_error}")
+                logger.error(f"更新文档或任务状态失败: {update_error}")
 
     def _generate_sample_content(self, document):
         """生成示例文档内容"""
@@ -353,6 +415,95 @@ Authorization: Bearer <token>
   "email": "user@example.com"
 }}
 ```
+"""
+        elif document.document_type == 'architecture':
+            return f"""# {document.title} 架构设计文档
+
+## 系统架构概述
+
+这是 {document.title} 的系统架构设计文档。
+
+## 架构风格
+
+### 整体架构
+- **架构类型**: 单体架构 / 微服务架构
+- **技术栈**: 前端 + 后端 + 数据库
+- **部署方式**: 容器化部署
+
+## 核心组件
+
+### 1. 前端层
+- **技术栈**: HTML/CSS/JavaScript
+- **框架**: 响应式设计
+- **功能**: 用户界面展示
+
+### 2. 后端层
+- **技术栈**: Python + Flask
+- **功能**: 业务逻辑处理
+- **API**: RESTful API设计
+
+### 3. 数据层
+- **数据库**: MySQL
+- **功能**: 数据存储和查询
+
+## 系统架构图
+
+```mermaid
+graph TD
+    A[用户界面] --> B[API网关]
+    B --> C[业务服务]
+    C --> D[数据访问层]
+    D --> E[数据库]
+```
+
+## 技术选型
+
+### 前端技术
+- HTML5 + CSS3
+- JavaScript ES6+
+- Bootstrap 响应式框架
+
+### 后端技术
+- Python 3.8+
+- Flask Web框架
+- SQLAlchemy ORM
+
+### 数据库
+- MySQL 8.0
+- 支持事务和索引优化
+
+## 部署架构
+
+### 开发环境
+- 本地开发服务器
+- 热重载支持
+- 调试工具集成
+
+### 生产环境
+- 容器化部署
+- 负载均衡
+- 监控和日志
+
+## 安全考虑
+
+- 用户认证和授权
+- 数据加密传输
+- SQL注入防护
+- XSS攻击防护
+
+## 性能优化
+
+- 数据库查询优化
+- 缓存策略
+- 静态资源压缩
+- CDN加速
+
+## 扩展性设计
+
+- 模块化架构
+- 插件化设计
+- 水平扩展支持
+- 微服务拆分准备
 """
         else:
             return f"""# {document.title}

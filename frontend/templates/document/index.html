@@ -12,7 +12,7 @@
                     <i class="fas fa-plus"></i> 新建文档
                 </button>
             </div>
-            
+
             <!-- 文档统计 -->
             <div class="row mb-4">
                 <div class="col-md-3">
@@ -170,5 +170,6 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{{ url_for('static', filename='js/api_client.js') }}"></script>
 <script src="{{ url_for('static', filename='js/document.js') }}"></script>
 {% endblock %}

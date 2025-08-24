@@ -9,11 +9,16 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Custom CSS -->
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/components.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/modal-fixes.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/navigation-fixes.css') }}" rel="stylesheet">
+    {% if request.endpoint == 'main.dashboard' %}
+    <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
+    {% endif %}
 
     <!-- Modal Fixes JavaScript -->
     <script src="{{ url_for('static', filename='js/modal-fixes.js') }}"></script>
@@ -23,40 +28,12 @@
     <script src="{{ url_for('static', filename='js/navigation-fix.js') }}"></script>
     <!-- URL Fix JavaScript -->
     <script src="{{ url_for('static', filename='js/url-fix.js') }}"></script>
-    <!-- Repository API Fix JavaScript -->
-    <script src="{{ url_for('static', filename='js/repository-fix.js') }}"></script>
     <!-- API Error Handler JavaScript -->
     <script src="{{ url_for('static', filename='js/api-error-handler.js') }}"></script>
 
-    <!-- 内联导航修复脚本 -->
-    <script>
-        // 确保导航链接正常工作
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('内联导航修复脚本加载');
+    {% block head %}{% endblock %}
 
-            // 修复导航链接
-            const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
-            navLinks.forEach(function(link) {
-                // 确保链接可以点击
-                link.style.pointerEvents = 'auto';
-                link.style.cursor = 'pointer';
-                link.style.userSelect = 'auto';
-
-                // 添加点击事件监听器
-                link.addEventListener('click', function(e) {
-                    console.log('导航链接被点击:', this.textContent.trim(), this.href);
-
-                    // 如果链接有效，允许正常跳转
-                    if (this.href && this.href !== '#' && this.href !== window.location.href) {
-                        console.log('正在跳转到:', this.href);
-                        // 不阻止默认行为，允许正常跳转
-                    }
-                });
-            });
-
-            console.log('导航修复完成，找到', navLinks.length, '个导航链接');
-        });
-    </script>
+    <!-- 导航修复脚本已移至 navigation-fix.js -->
 
     {% block extra_css %}{% endblock %}
 </head>
@@ -67,7 +44,7 @@
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
-                <i class="fas fa-code"></i> CoderWiki
+                <i class="fas fa-database"></i> CoderWiki
             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -121,19 +98,19 @@
                                 <i class="fas fa-user-cog"></i> 个人设置
                             </a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">
+                            <li><a class="dropdown-item" href="#" onclick="logout()">
                                 <i class="fas fa-sign-out-alt"></i> 退出登录
                             </a></li>
                         </ul>
                     </li>
                     {% else %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('auth.login') }}">
+                        <a class="nav-link" href="{{ url_for('main.login') }}">
                             <i class="fas fa-sign-in-alt"></i> 登录
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('auth.register') }}">
+                        <a class="nav-link" href="{{ url_for('main.register') }}">
                             <i class="fas fa-user-plus"></i> 注册
                         </a>
                     </li>
@@ -144,7 +121,7 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="container-fluid mt-4">
+    <main class="container-fluid mt-4" style="max-width: 100%; padding-left: 0; padding-right: 0;">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
@@ -160,7 +137,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-dark text-white mt-5 py-4">
+    <footer class="bg-dark text-white mt-5 py-4" style="display: none;">
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
@@ -190,17 +167,90 @@
     <!-- Custom JS -->
     <script src="{{ url_for('static', filename='js/api_client.js') }}"></script>
     <script src="{{ url_for('static', filename='js/realtime_updates_fixed.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/components/stats.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/components/repository_list.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/components/task_progress.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/components/recent_activity.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/components/system_status.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/components.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/performance.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/browser-compatibility.js') }}"></script>
+
+    <!-- Authentication check before loading components -->
+    <script>
+    (async function() {
+        try {
+            const response = await fetch('/api/auth/status', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                redirect: 'manual'
+            });
+
+            let isAuthenticated = false;
+            if (response.ok) {
+                const data = await response.json();
+                isAuthenticated = data.logged_in || false;
+            }
+
+            if (isAuthenticated) {
+                // Load components only if authenticated
+                console.log('用户已登录，加载组件...');
+
+                // Load component scripts dynamically
+                const componentScripts = [
+                    '{{ url_for("static", filename="js/components/stats.js") }}',
+                    '{{ url_for("static", filename="js/components/repository_list.js") }}',
+                    '{{ url_for("static", filename="js/components/task_progress.js") }}',
+                    '{{ url_for("static", filename="js/components/recent_activity.js") }}',
+                    '{{ url_for("static", filename="js/components/system_status.js") }}'
+                ];
+
+                for (const scriptSrc of componentScripts) {
+                    const script = document.createElement('script');
+                    script.src = scriptSrc;
+                    document.head.appendChild(script);
+                }
+
+                // Load other scripts
+                const otherScripts = [
+                    '{{ url_for("static", filename="js/main.js") }}',
+                    '{{ url_for("static", filename="js/components.js") }}',
+                    '{{ url_for("static", filename="js/performance.js") }}',
+                    '{{ url_for("static", filename="js/browser-compatibility.js") }}',
+                    '{{ url_for("static", filename="js/logout.js") }}'
+                ];
+
+                for (const scriptSrc of otherScripts) {
+                    const script = document.createElement('script');
+                    script.src = scriptSrc;
+                    document.head.appendChild(script);
+                }
+            } else {
+                console.log('用户未登录，跳过组件加载');
+                // Only load essential scripts for non-authenticated users
+                const essentialScripts = [
+                    '{{ url_for("static", filename="js/main.js") }}',
+                    '{{ url_for("static", filename="js/browser-compatibility.js") }}'
+                ];
+
+                for (const scriptSrc of essentialScripts) {
+                    const script = document.createElement('script');
+                    script.src = scriptSrc;
+                    document.head.appendChild(script);
+                }
+            }
+        } catch (error) {
+            console.error('认证检查失败:', error);
+            // Load minimal scripts on error
+            const minimalScripts = [
+                '{{ url_for("static", filename="js/main.js") }}'
+            ];
+
+            for (const scriptSrc of minimalScripts) {
+                const script = document.createElement('script');
+                script.src = scriptSrc;
+                document.head.appendChild(script);
+            }
+        }
+    })();
+    </script>
 
     {% block extra_js %}{% endblock %}
+    {% block scripts %}{% endblock %}
 
     <!-- 性能优化 - 预连接关键资源 -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net">

@@ -1,0 +1,106 @@
+/* 全屏布局强制覆盖样式 */
+
+/* 重置所有可能的布局限制 */
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+}
+
+/* 主内容区域全屏 */
+.main-content {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+}
+
+/* 容器全屏 */
+.container-fluid {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+}
+
+/* 行全屏 */
+.row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* 列保持适当间距 */
+.col-12, .col-lg-8, .col-lg-4, .col-lg-6, .col-lg-3, .col-md-12, .col-md-6 {
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+}
+
+/* 隐藏所有侧边栏 */
+.sidebar, .dashboard-sidebar, .navigation-sidebar {
+    display: none !important;
+}
+
+/* 确保内容区域充分利用空间 */
+.welcome-section,
+.stats-container,
+.repository-list-container,
+.recent-activity-container,
+.charts-section {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+}
+
+/* 卡片全屏 */
+.card {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .welcome-section,
+    .stats-container,
+    .repository-list-container,
+    .recent-activity-container,
+    .charts-section {
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+    }
+
+    .col-12, .col-lg-8, .col-lg-4, .col-lg-6, .col-lg-3, .col-md-12, .col-md-6 {
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .welcome-section,
+    .stats-container,
+    .repository-list-container,
+    .recent-activity-container,
+    .charts-section {
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+    }
+
+    .col-12, .col-lg-8, .col-lg-4, .col-lg-6, .col-lg-3, .col-md-12, .col-md-6 {
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+    }
+}

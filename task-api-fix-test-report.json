@@ -1,0 +1,23 @@
+{
+  "timestamp": "2025-08-23T14:32:56.686Z",
+  "summary": {
+    "total": 3,
+    "passed": 3,
+    "failed": 0,
+    "successRate": "100.0"
+  },
+  "results": [
+    {
+      "name": "任务API端点存在性测试",
+      "status": "PASSED"
+    },
+    {
+      "name": "任务API认证要求测试",
+      "status": "PASSED"
+    },
+    {
+      "name": "前端API调用修复测试",
+      "status": "PASSED"
+    }
+  ]
+}

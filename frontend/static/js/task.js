@@ -80,7 +80,10 @@ class TaskManager {
 
     async loadTasks() {
         try {
-            const response = await this.apiClient.get('/tasks');
+            // 清除任务相关的缓存，确保获取最新数据
+            this.apiClient.clearCache();
+
+            const response = await this.apiClient.get('/tasks', {}, { skipCache: true });
             if (response.success) {
                 this.tasks = response.tasks || [];
                 this.updateTaskStats();
@@ -244,7 +247,7 @@ class TaskManager {
 
     async viewTask(taskId) {
         try {
-            const response = await this.apiClient.get(`/api/tasks/${taskId}`);
+            const response = await this.apiClient.get(`/tasks/${taskId}`);
             if (response.success) {
                 this.showTaskDetail(response.task);
             } else {
@@ -260,7 +263,7 @@ class TaskManager {
         if (!confirm('确定要取消这个任务吗？')) return;
 
         try {
-            const response = await this.apiClient.post(`/api/tasks/${taskId}/cancel`);
+            const response = await this.apiClient.post(`/tasks/${taskId}/cancel`);
             if (response.success) {
                 this.showSuccess('任务已取消');
                 this.loadTasks();
@@ -275,7 +278,7 @@ class TaskManager {
 
     async retryTask(taskId) {
         try {
-            const response = await this.apiClient.post(`/api/tasks/${taskId}/retry`);
+            const response = await this.apiClient.post(`/tasks/${taskId}/retry`);
             if (response.success) {
                 this.showSuccess('任务已重新启动');
                 this.loadTasks();
@@ -292,7 +295,7 @@ class TaskManager {
         if (showNotification && !confirm('确定要删除这个任务吗？此操作不可恢复。')) return;
 
         try {
-            const response = await this.apiClient.delete(`/api/tasks/${taskId}`);
+            const response = await this.apiClient.delete(`/tasks/${taskId}`);
             if (response.success) {
                 if (showNotification) {
                     this.showSuccess('任务已删除');
@@ -416,10 +419,10 @@ class TaskManager {
     }
 
     startRealtimeUpdates() {
-        // Poll for task updates every 5 seconds
+        // Poll for task updates every 30 seconds for better responsiveness
         setInterval(() => {
             this.loadTasks();
-        }, 5000);
+        }, 30000);
     }
 
     // Bulk operations
@@ -500,7 +503,7 @@ class TaskManager {
             'high': 'bg-danger',
             'urgent': 'bg-danger'
         };
-        return classes[priority] || 'bg-secondary';
+        return classes[priority] || classes['normal'] || 'bg-secondary';
     }
 
     getPriorityText(priority) {
@@ -510,7 +513,7 @@ class TaskManager {
             'high': '高',
             'urgent': '紧急'
         };
-        return texts[priority] || priority;
+        return texts[priority] || (priority || 'normal');
     }
 
     formatDate(dateString) {

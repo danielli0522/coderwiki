@@ -11,7 +11,7 @@
     --info-color: #06b6d4;
     --light-color: #f8fafc;
     --dark-color: #1e293b;
-    
+
     /* 间距系统 */
     --spacing-xs: 4px;
     --spacing-sm: 8px;
@@ -19,19 +19,19 @@
     --spacing-lg: 24px;
     --spacing-xl: 32px;
     --spacing-2xl: 48px;
-    
+
     /* 圆角 */
     --border-radius-sm: 4px;
     --border-radius-md: 6px;
     --border-radius-lg: 8px;
     --border-radius-xl: 12px;
-    
+
     /* 阴影 */
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    
+
     /* 过渡动画 */
     --transition-fast: 150ms ease-in-out;
     --transition-normal: 300ms ease-in-out;
@@ -42,6 +42,30 @@
 .dashboard-container {
     min-height: 100vh;
     background-color: var(--light-color);
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+/* 全屏布局覆盖 */
+.container-fluid {
+    max-width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+/* 移除Bootstrap的默认容器限制 */
+.row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+.col-12, .col-lg-8, .col-lg-4, .col-lg-6, .col-lg-3, .col-md-12, .col-md-6 {
+    padding-left: 15px !important;
+    padding-right: 15px !important;
 }
 
 /* 仪表板头部 */
@@ -467,6 +491,78 @@
     color: var(--primary-color);
 }
 
+/* 全屏内容区域样式 */
+.welcome-section,
+.stats-container,
+.repository-list-container,
+.recent-activity-container,
+.charts-section {
+    width: 100%;
+    max-width: 100%;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+/* 确保dashboard页面完全全屏 */
+body.dashboard-page {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.dashboard-page .main-content {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+.dashboard-page .container-fluid {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* 全局全屏覆盖 */
+body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+}
+
+.main-content {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+.container-fluid {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* 确保卡片内容充分利用空间 */
+.card {
+    width: 100%;
+    max-width: 100%;
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
     .dashboard-sidebar {
@@ -476,7 +572,7 @@
         border-bottom: 1px solid #e5e7eb;
         margin-bottom: var(--spacing-md);
     }
-    
+
     .dashboard-sidebar.mobile-sidebar {
         position: fixed;
         top: 0;
@@ -488,28 +584,28 @@
         background-color: white;
         box-shadow: var(--shadow-lg);
     }
-    
+
     .dashboard-sidebar.mobile-sidebar.active {
         left: 0;
     }
-    
+
     .stats-card {
         margin-bottom: var(--spacing-md);
     }
-    
+
     .repository-item,
     .task-item {
         padding: var(--spacing-sm);
     }
-    
+
     .timeline::before {
         left: 15px;
     }
-    
+
     .timeline-item {
         padding-left: 45px;
     }
-    
+
     .timeline-badge {
         width: 30px;
         height: 30px;

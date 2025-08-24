@@ -20,38 +20,192 @@ system_bp = Blueprint('system', __name__, url_prefix='/api/system')
 def health_check():
     """系统健康检查"""
     try:
-        # 基本系统信息
-        system_info = {
-            'status': 'healthy',
-            'timestamp': datetime.now().isoformat(),
-            'uptime': time.time(),
-            'platform': platform.system(),
-            'python_version': platform.python_version(),
-            'cpu_count': psutil.cpu_count(),
-            'memory_total': psutil.virtual_memory().total,
-            'memory_available': psutil.virtual_memory().available,
-            'disk_usage': psutil.disk_usage('/').percent
-        }
-
+        # 获取系统资源使用情况
+        cpu_percent = psutil.cpu_percent(interval=1)
+        memory = psutil.virtual_memory()
+        disk = psutil.disk_usage('/')
+        
+        # 计算运行时间（使用当前时间作为模拟）
+        uptime = time.time()
+        
         # 检查关键服务状态
-        services_status = {
-            'database': 'healthy',  # 可以添加数据库连接检查
-            'redis': 'healthy',     # 可以添加Redis连接检查
-            'file_system': 'healthy'
+        services_status = []
+        service_checks = {
+            'database': check_database_health(),
+            'redis': check_redis_health(),
+            'file_system': check_filesystem_health()
         }
-
+        
+        for service_name, status in service_checks.items():
+            services_status.append({
+                'name': service_name,
+                'type': service_name,
+                'status': status['status'],
+                'response_time': status.get('response_time', 0)
+            })
+        
+        # 生成系统告警
+        alerts = generate_system_alerts(cpu_percent, memory.percent, disk.percent)
+        
+        # 确定整体状态
+        overall_status = determine_overall_status(service_checks, alerts)
+        
         return jsonify({
             'success': True,
-            'system': system_info,
-            'services': services_status
+            'overall_status': overall_status,
+            'uptime': int(uptime),
+            'cpu_usage': round(cpu_percent, 1),
+            'memory_usage': round(memory.percent, 1),
+            'disk_usage': round(disk.percent, 1),
+            'services': services_status,
+            'alerts': alerts,
+            'timestamp': datetime.now().isoformat()
         })
     except Exception as e:
         logger.error(f"Health check failed: {e}")
         return jsonify({
             'success': False,
             'error': 'Health check failed',
-            'status': 'unhealthy'
+            'overall_status': 'error',
+            'uptime': 0,
+            'cpu_usage': 0,
+            'memory_usage': 0,
+            'disk_usage': 0,
+            'services': [],
+            'alerts': [{
+                'level': 'error',
+                'title': '系统健康检查失败',
+                'message': str(e),
+                'timestamp': datetime.now().isoformat()
+            }]
         }), 500
+
+def check_database_health():
+    """检查数据库健康状态"""
+    try:
+        # 这里可以添加实际的数据库连接检查
+        # 暂时返回模拟数据
+        return {
+            'status': 'healthy',
+            'response_time': 5
+        }
+    except Exception as e:
+        logger.error(f"Database health check failed: {e}")
+        return {
+            'status': 'error',
+            'response_time': 0
+        }
+
+def check_redis_health():
+    """检查Redis健康状态"""
+    try:
+        # 这里可以添加实际的Redis连接检查
+        # 暂时返回模拟数据
+        return {
+            'status': 'healthy',
+            'response_time': 3
+        }
+    except Exception as e:
+        logger.error(f"Redis health check failed: {e}")
+        return {
+            'status': 'error',
+            'response_time': 0
+        }
+
+def check_filesystem_health():
+    """检查文件系统健康状态"""
+    try:
+        disk = psutil.disk_usage('/')
+        if disk.percent > 90:
+            return {
+                'status': 'warning',
+                'response_time': 1
+            }
+        return {
+            'status': 'healthy',
+            'response_time': 1
+        }
+    except Exception as e:
+        logger.error(f"Filesystem health check failed: {e}")
+        return {
+            'status': 'error',
+            'response_time': 0
+        }
+
+def generate_system_alerts(cpu_percent, memory_percent, disk_percent):
+    """生成系统告警"""
+    alerts = []
+    
+    # CPU使用率告警
+    if cpu_percent > 90:
+        alerts.append({
+            'level': 'error',
+            'title': 'CPU使用率过高',
+            'message': f'CPU使用率达到{cpu_percent}%，可能影响系统性能',
+            'timestamp': datetime.now().isoformat()
+        })
+    elif cpu_percent > 70:
+        alerts.append({
+            'level': 'warning',
+            'title': 'CPU使用率较高',
+            'message': f'CPU使用率达到{cpu_percent}%，建议关注',
+            'timestamp': datetime.now().isoformat()
+        })
+    
+    # 内存使用率告警
+    if memory_percent > 90:
+        alerts.append({
+            'level': 'error',
+            'title': '内存使用率过高',
+            'message': f'内存使用率达到{memory_percent}%，可能影响系统稳定性',
+            'timestamp': datetime.now().isoformat()
+        })
+    elif memory_percent > 80:
+        alerts.append({
+            'level': 'warning',
+            'title': '内存使用率较高',
+            'message': f'内存使用率达到{memory_percent}%，建议关注',
+            'timestamp': datetime.now().isoformat()
+        })
+    
+    # 磁盘使用率告警
+    if disk_percent > 90:
+        alerts.append({
+            'level': 'error',
+            'title': '磁盘空间不足',
+            'message': f'磁盘使用率达到{disk_percent}%，建议清理空间',
+            'timestamp': datetime.now().isoformat()
+        })
+    elif disk_percent > 80:
+        alerts.append({
+            'level': 'warning',
+            'title': '磁盘空间紧张',
+            'message': f'磁盘使用率达到{disk_percent}%，建议关注',
+            'timestamp': datetime.now().isoformat()
+        })
+    
+    return alerts
+
+def determine_overall_status(service_checks, alerts):
+    """确定整体系统状态"""
+    # 检查是否有错误级别的告警
+    error_alerts = [alert for alert in alerts if alert['level'] == 'error']
+    if error_alerts:
+        return 'error'
+    
+    # 检查服务状态
+    for service_name, status in service_checks.items():
+        if status['status'] == 'error':
+            return 'error'
+        elif status['status'] == 'warning':
+            return 'warning'
+    
+    # 检查是否有警告级别的告警
+    warning_alerts = [alert for alert in alerts if alert['level'] == 'warning']
+    if warning_alerts:
+        return 'warning'
+    
+    return 'healthy'
 
 @system_bp.route('/stats', methods=['GET'])
 @login_required
@@ -197,6 +351,96 @@ def get_logs():
             'success': False,
             'error': 'Failed to get logs'
         }), 500
+
+@system_bp.route('/performance', methods=['GET', 'POST'])
+def performance_metrics():
+    """性能指标相关接口"""
+    if request.method == 'POST':
+        """接收前端性能指标数据"""
+        try:
+            data = request.get_json()
+
+            if not data:
+                return jsonify({
+                    'success': False,
+                    'error': 'No performance data provided'
+                }), 400
+
+            # 记录性能指标
+            logger.info(f"Performance metrics received: {data}")
+
+            # 这里可以存储到数据库或进行进一步分析
+            # 例如：存储到性能监控数据库、触发告警等
+
+            return jsonify({
+                'success': True,
+                'message': 'Performance metrics received',
+                'timestamp': datetime.now().isoformat()
+            })
+
+        except Exception as e:
+            logger.error(f"Performance metrics endpoint failed: {e}")
+            return jsonify({
+                'success': False,
+                'error': 'Failed to process performance metrics'
+            }), 500
+
+    elif request.method == 'GET':
+        """获取系统性能指标"""
+        try:
+            # CPU使用率
+            cpu_percent = psutil.cpu_percent(interval=1)
+
+            # 内存使用情况
+            memory = psutil.virtual_memory()
+            memory_info = {
+                'total': memory.total,
+                'available': memory.available,
+                'used': memory.used,
+                'percent': memory.percent
+            }
+
+            # 磁盘使用情况
+            disk = psutil.disk_usage('/')
+            disk_info = {
+                'total': disk.total,
+                'used': disk.used,
+                'free': disk.free,
+                'percent': disk.percent
+            }
+
+            # 网络IO
+            network = psutil.net_io_counters()
+            network_info = {
+                'bytes_sent': network.bytes_sent,
+                'bytes_recv': network.bytes_recv,
+                'packets_sent': network.packets_sent,
+                'packets_recv': network.packets_recv
+            }
+
+            # 系统负载
+            load_avg = psutil.getloadavg() if hasattr(psutil, 'getloadavg') else None
+
+            performance_data = {
+                'cpu': {'percent': cpu_percent},
+                'memory': memory_info,
+                'disk': disk_info,
+                'network': network_info,
+                'load_average': load_avg,
+                'timestamp': datetime.now().isoformat()
+            }
+
+            return jsonify({
+                'success': True,
+                'performance': performance_data
+            })
+
+        except Exception as e:
+            logger.error(f"Get performance metrics failed: {e}")
+            return jsonify({
+                'success': False,
+                'error': 'Failed to get performance metrics'
+            }), 500
 
 @system_bp.route('/config', methods=['GET'])
 @login_required

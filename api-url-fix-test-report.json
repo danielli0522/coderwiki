@@ -1,0 +1,27 @@
+{
+  "timestamp": "2025-08-23T14:35:00.128Z",
+  "summary": {
+    "total": 4,
+    "passed": 4,
+    "failed": 0,
+    "successRate": "100.0"
+  },
+  "results": [
+    {
+      "name": "任务API端点测试",
+      "status": "PASSED"
+    },
+    {
+      "name": "仓库API端点测试",
+      "status": "PASSED"
+    },
+    {
+      "name": "文档API端点测试",
+      "status": "PASSED"
+    },
+    {
+      "name": "前端文件检查",
+      "status": "PASSED"
+    }
+  ]
+}

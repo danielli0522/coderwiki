@@ -27,27 +27,24 @@ function fixNavigationLinks() {
         link.style.cursor = 'pointer';
         link.style.userSelect = 'auto';
 
-        // 移除可能的事件监听器
-        const newLink = link.cloneNode(true);
-        link.parentNode.replaceChild(newLink, link);
-
-        // 添加点击事件监听器
-        newLink.addEventListener('click', function(e) {
+        // 添加点击事件监听器（不替换原始链接）
+        link.addEventListener('click', function(e) {
             console.log('Navigation link clicked:', this.textContent.trim(), this.href);
 
-            // 确保链接正常工作
-            if (this.href && this.href !== '#' && this.href !== window.location.href) {
+            // 确保链接正常工作 - 允许默认行为
+            if (this.href && this.href !== '#') {
                 console.log('Navigating to:', this.href);
-                window.location.href = this.href;
+                // 不阻止默认行为，让链接自然跳转
+                // 如果需要强制刷新，可以使用 window.location.href = this.href
             }
         });
 
         // 添加鼠标悬停效果
-        newLink.addEventListener('mouseenter', function() {
+        link.addEventListener('mouseenter', function() {
             this.style.opacity = '0.8';
         });
 
-        newLink.addEventListener('mouseleave', function() {
+        link.addEventListener('mouseleave', function() {
             this.style.opacity = '1';
         });
     });

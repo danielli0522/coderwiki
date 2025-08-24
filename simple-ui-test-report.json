@@ -1,0 +1,35 @@
+{
+  "timestamp": "2025-08-23T14:28:28.711Z",
+  "summary": {
+    "total": 6,
+    "passed": 6,
+    "failed": 0,
+    "successRate": "100.0"
+  },
+  "results": [
+    {
+      "name": "服务器连接测试",
+      "status": "PASSED"
+    },
+    {
+      "name": "登录页面测试",
+      "status": "PASSED"
+    },
+    {
+      "name": "注册页面测试",
+      "status": "PASSED"
+    },
+    {
+      "name": "仪表板重定向测试",
+      "status": "PASSED"
+    },
+    {
+      "name": "静态资源测试",
+      "status": "PASSED"
+    },
+    {
+      "name": "API端点测试",
+      "status": "PASSED"
+    }
+  ]
+}

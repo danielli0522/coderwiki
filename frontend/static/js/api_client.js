@@ -5,7 +5,6 @@
 class ApiClient {
     constructor(baseUrl = '/api') {
         this.baseUrl = baseUrl;
-        this.token = localStorage.getItem('auth_token');
         this.cache = new Map();
         this.cacheExpiry = 5 * 60 * 1000; // 5分钟缓存
         this.retryCount = 3;
@@ -17,9 +16,9 @@ class ApiClient {
         const config = {
             headers: {
                 'Content-Type': 'application/json',
-                ...this.token ? { 'Authorization': `Bearer ${this.token}` } : {},
                 ...options.headers
             },
+            credentials: 'include', // 确保发送cookies用于session认证
             ...options
         };
 
@@ -246,23 +245,30 @@ class ApiClient {
 
     // 认证相关方法
     setToken(token) {
-        this.token = token;
-        localStorage.setItem('auth_token', token);
+        // 移除Bearer token认证，使用session认证
+        // this.token = token;
+        // localStorage.setItem('auth_token', token);
     }
 
     getToken() {
-        return this.token;
+        // 移除Bearer token认证，使用session认证
+        // return this.token;
+        return null;
     }
 
     removeToken() {
-        this.token = null;
-        localStorage.removeItem('auth_token');
+        // 移除Bearer token认证，使用session认证
+        // this.token = null;
+        // localStorage.removeItem('auth_token');
     }
 
     handleAuthError() {
-        this.removeToken();
+        // 移除Bearer token认证，使用session认证
+        // this.removeToken();
         this.clearCache();
-        window.location.href = '/login';
+        // 临时禁用自动重定向到登录页面
+        // window.location.href = '/login';
+        console.log('认证错误，但已禁用自动重定向');
     }
 
     // 工具方法
@@ -283,9 +289,10 @@ class ApiClient {
         const config = {
             method: 'POST',
             body: formData,
-            headers: {
-                ...this.token ? { 'Authorization': `Bearer ${this.token}` } : {}
-            }
+            // 移除Bearer token认证，使用session认证
+            // headers: {
+            //     ...this.token ? { 'Authorization': `Bearer ${this.token}` } : {}
+            // }
         };
 
         const response = await fetch(`${this.baseUrl}${endpoint}`, config);

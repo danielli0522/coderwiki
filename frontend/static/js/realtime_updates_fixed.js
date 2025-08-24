@@ -243,9 +243,13 @@ class RealtimeUpdatesFixed {
             statusElement.textContent = message;
         }
 
-        // 显示通知
-        if (status === 'connected') {
-            this.showNotification('实时更新已连接', 'success');
+        // 显示通知 - 只在首次连接成功或连接失败时显示
+        if (status === 'connected' && !this.hasShownConnectedNotification) {
+            this.hasShownConnectedNotification = true;
+            // 只在首次连接时显示提示，避免频繁提示
+            // this.showNotification('实时更新已连接', 'success');
+        } else if (status === 'disconnected') {
+            this.hasShownConnectedNotification = false; // 重置标志
         } else if (status === 'error' || status === 'failed') {
             this.showNotification('实时更新连接失败', 'error');
         }

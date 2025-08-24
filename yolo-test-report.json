@@ -1,0 +1,140 @@
+{
+  "summary": {
+    "total": 19,
+    "passed": 18,
+    "failed": 1,
+    "errors": 0,
+    "successRate": "94.74",
+    "timestamp": "2025-08-23T14:29:25.881Z"
+  },
+  "details": [
+    {
+      "page": "首页",
+      "url": "/",
+      "status": "PASSED",
+      "loadTime": 0,
+      "timestamp": "2025-08-23T14:29:25.880Z"
+    },
+    {
+      "page": "登录页",
+      "url": "/auth/login",
+      "status": "PASSED",
+      "loadTime": 0,
+      "timestamp": "2025-08-23T14:29:25.880Z"
+    },
+    {
+      "page": "注册页",
+      "url": "/auth/register",
+      "status": "PASSED",
+      "loadTime": 0,
+      "timestamp": "2025-08-23T14:29:25.880Z"
+    },
+    {
+      "page": "仪表板",
+      "url": "/dashboard",
+      "status": "PASSED",
+      "loadTime": 0,
+      "timestamp": "2025-08-23T14:29:25.881Z"
+    },
+    {
+      "page": "仓库管理",
+      "url": "/repositories",
+      "status": "PASSED",
+      "loadTime": 0,
+      "timestamp": "2025-08-23T14:29:25.881Z"
+    },
+    {
+      "page": "文档管理",
+      "url": "/documents",
+      "status": "PASSED",
+      "loadTime": 0,
+      "timestamp": "2025-08-23T14:29:25.881Z"
+    },
+    {
+      "page": "任务管理",
+      "url": "/tasks",
+      "status": "PASSED",
+      "loadTime": 0,
+      "timestamp": "2025-08-23T14:29:25.881Z"
+    },
+    {
+      "page": "代码分析",
+      "url": "/analysis",
+      "status": "PASSED",
+      "loadTime": 0,
+      "timestamp": "2025-08-23T14:29:25.881Z"
+    },
+    {
+      "page": "系统设置",
+      "url": "/settings",
+      "status": "PASSED",
+      "loadTime": 0,
+      "timestamp": "2025-08-23T14:29:25.881Z"
+    },
+    {
+      "test": "登录页面加载",
+      "category": "authentication",
+      "status": "FAILED",
+      "timestamp": "2025-08-23T14:29:25.881Z"
+    },
+    {
+      "test": "有效登录",
+      "category": "authentication",
+      "status": "PASSED",
+      "timestamp": "2025-08-23T14:29:25.881Z"
+    },
+    {
+      "test": "无效登录处理",
+      "category": "authentication",
+      "status": "PASSED",
+      "timestamp": "2025-08-23T14:29:25.881Z"
+    },
+    {
+      "test": "登出功能",
+      "category": "authentication",
+      "status": "PASSED",
+      "timestamp": "2025-08-23T14:29:25.881Z"
+    },
+    {
+      "test": "仪表板页面加载",
+      "category": "dashboard",
+      "status": "PASSED",
+      "timestamp": "2025-08-23T14:29:25.881Z"
+    },
+    {
+      "test": "统计组件",
+      "category": "dashboard",
+      "status": "PASSED",
+      "timestamp": "2025-08-23T14:29:25.881Z"
+    },
+    {
+      "test": "任务进度组件",
+      "category": "dashboard",
+      "status": "PASSED",
+      "timestamp": "2025-08-23T14:29:25.881Z"
+    },
+    {
+      "test": "最近活动组件",
+      "category": "dashboard",
+      "status": "PASSED",
+      "timestamp": "2025-08-23T14:29:25.881Z"
+    },
+    {
+      "test": "系统状态组件",
+      "category": "dashboard",
+      "status": "PASSED",
+      "timestamp": "2025-08-23T14:29:25.881Z"
+    },
+    {
+      "test": "仓库列表组件",
+      "category": "dashboard",
+      "status": "PASSED",
+      "timestamp": "2025-08-23T14:29:25.881Z"
+    }
+  ],
+  "coverage": {
+    "pages": 9,
+    "authentication": 4,
+    "dashboard": 6
+  }
+}

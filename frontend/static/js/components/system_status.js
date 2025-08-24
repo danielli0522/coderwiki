@@ -6,13 +6,40 @@ class SystemStatusComponent {
     constructor() {
         this.systemData = {};
         this.refreshInterval = null;
+        this.isAuthenticated = false;
         this.init();
     }
 
-    init() {
+    async init() {
+        // 系统状态是公开的，不需要认证
+        this.isAuthenticated = true;
         this.bindEvents();
         this.loadSystemStatus();
         this.startAutoRefresh();
+    }
+
+    async checkAuthentication() {
+        try {
+            const response = await fetch('/api/auth/status', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                redirect: 'manual'
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                this.isAuthenticated = data.logged_in || false;
+            } else if (response.status === 302 || response.status === 303) {
+                this.isAuthenticated = false;
+            } else {
+                this.isAuthenticated = false;
+            }
+        } catch (error) {
+            console.error('认证检查失败:', error);
+            this.isAuthenticated = false;
+        }
     }
 
     bindEvents() {
@@ -26,16 +53,24 @@ class SystemStatusComponent {
     }
 
     async loadSystemStatus(forceRefresh = false) {
+        // 系统状态是公开的，不需要认证检查
+
         try {
-            const response = await fetch('/api/system/health');
-            
+            const response = await fetch('/api/system/health', {
+                redirect: 'manual'
+            });
+
+            if (response.status === 302 || response.status === 303) {
+                throw new Error('需要登录');
+            }
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const data = await response.json();
             this.systemData = data;
-            
+
             this.updateSystemStatus();
             this.updateServiceStatus();
             this.updateSystemAlerts();
@@ -55,17 +90,17 @@ class SystemStatusComponent {
     updateOverallStatus() {
         const statusElement = document.getElementById('systemOverallStatus');
         const statusDot = document.getElementById('systemStatusDot');
-        
+
         if (!statusElement || !this.systemData.overall_status) return;
-        
+
         const status = this.systemData.overall_status;
         const statusInfo = this.getStatusInfo(status);
-        
+
         if (statusElement) {
             statusElement.textContent = statusInfo.text;
             statusElement.className = `badge ${statusInfo.class}`;
         }
-        
+
         if (statusDot) {
             statusDot.className = `status-dot ${statusInfo.dotClass}`;
         }
@@ -74,22 +109,22 @@ class SystemStatusComponent {
     updateUptime() {
         const uptimeElement = document.getElementById('systemUptime');
         if (!uptimeElement || !this.systemData.uptime) return;
-        
+
         const uptime = this.systemData.uptime;
         const days = Math.floor(uptime / 86400);
         const hours = Math.floor((uptime % 86400) / 3600);
         const minutes = Math.floor((uptime % 3600) / 60);
-        
+
         uptimeElement.textContent = `${days}天 ${hours}小时 ${minutes}分钟`;
     }
 
     updateResourceUsage() {
         // 更新CPU使用率
         this.updateResourceMetric('cpu', this.systemData.cpu_usage);
-        
+
         // 更新内存使用率
         this.updateResourceMetric('memory', this.systemData.memory_usage);
-        
+
         // 更新磁盘使用率
         this.updateResourceMetric('disk', this.systemData.disk_usage);
     }
@@ -97,12 +132,12 @@ class SystemStatusComponent {
     updateResourceMetric(type, value) {
         const valueElement = document.getElementById(`${type}Usage`);
         const progressBar = document.getElementById(`${type}ProgressBar`);
-        
+
         if (!valueElement || !progressBar || value === undefined) return;
-        
+
         valueElement.textContent = `${value}%`;
         progressBar.style.width = `${value}%`;
-        
+
         // 根据使用率设置进度条颜色
         progressBar.className = 'progress-bar';
         if (value >= 90) {
@@ -117,9 +152,9 @@ class SystemStatusComponent {
     updateServiceStatus() {
         const serviceList = document.getElementById('serviceList');
         if (!serviceList || !this.systemData.services) return;
-        
+
         serviceList.innerHTML = '';
-        
+
         this.systemData.services.forEach(service => {
             const serviceElement = this.createServiceElement(service);
             serviceList.appendChild(serviceElement);
@@ -129,21 +164,21 @@ class SystemStatusComponent {
     createServiceElement(service) {
         const template = document.getElementById('serviceItemTemplate');
         if (!template) return document.createElement('div');
-        
+
         const element = template.content.cloneNode(true);
-        
+
         // 设置服务图标
         const iconElement = element.querySelector('.service-icon');
         if (iconElement) {
             iconElement.className = this.getServiceIcon(service.type);
         }
-        
+
         // 设置服务名称
         const nameElement = element.querySelector('.service-name');
         if (nameElement) {
             nameElement.textContent = service.name;
         }
-        
+
         // 设置服务状态
         const statusBadge = element.querySelector('.service-status-badge');
         if (statusBadge) {
@@ -151,22 +186,22 @@ class SystemStatusComponent {
             statusBadge.textContent = statusInfo.text;
             statusBadge.className = `badge ${statusInfo.class}`;
         }
-        
+
         // 设置响应时间
         const responseTimeElement = element.querySelector('.service-response-time');
         if (responseTimeElement && service.response_time) {
             responseTimeElement.textContent = `${service.response_time}ms`;
         }
-        
+
         return element;
     }
 
     updateSystemAlerts() {
         const alertsContainer = document.getElementById('systemAlerts');
         if (!alertsContainer || !this.systemData.alerts) return;
-        
+
         alertsContainer.innerHTML = '';
-        
+
         if (this.systemData.alerts.length === 0) {
             alertsContainer.innerHTML = `
                 <div class="alert alert-info" role="alert">
@@ -176,7 +211,7 @@ class SystemStatusComponent {
             `;
             return;
         }
-        
+
         this.systemData.alerts.forEach(alert => {
             const alertElement = this.createAlertElement(alert);
             alertsContainer.appendChild(alertElement);
@@ -187,7 +222,7 @@ class SystemStatusComponent {
         const alertDiv = document.createElement('div');
         alertDiv.className = `alert alert-${alert.level} alert-dismissible fade show`;
         alertDiv.setAttribute('role', 'alert');
-        
+
         const icon = this.getAlertIcon(alert.level);
         alertDiv.innerHTML = `
             <i class="fas fa-${icon} me-2"></i>
@@ -196,7 +231,7 @@ class SystemStatusComponent {
             <small class="text-muted">${this.formatTime(alert.timestamp)}</small>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         `;
-        
+
         return alertDiv;
     }
 
@@ -223,7 +258,7 @@ class SystemStatusComponent {
                 dotClass: 'status-dot-unknown'
             }
         };
-        
+
         return statusMap[status] || statusMap.unknown;
     }
 
@@ -257,10 +292,10 @@ class SystemStatusComponent {
     }
 
     startAutoRefresh() {
-        // 每30秒自动刷新一次系统状态
+        // 每3分钟自动刷新一次系统状态
         this.refreshInterval = setInterval(() => {
             this.loadSystemStatus();
-        }, 30000);
+        }, 180000);
     }
 
     stopAutoRefresh() {
@@ -282,11 +317,11 @@ class SystemStatusComponent {
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         `;
-        
+
         const container = document.querySelector('.system-status-container');
         if (container) {
             container.insertAdjacentHTML('afterbegin', alertHtml);
-            
+
             setTimeout(() => {
                 const alert = container.querySelector('.alert');
                 if (alert) {

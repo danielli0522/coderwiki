@@ -44,6 +44,22 @@ def get_repositories():
     except Exception as e:
         return jsonify({'error': '服务器内部错误'}), 500
 
+@repository_bp.route('/statistics', methods=['GET'])
+@login_required
+def get_repository_statistics():
+    """Get repository statistics for current user."""
+    try:
+        repo_service = RepositoryService()
+        stats = repo_service.get_repository_statistics(current_user.id)
+
+        return jsonify({
+            'success': True,
+            'statistics': stats
+        })
+
+    except Exception as e:
+        return jsonify({'error': '获取统计数据失败'}), 500
+
 @repository_bp.route('', methods=['POST'])
 @login_required
 def add_repository():
@@ -108,6 +124,7 @@ def get_repository(repository_id):
 @login_required
 def update_repository(repository_id):
     """Update a repository."""
+    print(f"DEBUG: PUT /api/repositories/{repository_id} - Method: {request.method}")
     try:
         data = request.get_json()
 
@@ -154,6 +171,7 @@ def get_delete_confirmation(repository_id):
 @login_required
 def delete_repository(repository_id):
     """Delete a repository."""
+    print(f"DEBUG: DELETE /api/repositories/{repository_id} - Method: {request.method}")
     try:
         repo_service = RepositoryService()
         result = repo_service.delete_repository(repository_id, current_user.id)
@@ -218,33 +236,6 @@ def analyze_repository(repository_id):
     except Exception as e:
         return jsonify({'error': '服务器内部错误'}), 500
 
-@repository_bp.route('/statistics', methods=['GET'])
-@login_required
-def get_repository_statistics():
-    """Get repository statistics for current user."""
-    try:
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.info(f"API: Getting repository statistics for user {current_user.id}")
-
-        repo_service = RepositoryService()
-        statistics = repo_service.get_repository_statistics(current_user.id)
-
-        logger.info(f"API: Successfully retrieved statistics for user {current_user.id}")
-
-        return jsonify({
-            'success': True,
-            'statistics': statistics
-        })
-
-    except Exception as e:
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.error(f"API: Error getting repository statistics for user {current_user.id}: {str(e)}")
-        logger.error(f"API: Error type: {type(e).__name__}")
-        import traceback
-        logger.error(f"API: Traceback: {traceback.format_exc()}")
-        return jsonify({'error': '服务器内部错误'}), 500
 
 @repository_bp.route('/enhanced-statistics', methods=['GET'])
 @login_required
@@ -414,11 +405,21 @@ def generate_document(repository_id):
         success = doc_service.generate_document_content(document['id'], current_user.id)
 
         if success:
+            # 获取创建的任务ID
+            from app.models.task import Task
+            task = Task.query.filter_by(
+                user_id=current_user.id,
+                repository_id=repository_id,
+                type='generate_document'
+            ).order_by(Task.created_at.desc()).first()
+
+            task_id = task.id if task else None
+
             return jsonify({
                 'success': True,
                 'message': '文档生成任务已启动',
                 'document_id': document['id'],
-                'task_id': f'doc_{document["id"]}'
+                'task_id': task_id
             })
         else:
             return jsonify({'error': '启动文档生成任务失败'}), 500

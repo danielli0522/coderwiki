@@ -7,11 +7,11 @@ class TaskProgressMonitor {
     constructor() {
         this.apiClient = new ApiClient();
         this.updateInterval = null;
-        this.refreshInterval = 3000; // 3 seconds default
+        this.refreshInterval = 180000; // 3 minutes default
         this.charts = {};
         this.settings = {
             autoRefresh: true,
-            refreshInterval: 3000,
+            refreshInterval: 180000,
             maxTasksDisplay: 50,
             enableNotifications: true,
             enableSound: true
@@ -94,7 +94,7 @@ class TaskProgressMonitor {
         this.settings.enableSound = enableSound;
 
         this.saveSettings();
-        
+
         // Restart monitoring with new settings
         this.stopMonitoring();
         if (this.settings.autoRefresh) {
@@ -112,13 +112,13 @@ class TaskProgressMonitor {
 
     showSettingsModal() {
         const modal = new bootstrap.Modal(document.getElementById('settingsModal'));
-        
+
         // Set current values
         document.getElementById('refreshInterval').value = this.settings.refreshInterval;
         document.getElementById('maxTasksDisplay').value = this.settings.maxTasksDisplay;
         document.getElementById('enableNotifications').checked = this.settings.enableNotifications;
         document.getElementById('enableSound').checked = this.settings.enableSound;
-        
+
         modal.show();
     }
 
@@ -205,7 +205,7 @@ class TaskProgressMonitor {
 
     async loadTaskStatistics() {
         try {
-            const response = await this.apiClient.get('/api/tasks/statistics');
+            const response = await this.apiClient.get('/tasks/statistics');
             if (response.success) {
                 this.updateStatistics(response.statistics);
                 this.updateCharts(response.statistics);
@@ -273,8 +273,8 @@ class TaskProgressMonitor {
         try {
             const filter = document.getElementById('taskTypeFilter')?.value || '';
             const sortBy = document.getElementById('sortBy')?.value || 'progress';
-            
-            const response = await this.apiClient.get('/api/tasks/active', {
+
+            const response = await this.apiClient.get('/tasks/active', {
                 filter: filter,
                 sort: sortBy,
                 limit: this.settings.maxTasksDisplay
@@ -324,9 +324,9 @@ class TaskProgressMonitor {
     }
 
     createTaskRow(task) {
-        const progressClass = task.progress >= 80 ? 'bg-success' : 
+        const progressClass = task.progress >= 80 ? 'bg-success' :
                            task.progress >= 50 ? 'bg-warning' : 'bg-info';
-        
+
         return `
             <tr>
                 <td>
@@ -344,11 +344,11 @@ class TaskProgressMonitor {
                 <td>
                     <div class="d-flex align-items-center">
                         <div class="progress me-2" style="width: 60px; height: 8px;">
-                            <div class="progress-bar ${progressClass}" 
-                                 role="progressbar" 
+                            <div class="progress-bar ${progressClass}"
+                                 role="progressbar"
                                  style="width: ${task.progress || 0}%"
-                                 aria-valuenow="${task.progress || 0}" 
-                                 aria-valuemin="0" 
+                                 aria-valuenow="${task.progress || 0}"
+                                 aria-valuemin="0"
                                  aria-valuemax="100">
                             </div>
                         </div>
@@ -365,13 +365,13 @@ class TaskProgressMonitor {
                 </td>
                 <td>
                     <div class="btn-group btn-group-sm">
-                        <button class="btn btn-outline-primary" 
+                        <button class="btn btn-outline-primary"
                                 onclick="taskProgressMonitor.showTaskDetail('${task.id}')"
                                 title="查看详情">
                             <i class="fas fa-eye"></i>
                         </button>
                         ${task.status === 'running' ? `
-                            <button class="btn btn-outline-warning" 
+                            <button class="btn btn-outline-warning"
                                     onclick="taskProgressMonitor.cancelTask('${task.id}')"
                                     title="取消任务">
                                 <i class="fas fa-stop"></i>
@@ -385,7 +385,7 @@ class TaskProgressMonitor {
 
     async loadQueueStatus() {
         try {
-            const response = await this.apiClient.get('/api/tasks/queue/status');
+            const response = await this.apiClient.get('/tasks/queue/status');
             if (response.success) {
                 this.updateQueueStatus(response.queue_status);
             }
@@ -445,7 +445,7 @@ class TaskProgressMonitor {
 
     async showTaskDetail(taskId) {
         try {
-            const response = await this.apiClient.get(`/api/tasks/${taskId}`);
+            const response = await this.apiClient.get(`/tasks/${taskId}`);
             if (response.success) {
                 this.showTaskDetailModal(response.task);
             }
@@ -477,11 +477,11 @@ class TaskProgressMonitor {
                     <div class="mb-3">
                         <label class="form-label fw-bold">进度</label>
                         <div class="progress">
-                            <div class="progress-bar bg-success" 
-                                 role="progressbar" 
+                            <div class="progress-bar bg-success"
+                                 role="progressbar"
                                  style="width: ${task.progress || 0}%"
-                                 aria-valuenow="${task.progress || 0}" 
-                                 aria-valuemin="0" 
+                                 aria-valuenow="${task.progress || 0}"
+                                 aria-valuemin="0"
                                  aria-valuemax="100">
                                 ${task.progress || 0}%
                             </div>
@@ -519,7 +519,7 @@ class TaskProgressMonitor {
         if (!confirm('确定要取消这个任务吗？')) return;
 
         try {
-            const response = await this.apiClient.post(`/api/tasks/${taskId}/cancel`);
+            const response = await this.apiClient.post(`/tasks/${taskId}/cancel`);
             if (response.success) {
                 this.showSuccess('任务已取消');
                 this.loadActiveTasks();
@@ -614,15 +614,15 @@ class TaskProgressMonitor {
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>
         `;
-        
+
         const container = document.createElement('div');
         container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
         container.appendChild(toast);
         document.body.appendChild(container);
-        
+
         const bsToast = new bootstrap.Toast(toast);
         bsToast.show();
-        
+
         toast.addEventListener('hidden.bs.toast', () => {
             document.body.removeChild(container);
         });

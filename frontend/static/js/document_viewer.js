@@ -1,6 +1,6 @@
 /**
  * Document Viewer - Main JavaScript
- * 
+ *
  * This file contains the main logic for the document viewer interface.
  */
 
@@ -18,20 +18,20 @@ class DocumentViewer {
         this.lineNumbers = localStorage.getItem('viewer-line-numbers') === 'true';
         this.fullscreen = false;
         this.searchHistory = JSON.parse(localStorage.getItem('viewer-search-history') || '[]');
-        
+
         this.init();
     }
-    
+
     init() {
         this.setupEventListeners();
         this.applyTheme();
         this.applyFontSize();
-        
+
         if (this.autoLoad && this.documentId) {
             this.loadDocument();
         }
     }
-    
+
     setupEventListeners() {
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
@@ -60,43 +60,52 @@ class DocumentViewer {
                         break;
                 }
             }
-            
+
             // Escape key to exit fullscreen
             if (e.key === 'Escape' && this.fullscreen) {
                 this.toggleFullscreen();
             }
         });
-        
+
         // Window resize handler
         window.addEventListener('resize', () => {
             this.handleResize();
         });
-        
+
         // Scroll handler for table of contents
         document.addEventListener('scroll', () => {
             this.updateActiveSection();
         });
     }
-    
+
     async loadDocument(version = null) {
         if (!this.documentId) {
             console.error('No document ID provided');
             return;
         }
-        
+
+        // Initialize navigation sidebar with document ID
+        if (window.initNavigationSidebar) {
+            try {
+                window.initNavigationSidebar(this.documentId);
+            } catch (error) {
+                console.error('Error initializing navigation sidebar:', error);
+            }
+        }
+
         this.setLoading(true);
         const targetVersion = version || this.currentVersion;
-        
+
         try {
             // Load document content
             const contentResponse = await fetch(`/api/documents/${this.documentId}/content?version=${targetVersion}`);
             if (!contentResponse.ok) {
                 throw new Error(`Failed to load document: ${contentResponse.status}`);
             }
-            
+
             const contentData = await contentResponse.json();
             this.currentContent = contentData.content;
-            
+
             // Load table of contents
             const tocResponse = await fetch(`/api/documents/${this.documentId}/toc?version=${targetVersion}`);
             if (tocResponse.ok) {
@@ -104,59 +113,92 @@ class DocumentViewer {
                 this.currentToc = tocData.toc || [];
                 this.renderToc();
             }
-            
+
             // Render content
             this.renderContent(contentData.content);
-            
+
             // Update document info
             this.updateDocumentInfo(contentData.metadata);
-            
+
             // Update current version
             this.currentVersion = targetVersion;
-            
+
             // Load available versions
             this.loadAvailableVersions();
-            
+
             // Hide loading spinner
             this.setLoading(false);
-            
+
         } catch (error) {
             console.error('Error loading document:', error);
-            this.showError('Failed to load document. Please try again.');
+
+            // Show more specific error message
+            let errorMessage = 'Failed to load document. Please try again.';
+            if (error.message.includes('404')) {
+                errorMessage = '文档不存在或您没有权限访问。';
+            } else if (error.message.includes('500')) {
+                errorMessage = '服务器内部错误，请稍后重试。';
+            } else if (error.message.includes('Failed to fetch')) {
+                errorMessage = '网络连接失败，请检查网络连接后重试。';
+            }
+
+            this.showError(errorMessage);
             this.setLoading(false);
         }
     }
-    
+
     renderContent(content) {
         const contentElement = document.getElementById('documentContent');
-        
+
+        // Check if content is empty or null
+        if (!content || content.trim() === '') {
+            contentElement.innerHTML = `
+                <div class="empty-content-message text-center py-5">
+                    <div class="empty-content-icon mb-3">
+                        <i class="fas fa-file-alt fa-3x text-muted"></i>
+                    </div>
+                    <h4 class="text-muted mb-3">文档内容为空</h4>
+                    <p class="text-muted mb-4">此文档尚未生成内容或内容生成失败。</p>
+                    <div class="empty-content-actions">
+                        <button class="btn btn-primary me-2" onclick="documentViewer.regenerateContent()">
+                            <i class="fas fa-sync"></i> 重新生成内容
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="documentViewer.reloadDocument()">
+                            <i class="fas fa-refresh"></i> 刷新页面
+                        </button>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
         // Convert markdown to HTML
         const html = marked.parse(content);
-        
+
         // Apply custom processing
         const processedHtml = this.processContent(html);
-        
+
         contentElement.innerHTML = processedHtml;
-        
+
         // Apply syntax highlighting
         this.applySyntaxHighlighting();
-        
+
         // Add line numbers if enabled
         if (this.lineNumbers) {
             this.addLineNumbers();
         }
-        
+
         // Setup internal links
         this.setupInternalLinks();
-        
+
         // Update document statistics
         this.updateDocumentStats();
     }
-    
+
     processContent(html) {
         // Custom content processing
         let processed = html;
-        
+
         // Add anchor links to headings
         processed = processed.replace(/<h([1-6])[^>]*>([^<]+)<\/h[1-6]>/g, (match, level, text) => {
             const anchor = this.generateAnchor(text);
@@ -167,25 +209,25 @@ class DocumentViewer {
                         </a>
                     </h${level}>`;
         });
-        
+
         // Enhance tables
         processed = processed.replace(/<table>/g, '<table class="table table-striped table-hover">');
-        
+
         // Enhance code blocks
         processed = processed.replace(/<pre><code class="language-([^"]+)">/g, '<pre><code class="language-$1 hljs">');
-        
+
         // Add responsive images
         processed = processed.replace(/<img([^>]+)>/g, '<img$1 class="img-fluid" loading="lazy">');
-        
+
         return processed;
     }
-    
+
     applySyntaxHighlighting() {
         // Highlight.js will automatically highlight code blocks
         // due to the marked configuration
         hljs.highlightAll();
     }
-    
+
     addLineNumbers() {
         const codeBlocks = document.querySelectorAll('pre code');
         codeBlocks.forEach(block => {
@@ -193,12 +235,12 @@ class DocumentViewer {
             const numberedLines = lines.map((line, index) => {
                 return `<span class="line-number" data-line="${index + 1}">${line}</span>`;
             }).join('\n');
-            
+
             block.innerHTML = numberedLines;
             block.classList.add('has-line-numbers');
         });
     }
-    
+
     setupInternalLinks() {
         // Handle internal anchor links
         document.querySelectorAll('a[href^="#"]').forEach(link => {
@@ -212,23 +254,23 @@ class DocumentViewer {
             });
         });
     }
-    
+
     updateDocumentStats() {
         const content = document.getElementById('documentContent');
         const text = content.textContent || '';
-        
+
         // Word count
         const wordCount = text.trim().split(/\s+/).filter(word => word.length > 0).length;
         document.getElementById('wordCount').textContent = wordCount.toLocaleString();
-        
+
         // Reading time (average 200 words per minute)
         const readingTimeMinutes = Math.ceil(wordCount / 200);
-        const readingTimeText = readingTimeMinutes < 60 
-            ? `${readingTimeMinutes} 分钟` 
+        const readingTimeText = readingTimeMinutes < 60
+            ? `${readingTimeMinutes} 分钟`
             : `${Math.floor(readingTimeMinutes / 60)} 小时 ${readingTimeMinutes % 60} 分钟`;
         document.getElementById('readingTime').textContent = readingTimeText;
     }
-    
+
     updateDocumentInfo(metadata) {
         if (metadata) {
             if (metadata.title) {
@@ -249,7 +291,7 @@ class DocumentViewer {
             }
         }
     }
-    
+
     async loadAvailableVersions() {
         try {
             const response = await fetch(`/api/documents/${this.documentId}/versions`);
@@ -261,11 +303,11 @@ class DocumentViewer {
             console.error('Error loading versions:', error);
         }
     }
-    
+
     renderVersionSelector(versions) {
         const selector = document.getElementById('versionSelect');
         selector.innerHTML = '';
-        
+
         versions.forEach(version => {
             const option = document.createElement('option');
             option.value = version.version;
@@ -276,17 +318,17 @@ class DocumentViewer {
             selector.appendChild(option);
         });
     }
-    
+
     async changeVersion(version) {
         if (version !== this.currentVersion) {
             await this.loadDocument(version);
         }
     }
-    
+
     async exportDocument(format, options = {}) {
         try {
             this.showProgress('正在导出文档...', 0);
-            
+
             const exportOptions = {
                 format: format,
                 include_toc: options.includeToc !== false,
@@ -294,7 +336,7 @@ class DocumentViewer {
                 theme: this.theme,
                 ...options
             };
-            
+
             const response = await fetch(`/api/documents/${this.documentId}/export`, {
                 method: 'POST',
                 headers: {
@@ -302,13 +344,13 @@ class DocumentViewer {
                 },
                 body: JSON.stringify(exportOptions)
             });
-            
+
             if (!response.ok) {
                 throw new Error(`Export failed: ${response.status}`);
             }
-            
+
             const result = await response.json();
-            
+
             if (result.task_id) {
                 // Poll for completion
                 this.pollExportStatus(result.task_id);
@@ -317,25 +359,25 @@ class DocumentViewer {
                 this.downloadFile(result.download_url, `${this.documentId}.${format}`);
                 this.hideProgress();
             }
-            
+
         } catch (error) {
             console.error('Export error:', error);
             this.showError('导出失败，请重试');
             this.hideProgress();
         }
     }
-    
+
     async pollExportStatus(taskId) {
         const maxAttempts = 60; // 5 minutes max
         let attempts = 0;
-        
+
         const poll = async () => {
             attempts++;
-            
+
             try {
                 const response = await fetch(`/api/tasks/${taskId}/status`);
                 const data = await response.json();
-                
+
                 if (data.status === 'completed') {
                     this.downloadFile(data.download_url, data.filename);
                     this.hideProgress();
@@ -359,10 +401,10 @@ class DocumentViewer {
                 }
             }
         };
-        
+
         poll();
     }
-    
+
     downloadFile(url, filename) {
         const link = document.createElement('a');
         link.href = url;
@@ -371,16 +413,16 @@ class DocumentViewer {
         link.click();
         document.body.removeChild(link);
     }
-    
+
     showShareModal() {
         const modal = new bootstrap.Modal(document.getElementById('shareModal'));
         modal.show();
     }
-    
+
     async generateShareLink() {
         const expiry = document.getElementById('shareExpiry').value;
         const password = document.getElementById('sharePassword').value;
-        
+
         try {
             const response = await fetch(`/api/documents/${this.documentId}/share`, {
                 method: 'POST',
@@ -392,7 +434,7 @@ class DocumentViewer {
                     password: password || null
                 })
             });
-            
+
             if (response.ok) {
                 const data = await response.json();
                 document.getElementById('shareLink').value = data.share_url;
@@ -404,12 +446,12 @@ class DocumentViewer {
             this.showError('生成分享链接失败');
         }
     }
-    
+
     copyShareLink() {
         const shareLink = document.getElementById('shareLink');
         shareLink.select();
         document.execCommand('copy');
-        
+
         // Show success message
         const button = event.target;
         const originalText = button.innerHTML;
@@ -418,13 +460,13 @@ class DocumentViewer {
             button.innerHTML = originalText;
         }, 2000);
     }
-    
+
     showVersionHistory() {
         const modal = new bootstrap.Modal(document.getElementById('versionHistoryModal'));
         modal.show();
         this.loadVersionHistory();
     }
-    
+
     async loadVersionHistory() {
         try {
             const response = await fetch(`/api/documents/${this.documentId}/versions`);
@@ -436,11 +478,11 @@ class DocumentViewer {
             console.error('Error loading version history:', error);
         }
     }
-    
+
     renderVersionHistory(versions) {
         const container = document.getElementById('versionHistory');
         container.innerHTML = '';
-        
+
         versions.forEach(version => {
             const versionElement = document.createElement('div');
             versionElement.className = 'version-item';
@@ -461,15 +503,15 @@ class DocumentViewer {
             container.appendChild(versionElement);
         });
     }
-    
+
     printDocument() {
         window.print();
     }
-    
+
     toggleFullscreen() {
         this.fullscreen = !this.fullscreen;
         const container = document.querySelector('.document-viewer-container');
-        
+
         if (this.fullscreen) {
             container.classList.add('fullscreen');
             document.documentElement.requestFullscreen();
@@ -478,60 +520,60 @@ class DocumentViewer {
             document.exitFullscreen();
         }
     }
-    
+
     toggleTheme() {
         this.theme = this.theme === 'light' ? 'dark' : 'light';
         this.applyTheme();
         localStorage.setItem('viewer-theme', this.theme);
     }
-    
+
     applyTheme() {
         document.documentElement.setAttribute('data-theme', this.theme);
     }
-    
+
     increaseFontSize() {
         this.fontSize = Math.min(this.fontSize + 2, 24);
         this.applyFontSize();
         localStorage.setItem('viewer-font-size', this.fontSize);
     }
-    
+
     decreaseFontSize() {
         this.fontSize = Math.max(this.fontSize - 2, 12);
         this.applyFontSize();
         localStorage.setItem('viewer-font-size', this.fontSize);
     }
-    
+
     applyFontSize() {
         document.getElementById('documentContent').style.fontSize = `${this.fontSize}px`;
     }
-    
+
     toggleLineNumbers() {
         this.lineNumbers = !this.lineNumbers;
         localStorage.setItem('viewer-line-numbers', this.lineNumbers);
         this.renderContent(this.currentContent);
     }
-    
+
     focusSearch() {
         const searchInput = document.querySelector('#searchInput');
         if (searchInput) {
             searchInput.focus();
         }
     }
-    
+
     toggleMobileSidebar() {
         const sidebar = document.querySelector('.navigation-sidebar');
         sidebar.classList.toggle('active');
     }
-    
+
     toggleMobileSearch() {
         const searchPanel = document.querySelector('.search-panel');
         searchPanel.classList.toggle('active');
     }
-    
+
     reloadDocument() {
         this.loadDocument();
     }
-    
+
     async downloadOriginal() {
         try {
             const response = await fetch(`/api/documents/${this.documentId}/download`);
@@ -546,22 +588,22 @@ class DocumentViewer {
             this.showError('下载失败');
         }
     }
-    
+
     showProgress(text, progress = 0) {
         const container = document.getElementById('progressContainer');
         const progressBar = document.getElementById('progressBar');
         const progressText = document.getElementById('progressText');
-        
+
         container.style.display = 'block';
         progressBar.style.width = `${progress}%`;
         progressText.textContent = text;
     }
-    
+
     hideProgress() {
         const container = document.getElementById('progressContainer');
         container.style.display = 'none';
     }
-    
+
     setLoading(loading) {
         this.isLoading = loading;
         const spinner = document.getElementById('loadingSpinner');
@@ -569,12 +611,29 @@ class DocumentViewer {
             spinner.style.display = loading ? 'flex' : 'none';
         }
     }
-    
+
     showError(message) {
-        // Show error message (you can use a toast or alert)
-        alert(message);
+        // Show error message in the content area
+        const contentElement = document.getElementById('documentContent');
+        contentElement.innerHTML = `
+            <div class="error-message text-center py-5">
+                <div class="error-icon mb-3">
+                    <i class="fas fa-exclamation-triangle fa-3x text-danger"></i>
+                </div>
+                <h4 class="text-danger mb-3">加载失败</h4>
+                <p class="text-muted mb-4">${message}</p>
+                <div class="error-actions">
+                    <button class="btn btn-primary me-2" onclick="documentViewer.reloadDocument()">
+                        <i class="fas fa-refresh"></i> 重新加载
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="window.history.back()">
+                        <i class="fas fa-arrow-left"></i> 返回
+                    </button>
+                </div>
+            </div>
+        `;
     }
-    
+
     handleResize() {
         // Handle responsive layout changes
         if (window.innerWidth > 768) {
@@ -582,12 +641,12 @@ class DocumentViewer {
             sidebar.classList.remove('active');
         }
     }
-    
+
     updateActiveSection() {
         // Update active section in table of contents based on scroll position
         const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
         const scrollPosition = window.scrollY + 100;
-        
+
         let activeHeading = null;
         headings.forEach(heading => {
             const rect = heading.getBoundingClientRect();
@@ -595,12 +654,12 @@ class DocumentViewer {
                 activeHeading = heading;
             }
         });
-        
+
         if (activeHeading) {
             this.highlightTocItem(activeHeading.id);
         }
     }
-    
+
     highlightTocItem(anchor) {
         // Highlight the corresponding TOC item
         const tocItems = document.querySelectorAll('.toc-item');
@@ -611,14 +670,20 @@ class DocumentViewer {
             }
         });
     }
-    
+
     renderToc() {
         // This will be implemented in the navigation component
-        if (window.navigationSidebar) {
-            window.navigationSidebar.renderToc(this.currentToc);
+        if (window.navigationSidebar && typeof window.navigationSidebar.renderToc === 'function') {
+            try {
+                window.navigationSidebar.renderToc(this.currentToc);
+            } catch (error) {
+                console.error('Error rendering table of contents:', error);
+            }
+        } else {
+            console.warn('Navigation sidebar not available or renderToc method not found');
         }
     }
-    
+
     generateAnchor(text) {
         return text.toLowerCase()
             .replace(/[^\w\s-]/g, '')
@@ -626,10 +691,78 @@ class DocumentViewer {
             .replace(/-+/g, '-')
             .trim('-');
     }
-    
+
     showExportModal() {
         const modal = new bootstrap.Modal(document.getElementById('exportModal'));
         modal.show();
+    }
+
+    async regenerateContent() {
+        if (!this.documentId) {
+            this.showError('文档ID不存在');
+            return;
+        }
+
+        try {
+            this.showProgress('正在重新生成文档内容...', 10);
+
+            // Call the regenerate API
+            const response = await fetch(`/api/documents/${this.documentId}/generate`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            this.showProgress('文档生成任务已启动，正在等待完成...', 50);
+
+            // Show success message
+            this.showSuccess('文档重新生成任务已启动，请稍后刷新页面查看结果。');
+
+            // Wait a bit and then reload the document
+            setTimeout(() => {
+                this.loadDocument();
+            }, 3000);
+
+        } catch (error) {
+            console.error('重新生成文档失败:', error);
+            this.showError('重新生成文档失败: ' + error.message);
+        } finally {
+            this.hideProgress();
+        }
+    }
+
+    showSuccess(message) {
+        // Show success message as a toast notification
+        const toast = document.createElement('div');
+        toast.className = 'toast-notification toast-success';
+        toast.innerHTML = `
+            <div class="toast-content">
+                <i class="fas fa-check-circle"></i>
+                <span>${message}</span>
+            </div>
+        `;
+
+        document.body.appendChild(toast);
+
+        // Show the toast
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 100);
+
+        // Hide the toast after 3 seconds
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 300);
+        }, 3000);
     }
 }
 

@@ -18,11 +18,12 @@ class ApiErrorHandler {
             const location = response.headers.get('location');
             console.log(`检测到认证重定向: ${response.status} -> ${location}`);
 
-            if (location && location.includes('/auth/login')) {
-                // 重定向到登录页面
-                window.location.href = location;
-                throw new Error('需要登录，正在跳转到登录页面...');
-            }
+            // 临时禁用自动重定向到登录页面
+            // if (location && location.includes('/auth/login')) {
+            //     // 重定向到登录页面
+            //     window.location.href = location;
+            //     throw new Error('需要登录，正在跳转到登录页面...');
+            // }
         }
 
         if (!response.ok) {
@@ -32,11 +33,12 @@ class ApiErrorHandler {
             // 检查是否是HTML响应（通常是错误页面）
             if (errorText.trim().startsWith('<!DOCTYPE') || errorText.trim().startsWith('<html')) {
                 // 检查是否是登录页面重定向
-                if (errorText.includes('login') || errorText.includes('登录')) {
-                    console.log('检测到登录页面重定向，跳转到登录页面');
-                    window.location.href = '/auth/login';
-                    throw new Error('需要登录，正在跳转到登录页面...');
-                }
+                // 临时禁用自动重定向到登录页面
+                // if (errorText.includes('login') || errorText.includes('登录')) {
+                //     console.log('检测到登录页面重定向，跳转到登录页面');
+                //     window.location.href = '/auth/login';
+                //     throw new Error('需要登录，正在跳转到登录页面...');
+                // }
                 throw new Error(`API端点返回HTML而不是JSON: ${endpoint}`);
             }
 
@@ -55,11 +57,12 @@ class ApiErrorHandler {
             console.warn(`API返回非JSON响应: ${endpoint}`, text.substring(0, 200));
 
             // 检查是否是登录页面
-            if (text.includes('login') || text.includes('登录')) {
-                console.log('检测到登录页面响应，跳转到登录页面');
-                window.location.href = '/auth/login';
-                throw new Error('需要登录，正在跳转到登录页面...');
-            }
+            // 临时禁用自动重定向到登录页面
+            // if (text.includes('login') || text.includes('登录')) {
+            //     console.log('检测到登录页面响应，跳转到登录页面');
+            //     window.location.href = '/auth/login';
+            //     throw new Error('需要登录，正在跳转到登录页面...');
+            // }
 
             throw new Error(`API返回非JSON响应: ${endpoint}`);
         }
@@ -85,7 +88,7 @@ class ApiErrorHandler {
 
             // 如果是认证错误，不显示错误消息，直接跳转
             if (error.message.includes('需要登录') || error.message.includes('跳转到登录页面')) {
-                return; // 不显示错误，让重定向处理
+                throw error; // 抛出错误，让调用者处理
             }
 
             // 显示用户友好的错误消息

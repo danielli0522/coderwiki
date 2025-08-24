@@ -2,6 +2,10 @@
 
 {% block title %}仓库管理 - CoderWiki{% endblock %}
 
+{% block extra_css %}
+<link href="{{ url_for('static', filename='css/repository-modal-fixes.css') }}" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid">
     <!-- 页面标题和操作按钮 -->
@@ -230,6 +234,8 @@
 {% endblock %}
 
 {% block extra_js %}
+<!-- 模态框修复脚本 - 必须在其他脚本之前加载 -->
+<script src="{{ url_for('static', filename='js/repository-modal-fix.js') }}"></script>
 <script src="{{ url_for('static', filename='js/disable-delete-modal.js') }}"></script>
 <script src="{{ url_for('static', filename='js/modal-close-fix.js') }}"></script>
 <script src="{{ url_for('static', filename='js/repository.js') }}"></script>

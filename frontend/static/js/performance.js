@@ -8,7 +8,7 @@ const PerformanceMonitor = {
         resourceTiming: {},
         paintTiming: {}
     },
-    
+
     // 初始化性能监控
     init: function() {
         this.collectNavigationTiming();
@@ -16,7 +16,7 @@ const PerformanceMonitor = {
         this.collectResourceTiming();
         this.setupPerformanceObserver();
     },
-    
+
     // 收集导航时间
     collectNavigationTiming: function() {
         if (window.performance && window.performance.timing) {
@@ -26,12 +26,12 @@ const PerformanceMonitor = {
                 domReady: timing.domContentLoadedEventEnd - timing.navigationStart,
                 firstPaint: timing.responseEnd - timing.navigationStart
             };
-            
+
             // 发送到后端或本地存储
             this.saveMetrics();
         }
     },
-    
+
     // 收集绘制时间
     collectPaintTiming: function() {
         if (window.performance && window.performance.getEntriesByType) {
@@ -41,7 +41,7 @@ const PerformanceMonitor = {
             });
         }
     },
-    
+
     // 收集资源时间
     collectResourceTiming: function() {
         if (window.performance && window.performance.getEntriesByType) {
@@ -52,7 +52,7 @@ const PerformanceMonitor = {
             };
         }
     },
-    
+
     // 设置性能观察者
     setupPerformanceObserver: function() {
         if (window.PerformanceObserver) {
@@ -64,7 +64,7 @@ const PerformanceMonitor = {
                 });
             });
             longTaskObserver.observe({ entryTypes: ['longtask'] });
-            
+
             // 观察布局变化
             const layoutObserver = new PerformanceObserver((list) => {
                 const entries = list.getEntries();
@@ -75,19 +75,36 @@ const PerformanceMonitor = {
             layoutObserver.observe({ entryTypes: ['layout-shift'] });
         }
     },
-    
+
     // 保存性能指标
     saveMetrics: function() {
         localStorage.setItem('performanceMetrics', JSON.stringify(this.metrics));
-        
+
         // 如果有后端API，发送性能数据
         if (typeof fetch !== 'undefined') {
-            fetch('/api/performance', {
-                method: 'POST',
+            // 检查用户是否已登录
+            fetch('/api/auth/status', {
+                method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(this.metrics)
+                redirect: 'manual'
+            }).then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                return { logged_in: false };
+            }).then(data => {
+                if (data.logged_in) {
+                    // 只有登录用户才发送性能数据
+                    return fetch('/api/system/performance', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(this.metrics)
+                    });
+                }
             }).catch(() => {
                 // 静默失败
             });
@@ -100,7 +117,7 @@ const LazyLoadManager = {
     // 图片懒加载
     initImageLazyLoad: function() {
         const images = document.querySelectorAll('img[data-src]');
-        
+
         if ('IntersectionObserver' in window) {
             const imageObserver = new IntersectionObserver((entries, observer) => {
                 entries.forEach(entry => {
@@ -112,7 +129,7 @@ const LazyLoadManager = {
                     }
                 });
             });
-            
+
             images.forEach(img => imageObserver.observe(img));
         } else {
             // 回退方案
@@ -122,29 +139,29 @@ const LazyLoadManager = {
             });
         }
     },
-    
+
     // 组件懒加载
     initComponentLazyLoad: function() {
         const components = document.querySelectorAll('[data-lazy-component]');
-        
+
         if ('IntersectionObserver' in window) {
             const componentObserver = new IntersectionObserver((entries, observer) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         const component = entry.target;
                         const componentName = component.dataset.lazyComponent;
-                        
+
                         // 动态加载组件
                         this.loadComponent(componentName, component);
                         observer.unobserve(component);
                     }
                 });
             }, { threshold: 0.1 });
-            
+
             components.forEach(component => componentObserver.observe(component));
         }
     },
-    
+
     // 加载组件
     loadComponent: function(componentName, container) {
         // 这里可以实现组件的动态加载
@@ -162,7 +179,7 @@ const ResourcePreloader = {
             '/static/js/components.js',
             '/static/js/performance.js'
         ];
-        
+
         criticalResources.forEach(resource => {
             if (resource.endsWith('.css')) {
                 this.preloadCSS(resource);
@@ -171,7 +188,7 @@ const ResourcePreloader = {
             }
         });
     },
-    
+
     // 预加载CSS
     preloadCSS: function(href) {
         const link = document.createElement('link');
@@ -183,7 +200,7 @@ const ResourcePreloader = {
         };
         document.head.appendChild(link);
     },
-    
+
     // 预加载JS
     preloadJS: function(src) {
         const link = document.createElement('link');
@@ -192,7 +209,7 @@ const ResourcePreloader = {
         link.href = src;
         document.head.appendChild(link);
     },
-    
+
     // 预连接到关键域名
     preconnectToDomains: function() {
         const domains = [
@@ -200,7 +217,7 @@ const ResourcePreloader = {
             'https://fonts.gstatic.com',
             'https://cdn.jsdelivr.net'
         ];
-        
+
         domains.forEach(domain => {
             const link = document.createElement('link');
             link.rel = 'preconnect';
@@ -216,7 +233,7 @@ const MemoryManager = {
     cleanupEventListeners: function() {
         // 这里可以实现事件监听器的清理逻辑
     },
-    
+
     // 清理DOM元素
     cleanupDOM: function() {
         // 移除空的文本节点
@@ -232,7 +249,7 @@ const MemoryManager = {
                 }
             }
         );
-        
+
         while (walker.nextNode()) {
             const node = walker.currentNode;
             if (node.parentNode) {
@@ -240,7 +257,7 @@ const MemoryManager = {
             }
         }
     },
-    
+
     // 优化内存使用
     optimizeMemory: function() {
         // 清理大型对象
@@ -269,24 +286,24 @@ const OfflineCacheManager = {
                 });
         }
     },
-    
+
     // 检查离线状态
     checkOfflineStatus: function() {
         window.addEventListener('online', () => {
             this.showOnlineStatus();
         });
-        
+
         window.addEventListener('offline', () => {
             this.showOfflineStatus();
         });
     },
-    
+
     // 显示在线状态
     showOnlineStatus: function() {
         console.log('Application is online');
         // 可以显示在线状态的UI
     },
-    
+
     // 显示离线状态
     showOfflineStatus: function() {
         console.log('Application is offline');
@@ -298,19 +315,19 @@ const OfflineCacheManager = {
 document.addEventListener('DOMContentLoaded', function() {
     // 初始化性能监控
     PerformanceMonitor.init();
-    
+
     // 初始化懒加载
     LazyLoadManager.initImageLazyLoad();
     LazyLoadManager.initComponentLazyLoad();
-    
+
     // 预加载资源
     ResourcePreloader.preloadCriticalResources();
     ResourcePreloader.preconnectToDomains();
-    
+
     // 初始化离线缓存
     OfflineCacheManager.initServiceWorker();
     OfflineCacheManager.checkOfflineStatus();
-    
+
     // 定期内存管理
     setInterval(() => {
         MemoryManager.optimizeMemory();

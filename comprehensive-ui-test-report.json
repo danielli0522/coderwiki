@@ -1,0 +1,187 @@
+{
+  "metadata": {
+    "timestamp": "2025-08-23T14:30:29.843Z",
+    "baseUrl": "http://localhost:5001",
+    "testMode": "Comprehensive-UI-Test",
+    "duration": null
+  },
+  "summary": {
+    "total": 21,
+    "passed": 21,
+    "failed": 0,
+    "successRate": "100.0"
+  },
+  "categories": [
+    {
+      "name": "基础连接测试",
+      "total": 3,
+      "passed": 3,
+      "failed": 0,
+      "successRate": "100.0"
+    },
+    {
+      "name": "页面功能测试",
+      "total": 5,
+      "passed": 5,
+      "failed": 0,
+      "successRate": "100.0"
+    },
+    {
+      "name": "API功能测试",
+      "total": 4,
+      "passed": 4,
+      "failed": 0,
+      "successRate": "100.0"
+    },
+    {
+      "name": "用户体验测试",
+      "total": 3,
+      "passed": 3,
+      "failed": 0,
+      "successRate": "100.0"
+    },
+    {
+      "name": "安全性测试",
+      "total": 3,
+      "passed": 3,
+      "failed": 0,
+      "successRate": "100.0"
+    },
+    {
+      "name": "性能测试",
+      "total": 3,
+      "passed": 3,
+      "failed": 0,
+      "successRate": "100.0"
+    }
+  ],
+  "details": [
+    {
+      "category": "基础连接测试",
+      "name": "服务器响应测试",
+      "status": "PASSED",
+      "timestamp": "2025-08-23T14:30:29.760Z"
+    },
+    {
+      "category": "基础连接测试",
+      "name": "主页重定向测试",
+      "status": "PASSED",
+      "timestamp": "2025-08-23T14:30:29.768Z"
+    },
+    {
+      "category": "基础连接测试",
+      "name": "静态资源可访问性测试",
+      "status": "PASSED",
+      "timestamp": "2025-08-23T14:30:29.772Z"
+    },
+    {
+      "category": "页面功能测试",
+      "name": "登录页面完整性测试",
+      "status": "PASSED",
+      "timestamp": "2025-08-23T14:30:29.776Z"
+    },
+    {
+      "category": "页面功能测试",
+      "name": "注册页面完整性测试",
+      "status": "PASSED",
+      "timestamp": "2025-08-23T14:30:29.779Z"
+    },
+    {
+      "category": "页面功能测试",
+      "name": "仪表板访问控制测试",
+      "status": "PASSED",
+      "timestamp": "2025-08-23T14:30:29.786Z"
+    },
+    {
+      "category": "页面功能测试",
+      "name": "仓库页面访问测试",
+      "status": "PASSED",
+      "timestamp": "2025-08-23T14:30:29.790Z"
+    },
+    {
+      "category": "页面功能测试",
+      "name": "文档页面访问测试",
+      "status": "PASSED",
+      "timestamp": "2025-08-23T14:30:29.795Z"
+    },
+    {
+      "category": "API功能测试",
+      "name": "认证API端点测试",
+      "status": "PASSED",
+      "timestamp": "2025-08-23T14:30:29.810Z"
+    },
+    {
+      "category": "API功能测试",
+      "name": "仓库API端点测试",
+      "status": "PASSED",
+      "timestamp": "2025-08-23T14:30:29.813Z"
+    },
+    {
+      "category": "API功能测试",
+      "name": "文档API端点测试",
+      "status": "PASSED",
+      "timestamp": "2025-08-23T14:30:29.817Z"
+    },
+    {
+      "category": "API功能测试",
+      "name": "任务API端点测试",
+      "status": "PASSED",
+      "timestamp": "2025-08-23T14:30:29.820Z"
+    },
+    {
+      "category": "用户体验测试",
+      "name": "页面标题测试",
+      "status": "PASSED",
+      "timestamp": "2025-08-23T14:30:29.826Z"
+    },
+    {
+      "category": "用户体验测试",
+      "name": "表单结构测试",
+      "status": "PASSED",
+      "timestamp": "2025-08-23T14:30:29.828Z"
+    },
+    {
+      "category": "用户体验测试",
+      "name": "响应式设计测试",
+      "status": "PASSED",
+      "timestamp": "2025-08-23T14:30:29.830Z"
+    },
+    {
+      "category": "安全性测试",
+      "name": "CSRF保护测试",
+      "status": "PASSED",
+      "timestamp": "2025-08-23T14:30:29.832Z"
+    },
+    {
+      "category": "安全性测试",
+      "name": "XSS防护测试",
+      "status": "PASSED",
+      "timestamp": "2025-08-23T14:30:29.834Z"
+    },
+    {
+      "category": "安全性测试",
+      "name": "敏感信息泄露测试",
+      "status": "PASSED",
+      "timestamp": "2025-08-23T14:30:29.836Z"
+    },
+    {
+      "category": "性能测试",
+      "name": "页面加载性能测试",
+      "status": "PASSED",
+      "timestamp": "2025-08-23T14:30:29.838Z"
+    },
+    {
+      "category": "性能测试",
+      "name": "API响应性能测试",
+      "status": "PASSED",
+      "timestamp": "2025-08-23T14:30:29.841Z"
+    },
+    {
+      "category": "性能测试",
+      "name": "资源大小测试",
+      "status": "PASSED",
+      "timestamp": "2025-08-23T14:30:29.842Z"
+    }
+  ],
+  "recommendations": []
+}

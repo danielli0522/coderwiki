@@ -21,97 +21,110 @@ wheels/
 *.egg
 MANIFEST
 
-# Virtual Environment
+# Virtual environments
 venv/
 env/
 ENV/
-env.bak/
-venv.bak/
 
 # IDE
-.idea/
 .vscode/
+.idea/
 *.swp
 *.swo
-*~
 
 # OS
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Test files and reports
+test_*.py
+*_test.py
+test-*.js
+*_test.js
+*_test_report.json
+*_test_report.html
+test-reports/
+ui_test_results/
+real_ui_test_results/
+ui_fix_verification_results/
+route_alignment_results/
+
+# Temporary files
+*.tmp
+*.temp
+cookies.txt
+.coverage
+htmlcov/
+.pytest_cache/
 
 # Database
 *.db
 *.sqlite
 *.sqlite3
 
-# Logs
-*.log
-logs/
-
 # Environment variables
 .env
 .env.local
-.env.*.local
+.env.production
 
-# Testing
-.coverage
-htmlcov/
-.pytest_cache/
-.tox/
-.nox/
-coverage.xml
-*.cover
-.hypothesis/
-
-# Documentation
-docs/_build/
-docs/build/
-
-# Temporary files
-tmp/
-temp/
-*.tmp
-*.temp
-
-# Node modules (if using npm)
+# Node modules (if any)
 node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 
-# Docker
-.dockerignore
+# Build artifacts
+dist/
+build/
 
-# Backup files
-*.bak
-*.backup
+# Repository test data
+backend/repos/
+backend/cookies.txt
 
-# Local development files
-local_settings.py
-dev_settings.py
+# Analysis reports
+*_ANALYSIS_REPORT.md
+*_FIX_SUMMARY.md
+*_FIX_REPORT.md
+*_DEBUG_REPORT.md
+*_ISSUE_DIAGNOSIS.md
+*_TEST_ANALYSIS_REPORT.md
+*_COMPREHENSIVE_REPORT.md
+*_ALIGNMENT_QA_FIX_REPORT.md
+*_SELECTION_FIX_SUMMARY.md
+*_DISPLAY_FINAL_FIX.md
+*_LOADING_FIX.md
+*_MODAL_FIX_SUMMARY.md
+*_PAGE_FIX_REPORT.md
+*_API_400_ERROR_ANALYSIS.md
+*_405_FIX_REPORT.md
+*_SYSTEMATIC_FIX_REPORT.md
+*_ENDPOINT_FIX_SUMMARY.md
+*_API_FIX_SUMMARY.md
+*_URL_FIX_REPORT.md
+*_TASK_API_FIX_REPORT.md
+*_UI_TEST_COMPREHENSIVE_REPORT.md
+*_UI_TEST_ANALYSIS_REPORT.md
+*_FIXES_SUMMARY.md
+*_ISSUE_DIAGNOSIS_AND_FIX.md
+*_ACCEPTANCE_REPORT.md
 
-# Cache
-.cache/
-__pycache__/
+# Test data files
+*_analysis_report.json
+*_test-report.json
+*_test-report.html
+*_test-report.json
 
-# Static files (if not using collectstatic)
-staticfiles/
-
-# Media files
-media/
-
-# Sensitive data
-secrets/
-*.key
-*.pem
-*.crt
-
-# Application specific
-uploads/
-generated_docs/
-*.pid
+# Test scripts
+create_test_*.py
+verify_test_*.py
+fix_*.py
+run-*.js
+simple-*.js
+comprehensive-*.js
+yolo-*.js
+ui-*.js
+test-*.js
+route_alignment_verification.py
+start_puppeteer_mcp.py
+install_puppeteer_mcp.sh

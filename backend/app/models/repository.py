@@ -36,7 +36,7 @@ class Repository(db.Model):
     last_commit = db.Column(db.String(50))
     analysis_progress = db.Column(db.Integer)
     last_analysis = db.Column(db.DateTime)
-    repo_metadata = db.Column('metadata', db.JSON)
+    repo_metadata = db.Column('repo_metadata', db.JSON)
 
     # Relationships
     documents = db.relationship('Document', backref='repository', lazy='dynamic',
@@ -96,3 +96,27 @@ class Repository(db.Model):
         if 'github.com' in url:
             return url.split('/')[-1].replace('.git', '')
         return url.split('/')[-1].replace('.git', '')
+
+    def update_repository_info(self, commit_hash: str, repo_size: int, file_count: int, metadata: dict = None):
+        """Update repository information after cloning or syncing."""
+        self.commit_hash = commit_hash
+        self.repo_size = repo_size
+        self.file_count = file_count
+        if metadata:
+            self.repo_metadata = metadata
+        self.updated_at = datetime.utcnow()
+
+    def update_clone_status(self, status: str, error: str = None):
+        """Update clone status."""
+        self.clone_status = status
+        if error:
+            self.clone_error = error
+        self.updated_at = datetime.utcnow()
+
+    def is_ready_for_analysis(self) -> bool:
+        """Check if repository is ready for analysis."""
+        return (
+            self.local_path is not None and
+            self.clone_status == 'completed' and
+            self.commit_hash is not None
+        )

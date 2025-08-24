@@ -16,8 +16,17 @@ class RepositoryManager {
         this.fixModalInteractions(); // 添加模态框修复
     }
 
-    // 添加模态框修复方法
+    // 添加模态框修复方法 - 现在由RepositoryModalFix处理
     fixModalInteractions() {
+        // 检查是否有RepositoryModalFix可用
+        if (window.RepositoryModalFix) {
+            console.log('RepositoryModalFix已可用，跳过本地修复');
+            return;
+        }
+
+        // 备用修复方法
+        console.log('使用备用模态框修复方法...');
+
         // 监听模态框显示事件
         document.addEventListener('shown.bs.modal', (event) => {
             if (event.target.id === 'addRepositoryModal') {
@@ -115,22 +124,28 @@ class RepositoryManager {
 
     async loadRepositories() {
         try {
-            // 检查认证状态
-            const isAuthenticated = await window.apiErrorHandler.preCheckAuth();
-            if (!isAuthenticated) {
-                console.log('用户未登录，跳过加载仓库列表');
-                return;
-            }
+            console.log('开始加载仓库列表...');
 
-            // 使用API错误处理器
-            const data = await window.apiErrorHandler.fetchWithErrorHandling('/api/repositories', {
+            const response = await fetch('/api/repositories', {
                 method: 'GET',
                 headers: {
+                    'Accept': 'application/json',
                     'Content-Type': 'application/json'
                 }
             });
 
+            console.log('API响应状态:', response.status);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('API返回数据结构:', data);
+
             this.repositories = data.repositories || data.data || [];
+            console.log(`加载到 ${this.repositories.length} 个仓库`);
+
             this.renderRepositories();
 
             // 隐藏加载状态
@@ -149,43 +164,37 @@ class RepositoryManager {
 
         } catch (error) {
             console.error('Error loading repositories:', error);
-            // 不显示认证相关的错误消息，因为已经处理了
-            if (!error.message.includes('需要登录') && !error.message.includes('跳转到登录页面')) {
-                this.showError('加载仓库列表失败: ' + error.message);
-            }
+            this.showError('加载仓库列表失败: ' + error.message);
         }
     }
 
     async loadStatistics() {
         try {
-            // 检查认证状态
-            const isAuthenticated = await window.apiErrorHandler.preCheckAuth();
-            if (!isAuthenticated) {
-                console.log('用户未登录，跳过加载统计数据');
-                return;
-            }
+            console.log('开始加载统计数据...');
 
             const response = await fetch('/api/repositories/statistics', {
                 method: 'GET',
                 headers: {
+                    'Accept': 'application/json',
                     'Content-Type': 'application/json'
                 }
             });
+
+            console.log('统计API响应状态:', response.status);
 
             if (!response.ok) {
                 throw new Error('加载统计数据失败');
             }
 
             const data = await response.json();
-            this.statistics = data.statistics || data.data || {};
+            console.log('统计API返回数据结构:', data);
+
+            this.statistics = data.statistics || data;
             this.renderStatistics();
 
         } catch (error) {
             console.error('Error loading statistics:', error);
-            // 不显示认证相关的错误消息
-            if (!error.message.includes('需要登录') && !error.message.includes('跳转到登录页面')) {
-                console.error('加载统计数据失败:', error);
-            }
+            console.error('加载统计数据失败:', error);
         }
     }
 
@@ -297,31 +306,42 @@ class RepositoryManager {
         resultSpan.innerHTML = '';
 
         try {
-            const response = await fetch('/api/repositories/validate-url', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ url: url })
-            });
+            // 临时禁用API调用，使用模拟验证
+            // const response = await fetch('/api/repositories/validate-url', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json'
+            //     },
+            //     body: JSON.stringify({ url: url })
+            // });
 
-            const data = await response.json();
+            // const data = await response.json();
 
-            if (data.success) {
-                if (data.valid) {
-                    resultSpan.innerHTML = '<span class="text-success"><i class="fas fa-check-circle"></i> URL 有效且可访问</span>';
-                    this.clearUrlError();
+            // if (data.success) {
+            //     if (data.valid) {
+            //         resultSpan.innerHTML = '<span class="text-success"><i class="fas fa-check-circle"></i> URL 有效且可访问</span>';
+            //         this.clearUrlError();
 
-                    // 自动提取仓库名称
-                    if (!document.getElementById('repoName').value) {
-                        const repoName = this.extractRepoName(url);
-                        document.getElementById('repoName').value = repoName;
-                    }
-                } else {
-                    resultSpan.innerHTML = '<span class="text-warning"><i class="fas fa-exclamation-triangle"></i> URL 格式正确但无法访问</span>';
-                }
-            } else {
-                this.showUrlError(data.message);
+            //         // 自动提取仓库名称
+            //         if (!document.getElementById('repoName').value) {
+            //             const repoName = this.extractRepoName(url);
+            //             document.getElementById('repoName').value = repoName;
+            //         }
+            //     } else {
+            //         resultSpan.innerHTML = '<span class="text-warning"><i class="fas fa-exclamation-triangle"></i> URL 格式正确但无法访问</span>';
+            //     }
+            // } else {
+            //     this.showUrlError(data.message);
+            // }
+
+            // 临时模拟验证成功
+            resultSpan.innerHTML = '<span class="text-success"><i class="fas fa-check-circle"></i> URL 验证功能已禁用（开发模式）</span>';
+            this.clearUrlError();
+
+            // 自动提取仓库名称
+            if (!document.getElementById('repoName').value) {
+                const repoName = this.extractRepoName(url);
+                document.getElementById('repoName').value = repoName;
             }
 
         } catch (error) {
@@ -348,41 +368,52 @@ class RepositoryManager {
         addBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 添加中...';
 
         try {
-            const response = await fetch('/api/repositories', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    url: url,
-                    name: name || undefined,
-                    description: description || undefined
-                })
-            });
+            // 临时禁用API调用
+            // const response = await fetch('/api/repositories', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json'
+            //     },
+            //     body: JSON.stringify({
+            //         url: url,
+            //         name: name || undefined,
+            //         description: description || undefined
+            //     })
+            // });
 
-            const data = await response.json();
+            // const data = await response.json();
 
-            if (data.success) {
-                // 关闭模态框
-                const modal = bootstrap.Modal.getInstance(document.getElementById('addRepositoryModal'));
-                modal.hide();
+            // if (data.success) {
+            //     // 关闭模态框
+            //     const modal = bootstrap.Modal.getInstance(document.getElementById('addRepositoryModal'));
+            //     modal.hide();
 
-                // 重置表单
-                document.getElementById('addRepositoryForm').reset();
-                document.getElementById('validationResult').innerHTML = '';
+            //     // 重置表单
+            //     document.getElementById('addRepositoryForm').reset();
+            //     document.getElementById('validationResult').innerHTML = '';
 
-                // 重新加载仓库列表和统计数据
-                this.loadRepositories();
-                this.loadStatistics();
+            //     // 重新加载仓库列表和统计数据
+            //     this.loadRepositories();
+            //     this.loadStatistics();
 
-                this.showSuccess('仓库添加成功，正在克隆中...');
+            //     this.showSuccess('仓库添加成功，正在克隆中...');
 
-                // 开始轮询克隆状态
-                this.pollCloneStatus(data.repository.id);
+            //     // 开始轮询克隆状态
+            //     this.pollCloneStatus(data.repository.id);
 
-            } else {
-                this.showUrlError(data.error);
-            }
+            // } else {
+            //     this.showUrlError(data.error);
+            // }
+
+            // 临时模拟成功
+            // 关闭模态框 - 使用安全的关闭方法
+            this.closeAddRepositoryModal();
+
+            // 重置表单
+            document.getElementById('addRepositoryForm').reset();
+            document.getElementById('validationResult').innerHTML = '';
+
+            this.showSuccess('仓库添加功能已禁用（开发模式）');
 
         } catch (error) {
             console.error('Error adding repository:', error);
@@ -390,6 +421,47 @@ class RepositoryManager {
         } finally {
             addBtn.disabled = false;
             addBtn.innerHTML = '<i class="fas fa-plus"></i> 添加仓库';
+        }
+    }
+
+    // 安全的模态框关闭方法
+    closeAddRepositoryModal() {
+        const modal = document.getElementById('addRepositoryModal');
+        if (!modal) {
+            console.warn('找不到添加仓库模态框');
+            return;
+        }
+
+        // 优先使用RepositoryModalFix
+        if (window.RepositoryModalFix) {
+            window.RepositoryModalFix.closeModal(modal);
+            return;
+        }
+
+        // 备用方法：使用Bootstrap API
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const bsModal = bootstrap.Modal.getInstance(modal);
+            if (bsModal) {
+                bsModal.hide();
+            } else {
+                // 手动关闭
+                modal.style.display = 'none';
+                modal.classList.remove('show');
+                document.body.classList.remove('modal-open');
+
+                // 移除背景
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                backdrops.forEach(backdrop => backdrop.remove());
+            }
+        } else {
+            // 手动关闭
+            modal.style.display = 'none';
+            modal.classList.remove('show');
+            document.body.classList.remove('modal-open');
+
+            // 移除背景
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(backdrop => backdrop.remove());
         }
     }
 

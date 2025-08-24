@@ -1,44 +1,169 @@
 /**
  * Analysis Management JavaScript
+ * Enhanced version with better error handling and navigation support
  */
 
 class AnalysisManager {
     constructor(options = {}) {
-        this.repositoryId = options.repositoryId;
+        this.repositoryId = options.repositoryId || null;
         this.repositoryName = options.repositoryName || '';
         this.currentAnalysis = null;
         this.analysisResults = null;
         this.analysisHistory = [];
         this.pollingInterval = null;
+        this.isInitialized = false;
         this.init();
     }
 
     init() {
+        console.log('Initializing AnalysisManager...');
         this.bindEvents();
-        this.loadAnalysisResults();
-        this.loadAnalysisHistory();
+        this.loadRepositories();
+        this.loadAnalysisStatistics();
+        this.isInitialized = true;
+        console.log('AnalysisManager initialized successfully');
     }
 
     bindEvents() {
         // 分析控制事件
-        document.getElementById('startAnalysisBtn').addEventListener('click', () => this.startAnalysis());
-        document.getElementById('startFirstAnalysisBtn').addEventListener('click', () => this.startAnalysis());
-        document.getElementById('stopAnalysisBtn').addEventListener('click', () => this.stopAnalysis());
-        document.getElementById('cancelAnalysisBtn').addEventListener('click', () => this.cancelAnalysis());
-        
+        this.bindElement('startAnalysisBtn', 'click', () => this.startAnalysis());
+        this.bindElement('startFirstAnalysisBtn', 'click', () => this.startAnalysis());
+        this.bindElement('stopAnalysisBtn', 'click', () => this.stopAnalysis());
+        this.bindElement('cancelAnalysisBtn', 'click', () => this.cancelAnalysis());
+        this.bindElement('modalStartAnalysisBtn', 'click', () => this.startAnalysisFromModal());
+
         // 其他操作事件
-        document.getElementById('refreshAnalysisBtn').addEventListener('click', () => this.refreshAnalysis());
-        document.getElementById('exportResultsBtn').addEventListener('click', () => this.exportResults());
-        document.getElementById('clearCacheBtn').addEventListener('click', () => this.clearCache());
-        
+        this.bindElement('refreshAnalysisBtn', 'click', () => this.refreshAnalysis());
+        this.bindElement('clearCacheBtn', 'click', () => this.clearCache());
+        this.bindElement('newAnalysisBtn', 'click', () => this.showNewAnalysisModal());
+
         // 分析类型选择事件
         document.querySelectorAll('input[type="checkbox"][id$="Analysis"]').forEach(checkbox => {
             checkbox.addEventListener('change', () => this.updateAnalysisTypes());
         });
+
+        // 仓库选择事件
+        this.bindElement('analysisRepoSelect', 'change', (e) => {
+            this.repositoryId = e.target.value;
+            if (this.repositoryId) {
+                this.loadAnalysisResults();
+                this.loadAnalysisHistory();
+            }
+        });
+
+        // 搜索和过滤事件
+        this.bindElement('analysisSearch', 'input', (e) => this.filterAnalysisHistory(e.target.value));
+        this.bindElement('analysisStatusFilter', 'change', (e) => this.filterAnalysisHistory('', e.target.value));
+    }
+
+    bindElement(selector, event, handler) {
+        const element = document.getElementById(selector);
+        if (element) {
+            element.addEventListener(event, handler);
+        } else {
+            console.warn(`Element with id '${selector}' not found`);
+        }
+    }
+
+    async loadRepositories() {
+        try {
+            const response = await fetch('/api/repositories', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to load repositories');
+            }
+
+            const data = await response.json();
+
+            if (data.success && data.repositories) {
+                this.populateRepositorySelect(data.repositories);
+            }
+
+        } catch (error) {
+            console.error('Error loading repositories:', error);
+            this.showError('加载仓库列表失败');
+        }
+    }
+
+    populateRepositorySelect(repositories) {
+        const select = document.getElementById('analysisRepoSelect');
+        const modalSelect = document.getElementById('analysisRepo');
+
+        if (select) {
+            select.innerHTML = '<option value="">请选择仓库</option>';
+            repositories.forEach(repo => {
+                const option = document.createElement('option');
+                option.value = repo.id;
+                option.textContent = repo.name;
+                select.appendChild(option);
+            });
+        }
+
+        if (modalSelect) {
+            modalSelect.innerHTML = '<option value="">请选择仓库</option>';
+            repositories.forEach(repo => {
+                const option = document.createElement('option');
+                option.value = repo.id;
+                option.textContent = repo.name;
+                modalSelect.appendChild(option);
+            });
+        }
+    }
+
+    async loadAnalysisStatistics() {
+        try {
+            const response = await fetch('/api/analysis/statistics', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to load analysis statistics');
+            }
+
+            const data = await response.json();
+
+            if (data.success && data.statistics) {
+                this.updateStatistics(data.statistics);
+            }
+
+        } catch (error) {
+            console.error('Error loading analysis statistics:', error);
+        }
+    }
+
+    updateStatistics(statistics) {
+        const elements = {
+            'totalAnalyses': statistics.total_analyses || 0,
+            'successAnalyses': statistics.completed_analyses || 0,
+            'runningAnalyses': statistics.pending_analyses || 0,
+            'failedAnalyses': statistics.failed_analyses || 0
+        };
+
+        Object.entries(elements).forEach(([id, value]) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = value;
+            }
+        });
     }
 
     async loadAnalysisResults() {
+        if (!this.repositoryId) {
+            this.showEmptyState();
+            return;
+        }
+
         try {
+            document.getElementById('analysisLoading').style.display = 'block';
+
             const response = await fetch(`/api/analysis/results/${this.repositoryId}`, {
                 method: 'GET',
                 headers: {
@@ -47,11 +172,11 @@ class AnalysisManager {
             });
 
             if (!response.ok) {
-                throw new Error('加载分析结果失败');
+                throw new Error('Failed to load analysis results');
             }
 
             const data = await response.json();
-            
+
             if (data.success) {
                 this.analysisResults = data.results;
                 this.renderAnalysisResults();
@@ -59,16 +184,19 @@ class AnalysisManager {
             } else {
                 this.showEmptyState();
             }
-            
+
         } catch (error) {
             console.error('Error loading analysis results:', error);
             this.showError('加载分析结果失败');
+            this.showEmptyState();
         } finally {
             document.getElementById('analysisLoading').style.display = 'none';
         }
     }
 
     async loadAnalysisHistory() {
+        if (!this.repositoryId) return;
+
         try {
             const response = await fetch(`/api/analysis/history/${this.repositoryId}`, {
                 method: 'GET',
@@ -78,23 +206,23 @@ class AnalysisManager {
             });
 
             if (!response.ok) {
-                throw new Error('加载分析历史失败');
+                throw new Error('Failed to load analysis history');
             }
 
             const data = await response.json();
-            
+
             if (data.success) {
                 this.analysisHistory = data.history;
                 this.renderAnalysisHistory();
             }
-            
+
         } catch (error) {
             console.error('Error loading analysis history:', error);
         }
     }
 
     renderAnalysisResults() {
-        if (!this.analysisResults) {
+        if (!this.analysisResults || Object.keys(this.analysisResults).length === 0) {
             this.showEmptyState();
             return;
         }
@@ -141,11 +269,9 @@ class AnalysisManager {
             </div>
         `;
 
-        document.getElementById('structureStats').innerHTML = statsHtml;
-
-        // 渲染目录树
-        if (structure.directory_tree) {
-            document.getElementById('directoryTree').innerHTML = this.renderDirectoryTree(structure.directory_tree);
+        const container = document.getElementById('structureStats');
+        if (container) {
+            container.innerHTML = statsHtml;
         }
     }
 
@@ -154,22 +280,14 @@ class AnalysisManager {
         if (!dependencies) return;
 
         // 渲染包管理器
-        const packageManagersHtml = dependencies.package_managers.map(pm => 
+        const packageManagersHtml = dependencies.package_managers?.map(pm =>
             `<span class="badge bg-primary me-1">${this.escapeHtml(pm)}</span>`
-        ).join('');
+        ).join('') || '<span class="text-muted">无</span>';
 
-        document.getElementById('packageManagers').innerHTML = packageManagersHtml || '<span class="text-muted">无</span>';
-
-        // 渲染依赖关系图（简化版本）
-        const dependencyGraphHtml = `
-            <div class="text-center">
-                <i class="fas fa-project-diagram fa-4x text-muted mb-3"></i>
-                <p class="text-muted">依赖关系图功能开发中...</p>
-                <small>检测到 ${Object.keys(dependencies.dependencies || {}).length} 个依赖</small>
-            </div>
-        `;
-
-        document.getElementById('dependencyGraph').innerHTML = dependencyGraphHtml;
+        const container = document.getElementById('packageManagers');
+        if (container) {
+            container.innerHTML = packageManagersHtml;
+        }
     }
 
     renderComplexityResults() {
@@ -191,27 +309,12 @@ class AnalysisManager {
                     </div>
                 </div>
             </div>
-            <div class="row mt-3">
-                <div class="col-12">
-                    <h6>复杂度分布</h6>
-                    <div class="progress" style="height: 20px;">
-                        ${this.renderComplexityProgress(complexity.complexity_distribution)}
-                    </div>
-                </div>
-            </div>
         `;
 
-        document.getElementById('complexityMetrics').innerHTML = metricsHtml;
-
-        // 渲染复杂度图表
-        const complexityChartHtml = `
-            <div class="text-center">
-                <i class="fas fa-chart-bar fa-4x text-muted mb-3"></i>
-                <p class="text-muted">复杂度图表功能开发中...</p>
-            </div>
-        `;
-
-        document.getElementById('complexityChart').innerHTML = complexityChartHtml;
+        const container = document.getElementById('complexityMetrics');
+        if (container) {
+            container.innerHTML = metricsHtml;
+        }
     }
 
     renderTechStackResults() {
@@ -229,31 +332,10 @@ class AnalysisManager {
             </div>
         `).join('') || '<p class="text-muted">无</p>';
 
-        document.getElementById('programmingLanguages').innerHTML = languagesHtml;
-
-        // 渲染框架和工具
-        const frameworksHtml = `
-            <div class="mb-3">
-                <strong>框架:</strong>
-                <div class="mt-1">
-                    ${techStack.frameworks?.map(f => `<span class="badge bg-success me-1">${this.escapeHtml(f)}</span>`).join('') || '<span class="text-muted">无</span>'}
-                </div>
-            </div>
-            <div class="mb-3">
-                <strong>数据库:</strong>
-                <div class="mt-1">
-                    ${techStack.databases?.map(d => `<span class="badge bg-info me-1">${this.escapeHtml(d)}</span>`).join('') || '<span class="text-muted">无</span>'}
-                </div>
-            </div>
-            <div class="mb-3">
-                <strong>工具:</strong>
-                <div class="mt-1">
-                    ${techStack.tools?.map(t => `<span class="badge bg-warning me-1">${this.escapeHtml(t)}</span>`).join('') || '<span class="text-muted">无</span>'}
-                </div>
-            </div>
-        `;
-
-        document.getElementById('frameworksTools').innerHTML = frameworksHtml;
+        const container = document.getElementById('programmingLanguages');
+        if (container) {
+            container.innerHTML = languagesHtml;
+        }
     }
 
     renderSecurityResults() {
@@ -275,7 +357,10 @@ class AnalysisManager {
             </div>
         `).join('') || '<p class="text-muted">未发现安全问题</p>';
 
-        document.getElementById('securityIssues').innerHTML = securityHtml;
+        const container = document.getElementById('securityIssues');
+        if (container) {
+            container.innerHTML = securityHtml;
+        }
     }
 
     renderPatternsResults() {
@@ -290,7 +375,10 @@ class AnalysisManager {
             </div>
         `).join('') || '<p class="text-muted">未识别到设计模式</p>';
 
-        document.getElementById('designPatterns').innerHTML = patternsHtml;
+        const container = document.getElementById('designPatterns');
+        if (container) {
+            container.innerHTML = patternsHtml;
+        }
     }
 
     renderQualityResults() {
@@ -314,43 +402,40 @@ class AnalysisManager {
             </div>
         `;
 
-        document.getElementById('qualityMetrics').innerHTML = metricsHtml;
-
-        // 渲染质量评分
-        const qualityScoreHtml = `
-            <div class="text-center">
-                <div class="quality-score-gauge">
-                    <div class="metric-card">
-                        <div class="metric-value">${quality.overall_score || '0'}</div>
-                        <div class="metric-label">总体质量评分</div>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        document.getElementById('qualityScore').innerHTML = qualityScoreHtml;
+        const container = document.getElementById('qualityMetrics');
+        if (container) {
+            container.innerHTML = metricsHtml;
+        }
     }
 
     renderAnalysisHistory() {
         const historyHtml = this.analysisHistory.map(item => `
-            <div class="history-item">
+            <div class="history-item border-bottom pb-2 mb-2">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <strong>分析 #${item.id}</strong>
-                        <span class="badge bg-${this.getStatusBadgeClass(item.status)} ms-2">${item.status}</span>
+                        <span class="badge bg-${this.getStatusBadgeClass(item.status)} ms-2">${this.getStatusText(item.status)}</span>
                     </div>
-                    <div class="timestamp">${this.formatDate(item.created_at)}</div>
+                    <div class="timestamp text-muted">${this.formatDate(item.created_at)}</div>
                 </div>
-                <div class="analysis-types">
-                    ${item.analysis_types?.map(type => `<span class="badge bg-outline-secondary me-1">${type}</span>`).join('')}
+                <div class="analysis-types mt-1">
+                    <span class="badge bg-outline-secondary me-1">${item.analysis_type}</span>
                 </div>
             </div>
         `).join('') || '<p class="text-muted">暂无分析历史</p>';
 
-        document.getElementById('analysisHistory').innerHTML = historyHtml;
+        const container = document.getElementById('analysisHistory');
+        if (container) {
+            container.innerHTML = historyHtml;
+        }
     }
 
     async startAnalysis() {
+        if (!this.repositoryId) {
+            this.showError('请先选择一个仓库');
+            return;
+        }
+
         const analysisTypes = this.getSelectedAnalysisTypes();
         const config = this.getAnalysisConfig();
 
@@ -379,14 +464,42 @@ class AnalysisManager {
                 this.currentAnalysis = data.analysis_ids[0];
                 this.startPolling();
                 this.updateAnalysisButtons(true);
+                this.showSuccess('分析已开始');
             } else {
-                this.showError(data.message);
+                this.showError(data.message || '开始分析失败');
             }
 
         } catch (error) {
             console.error('Error starting analysis:', error);
             this.showError('开始分析失败');
         }
+    }
+
+    async startAnalysisFromModal() {
+        const modalRepoSelect = document.getElementById('analysisRepo');
+        const repositoryId = modalRepoSelect.value;
+
+        if (!repositoryId) {
+            this.showError('请选择仓库');
+            return;
+        }
+
+        this.repositoryId = repositoryId;
+
+        // 更新主界面的仓库选择
+        const mainRepoSelect = document.getElementById('analysisRepoSelect');
+        if (mainRepoSelect) {
+            mainRepoSelect.value = repositoryId;
+        }
+
+        // 关闭模态框
+        const modal = bootstrap.Modal.getInstance(document.getElementById('newAnalysisModal'));
+        if (modal) {
+            modal.hide();
+        }
+
+        // 开始分析
+        await this.startAnalysis();
     }
 
     async stopAnalysis() {
@@ -408,7 +521,7 @@ class AnalysisManager {
                 this.hideProgressModal();
                 this.showSuccess('分析已停止');
             } else {
-                this.showError(data.message);
+                this.showError(data.message || '停止分析失败');
             }
 
         } catch (error) {
@@ -448,19 +561,20 @@ class AnalysisManager {
             const data = await response.json();
 
             if (data.success) {
-                this.updateProgress(data.status);
-                
-                if (data.status.status === 'completed' || data.status.status === 'failed') {
+                this.updateProgress(data);
+
+                if (data.status === 'completed' || data.status === 'failed') {
                     this.stopPolling();
                     this.updateAnalysisButtons(false);
                     this.hideProgressModal();
-                    
-                    if (data.status.status === 'completed') {
+
+                    if (data.status === 'completed') {
                         this.showSuccess('分析完成');
                         this.loadAnalysisResults();
                         this.loadAnalysisHistory();
+                        this.loadAnalysisStatistics();
                     } else {
-                        this.showError('分析失败: ' + data.status.message);
+                        this.showError('分析失败: ' + (data.error_message || '未知错误'));
                     }
                 }
             }
@@ -470,24 +584,16 @@ class AnalysisManager {
         }
     }
 
-    updateProgress(status) {
+    updateProgress(data) {
         const progressBar = document.getElementById('analysisProgressBar');
         const progressText = document.getElementById('analysisProgressText');
-        const progressDetails = document.getElementById('analysisProgressDetails');
 
-        progressBar.style.width = `${status.progress || 0}%`;
-        progressText.textContent = status.message || '分析中...';
+        if (progressBar) {
+            progressBar.style.width = `${data.progress || 0}%`;
+        }
 
-        if (status.details) {
-            progressDetails.innerHTML = `
-                <div class="progress-details">
-                    <small>当前步骤: ${status.details.current_step}</small>
-                    <br>
-                    <small>已处理文件: ${status.details.processed_files || 0}</small>
-                    <br>
-                    <small>预计剩余时间: ${status.details.estimated_time || '未知'}</small>
-                </div>
-            `;
+        if (progressText) {
+            progressText.textContent = data.message || '分析中...';
         }
     }
 
@@ -503,16 +609,21 @@ class AnalysisManager {
         }
     }
 
+    showNewAnalysisModal() {
+        const modal = new bootstrap.Modal(document.getElementById('newAnalysisModal'));
+        modal.show();
+    }
+
     updateAnalysisButtons(isAnalyzing) {
         const startBtn = document.getElementById('startAnalysisBtn');
         const stopBtn = document.getElementById('stopAnalysisBtn');
 
-        if (isAnalyzing) {
-            startBtn.style.display = 'none';
-            stopBtn.style.display = 'inline-block';
-        } else {
-            startBtn.style.display = 'inline-block';
-            stopBtn.style.display = 'none';
+        if (startBtn) {
+            startBtn.style.display = isAnalyzing ? 'none' : 'inline-block';
+        }
+
+        if (stopBtn) {
+            stopBtn.style.display = isAnalyzing ? 'inline-block' : 'none';
         }
     }
 
@@ -524,49 +635,40 @@ class AnalysisManager {
         const analysisTypes = this.analysisResults.analysis_types || [];
         const lastUpdated = this.analysisResults.last_updated;
 
-        document.getElementById('analysisStatus').textContent = this.getStatusText(status);
-        document.getElementById('completedAnalyses').textContent = completedAnalyses;
-        document.getElementById('analysisTypesCount').textContent = analysisTypes.length;
-        document.getElementById('lastUpdated').textContent = this.formatDate(lastUpdated);
+        const statusElement = document.getElementById('analysisStatus');
+        if (statusElement) {
+            statusElement.textContent = this.getStatusText(status);
+        }
+
+        const completedElement = document.getElementById('completedAnalyses');
+        if (completedElement) {
+            completedElement.textContent = completedAnalyses;
+        }
+
+        const typesElement = document.getElementById('analysisTypesCount');
+        if (typesElement) {
+            typesElement.textContent = analysisTypes.length;
+        }
+
+        const updatedElement = document.getElementById('lastUpdated');
+        if (updatedElement) {
+            updatedElement.textContent = this.formatDate(lastUpdated);
+        }
     }
 
     async refreshAnalysis() {
         await this.loadAnalysisResults();
         await this.loadAnalysisHistory();
+        await this.loadAnalysisStatistics();
         this.showSuccess('分析结果已刷新');
     }
 
-    async exportResults() {
-        try {
-            const response = await fetch(`/api/analysis/results/${this.repositoryId}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            const data = await response.json();
-            
-            if (data.success) {
-                const blob = new Blob([JSON.stringify(data.results, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `analysis-results-${this.repositoryId}-${new Date().toISOString().split('T')[0]}.json`;
-                a.click();
-                URL.revokeObjectURL(url);
-                this.showSuccess('分析结果已导出');
-            } else {
-                this.showError('导出失败');
-            }
-
-        } catch (error) {
-            console.error('Error exporting results:', error);
-            this.showError('导出失败');
-        }
-    }
-
     async clearCache() {
+        if (!this.repositoryId) {
+            this.showError('请先选择一个仓库');
+            return;
+        }
+
         if (!confirm('确定要清除分析缓存吗？这将删除所有分析结果。')) {
             return;
         }
@@ -587,7 +689,7 @@ class AnalysisManager {
                 this.showEmptyState();
                 this.loadAnalysisHistory();
             } else {
-                this.showError(data.message);
+                this.showError(data.message || '清除缓存失败');
             }
 
         } catch (error) {
@@ -599,16 +701,17 @@ class AnalysisManager {
     getSelectedAnalysisTypes() {
         const types = [];
         document.querySelectorAll('input[type="checkbox"][id$="Analysis"]:checked').forEach(checkbox => {
-            types.push(checkbox.id.replace('Analysis', ''));
+            const type = checkbox.id.replace('Analysis', '');
+            types.push(type);
         });
         return types;
     }
 
     getAnalysisConfig() {
         return {
-            max_file_size: parseInt(document.getElementById('maxFileSize').value) * 1024 * 1024,
-            timeout: parseInt(document.getElementById('timeout').value),
-            enable_cache: document.getElementById('enableCache').checked,
+            max_file_size: 10 * 1024 * 1024, // 10MB
+            timeout: 300, // 5 minutes
+            enable_cache: true,
             parallel_processing: true
         };
     }
@@ -627,15 +730,28 @@ class AnalysisManager {
         });
     }
 
+    filterAnalysisHistory(searchTerm = '', statusFilter = '') {
+        // 实现分析历史过滤功能
+        console.log('Filtering analysis history:', { searchTerm, statusFilter });
+    }
+
     showEmptyState() {
-        document.getElementById('analysisResults').style.display = 'none';
-        document.getElementById('analysisEmpty').style.display = 'block';
+        const resultsContainer = document.getElementById('analysisResults');
+        const emptyContainer = document.getElementById('analysisEmpty');
+
+        if (resultsContainer) {
+            resultsContainer.style.display = 'none';
+        }
+
+        if (emptyContainer) {
+            emptyContainer.style.display = 'block';
+        }
     }
 
     // 渲染辅助方法
     renderFileTypeProgress(fileTypes) {
         if (!fileTypes) return '';
-        
+
         const total = Object.values(fileTypes).reduce((sum, count) => sum + count, 0);
         return Object.entries(fileTypes).map(([type, count]) => {
             const percentage = (count / total * 100).toFixed(1);
@@ -643,36 +759,9 @@ class AnalysisManager {
         }).join('');
     }
 
-    renderComplexityProgress(distribution) {
-        if (!distribution) return '';
-        
-        const total = Object.values(distribution).reduce((sum, count) => sum + count, 0);
-        return Object.entries(distribution).map(([level, count]) => {
-            const percentage = (count / total * 100).toFixed(1);
-            const colorClass = this.getComplexityColorClass(level);
-            return `<div class="progress-bar bg-${colorClass}" style="width: ${percentage}%" title="${level}: ${count} files (${percentage}%)">${level}</div>`;
-        }).join('');
-    }
-
-    renderDirectoryTree(tree, level = 0) {
-        if (!tree) return '';
-        
-        let html = '';
-        Object.entries(tree).forEach(([name, children]) => {
-            const indent = '  '.repeat(level);
-            if (children && typeof children === 'object') {
-                html += `<div class="tree-item">${indent}${name}/</div>`;
-                html += this.renderDirectoryTree(children, level + 1);
-            } else {
-                html += `<div class="tree-item">${indent}${name}</div>`;
-            }
-        });
-        return html;
-    }
-
     // 工具方法
     formatNumber(num) {
-        return new Intl.NumberFormat().format(num);
+        return new Intl.NumberFormat().format(num || 0);
     }
 
     formatDate(dateString) {
@@ -681,6 +770,7 @@ class AnalysisManager {
     }
 
     escapeHtml(text) {
+        if (!text) return '';
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
@@ -717,20 +807,70 @@ class AnalysisManager {
         return classMap[severity] || 'secondary';
     }
 
-    getComplexityColorClass(complexity) {
-        const classMap = {
-            'low': 'success',
-            'medium': 'warning',
-            'high': 'danger'
-        };
-        return classMap[complexity] || 'secondary';
-    }
-
     showSuccess(message) {
-        alert(message); // 简单实现，可以改进为Toast
+        // 使用Bootstrap toast或alert
+        if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
+            // 创建toast通知
+            this.createToast('success', message);
+        } else {
+            alert(message);
+        }
     }
 
     showError(message) {
-        alert(message); // 简单实现，可以改进为Toast
+        // 使用Bootstrap toast或alert
+        if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
+            // 创建toast通知
+            this.createToast('danger', message);
+        } else {
+            alert(message);
+        }
+    }
+
+    createToast(type, message) {
+        const toastContainer = document.getElementById('toastContainer') || this.createToastContainer();
+
+        const toastHtml = `
+            <div class="toast align-items-center text-white bg-${type} border-0" role="alert">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        `;
+
+        toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+
+        const toastElement = toastContainer.lastElementChild;
+        const toast = new bootstrap.Toast(toastElement);
+        toast.show();
+
+        // 自动移除toast元素
+        toastElement.addEventListener('hidden.bs.toast', () => {
+            toastElement.remove();
+        });
+    }
+
+    createToastContainer() {
+        const container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container position-fixed top-0 end-0 p-3';
+        container.style.zIndex = '9999';
+        document.body.appendChild(container);
+        return container;
     }
 }
+
+// 全局实例
+window.analysisManager = null;
+
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Initializing analysis functionality...');
+    window.analysisManager = new AnalysisManager();
+});
+
+// 导出类供其他模块使用
+window.AnalysisManager = AnalysisManager;
