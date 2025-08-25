@@ -1,0 +1,44 @@
+{
+  "name": "coderwiki-ui-tests",
+  "version": "1.0.0",
+  "description": "Comprehensive UI tests for CoderWiki application",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:responsive": "jest --testNamePattern=\"responsive\"",
+    "test:accessibility": "jest --testNamePattern=\"accessibility\"",
+    "test:performance": "jest --testNamePattern=\"performance\"",
+    "test:visual": "jest --testNamePattern=\"visual\"",
+    "test:all": "jest --runInBand",
+    "report": "node report-generator.js"
+  },
+  "dependencies": {
+    "puppeteer": "^21.5.0",
+    "jest": "^29.7.0",
+    "jest-puppeteer": "^9.0.2",
+    "pixelmatch": "^5.3.0",
+    "pngjs": "^7.0.0",
+    "lighthouse": "^11.4.0",
+    "axe-core": "^4.8.3",
+    "puppeteer-cluster": "^0.23.0",
+    "fs-extra": "^11.2.0",
+    "sharp": "^0.33.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.8",
+    "@types/puppeteer": "^7.0.4"
+  },
+  "jest": {
+    "preset": "jest-puppeteer",
+    "testTimeout": 30000,
+    "setupFilesAfterEnv": ["<rootDir>/setup.js"],
+    "testMatch": ["<rootDir>/tests/**/*.test.js"],
+    "coverageDirectory": "coverage",
+    "collectCoverageFrom": [
+      "utils/**/*.js",
+      "!**/node_modules/**"
+    ]
+  }
+}

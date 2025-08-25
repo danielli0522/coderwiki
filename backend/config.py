@@ -73,7 +73,14 @@ class Config:
     WECHAT_ENABLED = os.environ.get('WECHAT_ENABLED', 'false').lower() == 'true'
 
     # CORS Configuration
-    CORS_ORIGINS = ['http://localhost:5001', 'http://127.0.0.1:5001', 'http://localhost:5002']
+    CORS_ORIGINS = [
+        'http://localhost:5001',
+        'http://127.0.0.1:5001',
+        'http://localhost:5002',
+        'http://10.11.75.81:5001',  # 本地网络IP
+        'http://198.18.0.1:5001',   # 本地网络IP
+        '*'  # 允许所有来源（开发环境）
+    ]
     CORS_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD']
     CORS_HEADERS = ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With']
 

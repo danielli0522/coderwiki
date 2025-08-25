@@ -11,24 +11,33 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Custom CSS -->
+    <!-- Enhanced CSS System -->
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/components.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/accessibility.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/modal-enhanced.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/user-feedback.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/responsive-navigation.css') }}" rel="stylesheet">
+    <!-- Legacy fixes for backward compatibility -->
     <link href="{{ url_for('static', filename='css/modal-fixes.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/navigation-fixes.css') }}" rel="stylesheet">
     {% if request.endpoint == 'main.dashboard' %}
     <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
     {% endif %}
 
-    <!-- Modal Fixes JavaScript -->
+    <!-- Enhanced JavaScript System - Load Critical Scripts First -->
+    <script src="{{ url_for('static', filename='js/performance-optimizer.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/accessibility.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/modal-system.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/user-feedback.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/responsive-navigation.js') }}"></script>
+    <!-- UI Enhancement System Coordinator -->
+    <script src="{{ url_for('static', filename='js/ui-enhancements.js') }}"></script>
+    <!-- Legacy scripts for backward compatibility -->
     <script src="{{ url_for('static', filename='js/modal-fixes.js') }}"></script>
-    <!-- Modal Close Fix JavaScript -->
     <script src="{{ url_for('static', filename='js/modal-close-fix.js') }}"></script>
-    <!-- Navigation Fix JavaScript -->
     <script src="{{ url_for('static', filename='js/navigation-fix.js') }}"></script>
-    <!-- URL Fix JavaScript -->
     <script src="{{ url_for('static', filename='js/url-fix.js') }}"></script>
-    <!-- API Error Handler JavaScript -->
     <script src="{{ url_for('static', filename='js/api-error-handler.js') }}"></script>
 
     {% block head %}{% endblock %}

@@ -1,0 +1,264 @@
+name: UI Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  ui-tests:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: backend/tests/ui/package-lock.json
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install Python dependencies
+      run: |
+        cd backend
+        python -m venv venv
+        source venv/bin/activate
+        pip install -r requirements.txt
+    
+    - name: Install UI test dependencies
+      run: |
+        cd backend/tests/ui
+        npm ci
+    
+    - name: Start application
+      run: |
+        cd backend
+        source venv/bin/activate
+        # Initialize database
+        python init_db.py
+        python create_default_user.py
+        # Start application in background
+        PORT=5001 python run.py &
+        sleep 10
+      env:
+        FLASK_ENV: testing
+        DATABASE_URL: sqlite:///test.db
+    
+    - name: Wait for application to be ready
+      run: |
+        timeout 60 bash -c 'until curl -f http://localhost:5001/; do sleep 2; done'
+    
+    - name: Run UI tests
+      run: |
+        cd backend/tests/ui
+        npm run test:all
+      env:
+        BASE_URL: http://localhost:5001
+        HEADLESS: true
+        CI: true
+    
+    - name: Run accessibility tests
+      run: |
+        cd backend/tests/ui
+        npm run test:accessibility
+      env:
+        BASE_URL: http://localhost:5001
+        HEADLESS: true
+    
+    - name: Run performance tests
+      run: |
+        cd backend/tests/ui
+        npm run test:performance
+      env:
+        BASE_URL: http://localhost:5001
+        HEADLESS: true
+    
+    - name: Run visual regression tests
+      run: |
+        cd backend/tests/ui
+        npm run test:visual
+      env:
+        BASE_URL: http://localhost:5001
+        HEADLESS: true
+    
+    - name: Generate test report
+      if: always()
+      run: |
+        cd backend/tests/ui
+        npm run report
+    
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: ui-test-results-${{ matrix.node-version }}
+        path: |
+          backend/tests/ui/reports/
+          backend/tests/ui/screenshots/
+          backend/tests/ui/coverage/
+    
+    - name: Upload screenshots on failure
+      if: failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: failure-screenshots-${{ matrix.node-version }}
+        path: backend/tests/ui/screenshots/actual/
+    
+    - name: Comment PR with test results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+          
+          // Find the latest test report
+          const reportsDir = 'backend/tests/ui/reports';
+          if (fs.existsSync(reportsDir)) {
+            const files = fs.readdirSync(reportsDir)
+              .filter(file => file.startsWith('ui-test-report-') && file.endsWith('.json'))
+              .sort()
+              .reverse();
+            
+            if (files.length > 0) {
+              const reportFile = path.join(reportsDir, files[0]);
+              const report = JSON.parse(fs.readFileSync(reportFile, 'utf8'));
+              
+              const comment = `## 🔍 UI Test Results
+              
+              **Test Execution**: ${report.summary.testExecution.passRate}% pass rate (${report.summary.testExecution.passed}/${report.summary.testExecution.totalTests} tests)
+              **Performance**: ${report.summary.performance.averageScore}/100 average score
+              **Accessibility**: ${report.summary.accessibility.averageScore}/100 average score
+              **Responsive Issues**: ${report.summary.responsive.totalIssues} total issues
+              **Visual Regressions**: ${report.summary.screenshots.visualRegressions} detected
+              
+              ${report.recommendations.length > 0 ? `### 📋 Recommendations
+              ${report.recommendations.slice(0, 3).map(rec => `- **${rec.title}**: ${rec.description}`).join('\n')}` : '✅ No major issues found!'}
+              
+              [View detailed report in artifacts](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
+          }
+
+  lighthouse-audit:
+    runs-on: ubuntu-latest
+    needs: ui-tests
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+        cache-dependency-path: backend/tests/ui/package-lock.json
+    
+    - name: Install dependencies
+      run: |
+        cd backend/tests/ui
+        npm ci
+        npm install -g @lhci/cli@0.12.x
+    
+    - name: Set up Python and start app
+      run: |
+        cd backend
+        python -m venv venv
+        source venv/bin/activate
+        pip install -r requirements.txt
+        python init_db.py
+        python create_default_user.py
+        PORT=5001 python run.py &
+        sleep 10
+      env:
+        FLASK_ENV: testing
+    
+    - name: Run Lighthouse CI
+      run: |
+        lhci autorun
+      env:
+        LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+        LHCI_SERVER_BASE_URL: http://localhost:5001
+    
+    - name: Upload Lighthouse results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: lighthouse-results
+        path: .lighthouseci/
+
+  visual-regression-baseline:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+        cache-dependency-path: backend/tests/ui/package-lock.json
+    
+    - name: Install dependencies
+      run: |
+        cd backend/tests/ui
+        npm ci
+    
+    - name: Set up Python and start app
+      run: |
+        cd backend
+        python -m venv venv
+        source venv/bin/activate
+        pip install -r requirements.txt
+        python init_db.py
+        python create_default_user.py
+        PORT=5001 python run.py &
+        sleep 10
+      env:
+        FLASK_ENV: testing
+    
+    - name: Update visual regression baselines
+      run: |
+        cd backend/tests/ui
+        npm run test:visual
+      env:
+        BASE_URL: http://localhost:5001
+        HEADLESS: true
+        UPDATE_BASELINES: true
+    
+    - name: Commit updated baselines
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add backend/tests/ui/screenshots/baseline/
+        if git diff --staged --quiet; then
+          echo "No baseline changes to commit"
+        else
+          git commit -m "Update visual regression baselines [skip ci]"
+          git push
+        fi

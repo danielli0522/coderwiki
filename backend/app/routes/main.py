@@ -124,6 +124,7 @@ def analysis():
 @login_required
 def analysis_results(repository_id):
     """Analysis results page for a repository."""
+    from app.models.repository import Repository
     # Check if repository exists and user has access
     repository = Repository.query.get_or_404(repository_id)
 
