@@ -64,37 +64,46 @@ class DocumentService:
             # 统计信息
             stats = self._get_document_stats(user_id)
 
-            return documents_data, stats
+            # 添加分页信息
+            pagination = {
+                'page': page,
+                'limit': limit,
+                'total': total,
+                'total_pages': (total + limit - 1) // limit
+            }
+
+            return documents_data, stats, pagination
 
         except Exception as e:
             logger.error(f"获取文档列表失败: {e}")
-            return [], {}
+            return [], {}, {}
 
-    def create_document(self, user_id, title, repository_id, document_type, description='', content='', skip_permission_check=False):
+    def create_document(self, user_id, title, repository_id=None, document_type='manual', description='', content='', skip_permission_check=False):
         """创建新文档"""
         try:
-            # 验证仓库是否存在
-            if skip_permission_check:
-                # 系统级操作，跳过用户权限检查
-                repository = Repository.query.filter_by(id=repository_id).first()
-            else:
-                # 用户级操作，检查权限
-                repository = Repository.query.filter(
-                    and_(
-                        Repository.id == repository_id,
-                        Repository.user_id == user_id
-                    )
-                ).first()
+            # 验证仓库是否存在（如果提供了repository_id）
+            if repository_id:
+                if skip_permission_check:
+                    # 系统级操作，跳过用户权限检查
+                    repository = Repository.query.filter_by(id=repository_id).first()
+                else:
+                    # 用户级操作，检查权限
+                    repository = Repository.query.filter(
+                        and_(
+                            Repository.id == repository_id,
+                            Repository.user_id == user_id
+                        )
+                    ).first()
 
-            if not repository:
-                raise ValueError("仓库不存在或无权限访问")
+                if not repository:
+                    raise ValueError("仓库不存在或无权限访问")
 
             # 创建文档
             document = Document(
                 title=title,
                 description=description,
                 document_type=document_type,
-                repository_id=repository_id,
+                repository_id=repository_id,  # 可以为None
                 user_id=user_id,
                 status='completed' if content else 'pending',
                 content=content,  # 使用传入的内容
@@ -238,7 +247,8 @@ class DocumentService:
                 progress=0,
                 title=f"生成文档: {document.title}",
                 description=f"为仓库生成{document.document_type}文档",
-                task_type='generate_document'
+                task_type='generate_document',
+                priority='normal'
             )
 
             db.session.add(task)

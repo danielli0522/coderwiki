@@ -179,7 +179,7 @@ describe('Authentication Flow Tests', () => {
       const testAccounts = [
         { username: 'admin', password: 'admin123' },
         { username: 'demo', password: 'demo123' },
-        { username: 'testuser', password: 'test123' }
+        { username: 'testuser', password: 'testuser123' }
       ];
       
       for (const account of testAccounts) {

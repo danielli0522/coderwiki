@@ -14,6 +14,7 @@ from config import Config
 db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
+socketio = None
 
 def create_app(config_class=Config):
     """Create and configure the Flask application."""
@@ -40,7 +41,7 @@ def create_app(config_class=Config):
         return User.query.get(int(user_id))
 
     # Register blueprints
-    from app.api import auth_bp, repository_bp, document_bp, task_bp, analysis_bp, user_bp, system_bp, activities_bp, llm_bp
+    from app.api import auth_bp, repository_bp, document_bp, task_bp, analysis_bp, user_bp, system_bp, activities_bp, llm_bp, mkdocs_bp, performance_bp, smart_document_bp
     from app.routes import main_bp
     app.register_blueprint(auth_bp)
     app.register_blueprint(repository_bp)
@@ -51,6 +52,9 @@ def create_app(config_class=Config):
     app.register_blueprint(system_bp)
     app.register_blueprint(activities_bp)
     app.register_blueprint(llm_bp)
+    app.register_blueprint(mkdocs_bp)
+    app.register_blueprint(performance_bp)
+    app.register_blueprint(smart_document_bp)
     app.register_blueprint(main_bp)
 
     # Register template filters
@@ -103,16 +107,33 @@ def create_app(config_class=Config):
         return date_obj.strftime('%Y-%m-%d %H:%M:%S')
 
     # Initialize WebSocket support
+    global socketio
     try:
-        from app.api.websocket import init_socketio, websocket_bp
-        init_socketio(app)
-        # 注册WebSocket蓝图到/api/ws前缀
+        from flask_socketio import SocketIO
+        from app.api.websocket import websocket_bp, setup_socketio_handlers
+        
+        socketio = SocketIO()
+        socketio.init_app(app, 
+                         cors_allowed_origins="*", 
+                         async_mode='threading',
+                         logger=True,
+                         engineio_logger=True,
+                         allow_unsafe_werkzeug=True)
+        
+        # Setup WebSocket event handlers within app context
+        with app.app_context():
+            setup_socketio_handlers(socketio)
+        
+        # Register WebSocket blueprint for REST endpoints
         app.register_blueprint(websocket_bp, url_prefix='/api/ws')
+        
         app.logger.info("WebSocket support initialized successfully")
     except ImportError as e:
         app.logger.warning(f"WebSocket support not available: {e}")
+        socketio = None
     except Exception as e:
         app.logger.error(f"Failed to initialize WebSocket: {e}")
+        socketio = None
 
     # Register main routes
     @app.route('/')
@@ -135,4 +156,4 @@ def create_app(config_class=Config):
         """Handle 405 Method Not Allowed errors."""
         return jsonify({'error': '方法不被允许', 'method': request.method, 'url': request.url}), 405
 
-    return app
+    return app, socketio

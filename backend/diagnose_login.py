@@ -46,7 +46,7 @@ def test_login_api():
     test_users = [
         {"username": "admin", "password": "admin123", "name": "管理员"},
         {"username": "demo", "password": "demo123", "name": "演示用户"},
-        {"username": "testuser", "password": "TestPassword123!", "name": "测试用户"}
+        {"username": "testuser", "password": "testuser123", "name": "测试用户"}
     ]
 
     success_count = 0

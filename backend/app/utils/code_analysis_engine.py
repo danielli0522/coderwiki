@@ -54,14 +54,14 @@ class CodeAnalysisEngine:
         """初始化分析引擎"""
         self.config = config or self._get_default_config()
         
-        # 初始化各个分析器
-        self.structure_analyzer = StructureAnalyzer
-        self.dependency_analyzer = DependencyAnalyzer
-        self.complexity_analyzer = ComplexityAnalyzer
-        self.tech_stack_analyzer = TechStackAnalyzer
-        self.security_scanner = SecurityScanner
-        self.pattern_recognizer = ProjectPatternRecognizer
-        self.repository_optimizer = LargeRepositoryOptimizer
+        # 初始化各个分析器类（保持类引用，在使用时实例化）
+        self.structure_analyzer_class = StructureAnalyzer
+        self.dependency_analyzer_class = DependencyAnalyzer
+        self.complexity_analyzer_class = ComplexityAnalyzer
+        self.tech_stack_analyzer_class = TechStackAnalyzer
+        self.security_scanner_class = SecurityScanner
+        self.pattern_recognizer_class = ProjectPatternRecognizer
+        self.repository_optimizer_class = LargeRepositoryOptimizer
         
         # 分析器映射
         self.analyzers = {
@@ -116,7 +116,7 @@ class CodeAnalysisEngine:
             repo_size = self._get_repository_size(repository_path)
             if repo_size > analysis_config.max_file_size * 10:  # 如果仓库大小超过文件大小限制的10倍
                 logger.info(f"Large repository detected ({repo_size} bytes), applying optimizations")
-                optimizer = self.repository_optimizer(repository_path)
+                optimizer = self.repository_optimizer_class(repository_path)
                 repository_path = optimizer.optimize_for_analysis()
             
             # 执行分析
@@ -184,10 +184,10 @@ class CodeAnalysisEngine:
             if analysis_type in self.analyzers:
                 try:
                     if analysis_type == 'complexity':
-                        analyzer = self.complexity_analyzer(str(Path(file_path).parent))
+                        analyzer = self.complexity_analyzer_class(str(Path(file_path).parent))
                         result = analyzer.analyze_file(file_path)
                     elif analysis_type == 'security':
-                        analyzer = self.security_scanner(str(Path(file_path).parent))
+                        analyzer = self.security_scanner_class(str(Path(file_path).parent))
                         result = analyzer.scan_file(file_path)
                     else:
                         result = {'message': f'File-level analysis not supported for {analysis_type}'}
@@ -257,34 +257,34 @@ class CodeAnalysisEngine:
     
     def _analyze_structure(self, repository_path: str, config: AnalysisConfig) -> Dict[str, Any]:
         """分析文件结构"""
-        analyzer = self.structure_analyzer(repository_path)
+        analyzer = self.structure_analyzer_class(repository_path)
         return analyzer.analyze()
     
     def _analyze_dependencies(self, repository_path: str, config: AnalysisConfig) -> Dict[str, Any]:
         """分析依赖关系"""
-        analyzer = self.dependency_analyzer(repository_path)
+        analyzer = self.dependency_analyzer_class(repository_path)
         return analyzer.analyze()
     
     def _analyze_complexity(self, repository_path: str, config: AnalysisConfig) -> Dict[str, Any]:
         """分析代码复杂度"""
-        analyzer = self.complexity_analyzer(repository_path)
+        analyzer = self.complexity_analyzer_class(repository_path)
         return analyzer.analyze()
     
     def _analyze_tech_stack(self, repository_path: str, config: AnalysisConfig) -> Dict[str, Any]:
         """分析技术栈"""
-        analyzer = self.tech_stack_analyzer(repository_path)
+        analyzer = self.tech_stack_analyzer_class(repository_path)
         return analyzer.analyze()
     
     def _analyze_security(self, repository_path: str, config: AnalysisConfig) -> Dict[str, Any]:
         """分析安全性"""
-        analyzer = self.security_scanner(repository_path)
+        analyzer = self.security_scanner_class(repository_path)
         scan_result = analyzer.scan_repository()
         # 转换为字典格式以确保一致性
         return scan_result.to_dict() if hasattr(scan_result, 'to_dict') else scan_result.__dict__
     
     def _analyze_patterns(self, repository_path: str, config: AnalysisConfig) -> Dict[str, Any]:
         """分析项目模式"""
-        analyzer = self.pattern_recognizer(repository_path)
+        analyzer = self.pattern_recognizer_class(repository_path)
         return analyzer.analyze_patterns()
     
     def _analyze_quality(self, repository_path: str, config: AnalysisConfig) -> Dict[str, Any]:

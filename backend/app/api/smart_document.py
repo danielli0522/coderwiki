@@ -60,13 +60,20 @@ def generate_smart_document(repository_id):
         )
 
         if result['success']:
-            return jsonify({
+            response_data = {
                 'success': True,
                 'task_id': result['task_id'],
                 'document_id': result.get('document_id'),
                 'session_id': result.get('session_id'),
                 'message': 'Smart document generation started successfully'
-            }), 200
+            }
+            
+            # 添加MkDocs站点URL（如果成功构建）
+            if result.get('mkdocs_url'):
+                response_data['mkdocs_url'] = result['mkdocs_url']
+                response_data['message'] = 'Smart document generation and MkDocs site build completed successfully'
+            
+            return jsonify(response_data), 200
         else:
             return jsonify({
                 'success': False,
@@ -302,4 +309,5 @@ def get_generation_config():
         return jsonify({
             'error': 'Internal server error'
         }), 500
+
 

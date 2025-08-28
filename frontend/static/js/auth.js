@@ -946,7 +946,7 @@ const Auth = {
      * Make API request
      */
     async apiRequest(endpoint, options = {}) {
-        const url = this.config.apiBaseUrl + endpoint;
+        const url = CoderWiki.config.apiBaseUrl + endpoint;
         const config = {
             headers: {
                 'Content-Type': 'application/json',

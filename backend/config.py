@@ -49,8 +49,13 @@ class Config:
     MCP_ENABLED = os.environ.get('MCP_ENABLED', 'true').lower() == 'true'
 
     # Claude Code服务配置
-    CLAUDE_CODE_ENABLED = os.environ.get('CLAUDE_CODE_ENABLED', 'false').lower() == 'true'
+    CLAUDE_CODE_ENABLED = os.environ.get('CLAUDE_CODE_ENABLED', 'true').lower() == 'true'
     BMAD_DOCS_PATH = os.environ.get('BMAD_DOCS_PATH', '../bmad-docs-generator/')
+
+    # Claude Code API configuration
+    CLAUDE_API_KEY = os.environ.get('CLAUDE_API_KEY') or os.environ.get('ANTHROPIC_API_KEY')
+    CLAUDE_WORKSPACE_ID = os.environ.get('CLAUDE_WORKSPACE_ID')
+    CLAUDE_USE_LOCAL_MODE = os.environ.get('CLAUDE_USE_LOCAL_MODE', 'False').lower() == 'true'
 
     # Git配置
     GIT_REPOS_PATH = Path(__file__).parent / 'repos'

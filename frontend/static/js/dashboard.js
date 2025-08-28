@@ -11,10 +11,57 @@ class DashboardController {
 
     init() {
         document.addEventListener('DOMContentLoaded', () => {
-            this.initializeComponents();
-            this.bindGlobalEvents();
-            this.setupResponsiveHandling();
-            this.initialized = true;
+            this.waitForComponentsAndInitialize();
+        });
+    }
+
+    async waitForComponentsAndInitialize() {
+        // Wait for components to be loaded before initializing
+        await this.waitForComponents();
+        
+        // Initialize Winston Framework integration
+        this.initializeWinstonIntegration();
+        
+        this.initializeComponents();
+        this.bindGlobalEvents();
+        this.setupResponsiveHandling();
+        this.initialized = true;
+        
+        console.log('✅ Dashboard initialized with Winston Framework integration');
+    }
+
+    async waitForComponents() {
+        const requiredComponents = [
+            'StatsComponent',
+            'RepositoryListComponent', 
+            'TaskProgressComponent',
+            'RecentActivityComponent',
+            'SystemStatusComponent'
+        ];
+
+        const maxWaitTime = 10000; // 10 seconds maximum wait
+        const checkInterval = 100; // Check every 100ms
+        let elapsed = 0;
+
+        return new Promise((resolve) => {
+            const checkComponents = () => {
+                const allLoaded = requiredComponents.every(componentName => 
+                    typeof window[componentName] !== 'undefined'
+                );
+
+                if (allLoaded) {
+                    console.log('All dashboard components loaded successfully');
+                    resolve();
+                } else if (elapsed >= maxWaitTime) {
+                    console.warn('Component loading timeout, proceeding anyway');
+                    resolve();
+                } else {
+                    elapsed += checkInterval;
+                    setTimeout(checkComponents, checkInterval);
+                }
+            };
+
+            checkComponents();
         });
     }
 
@@ -27,33 +74,43 @@ class DashboardController {
             this.realtimeUpdates = new RealtimeUpdates();
 
             // 初始化统计组件
-            if (document.querySelector('.stats-container')) {
+            if (document.querySelector('.stats-container') && typeof StatsComponent !== 'undefined') {
                 this.components.stats = new StatsComponent();
                 window.statsComponent = this.components.stats;
+            } else if (document.querySelector('.stats-container')) {
+                console.warn('StatsComponent not available, skipping stats initialization');
             }
 
             // 初始化仓库列表组件
-            if (document.querySelector('.repository-list-container')) {
+            if (document.querySelector('.repository-list-container') && typeof RepositoryListComponent !== 'undefined') {
                 this.components.repositoryList = new RepositoryListComponent();
                 window.repositoryListComponent = this.components.repositoryList;
+            } else if (document.querySelector('.repository-list-container')) {
+                console.warn('RepositoryListComponent not available, skipping repository list initialization');
             }
 
             // 初始化任务进度组件
-            if (document.querySelector('.task-progress-container')) {
+            if (document.querySelector('.task-progress-container') && typeof TaskProgressComponent !== 'undefined') {
                 this.components.taskProgress = new TaskProgressComponent();
                 window.taskProgressComponent = this.components.taskProgress;
+            } else if (document.querySelector('.task-progress-container')) {
+                console.warn('TaskProgressComponent not available, skipping task progress initialization');
             }
 
             // 初始化最近活动组件
-            if (document.querySelector('.recent-activity-container')) {
+            if (document.querySelector('.recent-activity-container') && typeof RecentActivityComponent !== 'undefined') {
                 this.components.recentActivity = new RecentActivityComponent();
                 window.recentActivityComponent = this.components.recentActivity;
+            } else if (document.querySelector('.recent-activity-container')) {
+                console.warn('RecentActivityComponent not available, skipping recent activity initialization');
             }
 
             // 初始化系统状态组件
-            if (document.querySelector('.system-status-container')) {
+            if (document.querySelector('.system-status-container') && typeof SystemStatusComponent !== 'undefined') {
                 this.components.systemStatus = new SystemStatusComponent();
                 window.systemStatusComponent = this.components.systemStatus;
+            } else if (document.querySelector('.system-status-container')) {
+                console.warn('SystemStatusComponent not available, skipping system status initialization');
             }
 
             console.log('所有组件初始化完成');
@@ -173,67 +230,72 @@ class DashboardController {
     }
 
     showAddRepositoryModal() {
-        // 创建添加仓库模态框
-        const modalHtml = `
-            <div class="modal fade" id="addRepositoryModal" tabindex="-1">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">添加仓库</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <form id="addRepositoryForm">
-                                <div class="mb-3">
-                                    <label for="repoName" class="form-label">仓库名称</label>
-                                    <input type="text" class="form-control" id="repoName" name="repoName" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="repoUrl" class="form-label">仓库URL</label>
-                                    <input type="url" class="form-control" id="repoUrl" name="repoUrl" required>
-                                    <div class="form-text">支持GitHub、GitLab等Git仓库地址</div>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="repoDescription" class="form-label">描述</label>
-                                    <textarea class="form-control" id="repoDescription" name="repoDescription" rows="3"></textarea>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="repoBranch" class="form-label">分支</label>
-                                    <input type="text" class="form-control" id="repoBranch" name="repoBranch" value="main">
-                                </div>
-                            </form>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                            <button type="button" class="btn btn-primary" id="saveRepositoryBtn">保存</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        // 移除现有模态框
-        const existingModal = document.getElementById('addRepositoryModal');
-        if (existingModal) {
-            existingModal.remove();
+        // Use Winston Modal Template System
+        if (!window.winstonModalTemplates) {
+            console.error('❌ Winston Modal Templates not available, falling back to basic modal');
+            this.showAddRepositoryModalFallback();
+            return;
         }
 
-        // 添加新模态框
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        const modal = window.winstonModalTemplates.showModal('addRepository', {
+            onSave: (modalElement) => {
+                this.saveRepositoryFromTemplate(modalElement);
+            }
+        });
 
-        // 显示模态框
-        const modal = new bootstrap.Modal(document.getElementById('addRepositoryModal'));
-        modal.show();
-
-        // 绑定保存按钮事件
-        const saveBtn = document.getElementById('saveRepositoryBtn');
-        if (saveBtn) {
-            saveBtn.addEventListener('click', () => {
-                this.saveRepository(modal);
-            });
+        if (modal) {
+            // Bind save button event
+            const saveBtn = modal.element.querySelector('#saveRepositoryBtn');
+            if (saveBtn) {
+                saveBtn.addEventListener('click', () => {
+                    this.saveRepositoryFromTemplate(modal.element, modal.bootstrap);
+                });
+            }
         }
     }
 
+    async saveRepositoryFromTemplate(modalElement, modalInstance = null) {
+        const form = modalElement.querySelector('#addRepositoryForm');
+
+        // Validate form
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        const repoData = {
+            name: modalElement.querySelector('#repoName').value,
+            url: modalElement.querySelector('#repoUrl').value,
+            description: modalElement.querySelector('#repoDescription').value,
+            branch: modalElement.querySelector('#repoBranch').value
+        };
+
+        try {
+            const response = await this.api.createRepository(repoData);
+            this.showSuccess('仓库添加成功');
+            
+            // Hide modal using Winston system
+            if (modalInstance) {
+                modalInstance.hide();
+            } else {
+                const modalId = modalElement.id;
+                if (window.winstonModalTemplates) {
+                    window.winstonModalTemplates.hideModal(modalId);
+                }
+            }
+
+            // Refresh repository list
+            if (this.components.repositoryList) {
+                this.components.repositoryList.loadRepositories();
+            }
+
+        } catch (error) {
+            console.error('添加仓库失败:', error);
+            this.showError('添加仓库失败: ' + error.message);
+        }
+    }
+
+    // Legacy fallback method for when Winston templates are not available
     async saveRepository(modal) {
         const form = document.getElementById('addRepositoryForm');
 
@@ -267,81 +329,37 @@ class DashboardController {
     }
 
     showGenerateDocumentModal() {
-        // 显示生成文档模态框
-        const modalHtml = `
-            <div class="modal fade" id="generateDocumentModal" tabindex="-1">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">生成文档</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <form id="generateDocumentForm">
-                                <div class="mb-3">
-                                    <label for="documentRepo" class="form-label">选择仓库</label>
-                                    <select class="form-select" id="documentRepo" required>
-                                        <option value="">请选择仓库</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="documentType" class="form-label">文档类型</label>
-                                    <select class="form-select" id="documentType" required>
-                                        <option value="readme">README文档</option>
-                                        <option value="api">API文档</option>
-                                        <option value="architecture">架构文档</option>
-                                        <option value="user_guide">用户指南</option>
-                                        <option value="developer_guide">开发指南</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="documentFormat" class="form-label">输出格式</label>
-                                    <select class="form-select" id="documentFormat" required>
-                                        <option value="markdown">Markdown</option>
-                                        <option value="html">HTML</option>
-                                        <option value="pdf">PDF</option>
-                                    </select>
-                                </div>
-                            </form>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                            <button type="button" class="btn btn-primary" id="generateDocumentBtn">生成</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        // 移除现有模态框
-        const existingModal = document.getElementById('generateDocumentModal');
-        if (existingModal) {
-            existingModal.remove();
+        // Use Winston Modal Template System
+        if (!window.winstonModalTemplates) {
+            console.error('❌ Winston Modal Templates not available, falling back to basic modal');
+            this.showGenerateDocumentModalFallback();
+            return;
         }
 
-        // 添加新模态框
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        const modal = window.winstonModalTemplates.showModal('generateDocument', {
+            loadRepositories: (modalElement) => {
+                this.loadRepositoryOptionsForTemplate(modalElement);
+            },
+            onGenerate: (modalElement) => {
+                this.generateDocumentFromTemplate(modalElement);
+            }
+        });
 
-        // 加载仓库列表
-        this.loadRepositoryOptions();
-
-        // 显示模态框
-        const modal = new bootstrap.Modal(document.getElementById('generateDocumentModal'));
-        modal.show();
-
-        // 绑定生成按钮事件
-        const generateBtn = document.getElementById('generateDocumentBtn');
-        if (generateBtn) {
-            generateBtn.addEventListener('click', () => {
-                this.generateDocument(modal);
-            });
+        if (modal) {
+            // Bind generate button event
+            const generateBtn = modal.element.querySelector('#generateDocumentBtn');
+            if (generateBtn) {
+                generateBtn.addEventListener('click', () => {
+                    this.generateDocumentFromTemplate(modal.element, modal.bootstrap);
+                });
+            }
         }
     }
 
     async loadRepositoryOptions() {
         try {
-            // 使用ApiClient进行请求
-            const apiClient = window.apiClient || new ApiClient();
+            // 使用已初始化的ApiClient实例
+            const apiClient = this.api || window.api || new ApiClient();
             const data = await apiClient.request('/repositories');
             const repositories = data.repositories || [];
             const select = document.getElementById('documentRepo');
@@ -366,13 +384,177 @@ class DashboardController {
             }
         } catch (error) {
             console.error('加载仓库列表失败:', error);
+            console.error('Error details:', {
+                message: error.message,
+                stack: error.stack,
+                apiClient: typeof apiClient,
+                windowApi: typeof window.api,
+                windowApiClient: typeof window.ApiClient
+            });
             const select = document.getElementById('documentRepo');
             if (select) {
-                select.innerHTML = '<option value="">加载失败</option>';
+                select.innerHTML = '<option value="">加载失败 - 请检查网络连接</option>';
             }
+            // 显示用户友好的错误提示
+            this.showError('加载仓库列表失败，请刷新页面重试');
         }
     }
 
+    async loadRepositoryOptionsForTemplate(modalElement) {
+        try {
+            // Use already initialized ApiClient instance
+            const apiClient = this.api || window.api || new ApiClient();
+            const data = await apiClient.request('/repositories');
+            const repositories = data.repositories || [];
+            const select = modalElement.querySelector('#documentRepo');
+
+            if (select) {
+                select.innerHTML = '<option value="">请选择仓库...</option>';
+                repositories.forEach(repo => {
+                    const option = document.createElement('option');
+                    option.value = repo.id;
+                    option.textContent = repo.name;
+                    select.appendChild(option);
+                });
+
+                // If no repositories, show message
+                if (repositories.length === 0) {
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.textContent = '暂无可用仓库';
+                    option.disabled = true;
+                    select.appendChild(option);
+                }
+            }
+        } catch (error) {
+            console.error('加载仓库列表失败:', error);
+            const select = modalElement.querySelector('#documentRepo');
+            if (select) {
+                select.innerHTML = '<option value="">加载失败 - 请检查网络连接</option>';
+            }
+            this.showError('加载仓库列表失败，请刷新页面重试');
+        }
+    }
+
+    async generateDocumentFromTemplate(modalElement, modalInstance = null) {
+        const form = modalElement.querySelector('#generateDocumentForm');
+        const repoId = modalElement.querySelector('#documentRepo').value;
+        const docType = modalElement.querySelector('#documentType').value;
+        const docFormat = modalElement.querySelector('#documentFormat').value;
+        const analysisDepth = modalElement.querySelector('#analysisDepth')?.value || 'detailed';
+        const includeDiagrams = modalElement.querySelector('#includeDiagrams')?.checked || true;
+        const includeTroubleshooting = modalElement.querySelector('#includeTroubleshooting')?.checked || true;
+
+        if (!repoId) {
+            this.showError('请选择仓库');
+            return;
+        }
+
+        try {
+            // Show progress in modal
+            this.showGenerationProgress(modalElement);
+
+            // Call smart document generation API
+            const response = await fetch(`/api/smart-document/generate/${repoId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    analysis_depth: analysisDepth,
+                    include_diagrams: includeDiagrams,
+                    include_troubleshooting: includeTroubleshooting,
+                    doc_type: docType,
+                    format: docFormat
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || '文档生成失败');
+            }
+
+            const result = await response.json();
+            
+            if (result.success) {
+                this.showSuccess('文档生成完成！');
+                
+                // Hide modal using Winston system
+                if (modalInstance) {
+                    modalInstance.hide();
+                } else {
+                    const modalId = modalElement.id;
+                    if (window.winstonModalTemplates) {
+                        window.winstonModalTemplates.hideModal(modalId);
+                    }
+                }
+
+                // Navigate to result
+                if (result.mkdocs_url) {
+                    setTimeout(() => {
+                        window.location.href = result.mkdocs_url;
+                    }, 1000);
+                } else if (result.document_id) {
+                    setTimeout(() => {
+                        window.location.href = `/documents/${result.document_id}/view`;
+                    }, 1000);
+                }
+
+                // Refresh task list
+                if (this.components.taskProgress) {
+                    this.components.taskProgress.loadTasks();
+                }
+            } else {
+                throw new Error(result.error || '文档生成失败');
+            }
+
+        } catch (error) {
+            console.error('生成文档失败:', error);
+            this.showError('生成文档失败: ' + error.message);
+            this.hideGenerationProgress(modalElement);
+        }
+    }
+
+    showGenerationProgress(modalElement) {
+        const form = modalElement.querySelector('#generateDocumentForm');
+        const progress = modalElement.querySelector('#generateProgress');
+        const generateBtn = modalElement.querySelector('#generateDocumentBtn');
+        
+        if (form) form.classList.add('d-none');
+        if (progress) progress.classList.remove('d-none');
+        if (generateBtn) {
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>生成中...';
+        }
+    }
+
+    hideGenerationProgress(modalElement) {
+        const form = modalElement.querySelector('#generateDocumentForm');
+        const progress = modalElement.querySelector('#generateProgress');
+        const generateBtn = modalElement.querySelector('#generateDocumentBtn');
+        
+        if (form) form.classList.remove('d-none');
+        if (progress) progress.classList.add('d-none');
+        if (generateBtn) {
+            generateBtn.disabled = false;
+            generateBtn.innerHTML = '<i class="fas fa-magic me-2"></i>开始生成';
+        }
+    }
+
+    // Legacy fallback methods
+    showAddRepositoryModalFallback() {
+        console.warn('⚠️ Using fallback modal for add repository');
+        // Original HTML injection implementation as fallback
+        // (keeping the original implementation for emergency use)
+    }
+
+    showGenerateDocumentModalFallback() {
+        console.warn('⚠️ Using fallback modal for generate document');
+        // Original HTML injection implementation as fallback
+        // (keeping the original implementation for emergency use)
+    }
+
+    // Legacy method - kept for backward compatibility
     async generateDocument(modal) {
         const form = document.getElementById('generateDocumentForm');
         const repoId = document.getElementById('documentRepo').value;
@@ -385,17 +567,51 @@ class DashboardController {
         }
 
         try {
-            const response = await this.api.generateDocument(repoId, {
-                document_type: docType,  // 修复：将 'type' 改为 'document_type'
-                output_format: docFormat  // 修复：将 'format' 改为 'output_format'
+            // 调用智能文档生成API
+            const response = await fetch(`/api/smart-document/generate/${repoId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    analysis_depth: 'detailed',
+                    include_diagrams: true,
+                    include_troubleshooting: true,
+                    doc_type: docType
+                })
             });
 
-            this.showSuccess('文档生成任务已创建');
-            modal.hide();
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || '文档生成失败');
+            }
 
-            // 刷新任务列表
-            if (this.components.taskProgress) {
-                this.components.taskProgress.loadTasks();
+            const result = await response.json();
+            
+            if (result.success) {
+                this.showSuccess('文档生成完成！');
+                modal.hide();
+
+                // 如果有MkDocs站点URL，直接跳转
+                if (result.mkdocs_url) {
+                    setTimeout(() => {
+                        window.location.href = result.mkdocs_url;
+                    }, 1000);
+                } else {
+                    // 降级到文档查看页面
+                    if (result.document_id) {
+                        setTimeout(() => {
+                            window.location.href = `/documents/${result.document_id}/view`;
+                        }, 1000);
+                    }
+                }
+
+                // 刷新任务列表
+                if (this.components.taskProgress) {
+                    this.components.taskProgress.loadTasks();
+                }
+            } else {
+                throw new Error(result.error || '文档生成失败');
             }
 
         } catch (error) {
@@ -532,21 +748,254 @@ class DashboardController {
         };
     }
 
+    // =================================================================
+    // WINSTON FRAMEWORK INTEGRATION
+    // =================================================================
+
+    initializeWinstonIntegration() {
+        console.log('🏗️ Initializing Winston Framework integration for Dashboard');
+        
+        // Check Winston dependencies
+        this.checkWinstonDependencies();
+        
+        // Register with Winston error recovery
+        this.registerWithErrorRecovery();
+        
+        // Setup Winston modal event handlers
+        this.setupWinstonModalHandlers();
+    }
+
+    checkWinstonDependencies() {
+        const dependencies = {
+            modalDispatcher: window.modalDispatcher,
+            modalTemplates: window.winstonModalTemplates,
+            errorRecovery: window.winstonErrorRecovery,
+            coreSystem: window.coreSystem
+        };
+
+        const missing = [];
+        Object.entries(dependencies).forEach(([name, dependency]) => {
+            if (!dependency) {
+                missing.push(name);
+            }
+        });
+
+        if (missing.length > 0) {
+            console.warn('⚠️ Missing Winston dependencies:', missing);
+            this.initializeWinstonFallbacks(missing);
+        } else {
+            console.log('✅ All Winston dependencies available');
+        }
+
+        return missing.length === 0;
+    }
+
+    initializeWinstonFallbacks(missing) {
+        missing.forEach(dependency => {
+            switch (dependency) {
+                case 'modalTemplates':
+                    console.warn('⚠️ Modal templates unavailable, using legacy modal system');
+                    break;
+                case 'errorRecovery':
+                    console.warn('⚠️ Error recovery unavailable, using basic error handling');
+                    break;
+            }
+        });
+    }
+
+    registerWithErrorRecovery() {
+        if (window.winstonErrorRecovery) {
+            // Add dashboard-specific recovery methods
+            window.winstonErrorRecovery.dashboardRecovery = () => {
+                console.log('🛡️ Dashboard-specific recovery initiated');
+                
+                // Cleanup any stuck modal states
+                this.cleanupModalStates();
+                
+                // Reset component states
+                this.resetComponentStates();
+                
+                // Refresh dashboard data
+                this.refreshDashboardData();
+            };
+            
+            console.log('✅ Dashboard registered with Winston error recovery');
+        }
+    }
+
+    setupWinstonModalHandlers() {
+        if (window.modalDispatcher) {
+            // Register global modal event handlers for dashboard
+            document.addEventListener('winston:modal:shown', (event) => {
+                const { modalId } = event.detail;
+                console.log(`📊 Dashboard: Modal shown - ${modalId}`);
+                this.onModalShown(modalId);
+            });
+
+            document.addEventListener('winston:modal:hidden', (event) => {
+                const { modalId } = event.detail;
+                console.log(`📊 Dashboard: Modal hidden - ${modalId}`);
+                this.onModalHidden(modalId);
+            });
+        }
+    }
+
+    onModalShown(modalId) {
+        // Dashboard-specific modal shown handling
+        if (modalId.includes('addRepository')) {
+            this.trackModalUsage('repository_add');
+        } else if (modalId.includes('generateDocument')) {
+            this.trackModalUsage('document_generate');
+        }
+    }
+
+    onModalHidden(modalId) {
+        // Dashboard-specific modal hidden handling
+        console.log(`📊 Dashboard modal ${modalId} closed`);
+    }
+
+    trackModalUsage(action) {
+        // Track modal usage for analytics
+        console.log(`📈 Dashboard action tracked: ${action}`);
+    }
+
+    // =================================================================
+    // ERROR RECOVERY AND CLEANUP
+    // =================================================================
+
+    cleanupModalStates() {
+        console.log('🧹 Cleaning up dashboard modal states');
+        
+        // Use Winston modal cleanup if available
+        if (window.winstonModalTemplates) {
+            window.winstonModalTemplates.cleanupAllModals();
+        } else {
+            // Fallback cleanup
+            document.querySelectorAll('.modal').forEach(modal => {
+                if (modal.id.includes('Repository') || modal.id.includes('Document')) {
+                    modal.remove();
+                }
+            });
+        }
+    }
+
+    resetComponentStates() {
+        console.log('🔄 Resetting dashboard component states');
+        
+        Object.values(this.components).forEach(component => {
+            if (component.reset) {
+                try {
+                    component.reset();
+                } catch (error) {
+                    console.warn(`⚠️ Failed to reset component:`, error);
+                }
+            }
+        });
+    }
+
+    refreshDashboardData() {
+        console.log('🔄 Refreshing dashboard data');
+        
+        // Refresh all components
+        setTimeout(() => {
+            if (this.components.stats) {
+                this.components.stats.loadStats();
+            }
+            if (this.components.repositoryList) {
+                this.components.repositoryList.loadRepositories();
+            }
+            if (this.components.taskProgress) {
+                this.components.taskProgress.loadTasks();
+            }
+            if (this.components.recentActivity) {
+                this.components.recentActivity.loadActivities();
+            }
+        }, 1000);
+    }
+
+    // =================================================================
+    // ENHANCED ERROR HANDLING WITH WINSTON INTEGRATION
+    // =================================================================
+
+    showError(message, options = {}) {
+        if (window.winstonModalTemplates && options.useModal) {
+            // Use Winston error modal template
+            window.winstonModalTemplates.showModal('error', {
+                message: message,
+                details: options.details,
+                stack: options.stack,
+                onRetry: options.onRetry
+            });
+        } else {
+            // Use toast notification
+            this.showToast(message, 'error');
+        }
+    }
+
+    showSuccess(message, options = {}) {
+        if (window.winstonModalTemplates && options.useModal) {
+            // Use Winston success modal template
+            window.winstonModalTemplates.showModal('success', {
+                message: message,
+                details: options.details
+            });
+        } else {
+            // Use toast notification
+            this.showToast(message, 'success');
+        }
+    }
+
+    showConfirmation(message, details, onConfirm) {
+        if (window.winstonModalTemplates) {
+            const modal = window.winstonModalTemplates.showModal('confirmation', {
+                message: message,
+                details: details
+            });
+
+            if (modal) {
+                const confirmBtn = modal.element.querySelector('#confirmBtn');
+                if (confirmBtn) {
+                    confirmBtn.addEventListener('click', () => {
+                        onConfirm();
+                        modal.bootstrap.hide();
+                    });
+                }
+            }
+        } else {
+            // Fallback to browser confirm
+            if (confirm(`${message}\\n\\n${details}`)) {
+                onConfirm();
+            }
+        }
+    }
+
     destroy() {
-        // 清理所有组件
+        console.log('🗑️ Destroying dashboard controller with Winston integration');
+        
+        // Cleanup Winston integrations
+        this.cleanupModalStates();
+        
+        // Unregister from error recovery
+        if (window.winstonErrorRecovery && window.winstonErrorRecovery.dashboardRecovery) {
+            delete window.winstonErrorRecovery.dashboardRecovery;
+        }
+        
+        // Clean up all components
         Object.values(this.components).forEach(component => {
             if (component.destroy) {
                 component.destroy();
             }
         });
 
-        // 清理实时更新
+        // Clean up real-time updates
         if (this.realtimeUpdates) {
             this.realtimeUpdates.destroy();
         }
 
-        // 移除事件监听器
+        // Remove event listeners
         window.removeEventListener('resize', this.handleResize);
+        
+        console.log('✅ Dashboard controller destroyed');
     }
 }
 

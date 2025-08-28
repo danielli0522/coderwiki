@@ -241,17 +241,11 @@ body {
 {% endblock %}
 
 {% block extra_js %}
-<!-- Load utility scripts first -->
-<script src="{{ url_for('static', filename='js/performance.js') }}"></script>
+<!-- Load components first to establish PerformanceMonitor -->
 <script src="{{ url_for('static', filename='js/components.js') }}"></script>
-<!-- Then load component scripts -->
-<script src="{{ url_for('static', filename='js/components/stats.js') }}"></script>
-<script src="{{ url_for('static', filename='js/components/repository_list.js') }}"></script>
-<script src="{{ url_for('static', filename='js/components/task_progress.js') }}"></script>
-<script src="{{ url_for('static', filename='js/components/recent_activity.js') }}"></script>
-<script src="{{ url_for('static', filename='js/components/system_status.js') }}"></script>
-<!-- Finally load main dashboard script -->
-<script src="{{ url_for('static', filename='js/api_client.js') }}"></script>
+<!-- Load performance utilities after components -->
+<script src="{{ url_for('static', filename='js/performance.js') }}"></script>
+<!-- Load main dashboard script -->
 <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 <script>
 // 确保dashboard页面全屏显示，隐藏任何侧边栏

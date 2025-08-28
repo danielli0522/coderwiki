@@ -1,36 +1,42 @@
-// Service Worker for CoderWiki
+/**
+ * CoderWiki Service Worker
+ * Provides offline capability and performance optimizations
+ */
+
 const CACHE_NAME = 'coderwiki-v1';
-const urlsToCache = [
+const URLS_TO_CACHE = [
     '/',
     '/static/css/style.css',
-    '/static/css/components.css',
+    '/static/js/core.js',
     '/static/js/components.js',
-    '/static/js/performance.js',
-    '/static/js/main.js',
-    'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css',
-    'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'
+    '/static/js/performance-unified.js',
+    '/static/images/logo.png'
 ];
 
-// 安装Service Worker
-self.addEventListener('install', function(event) {
+// Install event - cache resources
+self.addEventListener('install', event => {
+    console.log('Service Worker: Installing');
     event.waitUntil(
         caches.open(CACHE_NAME)
-            .then(function(cache) {
-                console.log('Opened cache');
-                return cache.addAll(urlsToCache);
+            .then(cache => {
+                console.log('Service Worker: Caching files');
+                return cache.addAll(URLS_TO_CACHE);
+            })
+            .catch(error => {
+                console.log('Service Worker: Cache failed', error);
             })
     );
 });
 
-// 激活Service Worker
-self.addEventListener('activate', function(event) {
-    const cacheWhitelist = [CACHE_NAME];
+// Activate event - clean up old caches
+self.addEventListener('activate', event => {
+    console.log('Service Worker: Activating');
     event.waitUntil(
-        caches.keys().then(function(cacheNames) {
+        caches.keys().then(cacheNames => {
             return Promise.all(
-                cacheNames.map(function(cacheName) {
-                    if (cacheWhitelist.indexOf(cacheName) === -1) {
+                cacheNames.map(cacheName => {
+                    if (cacheName !== CACHE_NAME) {
+                        console.log('Service Worker: Deleting old cache', cacheName);
                         return caches.delete(cacheName);
                     }
                 })
@@ -39,115 +45,54 @@ self.addEventListener('activate', function(event) {
     );
 });
 
-// 拦截网络请求
-self.addEventListener('fetch', function(event) {
+// Fetch event - serve from cache when offline
+self.addEventListener('fetch', event => {
+    // Skip non-GET requests
+    if (event.request.method !== 'GET') {
+        return;
+    }
+
+    // Skip API requests (let them fail naturally when offline)
+    if (event.request.url.includes('/api/')) {
+        return;
+    }
+
     event.respondWith(
         caches.match(event.request)
-            .then(function(response) {
-                // 如果在缓存中找到响应，则返回缓存的响应
-                if (response) {
-                    return response;
-                }
-                
-                // 否则，发起网络请求
-                return fetch(event.request).then(
-                    function(response) {
-                        // 检查是否收到有效的响应
-                        if (!response || response.status !== 200 || response.type !== 'basic') {
-                            return response;
-                        }
-                        
-                        // 克隆响应，因为响应是流，只能使用一次
-                        var responseToCache = response.clone();
-                        
-                        caches.open(CACHE_NAME)
-                            .then(function(cache) {
-                                cache.put(event.request, responseToCache);
+            .then(response => {
+                // Return cached version or fetch from network
+                return response || fetch(event.request)
+                    .catch(() => {
+                        // If both cache and network fail, return a basic offline page
+                        if (event.request.destination === 'document') {
+                            return new Response(`
+                                <!DOCTYPE html>
+                                <html>
+                                <head>
+                                    <title>CoderWiki - Offline</title>
+                                    <meta charset="utf-8">
+                                    <meta name="viewport" content="width=device-width, initial-scale=1">
+                                </head>
+                                <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; text-align: center; padding: 50px;">
+                                    <h1>CoderWiki</h1>
+                                    <p>You're currently offline. Please check your connection and try again.</p>
+                                </body>
+                                </html>
+                            `, {
+                                headers: { 'Content-Type': 'text/html' }
                             });
-                        
-                        return response;
-                    }
-                );
+                        }
+                    });
             })
     );
 });
 
-// 处理后台同步
-self.addEventListener('sync', function(event) {
-    if (event.tag === 'sync-forms') {
-        event.waitUntil(
-            // 同步表单数据
-            syncForms()
-        );
+// Background sync for failed API requests (future enhancement)
+self.addEventListener('sync', event => {
+    if (event.tag === 'background-sync') {
+        console.log('Service Worker: Background sync triggered');
+        // Handle background sync logic here
     }
 });
 
-// 处理推送通知
-self.addEventListener('push', function(event) {
-    if (event.data) {
-        const data = event.data.json();
-        const options = {
-            body: data.body,
-            icon: '/static/images/icon-192x192.png',
-            badge: '/static/images/badge-72x72.png',
-            vibrate: [100, 50, 100],
-            data: {
-                url: data.url || '/'
-            }
-        };
-        
-        event.waitUntil(
-            self.registration.showNotification(data.title, options)
-        );
-    }
-});
-
-// 处理通知点击
-self.addEventListener('notificationclick', function(event) {
-    event.notification.close();
-    
-    if (event.notification.data.url) {
-        event.waitUntil(
-            clients.openWindow(event.notification.data.url)
-        );
-    }
-});
-
-// 同步表单数据
-function syncForms() {
-    return new Promise((resolve, reject) => {
-        // 从IndexedDB获取待同步的表单数据
-        const request = indexedDB.open('CoderWikiDB', 1);
-        
-        request.onsuccess = function(event) {
-            const db = event.target.result;
-            const transaction = db.transaction(['forms'], 'readwrite');
-            const store = transaction.objectStore('forms');
-            const getAllRequest = store.getAll();
-            
-            getAllRequest.onsuccess = function() {
-                const forms = getAllRequest.result;
-                
-                // 同步每个表单
-                const syncPromises = forms.map(form => {
-                    return fetch('/api/forms', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(form.data)
-                    }).then(response => {
-                        if (response.ok) {
-                            // 同步成功，删除本地存储
-                            store.delete(form.id);
-                        }
-                    });
-                });
-                
-                Promise.all(syncPromises)
-                    .then(() => resolve())
-                    .catch(() => reject());
-            };
-        };
-    });
-}
+console.log('Service Worker: Script loaded');

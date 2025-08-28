@@ -144,11 +144,11 @@
 </div>
 
 <!-- 添加仓库模态框 -->
-<div class="modal fade" id="addRepositoryModal" tabindex="-1">
+<div class="modal fade" id="addRepositoryModal" tabindex="-1" aria-labelledby="addRepositoryModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">添加仓库</h5>
+                <h5 class="modal-title" id="addRepositoryModalLabel">添加仓库</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -190,11 +190,11 @@
 </div>
 
 <!-- 仓库详情模态框 -->
-<div class="modal fade" id="repositoryDetailModal" tabindex="-1">
+<div class="modal fade" id="repositoryDetailModal" tabindex="-1" aria-labelledby="repositoryDetailModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">仓库详情</h5>
+                <h5 class="modal-title" id="repositoryDetailModalLabel">仓库详情</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -210,11 +210,11 @@
 </div>
 
 <!-- 分析结果模态框 -->
-<div class="modal fade" id="analysisResultModal" tabindex="-1">
+<div class="modal fade" id="analysisResultModal" tabindex="-1" aria-labelledby="analysisResultModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">仓库分析结果</h5>
+                <h5 class="modal-title" id="analysisResultModalLabel">仓库分析结果</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -235,8 +235,10 @@
 
 {% block extra_js %}
 <!-- 模态框修复脚本 - 必须在其他脚本之前加载 -->
-<script src="{{ url_for('static', filename='js/repository-modal-fix.js') }}"></script>
-<script src="{{ url_for('static', filename='js/disable-delete-modal.js') }}"></script>
-<script src="{{ url_for('static', filename='js/modal-close-fix.js') }}"></script>
+<!-- Repository Modal Fix & Delete Modal - 已整合到 ui-framework.js -->
+<!-- <script src="{{ url_for('static', filename='js/repository-modal-fix.js') }}"></script> -->
+<!-- <script src="{{ url_for('static', filename='js/disable-delete-modal.js') }}"></script> -->
+<!-- Modal Close Fix - 已整合到 ui-framework.js -->
+<!-- <script src="{{ url_for('static', filename='js/modal-close-fix.js') }}"></script> -->
 <script src="{{ url_for('static', filename='js/repository.js') }}"></script>
 {% endblock %}

@@ -1,255 +1,443 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>导航链接测试 - CoderWiki</title>
+{% extends "base.html" %}
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+{% block title %}CoderWiki - 导航系统测试{% endblock %}
 
-    <style>
-        .test-result {
-            margin: 10px 0;
-            padding: 10px;
-            border-radius: 5px;
-        }
-        .test-success {
-            background-color: #d4edda;
-            border: 1px solid #c3e6cb;
-            color: #155724;
-        }
-        .test-error {
-            background-color: #f8d7da;
-            border: 1px solid #f5c6cb;
-            color: #721c24;
-        }
-        .test-info {
-            background-color: #d1ecf1;
-            border: 1px solid #bee5eb;
-            color: #0c5460;
-        }
-    </style>
-</head>
-<body>
-    <!-- 顶部导航 -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="/dashboard">
-                <i class="fas fa-code"></i> CoderWiki
-            </a>
+{% block extra_css %}
+<style>
+    .test-section {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .test-result {
+        padding: 0.75rem;
+        border-radius: 0.25rem;
+        margin: 0.5rem 0;
+        border-left: 4px solid;
+    }
+    
+    .test-result.success {
+        background: #d4edda;
+        border-left-color: #28a745;
+        color: #155724;
+    }
+    
+    .test-result.warning {
+        background: #fff3cd;
+        border-left-color: #ffc107;
+        color: #856404;
+    }
+    
+    .test-result.danger {
+        background: #f8d7da;
+        border-left-color: #dc3545;
+        color: #721c24;
+    }
+    
+    .navigation-test-links {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin: 1rem 0;
+    }
+    
+    .nav-test-button {
+        padding: 12px;
+        text-align: center;
+        background: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.3s;
+        display: block;
+    }
+    
+    .nav-test-button:hover {
+        background: #0056b3;
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin: 1rem 0;
+    }
+    
+    .stat-card {
+        background: white;
+        padding: 1rem;
+        border-radius: 0.375rem;
+        border: 1px solid #dee2e6;
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #007bff;
+    }
+    
+    .stat-label {
+        color: #6c757d;
+        font-size: 0.875rem;
+    }
+    
+    .console-output {
+        background: #1a1a1a;
+        color: #00ff00;
+        padding: 1rem;
+        border-radius: 0.375rem;
+        font-family: 'Courier New', monospace;
+        font-size: 0.875rem;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    .shortcut-help {
+        background: #e7f3ff;
+        border: 1px solid #b8daff;
+        border-radius: 0.375rem;
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+    
+    .shortcut-key {
+        background: #495057;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: monospace;
+        font-size: 0.85rem;
+    }
+</style>
+{% endblock %}
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/dashboard">
-                            <i class="fas fa-tachometer-alt"></i> 仪表板
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/repositories">
-                            <i class="fas fa-folder"></i> 仓库管理
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/documents">
-                            <i class="fas fa-file-alt"></i> 文档管理
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/analysis">
-                            <i class="fas fa-chart-line"></i> 代码分析
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/tasks">
-                            <i class="fas fa-tasks"></i> 任务管理
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/settings">
-                            <i class="fas fa-cog"></i> 系统设置
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <!-- 主要内容 -->
-    <div class="container mt-4">
-        <h1>导航链接测试页面</h1>
-
-        <div class="row">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">
-                        <h5>导航链接测试</h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="test-results">
-                            <div class="test-info">
-                                <strong>测试说明：</strong>点击下面的导航链接，测试是否能正常跳转。
-                            </div>
-                        </div>
-
-                        <div class="mt-3">
-                            <h6>测试链接：</h6>
-                            <div class="d-flex flex-wrap gap-2">
-                                <a href="/dashboard" class="btn btn-outline-primary" onclick="testNavigation(this, '/dashboard')">
-                                    <i class="fas fa-tachometer-alt"></i> 仪表板
-                                </a>
-                                <a href="/repositories" class="btn btn-outline-primary" onclick="testNavigation(this, '/repositories')">
-                                    <i class="fas fa-folder"></i> 仓库管理
-                                </a>
-                                <a href="/documents" class="btn btn-outline-primary" onclick="testNavigation(this, '/documents')">
-                                    <i class="fas fa-file-alt"></i> 文档管理
-                                </a>
-                                <a href="/analysis" class="btn btn-outline-primary" onclick="testNavigation(this, '/analysis')">
-                                    <i class="fas fa-chart-line"></i> 代码分析
-                                </a>
-                                <a href="/tasks" class="btn btn-outline-primary" onclick="testNavigation(this, '/tasks')">
-                                    <i class="fas fa-tasks"></i> 任务管理
-                                </a>
-                                <a href="/settings" class="btn btn-outline-primary" onclick="testNavigation(this, '/settings')">
-                                    <i class="fas fa-cog"></i> 系统设置
-                                </a>
-                            </div>
-                        </div>
-
-                        <div class="mt-3">
-                            <button class="btn btn-success" onclick="runAllTests()">
-                                <i class="fas fa-play"></i> 运行所有测试
-                            </button>
-                            <button class="btn btn-info" onclick="clearResults()">
-                                <i class="fas fa-trash"></i> 清除结果
-                            </button>
-                        </div>
-                    </div>
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-compass me-2"></i>
+                    导航系统测试 & 诊断中心
+                </h1>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-primary" id="runDiagnostics">
+                        <i class="fas fa-stethoscope me-1"></i> 运行诊断
+                    </button>
+                    <button type="button" class="btn btn-warning" id="resetNavigation">
+                        <i class="fas fa-redo me-1"></i> 重置导航
+                    </button>
+                    <button type="button" class="btn btn-danger" id="clearBlockers">
+                        <i class="fas fa-broom me-1"></i> 清理阻塞
+                    </button>
                 </div>
             </div>
-
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h5>调试信息</h5>
+        </div>
+    </div>
+    
+    <!-- 快捷键帮助 -->
+    <div class="row">
+        <div class="col-12">
+            <div class="shortcut-help">
+                <h6><i class="fas fa-keyboard me-2"></i>紧急导航快捷键</h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <span class="shortcut-key">Ctrl+D</span> 仪表盘 &nbsp;
+                        <span class="shortcut-key">Ctrl+H</span> 首页 &nbsp;
+                        <span class="shortcut-key">Ctrl+K</span> 仓库管理 &nbsp;
+                        <span class="shortcut-key">Ctrl+T</span> 任务管理
                     </div>
-                    <div class="card-body">
-                        <div id="debug-info">
-                            <p><strong>当前页面：</strong> <span id="current-url"></span></p>
-                            <p><strong>导航链接数量：</strong> <span id="nav-count"></span></p>
-                            <p><strong>点击事件：</strong> <span id="click-events">0</span></p>
-                        </div>
+                    <div class="col-md-6">
+                        <span class="shortcut-key">Escape</span> 清理阻塞 &nbsp;
+                        <span class="shortcut-key">Ctrl+Shift+D</span> 诊断 &nbsp;
+                        <span class="shortcut-key">Ctrl+Shift+R</span> 重置导航
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    
+    <!-- 导航系统状态 -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="test-section">
+                <h4 class="h5">
+                    <i class="fas fa-tachometer-alt me-2"></i>
+                    导航系统状态
+                </h4>
+                
+                <div class="stats-grid" id="navigationStats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalLinks">-</div>
+                        <div class="stat-label">总导航链接</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="validLinks">-</div>
+                        <div class="stat-label">有效链接</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="brokenLinks">-</div>
+                        <div class="stat-label">损坏链接</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="blockingOverlays">-</div>
+                        <div class="stat-label">阻塞浮层</div>
+                    </div>
+                </div>
+                
+                <div id="systemStatus" class="mt-3">
+                    <div class="test-result warning">
+                        <i class="fas fa-clock me-2"></i>
+                        <strong>等待诊断...</strong><br>
+                        点击"运行诊断"按钮开始检测
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 导航测试区 -->
+        <div class="col-md-6">
+            <div class="test-section">
+                <h4 class="h5">
+                    <i class="fas fa-mouse-pointer me-2"></i>
+                    导航功能测试
+                </h4>
+                
+                <div class="navigation-test-links">
+                    <a href="/" class="nav-test-button">
+                        <i class="fas fa-home me-2"></i>首页
+                    </a>
+                    <a href="/dashboard" class="nav-test-button">
+                        <i class="fas fa-tachometer-alt me-2"></i>仪表盘
+                    </a>
+                    <a href="/repositories" class="nav-test-button">
+                        <i class="fas fa-folder me-2"></i>仓库管理
+                    </a>
+                    <a href="/documents" class="nav-test-button">
+                        <i class="fas fa-file-alt me-2"></i>文档管理
+                    </a>
+                    <a href="/analysis" class="nav-test-button">
+                        <i class="fas fa-chart-line me-2"></i>代码分析
+                    </a>
+                    <a href="/tasks" class="nav-test-button">
+                        <i class="fas fa-tasks me-2"></i>任务管理
+                    </a>
+                </div>
+                
+                <div class="mt-3">
+                    <h6>测试说明：</h6>
+                    <ul class="small">
+                        <li>点击上方任意导航按钮测试跳转</li>
+                        <li>如果跳转失败，会自动显示紧急导航</li>
+                        <li>测试后返回此页面继续测试其他功能</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 控制台输出 -->
+    <div class="row">
+        <div class="col-12">
+            <div class="test-section">
+                <h4 class="h5">
+                    <i class="fas fa-terminal me-2"></i>
+                    系统日志输出
+                </h4>
+                
+                <div id="consoleOutput" class="console-output">
+                    <div>NavigationManager Test Suite v1.0</div>
+                    <div>==================================</div>
+                    <div>Ready for navigation testing...</div>
+                </div>
+                
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-secondary" id="clearConsole">
+                        <i class="fas fa-trash me-1"></i> 清空日志
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script>
-        let clickCount = 0;
-
-        // 更新调试信息
-        function updateDebugInfo() {
-            document.getElementById('current-url').textContent = window.location.href;
-            document.getElementById('nav-count').textContent = document.querySelectorAll('.navbar-nav .nav-link').length;
-            document.getElementById('click-events').textContent = clickCount;
-        }
-
-        // 测试导航链接
-        function testNavigation(element, url) {
-            clickCount++;
-            updateDebugInfo();
-
-            const resultDiv = document.createElement('div');
-            resultDiv.className = 'test-info';
-            resultDiv.innerHTML = `
-                <strong>测试链接：</strong> ${element.textContent.trim()}<br>
-                <strong>目标URL：</strong> ${url}<br>
-                <strong>时间：</strong> ${new Date().toLocaleTimeString()}<br>
-                <strong>状态：</strong> 正在测试...
-            `;
-
-            document.getElementById('test-results').appendChild(resultDiv);
-
-            // 模拟点击测试
-            setTimeout(() => {
-                try {
-                    // 检查链接是否有效
-                    if (element.href && element.href !== window.location.href) {
-                        resultDiv.className = 'test-success';
-                        resultDiv.innerHTML = `
-                            <strong>测试链接：</strong> ${element.textContent.trim()}<br>
-                            <strong>目标URL：</strong> ${url}<br>
-                            <strong>时间：</strong> ${new Date().toLocaleTimeString()}<br>
-                            <strong>状态：</strong> ✅ 链接有效，可以跳转
-                        `;
-                    } else {
-                        resultDiv.className = 'test-error';
-                        resultDiv.innerHTML = `
-                            <strong>测试链接：</strong> ${element.textContent.trim()}<br>
-                            <strong>目标URL：</strong> ${url}<br>
-                            <strong>时间：</strong> ${new Date().toLocaleTimeString()}<br>
-                            <strong>状态：</strong> ❌ 链接无效或无法跳转
-                        `;
-                    }
-                } catch (error) {
-                    resultDiv.className = 'test-error';
-                    resultDiv.innerHTML = `
-                        <strong>测试链接：</strong> ${element.textContent.trim()}<br>
-                        <strong>目标URL：</strong> ${url}<br>
-                        <strong>时间：</strong> ${new Date().toLocaleTimeString()}<br>
-                        <strong>状态：</strong> ❌ 测试出错：${error.message}
-                    `;
-                }
-            }, 1000);
-        }
-
-        // 运行所有测试
-        function runAllTests() {
-            const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
-            navLinks.forEach((link, index) => {
-                setTimeout(() => {
-                    testNavigation(link, link.href);
-                }, index * 500);
-            });
-        }
-
-        // 清除结果
-        function clearResults() {
-            const results = document.querySelectorAll('.test-results .test-info, .test-results .test-success, .test-results .test-error');
-            results.forEach(result => {
-                if (result.querySelector('strong')?.textContent !== '测试说明：') {
-                    result.remove();
-                }
-            });
-            clickCount = 0;
-            updateDebugInfo();
-        }
-
-        // 页面加载完成后初始化
-        document.addEventListener('DOMContentLoaded', function() {
-            updateDebugInfo();
-
-            // 监听导航链接点击
-            document.querySelectorAll('.navbar-nav .nav-link').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    clickCount++;
-                    updateDebugInfo();
-                    console.log('导航链接被点击:', this.textContent.trim(), this.href);
-                });
+{% block extra_js %}
+<script>
+class NavigationTester {
+    constructor() {
+        this.consoleOutput = document.getElementById('consoleOutput');
+        this.init();
+    }
+    
+    init() {
+        this.setupEventListeners();
+        this.log('🧭 NavigationTester initialized');
+        
+        // 自动运行初始诊断
+        setTimeout(() => {
+            this.runDiagnostics();
+        }, 1000);
+    }
+    
+    setupEventListeners() {
+        document.getElementById('runDiagnostics').addEventListener('click', () => this.runDiagnostics());
+        document.getElementById('resetNavigation').addEventListener('click', () => this.resetNavigation());
+        document.getElementById('clearBlockers').addEventListener('click', () => this.clearBlockers());
+        document.getElementById('clearConsole').addEventListener('click', () => this.clearConsole());
+        
+        // 监听导航点击
+        document.querySelectorAll('.nav-test-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                this.log(`🔗 Testing navigation to: ${e.target.href}`);
             });
         });
-    </script>
-</body>
-</html>
+    }
+    
+    runDiagnostics() {
+        this.log('🔍 Running navigation diagnostics...');
+        
+        if (window.getNavigationDiagnostics) {
+            const diagnostics = window.getNavigationDiagnostics();
+            
+            // 更新统计数字
+            document.getElementById('totalLinks').textContent = diagnostics.totalLinks;
+            document.getElementById('validLinks').textContent = diagnostics.validLinks;
+            document.getElementById('brokenLinks').textContent = diagnostics.brokenLinks;
+            document.getElementById('blockingOverlays').textContent = diagnostics.blockingOverlays;
+            
+            // 更新系统状态
+            this.updateSystemStatus(diagnostics);
+            
+            // 输出详细信息到控制台
+            this.log('📊 Diagnostics Results:');
+            this.log(`  Total Links: ${diagnostics.totalLinks}`);
+            this.log(`  Valid Links: ${diagnostics.validLinks}`);
+            this.log(`  Broken Links: ${diagnostics.brokenLinks}`);
+            this.log(`  Blocking Overlays: ${diagnostics.blockingOverlays}`);
+            this.log(`  Navigation Active: ${diagnostics.isNavigating ? 'Yes' : 'No'}`);
+            this.log(`  Monitoring Active: ${diagnostics.monitoringActive ? 'Yes' : 'No'}`);
+            
+            // 提供建议
+            if (diagnostics.brokenLinks > 0 || diagnostics.blockingOverlays > 0) {
+                this.log('⚠️ Issues detected! Recommendations:');
+                if (diagnostics.brokenLinks > 0) {
+                    this.log('  - Some navigation links are broken');
+                }
+                if (diagnostics.blockingOverlays > 0) {
+                    this.log('  - Found blocking overlays, click "Clear Blockers"');
+                }
+            } else {
+                this.log('✅ Navigation system appears healthy');
+            }
+        } else {
+            this.log('❌ NavigationManager not available');
+            this.updateSystemStatus({ error: 'NavigationManager not loaded' });
+        }
+    }
+    
+    updateSystemStatus(diagnostics) {
+        const statusDiv = document.getElementById('systemStatus');
+        
+        if (diagnostics.error) {
+            statusDiv.innerHTML = `
+                <div class="test-result danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>系统错误</strong><br>
+                    ${diagnostics.error}
+                </div>
+            `;
+            return;
+        }
+        
+        const hasIssues = diagnostics.brokenLinks > 0 || diagnostics.blockingOverlays > 0;
+        const statusClass = hasIssues ? 'warning' : 'success';
+        const statusIcon = hasIssues ? 'exclamation-triangle' : 'check-circle';
+        const statusText = hasIssues ? '发现问题' : '系统正常';
+        
+        statusDiv.innerHTML = `
+            <div class="test-result ${statusClass}">
+                <i class="fas fa-${statusIcon} me-2"></i>
+                <strong>${statusText}</strong><br>
+                导航管理器: ${diagnostics.monitoringActive ? '运行中' : '未运行'}<br>
+                ${hasIssues ? '建议使用重置或清理功能' : '所有导航功能正常工作'}
+            </div>
+        `;
+    }
+    
+    resetNavigation() {
+        this.log('🔄 Resetting navigation system...');
+        
+        if (window.resetNavigation) {
+            window.resetNavigation();
+            this.log('✅ Navigation system reset complete');
+            
+            // 重新运行诊断
+            setTimeout(() => {
+                this.runDiagnostics();
+            }, 1000);
+        } else {
+            this.log('❌ Reset function not available');
+        }
+    }
+    
+    clearBlockers() {
+        this.log('🧹 Clearing navigation blockers...');
+        
+        if (window.navigationManager) {
+            window.navigationManager.clearNavigationBlockers();
+            this.log('✅ Navigation blockers cleared');
+            
+            // 重新运行诊断
+            setTimeout(() => {
+                this.runDiagnostics();
+            }, 500);
+        } else {
+            this.log('❌ NavigationManager not available');
+        }
+    }
+    
+    clearConsole() {
+        this.consoleOutput.innerHTML = `
+            <div>NavigationManager Test Suite v1.0</div>
+            <div>==================================</div>
+            <div>Console cleared at ${new Date().toLocaleTimeString()}</div>
+        `;
+    }
+    
+    log(message) {
+        const timestamp = new Date().toLocaleTimeString();
+        const logEntry = document.createElement('div');
+        logEntry.textContent = `[${timestamp}] ${message}`;
+        this.consoleOutput.appendChild(logEntry);
+        this.consoleOutput.scrollTop = this.consoleOutput.scrollHeight;
+        
+        // 也输出到浏览器控制台
+        console.log(`NavigationTester: ${message}`);
+    }
+}
 
+// 初始化导航测试器
+document.addEventListener('DOMContentLoaded', function() {
+    window.navigationTester = new NavigationTester();
+});
+
+// 监听NavigationManager的事件
+document.addEventListener('navigationSystemReady', function() {
+    if (window.navigationTester) {
+        window.navigationTester.log('🎉 NavigationManager is ready');
+        window.navigationTester.runDiagnostics();
+    }
+});
+
+// 测试脚本加载顺序
+console.log('🧪 Navigation test page script loaded');
+</script>
+{% endblock %}

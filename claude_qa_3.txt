@@ -1,0 +1,29 @@
+问题: 解释一下什么是 REST API
+
+回答:
+REST API 是一种基于 HTTP 协议的网络应用程序接口设计架构风格。
+
+**核心概念：**
+- **REST** = Representational State Transfer（表述性状态转移）
+- 使用标准 HTTP 方法（GET、POST、PUT、DELETE）操作资源
+- 每个资源通过唯一的 URL 标识
+- 无状态通信，每个请求包含所有必要信息
+
+**关键特征：**
+1. **资源导向** - 数据被视为资源，通过 URL 访问（如 `/users/123`）
+2. **统一接口** - 使用标准 HTTP 动词：
+   - GET：获取资源
+   - POST：创建资源
+   - PUT：更新资源
+   - DELETE：删除资源
+3. **无状态** - 服务器不保存客户端状态
+4. **可缓存** - 响应可被缓存以提高性能
+
+**示例：**
+```
+GET    /api/users      # 获取用户列表
+GET    /api/users/1    # 获取ID为1的用户
+POST   /api/users      # 创建新用户
+PUT    /api/users/1    # 更新用户1
+DELETE /api/users/1    # 删除用户1
+```

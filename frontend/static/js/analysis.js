@@ -1,59 +1,55 @@
 /**
- * Analysis Management JavaScript
- * Enhanced version with better error handling and navigation support
+ * 代码分析管理器
+ * 负责处理代码分析相关的所有操作
  */
-
 class AnalysisManager {
-    constructor(options = {}) {
-        this.repositoryId = options.repositoryId || null;
-        this.repositoryName = options.repositoryName || '';
-        this.currentAnalysis = null;
-        this.analysisResults = null;
+    constructor() {
+        this.repositoryId = null;
+        this.analysisResults = {};
         this.analysisHistory = [];
+        this.currentAnalysis = null;
         this.pollingInterval = null;
-        this.isInitialized = false;
+        this.apiClient = new ApiClient();
+
         this.init();
     }
 
     init() {
-        console.log('Initializing AnalysisManager...');
         this.bindEvents();
-        this.loadRepositories();
-        this.loadAnalysisStatistics();
-        this.isInitialized = true;
-        console.log('AnalysisManager initialized successfully');
+        this.loadRepositoryList();
+        this.loadAnalysisResults();
     }
 
     bindEvents() {
-        // 分析控制事件
+        // 绑定仓库选择事件
+        this.bindElement('analysisRepoSelect', 'change', (e) => {
+            this.repositoryId = e.target.value;
+            this.loadAnalysisResults();
+        });
+
+        // 绑定分析按钮事件
         this.bindElement('startAnalysisBtn', 'click', () => this.startAnalysis());
         this.bindElement('startFirstAnalysisBtn', 'click', () => this.startAnalysis());
         this.bindElement('stopAnalysisBtn', 'click', () => this.stopAnalysis());
-        this.bindElement('cancelAnalysisBtn', 'click', () => this.cancelAnalysis());
-        this.bindElement('modalStartAnalysisBtn', 'click', () => this.startAnalysisFromModal());
-
-        // 其他操作事件
-        this.bindElement('refreshAnalysisBtn', 'click', () => this.refreshAnalysis());
-        this.bindElement('clearCacheBtn', 'click', () => this.clearCache());
         this.bindElement('newAnalysisBtn', 'click', () => this.showNewAnalysisModal());
 
-        // 分析类型选择事件
-        document.querySelectorAll('input[type="checkbox"][id$="Analysis"]').forEach(checkbox => {
-            checkbox.addEventListener('change', () => this.updateAnalysisTypes());
+        // 绑定模态框事件
+        this.bindElement('modalStartAnalysisBtn', 'click', () => this.startAnalysisFromModal());
+        this.bindElement('cancelAnalysisBtn', 'click', () => this.cancelAnalysis());
+        
+        // 绑定其他操作按钮
+        this.bindElement('refreshAnalysisBtn', 'click', () => this.refreshAnalysis());
+        this.bindElement('clearCacheBtn', 'click', () => this.clearCache());
+
+        // 绑定分析类型选择事件
+        document.querySelectorAll('input[id$="Analysis"]').forEach(checkbox => {
+            checkbox.addEventListener('change', () => this.updateAnalysisButtonState());
         });
 
-        // 仓库选择事件
-        this.bindElement('analysisRepoSelect', 'change', (e) => {
-            this.repositoryId = e.target.value;
-            if (this.repositoryId) {
-                this.loadAnalysisResults();
-                this.loadAnalysisHistory();
-            }
+        // 绑定配置选项事件
+        document.querySelectorAll('input[name="analysisConfig"]').forEach(checkbox => {
+            checkbox.addEventListener('change', () => this.updateAnalysisButtonState());
         });
-
-        // 搜索和过滤事件
-        this.bindElement('analysisSearch', 'input', (e) => this.filterAnalysisHistory(e.target.value));
-        this.bindElement('analysisStatusFilter', 'change', (e) => this.filterAnalysisHistory('', e.target.value));
     }
 
     bindElement(selector, event, handler) {
@@ -65,25 +61,10 @@ class AnalysisManager {
         }
     }
 
-    async loadRepositories() {
+    async loadRepositoryList() {
         try {
-            const response = await fetch('/api/repositories', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to load repositories');
-            }
-
-            const data = await response.json();
-
-            if (data.success && data.repositories) {
-                this.populateRepositorySelect(data.repositories);
-            }
-
+            const repositories = await this.apiClient.getRepositories();
+            this.populateRepositorySelect(repositories);
         } catch (error) {
             console.error('Error loading repositories:', error);
             this.showError('加载仓库列表失败');
@@ -115,46 +96,6 @@ class AnalysisManager {
         }
     }
 
-    async loadAnalysisStatistics() {
-        try {
-            const response = await fetch('/api/analysis/statistics', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to load analysis statistics');
-            }
-
-            const data = await response.json();
-
-            if (data.success && data.statistics) {
-                this.updateStatistics(data.statistics);
-            }
-
-        } catch (error) {
-            console.error('Error loading analysis statistics:', error);
-        }
-    }
-
-    updateStatistics(statistics) {
-        const elements = {
-            'totalAnalyses': statistics.total_analyses || 0,
-            'successAnalyses': statistics.completed_analyses || 0,
-            'runningAnalyses': statistics.pending_analyses || 0,
-            'failedAnalyses': statistics.failed_analyses || 0
-        };
-
-        Object.entries(elements).forEach(([id, value]) => {
-            const element = document.getElementById(id);
-            if (element) {
-                element.textContent = value;
-            }
-        });
-    }
-
     async loadAnalysisResults() {
         if (!this.repositoryId) {
             this.showEmptyState();
@@ -164,21 +105,10 @@ class AnalysisManager {
         try {
             document.getElementById('analysisLoading').style.display = 'block';
 
-            const response = await fetch(`/api/analysis/results/${this.repositoryId}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
+            const results = await this.apiClient.getAnalysisResults(this.repositoryId);
 
-            if (!response.ok) {
-                throw new Error('Failed to load analysis results');
-            }
-
-            const data = await response.json();
-
-            if (data.success) {
-                this.analysisResults = data.results;
+            if (results && Object.keys(results).length > 0) {
+                this.analysisResults = results;
                 this.renderAnalysisResults();
                 this.updateAnalysisStatus();
             } else {
@@ -198,24 +128,9 @@ class AnalysisManager {
         if (!this.repositoryId) return;
 
         try {
-            const response = await fetch(`/api/analysis/history/${this.repositoryId}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to load analysis history');
-            }
-
-            const data = await response.json();
-
-            if (data.success) {
-                this.analysisHistory = data.history;
-                this.renderAnalysisHistory();
-            }
-
+            const history = await this.apiClient.getAnalysisHistory(this.repositoryId);
+            this.analysisHistory = history;
+            this.renderAnalysisHistory();
         } catch (error) {
             console.error('Error loading analysis history:', error);
         }
@@ -445,33 +360,16 @@ class AnalysisManager {
         }
 
         try {
-            const response = await fetch('/api/analysis/start', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    repository_id: this.repositoryId,
-                    analysis_types: analysisTypes,
-                    config: config
-                })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                this.showProgressModal();
-                this.currentAnalysis = data.analysis_ids[0];
-                this.startPolling();
-                this.updateAnalysisButtons(true);
-                this.showSuccess('分析已开始');
-            } else {
-                this.showError(data.message || '开始分析失败');
-            }
-
+            const analysisId = await this.apiClient.startAnalysis(this.repositoryId, analysisTypes, config);
+            this.showProgressModal();
+            this.currentAnalysis = analysisId;
+            this.startPolling();
+            this.updateAnalysisButtons(true);
+            this.showSuccess('分析已开始');
         } catch (error) {
             console.error('Error starting analysis:', error);
-            this.showError('开始分析失败');
+            const errorMessage = error.message ? `开始分析失败: ${error.message}` : '开始分析失败';
+            this.showError(errorMessage);
         }
     }
 
@@ -506,24 +404,11 @@ class AnalysisManager {
         if (!this.currentAnalysis) return;
 
         try {
-            const response = await fetch(`/api/analysis/cancel/${this.currentAnalysis}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                this.stopPolling();
-                this.updateAnalysisButtons(false);
-                this.hideProgressModal();
-                this.showSuccess('分析已停止');
-            } else {
-                this.showError(data.message || '停止分析失败');
-            }
-
+            await this.apiClient.cancelAnalysis(this.currentAnalysis);
+            this.stopPolling();
+            this.updateAnalysisButtons(false);
+            this.hideProgressModal();
+            this.showSuccess('分析已停止');
         } catch (error) {
             console.error('Error stopping analysis:', error);
             this.showError('停止分析失败');
@@ -551,34 +436,23 @@ class AnalysisManager {
         if (!this.currentAnalysis) return;
 
         try {
-            const response = await fetch(`/api/analysis/status/${this.currentAnalysis}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
+            const data = await this.apiClient.getAnalysisStatus(this.currentAnalysis);
+            this.updateProgress(data);
 
-            const data = await response.json();
+            if (data.status === 'completed' || data.status === 'failed') {
+                this.stopPolling();
+                this.updateAnalysisButtons(false);
+                this.hideProgressModal();
 
-            if (data.success) {
-                this.updateProgress(data);
-
-                if (data.status === 'completed' || data.status === 'failed') {
-                    this.stopPolling();
-                    this.updateAnalysisButtons(false);
-                    this.hideProgressModal();
-
-                    if (data.status === 'completed') {
-                        this.showSuccess('分析完成');
-                        this.loadAnalysisResults();
-                        this.loadAnalysisHistory();
-                        this.loadAnalysisStatistics();
-                    } else {
-                        this.showError('分析失败: ' + (data.error_message || '未知错误'));
-                    }
+                if (data.status === 'completed') {
+                    this.showSuccess('分析完成');
+                    this.loadAnalysisResults();
+                    this.loadAnalysisHistory();
+                    // No need to call loadAnalysisStatistics here as it's not part of the new_code_analysis_results
+                } else {
+                    this.showError('分析失败: ' + (data.error_message || '未知错误'));
                 }
             }
-
         } catch (error) {
             console.error('Error polling analysis status:', error);
         }
@@ -659,7 +533,7 @@ class AnalysisManager {
     async refreshAnalysis() {
         await this.loadAnalysisResults();
         await this.loadAnalysisHistory();
-        await this.loadAnalysisStatistics();
+        // No need to call loadAnalysisStatistics here as it's not part of the new_code_analysis_results
         this.showSuccess('分析结果已刷新');
     }
 
@@ -674,24 +548,11 @@ class AnalysisManager {
         }
 
         try {
-            const response = await fetch(`/api/analysis/cache/clear/${this.repositoryId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                this.showSuccess('缓存已清除');
-                this.analysisResults = null;
-                this.showEmptyState();
-                this.loadAnalysisHistory();
-            } else {
-                this.showError(data.message || '清除缓存失败');
-            }
-
+            await this.apiClient.clearCache(this.repositoryId);
+            this.showSuccess('缓存已清除');
+            this.analysisResults = {};
+            this.showEmptyState();
+            this.loadAnalysisHistory();
         } catch (error) {
             console.error('Error clearing cache:', error);
             this.showError('清除缓存失败');
@@ -700,7 +561,7 @@ class AnalysisManager {
 
     getSelectedAnalysisTypes() {
         const types = [];
-        document.querySelectorAll('input[type="checkbox"][id$="Analysis"]:checked').forEach(checkbox => {
+        document.querySelectorAll('input[id$="Analysis"]:checked').forEach(checkbox => {
             const type = checkbox.id.replace('Analysis', '');
             types.push(type);
         });
@@ -708,17 +569,28 @@ class AnalysisManager {
     }
 
     getAnalysisConfig() {
-        return {
-            max_file_size: 10 * 1024 * 1024, // 10MB
-            timeout: 300, // 5 minutes
-            enable_cache: true,
-            parallel_processing: true
-        };
+        const config = {};
+        document.querySelectorAll('input[name="analysisConfig"]:checked').forEach(checkbox => {
+            config[checkbox.id] = checkbox.checked;
+        });
+        return config;
     }
 
-    updateAnalysisTypes() {
+    updateAnalysisButtonState() {
         // 更新分析类型选择的UI反馈
-        document.querySelectorAll('input[type="checkbox"][id$="Analysis"]').forEach(checkbox => {
+        document.querySelectorAll('input[id$="Analysis"]').forEach(checkbox => {
+            const label = checkbox.nextElementSibling;
+            if (checkbox.checked) {
+                label.style.fontWeight = '600';
+                label.style.color = '#007bff';
+            } else {
+                label.style.fontWeight = 'normal';
+                label.style.color = 'inherit';
+            }
+        });
+
+        // 更新配置选项的UI反馈
+        document.querySelectorAll('input[name="analysisConfig"]').forEach(checkbox => {
             const label = checkbox.nextElementSibling;
             if (checkbox.checked) {
                 label.style.fontWeight = '600';

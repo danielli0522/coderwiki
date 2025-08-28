@@ -18,7 +18,7 @@ from werkzeug.security import generate_password_hash
 
 def create_default_users():
     """创建默认用户账户"""
-    app = create_app(DevelopmentConfig)
+    app, socketio = create_app(DevelopmentConfig)
 
     with app.app_context():
         # 检查是否已存在用户
@@ -54,7 +54,7 @@ def create_default_users():
         test_user = User(
             username='testuser',
             email='test@example.com',
-            password_hash=generate_password_hash('test123'),
+            password_hash=generate_password_hash('testuser123'),
             is_admin=False,
             is_active=True
         )
@@ -83,7 +83,7 @@ def create_default_users():
             print()
             print("🧪 测试账户:")
             print("   用户名: testuser")
-            print("   密码: test123")
+            print("   密码: testuser123")
             print("   邮箱: test@example.com")
             print("   权限: 普通用户")
             print("=" * 50)

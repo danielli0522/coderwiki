@@ -134,6 +134,110 @@
         </div>
     </div>
 
+    <!-- MkDocs 站点管理 - 移至顶部并增强视觉效果 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-primary shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-book-open me-2"></i>MkDocs 静态文档站点
+                        </h5>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-light btn-sm" onclick="checkMkDocsSiteStatus({{ repository.id }})">
+                                <i class="fas fa-sync me-1"></i>检查状态
+                            </button>
+                            <button class="btn btn-warning btn-sm text-white" onclick="buildMkDocsSite({{ repository.id }})">
+                                <i class="fas fa-hammer me-1"></i>构建站点
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- 站点状态信息 -->
+                    <div id="mkdocs-status" class="mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="spinner-border spinner-border-sm me-2" role="status" id="status-loading" style="display: none;">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <span id="status-text" class="text-muted">点击"检查状态"获取站点信息</span>
+                        </div>
+                    </div>
+
+                    <!-- 站点操作区域 -->
+                    <div id="mkdocs-actions" style="display: none;">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card border-success">
+                                    <div class="card-body">
+                                        <h6 class="card-title text-success">
+                                            <i class="fas fa-eye me-2"></i>查看站点
+                                        </h6>
+                                        <p class="card-text text-muted">在新标签页中打开MkDocs文档站点</p>
+                                        <a id="view-site-btn" href="#" target="_blank" class="btn btn-success" style="display: none;">
+                                            <i class="fas fa-external-link-alt me-1"></i>查看文档站点
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-warning">
+                                    <div class="card-body">
+                                        <h6 class="card-title text-warning">
+                                            <i class="fas fa-redo me-2"></i>重新构建
+                                        </h6>
+                                        <p class="card-text text-muted">删除现有站点并重新构建</p>
+                                        <button class="btn btn-warning text-white" onclick="rebuildMkDocsSite({{ repository.id }})">
+                                            <i class="fas fa-redo me-1"></i>重新构建
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <div class="card border-info">
+                                    <div class="card-body">
+                                        <h6 class="card-title text-info">
+                                            <i class="fas fa-info-circle me-2"></i>站点信息
+                                        </h6>
+                                        <div id="site-info">
+                                            <!-- 站点信息将通过JavaScript填充 -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-danger">
+                                    <div class="card-body">
+                                        <h6 class="card-title text-danger">
+                                            <i class="fas fa-trash me-2"></i>删除站点
+                                        </h6>
+                                        <p class="card-text text-muted">删除已生成的MkDocs站点</p>
+                                        <button class="btn btn-danger" onclick="deleteMkDocsSite({{ repository.id }})">
+                                            <i class="fas fa-trash me-1"></i>删除站点
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 构建进度 -->
+                    <div id="mkdocs-build-progress" style="display: none;">
+                        <div class="text-center py-3">
+                            <div class="spinner-border text-primary mb-2" role="status">
+                                <span class="visually-hidden">构建中...</span>
+                            </div>
+                            <p class="text-muted mb-0">正在构建MkDocs站点，请稍候...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 统计信息 -->
     <div class="row mb-4">
         <div class="col-md-3">
@@ -397,9 +501,209 @@ function deleteRepository(repositoryId) {
     };
 }
 
+// MkDocs 相关函数
+function checkMkDocsSiteStatus(repositoryId) {
+    const statusLoading = document.getElementById('status-loading');
+    const statusText = document.getElementById('status-text');
+    
+    statusLoading.style.display = 'inline-block';
+    statusText.textContent = '检查中...';
+    
+    fetch(`/api/mkdocs/repositories/${repositoryId}/site-status`)
+        .then(response => response.json())
+        .then(data => {
+            statusLoading.style.display = 'none';
+            
+            if (data.success) {
+                if (data.built) {
+                    statusText.innerHTML = `<span class="text-success"><i class="fas fa-check-circle me-1"></i>站点已构建</span>`;
+                    showMkDocsActions(data);
+                } else {
+                    statusText.innerHTML = `<span class="text-warning"><i class="fas fa-exclamation-circle me-1"></i>站点未构建</span>`;
+                    document.getElementById('mkdocs-actions').style.display = 'none';
+                }
+            } else {
+                statusText.innerHTML = `<span class="text-danger"><i class="fas fa-times-circle me-1"></i>检查失败: ${data.error}</span>`;
+                document.getElementById('mkdocs-actions').style.display = 'none';
+            }
+        })
+        .catch(error => {
+            statusLoading.style.display = 'none';
+            statusText.innerHTML = `<span class="text-danger"><i class="fas fa-times-circle me-1"></i>检查失败: ${error.message}</span>`;
+            console.error('Error:', error);
+        });
+}
+
+function showMkDocsActions(siteData) {
+    const actionsDiv = document.getElementById('mkdocs-actions');
+    const viewSiteBtn = document.getElementById('view-site-btn');
+    const siteInfoDiv = document.getElementById('site-info');
+    
+    // 显示操作区域
+    actionsDiv.style.display = 'block';
+    
+    // 设置查看站点链接
+    if (siteData.site_url) {
+        viewSiteBtn.href = siteData.site_url;
+        viewSiteBtn.style.display = 'inline-block';
+    }
+    
+    // 显示站点信息
+    let siteInfoHtml = '';
+    if (siteData.build_time) {
+        const buildTime = new Date(siteData.build_time).toLocaleString('zh-CN');
+        siteInfoHtml += `<small class="text-muted d-block">构建时间: ${buildTime}</small>`;
+    }
+    if (siteData.file_count) {
+        siteInfoHtml += `<small class="text-muted d-block">文件数量: ${siteData.file_count}</small>`;
+    }
+    if (siteData.total_size_human) {
+        siteInfoHtml += `<small class="text-muted d-block">站点大小: ${siteData.total_size_human}</small>`;
+    }
+    
+    siteInfoDiv.innerHTML = siteInfoHtml || '<small class="text-muted">暂无详细信息</small>';
+}
+
+function buildMkDocsSite(repositoryId) {
+    const buildProgress = document.getElementById('mkdocs-build-progress');
+    const statusText = document.getElementById('status-text');
+    const actionsDiv = document.getElementById('mkdocs-actions');
+    
+    // 显示构建进度
+    buildProgress.style.display = 'block';
+    actionsDiv.style.display = 'none';
+    statusText.textContent = '构建中...';
+    
+    fetch(`/api/mkdocs/repositories/${repositoryId}/build-site`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        buildProgress.style.display = 'none';
+        
+        if (data.success) {
+            statusText.innerHTML = `<span class="text-success"><i class="fas fa-check-circle me-1"></i>站点构建成功</span>`;
+            showMkDocsActions(data);
+            
+            // 显示成功提示
+            showAlert('success', `MkDocs站点构建成功！生成了 ${data.docs_count} 个文档页面。`, 5000);
+        } else {
+            statusText.innerHTML = `<span class="text-danger"><i class="fas fa-times-circle me-1"></i>构建失败: ${data.error}</span>`;
+            showAlert('danger', `构建失败: ${data.error}`);
+        }
+    })
+    .catch(error => {
+        buildProgress.style.display = 'none';
+        statusText.innerHTML = `<span class="text-danger"><i class="fas fa-times-circle me-1"></i>构建失败: ${error.message}</span>`;
+        showAlert('danger', `构建失败: ${error.message}`);
+        console.error('Error:', error);
+    });
+}
+
+function rebuildMkDocsSite(repositoryId) {
+    if (!confirm('确定要重新构建MkDocs站点吗？这将删除现有站点并重新生成。')) {
+        return;
+    }
+    
+    const buildProgress = document.getElementById('mkdocs-build-progress');
+    const statusText = document.getElementById('status-text');
+    const actionsDiv = document.getElementById('mkdocs-actions');
+    
+    // 显示构建进度
+    buildProgress.style.display = 'block';
+    actionsDiv.style.display = 'none';
+    statusText.textContent = '重新构建中...';
+    
+    fetch(`/api/mkdocs/repositories/${repositoryId}/rebuild-site`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        buildProgress.style.display = 'none';
+        
+        if (data.success) {
+            statusText.innerHTML = `<span class="text-success"><i class="fas fa-check-circle me-1"></i>站点重新构建成功</span>`;
+            showMkDocsActions(data);
+            showAlert('success', `MkDocs站点重新构建成功！生成了 ${data.docs_count} 个文档页面。`, 5000);
+        } else {
+            statusText.innerHTML = `<span class="text-danger"><i class="fas fa-times-circle me-1"></i>重新构建失败: ${data.error}</span>`;
+            showAlert('danger', `重新构建失败: ${data.error}`);
+        }
+    })
+    .catch(error => {
+        buildProgress.style.display = 'none';
+        statusText.innerHTML = `<span class="text-danger"><i class="fas fa-times-circle me-1"></i>重新构建失败: ${error.message}</span>`;
+        showAlert('danger', `重新构建失败: ${error.message}`);
+        console.error('Error:', error);
+    });
+}
+
+function deleteMkDocsSite(repositoryId) {
+    if (!confirm('确定要删除MkDocs站点吗？此操作无法恢复。')) {
+        return;
+    }
+    
+    const statusText = document.getElementById('status-text');
+    const actionsDiv = document.getElementById('mkdocs-actions');
+    
+    statusText.textContent = '删除中...';
+    
+    fetch(`/api/mkdocs/repositories/${repositoryId}/delete-site`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            statusText.innerHTML = `<span class="text-info"><i class="fas fa-info-circle me-1"></i>站点已删除</span>`;
+            actionsDiv.style.display = 'none';
+            showAlert('success', 'MkDocs站点已成功删除');
+        } else {
+            statusText.innerHTML = `<span class="text-danger"><i class="fas fa-times-circle me-1"></i>删除失败: ${data.error}</span>`;
+            showAlert('danger', `删除失败: ${data.error}`);
+        }
+    })
+    .catch(error => {
+        statusText.innerHTML = `<span class="text-danger"><i class="fas fa-times-circle me-1"></i>删除失败: ${error.message}</span>`;
+        showAlert('danger', `删除失败: ${error.message}`);
+        console.error('Error:', error);
+    });
+}
+
+function showAlert(type, message, timeout = 3000) {
+    // 创建警告框元素
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 1050; max-width: 400px;';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    // 添加到页面
+    document.body.appendChild(alertDiv);
+    
+    // 自动移除
+    setTimeout(() => {
+        if (alertDiv && alertDiv.parentNode) {
+            alertDiv.parentNode.removeChild(alertDiv);
+        }
+    }, timeout);
+}
+
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', function() {
-    // 可以在这里添加页面特定的JavaScript逻辑
+    // 自动检查MkDocs站点状态
+    const repositoryId = {{ repository.id }};
+    checkMkDocsSiteStatus(repositoryId);
 });
 </script>
 {% endblock %}
@@ -420,6 +724,111 @@ document.addEventListener('DOMContentLoaded', function() {
 .card-header {
     background-color: #f8f9fa;
     border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+/* Enhanced MkDocs Section Styles */
+.card.border-primary.shadow-sm {
+    border-width: 2px !important;
+    box-shadow: 0 0.5rem 1rem rgba(0, 123, 255, 0.15) !important;
+    transition: all 0.3s ease;
+}
+
+.card.border-primary.shadow-sm:hover {
+    box-shadow: 0 0.75rem 1.5rem rgba(0, 123, 255, 0.25) !important;
+    transform: translateY(-2px);
+}
+
+.card-header.bg-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+    padding: 1rem 1.25rem;
+}
+
+.card-header.bg-primary h5 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.card-header.bg-primary .btn-light {
+    background-color: rgba(255, 255, 255, 0.95);
+    border: none;
+    font-weight: 500;
+}
+
+.card-header.bg-primary .btn-light:hover {
+    background-color: #ffffff;
+    transform: scale(1.05);
+}
+
+.card-header.bg-primary .btn-warning {
+    background-color: #ffc107;
+    border: none;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card-header.bg-primary .btn-warning:hover {
+    background-color: #ffb300;
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+#mkdocs-actions .card {
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+#mkdocs-actions .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+#mkdocs-actions .card-title {
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+#mkdocs-actions .btn {
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    transition: all 0.2s ease;
+}
+
+#mkdocs-actions .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+    border: none;
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+    border: none;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);
+    border: none;
+}
+
+/* Pulse animation for build status */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(0, 123, 255, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(0, 123, 255, 0);
+    }
+}
+
+#status-loading {
+    animation: pulse 2s infinite;
 }
 
 .list-group-item {

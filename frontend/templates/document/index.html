@@ -119,6 +119,19 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- 分页组件 -->
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div class="text-muted">
+                            显示第 <span id="currentPageInfo">1</span> 页，共 <span id="totalPagesInfo">1</span> 页，
+                            总计 <span id="totalItemsInfo">0</span> 条记录
+                        </div>
+                        <nav aria-label="文档分页">
+                            <ul class="pagination pagination-sm mb-0" id="documentPagination">
+                                <!-- 分页按钮将通过JavaScript动态生成 -->
+                            </ul>
+                        </nav>
+                    </div>
                 </div>
             </div>
         </div>
@@ -126,11 +139,11 @@
 </div>
 
 <!-- 新建文档模态框 -->
-<div class="modal fade" id="addDocumentModal" tabindex="-1">
+<div class="modal fade" id="addDocumentModal" tabindex="-1" aria-labelledby="addDocumentModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">新建文档</h5>
+                <h5 class="modal-title" id="addDocumentModalLabel">新建文档</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -161,8 +174,16 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                <button type="button" class="btn btn-primary" id="createDocumentBtn">创建文档</button>
+                <div class="d-flex justify-content-between align-items-center w-100">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle"></i>
+                        遇到交互问题？按 Ctrl+Alt+R 恢复
+                    </small>
+                    <div>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" id="createDocumentBtn">创建文档</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -170,6 +191,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{{ url_for('static', filename='js/api_client.js') }}"></script>
+<!-- api_client.js is already loaded in base.html -->
 <script src="{{ url_for('static', filename='js/document.js') }}"></script>
 {% endblock %}

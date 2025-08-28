@@ -370,8 +370,34 @@ class RepositoryListComponent {
         }
     }
 
-    viewRepository(repoId) {
-        window.location.href = `/repositories/${repoId}`;
+    async viewRepository(repoId) {
+        try {
+            // 获取仓库信息以构建MkDocs站点URL
+            const response = await fetch(`/api/repositories/${repoId}`);
+            if (response.ok) {
+                const repo = await response.json();
+                // 构建MkDocs站点URL
+                const sanitizedName = repo.name.replace(/[^\w\-_]/g, '_');
+                const mkdocsUrl = `/sites/${sanitizedName}_${repoId}/`;
+                
+                // 检查MkDocs站点是否存在
+                const checkResponse = await fetch(mkdocsUrl, { method: 'HEAD' });
+                if (checkResponse.ok) {
+                    // 站点存在，直接跳转
+                    window.location.href = mkdocsUrl;
+                } else {
+                    // 站点不存在，降级到仓库详情页
+                    window.location.href = `/repositories/${repoId}`;
+                }
+            } else {
+                // 获取仓库信息失败，降级到仓库详情页
+                window.location.href = `/repositories/${repoId}`;
+            }
+        } catch (error) {
+            console.error('查看仓库失败:', error);
+            // 发生错误，降级到仓库详情页
+            window.location.href = `/repositories/${repoId}`;
+        }
     }
 
     editRepository(repoId) {

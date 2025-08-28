@@ -16,7 +16,11 @@ from app.services.prompt_service import PromptService
 from app.services.task_service import TaskService
 from app.services.mcp_service import MCPService
 from app.services.claude_code_service import ClaudeCodeService
+from app.services.directory_service import DirectoryService
 from app.utils.llm_client import LLMClientFactory, LLMMetrics
+from app.utils.db_context import db_transaction
+from app.utils.claude_client import ClaudeCodeClient
+from app.utils.bmad_orchestrator import BMADOrchestrator
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +39,7 @@ class DocumentGenerator:
         self.llm_service = LLMService()
         self.prompt_service = PromptService()
         self.task_service = TaskService()
+        self.directory_service = DirectoryService()
 
         # 根据配置决定是否使用MCP服务
         if use_mcp is None:
@@ -57,17 +62,47 @@ class DocumentGenerator:
         if use_claude_code is None:
             # 从环境变量或默认值获取Claude Code配置
             import os
-            self.use_claude_code = os.environ.get('CLAUDE_CODE_ENABLED', 'false').lower() == 'true'
+            self.use_claude_code = os.environ.get('CLAUDE_CODE_ENABLED', 'true').lower() == 'true'
         else:
             self.use_claude_code = use_claude_code
 
+        # 初始化Claude Code和BMAD相关服务
+        self.claude_code_service = None
+        self.bmad_orchestrator = None
+        self.use_bmad_workflow = False
+        
         if self.use_claude_code:
             import os
             self.claude_code_service = ClaudeCodeService(
                 bmad_docs_path=os.environ.get('BMAD_DOCS_PATH', '/Users/lshl124/Documents/daniel/git/code/aigc/BMAD-METHOD/expansion-packs/bmad-docs-generator/')
             )
-        else:
-            self.claude_code_service = None
+            
+            # 检查是否使用BMAD工作流
+            self.use_bmad_workflow = os.environ.get('USE_BMAD_WORKFLOW', 'true').lower() == 'true'
+            
+            if self.use_bmad_workflow:
+                # 初始化BMAD orchestrator
+                try:
+                    from flask import current_app
+                    api_key = os.environ.get('ANTHROPIC_API_KEY') or os.environ.get('CLAUDE_API_KEY')
+                    workspace_id = os.environ.get('CLAUDE_WORKSPACE_ID', 'default')
+                    
+                    if api_key:
+                        try:
+                            claude_client = ClaudeCodeClient(api_key, workspace_id)
+                            self.bmad_orchestrator = BMADOrchestrator(claude_client)
+                            logger.info("BMAD Orchestrator initialized successfully")
+                        except Exception as client_error:
+                            logger.warning(f"Failed to initialize Claude Code client: {client_error}")
+                            # For now, create a mock orchestrator to demonstrate the workflow
+                            self.bmad_orchestrator = "mock_orchestrator"
+                            logger.info("Using mock BMAD orchestrator for demonstration")
+                    else:
+                        logger.warning("No API key found for BMAD orchestrator")
+                        self.use_bmad_workflow = False
+                except Exception as e:
+                    logger.error(f"Failed to initialize BMAD orchestrator: {e}")
+                    self.use_bmad_workflow = False
 
     def generate_document(self, repository_id: int, user_id: int, llm_config_id: int,
                          doc_type: str = 'overview', doc_title: str = None) -> Dict[str, Any]:
@@ -144,23 +179,46 @@ class DocumentGenerator:
                 raise Exception(f"Prompt generation failed: {prompt_result['error']}")
 
             # 步骤3: 调用文档生成服务
-            if self.use_claude_code and self.claude_code_service:
-                self.task_service.update_task_status(task.id, 'processing', 'Calling Claude Code service for document generation')
-                # 使用asyncio运行异步函数
-                import asyncio
-                try:
-                    loop = asyncio.get_event_loop()
-                except RuntimeError:
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-
-                llm_result = loop.run_until_complete(
-                    self._call_claude_code_for_documentation(
-                        repository=repository,
-                        doc_type=doc_type,
-                        doc_title=doc_title
-                    )
+            if self.use_claude_code and self.use_bmad_workflow and self.bmad_orchestrator:
+                # 使用BMAD工作流生成文档
+                self.task_service.update_task_status(task.id, 'processing', 'Initiating BMAD agent workflow for document generation')
+                llm_result = self._call_bmad_workflow_for_documentation(
+                    repository=repository,
+                    task=task,
+                    doc_type=doc_type,
+                    doc_title=doc_title
                 )
+            elif self.use_claude_code and self.claude_code_service:
+                # 使用简单的Claude Code服务
+                self.task_service.update_task_status(task.id, 'processing', 'Calling Claude Code service for document generation')
+                # 安全地处理异步调用，避免事件循环冲突
+                import asyncio
+                import concurrent.futures
+                
+                def run_async_in_thread():
+                    """在新线程中运行异步函数，避免事件循环冲突"""
+                    try:
+                        # 创建新的事件循环（在新线程中）
+                        new_loop = asyncio.new_event_loop()
+                        asyncio.set_event_loop(new_loop)
+                        try:
+                            return new_loop.run_until_complete(
+                                self._call_claude_code_for_documentation(
+                                    repository=repository,
+                                    doc_type=doc_type,
+                                    doc_title=doc_title
+                                )
+                            )
+                        finally:
+                            new_loop.close()
+                    except Exception as e:
+                        logger.error(f"Error in async thread execution: {e}")
+                        raise
+                
+                # 在线程池中运行异步操作，避免阻塞主线程
+                with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                    future = executor.submit(run_async_in_thread)
+                    llm_result = future.result(timeout=300)  # 5分钟超时
             elif self.use_mcp and self.mcp_service:
                 self.task_service.update_task_status(task.id, 'processing', 'Calling MCP service for document generation')
                 llm_result = self._call_mcp_for_documentation(
@@ -319,6 +377,127 @@ class DocumentGenerator:
                 'success': False,
                 'error': str(e)
             }
+
+    def _call_bmad_workflow_for_documentation(self, repository: Repository, task: Task,
+                                             doc_type: str, doc_title: str) -> Dict[str, Any]:
+        """通过BMAD代理工作流生成文档"""
+        try:
+            logger.info(f"Starting BMAD workflow for repository: {repository.name}")
+            
+            # 更新任务状态：准备BMAD工作流
+            self.task_service.update_task_status(task.id, 'processing', 'Configuring BMAD agent team')
+            
+            # 准备BMAD配置
+            bmad_config = {
+                'doc_type': doc_type,
+                'doc_title': doc_title or f"{repository.name} Technical Documentation",
+                'language': 'zh-CN',
+                'detailed': True,
+                'include_examples': True,
+                'agents': [
+                    'code-analyst',
+                    'architecture-analyst', 
+                    'flow-analyst',
+                    'problem-solver',
+                    'doc-engineer'
+                ]
+            }
+            
+            # 根据文档类型调整代理配置
+            if doc_type == 'architecture':
+                bmad_config['focus_agent'] = 'architecture-analyst'
+            elif doc_type == 'api':
+                bmad_config['focus_agent'] = 'code-analyst'
+            elif doc_type == 'database':
+                bmad_config['focus_agent'] = 'flow-analyst'
+            
+            # 更新任务状态：执行BMAD工作流
+            self.task_service.update_task_status(task.id, 'processing', 'Executing BMAD agent workflow (Alex, Jordan, Dr. Morgan, Maya)')
+            
+            # 执行BMAD工作流
+            workflow_result = self.bmad_orchestrator.execute_workflow(
+                repo_path=repository.local_path,
+                config=bmad_config
+            )
+            
+            if workflow_result['status'] == 'completed':
+                # 从BMAD工作流结果中提取文档内容
+                document_sections = workflow_result.get('document', {}).get('sections', {})
+                
+                # 组合所有代理的输出
+                combined_content = self._combine_bmad_agent_outputs(document_sections, doc_title, repository.name)
+                
+                # 记录代理执行信息
+                agent_outputs = workflow_result.get('agent_outputs', {})
+                logger.info(f"BMAD agents completed: {list(agent_outputs.keys())}")
+                
+                return {
+                    'success': True,
+                    'content': combined_content,
+                    'metrics': {
+                        'response_time': workflow_result.get('execution_time', 0),
+                        'model': 'bmad-multi-agent',
+                        'provider': 'claude-code-bmad'
+                    },
+                    'cost_estimate': 0.05,  # Estimated cost for BMAD workflow
+                    'bmad_metadata': {
+                        'session_id': workflow_result.get('session_id'),
+                        'agents_used': list(agent_outputs.keys()),
+                        'workflow_complete': True
+                    }
+                }
+            else:
+                logger.error(f"BMAD workflow failed: {workflow_result.get('error')}")
+                return {
+                    'success': False,
+                    'error': workflow_result.get('error', 'BMAD workflow execution failed')
+                }
+                
+        except Exception as e:
+            logger.error(f"Error in BMAD workflow execution: {str(e)}")
+            return {
+                'success': False,
+                'error': str(e)
+            }
+    
+    def _combine_bmad_agent_outputs(self, sections: Dict[str, Any], doc_title: str, repo_name: str) -> str:
+        """组合BMAD代理输出为统一文档"""
+        try:
+            content_parts = []
+            
+            # 添加文档头部
+            content_parts.append(f"# {doc_title or repo_name + ' Technical Documentation'}")
+            content_parts.append(f"\n*Generated by BMAD Agent Team*\n")
+            content_parts.append("---\n")
+            
+            # 按照逻辑顺序组织代理输出
+            agent_order = [
+                ('code-analyst', '## 1. Code Analysis (by Alex)'),
+                ('architecture-analyst', '## 2. Architecture Overview'),
+                ('flow-analyst', '## 3. Business Flow Analysis (by Jordan)'),
+                ('problem-solver', '## 4. Potential Issues & Solutions (by Dr. Morgan)'),
+                ('doc-engineer', '## 5. Final Documentation (by Maya)')
+            ]
+            
+            for agent_id, section_title in agent_order:
+                if agent_id in sections:
+                    agent_data = sections[agent_id]
+                    content_parts.append(f"\n{section_title}\n")
+                    content_parts.append(f"*Agent: {agent_data.get('agent_name', agent_id)}*\n")
+                    content_parts.append(agent_data.get('content', 'No content generated'))
+                    content_parts.append("\n---\n")
+            
+            # 添加生成元数据
+            content_parts.append("\n## Generation Metadata")
+            content_parts.append(f"- Generated at: {time.strftime('%Y-%m-%d %H:%M:%S')}")
+            content_parts.append(f"- Repository: {repo_name}")
+            content_parts.append(f"- BMAD Agents Used: {len(sections)}")
+            
+            return '\n'.join(content_parts)
+            
+        except Exception as e:
+            logger.error(f"Error combining BMAD outputs: {str(e)}")
+            return f"# {doc_title}\n\nError combining agent outputs: {str(e)}"
 
     def _call_mcp_for_documentation(self, repository: Repository, llm_config: LLMConfig,
                                    doc_type: str, doc_title: str) -> Dict[str, Any]:
@@ -542,13 +721,12 @@ class DocumentGenerator:
             else:
                 is_claude_code_generated = False
 
-            # 创建文档存储目录
+            # 使用统一的AI文档目录
             import os
             from pathlib import Path
 
-            # 创建文档存储目录
-            docs_dir = Path(__file__).parent.parent.parent / 'docs' / 'generated'
-            docs_dir.mkdir(parents=True, exist_ok=True)
+            # 获取统一的AI文档目录
+            docs_dir = self.directory_service.get_ai_docs_path(repository.name, repository.id)
 
             # 确定文件路径
             file_path = None

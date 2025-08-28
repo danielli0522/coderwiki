@@ -58,6 +58,25 @@ class SecurityIssue:
     confidence: float
     source_file: Optional[str]
     
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert security issue to dictionary for JSON serialization."""
+        return {
+            'id': self.id,
+            'title': self.title,
+            'description': self.description,
+            'severity': self.severity.value,  # Convert enum to string
+            'category': self.category.value,  # Convert enum to string
+            'affected_package': self.affected_package,
+            'affected_version': self.affected_version,
+            'fixed_version': self.fixed_version,
+            'cve_id': self.cve_id,
+            'cvss_score': self.cvss_score,
+            'references': self.references,
+            'remediation': self.remediation,
+            'confidence': self.confidence,
+            'source_file': self.source_file
+        }
+    
     def __post_init__(self):
         if self.references is None:
             self.references = []
@@ -71,6 +90,16 @@ class SecurityScanResult:
     risk_assessment: Dict[str, Any]
     recommendations: List[str]
     metadata: Dict[str, Any]
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert security scan result to dictionary for JSON serialization."""
+        return {
+            'issues': [issue.to_dict() for issue in self.issues],
+            'scan_summary': self.scan_summary,
+            'risk_assessment': self.risk_assessment,
+            'recommendations': self.recommendations,
+            'metadata': self.metadata
+        }
 
 
 class SecurityScanner:
@@ -127,6 +156,11 @@ class SecurityScanner:
             'scan_code_patterns': True,
             'scan_configs': True
         }
+    
+    def analyze(self) -> Dict[str, Any]:
+        """Analyze method compatible with CodeAnalysisEngine interface."""
+        scan_result = self.scan_repository()
+        return scan_result.to_dict() if hasattr(scan_result, 'to_dict') else scan_result.__dict__
     
     def scan_repository(self) -> SecurityScanResult:
         """Perform comprehensive security scan of the repository."""

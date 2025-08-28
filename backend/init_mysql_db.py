@@ -142,7 +142,7 @@ def create_database():
                 default_users = [
                     ('admin', 'admin@coderwiki.com', 'admin123', True),
                     ('demo', 'demo@coderwiki.com', 'demo123', False),
-                    ('testuser', 'test@example.com', 'test123', False)
+                    ('testuser', 'test@example.com', 'testuser123', False)
                 ]
 
                 for username, email, password, is_admin in default_users:
@@ -191,7 +191,7 @@ if __name__ == '__main__':
         print("\n💡 提示:")
         print("  - 默认管理员账户: admin / admin123")
         print("  - 演示账户: demo / demo123")
-        print("  - 测试账户: testuser / test123")
+        print("  - 测试账户: testuser / testuser123")
         print("  - 建议首次登录后修改默认密码")
     else:
         print("\n❌ 数据库初始化失败，请检查MySQL服务是否运行")

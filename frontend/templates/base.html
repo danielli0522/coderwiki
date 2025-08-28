@@ -25,20 +25,24 @@
     <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
     {% endif %}
 
-    <!-- Enhanced JavaScript System - Load Critical Scripts First -->
-    <script src="{{ url_for('static', filename='js/performance-optimizer.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/accessibility.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/modal-system.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/user-feedback.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/responsive-navigation.js') }}"></script>
-    <!-- UI Enhancement System Coordinator -->
-    <script src="{{ url_for('static', filename='js/ui-enhancements.js') }}"></script>
-    <!-- Legacy scripts for backward compatibility -->
-    <script src="{{ url_for('static', filename='js/modal-fixes.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/modal-close-fix.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/navigation-fix.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/url-fix.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/api-error-handler.js') }}"></script>
+    <!-- 🏗️ Winston's Architecture Optimization - Consolidated JS Framework -->
+    <!-- Core Infrastructure Layer -->
+    <script src="{{ url_for('static', filename='js/core.js') }}"></script>
+    
+    <!-- UI Framework Layer -->
+    <script src="{{ url_for('static', filename='js/ui-framework.js') }}"></script>
+    
+    <!-- Authentication Layer -->
+    <script src="{{ url_for('static', filename='js/auth-unified.js') }}"></script>
+    
+    <!-- Performance Layer -->
+    <script src="{{ url_for('static', filename='js/performance-unified.js') }}"></script>
+    
+    <!-- Winston Error Recovery System -->
+    <script src="{{ url_for('static', filename='js/winston-error-recovery.js') }}"></script>
+    
+    <!-- Winston Modal Template System -->
+    <script src="{{ url_for('static', filename='js/winston-modal-templates.js') }}"></script>
 
     {% block head %}{% endblock %}
 
@@ -173,34 +177,102 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Custom JS -->
-    <script src="{{ url_for('static', filename='js/api_client.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/realtime_updates_fixed.js') }}"></script>
+    <!-- Socket.IO for WebSocket support -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    
+    <!-- OVERLAY ELIMINATION SYSTEM - HIGH PRIORITY -->
+    <script>
+    /**
+     * Immediate Overlay Elimination Script
+     * This script runs immediately to prevent any overlay blocking issues
+     */
+    (function() {
+        let eliminatedCount = 0;
+        
+        function emergencyOverlayCleanup() {
+            // Remove common problematic overlays immediately
+            const problematicSelectors = [
+                '.modal-backdrop:not(.show)',
+                '#ui-init-progress',
+                '.loading-overlay:not(.active)',
+                '.user-feedback-overlay:not(.active)',
+                '.mobile-nav-overlay:not(.active)',
+                '[style*="z-index: 999"]:not(.modal):not(.dropdown):not(.popover)'
+            ];
+            
+            problematicSelectors.forEach(selector => {
+                const elements = document.querySelectorAll(selector);
+                elements.forEach(el => {
+                    if (el && el.parentNode) {
+                        el.remove();
+                        eliminatedCount++;
+                    }
+                });
+            });
+            
+            // Reset body styles that might block interaction
+            document.body.style.overflow = document.body.style.overflow || '';
+            document.body.style.pointerEvents = document.body.style.pointerEvents || '';
+            
+            if (eliminatedCount > 0) {
+                console.log(`🧹 Emergency cleanup removed ${eliminatedCount} problematic overlays`);
+            }
+        }
+        
+        // Run immediately
+        emergencyOverlayCleanup();
+        
+        // Run after DOM is loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', emergencyOverlayCleanup);
+        }
+        
+        // Run after page is fully loaded
+        window.addEventListener('load', emergencyOverlayCleanup);
+        
+    })();
+    </script>
+    
+    <!-- 🏗️ Winston's Architecture - Core system already loaded in head -->
 
     <!-- Authentication check before loading components -->
     <script>
+    // 简化的脚本加载逻辑
     (async function() {
         try {
-            const response = await fetch('/api/auth/status', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                redirect: 'manual'
-            });
+            // 🏗️ Winston Architecture - 核心框架已在head中加载
+            console.log('Core framework loaded, checking authentication...');
 
+            // 检查认证状态
             let isAuthenticated = false;
-            if (response.ok) {
-                const data = await response.json();
-                isAuthenticated = data.logged_in || false;
+            try {
+                const response = await fetch('/api/auth/status', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    redirect: 'manual'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    isAuthenticated = data.logged_in || false;
+                }
+            } catch (error) {
+                console.warn('认证检查失败，继续加载基础功能:', error);
             }
 
             if (isAuthenticated) {
-                // Load components only if authenticated
-                console.log('用户已登录，加载组件...');
+                console.log('用户已登录，加载完整功能...');
+                
+                // 🏗️ 业务逻辑脚本 - Winston Architecture (只加载存在的文件)
+                const businessLogicScripts = [
+                    '{{ url_for("static", filename="js/components.js") }}',  // 业务组件
+                    '{{ url_for("static", filename="js/main.js") }}'         // 主应用逻辑
+                ];
 
-                // Load component scripts dynamically
-                const componentScripts = [
+                // 首先加载子组件脚本（同步加载，确保依赖顺序）
+                const subComponentScripts = [
                     '{{ url_for("static", filename="js/components/stats.js") }}',
                     '{{ url_for("static", filename="js/components/repository_list.js") }}',
                     '{{ url_for("static", filename="js/components/task_progress.js") }}',
@@ -208,54 +280,54 @@
                     '{{ url_for("static", filename="js/components/system_status.js") }}'
                 ];
 
-                for (const scriptSrc of componentScripts) {
-                    const script = document.createElement('script');
-                    script.src = scriptSrc;
-                    document.head.appendChild(script);
+                // 顺序加载子组件脚本，确保所有组件在主脚本前加载
+                for (const scriptSrc of subComponentScripts) {
+                    try {
+                        await loadScript(scriptSrc);
+                    } catch (error) {
+                        console.warn('子组件脚本加载失败:', scriptSrc, error);
+                    }
                 }
 
-                // Load other scripts
-                const otherScripts = [
-                    '{{ url_for("static", filename="js/main.js") }}',
-                    '{{ url_for("static", filename="js/components.js") }}',
-                    '{{ url_for("static", filename="js/performance.js") }}',
-                    '{{ url_for("static", filename="js/browser-compatibility.js") }}',
-                    '{{ url_for("static", filename="js/logout.js") }}'
-                ];
-
-                for (const scriptSrc of otherScripts) {
-                    const script = document.createElement('script');
-                    script.src = scriptSrc;
-                    document.head.appendChild(script);
-                }
+                // 然后加载业务逻辑脚本
+                await Promise.allSettled(businessLogicScripts.map(scriptSrc => loadScript(scriptSrc)));
             } else {
-                console.log('用户未登录，跳过组件加载');
-                // Only load essential scripts for non-authenticated users
-                const essentialScripts = [
-                    '{{ url_for("static", filename="js/main.js") }}',
-                    '{{ url_for("static", filename="js/browser-compatibility.js") }}'
-                ];
-
-                for (const scriptSrc of essentialScripts) {
-                    const script = document.createElement('script');
-                    script.src = scriptSrc;
-                    document.head.appendChild(script);
-                }
+                console.log('用户未登录，仅加载基础功能');
             }
         } catch (error) {
-            console.error('认证检查失败:', error);
-            // Load minimal scripts on error
-            const minimalScripts = [
-                '{{ url_for("static", filename="js/main.js") }}'
-            ];
-
-            for (const scriptSrc of minimalScripts) {
-                const script = document.createElement('script');
-                script.src = scriptSrc;
-                document.head.appendChild(script);
-            }
+            console.error('脚本加载过程中发生错误:', error);
+            // 显示友好的错误消息
+            showFallbackError();
         }
     })();
+
+    // 脚本加载函数
+    function loadScript(src) {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = resolve;
+            script.onerror = () => {
+                console.warn('脚本加载失败:', src);
+                reject(new Error(`Failed to load script: ${src}`));
+            };
+            document.head.appendChild(script);
+        });
+    }
+
+    // 显示友好的错误消息
+    function showFallbackError() {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'alert alert-warning alert-dismissible fade show';
+        errorDiv.innerHTML = `
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            页面加载遇到问题，请刷新页面重试
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        const container = document.querySelector('main .container') || document.querySelector('main') || document.body;
+        container.insertAdjacentHTML('afterbegin', errorDiv.outerHTML);
+    }
     </script>
 
     {% block extra_js %}{% endblock %}
@@ -273,9 +345,10 @@
     <link rel="preload" href="{{ url_for('static', filename='css/style.css') }}" as="style">
     <link rel="preload" href="{{ url_for('static', filename='css/components.css') }}" as="style">
 
-    <!-- 性能优化 - 预加载关键JS -->
-    <link rel="preload" href="{{ url_for('static', filename='js/components.js') }}" as="script">
-    <link rel="preload" href="{{ url_for('static', filename='js/performance.js') }}" as="script">
+    <!-- 性能优化 - 预加载关键JS (Winston架构 - 核心框架文件) -->
+    <link rel="preload" href="{{ url_for('static', filename='js/core.js') }}" as="script">
+    <link rel="preload" href="{{ url_for('static', filename='js/ui-framework.js') }}" as="script">
+    <link rel="preload" href="{{ url_for('static', filename='js/main.js') }}" as="script">
 
     <!-- 性能优化 - 禁用不必要的功能 -->
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -288,5 +361,101 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="CoderWiki">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/icon-192x192.png') }}">
+
+    <!-- 导航系统紧急功能 -->
+    <script>
+    // 紧急导航快捷键
+    document.addEventListener('keydown', function(e) {
+        // 只有在按住Ctrl/Cmd时才触发
+        if (e.ctrlKey || e.metaKey) {
+            switch(e.key.toLowerCase()) {
+                case 'd': // Ctrl+D 仪表盘
+                    if (!e.shiftKey) { // 避免与书签冲突
+                        e.preventDefault();
+                        console.log('🔥 紧急快捷键: 跳转仪表盘');
+                        window.emergencyNavigate('/dashboard');
+                    }
+                    break;
+                case 'h': // Ctrl+H 首页
+                    e.preventDefault();
+                    console.log('🔥 紧急快捷键: 跳转首页');
+                    window.emergencyNavigate('/');
+                    break;
+                case 'k': // Ctrl+K 仓库管理
+                    e.preventDefault();
+                    console.log('🔥 紧急快捷键: 跳转仓库管理');
+                    window.emergencyNavigate('/repositories');
+                    break;
+                case 't': // Ctrl+T 任务管理
+                    if (!e.shiftKey) { // 避免与新标签冲突
+                        e.preventDefault();
+                        console.log('🔥 紧急快捷键: 跳转任务管理');
+                        window.emergencyNavigate('/tasks');
+                    }
+                    break;
+            }
+        }
+        
+        // 开发模式快捷键
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
+            switch(e.key.toLowerCase()) {
+                case 'd': // Ctrl+Shift+D 导航诊断
+                    e.preventDefault();
+                    if (window.getNavigationDiagnostics) {
+                        console.log('🔍 导航系统诊断:', window.getNavigationDiagnostics());
+                        alert('导航诊断信息已输出到控制台，请按F12查看');
+                    }
+                    break;
+                case 'r': // Ctrl+Shift+R 重置导航系统
+                    e.preventDefault();
+                    if (window.resetNavigation) {
+                        console.log('🔄 重置导航系统');
+                        window.resetNavigation();
+                        alert('导航系统已重置');
+                    }
+                    break;
+            }
+        }
+        
+        // Escape键清理阻塞元素
+        if (e.key === 'Escape') {
+            if (window.navigationManager) {
+                window.navigationManager.clearNavigationBlockers();
+            }
+        }
+    });
+    
+    // 页面加载完成后检查导航系统状态
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            if (window.getNavigationDiagnostics) {
+                const diagnostics = window.getNavigationDiagnostics();
+                console.log('📊 导航系统状态:', diagnostics);
+                
+                // 如果发现问题，在控制台提供解决建议
+                if (diagnostics.brokenLinks > 0 || diagnostics.blockingOverlays > 0) {
+                    console.warn('⚠️ 检测到导航问题！');
+                    console.log('💡 解决方案:');
+                    console.log('  1. 按 Escape 键清理阻塞元素');
+                    console.log('  2. 按 Ctrl+Shift+R 重置导航系统');
+                    console.log('  3. 使用紧急快捷键: Ctrl+D(仪表盘), Ctrl+H(首页), Ctrl+K(仓库)');
+                    console.log('  4. 如果问题持续，请刷新页面');
+                }
+            }
+        }, 2000);
+    });
+    
+    // 开发模式提示信息
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        console.log('🧭 导航系统快捷键帮助:');
+        console.log('  Ctrl+D: 仪表盘');
+        console.log('  Ctrl+H: 首页');
+        console.log('  Ctrl+K: 仓库管理');
+        console.log('  Ctrl+T: 任务管理');
+        console.log('  Ctrl+Shift+D: 导航诊断');
+        console.log('  Ctrl+Shift+R: 重置导航系统');
+        console.log('  Escape: 清理阻塞元素');
+    }
+    </script>
 </body>
 </html>

@@ -1,0 +1,24 @@
+问题: Python 中如何处理异常？
+
+回答:
+Python 中使用 `try-except` 语句处理异常：
+
+```python
+try:
+    # 可能出错的代码
+    result = 10 / 0
+except ZeroDivisionError:
+    # 处理特定异常
+    print("除零错误")
+except Exception as e:
+    # 处理其他异常
+    print(f"错误: {e}")
+else:
+    # 没有异常时执行
+    print("成功")
+finally:
+    # 总是执行
+    print("清理资源")
+```
+
+还可以主动抛出异常：`raise ValueError("错误信息")`

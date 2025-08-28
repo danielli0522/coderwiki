@@ -121,6 +121,10 @@ class ComplexityAnalyzer:
             '.rb': 'ruby'
         }
     
+    def analyze(self) -> Dict[str, Any]:
+        """Analyze method compatible with CodeAnalysisEngine interface."""
+        return self.analyze_complexity()
+    
     def analyze_complexity(self) -> Dict[str, Any]:
         """Analyze code complexity across the repository."""
         if not self.repository_path.exists():

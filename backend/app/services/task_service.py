@@ -3,6 +3,7 @@ Task service for managing background tasks.
 """
 
 from datetime import datetime
+from flask import current_app
 from app import db
 from app.models.task import Task
 
@@ -132,7 +133,39 @@ class TaskService:
         task.updated_at = datetime.utcnow()
         db.session.commit()
 
+        # Broadcast task update via WebSocket
+        self._broadcast_task_update(task)
+
         return task
+
+    def _broadcast_task_update(self, task):
+        """Broadcast task update via WebSocket."""
+        try:
+            if hasattr(current_app, 'broadcast_to_channel'):
+                # Broadcast to user-specific channel
+                user_channel = f'user:{task.user_id}'
+                current_app.broadcast_to_channel(user_channel, {
+                    'type': 'task_update',
+                    'task_id': task.id,
+                    'status': task.status,
+                    'progress': task.progress,
+                    'title': task.title,
+                    'updated_at': task.updated_at.isoformat() if task.updated_at else None,
+                    'error_message': task.error_message
+                })
+                
+                # Broadcast to general task updates channel
+                current_app.broadcast_to_channel('tasks:updates', {
+                    'type': 'task_update',
+                    'task_id': task.id,
+                    'user_id': task.user_id,
+                    'status': task.status,
+                    'progress': task.progress,
+                    'title': task.title
+                })
+        except Exception as e:
+            # Log error but don't fail the task update
+            current_app.logger.warning(f'Failed to broadcast task update: {e}')
 
     def start_task(self, task_id, user_id=None):
         """Start a task.

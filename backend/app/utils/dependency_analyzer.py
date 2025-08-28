@@ -48,6 +48,19 @@ class Dependency:
     def __post_init__(self):
         if self.vulnerabilities is None:
             self.vulnerabilities = []
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert dependency to dictionary for JSON serialization."""
+        return {
+            'name': self.name,
+            'version': self.version,
+            'type': self.type.value,  # Convert enum to string
+            'source_file': self.source_file,
+            'description': self.description,
+            'homepage': self.homepage,
+            'license': self.license,
+            'vulnerabilities': self.vulnerabilities
+        }
 
 
 @dataclass
@@ -88,6 +101,10 @@ class DependencyAnalyzer:
         
         self.vulnerability_db_url = "https://api.osv.dev/v1/query"
         self.outdated_check_url = "https://registry.npmjs.org"
+    
+    def analyze(self) -> Dict[str, Any]:
+        """Analyze method compatible with CodeAnalysisEngine interface."""
+        return self.analyze_dependencies()
     
     def analyze_dependencies(self, check_vulnerabilities: bool = True, check_outdated: bool = True) -> Dict[str, Any]:
         """Analyze all dependencies in the repository."""
@@ -151,11 +168,14 @@ class DependencyAnalyzer:
         if check_outdated:
             analysis['outdated_packages'] = self._check_outdated_packages(analysis['dependencies'])
         
-        # Calculate statistics
+        # Calculate statistics (before serialization)
         analysis['statistics'] = self._calculate_statistics(analysis)
         
-        # Generate recommendations
+        # Generate recommendations (before serialization)  
         analysis['recommendations'].extend(self._generate_recommendations(analysis))
+        
+        # Convert Dependency objects to dictionaries for JSON serialization
+        analysis['dependencies'] = [dep.to_dict() for dep in analysis['dependencies']]
         
         return analysis
     

@@ -60,8 +60,8 @@ def main():
 
         print("📦 导入应用模块...")
 
-        # 创建Flask应用
-        app = create_app(DevelopmentConfig)
+        # 创建Flask应用和SocketIO实例
+        app, socketio = create_app(DevelopmentConfig)
 
         # 获取配置
         port = int(os.environ.get('PORT', 5001))
@@ -73,12 +73,15 @@ def main():
         print(f"   - 主机: {host}")
         print(f"   - 调试模式: {debug}")
         print(f"   - 环境: {os.environ.get('FLASK_ENV', 'development')}")
+        print(f"   - WebSocket: {'已启用' if socketio else '未启用'}")
 
         # 显示访问地址
         print(f"\n🌐 服务地址:")
         print(f"   - 本地访问: http://localhost:{port}")
         print(f"   - 网络访问: http://10.11.75.81:{port}")
         print(f"   - 系统状态: http://{host}:{port}/system-status")
+        if socketio:
+            print(f"   - WebSocket: ws://{host}:{port}/socket.io/")
 
         print(f"\n🔑 默认用户:")
         print(f"   - admin (admin@coderwiki.com)")
@@ -88,13 +91,23 @@ def main():
         print(f"\n⏰ 启动时间: {time.strftime('%Y-%m-%d %H:%M:%S')}")
         print("=" * 50)
 
-        # 启动应用
-        app.run(
-            host=host,
-            port=port,
-            debug=debug,
-            use_reloader=False  # 避免重复启动
-        )
+        # 启动应用 (使用SocketIO如果可用)
+        if socketio:
+            print("🔌 启动WebSocket服务器...")
+            socketio.run(app,
+                        host=host,
+                        port=port,
+                        debug=debug,
+                        use_reloader=False,
+                        allow_unsafe_werkzeug=True)
+        else:
+            print("⚠️  启动标准Flask服务器 (WebSocket不可用)...")
+            app.run(
+                host=host,
+                port=port,
+                debug=debug,
+                use_reloader=False  # 避免重复启动
+            )
 
     except ImportError as e:
         print(f"❌ 导入错误: {e}")

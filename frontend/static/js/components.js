@@ -1,7 +1,9 @@
 // UI组件JavaScript功能 - 性能优化
+// Winston架构兼容性处理 - 避免重复定义
 
 // 性能优化 - 使用 requestAnimationFrame 和防抖
-const ComponentManager = {
+if (typeof window.ComponentManager === 'undefined') {
+window.ComponentManager = {
     // 性能优化 - 缓存DOM元素
     cache: {},
 
@@ -165,18 +167,31 @@ const ComponentManager = {
         });
     },
 
-    // 性能优化 - 初始化增强模态框
+    // 性能优化 - 初始化增强模态框 (使用Winston统一事件系统)
     initEnhancedModals: function() {
         const modals = document.querySelectorAll('.modal-enhanced');
 
         modals.forEach(modal => {
-            modal.addEventListener('show.bs.modal', () => {
-                this.addModalAnimation(modal);
-            });
-
-            modal.addEventListener('hidden.bs.modal', () => {
-                this.resetModalAnimation(modal);
-            });
+            if (!modal.id) {
+                console.warn('Enhanced modal missing ID, assigning one:', modal);
+                modal.id = 'enhanced-modal-' + Date.now();
+            }
+            
+            // Register with Winston modal dispatcher
+            if (window.modalDispatcher) {
+                window.modalDispatcher.register(modal.id, {
+                    onShow: () => this.addModalAnimation(modal),
+                    onHidden: () => this.resetModalAnimation(modal)
+                });
+            } else {
+                // Fallback for legacy compatibility
+                modal.addEventListener('show.bs.modal', () => {
+                    this.addModalAnimation(modal);
+                });
+                modal.addEventListener('hidden.bs.modal', () => {
+                    this.resetModalAnimation(modal);
+                });
+            }
         });
     },
 
@@ -475,6 +490,21 @@ const ComponentManager = {
 
     // 显示增强通知
     showEnhancedNotification: function(message, type = 'info') {
+        // 检查是否已经存在相同的通知
+        const existingAlerts = document.querySelectorAll('.alert-enhanced');
+        for (let alert of existingAlerts) {
+            if (alert.textContent.includes(message)) {
+                console.log('通知已存在，跳过重复显示:', message);
+                return;
+            }
+        }
+
+        // 限制同时显示的通知数量
+        if (existingAlerts.length >= 3) {
+            console.log('通知数量过多，移除最旧的通知');
+            existingAlerts[0].remove();
+        }
+
         const alertClass = `alert-enhanced alert-enhanced-${type}`;
         const notification = document.createElement('div');
         notification.className = alertClass;
@@ -488,11 +518,16 @@ const ComponentManager = {
 
         // 插入到页面顶部
         const container = document.querySelector('main .container') || document.querySelector('main');
-        container.insertAdjacentHTML('afterbegin', notification.outerHTML);
+        if (container) {
+            container.insertAdjacentHTML('afterbegin', notification.outerHTML);
+        } else {
+            // 如果没有找到容器，添加到body
+            document.body.insertAdjacentHTML('afterbegin', notification.outerHTML);
+        }
 
         // 自动关闭
         setTimeout(() => {
-            const alert = container.querySelector('.alert-enhanced');
+            const alert = document.querySelector('.alert-enhanced');
             if (alert) alert.remove();
         }, 5000);
     },
@@ -680,6 +715,8 @@ const ComponentManager = {
     }
 };
 
+} // End of ComponentManager if statement
+
 // 性能监控
 const ComponentPerformanceMonitor = {
     metrics: {},
@@ -788,30 +825,14 @@ const KeyboardNavigation = {
     },
 
     setupFocusManagement: function() {
-        // 为模态框设置焦点陷阱
-        document.addEventListener('shown.bs.modal', function(e) {
-            const modal = e.target;
-            const focusableElements = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-            const firstFocusableElement = focusableElements[0];
-            const lastFocusableElement = focusableElements[focusableElements.length - 1];
-
-            modal.addEventListener('keydown', function(e) {
-                if (e.key === 'Tab') {
-                    if (e.shiftKey) {
-                        if (document.activeElement === firstFocusableElement) {
-                            lastFocusableElement.focus();
-                            e.preventDefault();
-                        }
-                    } else {
-                        if (document.activeElement === lastFocusableElement) {
-                            firstFocusableElement.focus();
-                            e.preventDefault();
-                        }
-                    }
-                }
-            });
-
-            firstFocusableElement.focus();
+        // Winston Modal Dispatcher now handles all focus management
+        // This method kept for backward compatibility but delegates to Winston
+        console.log('📋 Focus management delegated to Winston Modal Event Dispatcher');
+        
+        // Optional: Register custom focus behaviors if needed
+        document.addEventListener('winston:modal:shown', (e) => {
+            // Custom focus logic can be added here if needed
+            console.log('Winston modal shown:', e.detail.modalId);
         });
     },
 
@@ -1143,7 +1164,9 @@ const AppInitializer = {
         KeyboardNavigation.init();
 
         // 初始化拖拽功能
-        DragDropManager.init();
+        if (typeof window.DragDropManager !== 'undefined' && window.DragDropManager.init) {
+            window.DragDropManager.init();
+        }
 
         // 初始化本地存储
         StorageManager.init();
@@ -1164,8 +1187,49 @@ const AppInitializer = {
     },
 
     setupGlobalErrorHandling: function() {
+        // 防止重复的错误处理
+        if (window.globalErrorHandlerInitialized) {
+            return;
+        }
+        window.globalErrorHandlerInitialized = true;
+
+        // 错误计数器，避免重复显示相同错误
+        let errorCount = 0;
+        let lastErrorTime = 0;
+        const ERROR_THROTTLE_TIME = 5000; // 5秒内只显示一次错误
+
         window.addEventListener('error', function(e) {
             console.error('全局错误:', e.error);
+
+            // 检查是否是网络相关错误（这些通常不需要显示给用户）
+            if (e.target && (e.target.tagName === 'IMG' || e.target.tagName === 'SCRIPT' || e.target.tagName === 'LINK')) {
+                console.warn('资源加载失败:', e.target.src || e.target.href);
+                return;
+            }
+
+            // 检查是否是已知的良性错误
+            if (e.message && (
+                e.message.includes('Script error') ||
+                e.message.includes('ResizeObserver') ||
+                e.message.includes('requestAnimationFrame') ||
+                e.message.includes('IntersectionObserver')
+            )) {
+                console.warn('忽略良性错误:', e.message);
+                return;
+            }
+
+            // 节流错误显示
+            const now = Date.now();
+            if (now - lastErrorTime < ERROR_THROTTLE_TIME) {
+                errorCount++;
+                if (errorCount > 3) {
+                    console.warn('错误频率过高，暂停显示错误消息');
+                    return;
+                }
+            } else {
+                errorCount = 1;
+                lastErrorTime = now;
+            }
 
             // 显示用户友好的错误消息
             ComponentManager.showEnhancedNotification(
@@ -1179,6 +1243,24 @@ const AppInitializer = {
 
         window.addEventListener('unhandledrejection', function(e) {
             console.error('未处理的Promise拒绝:', e.reason);
+
+            // 检查是否是网络请求失败
+            if (e.reason && e.reason.name === 'TypeError' && e.reason.message.includes('fetch')) {
+                console.warn('网络请求失败，可能是离线状态');
+                return;
+            }
+
+            // 节流错误显示
+            const now = Date.now();
+            if (now - lastErrorTime < ERROR_THROTTLE_TIME) {
+                errorCount++;
+                if (errorCount > 3) {
+                    return;
+                }
+            } else {
+                errorCount = 1;
+                lastErrorTime = now;
+            }
 
             ComponentManager.showEnhancedNotification(
                 '网络请求失败，请检查网络连接',
@@ -1235,13 +1317,10 @@ const AppInitializer = {
     }
 };
 
-// 页面加载完成后初始化应用
-document.addEventListener('DOMContentLoaded', function() {
-    AppInitializer.init();
-});
-
-// 导出到全局
-window.ComponentManager = ComponentManager;
+// 导出到全局 - Winston架构兼容
+if (typeof window.ComponentManager === 'undefined') {
+    window.ComponentManager = ComponentManager;
+}
 // Only set PerformanceMonitor if it doesn't already exist
 if (!window.PerformanceMonitor) {
     window.PerformanceMonitor = ComponentPerformanceMonitor;
@@ -1250,3 +1329,8 @@ window.KeyboardNavigation = KeyboardNavigation;
 window.DragDropManager = DragDropManager;
 window.StorageManager = StorageManager;
 window.AppInitializer = AppInitializer;
+
+// 页面加载完成后初始化应用
+document.addEventListener('DOMContentLoaded', function() {
+    AppInitializer.init();
+});

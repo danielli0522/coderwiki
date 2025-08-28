@@ -86,17 +86,42 @@ def add_repository():
         )
 
         if result['success']:
-            # Get the created repository
-            repository = repo_service.get_repository_by_id(result['repository_id'], current_user.id)
-            return jsonify({
-                'success': True,
-                'repository': repository.to_dict(),
-                'message': result['message']
-            }), 201
+            try:
+                # Get the created repository
+                logger.info(f"Getting repository by ID: {result['repository_id']} for user {current_user.id}")
+                repository = repo_service.get_repository_by_id(result['repository_id'], current_user.id)
+                
+                if not repository:
+                    logger.error(f"Repository {result['repository_id']} not found after creation")
+                    return jsonify({'error': '创建的仓库未找到'}), 500
+                    
+                logger.info(f"Converting repository to dict: {repository.name}")
+                repo_dict = repository.to_dict()
+                
+                return jsonify({
+                    'success': True,
+                    'repository': repo_dict,
+                    'message': result['message']
+                }), 201
+            
+            except Exception as e:
+                logger.error(f"Error getting created repository: {e}")
+                # 返回基本信息，即使to_dict()失败
+                return jsonify({
+                    'success': True,
+                    'repository': {
+                        'id': result['repository_id'],
+                        'name': result.get('name', name),
+                        'url': url,
+                        'status': 'cloning'
+                    },
+                    'message': result['message']
+                }), 201
         else:
             return jsonify({'error': result['error']}), 400
 
     except Exception as e:
+        logger.error(f"Add repository failed: {e}")
         return jsonify({'error': '服务器内部错误'}), 500
 
 @repository_bp.route('/<int:repository_id>', methods=['GET'])

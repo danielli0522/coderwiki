@@ -103,6 +103,10 @@ class ProjectPatternRecognizer:
             }
         }
     
+    def analyze_patterns(self) -> Dict[str, Any]:
+        """Analyze method compatible with CodeAnalysisEngine interface."""
+        return self.recognize_patterns()
+    
     def recognize_patterns(self) -> Dict[str, Any]:
         """Recognize architecture patterns in the project."""
         if not self.repository_path.exists():

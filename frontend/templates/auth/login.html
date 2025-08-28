@@ -82,8 +82,8 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- Login Modal Fix -->
-<script src="{{ url_for('static', filename='js/login-modal-fix.js') }}"></script>
+<!-- Login Modal Fix - 已整合到 auth-unified.js -->
+<!-- <script src="{{ url_for('static', filename='js/login-modal-fix.js') }}"></script> -->
 <script>
 // Login form handling
 document.getElementById('loginForm').addEventListener('submit', async function(e) {

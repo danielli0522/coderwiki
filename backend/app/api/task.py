@@ -5,6 +5,7 @@ Task API endpoints.
 from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
 from app.services.task_service import TaskService
+from app.models.task import Task
 
 task_bp = Blueprint('task', __name__, url_prefix='/api/tasks')
 
@@ -373,6 +374,35 @@ def retry_task(task_id):
         return jsonify({
             'success': True,
             'message': '任务已重试'
+        })
+
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        return jsonify({'error': '服务器内部错误'}), 500
+
+@task_bp.route('/<int:task_id>/cancel', methods=['POST'])
+@login_required
+def cancel_task(task_id):
+    """Cancel a running task."""
+    try:
+        task_service = TaskService()
+        task = task_service.get_task_by_id(task_id, current_user.id)
+
+        if not task:
+            return jsonify({'error': '任务不存在或您没有权限'}), 404
+
+        # Check if task can be cancelled
+        if task.status not in ['pending', 'running']:
+            return jsonify({'error': f'任务状态为 {task.status}，无法取消'}), 400
+
+        # Update task status to cancelled
+        task_service.update_task_status(task_id, 'cancelled', progress=task.progress)
+
+        return jsonify({
+            'success': True,
+            'message': '任务已取消',
+            'task': task.to_dict()
         })
 
     except ValueError as e:

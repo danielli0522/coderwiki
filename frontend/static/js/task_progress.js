@@ -408,7 +408,7 @@ class TaskProgressMonitor {
 
     async loadSystemPerformance() {
         try {
-            const response = await this.apiClient.get('/api/system/performance');
+            const response = await this.apiClient.get('/system/performance');
             if (response.success) {
                 this.updateSystemPerformance(response.performance);
             }

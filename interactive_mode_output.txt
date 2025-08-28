@@ -1,0 +1,25 @@
+Return Code: 0
+STDOUT:
+我来帮助你了解可用的命令：
+
+## 可用命令
+
+- **/help** - 获取Claude Code使用帮助
+- **/status** - 查看当前git状态和工作目录
+- **/exit** - 退出当前会话
+
+## 获取帮助
+
+如需更多帮助或反馈问题，请访问：https://github.com/anthropics/claude-code/issues
+
+## 当前状态
+
+工作目录：`/Users/lshl124/Documents/daniel/git/code/aigc/coderwiki`
+当前分支：`feature/stable-baseline`
+Git状态：有多个已修改和未跟踪的文件
+
+需要我帮你做什么吗？
+
+STDERR:
+Path /private/tmp/test_clone was not found.
+

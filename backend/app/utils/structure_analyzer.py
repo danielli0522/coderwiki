@@ -142,6 +142,10 @@ class StructureAnalyzer:
             }
         }
     
+    def analyze(self) -> Dict[str, Any]:
+        """Analyze method compatible with CodeAnalysisEngine interface."""
+        return self.analyze_structure()
+    
     def analyze_structure(self) -> Dict[str, Any]:
         """Analyze the complete file structure."""
         if not self.repository_path.exists():

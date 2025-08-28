@@ -15,17 +15,22 @@ logger = logging.getLogger(__name__)
 class ClaudeCodeClient:
     """Claude Code SDK 客户端"""
 
-    def __init__(self, api_key: str, workspace_id: str):
+    def __init__(self, api_key: str, workspace_id: Optional[str] = None):
         """
         初始化 Claude Code 客户端
 
         Args:
             api_key: Anthropic API 密钥
-            workspace_id: Claude Code 工作空间 ID
+            workspace_id: Claude Code 工作空间 ID（可选）
         """
+        if not api_key:
+            raise ValueError("API Key is required for Claude Code client")
+
         self.client = Anthropic(api_key=api_key)
         self.workspace_id = workspace_id
         self.session = None
+
+        logger.info(f"Initialized Claude Code client with API key: {api_key[:20]}...")
 
     def create_session(self) -> Dict[str, Any]:
         """

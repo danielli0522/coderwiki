@@ -17,7 +17,7 @@ from app import create_app
 from config import Config
 
 # 创建Flask应用
-app = create_app(Config)
+app, socketio = create_app(Config)
 
 if __name__ == '__main__':
     # 开发环境运行 - 使用端口5001避免与AirPlay冲突
@@ -28,4 +28,7 @@ if __name__ == '__main__':
     print(f"Debug mode: {debug}")
     print(f"Environment: {os.environ.get('FLASK_ENV', 'development')}")
 
-    app.run(host='0.0.0.0', port=port, debug=debug)
+    if socketio:
+        socketio.run(app, host='0.0.0.0', port=port, debug=debug, allow_unsafe_werkzeug=True)
+    else:
+        app.run(host='0.0.0.0', port=port, debug=debug)

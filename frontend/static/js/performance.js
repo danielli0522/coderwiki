@@ -1,7 +1,9 @@
 // 性能优化脚本
+// Winston架构兼容性处理 - 避免与performance-unified.js冲突
 
-// 性能监控
-const PerformanceMonitor = {
+// 性能监控 - 只在未定义时创建
+if (typeof window.PerformanceMonitor === 'undefined') {
+window.PerformanceMonitor = {
     // 页面加载性能指标
     metrics: {
         navigationTiming: {},
@@ -78,36 +80,42 @@ const PerformanceMonitor = {
 
     // 保存性能指标
     saveMetrics: function() {
-        localStorage.setItem('performanceMetrics', JSON.stringify(this.metrics));
+        try {
+            localStorage.setItem('performanceMetrics', JSON.stringify(this.metrics));
 
-        // 如果有后端API，发送性能数据
-        if (typeof fetch !== 'undefined') {
-            // 检查用户是否已登录
-            fetch('/api/auth/status', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                redirect: 'manual'
-            }).then(response => {
-                if (response.ok) {
-                    return response.json();
-                }
-                return { logged_in: false };
-            }).then(data => {
-                if (data.logged_in) {
-                    // 只有登录用户才发送性能数据
-                    return fetch('/api/system/performance', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(this.metrics)
-                    });
-                }
-            }).catch(() => {
-                // 静默失败
-            });
+            // 如果有后端API，发送性能数据
+            if (typeof fetch !== 'undefined') {
+                // 检查用户是否已登录
+                fetch('/api/auth/status', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    redirect: 'manual'
+                }).then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                    return { logged_in: false };
+                }).then(data => {
+                    if (data.logged_in) {
+                        // 只有登录用户才发送性能数据
+                        return fetch('/api/system/performance', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(this.metrics)
+                        });
+                    }
+                }).catch((error) => {
+                    // 静默失败，不显示错误消息
+                    console.debug('性能数据发送失败:', error);
+                });
+            }
+        } catch (error) {
+            // 静默处理错误，避免影响用户体验
+            console.debug('性能指标保存失败:', error);
         }
     }
 };
@@ -168,6 +176,7 @@ const LazyLoadManager = {
         console.log('Loading component:', componentName);
     }
 };
+} // 结束 PerformanceMonitor 定义
 
 // 资源预加载器
 const ResourcePreloader = {
@@ -175,16 +184,12 @@ const ResourcePreloader = {
     preloadCriticalResources: function() {
         const criticalResources = [
             '/static/css/style.css',
-            '/static/css/components.css',
-            '/static/js/components.js',
-            '/static/js/performance.js'
+            '/static/css/components.css'
         ];
 
         criticalResources.forEach(resource => {
             if (resource.endsWith('.css')) {
                 this.preloadCSS(resource);
-            } else if (resource.endsWith('.js')) {
-                this.preloadJS(resource);
             }
         });
     },
@@ -198,15 +203,6 @@ const ResourcePreloader = {
         link.onload = function() {
             this.rel = 'stylesheet';
         };
-        document.head.appendChild(link);
-    },
-
-    // 预加载JS
-    preloadJS: function(src) {
-        const link = document.createElement('link');
-        link.rel = 'preload';
-        link.as = 'script';
-        link.href = src;
         document.head.appendChild(link);
     },
 
@@ -282,7 +278,8 @@ const OfflineCacheManager = {
                     console.log('ServiceWorker registration successful');
                 })
                 .catch(error => {
-                    console.log('ServiceWorker registration failed:', error);
+                    // 静默处理Service Worker注册失败
+                    console.debug('ServiceWorker registration failed:', error);
                 });
         }
     },
@@ -334,8 +331,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 30000); // 每30秒检查一次
 });
 
-// 导出模块
-window.PerformanceMonitor = PerformanceMonitor;
+// 导出模块 - 只在未定义时设置
+if (!window.PerformanceMonitor) {
+    window.PerformanceMonitor = PerformanceMonitor;
+}
 window.LazyLoadManager = LazyLoadManager;
 window.ResourcePreloader = ResourcePreloader;
 window.MemoryManager = MemoryManager;

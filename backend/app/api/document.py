@@ -7,6 +7,8 @@ from flask_login import login_required, current_user
 from app.services.doc_service import DocumentService
 from app.services.document_generator import DocumentGenerator
 from app.utils.logger import get_logger
+from app import db
+from sqlalchemy import and_
 import io
 
 document_bp = Blueprint('document', __name__, url_prefix='/api/documents')
@@ -25,7 +27,7 @@ def get_documents():
         search = request.args.get('search', '')
         status = request.args.get('status', '')
 
-        documents, stats = doc_service.get_documents(
+        documents, stats, pagination = doc_service.get_documents(
             current_user.id, page, limit, search, status
         )
 
@@ -33,16 +35,59 @@ def get_documents():
             'success': True,
             'documents': documents,
             'stats': stats,
-            'pagination': {
-                'page': page,
-                'limit': limit,
-                'total': stats.get('total', 0)
-            }
+            'pagination': pagination
         })
 
     except Exception as e:
         logger.error(f"获取文档列表失败: {e}")
         return jsonify({'error': '获取文档列表失败'}), 500
+
+
+@document_bp.route('/recent', methods=['GET'])
+@login_required
+def get_recent_documents():
+    """获取最近创建的文档"""
+    try:
+        limit = int(request.args.get('limit', 5))
+        limit = min(max(1, limit), 20)  # Limit between 1 and 20
+
+        from app.models.document import Document
+        from datetime import datetime, timedelta
+
+        # Get documents from the last 30 days, ordered by creation date
+        thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+        
+        recent_documents = Document.query.filter(
+            Document.user_id == current_user.id,
+            Document.created_at >= thirty_days_ago
+        ).order_by(Document.created_at.desc()).limit(limit).all()
+
+        documents_data = []
+        for doc in recent_documents:
+            doc_dict = doc.to_dict()
+            # Add repository information if available
+            if doc.repository:
+                doc_dict['repository'] = {
+                    'id': doc.repository.id,
+                    'name': doc.repository.name,
+                    'url': doc.repository.url
+                }
+            documents_data.append(doc_dict)
+
+        return jsonify({
+            'success': True,
+            'documents': documents_data,
+            'total': len(documents_data),
+            'limit': limit
+        })
+
+    except Exception as e:
+        logger.error(f"获取最近文档失败: {e}")
+        return jsonify({
+            'success': False,
+            'error': '获取最近文档失败',
+            'documents': []
+        }), 500
 
 
 @document_bp.route('/', methods=['POST'])
@@ -77,6 +122,65 @@ def create_document():
         return jsonify({'error': str(e)}), 400
     except Exception as e:
         logger.error(f"创建文档失败: {e}")
+        return jsonify({'error': '创建文档失败'}), 500
+
+
+@document_bp.route('/simple', methods=['POST'])
+@login_required
+def create_simple_document():
+    """创建简单文档（不需要仓库）"""
+    try:
+        data = request.get_json()
+
+        if not data:
+            return jsonify({'error': '请求数据不能为空'}), 400
+
+        required_fields = ['title', 'content']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({'error': f'缺少必需字段: {field}'}), 400
+
+        # 创建一个默认仓库或使用系统仓库
+        from app.models.repository import Repository
+
+        # 查找或创建用户的默认文档仓库
+        default_repo = Repository.query.filter(
+            and_(
+                Repository.user_id == current_user.id,
+                Repository.name == '个人文档'
+            )
+        ).first()
+
+        if not default_repo:
+            default_repo = Repository(
+                name='个人文档',
+                description='个人创建的文档集合',
+                user_id=current_user.id,
+                is_public=False
+            )
+            db.session.add(default_repo)
+            db.session.commit()
+
+        document = doc_service.create_document(
+            user_id=current_user.id,
+            title=data['title'],
+            repository_id=default_repo.id,
+            document_type=data.get('document_type', 'manual'),
+            description=data.get('description', ''),
+            content=data['content']
+        )
+
+        return jsonify({
+            'success': True,
+            'id': document['id'],
+            'title': document['title'],
+            'created_at': document['created_at']
+        }), 201
+
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        logger.error(f"创建简单文档失败: {e}")
         return jsonify({'error': '创建文档失败'}), 500
 
 

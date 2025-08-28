@@ -368,52 +368,40 @@ class RepositoryManager {
         addBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 添加中...';
 
         try {
-            // 临时禁用API调用
-            // const response = await fetch('/api/repositories', {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json'
-            //     },
-            //     body: JSON.stringify({
-            //         url: url,
-            //         name: name || undefined,
-            //         description: description || undefined
-            //     })
-            // });
+            const response = await fetch('/api/repositories', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    url: url,
+                    name: name || undefined,
+                    description: description || undefined
+                })
+            });
 
-            // const data = await response.json();
+            const data = await response.json();
 
-            // if (data.success) {
-            //     // 关闭模态框
-            //     const modal = bootstrap.Modal.getInstance(document.getElementById('addRepositoryModal'));
-            //     modal.hide();
+            if (data.success) {
+                // 关闭模态框 - 使用安全的关闭方法
+                this.closeAddRepositoryModal();
 
-            //     // 重置表单
-            //     document.getElementById('addRepositoryForm').reset();
-            //     document.getElementById('validationResult').innerHTML = '';
+                // 重置表单
+                document.getElementById('addRepositoryForm').reset();
+                document.getElementById('validationResult').innerHTML = '';
 
-            //     // 重新加载仓库列表和统计数据
-            //     this.loadRepositories();
-            //     this.loadStatistics();
+                // 重新加载仓库列表和统计数据
+                this.loadRepositories();
+                this.loadStatistics();
 
-            //     this.showSuccess('仓库添加成功，正在克隆中...');
+                this.showSuccess('仓库添加成功，正在克隆中...');
 
-            //     // 开始轮询克隆状态
-            //     this.pollCloneStatus(data.repository.id);
+                // 开始轮询克隆状态
+                this.pollCloneStatus(data.repository.id);
 
-            // } else {
-            //     this.showUrlError(data.error);
-            // }
-
-            // 临时模拟成功
-            // 关闭模态框 - 使用安全的关闭方法
-            this.closeAddRepositoryModal();
-
-            // 重置表单
-            document.getElementById('addRepositoryForm').reset();
-            document.getElementById('validationResult').innerHTML = '';
-
-            this.showSuccess('仓库添加功能已禁用（开发模式）');
+            } else {
+                this.showUrlError(data.error);
+            }
 
         } catch (error) {
             console.error('Error adding repository:', error);
@@ -540,6 +528,7 @@ class RepositoryManager {
 
             } catch (error) {
                 console.error('Error polling clone status:', error);
+                this.handleApiError(error, '检查克隆状态失败');
             }
         };
 

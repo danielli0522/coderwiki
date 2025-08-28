@@ -15,7 +15,7 @@ from config import DevelopmentConfig
 
 def init_database():
     """Initialize database tables"""
-    app = create_app(DevelopmentConfig)
+    app, _ = create_app(DevelopmentConfig)
 
     with app.app_context():
         # 创建所有表

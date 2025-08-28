@@ -153,7 +153,7 @@ const CoderWiki = {
             }
             
             // 构建完整URL
-            const fullUrl = this.config.apiBaseUrl + url;
+            const fullUrl = CoderWiki.config.apiBaseUrl + url;
             
             return fetch(fullUrl, options)
                 .then(response => {
@@ -358,7 +358,7 @@ const CoderWiki = {
                 }
             };
             
-            xhr.open('POST', this.config.apiBaseUrl + '/upload', true);
+            xhr.open('POST', CoderWiki.config.apiBaseUrl + '/upload', true);
             xhr.send(formData);
         },
         

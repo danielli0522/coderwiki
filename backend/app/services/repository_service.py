@@ -14,6 +14,8 @@ from app.models.task import Task
 from app.utils.git_service import GitService
 from app.utils.repo_analyzer import RepositoryAnalyzer
 from app.utils.file_utils import FileUtils
+from app.services.directory_service import DirectoryService
+from app.utils.db_context import db_transaction, safe_db_commit
 import logging
 
 logger = logging.getLogger(__name__)
@@ -24,14 +26,11 @@ class RepositoryService:
 
     def __init__(self):
         """Initialize repository service."""
-        # 从配置中获取Git仓库路径
-        try:
-            from flask import current_app
-            git_repos_path = current_app.config.get('GIT_REPOS_PATH', '/tmp/coderwiki_repos')
-        except:
-            # 如果无法获取Flask配置，使用默认路径
-            git_repos_path = '/tmp/coderwiki_repos'
-
+        # Use the centralized directory service
+        self.directory_service = DirectoryService()
+        
+        # Initialize Git service with the unified repos directory
+        git_repos_path = str(self.directory_service.repos_dir)
         self.git_service = GitService(base_repo_path=git_repos_path)
         self.repo_analyzer = RepositoryAnalyzer()
 
@@ -61,24 +60,51 @@ class RepositoryService:
                     'error': 'Repository already exists for this user'
                 }
 
-            # Create new repository
-            repository = Repository(
-                user_id=user_id,
-                name=name,
-                url=url,
-                description=description,
-                status='active',
-                clone_status='pending'
-            )
+            # Create new repository with database transaction
+            with db_transaction():
+                repository = Repository(
+                    user_id=user_id,
+                    name=name,
+                    url=url,
+                    description=description,
+                    status='active',
+                    clone_status='pending'
+                )
 
-            db.session.add(repository)
-            db.session.commit()
+                db.session.add(repository)
+                db.session.flush()  # Get the ID without committing
+                repo_id = repository.id  # Store ID while in session
 
-            logger.info(f"Created repository {repository.id} for user {user_id}")
+            # Create all required directories using the unified directory service
+            try:
+                directory_paths = self.directory_service.create_repository_directories(name, repo_id)
+                logger.info(f"Created unified directories for repository {repo_id}: {directory_paths}")
+            except Exception as dir_error:
+                logger.error(f"Failed to create directories for repository {repo_id}: {str(dir_error)}")
+                # Don't fail the repository creation, but log the error
+
+            logger.info(f"Created repository {repo_id} for user {user_id}")
+
+            # Re-fetch repository for further operations
+            repository = Repository.query.get(repo_id)
+            
+            # Start the cloning process
+            try:
+                self._start_cloning_process(repository)
+                logger.info(f"Cloning process started for repository {repo_id}")
+            except Exception as clone_error:
+                logger.error(f"Failed to start cloning process for repository {repo_id}: {str(clone_error)}")
+                try:
+                    with db_transaction():
+                        repo = Repository.query.get(repo_id)
+                        repo.update_clone_status('failed', str(clone_error))
+                        repo.status = 'error'
+                except Exception as update_error:
+                    logger.error(f"Failed to update repository status after clone error: {update_error}")
 
             return {
                 'success': True,
-                'repository_id': repository.id,
+                'repository_id': repo_id,
                 'message': 'Repository created successfully'
             }
 
@@ -91,18 +117,21 @@ class RepositoryService:
             }
 
     def _start_cloning_process(self, repository: Repository) -> None:
-        """Start the repository cloning process."""
+        """Start the repository cloning process using unified directory structure."""
         try:
             # Update status to cloning
             repository.update_clone_status('cloning')
             db.session.commit()
 
-            # Start cloning process
-            clone_result = self.git_service.clone_repository(repository.url)
+            # Get the unified clone path
+            clone_path = self.directory_service.get_repository_clone_path(repository.name, repository.id)
+
+            # Start cloning process with specific path
+            clone_result = self.git_service.clone_repository(repository.url, str(clone_path))
 
             if clone_result['success']:
-                # Update repository with clone information
-                repository.local_path = clone_result['local_path']
+                # Update repository with clone information using unified path
+                repository.local_path = str(clone_path)
                 repository.branch = clone_result.get('branch', 'main')
                 repository.update_repository_info(
                     clone_result['commit_hash'],
@@ -113,7 +142,7 @@ class RepositoryService:
                 repository.update_clone_status('completed')
                 repository.status = 'active'
 
-                logger.info(f"Repository {repository.id} cloned successfully")
+                logger.info(f"Repository {repository.id} cloned successfully to {clone_path}")
             else:
                 # Update with error information
                 repository.update_clone_status('failed', clone_result['error'])
@@ -287,14 +316,15 @@ class RepositoryService:
                     'local_path': repository.local_path
                 }
 
-                # Step 1: Delete local repository files
-                file_cleanup_result = None
-                if repository.local_path:
-                    logger.info(f"Cleaning up local files for repository {repository_id}: {repository.local_path}")
-                    file_cleanup_result = FileUtils.delete_directory(repository.local_path)
-                    if not file_cleanup_result['success']:
-                        logger.warning(f"File cleanup failed for repository {repository_id}: {file_cleanup_result['error']}")
-                        # Continue with database deletion even if file cleanup fails
+                # Step 1: Delete all repository directories using unified cleanup
+                logger.info(f"Cleaning up unified directories for repository {repository_id}: {repository.name}")
+                file_cleanup_result = self.directory_service.cleanup_repository_directories(
+                    repository.name, repository.id
+                )
+                
+                if not file_cleanup_result['success']:
+                    logger.warning(f"Unified directory cleanup had issues for repository {repository_id}")
+                    # Continue with database deletion even if file cleanup fails
 
                 # Step 2: Delete database record (cascade delete will handle documents and tasks)
                 logger.info(f"Deleting database record for repository {repository_id}")

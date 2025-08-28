@@ -170,7 +170,11 @@ class RepositoryService:
             user_id=user_id,
             repository_id=repository_id,
             type='sync_repository',
-            status='pending'
+            status='pending',
+            priority='normal',
+            title=f"同步仓库: {repository_id}",
+            description="同步仓库到本地存储",
+            task_type='sync_repository'
         )
 
         db.session.add(task)
@@ -264,7 +268,11 @@ class RepositoryService:
             user_id=user_id,
             repository_id=repository_id,
             type='analyze_code',
-            status='pending'
+            status='pending',
+            priority='normal',
+            title=f"分析仓库: {repository_id}",
+            description="分析仓库结构和内容",
+            task_type='analyze_code'
         )
 
         db.session.add(task)

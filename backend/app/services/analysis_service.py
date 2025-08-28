@@ -60,6 +60,11 @@ class AnalysisService:
             
             repository_path = repository.local_path
             
+            # Validate repository path exists
+            import os
+            if not repository_path or not os.path.exists(repository_path):
+                raise ValueError(f"Repository path does not exist: {repository_path}")
+            
             # Start analysis in background
             analysis_ids = [record.id for record in analysis_records]
             self._run_analysis_async(
