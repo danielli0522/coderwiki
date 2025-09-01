@@ -2,7 +2,7 @@
 Task API endpoints.
 """
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from flask_login import login_required, current_user
 from app.services.task_service import TaskService
 from app.models.task import Task
@@ -90,7 +90,8 @@ def get_tasks():
         })
 
     except Exception as e:
-        return jsonify({'error': '服务器内部错误'}), 500
+        current_app.logger.error(f"Error in get_tasks: {str(e)}", exc_info=True)
+        return jsonify({'error': f'服务器内部错误: {str(e)}'}), 500
 
 @task_bp.route('/<int:task_id>', methods=['GET'])
 @login_required

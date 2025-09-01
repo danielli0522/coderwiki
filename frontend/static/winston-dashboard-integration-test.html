@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Winston Dashboard Modal Integration Test</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        .test-section { 
+            border-left: 4px solid #007bff; 
+            padding-left: 1rem; 
+            margin: 1rem 0; 
+        }
+        .test-passed { border-left-color: #28a745; }
+        .test-failed { border-left-color: #dc3545; }
+        .test-warning { border-left-color: #ffc107; }
+        .test-log {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        .test-controls {
+            position: sticky;
+            top: 0;
+            background: white;
+            border-bottom: 1px solid #dee2e6;
+            padding: 1rem;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="test-controls">
+            <h1 class="h3 mb-3">
+                <i class="fas fa-flask text-primary me-2"></i>
+                Winston Dashboard Modal Integration Test
+            </h1>
+            <div class="btn-group" role="group">
+                <button class="btn btn-primary" onclick="runAllTests()">
+                    <i class="fas fa-play me-2"></i>Run All Tests
+                </button>
+                <button class="btn btn-success" onclick="testAddRepositoryModal()">
+                    <i class="fas fa-plus me-2"></i>Test Add Repository
+                </button>
+                <button class="btn btn-info" onclick="testGenerateDocumentModal()">
+                    <i class="fas fa-magic me-2"></i>Test Generate Document
+                </button>
+                <button class="btn btn-warning" onclick="testErrorRecovery()">
+                    <i class="fas fa-shield-alt me-2"></i>Test Error Recovery
+                </button>
+                <button class="btn btn-secondary" onclick="clearLogs()">
+                    <i class="fas fa-trash me-2"></i>Clear Logs
+                </button>
+                <button class="btn btn-danger" onclick="emergencyCleanup()">
+                    <i class="fas fa-broom me-2"></i>Emergency Cleanup
+                </button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div id="testResults">
+                    <!-- Test results will be populated here -->
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-list-check text-info me-2"></i>
+                            Test Log
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="testLog" class="test-log"></div>
+                    </div>
+                </div>
+                
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-cog text-secondary me-2"></i>
+                            System Status
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="systemStatus">
+                            <!-- System status will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Winston Framework Components -->
+    <script src="js/core.js"></script>
+    <script src="js/winston-error-recovery.js"></script>
+    <script src="js/winston-modal-templates.js"></script>
+
+    <script>
+        // Test Framework
+        class WinstonDashboardTest {
+            constructor() {
+                this.testResults = [];
+                this.testLog = document.getElementById('testLog');
+                this.testResults = document.getElementById('testResults');
+                this.systemStatus = document.getElementById('systemStatus');
+                
+                this.initializeTest();
+            }
+
+            initializeTest() {
+                this.log('🏗️ Initializing Winston Dashboard Test Suite');
+                this.updateSystemStatus();
+                
+                // Wait for Winston components to load
+                setTimeout(() => {
+                    this.checkWinstonComponents();
+                }, 1000);
+            }
+
+            log(message, type = 'info') {
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = document.createElement('div');
+                logEntry.className = `text-${type === 'error' ? 'danger' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'muted'}`;
+                logEntry.innerHTML = `[${timestamp}] ${message}`;
+                this.testLog.appendChild(logEntry);
+                this.testLog.scrollTop = this.testLog.scrollHeight;
+                
+                console.log(`[Winston Test] ${message}`);
+            }
+
+            updateSystemStatus() {
+                const status = {
+                    'Winston Core': typeof window.coreSystem !== 'undefined',
+                    'Modal Dispatcher': typeof window.modalDispatcher !== 'undefined',
+                    'Modal Templates': typeof window.winstonModalTemplates !== 'undefined',
+                    'Error Recovery': typeof window.winstonErrorRecovery !== 'undefined',
+                    'Bootstrap': typeof window.bootstrap !== 'undefined'
+                };
+
+                const statusHtml = Object.entries(status).map(([name, available]) => {
+                    const icon = available ? 'fas fa-check-circle text-success' : 'fas fa-times-circle text-danger';
+                    const statusText = available ? 'Available' : 'Missing';
+                    return `
+                        <div class="d-flex justify-content-between align-items-center py-1">
+                            <span>${name}</span>
+                            <span><i class="${icon}"></i> ${statusText}</span>
+                        </div>
+                    `;
+                }).join('');
+
+                this.systemStatus.innerHTML = statusHtml;
+            }
+
+            checkWinstonComponents() {
+                this.log('🔍 Checking Winston Framework components...');
+                
+                const components = {
+                    'Winston Core System': window.coreSystem,
+                    'Modal Event Dispatcher': window.modalDispatcher,
+                    'Modal Template System': window.winstonModalTemplates,
+                    'Error Recovery System': window.winstonErrorRecovery
+                };
+
+                let allAvailable = true;
+                Object.entries(components).forEach(([name, component]) => {
+                    if (component) {
+                        this.log(`✅ ${name} available`, 'success');
+                    } else {
+                        this.log(`❌ ${name} missing`, 'error');
+                        allAvailable = false;
+                    }
+                });
+
+                if (allAvailable) {
+                    this.log('🎉 All Winston components loaded successfully!', 'success');
+                } else {
+                    this.log('⚠️ Some Winston components are missing', 'warning');
+                }
+            }
+
+            // Test Add Repository Modal
+            async testAddRepositoryModal() {
+                this.log('🧪 Testing Add Repository Modal...');
+                
+                try {
+                    if (!window.winstonModalTemplates) {
+                        throw new Error('Winston Modal Templates not available');
+                    }
+
+                    const modal = window.winstonModalTemplates.showModal('addRepository', {
+                        onSave: (modalElement) => {
+                            this.log('📝 Repository save callback triggered', 'success');
+                        }
+                    });
+
+                    if (modal) {
+                        this.log('✅ Add Repository modal created successfully', 'success');
+                        this.addTestResult('Add Repository Modal', 'Passed', 'Modal created and displayed correctly');
+                        
+                        // Auto-close after 3 seconds for testing
+                        setTimeout(() => {
+                            modal.bootstrap.hide();
+                            this.log('🔒 Test modal auto-closed', 'info');
+                        }, 3000);
+                    } else {
+                        throw new Error('Failed to create modal');
+                    }
+                } catch (error) {
+                    this.log(`❌ Add Repository modal test failed: ${error.message}`, 'error');
+                    this.addTestResult('Add Repository Modal', 'Failed', error.message);
+                }
+            }
+
+            // Test Generate Document Modal
+            async testGenerateDocumentModal() {
+                this.log('🧪 Testing Generate Document Modal...');
+                
+                try {
+                    if (!window.winstonModalTemplates) {
+                        throw new Error('Winston Modal Templates not available');
+                    }
+
+                    const modal = window.winstonModalTemplates.showModal('generateDocument', {
+                        loadRepositories: (modalElement) => {
+                            this.log('📚 Repository loading callback triggered', 'success');
+                            // Mock repository loading
+                            const select = modalElement.querySelector('#documentRepo');
+                            if (select) {
+                                select.innerHTML = `
+                                    <option value="">请选择仓库...</option>
+                                    <option value="1">Test Repository 1</option>
+                                    <option value="2">Test Repository 2</option>
+                                `;
+                            }
+                        },
+                        onGenerate: (modalElement) => {
+                            this.log('🚀 Document generation callback triggered', 'success');
+                        }
+                    });
+
+                    if (modal) {
+                        this.log('✅ Generate Document modal created successfully', 'success');
+                        this.addTestResult('Generate Document Modal', 'Passed', 'Modal created with repository loading');
+                        
+                        // Auto-close after 3 seconds for testing
+                        setTimeout(() => {
+                            modal.bootstrap.hide();
+                            this.log('🔒 Test modal auto-closed', 'info');
+                        }, 3000);
+                    } else {
+                        throw new Error('Failed to create modal');
+                    }
+                } catch (error) {
+                    this.log(`❌ Generate Document modal test failed: ${error.message}`, 'error');
+                    this.addTestResult('Generate Document Modal', 'Failed', error.message);
+                }
+            }
+
+            // Test Error Recovery System
+            testErrorRecovery() {
+                this.log('🧪 Testing Error Recovery System...');
+                
+                try {
+                    if (!window.winstonErrorRecovery) {
+                        throw new Error('Winston Error Recovery not available');
+                    }
+
+                    // Test emergency recovery
+                    this.log('🚨 Triggering emergency recovery...');
+                    window.winstonErrorRecovery.triggerEmergencyRecovery();
+                    
+                    setTimeout(() => {
+                        this.log('✅ Emergency recovery completed', 'success');
+                        this.addTestResult('Error Recovery System', 'Passed', 'Emergency recovery executed successfully');
+                    }, 1000);
+                    
+                } catch (error) {
+                    this.log(`❌ Error recovery test failed: ${error.message}`, 'error');
+                    this.addTestResult('Error Recovery System', 'Failed', error.message);
+                }
+            }
+
+            // Test Modal Memory Management
+            async testMemoryManagement() {
+                this.log('🧪 Testing Modal Memory Management...');
+                
+                try {
+                    if (!window.winstonModalTemplates) {
+                        throw new Error('Winston Modal Templates not available');
+                    }
+
+                    // Create multiple modals to test memory management
+                    const modals = [];
+                    for (let i = 0; i < 5; i++) {
+                        const modal = window.winstonModalTemplates.createModal('confirmation', {
+                            modalId: `testModal_${i}`,
+                            message: `Test Modal ${i}`
+                        });
+                        modals.push(modal);
+                    }
+
+                    this.log(`📊 Created ${modals.length} test modals`, 'info');
+
+                    // Check active modals count
+                    const activeCount = window.winstonModalTemplates.getActiveModals().length;
+                    this.log(`📈 Active modals count: ${activeCount}`, 'info');
+
+                    // Cleanup all modals
+                    window.winstonModalTemplates.cleanupAllModals();
+                    
+                    // Verify cleanup
+                    const afterCleanupCount = window.winstonModalTemplates.getActiveModals().length;
+                    this.log(`🧹 Active modals after cleanup: ${afterCleanupCount}`, 'info');
+
+                    if (afterCleanupCount === 0) {
+                        this.log('✅ Memory management test passed', 'success');
+                        this.addTestResult('Memory Management', 'Passed', 'All modals properly cleaned up');
+                    } else {
+                        this.log('⚠️ Memory management test partially failed', 'warning');
+                        this.addTestResult('Memory Management', 'Warning', `${afterCleanupCount} modals not cleaned up`);
+                    }
+
+                } catch (error) {
+                    this.log(`❌ Memory management test failed: ${error.message}`, 'error');
+                    this.addTestResult('Memory Management', 'Failed', error.message);
+                }
+            }
+
+            // Add test result to display
+            addTestResult(testName, status, details) {
+                const statusClass = status === 'Passed' ? 'test-passed' : status === 'Failed' ? 'test-failed' : 'test-warning';
+                const statusIcon = status === 'Passed' ? 'fas fa-check-circle text-success' : status === 'Failed' ? 'fas fa-times-circle text-danger' : 'fas fa-exclamation-triangle text-warning';
+                
+                const resultHtml = `
+                    <div class="test-section ${statusClass} mb-3">
+                        <h5>
+                            <i class="${statusIcon} me-2"></i>
+                            ${testName}
+                            <span class="badge bg-${status === 'Passed' ? 'success' : status === 'Failed' ? 'danger' : 'warning'} ms-2">
+                                ${status}
+                            </span>
+                        </h5>
+                        <p class="mb-0 text-muted">${details}</p>
+                    </div>
+                `;
+                
+                this.testResultsContainer.insertAdjacentHTML('beforeend', resultHtml);
+            }
+
+            // Run all tests
+            async runAllTests() {
+                this.log('🚀 Running complete Winston Dashboard integration test suite...');
+                this.clearResults();
+                
+                try {
+                    // Test system components
+                    this.checkWinstonComponents();
+                    
+                    // Test modal creation
+                    await this.testAddRepositoryModal();
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    await this.testGenerateDocumentModal();
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    // Test error recovery
+                    this.testErrorRecovery();
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    // Test memory management
+                    await this.testMemoryManagement();
+                    
+                    this.log('🎊 All tests completed!', 'success');
+                    
+                } catch (error) {
+                    this.log(`❌ Test suite failed: ${error.message}`, 'error');
+                }
+            }
+
+            clearResults() {
+                this.testResultsContainer = document.getElementById('testResults');
+                this.testResultsContainer.innerHTML = '';
+            }
+
+            clearLogs() {
+                this.testLog.innerHTML = '';
+                this.log('🧹 Logs cleared');
+            }
+
+            emergencyCleanup() {
+                this.log('🚨 Initiating emergency cleanup...');
+                
+                if (window.winstonModalTemplates) {
+                    window.winstonModalTemplates.cleanupAllModals();
+                }
+                
+                if (window.winstonErrorRecovery) {
+                    window.winstonErrorRecovery.performEmergencyRecovery();
+                }
+                
+                this.log('✅ Emergency cleanup completed', 'success');
+            }
+        }
+
+        // Global test functions
+        let winstonTest;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            winstonTest = new WinstonDashboardTest();
+        });
+
+        function runAllTests() {
+            winstonTest.runAllTests();
+        }
+
+        function testAddRepositoryModal() {
+            winstonTest.testAddRepositoryModal();
+        }
+
+        function testGenerateDocumentModal() {
+            winstonTest.testGenerateDocumentModal();
+        }
+
+        function testErrorRecovery() {
+            winstonTest.testErrorRecovery();
+        }
+
+        function clearLogs() {
+            winstonTest.clearLogs();
+        }
+
+        function emergencyCleanup() {
+            winstonTest.emergencyCleanup();
+        }
+    </script>
+</body>
+</html>

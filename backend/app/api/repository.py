@@ -6,6 +6,10 @@ from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
 from app.services.repository_service import RepositoryService
 from app.utils.repository_analyzer import RepositoryAnalyzer
+from app.models.repository import Repository
+import logging
+
+logger = logging.getLogger(__name__)
 
 repository_bp = Blueprint('repository', __name__, url_prefix='/api/repositories')
 

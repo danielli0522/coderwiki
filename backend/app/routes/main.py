@@ -331,6 +331,7 @@ def serve_mkdocs_site(site_path):
         from app.services.mkdocs_service import MkDocsService
         mkdocs_service_instance = MkDocsService()
         site_dir = mkdocs_service_instance._get_existing_site_build_path(repository.name, repository_id)
+        logger.info(f"Found site directory using flexible resolution: {site_dir}")
         
         if not site_dir:
             # 站点未构建

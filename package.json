@@ -1,0 +1,20 @@
+{
+  "name": "coderwiki",
+  "version": "1.0.0",
+  "description": "## 项目简介",
+  "main": "comprehensive-ui-automation-test-suite.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "node winston-ui-automation-test.js",
+    "test:headless": "HEADLESS=true node winston-ui-automation-test.js",
+    "report": "open winston-ui-test-report.html"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "puppeteer": "^24.17.0"
+  }
+}

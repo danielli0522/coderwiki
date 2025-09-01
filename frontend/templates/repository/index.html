@@ -123,6 +123,18 @@
                 </table>
             </div>
 
+            <!-- 分页控件 -->
+            <div id="paginationContainer" class="d-flex justify-content-between align-items-center mt-3" style="display: none;">
+                <div class="text-muted">
+                    <span id="paginationInfo"></span>
+                </div>
+                <nav aria-label="仓库分页">
+                    <ul class="pagination pagination-sm mb-0" id="paginationControls">
+                        <!-- 分页控件将在这里动态生成 -->
+                    </ul>
+                </nav>
+            </div>
+
             <!-- 加载状态 -->
             <div id="loadingState" class="text-center py-4">
                 <div class="spinner-border text-primary" role="status">

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>错误处理测试 - CoderWiki</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Enhanced CSS System -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/components.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>错误处理测试页面</h1>
+        <p>此页面用于测试错误处理修复效果</p>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>测试按钮</h5>
+                    </div>
+                    <div class="card-body">
+                        <button class="btn btn-primary me-2" onclick="testNormalError()">测试普通错误</button>
+                        <button class="btn btn-warning me-2" onclick="testNetworkError()">测试网络错误</button>
+                        <button class="btn btn-danger me-2" onclick="testMultipleErrors()">测试重复错误</button>
+                        <button class="btn btn-success" onclick="clearErrors()">清除错误</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>错误日志</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="errorLog" style="height: 200px; overflow-y: auto; background: #f8f9fa; padding: 10px; font-family: monospace; font-size: 12px;">
+                            <div>等待测试...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 简化的脚本加载逻辑 -->
+    <script>
+    // 简化的脚本加载逻辑
+    (async function() {
+        try {
+            // 首先加载核心脚本
+            const coreScripts = [
+                '{{ url_for("static", filename="js/main.js") }}',
+                '{{ url_for("static", filename="js/browser-compatibility.js") }}'
+            ];
+
+            // 加载核心脚本
+            for (const scriptSrc of coreScripts) {
+                await loadScript(scriptSrc);
+            }
+
+            // 检查认证状态
+            let isAuthenticated = false;
+            try {
+                const response = await fetch('/api/auth/status', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    redirect: 'manual'
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    isAuthenticated = data.logged_in || false;
+                }
+            } catch (error) {
+                console.warn('认证检查失败，继续加载基础功能:', error);
+            }
+
+            if (isAuthenticated) {
+                console.log('用户已登录，加载完整功能...');
+
+                // 加载组件脚本
+                const componentScripts = [
+                    '{{ url_for("static", filename="js/components.js") }}',
+                    '{{ url_for("static", filename="js/performance.js") }}'
+                ];
+
+                // 并行加载组件脚本
+                await Promise.allSettled(componentScripts.map(scriptSrc => loadScript(scriptSrc)));
+            } else {
+                console.log('用户未登录，仅加载基础功能');
+            }
+        } catch (error) {
+            console.error('脚本加载过程中发生错误:', error);
+            showFallbackError();
+        }
+    })();
+
+    // 脚本加载函数
+    function loadScript(src) {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = resolve;
+            script.onerror = () => {
+                console.warn('脚本加载失败:', src);
+                reject(new Error(`Failed to load script: ${src}`));
+            };
+            document.head.appendChild(script);
+        });
+    }
+
+    // 显示友好的错误消息
+    function showFallbackError() {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'alert alert-warning alert-dismissible fade show';
+        errorDiv.innerHTML = `
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            页面加载遇到问题，请刷新页面重试
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+
+        const container = document.querySelector('.container');
+        container.insertAdjacentHTML('afterbegin', errorDiv.outerHTML);
+    }
+
+    // 测试函数
+    function testNormalError() {
+        logMessage('触发普通错误...');
+        throw new Error('这是一个测试错误');
+    }
+
+    function testNetworkError() {
+        logMessage('触发网络错误...');
+        fetch('/api/nonexistent-endpoint')
+            .then(response => response.json())
+            .catch(error => {
+                logMessage('网络错误: ' + error.message);
+            });
+    }
+
+    function testMultipleErrors() {
+        logMessage('触发多个重复错误...');
+        for (let i = 0; i < 5; i++) {
+            setTimeout(() => {
+                try {
+                    throw new Error('重复错误 ' + (i + 1));
+                } catch (error) {
+                    logMessage('重复错误 ' + (i + 1) + ' 被捕获');
+                }
+            }, i * 100);
+        }
+    }
+
+    function clearErrors() {
+        logMessage('清除所有错误消息...');
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => alert.remove());
+    }
+
+    function logMessage(message) {
+        const logDiv = document.getElementById('errorLog');
+        const timestamp = new Date().toLocaleTimeString();
+        logDiv.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+        logDiv.scrollTop = logDiv.scrollHeight;
+    }
+    </script>
+</body>
+</html>
+

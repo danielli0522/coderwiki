@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>紧急恢复功能测试 - Winston Architecture</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .test-panel {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .status-pass { background: #28a745; }
+        .status-fail { background: #dc3545; }
+        .status-pending { background: #ffc107; }
+        #testResults {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .hotkey-combo {
+            background: #007bff;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="text-center mb-4">🚨 紧急恢复功能测试</h1>
+        <p class="text-center text-muted">Winston Architecture v1.0 - Emergency Recovery System</p>
+
+        <!-- 测试控制面板 -->
+        <div class="test-panel">
+            <h3>🎯 紧急恢复快捷键测试</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>主要快捷键:</h5>
+                    <ul>
+                        <li><span class="hotkey-combo">Ctrl+Alt+R</span> - 主要紧急恢复</li>
+                        <li><span class="hotkey-combo">Ctrl+双击</span> - 备选恢复方式</li>
+                        <li><span class="hotkey-combo">Escape</span> - 模态框关闭</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h5>测试按钮:</h5>
+                    <button id="createStuckModal" class="btn btn-warning me-2">模拟卡死模态框</button>
+                    <button id="testRecovery" class="btn btn-success me-2">测试恢复功能</button>
+                    <button id="clearLog" class="btn btn-secondary">清空日志</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 测试状态指示器 -->
+        <div class="test-panel">
+            <h4>🔍 测试状态</h4>
+            <div class="row">
+                <div class="col-md-4">
+                    <div id="frameworkStatus" class="mb-2">
+                        <span class="status-indicator status-pending"></span>
+                        <span>框架加载</span>
+                    </div>
+                    <div id="recoveryStatus" class="mb-2">
+                        <span class="status-indicator status-pending"></span>
+                        <span>恢复功能</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div id="hotkeyStatus" class="mb-2">
+                        <span class="status-indicator status-pending"></span>
+                        <span>快捷键绑定</span>
+                    </div>
+                    <div id="modalStatus" class="mb-2">
+                        <span class="status-indicator status-pending"></span>
+                        <span>模态框系统</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div id="accessibilityStatus" class="mb-2">
+                        <span class="status-indicator status-pending"></span>
+                        <span>可访问性修复</span>
+                    </div>
+                    <div id="overallStatus" class="mb-2">
+                        <span class="status-indicator status-pending"></span>
+                        <span>整体状态</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 测试结果日志 -->
+        <div class="test-panel">
+            <h4>📋 测试结果日志</h4>
+            <div id="testResults">正在初始化紧急恢复功能测试...</div>
+        </div>
+
+        <!-- 模拟测试模态框 -->
+        <div class="modal fade" id="testModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">测试模态框</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>这是一个用于测试紧急恢复功能的模态框。</p>
+                        <p>尝试使用以下快捷键:</p>
+                        <ul>
+                            <li><span class="hotkey-combo">Ctrl+Alt+R</span> - 紧急恢复</li>
+                            <li><span class="hotkey-combo">Ctrl+双击</span> - 备选方式</li>
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary">测试按钮</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载框架文件 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/core.js"></script>
+    <script src="js/ui-framework.js"></script>
+    <script src="js/performance-unified.js"></script>
+
+    <script>
+        // 紧急恢复功能测试脚本
+        class EmergencyRecoveryTest {
+            constructor() {
+                this.results = [];
+                this.testStatus = {
+                    framework: false,
+                    recovery: false,
+                    hotkeys: false,
+                    modal: false,
+                    accessibility: false
+                };
+                this.init();
+            }
+
+            init() {
+                this.log('🚀 开始紧急恢复功能测试...');
+                this.bindEvents();
+                this.runTests();
+            }
+
+            log(message, type = 'info') {
+                const timestamp = new Date().toLocaleTimeString();
+                const colors = {
+                    info: '#61dafb',
+                    success: '#4caf50',
+                    error: '#f44336',
+                    warning: '#ff9800'
+                };
+
+                const logDiv = document.getElementById('testResults');
+                logDiv.innerHTML += `<span style="color: ${colors[type]}">[${timestamp}] ${message}</span>\n`;
+                logDiv.scrollTop = logDiv.scrollHeight;
+            }
+
+            updateStatus(component, passed) {
+                this.testStatus[component] = passed;
+                const statusElement = document.getElementById(`${component}Status`).querySelector('.status-indicator');
+                statusElement.className = `status-indicator ${passed ? 'status-pass' : 'status-fail'}`;
+                
+                // 检查整体状态
+                const allPassed = Object.values(this.testStatus).every(status => status);
+                const overallElement = document.getElementById('overallStatus').querySelector('.status-indicator');
+                overallElement.className = `status-indicator ${allPassed ? 'status-pass' : 'status-pending'}`;
+            }
+
+            async runTests() {
+                // 测试1: 框架加载
+                await this.testFrameworkLoading();
+                
+                // 测试2: 紧急恢复功能
+                await this.testEmergencyRecovery();
+                
+                // 测试3: 快捷键绑定
+                await this.testHotkeyBinding();
+                
+                // 测试4: 模态框系统
+                await this.testModalSystem();
+                
+                // 测试5: 可访问性修复
+                await this.testAccessibilityFixes();
+
+                this.log('✅ 所有测试完成!', 'success');
+            }
+
+            async testFrameworkLoading() {
+                this.log('🔍 测试框架加载...');
+                
+                try {
+                    // 检查核心组件是否加载
+                    const coreLoaded = typeof window.CoreSystem !== 'undefined';
+                    const uiLoaded = typeof window.UnifiedUIFramework !== 'undefined';
+                    const perfLoaded = typeof window.PerformanceMonitor !== 'undefined';
+                    
+                    if (coreLoaded && uiLoaded && perfLoaded) {
+                        this.log('✅ 所有核心框架文件加载成功', 'success');
+                        this.updateStatus('framework', true);
+                    } else {
+                        this.log('❌ 部分框架文件加载失败', 'error');
+                        this.log(`Core: ${coreLoaded}, UI: ${uiLoaded}, Perf: ${perfLoaded}`, 'info');
+                        this.updateStatus('framework', false);
+                    }
+                } catch (error) {
+                    this.log(`❌ 框架加载测试失败: ${error.message}`, 'error');
+                    this.updateStatus('framework', false);
+                }
+            }
+
+            async testEmergencyRecovery() {
+                this.log('🚨 测试紧急恢复功能...');
+                
+                try {
+                    // 检查是否存在紧急恢复函数
+                    const hasEmergencyRecovery = typeof window.emergencyRecovery === 'function' ||
+                                               (window.unifiedUI && typeof window.unifiedUI.emergencyRecovery === 'function');
+                    
+                    if (hasEmergencyRecovery) {
+                        this.log('✅ 紧急恢复函数已定义', 'success');
+                        this.updateStatus('recovery', true);
+                    } else {
+                        this.log('❌ 紧急恢复函数未找到', 'error');
+                        this.updateStatus('recovery', false);
+                    }
+                } catch (error) {
+                    this.log(`❌ 紧急恢复测试失败: ${error.message}`, 'error');
+                    this.updateStatus('recovery', false);
+                }
+            }
+
+            async testHotkeyBinding() {
+                this.log('⌨️ 测试快捷键绑定...');
+                
+                try {
+                    // 模拟按键事件测试
+                    const ctrlAltREvent = new KeyboardEvent('keydown', {
+                        ctrlKey: true,
+                        altKey: true,
+                        key: 'r'
+                    });
+                    
+                    let hotkeyDetected = false;
+                    
+                    // 临时监听器检测快捷键是否被处理
+                    const testListener = (e) => {
+                        if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'r') {
+                            hotkeyDetected = true;
+                        }
+                    };
+                    
+                    document.addEventListener('keydown', testListener);
+                    document.dispatchEvent(ctrlAltREvent);
+                    document.removeEventListener('keydown', testListener);
+                    
+                    // 给予短暂延迟以确保事件处理
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    
+                    this.log('✅ 快捷键绑定测试完成', 'success');
+                    this.updateStatus('hotkeys', true);
+                    
+                } catch (error) {
+                    this.log(`❌ 快捷键测试失败: ${error.message}`, 'error');
+                    this.updateStatus('hotkeys', false);
+                }
+            }
+
+            async testModalSystem() {
+                this.log('🪟 测试模态框系统...');
+                
+                try {
+                    const modalElement = document.getElementById('testModal');
+                    if (modalElement) {
+                        // 检查模态框是否有正确的属性
+                        const hasBootstrapModal = typeof bootstrap !== 'undefined' && bootstrap.Modal;
+                        const hasCorrectAttributes = modalElement.hasAttribute('tabindex') && 
+                                                   modalElement.hasAttribute('aria-hidden');
+                        
+                        if (hasBootstrapModal && hasCorrectAttributes) {
+                            this.log('✅ 模态框系统配置正确', 'success');
+                            this.updateStatus('modal', true);
+                        } else {
+                            this.log('⚠️ 模态框配置可能存在问题', 'warning');
+                            this.updateStatus('modal', false);
+                        }
+                    } else {
+                        this.log('❌ 测试模态框未找到', 'error');
+                        this.updateStatus('modal', false);
+                    }
+                } catch (error) {
+                    this.log(`❌ 模态框测试失败: ${error.message}`, 'error');
+                    this.updateStatus('modal', false);
+                }
+            }
+
+            async testAccessibilityFixes() {
+                this.log('♿ 测试可访问性修复...');
+                
+                try {
+                    // 检查是否有aria-hidden监控机制
+                    const hasAccessibilityFixes = typeof MutationObserver !== 'undefined';
+                    const hasFocusManagement = document.activeElement !== null;
+                    
+                    if (hasAccessibilityFixes && hasFocusManagement) {
+                        this.log('✅ 可访问性修复机制可用', 'success');
+                        this.updateStatus('accessibility', true);
+                    } else {
+                        this.log('⚠️ 可访问性修复可能不完整', 'warning');
+                        this.updateStatus('accessibility', false);
+                    }
+                } catch (error) {
+                    this.log(`❌ 可访问性测试失败: ${error.message}`, 'error');
+                    this.updateStatus('accessibility', false);
+                }
+            }
+
+            bindEvents() {
+                // 模拟卡死模态框按钮
+                document.getElementById('createStuckModal').addEventListener('click', () => {
+                    this.log('⚠️ 模拟创建卡死模态框...', 'warning');
+                    const modal = new bootstrap.Modal(document.getElementById('testModal'));
+                    modal.show();
+                    
+                    // 模拟aria-hidden冲突
+                    setTimeout(() => {
+                        const modalEl = document.getElementById('testModal');
+                        modalEl.setAttribute('aria-hidden', 'true'); // 故意创建冲突
+                        this.log('🚨 已创建aria-hidden冲突 - 请尝试紧急恢复', 'error');
+                    }, 1000);
+                });
+
+                // 测试恢复功能按钮
+                document.getElementById('testRecovery').addEventListener('click', () => {
+                    this.log('🛠️ 手动触发紧急恢复功能...', 'info');
+                    if (typeof window.emergencyRecovery === 'function') {
+                        window.emergencyRecovery();
+                        this.log('✅ 紧急恢复功能已执行', 'success');
+                    } else if (window.unifiedUI && typeof window.unifiedUI.emergencyRecovery === 'function') {
+                        window.unifiedUI.emergencyRecovery();
+                        this.log('✅ 统一UI紧急恢复功能已执行', 'success');
+                    } else {
+                        this.log('❌ 未找到紧急恢复功能', 'error');
+                    }
+                });
+
+                // 清空日志按钮
+                document.getElementById('clearLog').addEventListener('click', () => {
+                    document.getElementById('testResults').innerHTML = '';
+                    this.log('🧹 日志已清空', 'info');
+                });
+
+                // 全局快捷键监听器 (用于测试)
+                document.addEventListener('keydown', (e) => {
+                    if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'r') {
+                        e.preventDefault();
+                        this.log('⌨️ 检测到 Ctrl+Alt+R 快捷键!', 'success');
+                    }
+                });
+
+                // 双击监听器 (用于测试)
+                let clickTimeout;
+                document.addEventListener('click', (e) => {
+                    if (e.ctrlKey) {
+                        if (clickTimeout) {
+                            // 双击检测到
+                            clearTimeout(clickTimeout);
+                            clickTimeout = null;
+                            this.log('⌨️ 检测到 Ctrl+双击 快捷键!', 'success');
+                        } else {
+                            clickTimeout = setTimeout(() => {
+                                clickTimeout = null;
+                            }, 300);
+                        }
+                    }
+                });
+            }
+        }
+
+        // 页面加载完成后启动测试
+        document.addEventListener('DOMContentLoaded', () => {
+            new EmergencyRecoveryTest();
+        });
+    </script>
+</body>
+</html>

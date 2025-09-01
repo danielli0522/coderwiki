@@ -110,8 +110,19 @@ class Task(db.Model):
         if not self.started_at:
             return 0
 
-        end_time = self.completed_at or datetime.now(timezone.utc)
-        return (end_time - self.started_at).total_seconds()
+        # Ensure both datetimes are timezone-aware
+        started_at = self.started_at
+        if started_at and started_at.tzinfo is None:
+            started_at = started_at.replace(tzinfo=timezone.utc)
+            
+        end_time = self.completed_at
+        if end_time:
+            if end_time.tzinfo is None:
+                end_time = end_time.replace(tzinfo=timezone.utc)
+        else:
+            end_time = datetime.now(timezone.utc)
+            
+        return (end_time - started_at).total_seconds()
 
     def is_running(self):
         """Check if task is currently running."""

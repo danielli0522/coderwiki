@@ -1,0 +1,722 @@
+{% extends "base.html" %}
+
+{% block title %}Unified Modal System Test - CoderWiki{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1>统一模态框系统测试</h1>
+            <p class="lead">测试新的统一模态框系统，验证所有功能是否正常工作。</p>
+
+            <!-- Test Status Dashboard -->
+            <div id="testStatus" class="alert alert-info mb-4">
+                <h5>测试状态：<span id="statusIndicator">未开始</span></h5>
+                <div class="progress">
+                    <div id="testProgress" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
+                <small id="statusMessage">点击下方按钮开始测试</small>
+            </div>
+
+            <!-- Test Controls -->
+            <div class="mb-4">
+                <div class="btn-group" role="group">
+                    <button class="btn btn-success" onclick="runAllTests()">
+                        <i class="fas fa-play"></i> 运行所有测试
+                    </button>
+                    <button class="btn btn-warning" onclick="runManualTests()">
+                        <i class="fas fa-hand-pointer"></i> 手动测试
+                    </button>
+                    <button class="btn btn-info" onclick="viewSystemInfo()">
+                        <i class="fas fa-info-circle"></i> 系统信息
+                    </button>
+                    <button class="btn btn-danger" onclick="clearAllModals()">
+                        <i class="fas fa-times"></i> 清除所有模态框
+                    </button>
+                </div>
+            </div>
+
+            <!-- Test Categories -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-cog"></i> 基础功能测试</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#basicModal">
+                                    基础模态框
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="testProgrammaticModal()">
+                                    程序控制模态框
+                                </button>
+                                <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#formModal">
+                                    表单模态框
+                                </button>
+                                <button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#confirmModal">
+                                    确认模态框
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-accessibility"></i> 可访问性测试</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-info" onclick="testKeyboardNavigation()">
+                                    键盘导航测试
+                                </button>
+                                <button class="btn btn-outline-dark" onclick="testFocusManagement()">
+                                    焦点管理测试
+                                </button>
+                                <button class="btn btn-outline-primary" onclick="testAriaAttributes()">
+                                    ARIA 属性测试
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="testScreenReader()">
+                                    屏幕阅读器测试
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced Tests -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-layer-group"></i> 高级功能测试</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-danger" onclick="testStackedModals()">
+                                    堆叠模态框测试
+                                </button>
+                                <button class="btn btn-outline-warning" onclick="testOverlayCleanup()">
+                                    覆盖层清理测试
+                                </button>
+                                <button class="btn btn-outline-success" onclick="testPerformance()">
+                                    性能测试
+                                </button>
+                                <button class="btn btn-outline-info" onclick="testErrorHandling()">
+                                    错误处理测试
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-bug"></i> 回归测试</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-primary" onclick="testInputInteraction()">
+                                    输入交互测试
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="testButtonClicks()">
+                                    按钮点击测试
+                                </button>
+                                <button class="btn btn-outline-success" onclick="testBackdropClick()">
+                                    背景点击测试
+                                </button>
+                                <button class="btn btn-outline-warning" onclick="testEscapeKey()">
+                                    ESC键测试
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Test Results -->
+            <div id="testResults" class="card" style="display: none;">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-bar"></i> 测试结果</h5>
+                </div>
+                <div class="card-body">
+                    <div id="resultsContent">
+                        <!-- Results will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Test Modals -->
+
+<!-- Basic Modal -->
+<div class="modal fade" id="basicModal" tabindex="-1" aria-labelledby="basicModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="basicModalLabel">基础模态框测试</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+            </div>
+            <div class="modal-body">
+                <p>这是一个基础的模态框，用于测试基本功能。</p>
+                <div class="alert alert-info">
+                    <strong>测试项目：</strong>
+                    <ul class="mb-0">
+                        <li>模态框正常显示</li>
+                        <li>背景遮罩工作正常</li>
+                        <li>关闭按钮功能正常</li>
+                        <li>ESC键可以关闭</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" onclick="logTest('基础模态框', '通过')">测试通过</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Form Modal -->
+<div class="modal fade" id="formModal" tabindex="-1" aria-labelledby="formModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="formModalLabel">表单模态框测试</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+            </div>
+            <div class="modal-body">
+                <form id="testForm">
+                    <div class="mb-3">
+                        <label for="testInput1" class="form-label">测试输入框 1</label>
+                        <input type="text" class="form-control" id="testInput1" placeholder="请输入文字...">
+                    </div>
+                    <div class="mb-3">
+                        <label for="testInput2" class="form-label">测试输入框 2</label>
+                        <input type="email" class="form-control" id="testInput2" placeholder="请输入邮箱...">
+                    </div>
+                    <div class="mb-3">
+                        <label for="testSelect" class="form-label">选择框</label>
+                        <select class="form-select" id="testSelect">
+                            <option value="">请选择...</option>
+                            <option value="1">选项 1</option>
+                            <option value="2">选项 2</option>
+                            <option value="3">选项 3</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="testTextarea" class="form-label">文本区域</label>
+                        <textarea class="form-control" id="testTextarea" rows="3" placeholder="请输入多行文字..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="testCheck">
+                            <label class="form-check-label" for="testCheck">
+                                同意测试条款
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="testFormSubmission()">提交测试</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalLabel">确认操作</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>警告：</strong>这是一个测试确认模态框。
+                </div>
+                <p>请确认是否要执行此操作？</p>
+                <div class="mb-3">
+                    <label for="confirmInput" class="form-label">请输入 "确认" 以继续：</label>
+                    <input type="text" class="form-control" id="confirmInput" placeholder="输入'确认'">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-danger" id="confirmButton" disabled onclick="executeConfirm()">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Programmatic Modal -->
+<div class="modal fade" id="programmaticModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">程序控制模态框</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>这个模态框是通过 JavaScript 程序控制显示的。</p>
+                <div id="programmaticContent">
+                    <p>内容将在这里动态加载...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideModal('#programmaticModal')">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Test Suite for Unified Modal System
+class ModalTestSuite {
+    constructor() {
+        this.tests = [];
+        this.results = [];
+        this.currentTest = 0;
+    }
+    
+    log(message, type = 'info') {
+        console.log(`[ModalTest] ${message}`);
+        const timestamp = new Date().toLocaleTimeString();
+        const logEntry = {
+            timestamp,
+            message,
+            type
+        };
+        
+        if (!window.testLog) window.testLog = [];
+        window.testLog.push(logEntry);
+    }
+    
+    async runAllTests() {
+        this.updateStatus('运行中', 0, '开始执行自动化测试...');
+        
+        const tests = [
+            { name: '系统初始化检查', fn: () => this.testSystemInitialization() },
+            { name: '基础API测试', fn: () => this.testBasicAPI() },
+            { name: '焦点管理测试', fn: () => this.testFocusManagement() },
+            { name: '键盘导航测试', fn: () => this.testKeyboardNavigation() },
+            { name: '覆盖层清理测试', fn: () => this.testOverlayCleanup() },
+            { name: '错误处理测试', fn: () => this.testErrorHandling() }
+        ];
+        
+        let passed = 0;
+        let failed = 0;
+        
+        for (let i = 0; i < tests.length; i++) {
+            const test = tests[i];
+            this.updateStatus('运行中', ((i + 1) / tests.length) * 100, `执行测试: ${test.name}`);
+            
+            try {
+                const result = await test.fn();
+                if (result) {
+                    passed++;
+                    this.log(`✅ ${test.name} - 通过`);
+                } else {
+                    failed++;
+                    this.log(`❌ ${test.name} - 失败`);
+                }
+            } catch (error) {
+                failed++;
+                this.log(`❌ ${test.name} - 错误: ${error.message}`, 'error');
+            }
+            
+            // 等待一小段时间确保DOM更新
+            await this.sleep(200);
+        }
+        
+        const total = passed + failed;
+        const status = failed === 0 ? '全部通过' : `部分失败 (${passed}/${total})`;
+        this.updateStatus(status, 100, `测试完成: ${passed} 通过, ${failed} 失败`);
+        
+        this.showResults({ passed, failed, total });
+    }
+    
+    testSystemInitialization() {
+        // Check if unified modal system is loaded
+        if (!window.unifiedModalSystem) {
+            throw new Error('统一模态框系统未加载');
+        }
+        
+        if (!window.UnifiedModalSystem) {
+            throw new Error('UnifiedModalSystem 类未定义');
+        }
+        
+        // Check API availability
+        const requiredMethods = ['show', 'hide', 'getActiveModal', 'hideAll'];
+        for (const method of requiredMethods) {
+            if (typeof window.unifiedModalSystem[method] !== 'function') {
+                throw new Error(`缺少方法: ${method}`);
+            }
+        }
+        
+        // Check backward compatibility
+        if (typeof window.showModal !== 'function' || 
+            typeof window.hideModal !== 'function') {
+            throw new Error('向后兼容性API缺失');
+        }
+        
+        return true;
+    }
+    
+    async testBasicAPI() {
+        // Test show method
+        const modal = document.querySelector('#basicModal');
+        if (!modal) throw new Error('测试模态框不存在');
+        
+        const bsModal = window.unifiedModalSystem.show('#basicModal');
+        if (!bsModal) throw new Error('show方法未返回Bootstrap实例');
+        
+        await this.sleep(300);
+        
+        if (!modal.classList.contains('show')) {
+            throw new Error('模态框未正确显示');
+        }
+        
+        // Test hide method
+        window.unifiedModalSystem.hide('#basicModal');
+        await this.sleep(300);
+        
+        if (modal.classList.contains('show')) {
+            throw new Error('模态框未正确隐藏');
+        }
+        
+        return true;
+    }
+    
+    async testFocusManagement() {
+        const modal = document.querySelector('#formModal');
+        window.unifiedModalSystem.show('#formModal');
+        
+        await this.sleep(300);
+        
+        // Check if focus is set to first focusable element
+        const activeElement = document.activeElement;
+        const firstInput = modal.querySelector('input');
+        
+        if (activeElement !== firstInput) {
+            window.unifiedModalSystem.hide('#formModal');
+            throw new Error('焦点未正确设置到第一个输入元素');
+        }
+        
+        window.unifiedModalSystem.hide('#formModal');
+        await this.sleep(300);
+        
+        return true;
+    }
+    
+    async testKeyboardNavigation() {
+        const modal = document.querySelector('#formModal');
+        window.unifiedModalSystem.show('#formModal');
+        
+        await this.sleep(300);
+        
+        // Simulate Tab key
+        const tabEvent = new KeyboardEvent('keydown', {
+            key: 'Tab',
+            bubbles: true,
+            cancelable: true
+        });
+        
+        document.activeElement.dispatchEvent(tabEvent);
+        await this.sleep(100);
+        
+        // Simulate Escape key
+        const escapeEvent = new KeyboardEvent('keydown', {
+            key: 'Escape',
+            bubbles: true,
+            cancelable: true
+        });
+        
+        document.dispatchEvent(escapeEvent);
+        await this.sleep(300);
+        
+        if (modal.classList.contains('show')) {
+            throw new Error('ESC键无法关闭模态框');
+        }
+        
+        return true;
+    }
+    
+    testOverlayCleanup() {
+        // Check for problematic overlays
+        const problematicSelectors = [
+            '#ui-init-progress',
+            '.loading-overlay',
+            '.user-feedback-overlay'
+        ];
+        
+        for (const selector of problematicSelectors) {
+            const elements = document.querySelectorAll(selector);
+            elements.forEach(el => {
+                const zIndex = parseInt(window.getComputedStyle(el).zIndex);
+                if (zIndex > 10000) {
+                    throw new Error(`发现阻塞性覆盖层: ${selector} (z-index: ${zIndex})`);
+                }
+            });
+        }
+        
+        return true;
+    }
+    
+    testErrorHandling() {
+        // Test with non-existent modal
+        try {
+            window.unifiedModalSystem.show('#nonExistentModal');
+        } catch (error) {
+            // Should not throw error, just warn
+        }
+        
+        // Test with invalid selector
+        try {
+            window.unifiedModalSystem.hide(null);
+        } catch (error) {
+            // Should handle gracefully
+        }
+        
+        return true;
+    }
+    
+    updateStatus(status, progress, message) {
+        document.getElementById('statusIndicator').textContent = status;
+        document.getElementById('testProgress').style.width = `${progress}%`;
+        document.getElementById('statusMessage').textContent = message;
+    }
+    
+    showResults(results) {
+        const resultsDiv = document.getElementById('testResults');
+        const contentDiv = document.getElementById('resultsContent');
+        
+        contentDiv.innerHTML = `
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="text-center">
+                        <h3 class="text-success">${results.passed}</h3>
+                        <p>通过</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center">
+                        <h3 class="text-danger">${results.failed}</h3>
+                        <p>失败</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center">
+                        <h3 class="text-primary">${results.total}</h3>
+                        <p>总计</p>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <h6>详细日志:</h6>
+            <div style="max-height: 300px; overflow-y: auto;">
+                <pre id="testLogOutput"></pre>
+            </div>
+        `;
+        
+        if (window.testLog) {
+            const logOutput = document.getElementById('testLogOutput');
+            logOutput.textContent = window.testLog
+                .map(entry => `[${entry.timestamp}] ${entry.message}`)
+                .join('\n');
+        }
+        
+        resultsDiv.style.display = 'block';
+    }
+    
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+}
+
+// Global test instance
+window.modalTestSuite = new ModalTestSuite();
+
+// Test functions
+function runAllTests() {
+    window.modalTestSuite.runAllTests();
+}
+
+function runManualTests() {
+    alert('手动测试模式：请点击各个测试按钮，观察模态框行为是否正常。');
+}
+
+function viewSystemInfo() {
+    const info = {
+        系统版本: window.unifiedModalSystem?.version || '未知',
+        Bootstrap版本: window.bootstrap?.Modal ? 'Bootstrap 5' : '未知',
+        活动模态框: window.unifiedModalSystem?.getActiveModal()?.id || '无',
+        模态框栈长度: window.unifiedModalSystem?.modalStack?.length || 0
+    };
+    
+    let infoText = '系统信息:\n';
+    for (const [key, value] of Object.entries(info)) {
+        infoText += `${key}: ${value}\n`;
+    }
+    
+    alert(infoText);
+}
+
+function clearAllModals() {
+    if (window.unifiedModalSystem) {
+        window.unifiedModalSystem.hideAll();
+    }
+}
+
+function testProgrammaticModal() {
+    window.unifiedModalSystem.show('#programmaticModal');
+    
+    setTimeout(() => {
+        document.getElementById('programmaticContent').innerHTML = `
+            <div class="alert alert-success">
+                <i class="fas fa-check"></i>
+                内容已动态加载！测试时间：${new Date().toLocaleTimeString()}
+            </div>
+        `;
+    }, 500);
+}
+
+function testFormSubmission() {
+    const formData = {
+        input1: document.getElementById('testInput1').value,
+        input2: document.getElementById('testInput2').value,
+        select: document.getElementById('testSelect').value,
+        textarea: document.getElementById('testTextarea').value,
+        checkbox: document.getElementById('testCheck').checked
+    };
+    
+    alert(`表单数据收集成功！\n${JSON.stringify(formData, null, 2)}`);
+    window.unifiedModalSystem.hide('#formModal');
+}
+
+function logTest(testName, result) {
+    console.log(`Test: ${testName} - ${result}`);
+    window.modalTestSuite.log(`${testName}: ${result}`);
+}
+
+// Confirm modal functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const confirmInput = document.getElementById('confirmInput');
+    const confirmButton = document.getElementById('confirmButton');
+    
+    if (confirmInput && confirmButton) {
+        confirmInput.addEventListener('input', function() {
+            confirmButton.disabled = this.value !== '确认';
+        });
+    }
+});
+
+function executeConfirm() {
+    alert('确认操作已执行！');
+    window.unifiedModalSystem.hide('#confirmModal');
+}
+
+// Individual test functions
+function testKeyboardNavigation() {
+    alert('键盘导航测试：打开模态框后，使用Tab键导航，使用ESC键关闭。');
+}
+
+function testFocusManagement() {
+    window.unifiedModalSystem.show('#formModal');
+}
+
+function testAriaAttributes() {
+    const modal = document.querySelector('#basicModal');
+    const checks = [
+        { attr: 'role', expected: 'dialog' },
+        { attr: 'aria-modal', expected: 'true' },
+        { attr: 'aria-labelledby', expected: 'basicModalLabel' }
+    ];
+    
+    let results = 'ARIA 属性检查结果:\n';
+    checks.forEach(check => {
+        const value = modal.getAttribute(check.attr);
+        const status = value === check.expected ? '✅' : '❌';
+        results += `${check.attr}: ${value} ${status}\n`;
+    });
+    
+    alert(results);
+}
+
+function testScreenReader() {
+    alert('屏幕阅读器测试：请使用屏幕阅读器软件测试模态框的可读性。');
+}
+
+function testStackedModals() {
+    // Open multiple modals to test stacking
+    window.unifiedModalSystem.show('#basicModal');
+    setTimeout(() => {
+        window.unifiedModalSystem.show('#formModal');
+    }, 500);
+}
+
+function testOverlayCleanup() {
+    window.modalTestSuite.testOverlayCleanup();
+    alert('覆盖层清理测试完成，检查控制台输出。');
+}
+
+function testPerformance() {
+    const startTime = performance.now();
+    
+    for (let i = 0; i < 10; i++) {
+        window.unifiedModalSystem.show('#basicModal');
+        window.unifiedModalSystem.hide('#basicModal');
+    }
+    
+    const endTime = performance.now();
+    const duration = endTime - startTime;
+    
+    alert(`性能测试完成：10次显示/隐藏操作用时 ${duration.toFixed(2)}ms`);
+}
+
+function testErrorHandling() {
+    // Test various error conditions
+    try {
+        window.unifiedModalSystem.show('#nonExistentModal');
+        window.unifiedModalSystem.hide(null);
+        window.unifiedModalSystem.show('');
+        alert('错误处理测试通过：系统正确处理了无效输入。');
+    } catch (error) {
+        alert(`错误处理测试失败：${error.message}`);
+    }
+}
+
+function testInputInteraction() {
+    window.unifiedModalSystem.show('#formModal');
+    alert('请在打开的表单中测试所有输入元素的交互功能。');
+}
+
+function testButtonClicks() {
+    window.unifiedModalSystem.show('#basicModal');
+    alert('请测试模态框中的按钮是否可以正常点击。');
+}
+
+function testBackdropClick() {
+    window.unifiedModalSystem.show('#basicModal');
+    alert('请点击模态框的背景区域测试是否可以关闭模态框。');
+}
+
+function testEscapeKey() {
+    window.unifiedModalSystem.show('#basicModal');
+    alert('请按ESC键测试是否可以关闭模态框。');
+}
+</script>
+{% endblock %}

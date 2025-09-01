@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block title %}新建文档 - CoderWiki{% endblock %}
+
+{% block head %}
+<!-- Document Add CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/document.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/form.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Page Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-0">新建文档</h1>
+                    <p class="text-muted mb-0">创建新的文档或从现有内容生成文档</p>
+                </div>
+                <a href="{{ url_for('main.documents') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> 返回文档列表
+                </a>
+            </div>
+
+            <!-- Document Creation Options -->
+            <div class="row">
+                <!-- Manual Document Creation -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-edit text-primary"></i> 手动创建文档
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="manualDocumentForm" method="POST" action="{{ url_for('main.add_document') }}">
+                                <div class="mb-3">
+                                    <label for="title" class="form-label">文档标题 <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="title" name="title" required
+                                           placeholder="请输入文档标题">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="description" class="form-label">文档描述</label>
+                                    <textarea class="form-control" id="description" name="description" rows="3"
+                                              placeholder="请输入文档描述（可选）"></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="content" class="form-label">文档内容 <span class="text-danger">*</span></label>
+                                    <textarea class="form-control" id="content" name="content" rows="10" required
+                                              placeholder="请输入文档内容，支持 Markdown 格式"></textarea>
+                                    <div class="form-text">
+                                        <i class="fas fa-info-circle"></i> 支持 Markdown 语法，可以使用 # ## ### 等标题，**粗体**，*斜体* 等格式
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="tags" class="form-label">标签</label>
+                                    <input type="text" class="form-control" id="tags" name="tags"
+                                           placeholder="用逗号分隔多个标签，如：技术文档,API,教程">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="visibility" class="form-label">可见性</label>
+                                    <select class="form-select" id="visibility" name="visibility">
+                                        <option value="private">私有（仅自己可见）</option>
+                                        <option value="public">公开（所有人可见）</option>
+                                    </select>
+                                </div>
+
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> 创建文档
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Generated Document -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-magic text-success"></i> AI 生成文档
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="aiDocumentForm">
+                                <div class="mb-3">
+                                    <label for="aiTitle" class="form-label">文档标题 <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="aiTitle" name="aiTitle" required
+                                           placeholder="请输入要生成的文档标题">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="aiPrompt" class="form-label">生成提示 <span class="text-danger">*</span></label>
+                                    <textarea class="form-control" id="aiPrompt" name="aiPrompt" rows="4" required
+                                              placeholder="请详细描述您希望生成的文档内容，包括主题、结构、风格等"></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="documentType" class="form-label">文档类型</label>
+                                    <select class="form-select" id="documentType" name="documentType">
+                                        <option value="technical">技术文档</option>
+                                        <option value="tutorial">教程指南</option>
+                                        <option value="api">API 文档</option>
+                                        <option value="user_guide">用户手册</option>
+                                        <option value="design">设计文档</option>
+                                        <option value="other">其他</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="aiTags" class="form-label">标签</label>
+                                    <input type="text" class="form-control" id="aiTags" name="aiTags"
+                                           placeholder="用逗号分隔多个标签">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="aiVisibility" class="form-label">可见性</label>
+                                    <select class="form-select" id="aiVisibility" name="aiVisibility">
+                                        <option value="private">私有（仅自己可见）</option>
+                                        <option value="public">公开（所有人可见）</option>
+                                    </select>
+                                </div>
+
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-success" id="generateBtn">
+                                        <i class="fas fa-magic"></i> 生成文档
+                                    </button>
+                                </div>
+                            </form>
+
+                            <!-- Generation Progress -->
+                            <div id="generationProgress" class="mt-3" style="display: none;">
+                                <div class="progress mb-2">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                         role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <small class="text-muted" id="progressText">正在生成文档...</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Templates -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-lightbulb text-warning"></i> 快速模板
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <div class="template-card" data-template="api-doc">
+                                        <div class="template-icon">
+                                            <i class="fas fa-code"></i>
+                                        </div>
+                                        <h6>API 文档模板</h6>
+                                        <p class="text-muted small">包含接口描述、参数说明、示例代码等</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="template-card" data-template="tutorial">
+                                        <div class="template-icon">
+                                            <i class="fas fa-graduation-cap"></i>
+                                        </div>
+                                        <h6>教程模板</h6>
+                                        <p class="text-muted small">包含步骤说明、截图、注意事项等</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="template-card" data-template="design-doc">
+                                        <div class="template-icon">
+                                            <i class="fas fa-palette"></i>
+                                        </div>
+                                        <h6>设计文档模板</h6>
+                                        <p class="text-muted small">包含设计思路、架构图、实现方案等</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="template-card" data-template="user-guide">
+                                        <div class="template-icon">
+                                            <i class="fas fa-users"></i>
+                                        </div>
+                                        <h6>用户手册模板</h6>
+                                        <p class="text-muted small">包含功能介绍、操作步骤、常见问题等</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-check-circle text-success"></i> 文档创建成功
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>文档已成功创建！</p>
+                <div id="documentInfo"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                <a href="#" class="btn btn-primary" id="viewDocumentBtn">
+                    <i class="fas fa-eye"></i> 查看文档
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/document_add.js') }}"></script>
+{% endblock %}
+

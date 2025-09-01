@@ -1,0 +1,84 @@
+/* Fix for navbar-collapse visibility on desktop screens */
+
+/* Ensure navbar-collapse is visible on screens >= 992px (Bootstrap lg breakpoint) */
+@media (min-width: 992px) {
+    .navbar-collapse {
+        display: flex !important;
+        flex-basis: auto;
+        flex-grow: 1;
+        align-items: center;
+    }
+    
+    .navbar-nav {
+        display: flex !important;
+        flex-direction: row;
+    }
+    
+    .navbar-nav .nav-link {
+        padding-right: 0.5rem;
+        padding-left: 0.5rem;
+    }
+    
+    /* Hide the toggler button on desktop */
+    .navbar-toggler {
+        display: none !important;
+    }
+}
+
+/* For medium screens (768px - 991px) */
+@media (min-width: 768px) and (max-width: 991px) {
+    .navbar-collapse {
+        display: flex !important;
+        flex-basis: auto;
+    }
+    
+    .navbar-nav {
+        flex-direction: row;
+    }
+    
+    .navbar-toggler {
+        display: none !important;
+    }
+}
+
+/* Mobile screens (< 768px) - keep default Bootstrap behavior */
+@media (max-width: 767px) {
+    .navbar-collapse {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: inherit;
+        z-index: 1000;
+    }
+    
+    .navbar-collapse.show {
+        display: block !important;
+    }
+    
+    .navbar-nav {
+        flex-direction: column;
+    }
+    
+    .navbar-nav .nav-item {
+        width: 100%;
+    }
+    
+    .navbar-nav .nav-link {
+        padding: 0.75rem 1rem;
+    }
+}
+
+/* Additional fix to ensure visibility */
+.navbar-expand-lg .navbar-collapse {
+    display: flex !important;
+}
+
+/* Ensure proper z-index layering */
+.navbar {
+    z-index: 1030 !important;
+}
+
+.navbar-collapse {
+    z-index: 1031 !important;
+}

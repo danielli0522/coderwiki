@@ -148,74 +148,138 @@ class StatsComponent {
         const ctx = document.getElementById('generationChart');
         if (!ctx) return;
 
-        // 销毁现有图表
-        if (this.charts.generation) {
-            this.charts.generation.destroy();
+        // 确保Canvas有正确的ID
+        if (!ctx.id) {
+            ctx.id = 'generationChart';
         }
 
-        this.charts.generation = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: trendData.map(item => item.date),
-                datasets: [{
-                    label: '文档生成数量',
-                    data: trendData.map(item => item.count),
-                    borderColor: '#2563eb',
-                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                    tension: 0.4,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
+        // 使用安全的Chart创建方法
+        if (window.createSafeChart) {
+            this.charts.generation = window.createSafeChart('generationChart', {
+                type: 'line',
+                data: {
+                    labels: trendData.map(item => item.date),
+                    datasets: [{
+                        label: '文档生成数量',
+                        data: trendData.map(item => item.count),
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
                     }
                 }
+            });
+        } else {
+            // 降级方案：手动销毁现有图表
+            if (this.charts.generation) {
+                this.charts.generation.destroy();
             }
-        });
+            this.charts.generation = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: trendData.map(item => item.date),
+                    datasets: [{
+                        label: '文档生成数量',
+                        data: trendData.map(item => item.count),
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
     }
 
     renderDocumentTypeChart(typeData) {
         const ctx = document.getElementById('documentTypeChart');
         if (!ctx) return;
 
-        // 销毁现有图表
-        if (this.charts.documentType) {
-            this.charts.documentType.destroy();
+        // 确保Canvas有正确的ID
+        if (!ctx.id) {
+            ctx.id = 'documentTypeChart';
         }
 
         const labels = Object.keys(typeData);
         const data = Object.values(typeData);
         const colors = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
-        this.charts.documentType = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: data,
-                    backgroundColor: colors.slice(0, labels.length),
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
+        // 使用安全的Chart创建方法
+        if (window.createSafeChart) {
+            this.charts.documentType = window.createSafeChart('documentTypeChart', {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors.slice(0, labels.length),
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
                     }
                 }
+            });
+        } else {
+            // 降级方案：手动销毁现有图表
+            if (this.charts.documentType) {
+                this.charts.documentType.destroy();
             }
-        });
+            this.charts.documentType = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors.slice(0, labels.length),
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
     }
 
     startAutoRefresh() {
@@ -251,11 +315,17 @@ class StatsComponent {
 
     destroy() {
         // 清理图表实例
-        Object.values(this.charts).forEach(chart => {
-            if (chart && typeof chart.destroy === 'function') {
-                chart.destroy();
-            }
-        });
+        if (window.chartResourceManager) {
+            // 使用资源管理器清理
+            window.chartResourceManager.destroyAllCharts();
+        } else {
+            // 降级清理方案
+            Object.values(this.charts).forEach(chart => {
+                if (chart && typeof chart.destroy === 'function') {
+                    chart.destroy();
+                }
+            });
+        }
         this.charts = {};
     }
 }

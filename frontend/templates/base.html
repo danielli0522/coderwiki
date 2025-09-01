@@ -21,6 +21,7 @@
     <!-- Legacy fixes for backward compatibility -->
     <link href="{{ url_for('static', filename='css/modal-fixes.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/navigation-fixes.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/navbar-desktop-fix.css') }}" rel="stylesheet">
     {% if request.endpoint == 'main.dashboard' %}
     <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
     {% endif %}
@@ -43,6 +44,12 @@
     
     <!-- Winston Modal Template System -->
     <script src="{{ url_for('static', filename='js/winston-modal-templates.js') }}"></script>
+    
+    <!-- Modal Accessibility Fix -->
+    <script src="{{ url_for('static', filename='js/modal-accessibility-fix.js') }}"></script>
+    
+    <!-- Performance Optimizations -->
+    <script src="{{ url_for('static', filename='js/performance-optimizations.js') }}"></script>
 
     {% block head %}{% endblock %}
 

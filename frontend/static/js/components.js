@@ -717,8 +717,9 @@ window.ComponentManager = {
 
 } // End of ComponentManager if statement
 
-// 性能监控
-const ComponentPerformanceMonitor = {
+// 性能监控 - 完全避免重复声明冲突
+if (!window.ComponentPerformanceMonitor) {
+    window.ComponentPerformanceMonitor = {
     metrics: {},
 
     init: function() {
@@ -1158,7 +1159,9 @@ const StorageManager = {
 const AppInitializer = {
     init: function() {
         // 初始化性能监控
-        ComponentPerformanceMonitor.init();
+        if (window.ComponentPerformanceMonitor) {
+            window.ComponentPerformanceMonitor.init();
+        }
 
         // 初始化键盘导航
         KeyboardNavigation.init();
@@ -1315,15 +1318,16 @@ const AppInitializer = {
             });
         }
     }
-};
+    };
+} // End of ComponentPerformanceMonitor if statement
 
 // 导出到全局 - Winston架构兼容
 if (typeof window.ComponentManager === 'undefined') {
     window.ComponentManager = ComponentManager;
 }
-// Only set PerformanceMonitor if it doesn't already exist
+// Only set PerformanceMonitor if it doesn't already exist (Winston架构兼容)
 if (!window.PerformanceMonitor) {
-    window.PerformanceMonitor = ComponentPerformanceMonitor;
+    window.PerformanceMonitor = window.ComponentPerformanceMonitor;
 }
 window.KeyboardNavigation = KeyboardNavigation;
 window.DragDropManager = DragDropManager;

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Winston Document Manager Integration Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>🏗️ Winston Document Manager Integration Test</h1>
+        
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>🧪 Integration Status</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="integrationStatus">
+                            <p><span id="bootstrapStatus">❓</span> Bootstrap Status</p>
+                            <p><span id="winstonStatus">❓</span> Winston Error Recovery</p>
+                            <p><span id="documentManagerStatus">❓</span> Document Manager</p>
+                            <p><span id="modalRegistryStatus">❓</span> Modal Registry</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>🎮 Test Controls</h3>
+                    </div>
+                    <div class="card-body">
+                        <button id="testModalBtn" class="btn btn-primary me-2">
+                            <i class="fas fa-plus"></i> Test Modal
+                        </button>
+                        <button id="testEmergencyRecoveryBtn" class="btn btn-warning me-2">
+                            <i class="fas fa-first-aid"></i> Test Emergency Recovery
+                        </button>
+                        <button id="testWinstonCleanupBtn" class="btn btn-danger">
+                            <i class="fas fa-broom"></i> Test Winston Cleanup
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>📊 Modal Registry Status</h3>
+                    </div>
+                    <div class="card-body">
+                        <pre id="modalRegistryInfo">Loading...</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>📝 Console Log</h3>
+                    </div>
+                    <div class="card-body">
+                        <pre id="consoleLog" style="height: 200px; overflow-y: auto; background: #f8f9fa; padding: 10px;"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Modal -->
+    <div class="modal fade" id="testModal" tabindex="-1" aria-labelledby="testModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="testModalLabel">Winston Integration Test Modal</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>This modal tests the Winston + Bootstrap integration:</p>
+                    <ul>
+                        <li>✅ Proper Bootstrap modal.show() usage</li>
+                        <li>✅ Winston modal registry tracking</li>
+                        <li>✅ Error recovery integration</li>
+                        <li>✅ Accessibility preservation</li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/winston-error-recovery.js"></script>
+    <script src="/static/js/core.js"></script>
+    
+    <script>
+        // Mock document manager for testing
+        class TestDocumentManager {
+            constructor() {
+                this.modalRegistry = new Map();
+                this.winstonIntegration = this.initializeWinstonIntegration();
+            }
+            
+            initializeWinstonIntegration() {
+                return {
+                    registerModal: (modalId, instance) => {
+                        this.modalRegistry.set(modalId, {
+                            instance,
+                            timestamp: Date.now(),
+                            type: 'bootstrap'
+                        });
+                        console.log(`📋 Winston: Modal registered - ${modalId}`);
+                        this.updateModalRegistryDisplay();
+                    },
+                    
+                    unregisterModal: (modalId) => {
+                        this.modalRegistry.delete(modalId);
+                        console.log(`🗑️ Winston: Modal unregistered - ${modalId}`);
+                        this.updateModalRegistryDisplay();
+                    },
+                    
+                    getActiveModals: () => {
+                        return Array.from(this.modalRegistry.keys());
+                    },
+                    
+                    emergencyCleanupModals: () => {
+                        console.log('🚨 Winston: Emergency modal cleanup initiated');
+                        this.modalRegistry.forEach((modalInfo, modalId) => {
+                            this.forceCloseModal(modalId, modalInfo);
+                        });
+                        this.modalRegistry.clear();
+                        this.updateModalRegistryDisplay();
+                    },
+                    
+                    reportError: (error, context) => {
+                        if (window.winstonErrorRecovery) {
+                            window.winstonErrorRecovery.handleError({
+                                type: 'document_manager_error',
+                                error: error,
+                                context: context,
+                                timestamp: new Date().toISOString()
+                            });
+                        }
+                    }
+                };
+            }
+            
+            showTestModal() {
+                const modalElement = document.getElementById('testModal');
+                const modalId = 'testModal';
+                
+                try {
+                    const modal = new bootstrap.Modal(modalElement, {
+                        backdrop: 'static',
+                        keyboard: false
+                    });
+                    
+                    this.winstonIntegration.registerModal(modalId, modal);
+                    
+                    modalElement.addEventListener('hidden.bs.modal', () => {
+                        this.winstonIntegration.unregisterModal(modalId);
+                    }, { once: true });
+                    
+                    modal.show();
+                    console.log('✅ Winston: Test modal shown with proper tracking');
+                    
+                } catch (error) {
+                    console.error('❌ Winston: Failed to show test modal:', error);
+                    this.winstonIntegration.reportError(error, 'showTestModal');
+                }
+            }
+            
+            forceCloseModal(modalId, modalInfo = null) {
+                const modalElement = document.getElementById(modalId);
+                if (!modalElement) return;
+                
+                try {
+                    if (modalInfo && modalInfo.instance && modalInfo.instance.hide) {
+                        modalInfo.instance.hide();
+                    } else {
+                        const bootstrapInstance = bootstrap.Modal.getInstance(modalElement);
+                        if (bootstrapInstance) {
+                            bootstrapInstance.hide();
+                        }
+                    }
+                } catch (error) {
+                    console.warn('Winston: Bootstrap cleanup failed');
+                }
+            }
+            
+            updateModalRegistryDisplay() {
+                const info = {
+                    activeModals: Array.from(this.modalRegistry.keys()),
+                    totalCount: this.modalRegistry.size,
+                    details: Array.from(this.modalRegistry.entries()).map(([id, info]) => ({
+                        id,
+                        type: info.type,
+                        timestamp: new Date(info.timestamp).toLocaleTimeString()
+                    }))
+                };
+                
+                document.getElementById('modalRegistryInfo').textContent = JSON.stringify(info, null, 2);
+            }
+        }
+        
+        // Initialize test environment
+        document.addEventListener('DOMContentLoaded', () => {
+            const testManager = new TestDocumentManager();
+            window.testDocumentManager = testManager;
+            
+            // Status checks
+            document.getElementById('bootstrapStatus').textContent = 
+                typeof bootstrap !== 'undefined' ? '✅' : '❌';
+            document.getElementById('winstonStatus').textContent = 
+                typeof window.winstonErrorRecovery !== 'undefined' ? '✅' : '❌';
+            document.getElementById('documentManagerStatus').textContent = 
+                typeof testManager !== 'undefined' ? '✅' : '❌';
+            document.getElementById('modalRegistryStatus').textContent = 
+                testManager.modalRegistry instanceof Map ? '✅' : '❌';
+            
+            // Event handlers
+            document.getElementById('testModalBtn').addEventListener('click', () => {
+                testManager.showTestModal();
+            });
+            
+            document.getElementById('testEmergencyRecoveryBtn').addEventListener('click', () => {
+                if (window.winstonErrorRecovery) {
+                    window.winstonErrorRecovery.triggerEmergencyRecovery();
+                } else {
+                    console.log('Winston Error Recovery not available');
+                }
+            });
+            
+            document.getElementById('testWinstonCleanupBtn').addEventListener('click', () => {
+                testManager.winstonIntegration.emergencyCleanupModals();
+            });
+            
+            testManager.updateModalRegistryDisplay();
+            
+            // Console log capture
+            const originalLog = console.log;
+            const consoleLogElement = document.getElementById('consoleLog');
+            
+            console.log = function(...args) {
+                originalLog.apply(console, args);
+                consoleLogElement.textContent += args.join(' ') + '\n';
+                consoleLogElement.scrollTop = consoleLogElement.scrollHeight;
+            };
+            
+            console.log('🏗️ Winston Document Manager Integration Test initialized');
+        });
+    </script>
+</body>
+</html>

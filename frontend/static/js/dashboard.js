@@ -274,10 +274,33 @@ class DashboardController {
             name: modalElement.querySelector('#repoName').value,
             url: modalElement.querySelector('#repoUrl').value,
             description: modalElement.querySelector('#repoDescription').value,
-            branch: modalElement.querySelector('#repoBranch').value
+            branch: modalElement.querySelector('#repoBranch')?.value
         };
 
         try {
+            // Enhanced authentication check
+            const authResponse = await fetch('/api/auth/status', {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include'
+            });
+
+            let isAuthenticated = false;
+            if (authResponse.ok) {
+                const authData = await authResponse.json();
+                isAuthenticated = authData.logged_in || false;
+            }
+
+            // If not authenticated, show login prompt
+            if (!isAuthenticated) {
+                const message = '请先登录后再添加仓库。系统将为您跳转到登录页面。';
+                
+                if (confirm(`${message}\n\n点击确定跳转到登录页面。`)) {
+                    window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+                }
+                return;
+            }
+
             const response = await this.api.createRepository(repoData);
             this.showSuccess('仓库添加成功');
             
@@ -298,7 +321,16 @@ class DashboardController {
 
         } catch (error) {
             console.error('添加仓库失败:', error);
-            this.showError('添加仓库失败: ' + error.message);
+            
+            // Check if it's an authentication error
+            if (error.message.includes('401') || error.message.includes('login') || error.message.includes('登录')) {
+                const message = '登录会话已过期，请重新登录后再试。';
+                if (confirm(`${message}\n\n点击确定跳转到登录页面。`)) {
+                    window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+                }
+            } else {
+                this.showError('添加仓库失败: ' + error.message);
+            }
         }
     }
 
@@ -316,10 +348,33 @@ class DashboardController {
             name: document.getElementById('repoName').value,
             url: document.getElementById('repoUrl').value,
             description: document.getElementById('repoDescription').value,
-            branch: document.getElementById('repoBranch').value
+            branch: document.getElementById('repoBranch')?.value
         };
 
         try {
+            // Enhanced authentication check
+            const authResponse = await fetch('/api/auth/status', {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include'
+            });
+
+            let isAuthenticated = false;
+            if (authResponse.ok) {
+                const authData = await authResponse.json();
+                isAuthenticated = authData.logged_in || false;
+            }
+
+            // If not authenticated, show login prompt
+            if (!isAuthenticated) {
+                const message = '请先登录后再添加仓库。系统将为您跳转到登录页面。';
+                
+                if (confirm(`${message}\n\n点击确定跳转到登录页面。`)) {
+                    window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+                }
+                return;
+            }
+
             const response = await this.api.createRepository(repoData);
             this.showSuccess('仓库添加成功');
             modal.hide();
@@ -331,7 +386,16 @@ class DashboardController {
 
         } catch (error) {
             console.error('添加仓库失败:', error);
-            this.showError('添加仓库失败: ' + error.message);
+            
+            // Check if it's an authentication error
+            if (error.message.includes('401') || error.message.includes('login') || error.message.includes('登录')) {
+                const message = '登录会话已过期，请重新登录后再试。';
+                if (confirm(`${message}\n\n点击确定跳转到登录页面。`)) {
+                    window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+                }
+            } else {
+                this.showError('添加仓库失败: ' + error.message);
+            }
         }
     }
 
