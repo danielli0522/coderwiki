@@ -6,7 +6,7 @@
 class TaskDetailManager {
     constructor(taskId) {
         this.taskId = taskId;
-        this.apiClient = new ApiClient();
+        this.apiClient = window.api || new ApiClient();
         this.updateInterval = null;
         this.init();
     }

@@ -9,7 +9,7 @@ class AnalysisManager {
         this.analysisHistory = [];
         this.currentAnalysis = null;
         this.pollingInterval = null;
-        this.apiClient = new ApiClient();
+        this.apiClient = window.api || new ApiClient();
 
         this.init();
     }

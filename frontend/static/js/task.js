@@ -9,7 +9,7 @@ class TaskManager {
         this.filteredTasks = [];
         this.currentFilter = '';
         this.currentSearch = '';
-        this.apiClient = new ApiClient();
+        this.apiClient = window.api || new ApiClient();
         this.init();
     }
 

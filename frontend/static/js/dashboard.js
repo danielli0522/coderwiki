@@ -67,8 +67,15 @@ class DashboardController {
 
     initializeComponents() {
         try {
-            // 初始化API客户端
-            this.api = new ApiClient();
+            // 初始化API客户端 - 使用全局实例或创建新实例
+            if (window.api && typeof window.api.createRepository === 'function') {
+                this.api = window.api;
+            } else if (typeof ApiClient !== 'undefined') {
+                this.api = new ApiClient();
+            } else {
+                // 降级策略：使用fetch API
+                this.api = this.createFallbackApiClient();
+            }
 
             // 初始化实时更新
             this.realtimeUpdates = new RealtimeUpdates();
@@ -996,6 +1003,92 @@ class DashboardController {
         window.removeEventListener('resize', this.handleResize);
         
         console.log('✅ Dashboard controller destroyed');
+    }
+
+    // 降级策略：创建简单的API客户端
+    createFallbackApiClient() {
+        console.warn('🚨 ApiClient not available, using fallback implementation');
+        return {
+            async createRepository(data) {
+                try {
+                    const response = await fetch('/api/repositories', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data),
+                        credentials: 'include'
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    
+                    return await response.json();
+                } catch (error) {
+                    console.error('Repository creation failed:', error);
+                    throw error;
+                }
+            },
+            
+            async getRepositories() {
+                try {
+                    const response = await fetch('/api/repositories', {
+                        method: 'GET',
+                        credentials: 'include'
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    
+                    return await response.json();
+                } catch (error) {
+                    console.error('Repository fetch failed:', error);
+                    throw error;
+                }
+            },
+            
+            async updateRepository(id, data) {
+                try {
+                    const response = await fetch(`/api/repositories/${id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data),
+                        credentials: 'include'
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    
+                    return await response.json();
+                } catch (error) {
+                    console.error('Repository update failed:', error);
+                    throw error;
+                }
+            },
+            
+            async deleteRepository(id) {
+                try {
+                    const response = await fetch(`/api/repositories/${id}`, {
+                        method: 'DELETE',
+                        credentials: 'include'
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    
+                    return await response.json();
+                } catch (error) {
+                    console.error('Repository delete failed:', error);
+                    throw error;
+                }
+            }
+        };
     }
 }
 

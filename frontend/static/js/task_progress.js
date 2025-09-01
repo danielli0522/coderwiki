@@ -5,7 +5,7 @@
 
 class TaskProgressMonitor {
     constructor() {
-        this.apiClient = new ApiClient();
+        this.apiClient = window.api || new ApiClient();
         this.updateInterval = null;
         this.refreshInterval = 180000; // 3 minutes default
         this.charts = {};

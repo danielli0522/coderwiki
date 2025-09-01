@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API测试页面</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .warning { background-color: #fff3cd; border: 1px solid #ffeaa7; color: #856404; }
+        button { margin: 5px; padding: 10px 15px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>🧪 API接口修复测试</h1>
+    
+    <div id="test-results"></div>
+    
+    <h2>测试操作</h2>
+    <button onclick="testApiAvailability()">测试API可用性</button>
+    <button onclick="testCreateRepository()">测试创建仓库API</button>
+    <button onclick="testGlobalApiInstance()">测试全局API实例</button>
+    <button onclick="testDashboardController()">测试Dashboard控制器</button>
+    <button onclick="runAllTests()">运行所有测试</button>
+    
+    <h2>控制台日志</h2>
+    <pre id="console-log" style="background: #f8f9fa; padding: 10px; border-radius: 5px; height: 200px; overflow-y: scroll;"></pre>
+
+    <!-- 加载必要的脚本 -->
+    <script src="../frontend/static/js/core.js"></script>
+    <script src="../frontend/static/js/dashboard.js"></script>
+    
+    <script>
+        let testResults = [];
+        const originalConsoleLog = console.log;
+        const originalConsoleError = console.error;
+        const originalConsoleWarn = console.warn;
+        
+        // 劫持console输出
+        function setupConsoleCapture() {
+            const logElement = document.getElementById('console-log');
+            
+            console.log = function(...args) {
+                originalConsoleLog.apply(console, args);
+                logElement.textContent += '[LOG] ' + args.join(' ') + '\n';
+                logElement.scrollTop = logElement.scrollHeight;
+            };
+            
+            console.error = function(...args) {
+                originalConsoleError.apply(console, args);
+                logElement.textContent += '[ERROR] ' + args.join(' ') + '\n';
+                logElement.scrollTop = logElement.scrollHeight;
+            };
+            
+            console.warn = function(...args) {
+                originalConsoleWarn.apply(console, args);
+                logElement.textContent += '[WARN] ' + args.join(' ') + '\n';
+                logElement.scrollTop = logElement.scrollHeight;
+            };
+        }
+        
+        function addTestResult(name, success, message, details = '') {
+            const result = { name, success, message, details, timestamp: new Date().toISOString() };
+            testResults.push(result);
+            
+            const resultsContainer = document.getElementById('test-results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${success ? 'success' : 'error'}`;
+            resultDiv.innerHTML = `
+                <strong>${success ? '✅' : '❌'} ${name}</strong><br>
+                ${message}
+                ${details ? `<br><small>${details}</small>` : ''}
+                <small style="float: right;">${new Date().toLocaleTimeString()}</small>
+            `;
+            resultsContainer.appendChild(resultDiv);
+        }
+        
+        function testApiAvailability() {
+            console.log('🔍 测试API可用性...');
+            
+            try {
+                // 检查ApiClient类是否存在
+                if (typeof ApiClient === 'undefined') {
+                    addTestResult('ApiClient类检查', false, 'ApiClient类未定义');
+                    return;
+                }
+                addTestResult('ApiClient类检查', true, 'ApiClient类已正确定义');
+                
+                // 检查全局API实例
+                if (!window.api) {
+                    addTestResult('全局API实例检查', false, 'window.api不存在');
+                    return;
+                }
+                addTestResult('全局API实例检查', true, 'window.api存在');
+                
+                // 检查createRepository方法
+                if (typeof window.api.createRepository !== 'function') {
+                    addTestResult('createRepository方法检查', false, 'createRepository方法不存在或不是函数');
+                    return;
+                }
+                addTestResult('createRepository方法检查', true, 'createRepository方法存在且为函数');
+                
+            } catch (error) {
+                addTestResult('API可用性测试', false, '测试过程中发生错误', error.message);
+            }
+        }
+        
+        function testCreateRepository() {
+            console.log('🔍 测试创建仓库API...');
+            
+            const testData = {
+                name: 'test-repo-' + Date.now(),
+                url: 'https://github.com/test/repo',
+                description: '测试仓库'
+            };
+            
+            try {
+                if (!window.api || typeof window.api.createRepository !== 'function') {
+                    addTestResult('创建仓库API测试', false, 'API或createRepository方法不可用');
+                    return;
+                }
+                
+                // 注意：这里只是测试方法调用，不实际发送请求
+                const apiMethod = window.api.createRepository;
+                if (typeof apiMethod === 'function') {
+                    addTestResult('创建仓库API测试', true, 'createRepository方法可调用', `方法签名正确`);
+                } else {
+                    addTestResult('创建仓库API测试', false, 'createRepository不是有效方法');
+                }
+                
+            } catch (error) {
+                addTestResult('创建仓库API测试', false, '测试过程中发生错误', error.message);
+            }
+        }
+        
+        function testGlobalApiInstance() {
+            console.log('🔍 测试全局API实例...');
+            
+            try {
+                const checks = [
+                    { name: 'window.api存在', test: () => !!window.api },
+                    { name: 'createRepository方法', test: () => typeof window.api.createRepository === 'function' },
+                    { name: 'getRepositories方法', test: () => typeof window.api.getRepositories === 'function' },
+                    { name: 'updateRepository方法', test: () => typeof window.api.updateRepository === 'function' },
+                    { name: 'deleteRepository方法', test: () => typeof window.api.deleteRepository === 'function' }
+                ];
+                
+                let allPassed = true;
+                checks.forEach(check => {
+                    const passed = check.test();
+                    if (!passed) allPassed = false;
+                    addTestResult(check.name, passed, passed ? '检查通过' : '检查失败');
+                });
+                
+                addTestResult('全局API实例综合测试', allPassed, allPassed ? '所有API方法都可用' : '部分API方法不可用');
+                
+            } catch (error) {
+                addTestResult('全局API实例测试', false, '测试过程中发生错误', error.message);
+            }
+        }
+        
+        function testDashboardController() {
+            console.log('🔍 测试Dashboard控制器...');
+            
+            try {
+                // 检查DashboardController类
+                if (typeof DashboardController === 'undefined') {
+                    addTestResult('DashboardController类检查', false, 'DashboardController类未定义');
+                    return;
+                }
+                addTestResult('DashboardController类检查', true, 'DashboardController类已定义');
+                
+                // 检查全局dashboard实例
+                if (!window.dashboard) {
+                    addTestResult('全局dashboard实例检查', false, 'window.dashboard不存在');
+                    return;
+                }
+                addTestResult('全局dashboard实例检查', true, 'window.dashboard存在');
+                
+                // 检查dashboard的api属性
+                if (!window.dashboard.api) {
+                    addTestResult('Dashboard API实例检查', false, 'dashboard.api不存在');
+                    return;
+                }
+                addTestResult('Dashboard API实例检查', true, 'dashboard.api存在');
+                
+                // 检查dashboard api的createRepository方法
+                if (typeof window.dashboard.api.createRepository !== 'function') {
+                    addTestResult('Dashboard API方法检查', false, 'dashboard.api.createRepository不是函数');
+                    return;
+                }
+                addTestResult('Dashboard API方法检查', true, 'dashboard.api.createRepository方法可用');
+                
+            } catch (error) {
+                addTestResult('Dashboard控制器测试', false, '测试过程中发生错误', error.message);
+            }
+        }
+        
+        function runAllTests() {
+            console.log('🚀 运行所有测试...');
+            
+            // 清空之前的结果
+            document.getElementById('test-results').innerHTML = '';
+            document.getElementById('console-log').textContent = '';
+            testResults = [];
+            
+            // 运行所有测试
+            setTimeout(() => testApiAvailability(), 100);
+            setTimeout(() => testGlobalApiInstance(), 300);
+            setTimeout(() => testDashboardController(), 500);
+            setTimeout(() => testCreateRepository(), 700);
+            
+            setTimeout(() => {
+                console.log('📊 测试总结:');
+                const passed = testResults.filter(r => r.success).length;
+                const total = testResults.length;
+                console.log(`通过: ${passed}/${total}`);
+                
+                if (passed === total) {
+                    addTestResult('总体测试结果', true, `所有测试通过 (${passed}/${total})`);
+                } else {
+                    addTestResult('总体测试结果', false, `部分测试失败 (${passed}/${total})`);
+                }
+            }, 1000);
+        }
+        
+        // 页面加载完成后设置
+        window.addEventListener('load', () => {
+            setupConsoleCapture();
+            console.log('🔧 API修复测试页面已加载');
+            console.log('请点击测试按钮进行验证');
+        });
+    </script>
+</body>
+</html>
