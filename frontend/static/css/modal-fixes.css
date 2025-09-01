@@ -1,7 +1,20 @@
 /* 模态框修复样式 - 强力解决无法输入问题 */
 
-/* 重置所有可能的干扰样式 */
-.modal {
+/* 确保隐藏的模态框不会阻塞页面交互 */
+.modal:not(.show) {
+    pointer-events: none !important;
+    visibility: hidden !important;
+    display: none !important;
+}
+
+.modal-backdrop:not(.show) {
+    pointer-events: none !important;
+    visibility: hidden !important;
+    display: none !important;
+}
+
+/* 重置所有可能的干扰样式 - 只对显示的模态框生效 */
+.modal.show {
     z-index: 99999 !important;
     position: fixed !important;
     top: 0 !important;
@@ -13,7 +26,7 @@
     display: block !important;
 }
 
-.modal-backdrop {
+.modal-backdrop.show {
     z-index: 99998 !important;
     position: fixed !important;
     top: 0 !important;
