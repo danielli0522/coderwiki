@@ -39,8 +39,8 @@ class PromptsBasedDocGenerator:
     def __init__(self):
         """初始化生成器"""
         self.prompts_dir = PROJECT_ROOT / 'docs' / 'prompts'
-        # 输出根目录：项目根目录下的 coderwiki-output-docs
-        self.output_base_dir = PROJECT_ROOT / 'coderwiki-output-docs'
+        # 临时产出根目录：项目根目录下 temp/ai-generate-doc（避免与持久化产物混淆）
+        self.output_base_dir = PROJECT_ROOT / 'temp'
         self.ai_docs_dir = self.output_base_dir / 'ai-generate-doc'
         self.mkdocs_dir = self.output_base_dir / 'mkdocs-site'
 
@@ -53,7 +53,7 @@ class PromptsBasedDocGenerator:
 
         logger.info(f"PromptsBasedDocGenerator initialized")
         logger.info(f"Prompts dir: {self.prompts_dir}")
-        logger.info(f"Output base dir: {self.output_base_dir}")
+        logger.info(f"Output base dir (TEMP): {self.output_base_dir}")
         logger.info(f"Available prompts: {list(self.prompts.keys())}")
 
     def _load_prompts(self) -> Dict[str, str]:
@@ -741,7 +741,7 @@ def main():
 🚀 AI文档生成器 - 使用prompts目录提示词
 
 工作目录: {PROJECT_ROOT}
-输出目录: {PROJECT_ROOT}/coderwiki-output-docs/
+输出目录(临时): {PROJECT_ROOT}/temp/ai-generate-doc/
 提示词目录: {PROJECT_ROOT}/docs/prompts/
 
 开始生成AI文档...
