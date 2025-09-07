@@ -34,18 +34,18 @@ sequenceDiagram
     User->>WebUI: Create Repository (name, URL)
     WebUI->>API: POST /api/repositories
     API->>RepoService: create_repository(user_id, url, name, description)
-    
+
     RepoService->>DirService: create_repository_directories(name, repo_id)
     Note over DirService: Creates unified directory structure
     DirService->>FileSystem: mkdir coderwiki-output-docs/repos/{name}_{id}/
     DirService->>FileSystem: mkdir coderwiki-output-docs/ai-generate-doc/{name}_{id}/
     DirService->>FileSystem: mkdir coderwiki-output-docs/mkdocs-site/{name}_{id}/
     DirService-->>RepoService: Directory paths created
-    
+
     RepoService->>GitClone: git clone {url} repos/{name}_{id}/
     GitClone->>FileSystem: Clone repository files
     GitClone-->>RepoService: Repository cloned successfully
-    
+
     RepoService->>API: Repository created (ID: {repo_id})
     API->>WebUI: Repository creation result
     WebUI-->>User: Repository added successfully
@@ -55,41 +55,41 @@ sequenceDiagram
     User->>WebUI: Generate Documentation
     WebUI->>API: POST /api/documents/generate/{repo_id}
     API->>DocGenService: generate_docs_for_repository(repo_id)
-    
+
     DocGenService->>DirService: get_repository_directory(name, repo_id)
     DirService-->>DocGenService: coderwiki-output-docs/repos/{name}_{id}/
-    
-    DocGenService->>DirService: get_ai_docs_directory(name, repo_id)  
+
+    DocGenService->>DirService: get_ai_docs_directory(name, repo_id)
     DirService-->>DocGenService: coderwiki-output-docs/ai-generate-doc/{name}_{id}/
-    
+
     DocGenService->>FileSystem: Load docs/prompts/sequence.json
     FileSystem-->>DocGenService: Prompt execution sequence config
-    
+
     Note over DocGenService: Load 3 prompts from sequence.json
     DocGenService->>FileSystem: Read docs/prompts/technical-overview.md
-    DocGenService->>FileSystem: Read docs/prompts/API逆向分析.md
+    DocGenService->>FileSystem: Read docs/prompts/API接口分析.md
     DocGenService->>FileSystem: Read docs/prompts/模块深度考古与高频提交问题.md
     FileSystem-->>DocGenService: Prompt content loaded
-    
+
     loop For each prompt in sequence
         Note over DocGenService, ClaudeCLI: Execute Prompt via Claude Headless Mode
         DocGenService->>ClaudeRunner: _execute_prompt(config, repository, repo_source_dir, output_dir)
-        
+
         Note over ClaudeRunner: Replace variables in prompt
         Note over ClaudeRunner: {project_name} → repository.name
         Note over ClaudeRunner: {repository_path} → repo_source_dir
-        
+
         ClaudeRunner->>ClaudeCLI: claude -p "{prompt_content}" --allowedTools "Read,Grep,Glob" --add-dir "{repo_source_dir}" --permission-mode acceptEdits --timeout 600
-        
+
         Note over ClaudeCLI: Execute in repository context
         ClaudeCLI->>FileSystem: Analyze repository files (Read, Grep, Glob)
         ClaudeCLI->>ClaudeCLI: Generate documentation content
         ClaudeCLI-->>ClaudeRunner: Execution result with generated content
-        
+
         ClaudeRunner->>FileSystem: Write ai-generate-doc/{name}_{id}/{name}-{prompt-name}.md
         ClaudeRunner-->>DocGenService: Generation result (success/failure, content, execution_time)
     end
-    
+
     DocGenService->>API: Generation completed (3 documents created)
     API->>WebUI: AI documents generated successfully
     WebUI-->>User: Documentation generation completed
@@ -99,38 +99,38 @@ sequenceDiagram
     User->>WebUI: Build Documentation Site
     WebUI->>API: POST /api/mkdocs/build/{repo_id}
     API->>MkDocsService: build_site_for_repository(repo_id, user_id)
-    
+
     MkDocsService->>DirService: get_mkdocs_site_path(name, repo_id)
     DirService-->>MkDocsService: coderwiki-output-docs/mkdocs-site/{name}_{id}/
-    
+
     MkDocsService->>DirService: get_mkdocs_docs_path(name, repo_id)
     DirService-->>MkDocsService: coderwiki-output-docs/mkdocs-site/{name}_{id}/docs/
-    
+
     Note over MkDocsService: Collect AI-generated documents
     MkDocsService->>FileSystem: Scan ai-generate-doc/{name}_{id}/*.md
     FileSystem-->>MkDocsService: List of generated documents
-    
+
     Note over MkDocsService: Create MkDocs structure
     loop For each AI document
         MkDocsService->>FileSystem: Copy {name}-{prompt}.md → mkdocs-site/{name}_{id}/docs/
     end
-    
+
     MkDocsService->>FileSystem: Generate mkdocs.yml config
     Note over FileSystem: mkdocs-site/{name}_{id}/mkdocs.yml
     Note over FileSystem: - site_name: "{name} Documentation"
     Note over FileSystem: - theme: material with Mermaid support
     Note over FileSystem: - nav: Auto-generated from documents
-    
+
     MkDocsService->>FileSystem: Create mermaid-init.js script
     Note over FileSystem: mkdocs-site/{name}_{id}/docs/javascripts/mermaid-init.js
-    
+
     MkDocsService->>MkDocsBuild: mkdocs build --clean (cwd: mkdocs-site/{name}_{id}/)
     MkDocsBuild->>FileSystem: Generate static site files
     Note over FileSystem: mkdocs-site/{name}_{id}/site/index.html
     Note over FileSystem: mkdocs-site/{name}_{id}/site/assets/
     Note over FileSystem: mkdocs-site/{name}_{id}/site/search/
     MkDocsBuild-->>MkDocsService: Static site built successfully
-    
+
     MkDocsService->>API: Site built successfully
     API->>WebUI: MkDocs site ready
     WebUI-->>User: Documentation site built: /sites/{name}_{id}/
@@ -145,7 +145,7 @@ sequenceDiagram
     Note over User, WebServer: File Storage Summary
     Note over FileSystem: coderwiki-output-docs/
     Note over FileSystem: ├── repos/{name}_{id}/           # Git cloned repository
-    Note over FileSystem: ├── ai-generate-doc/{name}_{id}/ # AI generated *.md files  
+    Note over FileSystem: ├── ai-generate-doc/{name}_{id}/ # AI generated *.md files
     Note over FileSystem: └── mkdocs-site/{name}_{id}/     # MkDocs project & built site
     Note over FileSystem:     ├── docs/                    # Source markdown files
     Note over FileSystem:     ├── mkdocs.yml               # MkDocs configuration
@@ -155,6 +155,7 @@ sequenceDiagram
 ## Key Components and Their Responsibilities
 
 ### 1. **DirectoryService** (Unified Path Management)
+
 - **Location**: `/backend/app/services/directory_service.py`
 - **Responsibility**: Centralized directory structure management
 - **Key Methods**:
@@ -163,6 +164,7 @@ sequenceDiagram
   - `get_mkdocs_site_path()` → `coderwiki-output-docs/mkdocs-site/{name}_{id}/`
 
 ### 2. **DocumentGenerationService** (Optimized AI Generation)
+
 - **Location**: `/backend/app/services/document_generation_service.py`
 - **Responsibility**: Direct Claude headless mode execution with prompts
 - **Key Optimizations**:
@@ -172,6 +174,7 @@ sequenceDiagram
   - Direct variable replacement in prompts
 
 ### 3. **Claude Headless Runner** (AI Execution Engine)
+
 - **Location**: `/claude_headless_runner.py`
 - **Responsibility**: Execute Claude CLI in headless mode
 - **Key Features**:
@@ -181,6 +184,7 @@ sequenceDiagram
   - Timeout handling (300-1200s)
 
 ### 4. **MkDocsService** (Static Site Generation)
+
 - **Location**: `/backend/app/services/mkdocs_service.py`
 - **Responsibility**: Convert AI documents to static documentation sites
 - **Key Features**:
@@ -192,6 +196,7 @@ sequenceDiagram
 ## Configuration Files
 
 ### 1. **Prompt Execution Sequence** (`docs/prompts/sequence.json`)
+
 ```json
 {
   "version": "1.0",
@@ -202,8 +207,8 @@ sequenceDiagram
       "tools": ["Read", "Grep", "Glob"]
     },
     {
-      "prompt_file": "API逆向分析.md",
-      "timeout": 900,  
+      "prompt_file": "API接口分析.md",
+      "timeout": 900,
       "tools": ["Read", "Grep", "Bash"]
     },
     {
@@ -216,23 +221,27 @@ sequenceDiagram
 ```
 
 ### 2. **Available Prompts** (`docs/prompts/`)
+
 - `technical-overview.md` - Comprehensive technical analysis
-- `API逆向分析.md` - API reverse engineering analysis  
+- `API接口分析.md` - API reverse engineering analysis
 - `模块深度考古与高频提交问题.md` - Module archaeology & commit analysis
 
 ## File Storage Locations
 
 ### **Repository Files**
+
 - **Location**: `coderwiki-output-docs/repos/{name}_{id}/`
 - **Content**: Original cloned git repository
 - **Purpose**: Source code analysis context for AI
 
 ### **AI Generated Documents**
+
 - **Location**: `coderwiki-output-docs/ai-generate-doc/{name}_{id}/`
 - **Content**: `{name}-{prompt-name}.md` files
 - **Purpose**: AI-generated technical documentation
 
 ### **MkDocs Sites**
+
 - **Location**: `coderwiki-output-docs/mkdocs-site/{name}_{id}/`
 - **Structure**:
   - `docs/` - Source markdown files (copied from ai-generate-doc)

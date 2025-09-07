@@ -35,89 +35,89 @@ logger = logging.getLogger(__name__)
 
 class PromptsBasedDocGenerator:
     """基于docs/prompts目录提示词的AI文档生成器"""
-    
+
     def __init__(self):
         """初始化生成器"""
         self.prompts_dir = PROJECT_ROOT / 'docs' / 'prompts'
         self.output_base_dir = PROJECT_ROOT / 'coderwiki-output-docs'
         self.ai_docs_dir = self.output_base_dir / 'ai-generate-doc'
         self.mkdocs_dir = self.output_base_dir / 'mkdocs-site'
-        
+
         # 确保输出目录存在
         self.ai_docs_dir.mkdir(parents=True, exist_ok=True)
         self.mkdocs_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # 加载提示词模板
         self.prompts = self._load_prompts()
-        
+
         logger.info(f"PromptsBasedDocGenerator initialized")
         logger.info(f"Prompts dir: {self.prompts_dir}")
         logger.info(f"Output base dir: {self.output_base_dir}")
         logger.info(f"Available prompts: {list(self.prompts.keys())}")
-    
+
     def _load_prompts(self) -> Dict[str, str]:
         """加载docs/prompts目录中的提示词"""
         prompts = {}
-        
+
         if not self.prompts_dir.exists():
             logger.warning(f"Prompts directory not found: {self.prompts_dir}")
             return prompts
-        
+
         # 加载所有.md提示词文件
         for prompt_file in self.prompts_dir.glob("*.md"):
             try:
                 with open(prompt_file, 'r', encoding='utf-8') as f:
                     content = f.read()
-                
+
                 # 使用文件名作为提示词类型
                 prompt_type = prompt_file.stem
                 prompts[prompt_type] = content
-                
+
                 logger.info(f"Loaded prompt: {prompt_type} ({len(content)} chars)")
             except Exception as e:
                 logger.error(f"Failed to load prompt {prompt_file}: {e}")
-        
+
         # 加载sequence.json如果存在
         sequence_file = self.prompts_dir / 'sequence.json'
         if sequence_file.exists():
             try:
                 with open(sequence_file, 'r', encoding='utf-8') as f:
                     sequence_config = json.load(f)
-                
+
                 prompts['sequence_config'] = sequence_config
                 logger.info("Loaded sequence configuration")
             except Exception as e:
                 logger.error(f"Failed to load sequence config: {e}")
-        
+
         return prompts
-    
+
     def run_document_generation(self, repository_name: str = None, repository_id: int = None) -> Dict[str, Any]:
         """运行文档生成"""
         try:
             logger.info("Starting AI document generation with prompts...")
-            
+
             # 如果没有指定仓库，尝试从现有输出目录中找到
             if not repository_name:
                 repository_name, repository_id = self._detect_existing_repository()
-            
+
             if not repository_name:
-                repository_name = "default_project" 
+                repository_name = "default_project"
                 repository_id = repository_id or 1
                 logger.warning(f"No repository specified, using default: {repository_name}")
-            
+
             # 创建仓库特定的输出目录
             repo_output_dir = self.ai_docs_dir / f"{repository_name}_{repository_id}"
             repo_output_dir.mkdir(parents=True, exist_ok=True)
-            
+
             # 为每个提示词生成文档
             generated_docs = {}
-            
+
             for prompt_type, prompt_content in self.prompts.items():
                 if prompt_type == 'sequence_config':
                     continue  # 跳过配置文件
-                
+
                 logger.info(f"Generating document using prompt: {prompt_type}")
-                
+
                 # 根据提示词类型生成文档
                 doc_result = self._generate_document_with_prompt(
                     prompt_type=prompt_type,
@@ -126,16 +126,16 @@ class PromptsBasedDocGenerator:
                     repository_id=repository_id,
                     output_dir=repo_output_dir
                 )
-                
+
                 if doc_result['success']:
                     generated_docs[prompt_type] = doc_result
                     logger.info(f"✓ Generated document: {doc_result['file_path']}")
                 else:
                     logger.error(f"✗ Failed to generate document for {prompt_type}: {doc_result.get('error')}")
-            
+
             # 创建总结文档
             summary_doc = self._create_summary_document(generated_docs, repo_output_dir, repository_name)
-            
+
             result = {
                 'success': True,
                 'repository_name': repository_name,
@@ -146,19 +146,19 @@ class PromptsBasedDocGenerator:
                 'summary_document': summary_doc,
                 'generation_time': datetime.now().isoformat()
             }
-            
+
             logger.info(f"Document generation completed successfully!")
             logger.info(f"Generated {len(generated_docs)} documents in {repo_output_dir}")
-            
+
             return result
-            
+
         except Exception as e:
             logger.error(f"Document generation failed: {e}")
             return {
                 'success': False,
                 'error': str(e)
             }
-    
+
     def _detect_existing_repository(self) -> tuple:
         """检测现有的仓库目录"""
         try:
@@ -166,43 +166,43 @@ class PromptsBasedDocGenerator:
             for item in self.ai_docs_dir.iterdir():
                 if item.is_dir():
                     dir_name = item.name
-                    
+
                     # 尝试解析目录名：repository_name_id
                     if '_' in dir_name:
                         parts = dir_name.rsplit('_', 1)
                         if len(parts) == 2 and parts[1].isdigit():
                             return parts[0], int(parts[1])
-                    
+
                     # 如果无法解析ID，使用默认ID
                     return dir_name, 1
-            
+
             return None, None
-            
+
         except Exception as e:
             logger.warning(f"Failed to detect existing repository: {e}")
             return None, None
-    
-    def _generate_document_with_prompt(self, prompt_type: str, prompt_content: str, 
-                                     repository_name: str, repository_id: int, 
+
+    def _generate_document_with_prompt(self, prompt_type: str, prompt_content: str,
+                                     repository_name: str, repository_id: int,
                                      output_dir: Path) -> Dict[str, Any]:
         """使用指定提示词生成文档"""
         try:
             # 模拟AI文档生成（在真实环境中应该调用AI API）
             logger.info(f"Processing prompt type: {prompt_type}")
-            
+
             # 解析提示词内容，提取关键信息
             document_title = self._extract_document_title(prompt_type, prompt_content)
-            
+
             # 基于提示词生成内容（这里是模拟实现）
             generated_content = self._simulate_ai_generation(prompt_type, prompt_content, repository_name)
-            
+
             # 创建文档文件
             doc_filename = f"{repository_name}-{prompt_type}.md"
             doc_file_path = output_dir / doc_filename
-            
+
             with open(doc_file_path, 'w', encoding='utf-8') as f:
                 f.write(generated_content)
-            
+
             return {
                 'success': True,
                 'prompt_type': prompt_type,
@@ -211,7 +211,7 @@ class PromptsBasedDocGenerator:
                 'file_size': doc_file_path.stat().st_size,
                 'content_preview': generated_content[:200] + "..." if len(generated_content) > 200 else generated_content
             }
-            
+
         except Exception as e:
             logger.error(f"Failed to generate document with prompt {prompt_type}: {e}")
             return {
@@ -219,7 +219,7 @@ class PromptsBasedDocGenerator:
                 'error': str(e),
                 'prompt_type': prompt_type
             }
-    
+
     def _extract_document_title(self, prompt_type: str, prompt_content: str) -> str:
         """从提示词中提取文档标题"""
         # 尝试从提示词内容中提取标题
@@ -227,22 +227,22 @@ class PromptsBasedDocGenerator:
         for line in lines:
             if line.strip().startswith('# '):
                 return line.strip()[2:].strip()
-        
+
         # 根据提示词类型生成标题
         title_mapping = {
-            'API逆向分析': 'API逆向分析报告',
+            'API接口分析': 'API接口分析报告',
             'technical-overview': '技术概览文档',
             '模块深度考古与高频提交问题': '模块深度考古与高频提交问题分析'
         }
-        
+
         return title_mapping.get(prompt_type, prompt_type.replace('-', ' ').replace('_', ' ').title())
-    
+
     def _simulate_ai_generation(self, prompt_type: str, prompt_content: str, repository_name: str) -> str:
         """模拟AI生成内容（在真实环境中应该调用实际的AI API）"""
-        
+
         # 根据提示词类型生成相应的内容模板
-        if prompt_type == 'API逆向分析':
-            return f"""# {repository_name} - API逆向分析报告
+        if prompt_type == 'API接口分析':
+            return f"""# {repository_name} - API接口分析报告
 
 ## 1. 概览 (Overview)
 
@@ -305,7 +305,7 @@ class PromptsBasedDocGenerator:
 ## 生成信息
 
 - **生成时间:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-- **基于提示词:** API逆向分析.md
+- **基于提示词:** API接口分析.md
 - **仓库:** {repository_name}
 - **分析方法:** 基于提供的核心职责总结和代码结构分析
 
@@ -388,7 +388,7 @@ sequenceDiagram
 erDiagram
     USER ||--o{{ REPOSITORY : owns
     REPOSITORY ||--o{{ DOCUMENT : contains
-    
+
     USER {{
         int id PK
         string username
@@ -469,7 +469,7 @@ sequenceDiagram
     participant DocGen as 文档生成器
     participant AI as AI服务
     participant Storage as 存储服务
-    
+
     User->>+API: 请求生成文档
     API->>+DocGen: 创建生成任务
     DocGen->>+AI: 调用AI生成服务
@@ -491,7 +491,7 @@ sequenceDiagram
     participant Analyzer as 代码分析器
     participant GitService as Git服务
     participant Database as 数据库
-    
+
     Scheduler->>+Analyzer: 启动仓库分析
     Analyzer->>+GitService: 克隆/更新仓库
     Note over GitService: ⚠️ 问题4: 大型仓库克隆超时
@@ -512,7 +512,7 @@ sequenceDiagram
     participant AuthService as 认证服务
     participant UserDB as 用户数据库
     participant Session as 会话管理
-    
+
     Client->>+AuthAPI: 用户登录请求
     AuthAPI->>+AuthService: 验证用户凭证
     AuthService->>+UserDB: 查询用户信息
@@ -533,7 +533,7 @@ sequenceDiagram
 - **技术风险**: 用户体验下降，功能不稳定
 - **解决建议**: 实现重试机制、熔断器模式、备用AI服务
 
-### 问题2: 并发写入冲突  
+### 问题2: 并发写入冲突
 - **症状**: 多用户同时生成文档时出现文件冲突
 - **影响范围**: 文档存储模块
 - **技术风险**: 数据丢失、文件损坏
@@ -573,7 +573,7 @@ sequenceDiagram
 
 ### 高优先级（立即执行）
 1. **实现AI API重试机制** - 解决问题1
-2. **优化数据库查询性能** - 解决问题6  
+2. **优化数据库查询性能** - 解决问题6
 3. **实现文件并发写入控制** - 解决问题2
 
 ### 中优先级（1个月内）
@@ -660,8 +660,8 @@ sequenceDiagram
 
 > 注意：此文档基于提示词模板生成，具体内容需要结合实际项目情况进行调整。
 """
-    
-    def _create_summary_document(self, generated_docs: Dict[str, Any], output_dir: Path, 
+
+    def _create_summary_document(self, generated_docs: Dict[str, Any], output_dir: Path,
                                repository_name: str) -> str:
         """创建文档生成总结"""
         try:
@@ -674,7 +674,7 @@ sequenceDiagram
 ## 生成的文档列表
 
 """
-            
+
             for prompt_type, doc_info in generated_docs.items():
                 summary_content += f"""### {doc_info['document_title']}
 
@@ -686,23 +686,23 @@ sequenceDiagram
 ---
 
 """
-            
+
             summary_content += f"""## 使用的提示词
 
 本次生成使用了以下提示词文件：
 
 """
-            
+
             for prompt_type in generated_docs.keys():
                 summary_content += f"- `{prompt_type}.md`\n"
-            
+
             summary_content += f"""
 
 ## 输出目录结构
 
 ```
 {output_dir}/
-├── {repository_name}-API逆向分析.md
+├── {repository_name}-API接口分析.md
 ├── {repository_name}-technical-overview.md
 ├── {repository_name}-模块深度考古与高频提交问题.md
 └── README.md (本文档)
@@ -717,19 +717,19 @@ sequenceDiagram
 
 ---
 
-**生成时间**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}  
-**生成工具**: PromptsBasedDocGenerator  
-**基于目录**: docs/prompts/  
+**生成时间**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+**生成工具**: PromptsBasedDocGenerator
+**基于目录**: docs/prompts/
 """
-            
+
             # 保存总结文档
             summary_file = output_dir / "README.md"
             with open(summary_file, 'w', encoding='utf-8') as f:
                 f.write(summary_content)
-            
+
             logger.info(f"Created summary document: {summary_file}")
             return str(summary_file)
-            
+
         except Exception as e:
             logger.error(f"Failed to create summary document: {e}")
             return ""
@@ -745,14 +745,14 @@ def main():
 
 开始生成AI文档...
 """)
-    
+
     try:
         # 初始化生成器
         generator = PromptsBasedDocGenerator()
-        
+
         # 运行文档生成
         result = generator.run_document_generation()
-        
+
         if result['success']:
             print(f"""
 ✅ 文档生成成功完成！
@@ -779,9 +779,9 @@ def main():
 错误信息: {result.get('error', 'Unknown error')}
 """)
             return 1
-        
+
         return 0
-        
+
     except KeyboardInterrupt:
         print("\n⏹️ 用户中断操作")
         return 1
