@@ -85,6 +85,10 @@ backend/cookies.txt
 
 # Generated documentation output
 backend/coderwiki-output-docs/
+coderwiki-output-docs/
+coderwiki-output-docs/mkdocs-site/
+coderwiki-output-docs/**/site/
+coderwiki-output-docs/**/.git/
 
 # Temporary and cache directories
 temp/

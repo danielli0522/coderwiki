@@ -39,6 +39,7 @@ class PromptsBasedDocGenerator:
     def __init__(self):
         """初始化生成器"""
         self.prompts_dir = PROJECT_ROOT / 'docs' / 'prompts'
+        # 输出根目录：项目根目录下的 coderwiki-output-docs
         self.output_base_dir = PROJECT_ROOT / 'coderwiki-output-docs'
         self.ai_docs_dir = self.output_base_dir / 'ai-generate-doc'
         self.mkdocs_dir = self.output_base_dir / 'mkdocs-site'

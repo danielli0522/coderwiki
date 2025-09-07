@@ -1,8 +1,0 @@
-{
-  "timestamp": "2025-08-28T08:09:29.353Z",
-  "status": "error",
-  "error": {
-    "message": "page.waitForTimeout is not a function",
-    "stack": "TypeError: page.waitForTimeout is not a function\n    at testMkDocsFeature (/Users/lshl124/Documents/daniel/git/code/aigc/coderwiki/backend/test_mkdocs_puppeteer.js:36:20)"
-  }
-}
