@@ -19,11 +19,176 @@ class RepositoryManager {
         await this.checkAuthentication();
         if (this.isAuthenticated) {
             this.bindEvents();
+            this.setupRealtimeUpdates();
             this.loadRepositories();
             this.loadStatistics();
         } else {
             console.log('用户未登录，跳过仓库管理初始化');
         }
+    }
+
+    setupRealtimeUpdates() {
+        // WebSocket-based real-time updates (QA Fix for PERF-001)
+        document.addEventListener('repositoryStatusUpdate', (event) => {
+            console.log('🔄 Received real-time repository update:', event.detail);
+            this.handleRepositoryUpdate(event.detail);
+        });
+
+        document.addEventListener('taskUpdate', (event) => {
+            console.log('⚙️ Received real-time task update:', event.detail);
+            this.handleTaskUpdate(event.detail);
+        });
+
+        // Connection status monitoring
+        document.addEventListener('connectionStatus', (event) => {
+            this.updateConnectionStatus(event.detail.status);
+        });
+
+        console.log('✅ Real-time updates configured for repository management');
+    }
+
+    handleRepositoryUpdate(updateData) {
+        const { repositoryId, status, progress, name, error, lastUpdated } = updateData;
+        
+        // Update local repository data
+        const repoIndex = this.repositories.findIndex(repo => repo.id === repositoryId);
+        if (repoIndex !== -1) {
+            this.repositories[repoIndex].status = status;
+            this.repositories[repoIndex].progress = progress;
+            if (lastUpdated) {
+                this.repositories[repoIndex].updated_at = lastUpdated;
+            }
+            
+            // Update UI for this specific repository
+            this.updateRepositoryRowUI(repositoryId, {
+                status,
+                progress,
+                error,
+                lastUpdated
+            });
+            
+            // Update statistics if status changed to completed/failed
+            if (status === 'completed' || status === 'failed') {
+                this.loadStatistics();
+            }
+            
+            console.log(`✅ Updated repository ${name} (${repositoryId}) status to: ${status}`);
+        }
+    }
+
+    handleTaskUpdate(updateData) {
+        const { taskId, status, progress, repositoryId } = updateData;
+        
+        if (repositoryId) {
+            // Update repository progress based on task progress
+            this.updateRepositoryRowUI(repositoryId, {
+                status: status === 'completed' ? 'completed' : 'analyzing',
+                progress: progress
+            });
+            
+            console.log(`⚙️ Updated task ${taskId} affecting repository ${repositoryId}: ${status} (${progress}%)`);
+        }
+    }
+
+    updateRepositoryRowUI(repositoryId, updateData) {
+        const row = document.querySelector(`tr[data-repo-id="${repositoryId}"]`);
+        if (!row) return;
+
+        const { status, progress, error, lastUpdated } = updateData;
+
+        // Update status badge
+        const statusBadge = row.querySelector('.status-badge');
+        if (statusBadge && status) {
+            statusBadge.className = `badge status-badge status-${status}`;
+            statusBadge.textContent = this.getStatusDisplayText(status);
+            
+            // Add visual feedback for status changes
+            statusBadge.style.animation = 'pulse 0.5s ease-in-out';
+            setTimeout(() => {
+                statusBadge.style.animation = '';
+            }, 500);
+        }
+
+        // Update progress bar (if analyzing)
+        let progressBar = row.querySelector('.progress-bar');
+        if (status === 'analyzing' && progress !== undefined) {
+            if (!progressBar) {
+                // Create progress bar if it doesn't exist
+                const statusCell = row.querySelector('.status-cell');
+                if (statusCell) {
+                    const progressContainer = document.createElement('div');
+                    progressContainer.className = 'progress mt-1';
+                    progressContainer.style.height = '4px';
+                    
+                    progressBar = document.createElement('div');
+                    progressBar.className = 'progress-bar bg-info';
+                    progressBar.setAttribute('role', 'progressbar');
+                    
+                    progressContainer.appendChild(progressBar);
+                    statusCell.appendChild(progressContainer);
+                }
+            }
+            
+            if (progressBar) {
+                progressBar.style.width = `${progress}%`;
+                progressBar.setAttribute('aria-valuenow', progress);
+                progressBar.setAttribute('aria-valuemin', '0');
+                progressBar.setAttribute('aria-valuemax', '100');
+            }
+        } else {
+            // Remove progress bar if not analyzing
+            const progressContainer = row.querySelector('.progress');
+            if (progressContainer) {
+                progressContainer.remove();
+            }
+        }
+
+        // Update last updated timestamp
+        const timestampCell = row.querySelector('.timestamp-cell');
+        if (timestampCell && lastUpdated) {
+            timestampCell.textContent = this.formatTimestamp(lastUpdated);
+        }
+
+        // Show error state if applicable
+        if (error && status === 'failed') {
+            const statusCell = row.querySelector('.status-cell');
+            if (statusCell && !statusCell.querySelector('.error-indicator')) {
+                const errorIcon = document.createElement('i');
+                errorIcon.className = 'fas fa-exclamation-triangle text-warning ms-1 error-indicator';
+                errorIcon.title = error;
+                statusCell.appendChild(errorIcon);
+            }
+        }
+    }
+
+    updateConnectionStatus(status) {
+        const connectionIndicator = document.getElementById('realtime-status');
+        if (connectionIndicator) {
+            connectionIndicator.className = `badge ms-2 ${this.getConnectionStatusClass(status)}`;
+            connectionIndicator.textContent = this.getConnectionStatusText(status);
+        }
+    }
+
+    getConnectionStatusClass(status) {
+        const statusClasses = {
+            'connected': 'bg-success',
+            'polling': 'bg-warning',
+            'disconnected': 'bg-secondary',
+            'error': 'bg-danger',
+            'failed': 'bg-danger'
+        };
+        return statusClasses[status] || 'bg-secondary';
+    }
+
+    getConnectionStatusText(status) {
+        const statusTexts = {
+            'connected': '实时',
+            'polling': '轮询',
+            'disconnected': '离线',
+            'error': '错误',
+            'failed': '失败'
+        };
+        return statusTexts[status] || '未知';
     }
 
     async checkAuthentication() {
@@ -49,6 +214,28 @@ class RepositoryManager {
     }
 
     bindEvents() {
+        // 添加仓库按钮 - 修复缺失的事件绑定
+        const addRepoBtn = document.getElementById('addRepoBtn');
+        if (addRepoBtn) {
+            addRepoBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.handleAddRepository();
+            });
+            console.log('✅ Add repository button event bound');
+        }
+
+        // 验证URL按钮事件绑定
+        const validateUrlBtn = document.getElementById('validateUrlBtn');
+        if (validateUrlBtn) {
+            validateUrlBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.handleValidateUrl();
+            });
+            console.log('✅ Validate URL button event bound');
+        }
+
         // 搜索功能
         const searchInput = document.getElementById('searchRepo');
         if (searchInput) {
@@ -349,13 +536,32 @@ class RepositoryManager {
         row.dataset.repoId = repo.id;
 
         // 状态徽章样式
-        const getStatusBadge = (status) => {
+        const getStatusBadge = (repo) => {
+            const status = repo.status;
+            if (status === 'error') {
+                // 显示错误原因
+                let errorInfo = '错误';
+                if (repo.clone_error) {
+                    if (repo.clone_error.includes('not-a-git-url') || repo.clone_error.includes('Invalid URL')) {
+                        errorInfo = '错误(URL无效)';
+                    } else if (repo.clone_error.includes('Permission denied')) {
+                        errorInfo = '错误(权限不足)';
+                    } else if (repo.clone_error.includes('Repository not found')) {
+                        errorInfo = '错误(仓库不存在)';
+                    } else if (repo.clone_error.includes('Network')) {
+                        errorInfo = '错误(网络问题)';
+                    } else {
+                        errorInfo = '错误(克隆失败)';
+                    }
+                }
+                return `<span class="badge bg-danger" title="${this.escapeHtml(repo.clone_error || '未知错误')}">${errorInfo}</span>`;
+            }
+            
             const statusMap = {
                 'active': '<span class="badge bg-success">活跃</span>',
                 'inactive': '<span class="badge bg-secondary">非活跃</span>',
-                'error': '<span class="badge bg-danger">错误</span>',
                 'cloning': '<span class="badge bg-warning">克隆中</span>',
-                'completed': '<span class="badge bg-success">已完成</span>'
+                'analyzing': '<span class="badge bg-info">分析中</span>'
             };
             return statusMap[status] || `<span class="badge bg-primary">${status}</span>`;
         };
@@ -392,14 +598,9 @@ class RepositoryManager {
                     </a>
                 </div>
             </td>
-            <td>${getStatusBadge(repo.status)}</td>
+            <td>${getStatusBadge(repo)}</td>
             <td>
-                ${repo.clone_status === 'completed' ? 
-                    '<span class="badge bg-success">已完成</span>' : 
-                    repo.clone_status === 'failed' ? 
-                    '<span class="badge bg-danger">失败</span>' :
-                    '<span class="badge bg-warning">未知</span>'
-                }
+                ${this.getCloneStatusDisplay(repo)}
             </td>
             <td>${repo.file_count || 0}</td>
             <td>${formatSize(repo.size)}</td>
@@ -516,6 +717,258 @@ class RepositoryManager {
         }
     }
 
+    handleAddRepository() {
+        console.log('🔄 Opening add repository modal...');
+        
+        // 尝试使用Winston模态框系统
+        if (window.winstonModalTemplates) {
+            this.showAddRepositoryWithWinston();
+        } else {
+            // 降级到Bootstrap模态框
+            this.showAddRepositoryWithBootstrap();
+        }
+    }
+
+    showAddRepositoryWithWinston() {
+        const modal = window.winstonModalTemplates.showModal('addRepository', {
+            onSave: (modalElement) => {
+                this.saveRepositoryFromModal(modalElement);
+            }
+        });
+
+        if (modal) {
+            // 绑定保存按钮事件
+            const saveBtn = modal.element.querySelector('#saveRepositoryBtn');
+            if (saveBtn) {
+                saveBtn.addEventListener('click', () => {
+                    this.saveRepositoryFromModal(modal.element, modal.bootstrap);
+                });
+            }
+            console.log('✅ Winston add repository modal opened');
+        } else {
+            console.warn('⚠️ Failed to open Winston modal, falling back to Bootstrap');
+            this.showAddRepositoryWithBootstrap();
+        }
+    }
+
+    showAddRepositoryWithBootstrap() {
+        const modalElement = document.getElementById('addRepositoryModal');
+        if (modalElement) {
+            // 清理之前的事件监听器
+            const existingBtn = modalElement.querySelector('#addRepoBtn');
+            if (existingBtn) {
+                // 克隆按钮以清理事件监听器
+                const newBtn = existingBtn.cloneNode(true);
+                existingBtn.parentNode.replaceChild(newBtn, existingBtn);
+                
+                // 添加新的事件监听器
+                newBtn.addEventListener('click', () => {
+                    this.saveRepositoryFromModal(modalElement);
+                });
+            }
+
+            // 显示模态框
+            const bsModal = new bootstrap.Modal(modalElement);
+            bsModal.show();
+            console.log('✅ Bootstrap add repository modal opened');
+        } else {
+            console.error('❌ Add repository modal not found in DOM');
+            this.showError('无法打开添加仓库对话框');
+        }
+    }
+
+    async saveRepositoryFromModal(modalElement, modalInstance = null) {
+        const form = modalElement.querySelector('#addRepositoryForm');
+        
+        // 验证表单
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        const repoData = {
+            name: modalElement.querySelector('#repoName')?.value || '',
+            url: modalElement.querySelector('#repoUrl')?.value || '',
+            description: modalElement.querySelector('#repoDescription')?.value || ''
+        };
+
+        // 如果名称为空，从URL中提取
+        if (!repoData.name && repoData.url) {
+            const urlParts = repoData.url.split('/');
+            const repoName = urlParts[urlParts.length - 1].replace('.git', '');
+            repoData.name = repoName;
+        }
+
+        if (!repoData.url) {
+            this.showError('请输入仓库URL');
+            return;
+        }
+
+        try {
+            // 检查认证状态
+            const authResponse = await fetch('/api/auth/status', {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include'
+            });
+
+            let isAuthenticated = false;
+            if (authResponse.ok) {
+                const authData = await authResponse.json();
+                isAuthenticated = authData.logged_in || false;
+            }
+
+            if (!isAuthenticated) {
+                const message = '请先登录后再添加仓库。系统将为您跳转到登录页面。';
+                if (confirm(`${message}\n\n点击确定跳转到登录页面。`)) {
+                    window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+                }
+                return;
+            }
+
+            // 调用API添加仓库
+            const response = await fetch('/api/repositories', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(repoData),
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const result = await response.json();
+            this.showSuccess('仓库添加成功');
+
+            // 关闭模态框
+            if (modalInstance) {
+                modalInstance.hide();
+            } else if (window.winstonModalTemplates) {
+                window.winstonModalTemplates.hideModal(modalElement.id);
+            } else {
+                const bsModal = bootstrap.Modal.getInstance(modalElement);
+                if (bsModal) {
+                    bsModal.hide();
+                }
+            }
+
+            // 重新加载仓库列表
+            this.loadRepositories();
+            this.loadStatistics();
+
+        } catch (error) {
+            console.error('添加仓库失败:', error);
+            
+            // 检查是否是认证错误
+            if (error.message.includes('401') || error.message.includes('login') || error.message.includes('登录')) {
+                const message = '登录会话已过期，请重新登录后再试。';
+                if (confirm(`${message}\n\n点击确定跳转到登录页面。`)) {
+                    window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+                }
+            } else {
+                this.showError('添加仓库失败: ' + error.message);
+            }
+        }
+    }
+
+    async handleValidateUrl() {
+        console.log('🔍 Validating repository URL...');
+        
+        const urlInput = document.getElementById('repoUrl');
+        const resultSpan = document.getElementById('validationResult');
+        const validateBtn = document.getElementById('validateUrlBtn');
+        
+        if (!urlInput || !resultSpan) {
+            console.error('❌ URL validation elements not found');
+            return;
+        }
+
+        const url = urlInput.value.trim();
+        
+        if (!url) {
+            resultSpan.innerHTML = '<span class="text-warning"><i class="fas fa-exclamation-triangle"></i> 请输入URL</span>';
+            return;
+        }
+
+        // 基本URL格式验证
+        try {
+            new URL(url);
+        } catch (error) {
+            resultSpan.innerHTML = '<span class="text-danger"><i class="fas fa-times-circle"></i> URL格式无效</span>';
+            return;
+        }
+
+        // 检查是否是Git仓库URL
+        if (!this.isValidGitUrl(url)) {
+            resultSpan.innerHTML = '<span class="text-warning"><i class="fas fa-exclamation-triangle"></i> 请输入Git仓库URL</span>';
+            return;
+        }
+
+        // 显示验证中状态
+        if (validateBtn) {
+            validateBtn.disabled = true;
+            validateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 验证中...';
+        }
+        resultSpan.innerHTML = '<span class="text-info"><i class="fas fa-spinner fa-spin"></i> 验证中...</span>';
+
+        try {
+            // 调用后端验证API
+            const response = await fetch('/api/repositories/validate-url', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ url: url }),
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                
+                if (result.valid) {
+                    resultSpan.innerHTML = '<span class="text-success"><i class="fas fa-check-circle"></i> 仓库URL有效</span>';
+                    
+                    // 自动填充仓库名称（如果为空）
+                    const nameInput = document.getElementById('repoName');
+                    if (nameInput && !nameInput.value.trim() && result.name) {
+                        nameInput.value = result.name;
+                    }
+                } else {
+                    resultSpan.innerHTML = `<span class="text-danger"><i class="fas fa-times-circle"></i> ${result.error || '仓库不可访问'}</span>`;
+                }
+            } else {
+                resultSpan.innerHTML = '<span class="text-danger"><i class="fas fa-times-circle"></i> 验证失败，请稍后重试</span>';
+            }
+        } catch (error) {
+            console.error('URL验证失败:', error);
+            resultSpan.innerHTML = '<span class="text-danger"><i class="fas fa-times-circle"></i> 验证失败，网络错误</span>';
+        } finally {
+            // 恢复按钮状态
+            if (validateBtn) {
+                validateBtn.disabled = false;
+                validateBtn.innerHTML = '<i class="fas fa-check-circle"></i> 验证 URL';
+            }
+        }
+    }
+
+    isValidGitUrl(url) {
+        // 检查是否是Git仓库URL格式
+        const gitPatterns = [
+            /^https?:\/\/[^\/]+\/.*\.git$/,  // https://domain/path/repo.git
+            /^https?:\/\/github\.com\/[^\/]+\/[^\/]+$/,  // https://github.com/user/repo
+            /^https?:\/\/gitlab\.com\/[^\/]+\/[^\/]+$/,  // https://gitlab.com/user/repo
+            /^https?:\/\/bitbucket\.org\/[^\/]+\/[^\/]+$/,  // https://bitbucket.org/user/repo
+            /^git@[^:]+:[^\/]+\/.*\.git$/,  // git@domain:user/repo.git
+            /^ssh:\/\/git@[^\/]+\/.*\.git$/  // ssh://git@domain/user/repo.git
+        ];
+        
+        return gitPatterns.some(pattern => pattern.test(url));
+    }
+
     async loadStatistics() {
         try {
             const response = await fetch('/api/repositories/statistics');
@@ -545,6 +998,45 @@ class RepositoryManager {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    getCloneStatusDisplay(repo) {
+        const status = repo.clone_status;
+        const error = repo.clone_error;
+        
+        if (status === 'completed') {
+            return '<span class="badge bg-success">已完成</span>';
+        } else if (status === 'pending') {
+            return '<span class="badge bg-secondary">待处理</span>';
+        } else if (status === 'cloning') {
+            return '<span class="badge bg-primary">克隆中</span>';
+        } else if (status === 'failed') {
+            // 显示失败原因
+            let errorMessage = '失败';
+            if (error) {
+                // 提取关键错误信息
+                if (error.includes('not-a-git-url') || error.includes('Invalid URL')) {
+                    errorMessage = '失败(URL无效)';
+                } else if (error.includes('Permission denied') || error.includes('Authentication failed')) {
+                    errorMessage = '失败(权限不足)';
+                } else if (error.includes('Repository not found') || error.includes('404')) {
+                    errorMessage = '失败(仓库不存在)';
+                } else if (error.includes('Network') || error.includes('timeout')) {
+                    errorMessage = '失败(网络错误)';
+                } else if (error.includes('No space left') || error.includes('disk')) {
+                    errorMessage = '失败(磁盘空间不足)';
+                } else if (error.length > 50) {
+                    // 如果错误信息太长，显示简化版本
+                    errorMessage = '失败(点击查看详情)';
+                } else {
+                    errorMessage = `失败(${error.substring(0, 20)}...)`;
+                }
+            }
+            return `<span class="badge bg-danger" title="${this.escapeHtml(error || '未知错误')}">${errorMessage}</span>`;
+        } else {
+            // 处理未知状态的情况
+            return `<span class="badge bg-warning" title="数据状态异常，请联系管理员">未知(${status || '状态异常'})</span>`;
+        }
     }
 
     debounce(func, wait) {

@@ -273,8 +273,7 @@ class DashboardController {
         const repoData = {
             name: modalElement.querySelector('#repoName').value,
             url: modalElement.querySelector('#repoUrl').value,
-            description: modalElement.querySelector('#repoDescription').value,
-            branch: modalElement.querySelector('#repoBranch')?.value
+            description: modalElement.querySelector('#repoDescription').value
         };
 
         try {

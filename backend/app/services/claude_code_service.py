@@ -637,3 +637,309 @@ python run.py
 """
 
         return fallback_content
+
+    def generate_document_content(self, document_id: int, user_id: int) -> bool:
+        """
+        同步文档生成方法，兼容现有API接口
+        
+        Args:
+            document_id: 文档ID
+            user_id: 用户ID
+            
+        Returns:
+            bool: 生成任务是否成功启动
+        """
+        import asyncio
+        import threading
+        from ..models.document import Document
+        from ..models.repository import Repository
+        from .. import db
+        from sqlalchemy import and_
+        
+        try:
+            # 获取文档信息
+            document = Document.query.filter(
+                and_(
+                    Document.id == document_id,
+                    Document.user_id == user_id
+                )
+            ).first()
+            
+            if not document:
+                logger.error(f"Document {document_id} not found for user {user_id}")
+                return False
+                
+            # 获取关联的仓库信息
+            repository = Repository.query.get(document.repository_id)
+            if not repository:
+                logger.error(f"Repository {document.repository_id} not found")
+                return False
+            
+            # 启动异步任务生成文档
+            def run_async_generation():
+                try:
+                    # 创建新的事件循环
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    
+                    # 准备生成参数
+                    repository_path = repository.local_path or f"/tmp/repos/{repository.name}"
+                    doc_type = getattr(document, 'document_type', 'technical_design')
+                    doc_title = document.title
+                    
+                    # 调用异步生成方法
+                    result = loop.run_until_complete(
+                        self.generate_technical_document(
+                            repository_path=repository_path,
+                            doc_type=doc_type,
+                            doc_title=doc_title,
+                            additional_params={'detailed': True}
+                        )
+                    )
+                    
+                    # 更新文档内容
+                    if result.get('success'):
+                        document.content = result.get('content', '')
+                        document.status = 'completed'
+                        document.generation_time = result.get('generation_time', 0)
+                        
+                        # 保存数据库更改
+                        db.session.commit()
+                        logger.info(f"Document {document_id} generation completed successfully")
+                    else:
+                        document.status = 'failed'
+                        document.error_message = result.get('error', 'Unknown error')
+                        db.session.commit()
+                        logger.error(f"Document {document_id} generation failed: {result.get('error')}")
+                        
+                except Exception as e:
+                    logger.error(f"Async document generation failed for {document_id}: {str(e)}")
+                    document.status = 'failed'
+                    document.error_message = str(e)
+                    try:
+                        db.session.commit()
+                    except:
+                        pass
+                finally:
+                    loop.close()
+            
+            # 在后台线程中运行异步生成
+            thread = threading.Thread(target=run_async_generation, daemon=True)
+            thread.start()
+            
+            # 更新文档状态为生成中 - 使用数据库兼容的状态值
+            document.status = 'pending'  # 使用现有的状态枚举值
+            db.session.commit()
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to start document generation for {document_id}: {str(e)}")
+            return False
+    
+    def get_document(self, document_id: int, user_id: int) -> dict:
+        """获取文档信息，兼容现有API"""
+        from ..models.document import Document
+        from sqlalchemy import and_
+        
+        try:
+            document = Document.query.filter(
+                and_(
+                    Document.id == document_id,
+                    Document.user_id == user_id
+                )
+            ).first()
+            
+            if not document:
+                return None
+                
+            return {
+                'id': document.id,
+                'title': document.title,
+                'content': document.content or '',
+                'status': document.status or 'draft',
+                'document_type': getattr(document, 'document_type', 'technical'),
+                'created_at': document.created_at.isoformat() if document.created_at else None,
+                'updated_at': document.updated_at.isoformat() if document.updated_at else None,
+                'repository_id': document.repository_id
+            }
+            
+        except Exception as e:
+            logger.error(f"Failed to get document {document_id}: {str(e)}")
+            return None
+    
+    def get_documents(self, user_id: int, page: int = 1, limit: int = 10, search: str = '', status: str = '') -> tuple:
+        """获取文档列表，兼容现有API"""
+        from ..models.document import Document
+        
+        try:
+            query = Document.query.filter_by(user_id=user_id)
+            
+            if search:
+                query = query.filter(Document.title.contains(search))
+            if status:
+                query = query.filter(Document.status == status)
+                
+            # 分页
+            total = query.count()
+            documents = query.offset((page - 1) * limit).limit(limit).all()
+            
+            doc_list = []
+            for doc in documents:
+                doc_list.append({
+                    'id': doc.id,
+                    'title': doc.title,
+                    'status': doc.status or 'draft',
+                    'document_type': getattr(doc, 'document_type', 'technical'),
+                    'created_at': doc.created_at.isoformat() if doc.created_at else None,
+                    'updated_at': doc.updated_at.isoformat() if doc.updated_at else None,
+                    'repository_id': doc.repository_id
+                })
+            
+            stats = {
+                'total': total,
+                'completed': len([d for d in doc_list if d['status'] == 'completed']),
+                'generating': len([d for d in doc_list if d['status'] == 'generating']),
+                'failed': len([d for d in doc_list if d['status'] == 'failed'])
+            }
+            
+            pagination = {
+                'page': page,
+                'pages': (total + limit - 1) // limit,
+                'per_page': limit,
+                'total': total
+            }
+            
+            return doc_list, stats, pagination
+            
+        except Exception as e:
+            logger.error(f"Failed to get documents for user {user_id}: {str(e)}")
+            return [], {}, {}
+    
+    def create_document(self, user_id: int, title: str, repository_id: int, **kwargs) -> dict:
+        """创建文档，兼容现有API"""
+        from ..models.document import Document
+        from .. import db
+        
+        try:
+            document = Document(
+                user_id=user_id,
+                title=title,
+                repository_id=repository_id,
+                content='',
+                status='draft',
+                document_type=kwargs.get('document_type', 'technical'),
+                format=kwargs.get('format', 'markdown'),
+                version=kwargs.get('version', '1.0.0')
+            )
+            
+            db.session.add(document)
+            db.session.commit()
+            
+            return {
+                'id': document.id,
+                'title': document.title,
+                'status': 'draft',
+                'repository_id': repository_id
+            }
+            
+        except Exception as e:
+            logger.error(f"Failed to create document: {str(e)}")
+            raise
+    
+    def update_document(self, document_id: int, user_id: int, **kwargs) -> dict:
+        """更新文档，兼容现有API"""
+        from ..models.document import Document
+        from sqlalchemy import and_
+        from .. import db
+        
+        try:
+            document = Document.query.filter(
+                and_(
+                    Document.id == document_id,
+                    Document.user_id == user_id
+                )
+            ).first()
+            
+            if not document:
+                return None
+                
+            for key, value in kwargs.items():
+                if hasattr(document, key):
+                    setattr(document, key, value)
+            
+            db.session.commit()
+            
+            return {
+                'id': document.id,
+                'title': document.title,
+                'status': document.status,
+                'content': document.content
+            }
+            
+        except Exception as e:
+            logger.error(f"Failed to update document {document_id}: {str(e)}")
+            return None
+    
+    def delete_document(self, document_id: int, user_id: int) -> bool:
+        """删除文档，兼容现有API"""
+        from ..models.document import Document
+        from sqlalchemy import and_
+        from .. import db
+        
+        try:
+            document = Document.query.filter(
+                and_(
+                    Document.id == document_id,
+                    Document.user_id == user_id
+                )
+            ).first()
+            
+            if not document:
+                return False
+                
+            db.session.delete(document)
+            db.session.commit()
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to delete document {document_id}: {str(e)}")
+            return False
+    
+    def download_document(self, document_id: int, user_id: int) -> dict:
+        """下载文档，兼容现有API"""
+        document = self.get_document(document_id, user_id)
+        if document and document.get('content'):
+            return {
+                'filename': f"{document['title']}.md",
+                'content': document['content'],
+                'mimetype': 'text/markdown'
+            }
+        return None
+    
+    def generate_toc(self, content: str) -> list:
+        """生成目录，兼容现有API"""
+        import re
+        
+        if not content:
+            return []
+            
+        toc = []
+        lines = content.split('\n')
+        
+        for line in lines:
+            # 匹配Markdown标题
+            match = re.match(r'^(#{1,6})\s+(.+)', line.strip())
+            if match:
+                level = len(match.group(1))
+                title = match.group(2)
+                anchor = re.sub(r'[^\w\-_]', '-', title.lower())
+                
+                toc.append({
+                    'level': level,
+                    'title': title,
+                    'anchor': anchor
+                })
+        
+        return toc

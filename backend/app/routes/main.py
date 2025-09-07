@@ -2,10 +2,14 @@
 Main routes for the application.
 """
 
-from flask import Blueprint, render_template, redirect, url_for, flash, send_from_directory, abort
-from flask_login import login_required, current_user
+from flask import Blueprint, render_template, redirect, url_for, flash, send_from_directory, abort, request, jsonify
+from flask_login import login_required, current_user, login_user
+from app.services.auth_service import AuthService
 import os
 from pathlib import Path
+import logging
+
+logger = logging.getLogger(__name__)
 
 main_bp = Blueprint('main', __name__)
 
@@ -15,12 +19,63 @@ def dashboard():
     """Main dashboard page."""
     return render_template('dashboard/index.html')
 
-@main_bp.route('/login')
+@main_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    """Login page."""
-    if current_user.is_authenticated:
-        return redirect(url_for('main.dashboard'))
-    return render_template('auth/login.html')
+    """Login page and handler."""
+    if request.method == 'GET':
+        if current_user.is_authenticated:
+            return redirect(url_for('main.dashboard'))
+        return render_template('auth/login.html')
+    
+    # POST request - handle login
+    try:
+        # Try JSON data first (for AJAX requests)
+        data = request.get_json()
+        if not data:
+            # Try form data (for traditional form submissions)
+            data = {
+                'username': request.form.get('username'),
+                'password': request.form.get('password'),
+                'remember': request.form.get('remember') is not None
+            }
+        
+        if not data.get('username') or not data.get('password'):
+            return jsonify({'error': '用户名和密码不能为空'}), 400
+        
+        logger.info(f"Processing login for user: {data['username']}")
+        
+        auth_service = AuthService()
+        user = auth_service.login_user(data['username'], data['password'], data.get('remember', False))
+        
+        # Log in the user
+        login_user(user, remember=data.get('remember', False))
+        logger.info(f"User {user.username} logged in successfully")
+        
+        # Return JSON response for AJAX or redirect for form
+        if request.is_json:
+            return jsonify({
+                'success': True,
+                'user': user.to_dict(),
+                'message': '登录成功'
+            })
+        else:
+            flash('登录成功', 'success')
+            return redirect(url_for('main.dashboard'))
+            
+    except ValueError as e:
+        logger.warning(f"Login failed: {str(e)}")
+        if request.is_json:
+            return jsonify({'error': str(e)}), 401
+        else:
+            flash(str(e), 'error')
+            return render_template('auth/login.html')
+    except Exception as e:
+        logger.error(f"Login error: {str(e)}")
+        if request.is_json:
+            return jsonify({'error': '服务器内部错误'}), 500
+        else:
+            flash('登录时发生错误，请重试', 'error')
+            return render_template('auth/login.html')
 
 @main_bp.route('/register')
 def register():

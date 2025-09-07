@@ -43,6 +43,13 @@ class ApiClient {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
+            // 检查响应是否是HTML（表示被重定向到登录页面）
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('text/html')) {
+                // 用户未登录，被重定向到登录页面
+                throw new Error('Authentication required - please login first');
+            }
+
             const data = await response.json();
 
             // 缓存GET请求
@@ -53,6 +60,13 @@ class ApiClient {
             return data;
         } catch (error) {
             console.error('API请求失败:', error);
+            
+            // 特殊处理认证错误
+            if (error.message.includes('Authentication required')) {
+                // 可以在这里显示登录提示或跳转到登录页面
+                console.warn('用户未登录，需要先登录');
+            }
+            
             throw error;
         }
     }
@@ -61,6 +75,11 @@ class ApiClient {
         try {
             return await fetch(url, config);
         } catch (error) {
+            // 检查网络错误类型
+            if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                error.message = '网络连接失败，请检查网络连接或服务器状态';
+            }
+            
             if (retryCount > 0) {
                 console.warn(`请求失败，${this.retryDelay}ms后重试 (剩余${retryCount}次)`, error);
                 await this.delay(this.retryDelay);

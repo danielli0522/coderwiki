@@ -75,9 +75,29 @@ class MkDocsService:
             # 2. 收集文档内容
             docs_content = self._collect_repository_documents(repository_id)
             
-            if not docs_content:
-                # 如果没有生成的文档，创建基础文档结构
-                docs_content = self._create_basic_docs_structure(repository)
+            # 检查是否只有基础文档（没有AI生成的文档）
+            has_ai_docs = any(doc.get('document_type') == 'ai_generated' for doc in docs_content) if docs_content else False
+            
+            if not docs_content or not has_ai_docs:
+                # 尝试触发AI文档生成
+                logger.info(f"No AI-generated docs found for repository {repository_id}, triggering automatic generation")
+                
+                try:
+                    # 触发AI文档生成
+                    ai_generation_result = self._trigger_ai_document_generation(repository_id, user_id)
+                    
+                    if ai_generation_result and ai_generation_result.get('success'):
+                        logger.info(f"AI document generation completed for repository {repository_id}")
+                        # 重新收集文档（包括新生成的）
+                        docs_content = self._collect_repository_documents(repository_id)
+                    else:
+                        logger.warning(f"AI document generation failed or not available: {ai_generation_result}")
+                except Exception as e:
+                    logger.error(f"Error triggering AI document generation: {e}")
+                
+                # 如果仍然没有文档，创建基础文档结构
+                if not docs_content:
+                    docs_content = self._create_basic_docs_structure(repository)
             
             # 3. 写入文档文件并构建导航结构
             nav_config = []
@@ -385,6 +405,162 @@ Use the navigation menu to explore different sections of this documentation.
                     })
         
         return basic_docs
+
+    def _trigger_ai_document_generation(self, repository_id: int, user_id: int) -> Dict[str, Any]:
+        """
+        触发AI文档生成（简化版本）
+        
+        Args:
+            repository_id: 仓库ID
+            user_id: 用户ID
+            
+        Returns:
+            生成结果字典
+        """
+        try:
+            from app.models.repository import Repository
+            from app.utils.repository_analyzer import RepositoryAnalyzer
+            import os
+            
+            # 获取仓库信息
+            repository = Repository.query.filter_by(id=repository_id, user_id=user_id).first()
+            if not repository:
+                logger.error(f"Repository {repository_id} not found for user {user_id}")
+                return {'success': False, 'error': 'Repository not found'}
+            
+            # 检查环境变量是否启用Claude Code
+            claude_enabled = os.environ.get('CLAUDE_CODE_ENABLED', 'false').lower() == 'true'
+            
+            if not claude_enabled:
+                logger.info("Claude Code is not enabled, generating basic documentation instead")
+                # 生成基础文档而不是跳过
+                return self._generate_basic_ai_documentation(repository)
+            
+            # 尝试使用完整的AI服务
+            try:
+                from app.services.claude_code_service import ClaudeCodeService
+                claude_service = ClaudeCodeService()
+                
+                # 创建文档记录
+                document = claude_service.create_document(
+                    user_id=user_id,
+                    title=f'{repository.name} - AI Generated Documentation',
+                    repository_id=repository_id,
+                    document_type='overview',
+                    description=f'AI-generated overview documentation for {repository.name}'
+                )
+                
+                if document and document.get('id'):
+                    # 触发文档生成
+                    logger.info(f"Starting AI document generation for repository {repository_id}")
+                    success = claude_service.generate_document_content(
+                        document['id'], 
+                        user_id
+                    )
+                    
+                    if success:
+                        logger.info(f"AI document generation completed successfully for repository {repository_id}")
+                        return {'success': True, 'document_id': document['id']}
+            except Exception as e:
+                logger.warning(f"Full AI service failed: {e}, falling back to basic generation")
+            
+            # 如果AI服务失败，生成基础AI文档
+            return self._generate_basic_ai_documentation(repository)
+                
+        except Exception as e:
+            logger.error(f"Error in AI document generation: {e}")
+            return {'success': False, 'error': str(e)}
+    
+    def _generate_basic_ai_documentation(self, repository) -> Dict[str, Any]:
+        """
+        生成基础的AI文档（不依赖Claude API）
+        """
+        try:
+            from app.utils.repository_analyzer import RepositoryAnalyzer
+            
+            # 使用仓库分析器生成文档内容
+            analyzer = RepositoryAnalyzer(repository.local_path)
+            analysis = analyzer.analyze_repository()
+            
+            # 创建AI文档目录
+            ai_docs_dir = self.docs_base_dir / f"{repository.name}_{repository.id}"
+            ai_docs_dir.mkdir(parents=True, exist_ok=True)
+            
+            # 生成概览文档
+            overview_content = f"""# {repository.name} - Project Overview
+
+## Repository Information
+- **Name**: {repository.name}
+- **URL**: {repository.url}
+- **Description**: {repository.description or 'No description provided'}
+- **Primary Language**: {repository.language or 'Unknown'}
+
+## Code Statistics
+- **Total Files**: {analysis.get('file_count', 0)}
+- **Lines of Code**: {analysis.get('lines_of_code', 0)}
+- **File Types**: {', '.join(analysis.get('file_types', []))}
+
+## Project Structure
+{self._format_directory_tree(analysis.get('structure', {}))}
+
+## Technology Stack
+{self._format_tech_stack(analysis.get('languages', {}))}
+
+## Key Features
+Based on the repository analysis:
+- Repository contains {analysis.get('file_count', 0)} files
+- Primary language is {repository.language or 'not detected'}
+- Code complexity: {analysis.get('complexity', 'Medium')}
+
+## Documentation Status
+This is an automatically generated documentation based on static code analysis.
+For more detailed documentation, please enable Claude Code integration.
+
+---
+*Generated at {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC*
+"""
+            
+            # 保存文档
+            overview_file = ai_docs_dir / "overview.md"
+            with open(overview_file, 'w', encoding='utf-8') as f:
+                f.write(overview_content)
+            
+            logger.info(f"Generated basic AI documentation for repository {repository.id}")
+            return {'success': True, 'basic_doc': True}
+            
+        except Exception as e:
+            logger.error(f"Error generating basic AI documentation: {e}")
+            return {'success': False, 'error': str(e)}
+    
+    def _format_directory_tree(self, structure: Dict) -> str:
+        """格式化目录树"""
+        if not structure:
+            return "Directory structure not available"
+        
+        lines = []
+        def format_tree(items, prefix=""):
+            for i, (name, value) in enumerate(items.items()):
+                is_last = i == len(items) - 1
+                lines.append(f"{prefix}{'└── ' if is_last else '├── '}{name}")
+                if isinstance(value, dict) and value:
+                    extension = "    " if is_last else "│   "
+                    format_tree(value, prefix + extension)
+        
+        format_tree(structure)
+        return "```\n" + "\n".join(lines) + "\n```"
+    
+    def _format_tech_stack(self, languages: Dict) -> str:
+        """格式化技术栈信息"""
+        if not languages:
+            return "- No language statistics available"
+        
+        lines = []
+        total = sum(languages.values())
+        for lang, count in sorted(languages.items(), key=lambda x: x[1], reverse=True):
+            percentage = (count / total * 100) if total > 0 else 0
+            lines.append(f"- **{lang}**: {percentage:.1f}% ({count} files)")
+        
+        return "\n".join(lines)
 
     def _generate_mkdocs_config(self, repository, nav_config: List[Dict[str, str]]) -> Dict[str, Any]:
         """

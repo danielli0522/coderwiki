@@ -12,7 +12,7 @@ class Config:
 
     # 数据库配置 - 默认使用MySQL
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'mysql+pymysql://coderwiki_user:coderwiki_password@localhost:3306/coderwiki'
+        'mysql+pymysql://root:123456@localhost:3306/coderwiki?charset=utf8mb4'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_recycle': 3600,
@@ -122,7 +122,7 @@ class DevelopmentConfig(Config):
 
     # 开发环境数据库 - 使用MySQL
     SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or \
-        'mysql+pymysql://coderwiki_user:coderwiki_password@localhost:3306/coderwiki'
+        'mysql+pymysql://root:123456@localhost:3306/coderwiki?charset=utf8mb4'
 
     # 开发环境LLM配置
     LLM_MODEL = os.environ.get('DEV_LLM_MODEL', 'gpt-3.5-turbo')
@@ -137,7 +137,7 @@ class ProductionConfig(Config):
 
     # 生产环境数据库
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'mysql+pymysql://coderwiki_user:coderwiki_password@localhost:3306/coderwiki'
+        'mysql+pymysql://root:123456@localhost:3306/coderwiki?charset=utf8mb4'
 
     # 生产环境日志
     LOG_LEVEL = 'WARNING'

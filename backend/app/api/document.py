@@ -4,16 +4,19 @@ Document API endpoints.
 
 from flask import Blueprint, request, jsonify, send_file
 from flask_login import login_required, current_user
-from app.services.doc_service import DocumentService
+from app.services.claude_code_service import ClaudeCodeService
 from app.services.document_generator import DocumentGenerator
+from app.services.document_generation_service import DocumentGenerationService
 from app.utils.logger import get_logger
 from app import db
 from sqlalchemy import and_
+from pathlib import Path
 import io
 
 document_bp = Blueprint('document', __name__, url_prefix='/api/documents')
-doc_service = DocumentService()
+claude_service = ClaudeCodeService()
 doc_generator = DocumentGenerator()
+doc_generation_service = DocumentGenerationService()
 logger = get_logger(__name__)
 
 
@@ -27,7 +30,7 @@ def get_documents():
         search = request.args.get('search', '')
         status = request.args.get('status', '')
 
-        documents, stats, pagination = doc_service.get_documents(
+        documents, stats, pagination = claude_service.get_documents(
             current_user.id, page, limit, search, status
         )
 
@@ -105,7 +108,7 @@ def create_document():
             if field not in data:
                 return jsonify({'error': f'缺少必需字段: {field}'}), 400
 
-        document = doc_service.create_document(
+        document = claude_service.create_document(
             user_id=current_user.id,
             title=data['title'],
             repository_id=data['repository_id'],
@@ -161,7 +164,7 @@ def create_simple_document():
             db.session.add(default_repo)
             db.session.commit()
 
-        document = doc_service.create_document(
+        document = claude_service.create_document(
             user_id=current_user.id,
             title=data['title'],
             repository_id=default_repo.id,
@@ -189,7 +192,7 @@ def create_simple_document():
 def get_document(document_id):
     """获取单个文档"""
     try:
-        document = doc_service.get_document(document_id, current_user.id)
+        document = claude_service.get_document(document_id, current_user.id)
 
         if not document:
             return jsonify({'error': '文档不存在或无权限访问'}), 404
@@ -316,7 +319,7 @@ def update_document(document_id):
         if not data:
             return jsonify({'error': '请求数据不能为空'}), 400
 
-        document = doc_service.update_document(document_id, current_user.id, **data)
+        document = claude_service.update_document(document_id, current_user.id, **data)
 
         if not document:
             return jsonify({'error': '文档不存在或无权限访问'}), 404
@@ -336,7 +339,7 @@ def update_document(document_id):
 def delete_document(document_id):
     """删除文档"""
     try:
-        success = doc_service.delete_document(document_id, current_user.id)
+        success = claude_service.delete_document(document_id, current_user.id)
 
         if not success:
             return jsonify({'error': '文档不存在或无权限删除'}), 404
@@ -353,7 +356,7 @@ def delete_document(document_id):
 def generate_document(document_id):
     """生成文档内容"""
     try:
-        success = doc_service.generate_document_content(document_id, current_user.id)
+        success = claude_service.generate_document_content(document_id, current_user.id)
 
         if not success:
             return jsonify({'error': '文档不存在或无权限生成'}), 404
@@ -369,7 +372,7 @@ def generate_document(document_id):
 def download_document(document_id):
     """下载文档"""
     try:
-        result = doc_service.download_document(document_id, current_user.id)
+        result = claude_service.download_document(document_id, current_user.id)
 
         if not result:
             return jsonify({'error': '文档不存在或无权限下载'}), 404
@@ -395,7 +398,7 @@ def download_document(document_id):
 def get_document_content(document_id):
     """获取文档内容"""
     try:
-        document = doc_service.get_document(document_id, current_user.id)
+        document = claude_service.get_document(document_id, current_user.id)
 
         if not document:
             return jsonify({'error': '文档不存在或无权限访问'}), 404
@@ -422,13 +425,13 @@ def get_document_content(document_id):
 def get_document_toc(document_id):
     """获取文档目录"""
     try:
-        document = doc_service.get_document(document_id, current_user.id)
+        document = claude_service.get_document(document_id, current_user.id)
 
         if not document:
             return jsonify({'error': '文档不存在或无权限访问'}), 404
 
         content = document.get('content', '')
-        toc = doc_service.generate_toc(content)
+        toc = claude_service.generate_toc(content)
 
         return jsonify({
             'success': True,
@@ -438,3 +441,100 @@ def get_document_toc(document_id):
     except Exception as e:
         logger.error(f"获取文档目录失败: {e}")
         return jsonify({'error': '获取文档目录失败'}), 500
+
+
+@document_bp.route('/repository/<int:repository_id>/generate-ai-docs', methods=['POST'])
+@login_required
+def generate_ai_docs_for_repository(repository_id):
+    """为仓库生成AI技术文档"""
+    try:
+        from app.models.repository import Repository
+        
+        # 验证仓库存在且用户有权限
+        repository = Repository.query.filter_by(id=repository_id, user_id=current_user.id).first()
+        if not repository:
+            return jsonify({'error': '仓库不存在或无权限访问'}), 404
+        
+        logger.info(f"开始为仓库 {repository.name} (ID: {repository_id}) 生成AI文档")
+        
+        # 调用优化后的文档生成服务
+        result = doc_generation_service.generate_docs_for_repository(
+            repository_id=repository_id
+        )
+        
+        if result['success']:
+            logger.info(f"文档生成成功: {result['output_directory']}")
+            return jsonify({
+                'success': True,
+                'message': f"成功生成 {result['statistics']['successful_prompts']}/{result['statistics']['total_prompts']} 个文档",
+                'output_directory': result['output_directory'],
+                'generated_files': result['generated_files'],
+                'results': result['results'],
+                'statistics': result['statistics']
+            })
+        else:
+            logger.error(f"文档生成失败: {result['error']}")
+            return jsonify({
+                'success': False,
+                'error': result['error']
+            }), 400
+            
+    except Exception as e:
+        logger.error(f"AI文档生成过程发生异常: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': f'文档生成失败: {str(e)}'
+        }), 500
+
+
+@document_bp.route('/ai-docs/status/<int:repository_id>', methods=['GET'])
+@login_required
+def get_ai_docs_status(repository_id):
+    """获取仓库AI文档生成状态"""
+    try:
+        from app.models.repository import Repository
+        from app.models.document import Document
+        
+        # 验证仓库存在且用户有权限
+        repository = Repository.query.filter_by(id=repository_id, user_id=current_user.id).first()
+        if not repository:
+            return jsonify({'error': '仓库不存在或无权限访问'}), 404
+        
+        # 查找AI生成的文档
+        ai_documents = Document.query.filter_by(
+            repository_id=repository_id,
+            document_type='ai_generated'
+        ).all()
+        
+        # 使用DirectoryService检查输出目录
+        from app.services.directory_service import DirectoryService
+        directory_service = DirectoryService()
+        output_dir_path = directory_service.get_ai_docs_directory(repository.name, repository_id)
+        output_dir = Path(output_dir_path)
+        
+        return jsonify({
+            'success': True,
+            'repository_name': repository.name,
+            'repository_id': repository_id,
+            'has_ai_docs': len(ai_documents) > 0,
+            'ai_documents_count': len(ai_documents),
+            'output_directory_exists': output_dir.exists(),
+            'output_path': str(output_dir) if output_dir.exists() else None,
+            'ai_documents': [
+                {
+                    'id': doc.id,
+                    'title': doc.title,
+                    'created_at': doc.created_at.isoformat(),
+                    'status': doc.status,
+                    'file_path': doc.file_path
+                }
+                for doc in ai_documents
+            ]
+        })
+        
+    except Exception as e:
+        logger.error(f"获取AI文档状态失败: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': f'获取状态失败: {str(e)}'
+        }), 500

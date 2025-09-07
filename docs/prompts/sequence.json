@@ -1,0 +1,39 @@
+{
+  "version": "1.0",
+  "output_base": "coderwiki-output-docs",
+  "repos_base": "coderwiki-output-docs/repos",
+  "execution_sequence": [
+    {
+      "prompt_file": "technical-overview.md",
+      "timeout": 600,
+      "tools": ["Read", "Grep", "Glob"],
+      "variables": {
+        "analysis_depth": "comprehensive",
+        "include_examples": true
+      }
+    },
+    {
+      "prompt_file": "API逆向分析.md", 
+      "timeout": 900,
+      "tools": ["Read", "Grep", "Bash"],
+      "variables": {
+        "focus_areas": ["endpoints", "models", "authentication"]
+      }
+    },
+    {
+      "prompt_file": "模块深度考古与高频提交问题.md",
+      "timeout": 1200,
+      "tools": ["Read", "Grep", "Bash", "WebSearch"],
+      "variables": {
+        "history_depth": "6_months",
+        "include_git_analysis": true
+      }
+    }
+  ],
+  "global_variables": {
+    "project_name": "{repository_name}",
+    "repository_id": "{repository_id}",
+    "output_format": "markdown",
+    "language": "zh-CN"
+  }
+}

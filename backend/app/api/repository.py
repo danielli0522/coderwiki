@@ -398,6 +398,29 @@ def bulk_delete_repositories():
     except Exception as e:
         return jsonify({'error': '服务器内部错误'}), 500
 
+@repository_bp.route('/bulk-analyze', methods=['POST'])
+@login_required
+def bulk_analyze_repositories():
+    """Analyze multiple repositories."""
+    try:
+        data = request.get_json()
+
+        if not data or 'repository_ids' not in data:
+            return jsonify({'error': '缺少仓库ID列表'}), 400
+
+        repository_ids = data['repository_ids']
+        if not isinstance(repository_ids, list) or not repository_ids:
+            return jsonify({'error': '仓库ID列表必须是非空数组'}), 400
+
+        repo_service = RepositoryService()
+        result = repo_service.bulk_analyze_repositories(current_user.id, repository_ids)
+
+        return jsonify(result)
+
+    except Exception as e:
+        logger.error(f"Bulk analyze error: {e}")
+        return jsonify({'error': '服务器内部错误'}), 500
+
 @repository_bp.route('/<int:repository_id>/generate', methods=['POST'])
 @login_required
 def generate_document(repository_id):
@@ -419,10 +442,10 @@ def generate_document(repository_id):
         description = data.get('description', f'为{repository.name}生成的{document_type}文档')
 
         # 创建文档记录
-        from app.services.doc_service import DocumentService
-        doc_service = DocumentService()
+        from app.services.claude_code_service import ClaudeCodeService
+        claude_service = ClaudeCodeService()
 
-        document = doc_service.create_document(
+        document = claude_service.create_document(
             user_id=current_user.id,
             title=title,
             repository_id=repository_id,
@@ -431,7 +454,7 @@ def generate_document(repository_id):
         )
 
         # 启动文档生成任务
-        success = doc_service.generate_document_content(document['id'], current_user.id)
+        success = claude_service.generate_document_content(document['id'], current_user.id)
 
         if success:
             # 获取创建的任务ID

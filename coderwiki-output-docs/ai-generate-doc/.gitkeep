@@ -1,0 +1,9 @@
+# AI Generated Documentation Output Directory
+
+This directory contains automatically generated technical documentation using Claude headless mode.
+
+Structure:
+- {repository_name}_{repository_id}/
+  - technical-overview/
+  - api-analysis/
+  - module-archaeology/

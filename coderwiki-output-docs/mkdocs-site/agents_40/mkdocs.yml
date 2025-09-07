@@ -1,0 +1,63 @@
+extra_javascript:
+- https://unpkg.com/mermaid/dist/mermaid.min.js
+- javascripts/mermaid-init.js
+markdown_extensions:
+- admonition
+- codehilite
+- toc
+- tables
+- fenced_code
+- def_list
+- footnotes
+- md_in_html
+- pymdownx.arithmatex
+- pymdownx.betterem
+- pymdownx.caret
+- pymdownx.mark
+- pymdownx.tilde
+- pymdownx.details
+- pymdownx.emoji
+- pymdownx.highlight
+- pymdownx.inlinehilite
+- pymdownx.keys
+- pymdownx.magiclink
+- pymdownx.smartsymbols
+- pymdownx.superfences:
+    custom_fences:
+    - class: mermaid
+      format: '!!python/name:pymdownx.superfences.fence_code_format'
+      name: mermaid
+- pymdownx.tabbed
+- pymdownx.tasklist
+nav:
+- README: index.md
+plugins:
+- search
+- awesome-pages
+repo_name: agents
+repo_url: https://github.com/danielli0522/agents
+site_description: Default test repository for CoderWiki development and testing
+site_name: agents Documentation
+theme:
+  features:
+  - navigation.tabs
+  - navigation.sections
+  - navigation.expand
+  - navigation.indexes
+  - toc.integrate
+  - search.suggest
+  - search.highlight
+  name: material
+  palette:
+  - accent: blue
+    primary: blue
+    scheme: default
+    toggle:
+      icon: material/brightness-7
+      name: Switch to dark mode
+  - accent: blue
+    primary: blue
+    scheme: slate
+    toggle:
+      icon: material/brightness-4
+      name: Switch to light mode

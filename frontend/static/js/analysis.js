@@ -368,7 +368,26 @@ class AnalysisManager {
             this.showSuccess('分析已开始');
         } catch (error) {
             console.error('Error starting analysis:', error);
-            const errorMessage = error.message ? `开始分析失败: ${error.message}` : '开始分析失败';
+            
+            let errorMessage;
+            if (error.message && error.message.includes('Authentication required')) {
+                errorMessage = '用户未登录，请先登录后再试';
+            } else if (error.message && error.message.includes('网络连接失败')) {
+                errorMessage = '网络连接失败，请检查网络连接或稍后重试';
+            } else if (error.message && error.message.includes('Failed to fetch')) {
+                errorMessage = '无法连接到服务器，请检查网络连接或联系管理员';
+            } else if (error.message && error.message.includes('HTTP error! status: 400')) {
+                errorMessage = '请求参数有误，请检查仓库是否存在且已完成克隆';
+            } else if (error.message && error.message.includes('HTTP error! status: 403')) {
+                errorMessage = '无权限访问此仓库，请检查权限设置';
+            } else if (error.message && error.message.includes('HTTP error! status: 404')) {
+                errorMessage = '仓库不存在，请检查仓库是否已正确添加';
+            } else if (error.message && error.message.includes('HTTP error! status: 500')) {
+                errorMessage = '服务器内部错误，请稍后重试或联系管理员';
+            } else {
+                errorMessage = error.message ? `开始分析失败: ${error.message}` : '开始分析失败，请稍后重试';
+            }
+            
             this.showError(errorMessage);
         }
     }

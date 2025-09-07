@@ -1,7 +1,7 @@
 /**
  * 文档管理页面JavaScript - Winston Framework Integration
  * 🏗️ Winston Architecture Optimization - Clean Modal System Integration
- * 
+ *
  * REFACTOR SUMMARY:
  * ✅ Preserved correct Bootstrap modal.show() and modal.hide() calls
  * ✅ Removed all manual DOM manipulation (style.display, classList operations)
@@ -11,14 +11,14 @@
  * ✅ Enhanced error recovery through Winston integration
  * ✅ Maintained accessibility and focus management
  * ✅ Added comprehensive fallback mechanisms
- * 
+ *
  * KEY INTEGRATION POINTS:
  * - Modal Registry: Tracks all active modals via Winston
  * - Error Recovery: Reports errors to Winston system
  * - Lifecycle Management: Full Bootstrap event lifecycle with Winston tracking
  * - Emergency Cleanup: Coordinated cleanup across Winston and Bootstrap
  * - Health Monitoring: Provides health checks to Winston error recovery
- * 
+ *
  * PRESERVED ORIGINAL FEATURES:
  * - Correct Bootstrap API usage (modal.show/hide)
  * - Accessibility setup and focus management
@@ -32,11 +32,11 @@ class DocumentManager {
         this.pageSize = 10;
         this.totalItems = 0;
         this.totalPages = 1;
-        
+
         // Winston Integration - Modal Registry
         this.modalRegistry = new Map();
         this.winstonIntegration = this.initializeWinstonIntegration();
-        
+
         this.init();
         this.setupEmergencyRecovery();
     }
@@ -56,18 +56,18 @@ class DocumentManager {
                 });
                 console.log(`📋 Winston: Modal registered - ${modalId}`);
             },
-            
+
             // 注销模态框
             unregisterModal: (modalId) => {
                 this.modalRegistry.delete(modalId);
                 console.log(`🗑️ Winston: Modal unregistered - ${modalId}`);
             },
-            
+
             // 获取所有活动模态框
             getActiveModals: () => {
                 return Array.from(this.modalRegistry.keys());
             },
-            
+
             // 紧急清理所有模态框 - 与Winston错误恢复集成
             emergencyCleanupModals: () => {
                 console.log('🚨 Winston: Emergency modal cleanup initiated');
@@ -76,7 +76,7 @@ class DocumentManager {
                 });
                 this.modalRegistry.clear();
             },
-            
+
             // 错误恢复集成点
             reportError: (error, context) => {
                 if (window.winstonErrorRecovery) {
@@ -345,7 +345,7 @@ class DocumentManager {
     showAddDocumentModal() {
         const modalElement = document.getElementById('addDocumentModal');
         const modalId = 'addDocumentModal';
-        
+
         // 确保Bootstrap已经加载
         if (typeof bootstrap === 'undefined') {
             const error = new Error('Bootstrap not loaded');
@@ -353,9 +353,9 @@ class DocumentManager {
             console.error('❌ Bootstrap not loaded');
             return;
         }
-        
+
         console.log('🔧 Winston + Bootstrap: Starting modal activation...');
-        
+
         try {
             // Winston Step 1: 清理任何现有的模态框实例
             const existingModal = bootstrap.Modal.getInstance(modalElement);
@@ -364,28 +364,28 @@ class DocumentManager {
                 this.winstonIntegration.unregisterModal(modalId);
                 console.log('🗑️ Winston: Disposed existing modal instance');
             }
-            
+
             // Winston Step 2: 使用正确的Bootstrap API创建模态框实例
             const modal = new bootstrap.Modal(modalElement, {
                 backdrop: 'static',  // 点击背景不关闭
                 keyboard: false      // ESC键不关闭，使用我们的事件处理
             });
-            
+
             // Winston Step 3: 注册模态框到Winston注册表
             this.winstonIntegration.registerModal(modalId, modal);
             this.currentModal = modal;
-            
+
             // Winston Step 4: 设置完整的生命周期事件处理
             this.setupWinstonModalLifecycle(modalElement, modalId, modal);
-            
+
             // Winston Step 5: 使用Bootstrap API显示模态框
             modal.show();
             console.log('✅ Winston + Bootstrap: Modal shown properly with tracking');
-            
+
         } catch (error) {
             console.error('❌ Winston: Failed to show modal:', error);
             this.winstonIntegration.reportError(error, 'showAddDocumentModal');
-            
+
             // Winston错误恢复：尝试使用备用方法
             this.showModalWithFallback(modalElement, modalId);
         }
@@ -399,22 +399,22 @@ class DocumentManager {
         // 模态框显示完成事件
         modalElement.addEventListener('shown.bs.modal', () => {
             console.log(`✅ Winston: Modal ${modalId} fully displayed`);
-            
+
             // 加载仓库数据
             this.loadRepositories().catch(error => {
                 this.winstonIntegration.reportError(error, 'loadRepositories');
             });
-            
+
             // 聚焦管理
             const firstInput = modalElement.querySelector('input, select, textarea');
             if (firstInput) {
                 firstInput.focus();
                 console.log('♿ Winston: Focus set to first input');
             }
-            
+
             // Winston集成：通知其他系统模态框已显示
             this.notifyWinstonModalShown(modalId);
-            
+
         }, { once: true });
 
         // 模态框隐藏开始事件
@@ -425,20 +425,20 @@ class DocumentManager {
         // 模态框完全隐藏事件 - 重要的清理步骤
         modalElement.addEventListener('hidden.bs.modal', () => {
             console.log(`🧹 Winston: Modal ${modalId} fully hidden`);
-            
+
             // Winston清理：从注册表移除
             this.winstonIntegration.unregisterModal(modalId);
             this.currentModal = null;
-            
+
             // 原有的表单重置逻辑
             const form = modalElement.querySelector('#addDocumentForm');
             if (form) {
                 form.reset();
             }
-            
+
             // Winston确保页面交互恢复
             this.restorePageInteractions();
-            
+
         }, { once: true });
     }
 
@@ -448,7 +448,7 @@ class DocumentManager {
      */
     showModalWithFallback(modalElement, modalId) {
         console.log('🚨 Winston: Using fallback modal display method');
-        
+
         try {
             // 使用Winston的UIFramework备用方法
             if (window.UnifiedUIFramework && window.UnifiedUIFramework.modalSystem) {
@@ -491,10 +491,10 @@ class DocumentManager {
      */
     hideAddDocumentModal() {
         const modalId = 'addDocumentModal';
-        
+
         try {
             console.log('🔄 Winston: Starting modal hide process...');
-            
+
             // Winston方法1: 使用存储的Bootstrap实例
             if (this.currentModal) {
                 this.currentModal.hide();
@@ -517,7 +517,7 @@ class DocumentManager {
         } catch (error) {
             console.error('❌ Winston: Failed to hide modal:', error);
             this.winstonIntegration.reportError(error, 'hideAddDocumentModal');
-            
+
             // Winston紧急恢复：强制清理
             this.forceCloseModal(modalId);
         }
@@ -528,7 +528,7 @@ class DocumentManager {
      */
     hideModalWithFallback(modalElement, modalId) {
         console.log('🚨 Winston: Using fallback modal hide method');
-        
+
         try {
             // 尝试Winston的UIFramework方法
             if (window.UnifiedUIFramework && window.UnifiedUIFramework.modalSystem) {
@@ -549,7 +549,7 @@ class DocumentManager {
      */
     forceCloseModal(modalId, modalInfo = null) {
         console.log(`🚨 Winston: Force closing modal ${modalId}`);
-        
+
         const modalElement = document.getElementById(modalId);
         if (!modalElement) return;
 
@@ -570,11 +570,11 @@ class DocumentManager {
 
         // 手动清理DOM状态
         this.manualModalCleanup();
-        
+
         // 从Winston注册表移除
         this.winstonIntegration.unregisterModal(modalId);
     }
-    
+
     /**
      * 手动模态框清理 - Winston增强版本
      * 移除所有手动DOM操作，使用更安全的清理方法
@@ -582,11 +582,11 @@ class DocumentManager {
     manualModalCleanup() {
         const modalElement = document.getElementById('addDocumentModal');
         const modalId = 'addDocumentModal';
-        
+
         console.log('🧹 Winston: Starting manual modal cleanup...');
-        
+
         if (!modalElement) return;
-        
+
         // 重要：避免直接DOM操作，尝试使用Bootstrap API
         try {
             const existingInstance = bootstrap.Modal.getInstance(modalElement);
@@ -597,23 +597,23 @@ class DocumentManager {
         } catch (error) {
             console.warn('Winston: Failed to dispose Bootstrap instance:', error);
         }
-        
+
         // Winston安全清理：仅在必要时进行DOM操作
         this.safeModalDOMCleanup(modalElement);
-        
+
         // 重置表单
         const form = modalElement.querySelector('#addDocumentForm');
         if (form) {
             form.reset();
         }
-        
+
         // Winston清理：从注册表移除
         this.winstonIntegration.unregisterModal(modalId);
         this.currentModal = null;
-        
+
         // Winston页面恢复
         this.restorePageInteractions();
-        
+
         console.log('✅ Winston: Manual modal cleanup completed safely');
     }
 
@@ -628,7 +628,7 @@ class DocumentManager {
                 modalElement.classList.remove('show');
                 modalElement.setAttribute('aria-hidden', 'true');
                 modalElement.style.display = '';  // 让CSS控制显示
-                
+
                 // 安全移除背景遮罩
                 const backdrops = document.querySelectorAll('.modal-backdrop');
                 backdrops.forEach(backdrop => {
@@ -637,7 +637,7 @@ class DocumentManager {
                         backdrop.remove();
                     }
                 });
-                
+
                 // 恢复页面状态
                 if (!document.querySelector('.modal.show')) {
                     document.body.classList.remove('modal-open');
@@ -654,43 +654,43 @@ class DocumentManager {
      */
     manualModalShow(modalElement, modalId) {
         console.log('🚨 Winston: Using manual modal show (last resort)');
-        
+
         // 创建最小化的模态框显示
         modalElement.style.display = 'block';
         modalElement.classList.add('show');
         modalElement.removeAttribute('aria-hidden');
-        
+
         // 创建简单背景遮罩
         if (!document.querySelector('.modal-backdrop')) {
             const backdrop = document.createElement('div');
             backdrop.className = 'modal-backdrop fade show';
             backdrop.style.zIndex = '1040'; // Bootstrap默认值
             document.body.appendChild(backdrop);
-            
+
             // 点击背景关闭
             backdrop.addEventListener('click', () => {
                 this.hideAddDocumentModal();
             });
         }
-        
+
         // 设置body状态
         document.body.classList.add('modal-open');
-        
+
         // Winston注册
         this.winstonIntegration.registerModal(modalId, { type: 'manual' });
-        
+
         // 加载数据和设置焦点
         this.loadRepositories().catch(error => {
             console.error('Failed to load repositories:', error);
         });
-        
+
         setTimeout(() => {
             const firstInput = modalElement.querySelector('input, select, textarea');
             if (firstInput) {
                 firstInput.focus();
             }
         }, 100);
-        
+
         console.log('✅ Winston: Manual modal show completed');
     }
 
@@ -698,7 +698,7 @@ class DocumentManager {
         if (!modalElement || modalElement.dataset.accessibilitySetup === 'true') {
             return; // 避免重复设置
         }
-        
+
         // 标记已设置，避免重复绑定
         modalElement.dataset.accessibilitySetup = 'true';
 
@@ -709,16 +709,16 @@ class DocumentManager {
             if (form) {
                 form.reset();
             }
-            
+
             // 清理实例引用
             this.currentModal = null;
-            
+
             // 确保页面其他元素可以正常交互
             this.restorePageInteractions();
-            
+
             console.log('🧹 Modal fully hidden and cleaned up');
         });
-        
+
         console.log('♿ Modal accessibility setup completed');
     }
 
@@ -726,7 +726,7 @@ class DocumentManager {
         // 移除可能阻止交互的样式或属性
         document.body.style.overflow = '';
         document.body.classList.remove('modal-open');
-        
+
         // 移除模态框背景遮罩可能的干扰
         const backdrops = document.querySelectorAll('.modal-backdrop');
         backdrops.forEach(backdrop => {
@@ -929,25 +929,25 @@ class DocumentManager {
      */
     performLocalEmergencyRecovery() {
         console.log('🔧 Document Manager: Starting local emergency recovery...');
-        
+
         try {
             // 1. 清理所有已注册的模态框
             this.winstonIntegration.emergencyCleanupModals();
-            
+
             // 2. 重置页面状态
             this.restorePageInteractions();
-            
+
             // 3. 重新初始化关键事件监听器
             this.rebindCriticalEvents();
-            
+
             // 4. 通知Winston系统恢复完成
             if (window.winstonErrorRecovery) {
                 window.winstonErrorRecovery.reportRecoverySuccess('DocumentManager');
             }
-            
+
             console.log('✅ Document Manager: Local emergency recovery completed');
             this.showToast('文档管理器已恢复正常', 'success');
-            
+
         } catch (error) {
             console.error('❌ Document Manager: Emergency recovery failed:', error);
             this.winstonIntegration.reportError(error, 'performLocalEmergencyRecovery');
@@ -959,14 +959,14 @@ class DocumentManager {
      */
     handleWinstonGlobalRecovery() {
         console.log('🛡️ Document Manager: Handling Winston global recovery');
-        
+
         // 清理本地状态
         this.modalRegistry.clear();
         this.currentModal = null;
-        
+
         // 确保页面交互正常
         this.restorePageInteractions();
-        
+
         // 重新绑定事件
         setTimeout(() => {
             this.rebindCriticalEvents();
@@ -978,18 +978,18 @@ class DocumentManager {
      */
     rebindCriticalEvents() {
         console.log('🔄 Document Manager: Rebinding critical events...');
-        
+
         // 重新绑定新建文档按钮
         const addBtn = document.getElementById('addDocumentBtn');
         if (addBtn && !addBtn.dataset.eventsRebound) {
             // 移除可能的重复监听器
             addBtn.removeEventListener('click', this.boundShowModal);
-            
+
             // 重新绑定
             this.boundShowModal = () => this.showAddDocumentModal();
             addBtn.addEventListener('click', this.boundShowModal);
             addBtn.dataset.eventsRebound = 'true';
-            
+
             console.log('✅ Add document button rebound');
         }
     }
@@ -1044,43 +1044,43 @@ window.emergencyRecovery = function() {
 function initializeDocumentManager() {
     try {
         console.log('🚀 Winston: 正在初始化文档管理器...');
-        
+
         // Winston Step 1: 检查必要的依赖
         const dependencies = {
             DocumentManager: typeof DocumentManager !== 'undefined',
             bootstrap: typeof bootstrap !== 'undefined',
             winstonErrorRecovery: typeof window.winstonErrorRecovery !== 'undefined'
         };
-        
+
         console.log('🔍 Winston: 依赖检查结果:', dependencies);
-        
+
         if (!dependencies.DocumentManager) {
             console.error('❌ DocumentManager 类未定义');
             return false;
         }
-        
+
         if (!dependencies.bootstrap) {
             console.warn('⚠️ Bootstrap 未完全加载，稍后重试...');
             return false;
         }
-        
+
         // Winston Step 2: 创建文档管理器实例
         const documentManager = new DocumentManager();
         window.documentManager = documentManager;
-        
+
         // Winston Step 3: 注册到Winston全局系统
         if (dependencies.winstonErrorRecovery) {
             console.log('🛡️ Winston: 向错误恢复系统注册文档管理器');
             window.winstonModules = window.winstonModules || {};
             window.winstonModules.documentManager = documentManager;
         }
-        
+
         console.log('✅ Winston: 文档管理器初始化成功');
         return true;
-        
+
     } catch (error) {
         console.error('❌ Winston: 文档管理器初始化失败:', error);
-        
+
         // Winston错误报告
         if (window.winstonErrorRecovery) {
             window.winstonErrorRecovery.handleError({
@@ -1090,7 +1090,7 @@ function initializeDocumentManager() {
                 timestamp: new Date().toISOString()
             });
         }
-        
+
         return false;
     }
 }
@@ -1101,7 +1101,7 @@ function safeInitialization() {
     if (initializeDocumentManager()) {
         return;
     }
-    
+
     // 策略2: DOM加载完成后尝试
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
@@ -1125,13 +1125,13 @@ function safeInitialization() {
 // 重试机制
 function retryInitialization(attempts = 0) {
     const maxAttempts = 5;
-    
+
     if (attempts >= maxAttempts) {
         console.error('❌ 文档管理器初始化彻底失败，启用应急模式');
         setupEmergencyFallback();
         return;
     }
-    
+
     setTimeout(() => {
         if (!window.documentManager && !initializeDocumentManager()) {
             console.log(`🔄 文档管理器初始化重试 ${attempts + 1}/${maxAttempts}`);
@@ -1143,29 +1143,29 @@ function retryInitialization(attempts = 0) {
 // 应急备用功能
 function setupEmergencyFallback() {
     console.log('🚨 启用应急备用点击功能...');
-    
+
     // 直接绑定关键按钮事件
     const addBtn = document.getElementById('addDocumentBtn');
     if (addBtn) {
         addBtn.addEventListener('click', function() {
             console.log('🆘 应急模式：新建文档按钮点击');
-            
+
             // 简单的模态框显示
             const modal = document.getElementById('addDocumentModal');
             if (modal) {
                 modal.style.display = 'block';
                 modal.classList.add('show');
                 modal.removeAttribute('aria-hidden');
-                
+
                 // 创建背景遮罩
                 const backdrop = document.createElement('div');
                 backdrop.className = 'modal-backdrop fade show';
                 document.body.appendChild(backdrop);
-                
+
                 console.log('✅ 应急模式成功打开模态框');
             }
         });
-        
+
         console.log('✅ 应急点击事件已绑定');
     }
 }
