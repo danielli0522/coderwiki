@@ -8,7 +8,7 @@ from flask import Flask, redirect, url_for, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
-from config import Config
+from app.config import Config
 
 # Initialize extensions
 db = SQLAlchemy()
@@ -26,6 +26,13 @@ def create_app(config_class=Config):
     # Initialize extensions with app
     db.init_app(app)
     migrate.init_app(app, db)
+
+    # Ensure tables exist (bootstrap for fresh MySQL without migrations)
+    try:
+        with app.app_context():
+            db.create_all()
+    except Exception as e:
+        app.logger.error(f"Database initialization failed: {e}")
     login_manager.init_app(app)
 
     # Configure login manager
@@ -111,22 +118,22 @@ def create_app(config_class=Config):
     try:
         from flask_socketio import SocketIO
         from app.api.websocket import websocket_bp, setup_socketio_handlers
-        
+
         socketio = SocketIO()
-        socketio.init_app(app, 
-                         cors_allowed_origins="*", 
+        socketio.init_app(app,
+                         cors_allowed_origins="*",
                          async_mode='threading',
                          logger=True,
                          engineio_logger=True,
                          allow_unsafe_werkzeug=True)
-        
+
         # Setup WebSocket event handlers within app context
         with app.app_context():
             setup_socketio_handlers(socketio)
-        
+
         # Register WebSocket blueprint for REST endpoints
         app.register_blueprint(websocket_bp, url_prefix='/api/ws')
-        
+
         app.logger.info("WebSocket support initialized successfully")
     except ImportError as e:
         app.logger.warning(f"WebSocket support not available: {e}")

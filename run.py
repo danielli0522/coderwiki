@@ -14,15 +14,19 @@ sys.path.insert(0, str(backend_dir))
 os.chdir(backend_dir)
 
 from app import create_app
-from config import Config
+from app.config import Config, ProductionConfig
+
+# 根据环境选择配置类（默认生产）
+env = os.environ.get('FLASK_ENV', 'production').lower()
+config_class = ProductionConfig if env == 'production' else Config
 
 # 创建Flask应用
-app, socketio = create_app(Config)
+app, socketio = create_app(config_class)
 
 if __name__ == '__main__':
     # 开发环境运行 - 使用端口5001避免与AirPlay冲突
     port = int(os.environ.get('PORT', 5001))
-    debug = os.environ.get('FLASK_DEBUG', 'True').lower() == 'true'
+    debug = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
 
     print(f"Starting CoderWiki application on port {port}")
     print(f"Debug mode: {debug}")

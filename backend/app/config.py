@@ -11,9 +11,10 @@ class Config:
     # Basic Flask config
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
 
-    # Database configuration
+    # Database configuration (MySQL only)
+    # NOTE: We intentionally remove sqlite fallback to enforce MySQL usage.
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'sqlite:///coderwiki.db'
+        'mysql+pymysql://coderwiki:coderwiki@localhost/coderwiki'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_recycle': 3600,
@@ -52,6 +53,11 @@ class Config:
     LOG_LEVEL = os.environ.get('LOG_LEVEL', 'INFO')
     LOG_FILE = os.environ.get('LOG_FILE', 'app.log')
 
+    # Frontend template/static locations (project-root relative)
+    PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+    TEMPLATE_FOLDER = os.path.join(PROJECT_ROOT, 'frontend', 'templates')
+    STATIC_FOLDER = os.path.join(PROJECT_ROOT, 'frontend', 'static')
+
     @staticmethod
     def init_app(app):
         """Initialize configuration for app."""
@@ -61,20 +67,20 @@ class DevelopmentConfig(Config):
     """Development configuration."""
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or \
-        'sqlite:///coderwiki_dev.db'
+        'mysql+pymysql://coderwiki:coderwiki@localhost/coderwiki_dev'
 
 class TestingConfig(Config):
     """Testing configuration."""
     TESTING = True
     SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL') or \
-        'sqlite:///coderwiki_test.db'
+        'mysql+pymysql://coderwiki:coderwiki@localhost/coderwiki_test'
     WTF_CSRF_ENABLED = False
 
 class ProductionConfig(Config):
     """Production configuration."""
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'sqlite:///coderwiki_prod.db'
+        'mysql+pymysql://coderwiki:coderwiki@localhost/coderwiki_prod'
 
     @classmethod
     def init_app(cls, app):
