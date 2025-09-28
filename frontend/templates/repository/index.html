@@ -15,6 +15,9 @@
             <p class="text-muted mb-0">管理您的代码仓库并生成文档</p>
         </div>
         <div>
+            <button class="btn btn-success me-2" id="refreshLocalReposBtn" title="扫描本地仓库">
+                <i class="fas fa-sync-alt"></i> 扫描本地仓库
+            </button>
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRepositoryModal">
                 <i class="fas fa-plus"></i> 添加仓库
             </button>
@@ -92,7 +95,12 @@
                 <h5 class="mb-0">我的仓库</h5>
                 <div class="d-flex gap-2">
                     <input type="text" class="form-control form-control-sm" id="searchRepo" placeholder="搜索仓库..." style="width: 200px;">
-                    <select class="form-select form-select-sm" id="statusFilter" style="width: 150px;">
+                    <select class="form-select form-select-sm" id="sourceTypeFilter" style="width: 120px;">
+                        <option value="">全部</option>
+                        <option value="git">Git仓库</option>
+                        <option value="local">本地仓库</option>
+                    </select>
+                    <select class="form-select form-select-sm" id="statusFilter" style="width: 120px;">
                         <option value="">所有状态</option>
                         <option value="active">活跃</option>
                         <option value="cloning">克隆中</option>
@@ -108,12 +116,14 @@
                     <thead>
                         <tr>
                             <th>名称</th>
+                            <th>来源</th>
                             <th>URL</th>
                             <th>状态</th>
                             <th>克隆状态</th>
                             <th>文件数</th>
                             <th>大小</th>
                             <th>创建时间</th>
+                            <th>分析时间</th>
                             <th>操作</th>
                         </tr>
                     </thead>

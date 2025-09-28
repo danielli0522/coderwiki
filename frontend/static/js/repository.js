@@ -254,6 +254,26 @@ class RepositoryManager {
             });
         }
 
+        // 源类型筛选
+        const sourceTypeFilter = document.getElementById('sourceTypeFilter');
+        if (sourceTypeFilter) {
+            sourceTypeFilter.addEventListener('change', () => {
+                this.currentPage = 1; // 重置到第一页
+                this.loadRepositories();
+            });
+        }
+
+        // 扫描本地仓库按钮
+        const refreshLocalReposBtn = document.getElementById('refreshLocalReposBtn');
+        if (refreshLocalReposBtn) {
+            refreshLocalReposBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.handleRefreshLocalRepos();
+            });
+            console.log('✅ Refresh local repos button event bound');
+        }
+
         // 分页控件事件委托
         const paginationControls = document.getElementById('paginationControls');
         if (paginationControls) {
@@ -355,16 +375,20 @@ class RepositoryManager {
             // 获取搜索和筛选参数
             const searchInput = document.getElementById('searchRepo');
             const statusFilter = document.getElementById('statusFilter');
-            
+            const sourceTypeFilter = document.getElementById('sourceTypeFilter');
+
             const params = new URLSearchParams();
             params.append('page', this.currentPage);
             params.append('per_page', this.perPage);
-            
+
             if (searchInput && searchInput.value) {
                 params.append('search', searchInput.value);
             }
             if (statusFilter && statusFilter.value) {
                 params.append('status', statusFilter.value);
+            }
+            if (sourceTypeFilter && sourceTypeFilter.value) {
+                params.append('source_type', sourceTypeFilter.value);
             }
 
             const response = await fetch(`/api/repositories?${params}`, {
@@ -581,6 +605,26 @@ class RepositoryManager {
             return new Date(dateString).toLocaleDateString('zh-CN');
         };
 
+        // 格式化分析日期
+        const formatAnalysisDate = (repo) => {
+            if (!repo.last_analysis) return '<span class="text-muted">未分析</span>';
+            if (repo.status === 'analyzing') return '<span class="text-primary">分析中...</span>';
+
+            const date = new Date(repo.last_analysis);
+            const now = new Date();
+            const hours = (now - date) / (1000 * 60 * 60);
+
+            if (hours < 24) {
+                if (hours < 1) {
+                    return '<span class="text-success">刚刚</span>';
+                } else {
+                    return `<span class="text-success">${Math.floor(hours)}小时前</span>`;
+                }
+            } else {
+                return date.toLocaleDateString('zh-CN');
+            }
+        };
+
         row.innerHTML = `
             <td>
                 <div class="d-flex align-items-center">
@@ -590,6 +634,9 @@ class RepositoryManager {
                         <small class="text-muted">${this.escapeHtml(repo.description || '暂无描述')}</small>
                     </div>
                 </div>
+            </td>
+            <td>
+                ${this.getSourceTypeBadge(repo)}
             </td>
             <td>
                 <div class="text-truncate" style="max-width: 200px;">
@@ -605,6 +652,7 @@ class RepositoryManager {
             <td>${repo.file_count || 0}</td>
             <td>${formatSize(repo.size)}</td>
             <td>${formatDate(repo.created_at)}</td>
+            <td class="analysis-date-cell"></td>
             <td>
                 <div class="btn-group btn-group-sm" role="group">
                     <button type="button" class="btn btn-outline-primary btn-view" title="查看仓库">
@@ -622,6 +670,12 @@ class RepositoryManager {
                 </div>
             </td>
         `;
+
+        // Populate analysis date cell
+        const analysisDateCell = row.querySelector('.analysis-date-cell');
+        if (analysisDateCell) {
+            analysisDateCell.innerHTML = formatAnalysisDate(repo);
+        }
 
         return row;
     }
@@ -1057,6 +1111,68 @@ class RepositoryManager {
 
     showSuccess(message) {
         this.showAlert(message, 'success');
+    }
+
+    getSourceTypeBadge(repo) {
+        const sourceType = repo.source_type || 'git';
+        if (sourceType === 'local') {
+            return '<span class="badge bg-secondary">本地</span>';
+        } else {
+            return '<span class="badge bg-primary">Git</span>';
+        }
+    }
+
+    async handleRefreshLocalRepos() {
+        console.log('🔄 Refreshing local repositories...');
+
+        const refreshBtn = document.getElementById('refreshLocalReposBtn');
+        if (refreshBtn) {
+            // 显示加载状态
+            const originalContent = refreshBtn.innerHTML;
+            refreshBtn.disabled = true;
+            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 扫描中...';
+
+            try {
+                const response = await fetch('/api/repositories/discover', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+
+                // 显示成功消息
+                const discoveredCount = result.discovered_count || 0;
+                const addedCount = result.added_count || 0;
+
+                if (addedCount > 0) {
+                    this.showSuccess(`扫描完成！发现 ${discoveredCount} 个本地仓库，新增 ${addedCount} 个。`);
+                } else if (discoveredCount > 0) {
+                    this.showSuccess(`扫描完成！发现 ${discoveredCount} 个本地仓库，均已存在。`);
+                } else {
+                    this.showSuccess('扫描完成！未发现新的本地仓库。');
+                }
+
+                // 重新加载仓库列表
+                this.loadRepositories();
+                this.loadStatistics();
+
+            } catch (error) {
+                console.error('扫描本地仓库失败:', error);
+                this.showError('扫描本地仓库失败: ' + error.message);
+            } finally {
+                // 恢复按钮状态
+                refreshBtn.disabled = false;
+                refreshBtn.innerHTML = originalContent;
+            }
+        }
     }
 
     showAlert(message, type) {

@@ -1,0 +1,243 @@
+openapi: 3.0.3
+info:
+  title: Repository Discovery API
+  description: API for discovering and managing local repositories in output directory
+  version: 1.0.0
+
+paths:
+  /api/repositories/discover:
+    post:
+      summary: Discover repositories in output directory
+      description: Scan coderwiki-output-docs/repos/ directory for new repositories
+      security:
+        - login_required: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                force_refresh:
+                  type: boolean
+                  default: false
+                  description: Force re-scan even if recently scanned
+      responses:
+        200:
+          description: Discovery completed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  discovered_count:
+                    type: integer
+                    description: Number of new repositories discovered
+                    example: 3
+                  existing_count:
+                    type: integer
+                    description: Number of existing repositories found
+                    example: 2
+                  discovered_repos:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DiscoveredRepository'
+                  existing_repos:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ExistingRepository'
+                  errors:
+                    type: array
+                    items:
+                      type: string
+                    description: Any errors encountered during discovery
+                  message:
+                    type: string
+                    example: "Discovered 3 new repositories, 2 already exist"
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          $ref: '#/components/responses/InternalError'
+
+  /api/repositories:
+    get:
+      summary: Get repository list with filtering
+      description: Get paginated repository list with source type filtering
+      security:
+        - login_required: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+        - name: source_type
+          in: query
+          schema:
+            type: string
+            enum: [git_remote, local_output]
+          description: Filter by repository source type
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Search in repository name and description
+      responses:
+        200:
+          description: Repository list retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  repositories:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Repository'
+                  total:
+                    type: integer
+                    example: 25
+                  page:
+                    type: integer
+                    example: 1
+                  per_page:
+                    type: integer
+                    example: 10
+                  pages:
+                    type: integer
+                    example: 3
+                  has_next:
+                    type: boolean
+                    example: true
+                  has_prev:
+                    type: boolean
+                    example: false
+        401:
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  schemas:
+    Repository:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 123
+        name:
+          type: string
+          example: "my-project"
+        url:
+          type: string
+          example: "https://github.com/user/repo.git"
+        description:
+          type: string
+          example: "My awesome project"
+        source_type:
+          type: string
+          enum: [git_remote, local_output]
+          example: "local_output"
+        local_source_path:
+          type: string
+          nullable: true
+          example: "/path/to/coderwiki-output-docs/repos/my-project"
+        status:
+          type: string
+          enum: [active, inactive, error, cloning, analyzing]
+          example: "active"
+        created_at:
+          type: string
+          format: date-time
+          example: "2025-09-28T10:00:00Z"
+        file_count:
+          type: integer
+          nullable: true
+          example: 150
+        language:
+          type: string
+          nullable: true
+          example: "Python"
+
+    DiscoveredRepository:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 124
+        name:
+          type: string
+          example: "new-project"
+        path:
+          type: string
+          example: "/path/to/coderwiki-output-docs/repos/new-project"
+        file_count:
+          type: integer
+          example: 89
+        size_bytes:
+          type: integer
+          example: 1048576
+        language:
+          type: string
+          nullable: true
+          example: "JavaScript"
+
+    ExistingRepository:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 125
+        name:
+          type: string
+          example: "existing-project"
+        path:
+          type: string
+          example: "/path/to/coderwiki-output-docs/repos/existing-project"
+
+  responses:
+    Unauthorized:
+      description: User not authenticated
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Authentication required"
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Internal server error"
+
+  securitySchemes:
+    login_required:
+      type: http
+      scheme: bearer
+      description: Flask-Login session authentication
