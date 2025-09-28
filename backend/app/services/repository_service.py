@@ -5,6 +5,7 @@ Repository service layer for business logic.
 import os
 from datetime import datetime
 from typing import List, Optional, Dict, Any, Tuple
+from pathlib import Path
 from sqlalchemy import or_, and_, desc, asc, func
 from app import db
 from app.models.repository import Repository
@@ -598,7 +599,7 @@ class RepositoryService:
     def get_repositories_paginated(self, user_id: int, page: int = 1,
                                    per_page: int = 10, sort_field: str = 'created_at',
                                    sort_order: str = 'desc', status_filter: str = None,
-                                   search_query: str = None) -> Dict[str, Any]:
+                                   search_query: str = None, source_type_filter: str = None) -> Dict[str, Any]:
         """Get paginated repositories with sorting and filtering.
 
         Args:
@@ -609,6 +610,7 @@ class RepositoryService:
             sort_order: Sort order ('asc' or 'desc')
             status_filter: Filter by status
             search_query: Search in name and description
+            source_type_filter: Filter by source type ('git_remote' or 'local_output')
 
         Returns:
             Dictionary with paginated results
@@ -620,6 +622,10 @@ class RepositoryService:
             # Apply status filter
             if status_filter:
                 query = query.filter(Repository.status == status_filter)
+
+            # Apply source type filter
+            if source_type_filter:
+                query = query.filter(Repository.source_type == source_type_filter)
 
             # Add search functionality
             if search_query:
@@ -1050,3 +1056,228 @@ class RepositoryService:
                 'success': False,
                 'error': str(e)
             }
+
+    def discover_output_repositories(self, user_id: int) -> Dict[str, Any]:
+        """
+        Discover repositories in the coderwiki-output-docs/repos/ directory.
+
+        Args:
+            user_id: User ID to associate discovered repositories with
+
+        Returns:
+            Dictionary with discovery results
+        """
+        try:
+            repos_dir = self.directory_service.repos_dir
+            discovered_repos = []
+            existing_repos = []
+            errors = []
+
+            if not repos_dir.exists():
+                logger.warning(f"Output repos directory does not exist: {repos_dir}")
+                return {
+                    'success': True,
+                    'discovered_count': 0,
+                    'existing_count': 0,
+                    'discovered_repos': [],
+                    'existing_repos': [],
+                    'errors': [],
+                    'message': 'Output repos directory does not exist'
+                }
+
+            # Scan directory for potential repositories
+            for item in repos_dir.iterdir():
+                if item.is_dir():
+                    try:
+                        repo_name = item.name
+                        repo_path = str(item)
+
+                        # Check if this local repository already exists
+                        existing_repo = Repository.query.filter_by(
+                            user_id=user_id,
+                            source_type='local_output',
+                            local_source_path=repo_path
+                        ).first()
+
+                        if existing_repo:
+                            existing_repos.append({
+                                'id': existing_repo.id,
+                                'name': existing_repo.name,
+                                'path': repo_path
+                            })
+                            continue
+
+                        # Validate if it's a proper repository (has some code files)
+                        if self._is_valid_repository_directory(item):
+                            # Create repository record
+                            new_repo = Repository.create_local_repository(
+                                user_id=user_id,
+                                name=repo_name,
+                                local_path=repo_path,
+                                description=f"Local repository from output directory"
+                            )
+
+                            # Try to get some basic info about the repository
+                            repo_info = self._analyze_local_repository(item)
+                            if repo_info:
+                                new_repo.file_count = repo_info.get('file_count', 0)
+                                new_repo.repo_size = repo_info.get('size_bytes', 0)
+                                new_repo.language = repo_info.get('primary_language')
+                                new_repo.repo_metadata = repo_info
+
+                            with db_transaction():
+                                db.session.add(new_repo)
+                                db.session.flush()
+                                repo_id = new_repo.id
+
+                            discovered_repos.append({
+                                'id': repo_id,
+                                'name': repo_name,
+                                'path': repo_path,
+                                'file_count': new_repo.file_count,
+                                'size_bytes': new_repo.repo_size,
+                                'language': new_repo.language
+                            })
+
+                            logger.info(f"Discovered and added local repository: {repo_name} (ID: {repo_id})")
+                        else:
+                            logger.debug(f"Skipping directory (not a valid repository): {repo_name}")
+
+                    except Exception as e:
+                        error_msg = f"Error processing directory {item.name}: {str(e)}"
+                        logger.error(error_msg)
+                        errors.append(error_msg)
+
+            return {
+                'success': True,
+                'discovered_count': len(discovered_repos),
+                'existing_count': len(existing_repos),
+                'discovered_repos': discovered_repos,
+                'existing_repos': existing_repos,
+                'errors': errors,
+                'message': f'Discovered {len(discovered_repos)} new repositories, {len(existing_repos)} already exist'
+            }
+
+        except Exception as e:
+            logger.error(f"Error discovering output repositories: {str(e)}")
+            return {
+                'success': False,
+                'error': str(e),
+                'discovered_count': 0,
+                'existing_count': 0,
+                'discovered_repos': [],
+                'existing_repos': [],
+                'errors': [str(e)]
+            }
+
+    def _is_valid_repository_directory(self, path: Path) -> bool:
+        """
+        Check if a directory is a valid repository for analysis.
+
+        Args:
+            path: Path to check
+
+        Returns:
+            True if it's a valid repository directory
+        """
+        try:
+            # Check if directory has any source code files
+            source_extensions = {
+                '.py', '.js', '.ts', '.java', '.cpp', '.c', '.h', '.hpp',
+                '.cs', '.php', '.rb', '.go', '.rs', '.kt', '.swift',
+                '.scala', '.clj', '.hs', '.ml', '.sh', '.sql', '.r'
+            }
+
+            file_count = 0
+            for file_path in path.rglob('*'):
+                if file_path.is_file():
+                    file_count += 1
+                    if file_path.suffix.lower() in source_extensions:
+                        return True
+                    # Stop if we've checked too many files
+                    if file_count > 1000:
+                        break
+
+            # Also consider directories with README, package.json, requirements.txt, etc.
+            config_files = {
+                'README.md', 'README.txt', 'readme.md', 'readme.txt',
+                'package.json', 'requirements.txt', 'Pipfile', 'pom.xml',
+                'Cargo.toml', 'go.mod', 'composer.json', 'Gemfile'
+            }
+
+            for config_file in config_files:
+                if (path / config_file).exists():
+                    return True
+
+            return False
+
+        except Exception as e:
+            logger.error(f"Error validating repository directory {path}: {str(e)}")
+            return False
+
+    def _analyze_local_repository(self, path: Path) -> Dict[str, Any]:
+        """
+        Analyze a local repository to get basic information.
+
+        Args:
+            path: Repository path
+
+        Returns:
+            Dictionary with repository information
+        """
+        try:
+            info = {
+                'file_count': 0,
+                'size_bytes': 0,
+                'languages': {},
+                'primary_language': None,
+                'has_git': False
+            }
+
+            # Check if it's a git repository
+            if (path / '.git').exists():
+                info['has_git'] = True
+
+            # Count files and analyze languages
+            language_extensions = {
+                '.py': 'Python',
+                '.js': 'JavaScript',
+                '.ts': 'TypeScript',
+                '.java': 'Java',
+                '.cpp': 'C++',
+                '.c': 'C',
+                '.cs': 'C#',
+                '.php': 'PHP',
+                '.rb': 'Ruby',
+                '.go': 'Go',
+                '.rs': 'Rust',
+                '.kt': 'Kotlin',
+                '.swift': 'Swift',
+                '.scala': 'Scala'
+            }
+
+            for file_path in path.rglob('*'):
+                if file_path.is_file():
+                    try:
+                        info['file_count'] += 1
+                        info['size_bytes'] += file_path.stat().st_size
+
+                        # Track language distribution
+                        ext = file_path.suffix.lower()
+                        if ext in language_extensions:
+                            lang = language_extensions[ext]
+                            info['languages'][lang] = info['languages'].get(lang, 0) + 1
+
+                    except (OSError, PermissionError):
+                        continue
+
+            # Determine primary language
+            if info['languages']:
+                info['primary_language'] = max(info['languages'].keys(),
+                                             key=lambda k: info['languages'][k])
+
+            return info
+
+        except Exception as e:
+            logger.error(f"Error analyzing local repository {path}: {str(e)}")
+            return {}

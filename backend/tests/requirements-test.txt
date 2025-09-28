@@ -1,0 +1,70 @@
+# Testing framework and core dependencies
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-mock>=3.11.1
+pytest-xdist>=3.3.1
+pytest-timeout>=2.1.0
+
+# Test fixtures and factories
+factory-boy>=3.3.0
+faker>=19.3.0
+
+# Git testing utilities
+GitPython>=3.1.32
+
+# Database testing
+pytest-flask>=1.2.0
+pytest-flask-sqlalchemy>=1.1.0
+
+# Mock and testing utilities
+responses>=0.23.3
+freezegun>=1.2.2
+testfixtures>=7.1.0
+
+# Code quality and coverage
+coverage>=7.2.7
+pytest-html>=3.2.0
+pytest-json-report>=1.5.0
+
+# Performance testing
+pytest-benchmark>=4.0.0
+memory-profiler>=0.61.0
+
+# Parallel testing
+pytest-parallel>=0.1.1
+
+# Test data generation
+hypothesis>=6.82.0
+
+# HTTP testing
+httpx>=0.24.1
+aioresponses>=0.7.4
+
+# File system testing
+pyfakefs>=5.2.4
+
+# Configuration testing
+pytest-env>=0.8.2
+
+# Logging testing
+pytest-logging>=2016.11.4
+
+# CLI testing
+click-testing>=0.1.0
+
+# Database fixtures
+pytest-postgresql>=5.0.0
+pytest-redis>=3.0.2
+
+# Asyncio testing
+pytest-asyncio>=0.21.1
+
+# Security testing
+bandit>=1.7.5
+
+# Documentation testing
+pytest-doctest>=0.0.1
+
+# Type checking
+mypy>=1.5.1
+pytest-mypy>=0.10.3

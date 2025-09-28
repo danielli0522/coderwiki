@@ -18,7 +18,11 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_recycle': 3600,
-        'pool_pre_ping': True
+        'pool_pre_ping': True,
+        'connect_args': {
+            'autocommit': True,
+            'charset': 'utf8mb4'
+        }
     }
 
     # Flask-Login configuration
@@ -44,6 +48,10 @@ class Config:
     # Git repository configuration
     REPO_CLONE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'repos')
     MAX_REPO_SIZE = 100 * 1024 * 1024  # 100MB max repository size
+
+    # Project path configuration
+    PROJECT_ROOT = os.environ.get('PROJECT_ROOT') or os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    OUTPUT_DOCS_PATH = os.environ.get('OUTPUT_DOCS_PATH') or os.path.join(PROJECT_ROOT, 'coderwiki-output-docs')
 
     # Task queue configuration
     CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/0')
@@ -80,7 +88,7 @@ class ProductionConfig(Config):
     """Production configuration."""
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'mysql+pymysql://coderwiki:coderwiki@localhost/coderwiki_prod'
+        'mysql+pymysql://coderwiki:coderwiki@localhost/coderwiki'
 
     @classmethod
     def init_app(cls, app):

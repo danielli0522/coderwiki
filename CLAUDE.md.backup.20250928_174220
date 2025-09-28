@@ -1,0 +1,27 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## 项目架构
+
+CoderWiki 是一个基于 Flask 的智能代码文档生成与管理平台：
+
+### 核心组件结构
+- **backend/app/**: Flask 应用核心
+  - `api/`: REST API 接口（认证、仓库管理、文档生成）
+  - `models/`: SQLAlchemy 数据模型（用户、仓库、文档等）
+  - `services/`: 业务逻辑层（仓库服务、分析服务）
+  - `utils/`: 工具模块（代码分析引擎、AI客户端、Git服务等）
+  - `routes/`: 页面路由
+- **frontend/**: 前端静态资源和模板
+- **bmad-docs-generator/**: 智能文档生成系统
+- **coderwiki-output-docs/**: 生成的文档输出目录
+
+### 关键技术栈
+- Flask 2.3.3 + SQLAlchemy（ORM）
+- 数据库：SQLite（开发）/ MySQL（生产）
+- AI集成：OpenAI GPT + Anthropic Claude
+- 前端：Bootstrap 5 + 原生JavaScript
+
+## 🏗️ 系统架构速览
+

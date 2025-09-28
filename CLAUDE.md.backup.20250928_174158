@@ -1,0 +1,98 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## 项目架构
+
+CoderWiki 是一个基于 Flask 的智能代码文档生成与管理平台：
+
+### 核心组件结构
+- **backend/app/**: Flask 应用核心
+  - `api/`: REST API 接口（认证、仓库管理、文档生成）
+  - `models/`: SQLAlchemy 数据模型（用户、仓库、文档等）
+  - `services/`: 业务逻辑层（仓库服务、分析服务）
+  - `utils/`: 工具模块（代码分析引擎、AI客户端、Git服务等）
+  - `routes/`: 页面路由
+- **frontend/**: 前端静态资源和模板
+- **bmad-docs-generator/**: 智能文档生成系统
+- **coderwiki-output-docs/**: 生成的文档输出目录
+
+### 关键技术栈
+- Flask 2.3.3 + SQLAlchemy（ORM）
+- 数据库：SQLite（开发）/ MySQL（生产）
+- AI集成：OpenAI GPT + Anthropic Claude
+- 前端：Bootstrap 5 + 原生JavaScript
+
+## 常用命令
+
+### 开发环境启动
+```bash
+# 激活虚拟环境
+source venv/bin/activate  # macOS/Linux
+# 或
+venv\Scripts\activate     # Windows
+
+# 启动应用（推荐端口5001，避免AirPlay冲突）
+python run.py
+# 或指定端口
+PORT=5002 python run.py
+```
+
+### 数据库操作
+```bash
+cd backend
+python init_db.py              # 初始化数据库
+python create_default_user.py  # 创建默认用户
+python manage_users.py list    # 查看用户列表
+```
+
+### 测试
+```bash
+cd backend
+python -m pytest tests/unit/        # 单元测试
+python -m pytest tests/integration/ # 集成测试
+python -m pytest tests/e2e/         # 端到端测试
+```
+
+### 代码质量检查
+```bash
+ruff check .     # 代码检查
+black .          # 代码格式化
+```
+
+### 诊断工具
+```bash
+python scripts/diagnose_api_quota.py  # API配额诊断
+```
+
+## 开发注意事项
+
+### 目录约定
+- **temp/**: 临时生成的文件（测试、诊断）- 不提交到git
+- **logs/**: 应用日志文件
+- **coderwiki-output-docs/**: 文档生成输出目录
+
+### 重要服务模块
+- `app/utils/code_analysis_engine.py`: 核心代码分析引擎
+- `app/utils/llm_client.py`: AI客户端封装
+- `app/services/repository_service.py`: 仓库管理核心逻辑
+- `app/utils/git_service.py`: Git操作封装
+
+### 配置管理
+- 开发配置：`backend/app/config.py`
+- 环境变量：`.env`文件（参考`.env.example`）
+- 生产配置：使用环境变量覆盖
+
+### API端点
+- 认证：`/api/auth/*`
+- 仓库管理：`/api/repositories/*`
+- 文档生成：`/api/repositories/{id}/generate`
+
+### 默认账户（开发环境）
+- 管理员：admin/admin123
+- 演示用户：demo/demo123
+- 测试用户：testuser/test123
+
+### 错误处理
+- 同一类缺陷修复3次还没搞定，应该呼叫架构师进行Review
+- 临时生成的bug fix的测试文本和诊断方案放在temp目录

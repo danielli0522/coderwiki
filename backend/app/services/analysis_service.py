@@ -18,7 +18,11 @@ logger = logging.getLogger(__name__)
 
 
 class AnalysisService:
-    """Service for managing code analysis operations."""
+    """Service for managing code analysis operations.
+
+    Supports both Git remote repositories and local repositories from
+    the coderwiki-output-docs/repos/ directory structure.
+    """
     
     def __init__(self):
         self.analysis_engine = CodeAnalysisEngine()
@@ -27,9 +31,22 @@ class AnalysisService:
             'tech_stack', 'security', 'patterns', 'quality'
         ]
     
-    def start_analysis(self, repository_id: int, analysis_types: List[str], 
+    def start_analysis(self, repository_id: int, analysis_types: List[str],
                       config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Start a new code analysis task."""
+        """Start a new code analysis task.
+
+        Supports both Git remote repositories and local repositories from
+        coderwiki-output-docs/repos/. Uses Repository.get_analysis_path()
+        to determine the correct path based on repository source_type.
+
+        Args:
+            repository_id: ID of the repository to analyze
+            analysis_types: List of analysis types to perform
+            config: Optional analysis configuration
+
+        Returns:
+            Dict with success status, message, and analysis IDs
+        """
         try:
             # Validate analysis types
             invalid_types = set(analysis_types) - set(self.supported_analysis_types)
@@ -57,13 +74,39 @@ class AnalysisService:
             repository = Repository.query.get(repository_id)
             if not repository:
                 raise ValueError(f"Repository not found: {repository_id}")
-            
-            repository_path = repository.local_path
-            
-            # Validate repository path exists
-            import os
+
+            # Check if repository is ready for analysis
+            if not repository.is_ready_for_analysis():
+                if repository.is_local_repository():
+                    raise ValueError(f"Local repository path does not exist: {repository.local_source_path}")
+                else:
+                    raise ValueError(f"Repository is not ready for analysis. Status: {repository.clone_status}")
+
+            # Get the appropriate path for analysis based on repository type
+            repository_path = repository.get_analysis_path()
+
+            # Additional validation for local repositories
+            if repository.is_local_repository():
+                if not repository_path:
+                    raise ValueError(f"Local repository path is not configured for repository: {repository.name}")
+
+                if not os.path.isdir(repository_path):
+                    raise ValueError(f"Local repository path is not a valid directory: {repository_path}")
+
+                # Check if the local repository has any content
+                try:
+                    dir_contents = os.listdir(repository_path)
+                    if not dir_contents:
+                        logger.warning(f"Local repository directory is empty: {repository_path}")
+                except PermissionError:
+                    raise ValueError(f"Permission denied accessing local repository: {repository_path}")
+                except OSError as e:
+                    raise ValueError(f"Error accessing local repository {repository_path}: {str(e)}")
+
+            # Final validation that repository path exists (for both Git and local repositories)
             if not repository_path or not os.path.exists(repository_path):
-                raise ValueError(f"Repository path does not exist: {repository_path}")
+                repo_type = "local" if repository.is_local_repository() else "Git"
+                raise ValueError(f"{repo_type} repository path does not exist: {repository_path}")
             
             # Start analysis in background
             analysis_ids = [record.id for record in analysis_records]
@@ -413,11 +456,18 @@ class AnalysisService:
             parallel_processing=config.get('parallel_processing', True)
         )
     
-    def _run_analysis_async(self, repository_id: int, repository_path: str, 
+    def _run_analysis_async(self, repository_id: int, repository_path: str,
                            analysis_types: List[str], config: AnalysisConfig,
                            analysis_ids: List[int]):
         """Run analysis asynchronously (simplified version)."""
         try:
+            # Get repository info for logging
+            from app.models.repository import Repository
+            repository = Repository.query.get(repository_id)
+            repo_type = "local" if repository and repository.is_local_repository() else "Git"
+
+            logger.info(f"Starting {repo_type} repository analysis for repository {repository_id} at path: {repository_path}")
+            logger.info(f"Analysis types: {analysis_types}")
             # Update status to analyzing
             for analysis_id in analysis_ids:
                 analysis = CodeAnalysis.query.get(analysis_id)
@@ -444,24 +494,29 @@ class AnalysisService:
                     
                     # Run analysis
                     start_time = time.time()
+                    logger.debug(f"Running {analysis_type} analysis on {repo_type} repository: {repository_path}")
+
                     result = self.analysis_engine.analyze_repository(
-                        repository_path, 
-                        [analysis_type], 
+                        repository_path,
+                        [analysis_type],
                         config
                     )
                     analysis_time = time.time() - start_time
-                    
+
                     if result.success:
+                        logger.info(f"Completed {analysis_type} analysis for {repo_type} repository {repository_id} in {analysis_time:.2f}s")
                         analysis.complete_analysis(result.to_dict(), analysis_time)
                         # Cache the result
                         CacheService.set_cache(repository_id, analysis_type, result.to_dict())
                     else:
+                        logger.error(f"Failed {analysis_type} analysis for {repo_type} repository {repository_id}: {result.error_message}")
                         analysis.fail_analysis(result.error_message)
-                    
+
                     db.session.commit()
-                    
+
                 except Exception as e:
-                    logger.error(f"Error in {analysis_type} analysis: {str(e)}")
+                    error_msg = f"Error in {analysis_type} analysis for {repo_type} repository {repository_id}: {str(e)}"
+                    logger.error(error_msg)
                     analysis.fail_analysis(str(e))
                     db.session.commit()
             

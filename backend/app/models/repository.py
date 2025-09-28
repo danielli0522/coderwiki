@@ -3,6 +3,7 @@ Repository model definition.
 """
 
 import re
+import os
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from app import db
@@ -38,6 +39,10 @@ class Repository(db.Model):
     last_analysis = db.Column(db.DateTime)
     repo_metadata = db.Column('repo_metadata', db.JSON)
 
+    # New fields for local repository support
+    source_type = db.Column(db.Enum('git_remote', 'local_output'), default='git_remote', nullable=False, index=True)
+    local_source_path = db.Column(db.String(1000))  # Path in coderwiki-output-docs/repos/
+
     # Relationships
     documents = db.relationship('Document', backref='repository', lazy='dynamic',
                                cascade='all, delete-orphan')
@@ -71,7 +76,9 @@ class Repository(db.Model):
             'last_commit': self.last_commit,
             'analysis_progress': self.analysis_progress,
             'last_analysis': self.last_analysis.isoformat() if self.last_analysis else None,
-            'metadata': self.repo_metadata
+            'metadata': self.repo_metadata,
+            'source_type': self.source_type,
+            'local_source_path': self.local_source_path
         }
 
     def __repr__(self):
@@ -115,8 +122,61 @@ class Repository(db.Model):
 
     def is_ready_for_analysis(self) -> bool:
         """Check if repository is ready for analysis."""
-        return (
-            self.local_path is not None and
-            self.clone_status == 'completed' and
-            self.commit_hash is not None
+        if self.source_type == 'local_output':
+            # For local repositories, check if the local source path exists
+            return (
+                self.local_source_path is not None and
+                os.path.exists(self.local_source_path)
+            )
+        else:
+            # For Git repositories, use existing logic
+            return (
+                self.local_path is not None and
+                self.clone_status == 'completed' and
+                self.commit_hash is not None
+            )
+
+    def get_analysis_path(self) -> str:
+        """Get the path to use for analysis."""
+        import os
+        from flask import current_app
+
+        if self.source_type == 'local_output':
+            path = self.local_source_path
+        else:
+            path = self.local_path
+
+        if not path:
+            return None
+
+        # 如果是相对路径，使用配置中的路径作为基础
+        if not os.path.isabs(path):
+            if self.source_type == 'local_output':
+                # 输出文档使用OUTPUT_DOCS_PATH
+                base_path = current_app.config.get('OUTPUT_DOCS_PATH', 'coderwiki-output-docs')
+                return os.path.join(base_path, path)
+            else:
+                # 克隆的仓库使用PROJECT_ROOT
+                base_path = current_app.config.get('PROJECT_ROOT', '.')
+                return os.path.join(base_path, path)
+
+        return path
+
+    def is_local_repository(self) -> bool:
+        """Check if this is a local repository from output directory."""
+        return self.source_type == 'local_output'
+
+    @staticmethod
+    def create_local_repository(user_id: int, name: str, local_path: str,
+                               description: str = None) -> 'Repository':
+        """Create a repository instance for a local repository."""
+        return Repository(
+            user_id=user_id,
+            name=name,
+            url='local://' + local_path,  # Use a pseudo URL for local repos
+            description=description,
+            source_type='local_output',
+            local_source_path=local_path,
+            status='active',
+            clone_status='completed'  # Local repos are always "cloned"
         )

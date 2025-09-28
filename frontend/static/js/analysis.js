@@ -83,6 +83,13 @@ class AnalysisManager {
                 option.textContent = repo.name;
                 select.appendChild(option);
             });
+
+            // 自动选择第一个仓库
+            if (repositories.length > 0) {
+                select.value = repositories[0].id;
+                this.repositoryId = repositories[0].id;
+                this.loadAnalysisResults();
+            }
         }
 
         if (modalSelect) {
@@ -94,6 +101,9 @@ class AnalysisManager {
                 modalSelect.appendChild(option);
             });
         }
+
+        // 默认选择一些基础分析类型
+        this.setDefaultAnalysisTypes();
     }
 
     async loadAnalysisResults() {
@@ -593,6 +603,22 @@ class AnalysisManager {
             config[checkbox.id] = checkbox.checked;
         });
         return config;
+    }
+
+    setDefaultAnalysisTypes() {
+        // 默认选择一些基础分析类型（最可靠的4种）
+        const defaultTypes = ['structure', 'tech_stack', 'dependencies', 'security'];
+
+        defaultTypes.forEach(type => {
+            const checkbox = document.getElementById(type + 'Analysis');
+            if (checkbox) {
+                checkbox.checked = true;
+                console.log(`Auto-selected analysis type: ${type}`);
+            }
+        });
+
+        // 更新按钮状态
+        this.updateAnalysisButtonState();
     }
 
     updateAnalysisButtonState() {

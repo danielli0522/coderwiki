@@ -25,12 +25,17 @@ def get_repositories():
         sort_order = request.args.get('sort_order', 'desc')
         status_filter = request.args.get('status')
         search_query = request.args.get('search')
+        source_type = request.args.get('source_type')
 
         # Validate parameters
         if per_page < 1 or per_page > 50:
             per_page = 10
         if page < 1:
             page = 1
+
+        # Validate source_type parameter
+        if source_type and source_type not in ['git_remote', 'local_output']:
+            return jsonify({'error': 'Invalid source_type. Must be "git_remote" or "local_output"'}), 400
 
         repo_service = RepositoryService()
         result = repo_service.get_repositories_paginated(
@@ -40,12 +45,14 @@ def get_repositories():
             sort_field=sort_field,
             sort_order=sort_order,
             status_filter=status_filter,
-            search_query=search_query
+            search_query=search_query,
+            source_type_filter=source_type
         )
 
         return jsonify(result)
 
     except Exception as e:
+        logger.error(f"Get repositories error: {e}")
         return jsonify({'error': '服务器内部错误'}), 500
 
 @repository_bp.route('/statistics', methods=['GET'])
@@ -419,6 +426,30 @@ def bulk_analyze_repositories():
 
     except Exception as e:
         logger.error(f"Bulk analyze error: {e}")
+        return jsonify({'error': '服务器内部错误'}), 500
+
+@repository_bp.route('/discover', methods=['POST'])
+@login_required
+def discover_repositories():
+    """Discover repositories in output directory."""
+    try:
+        data = request.get_json() or {}
+        force_refresh = data.get('force_refresh', False)
+
+        logger.info(f"Starting repository discovery for user {current_user.id}, force_refresh={force_refresh}")
+
+        repo_service = RepositoryService()
+        result = repo_service.discover_output_repositories(current_user.id)
+
+        if result['success']:
+            logger.info(f"Repository discovery completed: {result['discovered_count']} new, {result['existing_count']} existing")
+            return jsonify(result)
+        else:
+            logger.error(f"Repository discovery failed: {result.get('error', 'Unknown error')}")
+            return jsonify({'error': result.get('error', '发现仓库失败')}), 500
+
+    except Exception as e:
+        logger.error(f"Repository discovery error: {e}")
         return jsonify({'error': '服务器内部错误'}), 500
 
 @repository_bp.route('/<int:repository_id>/generate', methods=['POST'])

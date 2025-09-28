@@ -150,11 +150,17 @@ def create_app(config_class=Config):
     # Error handlers
     @app.errorhandler(404)
     def not_found_error(error):
+        # Check if the request is for an API endpoint
+        if request.path.startswith('/api/'):
+            return jsonify({'error': '端点未找到', 'path': request.path}), 404
         return '页面未找到', 404
 
     @app.errorhandler(500)
     def internal_error(error):
         db.session.rollback()
+        # Check if the request is for an API endpoint
+        if request.path.startswith('/api/'):
+            return jsonify({'error': '内部服务器错误', 'path': request.path}), 500
         return '内部服务器错误', 500
 
 
