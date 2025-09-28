@@ -590,10 +590,25 @@ class AnalysisManager {
 
     getSelectedAnalysisTypes() {
         const types = [];
+
+        // ID到API名称的映射
+        const typeMapping = {
+            'structureAnalysis': 'structure',
+            'dependenciesAnalysis': 'dependencies',
+            'complexityAnalysis': 'complexity',
+            'techStackAnalysis': 'tech_stack',
+            'securityAnalysis': 'security',
+            'patternsAnalysis': 'patterns',
+            'qualityAnalysis': 'quality'
+        };
+
         document.querySelectorAll('input[id$="Analysis"]:checked').forEach(checkbox => {
-            const type = checkbox.id.replace('Analysis', '');
-            types.push(type);
+            const apiType = typeMapping[checkbox.id];
+            if (apiType) {
+                types.push(apiType);
+            }
         });
+
         return types;
     }
 
