@@ -1,0 +1,293 @@
+<section class="module" id="module-2">
+  <div class="module-inner">
+    <h2>核心概念</h2>
+    <p>Codebuff 的核心概念包括多代理协作、自然语言指令处理和精确的代码编辑。理解这些概念是高效使用 Codebuff 的基础。</p>
+
+    <h3>多代理协作</h3>
+    <p>Codebuff 使用多个专门代理来完成任务，每个代理负责不同的子任务。这种协作方式比单一模型工具提供更好的上下文理解、更准确的编辑和更少的错误。</p>
+
+    <div class="arch-diagram">
+      <h4>四代理协作流程</h4>
+      <div class="diagram-flow">
+        <div class="diagram-node">
+          <strong>文件选择代理</strong><br>
+          <small>扫描项目结构<br>定位相关文件<br>理解依赖关系</small>
+        </div>
+        <div class="diagram-arrow">↓</div>
+        <div class="diagram-node highlight">
+          <strong>规划代理</strong><br>
+          <small>分析修改范围<br>确定执行顺序<br>评估风险</small>
+        </div>
+        <div class="diagram-arrow">↓</div>
+        <div class="diagram-node highlight">
+          <strong>编辑代理</strong><br>
+          <small>精确代码修改<br>保持风格一致<br>处理边界情况</small>
+        </div>
+        <div class="diagram-arrow">↓</div>
+        <div class="diagram-node highlight">
+          <strong>审查代理</strong><br>
+          <small>验证变更正确性<br>检查副作用<br>确认测试通过</small>
+        </div>
+      </div>
+    </div>
+
+    <h3>自然语言指令处理</h3>
+    <p>Codebuff 能够理解自然语言指令，并将其转化为具体的代码修改操作。这使得用户无需编写代码即可完成复杂的任务。</p>
+    <div class="code-translation">
+      <div class="code">
+        <pre><code># 简单指令示例
+codebuff "add authentication to my API"
+
+# 复杂指令示例
+codebuff "Refactor the database connection
+  code to use connection pooling, update all
+  modules that directly create connections,
+  and add error handling for pool exhaustion"
+
+# 带上下文的指令
+codebuff "Based on the user model in
+  src/models/user.ts, create CRUD API
+  endpoints with input validation"</code></pre>
+      </div>
+      <div class="translation">
+        <p>Codebuff 可以处理从简单到复杂的各种指令。简单的指令只需一句话，复杂的指令可以包含多个修改要求和约束条件。你还可以引用项目中的具体文件来提供上下文。</p>
+      </div>
+    </div>
+
+    <h3>文件选择策略</h3>
+    <p>文件选择代理是 Codebuff 最核心的组件之一。它需要准确理解项目结构，找到所有相关文件。</p>
+
+    <div class="pattern-cards">
+      <div class="pattern-card">
+        <h4>依赖分析</h4>
+        <p>通过分析 import 语句和模块引用，构建完整的依赖图谱，确保修改不会遗漏任何相关文件。</p>
+      </div>
+      <div class="pattern-card">
+        <h4>语义搜索</h4>
+        <p>基于代码语义进行搜索，不只是文本匹配。能理解函数调用、类型引用等深层关系。</p>
+      </div>
+      <div class="pattern-card">
+        <h4>上下文窗口优化</h4>
+        <p>智能选择最相关的代码片段，在有限的上下文窗口中提供最有价值的信息。</p>
+      </div>
+    </div>
+
+    <h3>规划代理的工作机制</h3>
+    <p>规划代理接收文件选择代理的结果，制定具体的修改计划。</p>
+
+    <div class="code-translation">
+      <div class="code">
+        <pre><code># 规划代理的输出示例
+Plan for "Add rate limiting to API":
+
+Step 1: Install rate-limit package
+  File: package.json
+  Action: Add dependency
+
+Step 2: Create rate limiter middleware
+  File: src/middleware/rateLimit.ts
+  Action: Create new file
+
+Step 3: Apply to routes
+  Files: src/routes/*.ts
+  Action: Import and use middleware
+
+Step 4: Add configuration
+  File: src/config/rateLimit.ts
+  Action: Create config file
+
+Step 5: Update tests
+  Files: tests/routes/*.test.ts
+  Action: Add rate limit tests</code></pre>
+      </div>
+      <div class="translation">
+        <p>规划代理会将任务分解为有序的步骤，每步指定目标文件和操作类型。这种结构化的规划确保了修改的完整性和正确顺序。</p>
+      </div>
+    </div>
+
+    <h3>编辑代理的精确性</h3>
+    <p>编辑代理是执行实际代码修改的组件，它的精确性直接决定了 Codebuff 的输出质量。</p>
+
+    <div class="code-translation">
+      <div class="code">
+        <pre><code>// 编辑前：原始代码
+app.post('/api/users', (req, res) => {
+  const user = createUser(req.body);
+  res.json(user);
+});
+
+// 编辑后：添加验证
+app.post('/api/users', validateUserInput,
+  (req, res) => {
+    const user = createUser(req.body);
+    res.json(user);
+});</code></pre>
+      </div>
+      <div class="translation">
+        <p>编辑代理会进行精确的代码插入和修改，而不是替换整个文件。这减少了对代码风格和格式的干扰，保持了与现有代码的一致性。</p>
+      </div>
+    </div>
+
+    <h3>审查代理的验证机制</h3>
+    <p>审查代理在编辑完成后进行最终检查，确保修改的正确性和完整性。</p>
+
+    <div class="callout callout-accent">
+      <p><strong>审查清单</strong>：审查代理会检查——语法正确性、逻辑一致性、副作用评估、测试覆盖率、代码风格匹配、边界情况处理。</p>
+    </div>
+
+    <ul>
+      <li><strong>语法验证</strong>：确保修改后的代码没有语法错误</li>
+      <li><strong>逻辑检查</strong>：验证修改是否实现了预期功能</li>
+      <li><strong>副作用分析</strong>：评估修改对其他模块的影响</li>
+      <li><strong>测试运行</strong>：自动运行相关测试确保不引入回归</li>
+    </ul>
+
+    <h3>代理间的信息传递</h3>
+    <div class="code-translation">
+      <div class="code">
+        <pre><code># 代理间传递的信息结构
+{
+  "task": "Add authentication to API",
+  "selected_files": [
+    "src/routes/auth.ts",
+    "src/middleware/auth.ts",
+    "src/models/user.ts"
+  ],
+  "plan": [
+    {"step": 1, "file": "...", "action": "..."},
+    {"step": 2, "file": "...", "action": "..."}
+  ],
+  "edits": [
+    {"file": "...", "diff": "...", "reason": "..."}
+  ],
+  "review": {
+    "passed": true,
+    "warnings": [],
+    "suggestions": []
+  }
+}</code></pre>
+      </div>
+      <div class="translation">
+        <p>每个代理将处理结果以结构化的方式传递给下一个代理，包含任务描述、选中的文件、修改计划、具体编辑和审查结果。</p>
+      </div>
+    </div>
+
+    <section class="screen animate-in">
+      <h3>代理协作中的上下文传递机制</h3>
+      <p>Codebuff 的多代理架构中，上下文的传递方式直接影响最终的编辑质量。每个代理接收到的不仅是前一个代理的输出，还有累积的项目知识。</p>
+
+      <div class="code-translation">
+        <div class="code">
+          <pre><code># 上下文传递的数据结构
+{
+  "project_context": {
+    "language": "TypeScript",
+    "framework": "NestJS",
+    "structure": {
+      "src/": ["controllers/", "services/",
+               "modules/", "dto/"],
+      "test/": ["unit/", "e2e/"]
+    },
+    "conventions": {
+      "naming": "camelCase",
+      "file_structure": "feature-based"
+    }
+  },
+  "agent_chain": [
+    {
+      "agent": "file_selector",
+      "output": {
+        "selected": ["src/auth/auth.service.ts",
+                     "src/auth/auth.module.ts"],
+        "reason": "Auth-related files identified
+                   via import analysis"
+      }
+    },
+    {
+      "agent": "planner",
+      "input": "<previous_output>",
+      "output": {
+        "steps": [...],
+        "risk_assessment": "LOW"
+      }
+    }
+  ]
+}</code></pre>
+        </div>
+        <div class="translation">
+          <p>上下文传递采用累积式设计——每个代理都能看到之前所有代理的输出。这种设计确保了编辑代理不仅知道"改什么"，还知道"为什么改"和"改了什么相关的内容"。</p>
+        </div>
+      </div>
+
+      <div class="callout callout-accent">
+        <p><strong>上下文窗口优化策略</strong>：Codebuff 会在传递上下文时自动压缩不相关的信息。例如，编辑代理不需要知道文件选择代理是如何找到文件的，只需要知道哪些文件被选中以及为什么。这种选择性传递确保了有限上下文窗口的高效利用。</p>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>编辑代理的 Diff 算法</h3>
+      <p>编辑代理不会替换整个文件，而是生成精确的 diff（差异）来描述修改。这种设计保持了代码的原始风格和格式。</p>
+
+      <div class="code-translation">
+        <div class="code">
+          <pre><code>// 编辑代理生成的 diff 示例
+--- a/src/auth/auth.service.ts
++++ b/src/auth/auth.service.ts
+@@ -15,6 +15,12 @@
+   async login(dto: LoginDto) {
+     const user = await this.validateUser(dto);
++
++    // Rate limiting check
++    const attempts = await this.getRecentAttempts(
++      dto.email
++    );
++    if (attempts > 5) {
++      throw new TooManyAttemptsException();
++    }
++
+     const token = this.generateToken(user);
+     return { access_token: token };
+   }</code></pre>
+        </div>
+        <div class="translation">
+          <p>编辑代理使用精确的行级 diff，只插入或修改必要的部分。这种方式不会干扰文件的其余内容，保持了代码风格的一致性。上例中，代理仅在登录方法中插入了速率限制检查逻辑。</p>
+        </div>
+      </div>
+
+      <div class="pattern-cards">
+        <div class="pattern-card">
+          <h4>最小改动原则</h4>
+          <p>编辑代理遵循最小改动原则——只修改完成任务所必需的代码。它不会"顺手"重构、格式化或添加注释，除非你明确要求。</p>
+        </div>
+        <div class="pattern-card">
+          <h4>风格匹配</h4>
+          <p>编辑代理会分析周围代码的缩进风格（空格 vs Tab）、引号类型、命名约定等，确保新代码与现有代码风格一致。</p>
+        </div>
+        <div class="pattern-card">
+          <h4>边界安全</h4>
+          <p>编辑代理在修改代码时会特别关注函数边界、条件分支和异常处理路径，确保不会因为遗漏边界条件而引入新的 bug。</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="quiz">
+      <p><strong>小测验：</strong>Codebuff 使用哪种方式来处理用户的指令？</p>
+      <ul>
+        <li><button>A. 编写代码</button></li>
+        <li><button>B. 自然语言处理</button></li>
+        <li><button>C. 图形界面操作</button></li>
+        <li><button>D. 命令行输入</button></li>
+      </ul>
+    </div>
+
+    <div class="quiz">
+      <p><strong>深度思考：</strong>为什么多代理协作比单一模型更有效？</p>
+      <ul>
+        <li><button>A. 每个代理专注单一职责，减少信息过载和认知负担</button></li>
+        <li><button>B. 多个代理使用不同的模型</button></li>
+        <li><button>C. 并行处理速度更快</button></li>
+        <li><button>D. 占用更多计算资源</button></li>
+      </ul>
+    </div>
+  </div>
+</section>

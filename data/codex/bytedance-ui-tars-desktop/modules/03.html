@@ -1,0 +1,188 @@
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">Operator：从 AI 指令到鼠标点击</h1>
+      <p class="module-subtitle">AI 说"点击(335, 360)"，但电脑怎么知道你要点哪里？Operator 就是 AI 世界和真实电脑之间的翻译官。</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Operator 的角色</h2>
+        <p>模型输出的是文字指令——"click(start_box='[0.131, 0.25, 0.131, 0.25]')"。但电脑需要真实的鼠标移动和键盘输入。<span class="term" data-definition="Operator 在这里指'操作器'——把 AI 的抽象指令翻译成具体操作的组件。就像汽车的方向盘和踏板，把你的意图翻译成机械运动。">Operator</span> 就是这个翻译层。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🖱️</div>
+            <h4 class="pattern-title">NutJS Operator</h4>
+            <p class="pattern-desc">用 NutJS 库控制真实鼠标键盘，适用于本地桌面操作</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🌐</div>
+            <h4 class="pattern-title">Browser Operator</h4>
+            <p class="pattern-desc">控制浏览器内的 DOM 操作，支持 Playwright 和 CDP</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">📱</div>
+            <h4 class="pattern-title">ADB Operator</h4>
+            <p class="pattern-desc">通过 Android Debug Bridge 控制安卓手机界面</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Electron 桌面截图的实现</h2>
+        <p>在 Electron 桌面应用中，截图不是用浏览器 API，而是用 Electron 原生的 desktopCapturer。这段代码展示了如何获取高质量屏幕截图。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-comment">// apps/ui-tars/src/main/agent/operator.ts</span>
+<span class="code-line"><span class="code-keyword">export class</span> <span class="code-function">NutJSElectronOperator</span></span>
+<span class="code-line">  <span class="code-keyword">extends</span> NutJSOperator {</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">public async</span> <span class="code-function">screenshot</span>() {</span>
+<span class="code-line">    <span class="code-keyword">const</span> { physicalSize, logicalSize,</span>
+<span class="code-line">      scaleFactor } = <span class="code-function">getScreenSize</span>();</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">const</span> sources = <span class="code-keyword">await</span></span>
+<span class="code-line">      desktopCapturer.<span class="code-function">getSources</span>({</span>
+<span class="code-line">        types: [<span class="code-string">'screen'</span>],</span>
+<span class="code-line">        thumbnailSize: {</span>
+<span class="code-line">          width: logicalSize.width,</span>
+<span class="code-line">          height: logicalSize.height }</span>
+<span class="code-line">      });</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">const</span> screenshot =</span>
+<span class="code-line">      sources[<span class="code-number">0</span>].thumbnail;</span>
+<span class="code-line">    <span class="code-keyword">return</span> {</span>
+<span class="code-line">      base64: screenshot.toJPEG(<span class="code-number">75</span>)</span>
+<span class="code-line">        .toString(<span class="code-string">'base64'</span>),</span>
+<span class="code-line">      scaleFactor</span>
+<span class="code-line">    };</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">继承 NutJSOperator，扩展 Electron 特有的截图能力...</p>
+              <p class="tl">获取屏幕的物理尺寸、逻辑尺寸和缩放比例...</p>
+              <p class="tl">调用 Electron 的 desktopCapturer API 获取屏幕截图...</p>
+              <p class="tl">只截取屏幕（不是窗口）...</p>
+              <p class="tl">按逻辑尺寸获取缩略图（考虑 Retina 缩放）...</p>
+              <p class="tl">取第一个屏幕源（主显示器）...</p>
+              <p class="tl">转为 JPEG 格式（质量 75%），再转 base64 文本...</p>
+              <p class="tl">返回 base64 图片和缩放因子——供模型使用。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Windows 输入的特殊处理</h2>
+        <p>在 Windows 上直接用 keyboard.type() 输入中文会出问题。UI-TARS 用了一个聪明的替代方案：先复制到剪贴板，再 Ctrl+V 粘贴。</p>
+
+        <div class="chat-window" id="chat-module3">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="model" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">AI</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">AI 模型</span>
+                <p>我需要在这个搜索框里输入"北京到上海的机票"——执行 type(content="北京到上海的机票")</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="parser" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">PA</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">Action Parser</span>
+                <p>解析完成：action_type = type, content = "北京到上海的机票"</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="operator" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">OP</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">NutJS Operator</span>
+                <p>检测到是 Windows 系统，keyboard.type() 不支持中文。启用剪贴板方案...</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="os" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">OS</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">操作系统</span>
+                <p>clipboard.writeText("北京到上海的机票") → Ctrl+V → 输入完成！原剪贴板内容已恢复。</p>
+              </div>
+            </div>
+          </div>
+          <div class="chat-typing" id="chat-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module3-typing-avatar">?</div>
+            <div class="chat-typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>
+          </div>
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">Next Message</button>
+            <button class="btn chat-all-btn">Play All</button>
+            <button class="btn chat-reset-btn">Replay</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Action Space：AI 可以做哪些操作？</h2>
+        <p>模型的输出格式被限定在一组预定义的"动作空间"里。就像给棋手规定只能下在棋盘交叉点上一样。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-comment">// 定义 AI 可用的操作列表</span>
+<span class="code-line"><span class="code-keyword">static</span> MANUAL = {</span>
+<span class="code-line">  ACTION_SPACES: [</span>
+<span class="code-line">    <span class="code-string">"click(start_box='[x1,y1,x2,y2]')"</span>,</span>
+<span class="code-line">    <span class="code-string">"drag(start_box=..., end_box=...)"</span>,</span>
+<span class="code-line">    <span class="code-string">"type(content='xxx')"</span>,</span>
+<span class="code-line">    <span class="code-string">"scroll(start_box=..., direction=...)"</span>,</span>
+<span class="code-line">    <span class="code-string">"hotkey(key='ctrl c')"</span>,</span>
+<span class="code-line">    <span class="code-string">"finished()"</span>,</span>
+<span class="code-line">    <span class="code-string">"call_user()"</span>,</span>
+<span class="code-line">  ]</span>
+<span class="code-line">};</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">定义了 AI 能执行的所有操作类型...</p>
+              <p class="tl">click：点击某个区域（用坐标框表示）...</p>
+              <p class="tl">drag：从一个区域拖拽到另一个区域...</p>
+              <p class="tl">type：在当前位置输入文字内容...</p>
+              <p class="tl">scroll：在某个区域向指定方向滚动...</p>
+              <p class="tl">hotkey：模拟快捷键组合（如 Ctrl+C）...</p>
+              <p class="tl">finished：任务完成，停止循环...</p>
+              <p class="tl">call_user：遇到困难，请求用户帮助。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block" data-correct="option-a" data-explanation-right="Operator 是核心抽象层——同一个 AI 指令可以通过不同的 Operator 在不同平台上执行（桌面、浏览器、手机），这就是 Operator 模式的价值。" data-explanation-wrong="Operator 不是模型本身，而是模型和真实操作系统之间的翻译层。">
+            <h3 class="quiz-question">如果你想让 UI-TARS 控制一台 Android 手机而不是电脑桌面，你需要修改哪一层？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>只需要替换 Operator 为 ADB Operator，模型和循环逻辑不变</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>需要同时修改 GUIAgent 的循环逻辑和 Operator</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>需要重新训练一个专门针对手机屏幕的模型</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">Try Again</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>

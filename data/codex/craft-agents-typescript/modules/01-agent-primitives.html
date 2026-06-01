@@ -1,0 +1,233 @@
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">TypeScript Agent 基元</h1>
+      <p class="module-subtitle">当你向 Craft Agents 发送消息，代码里究竟发生了什么？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: What is Craft Agents -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Craft Agents 是什么？</h2>
+        <p>想象你有一个超级助手——它不仅能回答问题，还能真正<strong>帮你做事</strong>：发邮件、查数据库、连接 Slack、运行代码。这就是 Craft Agents 做的事。它是由 <span class="term" data-definition="craft.do 是一款文档协作工具，类似于 Notion 的升级版。他们的工程团队为了自己工作而构建了 Craft Agents。">craft.do 团队</span>专门为"指挥 AI Agent 干活"而打造的 TypeScript 桌面应用。</p>
+        <p>Craft Agents 使用了 Anthropic 的 <span class="term" data-definition="Claude Agent SDK 是 Anthropic 提供的官方开发工具包，让开发者可以把 Claude 嵌入到自己的应用里，并让它执行多步骤的复杂任务。">Claude Agent SDK</span>，把复杂的"让 AI 自主行动"能力打包成了一个优美的桌面应用。</p>
+
+        <div class="pattern-cards stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">🤖</div>
+            <h4 class="pattern-title">多会话管理</h4>
+            <p class="pattern-desc">同时运行多个 Agent 对话，每个都有独立状态和上下文，互不干扰。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">🔌</div>
+            <h4 class="pattern-title">零配置接入工具</h4>
+            <p class="pattern-desc">告诉 Agent "连接 Linear"，它自己找 API、读文档、配好认证——你不用动手。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">📦</div>
+            <h4 class="pattern-title">技能系统</h4>
+            <p class="pattern-desc">把专门的指令打包成"技能"，Agent 随时调用，就像给员工发操作手册。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: The cast of characters -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码里的"主演"——核心类型</h2>
+        <p>Craft Agents 的代码就像一部剧，有几个主角。理解它们，你就能告诉 AI "把这个逻辑放到 Session 里，不要放到 Workspace 里"——这正是指挥 AI 的关键。</p>
+
+        <div class="icon-rows stagger-children">
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-accent)">🏠</div>
+            <div>
+              <strong>Workspace（工作区）</strong>
+              <p>像一个独立的"工作桌"，每个工作区有自己的 AI 配置、技能包和连接的工具。</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-2)">💬</div>
+            <div>
+              <strong>Session（会话）</strong>
+              <p>一次完整的对话线程——从"你好"到任务完成。每个 Session 有独立的消息历史和状态。</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-3)">📨</div>
+            <div>
+              <strong>StoredMessage（消息记录）</strong>
+              <p>每条消息的持久化存储，包含内容、发送者、<span class="term" data-definition="Token 是 AI 模型处理文本的基本单位，大约等于 0.75 个英文单词。Token 用量直接决定了 API 费用。">token 用量</span>和时间戳。</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-4)">⚙️</div>
+            <div>
+              <strong>MessagingGateway（消息网关）</strong>
+              <p>整个系统的"中央调度室"，负责把前端的操作指令路由到正确的处理器。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Code translation - Session type -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码翻译：Session 是如何定义的</h2>
+        <p>下面是 Craft Agents 里 <code>Session</code> 的真实定义（来自 <code>packages/core/src/types/session.ts</code>）。左边是代码，右边是白话解释：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">export interface</span> <span class="code-function">Session</span> {</span>
+<span class="code-line">  <span class="code-property">id</span>: <span class="code-keyword">string</span>;</span>
+<span class="code-line">  <span class="code-property">sdkSessionId</span>?: <span class="code-keyword">string</span>;</span>
+<span class="code-line">  <span class="code-property">workspaceId</span>: <span class="code-keyword">string</span>;</span>
+<span class="code-line">  <span class="code-property">name</span>?: <span class="code-keyword">string</span>;</span>
+<span class="code-line">  <span class="code-property">status</span>?: <span class="code-function">SessionStatus</span>;</span>
+<span class="code-line">  <span class="code-property">isFlagged</span>?: <span class="code-keyword">boolean</span>;</span>
+<span class="code-line">  <span class="code-property">isArchived</span>?: <span class="code-keyword">boolean</span>;</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">定义一个"会话"长什么样——它有哪些属性</p>
+              <p class="tl">每个会话有一个唯一的 ID（比如 uuid），系统用它来找到你</p>
+              <p class="tl">SDK 内部用的 ID，第一条消息发送后才有——所以是"可选"的（?）</p>
+              <p class="tl">这个会话属于哪个工作区——每个会话必须"住"在某个工作区里</p>
+              <p class="tl">会话名字，可以不填（? 表示可选）</p>
+              <p class="tl">工作状态：todo / in_progress / done 等——用于任务管理流程</p>
+              <p class="tl">是否被用户标记了星标/红旗</p>
+              <p class="tl">是否已归档——归档后不在收件箱显示，但数据还在</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键洞察：接口 vs 类</strong>
+            <p><span class="term" data-definition="interface（接口）是 TypeScript 中描述数据形状的方式，就像一张表格的列名——告诉你有哪些字段、每个字段是什么类型，但它不包含任何执行逻辑。">interface</span> 只是数据的"形状说明书"，不包含任何行为。当你告诉 AI "在 Session 类型里加一个 priority 字段"，AI 就知道该改 interface，而不是改某个函数。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Group chat - what happens when you send a message -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">发一条消息，幕后发生了什么</h2>
+        <p>你在 Craft Agents 里打了一段话按下发送——这个简单动作触发了一条完整的指令链。点击"下一条消息"，跟着数据走一遍：</p>
+
+        <div class="chat-window" id="chat-craft-1">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="user" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">U</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">你</span>
+                <p>帮我分析一下上周的销售数据。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="webui" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">UI</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">前端 (Electron Renderer)</span>
+                <p>收到消息！我把它打包成 Command，发给 MessagingGateway：<br><code>{ type: "SEND_MESSAGE", payload: { sessionId, content } }</code></p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="gateway" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">GW</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">MessagingGateway</span>
+                <p>收到 SEND_MESSAGE 指令！我先把消息存到本地 <span class="term" data-definition="数据库是持久化存储数据的地方，即使程序关闭数据也不会丢失。Craft Agents 使用本地 SQLite 数据库存储消息历史。">数据库</span>，然后把它转交给 ClaudeAgentRunner。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="runner" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">AI</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">ClaudeAgentRunner</span>
+                <p>我调用 Anthropic SDK，把消息历史和当前技能包一起发给 Claude API。拿到响应后，我通过 SSE 事件流把内容一块一块地推回给前端——这样你就能看到"打字机效果"！</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="webui" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">UI</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">前端 (Electron Renderer)</span>
+                <p>收到流式数据！我把每个文字块实时追加到屏幕上，用户体验就像在看 ChatGPT 打字。完成后更新消息状态为 "done"。</p>
+              </div>
+            </div>
+          </div>
+          <div class="chat-typing" id="chat-craft-1-typing" style="display:none">
+            <div class="chat-avatar" id="chat-craft-1-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条</button>
+            <button class="btn chat-all-btn">全部播放</button>
+            <button class="btn chat-reset-btn">重播</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验一下你的理解</h2>
+
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="对！Session 只是 Agent 对话的边界，一个 Workspace 里可以有很多个 Session。就像你桌子上可以有多本笔记本。"
+               data-explanation-wrong="再想想——Workspace 是工作区（桌子），Session 是每次对话（笔记本），两者是包含关系。">
+            <h3 class="quiz-question">你在 Craft Agents 里同时开了三个 AI 对话：分析销售数据、写市场方案、查竞品信息。这三个对话和工作区的关系是？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>每个对话都是独立的 Workspace，互不相关</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>三个对话都是同一个 Workspace 里的不同 Session</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>所有对话共用一个 Session，消息混在一起</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！interface 是数据形状的说明，加字段就是修改 interface。理解这一点，你就能精准指挥 AI 改代码。"
+               data-explanation-wrong="不是这个。Session 已经是存储在数据库里的——你要做的是改它的类型定义，让 TypeScript 知道这个字段存在。">
+            <h3 class="quiz-question">你想给每个 Session 加一个"优先级"字段（1=高、2=中、3=低）。你应该让 AI 修改哪里？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>修改数据库里的某一行记录</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>修改前端的显示组件</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>在 Session interface 里加 priority?: 1 | 2 | 3 字段</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">提交答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">再试一次</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

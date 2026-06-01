@@ -1,0 +1,262 @@
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">认识核心角色：七大组件各司其职</h1>
+      <p class="module-subtitle">就像一部电影有不同的演员，GPT Researcher 也有不同的组件扮演不同角色。</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: The Cast -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">项目目录结构</h2>
+        <p>先看看代码是怎么组织的。就像了解一个公司的部门设置一样，目录结构能帮你快速理解系统分工：</p>
+        <div class="file-tree">
+          <div class="ft-folder open">
+            <span class="ft-name">gpt_researcher/</span>
+            <span class="ft-desc">核心研究引擎</span>
+            <div class="ft-children">
+              <div class="ft-file">
+                <span class="ft-name">agent.py</span>
+                <span class="ft-desc">主控类 GPTResearcher，系统的 CEO</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">actions/</span>
+                <span class="ft-desc">具体动作：搜索、爬虫、生成查询</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">skills/</span>
+                <span class="ft-desc">高级技能：研究执行、报告写作、深度研究</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">retrievers/</span>
+                <span class="ft-desc">20+ 搜索引擎适配器</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">scraper/</span>
+                <span class="ft-desc">网页爬虫工具箱</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">memory/</span>
+                <span class="ft-desc">向量存储和记忆管理</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">config/</span>
+                <span class="ft-desc">配置管理</span>
+              </div>
+            </div>
+          </div>
+          <div class="ft-folder">
+            <span class="ft-name">multi_agents/</span>
+            <span class="ft-desc">多 Agent 协作模式（高级）</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: The Seven Components -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">七个核心角色</h2>
+        <p>GPT Researcher 内部有七个关键组件。把每个组件想象成一个团队成员：</p>
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🎯</div>
+            <div>
+              <strong>GPTResearcher（主控）</strong>
+              <p>团队 CEO。创建并协调所有其他组件。你只跟它打交道。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🔍</div>
+            <div>
+              <strong>ResearchConductor（搜索指挥）</strong>
+              <p>研究经理。规划搜索策略、生成子问题、协调搜索引擎并行工作。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">📝</div>
+            <div>
+              <strong>ReportGenerator（报告写手）</strong>
+              <p>资深撰稿人。把收集到的信息整理成结构化的研究报告。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">🧠</div>
+            <div>
+              <strong>ContextManager（上下文管家）</strong>
+              <p>资料管理员。把爬取到的内容做 <span class="term" data-definition="向量嵌入（Embedding）是把文本转换成一串数字的过程。语义相似的文本，数字也相似。这样计算机就能通过「距离」找到相关内容。">向量嵌入</span>，找到跟研究问题最相关的内容。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-5)">🕷️</div>
+            <div>
+              <strong>BrowserManager（浏览器管家）</strong>
+              <p>浏览器操作员。负责打开网页、提取正文内容、过滤广告和无关信息。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: #E89585">✂️</div>
+            <div>
+              <strong>SourceCurator（素材筛选）</strong>
+              <p>质量审核员。对搜索结果做排序和筛选，去掉重复和低质量来源。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: #7B6DAA">🔬</div>
+            <div>
+              <strong>DeepResearchSkill（深度研究）</strong>
+              <p>进阶研究员。可选组件，用于更深入的多轮迭代研究。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Code Translation - How components are initialized -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">组件是怎么创建出来的？</h2>
+        <p>看看 <code>agent.py</code> 的 <code>__init__</code> 方法——GPTResearcher 在初始化时就创建了所有团队成员：</p>
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># Initialize components</span></span>
+<span class="code-line">self.research_conductor = ResearchConductor(self)</span>
+<span class="code-line">self.report_generator = ReportGenerator(self)</span>
+<span class="code-line">self.context_manager = ContextManager(self)</span>
+<span class="code-line">self.scraper_manager = BrowserManager(self)</span>
+<span class="code-line">self.source_curator = SourceCurator(self)</span>
+<span class="code-line">self.deep_researcher = DeepResearchSkill(self)</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">注释：初始化各个组件</p>
+              <p class="tl">雇佣搜索经理，把自己（self）传给它，让它能调用其他资源</p>
+              <p class="tl">雇佣报告写手，同样传入自己的引用</p>
+              <p class="tl">雇佣上下文管家</p>
+              <p class="tl">雇佣浏览器操作员</p>
+              <p class="tl">雇佣素材筛选员</p>
+              <p class="tl">雇佣深度研究员（仅在深度研究模式下）</p>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-info">
+          <div class="callout-icon">🧩</div>
+          <div class="callout-content">
+            <strong class="callout-title">设计模式：组合优于继承</strong>
+            <p>GPT Researcher 没有把所有功能写在一个巨大的类里，而是把不同职责拆成独立的 Skill 类，每个都接收 <code>self</code>（主控的引用）。这叫「组合模式」——像搭积木一样组合功能。如果你想加新功能，只需要创建新的 Skill 类，不用改动主控代码。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Multi-Agent architecture -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">进阶：多 Agent 协作模式</h2>
+        <p>除了单 Agent 模式，GPT Researcher 还有一个更强大的 <span class="term" data-definition="Multi-Agent（多智能体）模式是指多个专业化的 AI Agent 协同工作，就像一个团队里有研究员、编辑、审核员等不同角色。">多 Agent</span> 模式。在 <code>multi_agents/</code> 目录下，有一个用 <span class="term" data-definition="LangGraph 是 LangChain 推出的图编排框架，可以把多个 Agent 连接成一个有向图，定义谁先执行、谁后执行、什么条件下分支。">LangGraph</span> 编排的完整研究团队：</p>
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🔍</div>
+            <h4 class="pattern-title">ResearchAgent</h4>
+            <p class="pattern-desc">负责执行初始研究，收集原始信息。是团队的「一线调查员」。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">📋</div>
+            <h4 class="pattern-title">EditorAgent</h4>
+            <p class="pattern-desc">负责规划研究和分配任务。是团队的「主编」，决定研究哪些方向。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">✍️</div>
+            <h4 class="pattern-title">WriterAgent</h4>
+            <p class="pattern-desc">根据研究结果撰写报告。是团队的「专栏作家」。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">👥</div>
+            <h4 class="pattern-title">HumanAgent</h4>
+            <p class="pattern-desc">人类审核环节。可以批准或修改研究计划，实现人机协作。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🚀</div>
+            <h4 class="pattern-title">PublisherAgent</h4>
+            <p class="pattern-desc">最终发布报告。负责格式化输出和保存文件。</p>
+          </div>
+        </div>
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># multi_agents/agents/orchestrator.py</span></span>
+<span class="code-line">workflow = StateGraph(ResearchState)</span>
+<span class="code-line">workflow.add_node(<span class="code-string">"browser"</span>, agents[<span class="code-string">"research"</span>].run_initial_research)</span>
+<span class="code-line">workflow.add_node(<span class="code-string">"planner"</span>, agents[<span class="code-string">"editor"</span>].plan_research)</span>
+<span class="code-line">workflow.add_node(<span class="code-string">"researcher"</span>, agents[<span class="code-string">"editor"</span>].run_parallel_research)</span>
+<span class="code-line">workflow.add_node(<span class="code-string">"writer"</span>, agents[<span class="code-string">"writer"</span>].run)</span>
+<span class="code-line">workflow.add_node(<span class="code-string">"publisher"</span>, agents[<span class="code-string">"publisher"</span>].run)</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">创建一个状态图（工作流）来编排 Agent</p>
+              <p class="tl">第 1 步：ResearchAgent 做初始调研</p>
+              <p class="tl">第 2 步：EditorAgent 规划研究计划</p>
+              <p class="tl">第 3 步：EditorAgent 并行执行研究任务</p>
+              <p class="tl">第 4 步：WriterAgent 撰写报告</p>
+              <p class="tl">第 5 步：PublisherAgent 发布报告</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验你的理解</h2>
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！每个 Skill 组件（ResearchConductor、ReportGenerator 等）都接收 self（主控的引用），通过 self 访问共享的配置、上下文和工具。这就是组合模式。"
+               data-explanation-wrong="再想想：所有组件都在 GPTResearcher.__init__ 中创建，并且都传入 self。它们通过 self 访问共享资源。">
+            <h3 class="quiz-question">GPTResearcher 和它的 Skill 组件之间是什么关系？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>继承关系——每个 Skill 都是 GPTResearcher 的子类</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>组合关系——GPTResearcher 持有各 Skill 的实例，通过 self 共享资源</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>独立关系——各 Skill 互不相关，各自运行</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="没错！多 Agent 模式用 LangGraph 编排 ResearchAgent、EditorAgent、WriterAgent 等，形成一个有向工作流图。单 Agent 模式只有一个 GPTResearcher 内部协调。"
+               data-explanation-wrong="提示：multi_agents/ 目录下的代码使用 LangGraph 的 StateGraph 来编排多个 Agent。这是和单 Agent 模式最大的区别。">
+            <h3 class="quiz-question">GPT Researcher 的多 Agent 模式使用了什么框架来编排工作流？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>LangGraph（LangChain 的图编排框架）</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Celery（Python 异步任务队列）</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Airflow（数据流水线工具）</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

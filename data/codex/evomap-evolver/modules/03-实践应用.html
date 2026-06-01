@@ -1,0 +1,255 @@
+<section class="module" id="module-3" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number" style="color: var(--color-accent)">03</span>
+      <h1 class="module-title" style="color: var(--color-accent)">实践应用</h1>
+      <p class="module-subtitle" style="color: var(--color-text-secondary)">看看 Evolver 的各个模块如何协同工作</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">项目架构一览</h2>
+        <p>在深入代码之前，先来认识一下 Evolver 的"演员表"——每个模块各司其职，就像一支分工明确的探险队：</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🧬</div>
+            <div>
+              <strong>Evolver 核心引擎</strong>
+              <p>负责管理整个进化流程的调度和协调</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">📊</div>
+            <div>
+              <strong>Population 种群管理器</strong>
+              <p>维护和操作种群数据，处理选择、交叉和变异</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🎯</div>
+            <div>
+              <strong>Fitness 评估器</strong>
+              <p>计算每个个体的适应度分数，决定谁更优秀</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">⚙️</div>
+            <div>
+              <strong>Configuration 配置模块</strong>
+              <p>管理所有可调参数：种群大小、变异率、交叉率等</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">📌</div>
+          <div class="callout-content">
+            <strong class="callout-title">实用建议</strong>
+            <p>当你在使用 AI 工具构建类似系统时，理解这些模块的分工非常重要。你可以告诉 AI："把进化逻辑放在 Evolver 类里，种群管理单独抽成一个 Population 类"——这种精确的指令能大大提高 AI 的输出质量。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">模块间的"对话"</h2>
+        <p>当一次进化开始运行时，各个模块之间会这样沟通：</p>
+
+        <div class="chat-window" id="chat-module3">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="evolver" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🧬</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Evolver 引擎</span>
+                <p>配置模块，给我当前的参数设置，我要开始一轮进化了。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="config" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">⚙️</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">Configuration</span>
+                <p>收到！种群大小 100，变异率 0.05，交叉率 0.8，最大代数 500。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="evolver" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🧬</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Evolver 引擎</span>
+                <p>Population，用这些参数初始化 100 个个体。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="population" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">📊</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">Population</span>
+                <p>已生成 100 个随机个体，每个都有独立的基因序列。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="evolver" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🧬</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Evolver 引擎</span>
+                <p>Fitness 评估器，请评估这 100 个个体的适应度。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="5" data-sender="fitness" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">🎯</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">Fitness 评估器</span>
+                <p>评估完毕！最优个体得分 0.73，平均得分 0.45。建议继续进化。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="6" data-sender="evolver" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🧬</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Evolver 引擎</span>
+                <p>Population，根据适应度选择优秀个体，执行交叉和变异，生成下一代。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="7" data-sender="population" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">📊</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">Population</span>
+                <p>新一代已就绪！经过选择、交叉和变异，种群已更新。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-module3-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module3-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条消息</button>
+            <button class="btn chat-all-btn">播放全部</button>
+            <button class="btn chat-reset-btn">重新播放</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">选择与交叉的代码实现</h2>
+        <p>下面是种群管理器中执行选择和交叉操作的核心代码：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-function">select</span>(population, fitnessScores) {
+  <span class="code-keyword">const</span> selected = [];
+  <span class="code-keyword">const</span> totalFitness = fitnessScores.<span class="code-function">reduce</span>(
+    (sum, f) => sum + f, <span class="code-number">0</span>
+  );
+
+  <span class="code-keyword">for</span> (<span class="code-keyword">let</span> i = <span class="code-number">0</span>; i &lt; population.length; i++) {
+    <span class="code-keyword">let</span> threshold = Math.<span class="code-function">random</span>() * totalFitness;
+    <span class="code-keyword">let</span> cumulative = <span class="code-number">0</span>;
+    <span class="code-keyword">for</span> (<span class="code-keyword">let</span> j = <span class="code-number">0</span>; j &lt; population.length; j++) {
+      cumulative += fitnessScores[j];
+      <span class="code-keyword">if</span> (cumulative >= threshold) {
+        selected.<span class="code-function">push</span>(population[j]);
+        <span class="code-keyword">break</span>;
+      }
+    }
+  }
+  <span class="code-keyword">return</span> selected;
+}
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">选择函数：从种群中挑选优秀个体...</p>
+              <p class="tl">计算所有个体的适应度总分...</p>
+              <p class="tl">为每个需要的个体执行一次"轮盘赌"选择...</p>
+              <p class="tl">生成一个随机阈值（想象转动轮盘）...</p>
+              <p class="tl">累加适应度，当累加值超过阈值时选中该个体...</p>
+              <p class="tl">适应度越高的个体，被选中的概率越大——就像轮盘上占的格子越多，被指到的概率越高。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">变异操作的实现</h2>
+        <p>变异是进化算法中保持种群多样性的关键操作。Evolver 提供了多种变异策略来应对不同场景。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-function">mutate</span>(individual, mutationRate) {
+  <span class="code-keyword">const</span> mutated = { ...individual };
+  <span class="code-keyword">const</span> genes = [...mutated.genes];
+
+  <span class="code-keyword">for</span> (<span class="code-keyword">let</span> i = <span class="code-number">0</span>; i &lt; genes.length; i++) {
+    <span class="code-keyword">if</span> (Math.<span class="code-function">random</span>() &lt; mutationRate) {
+      <span class="code-comment">// 高斯变异：在当前值附近随机偏移</span>
+      genes[i] += <span class="code-function">gaussianRandom</span>(<span class="code-number">0</span>, <span class="code-number">0.1</span>);
+      genes[i] = Math.<span class="code-function">max</span>(<span class="code-number">0</span>, Math.<span class="code-function">min</span>(<span class="code-number">1</span>, genes[i]));
+    }
+  }
+  mutated.genes = genes;
+  <span class="code-keyword">return</span> mutated;
+}
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">创建个体的副本，避免修改原始数据...</p>
+              <p class="tl">遍历每个基因...</p>
+              <p class="tl">以一定概率决定是否变异——不是每个基因都会变...</p>
+              <p class="tl">使用高斯分布进行随机偏移，保留原有特征的"影子"...</p>
+              <p class="tl">将值限制在 [0, 1] 范围内，防止基因值失控...</p>
+              <p class="tl">返回变异后的新个体。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">变异率的重要性</strong>
+            <p>变异率太小（如 0.001）会导致种群失去多样性，所有个体变得几乎相同，陷入局部最优。变异率太大（如 0.5）则会让进化变成随机搜索，无法收敛。实践中的"甜点"通常在 0.01 到 0.1 之间。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">架构测验</h2>
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！Population 模块负责维护种群数据并执行选择、交叉和变异操作。"
+               data-explanation-wrong="再看看——哪个模块负责维护和操作种群数据？">
+            <h3 class="quiz-question">在 Evolver 中，哪个模块负责执行选择和交叉操作？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Evolver 核心引擎</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Population 种群管理器</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Fitness 评估器</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重试</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>

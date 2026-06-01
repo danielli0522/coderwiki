@@ -1,0 +1,243 @@
+    <section class="module" id="module-3">
+      <div class="module-inner">
+
+        <header class="module-header">
+          <span class="module-number">03</span>
+          <h1 class="module-title">账号池：健身房储物柜的并发哲学</h1>
+          <p class="module-tagline">每个账号是一个储物柜，柜子有满员上限；满员时新人排队，柜子腾出来按到达顺序唤醒。</p>
+        </header>
+
+        <section class="screen">
+          <h2>问题：账号会被掐</h2>
+          <p>DeepSeek 网页对话有反爬规则：单账号短时间发太多请求会被风控。你想跑高并发？要么多备几个账号，要么慢一点 —— 最好两件事都做。<strong>账号池就是给多账号 + 限速排出秩序的那个调度员。</strong></p>
+
+          <div class="callout callout-accent">
+            <div class="callout-icon">🏋️</div>
+            <div class="callout-content">
+              <strong class="callout-title">健身房储物柜比喻</strong>
+              <p>每个 DeepSeek 账号是一个储物柜，每个柜子最多能同时塞两件衣服（<code>maxInflightPerAccount</code>，默认 2）。来锻炼的人（请求）找空柜子；柜子全满时排队等；有人取走衣服，按排队顺序通知下一位。</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>账号池的内部结构</h2>
+          <p>读一下 Pool 的核心字段，就知道它在记什么：</p>
+
+          <div class="translation-block animate-in">
+            <div class="translation-code">
+              <span class="translation-label">CODE · internal/account/pool_core.go</span>
+              <pre><code><span class="code-line"><span class="code-keyword">type</span> Pool <span class="code-keyword">struct</span> {</span>
+<span class="code-line">  store                  *config.Store</span>
+<span class="code-line">  mu                     sync.Mutex</span>
+<span class="code-line">  queue                  []string</span>
+<span class="code-line">  inUse                  map[string]int</span>
+<span class="code-line">  waiters                []chan struct{}</span>
+<span class="code-line">  maxInflightPerAccount  int</span>
+<span class="code-line">  recommendedConcurrency int</span>
+<span class="code-line">  maxQueueSize           int</span>
+<span class="code-line">  globalMaxInflight      int</span>
+<span class="code-line">}</span></code></pre>
+            </div>
+            <div class="translation-english">
+              <span class="translation-label">每个字段在管什么</span>
+              <div class="translation-lines">
+                <p class="tl"><code>store</code>：账号清单的来源，配置改了从这里重新读。</p>
+                <p class="tl"><code>mu</code>：<span class="term" data-definition="Mutex = 互斥锁。一次只允许一个调用方进入受保护的代码段，其他要等。用来保护多线程下的共享状态不被同时改坏。">互斥锁</span>。所有借/还账号的操作都先抢这把锁，避免两个请求同时改同一个柜子。</p>
+                <p class="tl"><code>queue</code>：账号 ID 的"轮询顺序"。每次借出一个账号，把它挪到队尾，让别的账号也有机会被选。</p>
+                <p class="tl"><code>inUse</code>：每个账号当前正在跑几单。比如 <code>{"acc-A": 2, "acc-B": 0}</code> 表示 A 满员、B 空闲。</p>
+                <p class="tl"><code>waiters</code>：等不到空柜子的请求。每个等待者持有一个 <span class="term" data-definition="channel = Go 语言里的"通信管道"。一边写一边读，常用来通知"事件发生了"。这里只是用作信号，写不写值无所谓。">channel</span>，柜子腾出来时被唤醒。</p>
+                <p class="tl"><code>maxInflightPerAccount</code>：单个柜子最多能同时塞几件衣服，默认 2。</p>
+                <p class="tl"><code>recommendedConcurrency</code>：动态算出来的"建议总并发" = 账号数 × 每柜上限。</p>
+                <p class="tl"><code>maxQueueSize</code> / <code>globalMaxInflight</code>：等待队列长度上限和全局正在跑的总数上限，两道保险防止雪崩。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>核心动作：AcquireWait —— 借一个柜子，等不到就排队</h2>
+
+          <div class="translation-block animate-in">
+            <div class="translation-code">
+              <span class="translation-label">CODE · internal/account/pool_acquire.go</span>
+              <pre><code><span class="code-line"><span class="code-keyword">func</span> (p *Pool) <span class="code-function">AcquireWait</span>(ctx context.Context,</span>
+<span class="code-line">    target string, exclude map[string]bool) (config.Account, bool) {</span>
+<span class="code-line">  <span class="code-keyword">for</span> {</span>
+<span class="code-line">    <span class="code-keyword">if</span> ctx.<span class="code-function">Err</span>() != <span class="code-keyword">nil</span> { <span class="code-keyword">return</span> config.Account{}, <span class="code-keyword">false</span> }</span>
+<span class="code-line">    p.mu.<span class="code-function">Lock</span>()</span>
+<span class="code-line">    <span class="code-keyword">if</span> acc, ok := p.<span class="code-function">acquireLocked</span>(target, exclude); ok {</span>
+<span class="code-line">      p.mu.<span class="code-function">Unlock</span>(); <span class="code-keyword">return</span> acc, <span class="code-keyword">true</span></span>
+<span class="code-line">    }</span>
+<span class="code-line">    <span class="code-keyword">if</span> !p.<span class="code-function">canQueueLocked</span>(target, exclude) {</span>
+<span class="code-line">      p.mu.<span class="code-function">Unlock</span>(); <span class="code-keyword">return</span> config.Account{}, <span class="code-keyword">false</span></span>
+<span class="code-line">    }</span>
+<span class="code-line">    waiter := <span class="code-function">make</span>(<span class="code-keyword">chan</span> struct{})</span>
+<span class="code-line">    p.waiters = <span class="code-function">append</span>(p.waiters, waiter)</span>
+<span class="code-line">    p.mu.<span class="code-function">Unlock</span>()</span>
+<span class="code-line">    <span class="code-keyword">select</span> {</span>
+<span class="code-line">      <span class="code-keyword">case</span> &lt;-ctx.<span class="code-function">Done</span>(): <span class="code-comment">/* 客户端取消，登记销毁 */</span></span>
+<span class="code-line">      <span class="code-keyword">case</span> &lt;-waiter:    <span class="code-comment">/* 有人还柜子了，被唤醒 */</span></span>
+<span class="code-line">    }</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span></code></pre>
+            </div>
+            <div class="translation-english">
+              <span class="translation-label">中文翻译</span>
+              <div class="translation-lines">
+                <p class="tl">这是一个"循环重试"风格：先试着借，借不到就排队，被叫醒后再试。</p>
+                <p class="tl">每轮先看 <span class="term" data-definition="context = Go 里跨函数传递"取消信号 / 截止时间"的容器。客户端断开连接时它会被取消，链路上的所有等待都应该立刻退出。">context</span> 是不是已经被取消（客户端跑了？超时？），是就空手回去。</p>
+                <p class="tl">抢锁、调 acquireLocked 试着借柜子。能借到就解锁、立刻拿着账号回去。</p>
+                <p class="tl">借不到，再问一句"我有资格排队吗" —— 全局上限到了 / 队列已经爆了 / 唯一可用账号在 exclude 黑名单里，都直接放弃。</p>
+                <p class="tl">能排队就建一个空 channel，把它登记到 waiters 列表，解锁后挂起来等。</p>
+                <p class="tl">挂起方式：select 在两件事上同时等 —— 上下文取消 或 有人通过 channel 叫醒我。</p>
+                <p class="tl">被叫醒后，循环回到顶部，重新抢锁、重新尝试借柜子。</p>
+                <p class="tl">这种 lock + 排队 + 信号通知的模式叫"生产者-消费者 + 公平唤醒"，是并发编程的经典骨架。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>追一遍三人抢两个柜子</h2>
+          <p>假设你有 1 个账号、单柜上限 2 件。三个请求同时到：</p>
+
+          <div class="flow-animation" data-steps='[
+            {"highlight":"flow-actor-1","label":"请求 R1 到达，账号 A 当前 0 件，借成功 → A=1"},
+            {"highlight":"flow-actor-1","label":"请求 R2 到达，账号 A 当前 1 件，借成功 → A=2","packet":true,"from":"actor-1","to":"actor-2"},
+            {"highlight":"flow-actor-3","label":"请求 R3 到达，账号 A 满员（2/2），R3 排队等待"},
+            {"highlight":"flow-actor-2","label":"R1 完成，归还账号 A → A=1，唤醒 waiters 的第一位 R3","packet":true,"from":"actor-2","to":"actor-3"},
+            {"highlight":"flow-actor-3","label":"R3 被唤醒，循环重试，借成功 → A=2"}
+          ]'>
+            <div class="flow-actors">
+              <div class="flow-actor" id="flow-actor-1">
+                <div class="flow-actor-icon">R1</div>
+                <span>请求 1</span>
+              </div>
+              <div class="flow-actor" id="flow-actor-2">
+                <div class="flow-actor-icon">A</div>
+                <span>账号池</span>
+              </div>
+              <div class="flow-actor" id="flow-actor-3">
+                <div class="flow-actor-icon">R3</div>
+                <span>请求 3（排队中）</span>
+              </div>
+            </div>
+
+            <div class="flow-packet" id="flow-packet"></div>
+            <div class="flow-step-label" id="flow-label">点"下一步"看请求怎么排队</div>
+
+            <div class="flow-controls">
+              <button class="btn flow-next-btn">下一步</button>
+              <button class="btn flow-reset-btn">重新播放</button>
+              <span class="flow-progress"></span>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>设计取舍</h2>
+          <div class="pattern-cards">
+            <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+              <div class="pattern-icon" style="background: var(--color-actor-1)">⚖️</div>
+              <h4 class="pattern-title">公平 vs 性能</h4>
+              <p class="pattern-desc">用 channel 列表 + FIFO 唤醒，保证先到先服务，不会出现"运气不好的请求永远等不到"的饥饿问题。</p>
+            </div>
+            <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+              <div class="pattern-icon" style="background: var(--color-actor-2)">🛑</div>
+              <h4 class="pattern-title">两道保险</h4>
+              <p class="pattern-desc"><code>maxQueueSize</code> 防排队雪崩 —— 队列爆了就直接拒绝，而不是让客户端无限等下去。</p>
+            </div>
+            <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+              <div class="pattern-icon" style="background: var(--color-actor-3)">🔄</div>
+              <h4 class="pattern-title">轮询 + bumpQueue</h4>
+              <p class="pattern-desc">借出一个账号就把它挪到队尾，下次优先选别的 —— 让多账号"轮流喝水"，分散每个账号的瞬时压力。</p>
+            </div>
+          </div>
+
+          <div class="callout callout-info">
+            <div class="callout-icon">📝</div>
+            <div class="callout-content">
+              <strong class="callout-title">为什么不直接信号量</strong>
+              <p>用一个全局 <span class="term" data-definition="信号量 = 一个有上限的"许可证池"。要做事先领一张证，做完归还；证发完了想做事就要等。">信号量</span>限总并发更简单 —— 但你失去了"哪些请求该等更久"的精细控制。账号池的设计允许：让目标账号已被指定的请求只在那一柜里排队，不被别人插队。</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>检查理解</h2>
+          <div class="quiz-container" id="quiz-module3">
+
+            <div class="quiz-question-block"
+                 data-correct="c"
+                 data-explanation-right="对。inUse[acc-A] 已经是 2，等于 maxInflightPerAccount，所以新请求不能直接借这个柜子，会被挂进 waiters 等通知。"
+                 data-explanation-wrong="再看 inUse 的含义：它记的是当前在跑的请求数，达到 maxInflightPerAccount 就满员了。">
+              <h3 class="quiz-question"><code>inUse = {"acc-A": 2}</code>，<code>maxInflightPerAccount=2</code>，新请求要 acc-A，会发生什么？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>立刻借成功，inUse 变成 3。</span>
+                </button>
+                <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>报错，账号已经被锁定。</span>
+                </button>
+                <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>挂进 waiters 排队，等有人归还后被 channel 唤醒重试。</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <div class="quiz-question-block"
+                 data-correct="b"
+                 data-explanation-right="对。canQueueLocked 在两种情况下拒绝排队：全局上限到了、或者队列已经爆。直接返回 false 让客户端立刻知道，比让它排几分钟再超时友好得多。"
+                 data-explanation-wrong="再看代码：if !canQueueLocked → 直接 return false，并不是一定要排队。">
+              <h3 class="quiz-question">为什么 AcquireWait 在挂起前要先调用 canQueueLocked 检查一下？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>性能优化：避免反复抢锁。</span>
+                </button>
+                <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>背压保护：队列满或全局并发超限时立刻拒绝，不让客户端排无尽队。</span>
+                </button>
+                <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>调试用：方便打印日志看队列长度。</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <div class="quiz-question-block"
+                 data-correct="a"
+                 data-explanation-right="对。客户端断开后 ctx.Done 会触发，AcquireWait 立刻退出循环、登记销毁这个 waiter，而不是傻等账号腾出来再返回。这避免了"客户端跑了，服务端还在等账号"的资源泄漏。"
+                 data-explanation-wrong="再看 select 那一段：除了 waiter 唤醒，还监听 ctx.Done()，正是为了客户端取消时能立刻撤退。">
+              <h3 class="quiz-question">客户端在排队过程中断开连接，会发生什么？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>ctx.Done 触发，select 立刻命中取消分支，登记销毁 waiter 后退出。</span>
+                </button>
+                <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>什么都不会发生，请求继续排队，最后超时。</span>
+                </button>
+                <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>Pool 会崩溃，因为 channel 没人读。</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">检查答案</button>
+            <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重做</button>
+          </div>
+        </section>
+
+      </div>
+    </section>

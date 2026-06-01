@@ -1,0 +1,211 @@
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">捕获：Hook 拦截机制</h1>
+      <p class="module-subtitle">claude-mem 怎么在 Claude Code 完全不知情的情况下，监视它的每一次行动？</p>
+    </header>
+
+    <!-- Screen 1: What hooks are -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">Hook 是什么：快递包裹的追踪系统</h2>
+      <p>想象快递公司的包裹追踪：每次包裹状态变化（揽件、分拣、派送、签收），系统自动在日志里记录一条。你不需要手动打电话问——系统自动帮你记。</p>
+      <p>Claude Code 的 <span class="term" data-definition="生命周期钩子（Lifecycle Hooks）是软件系统在特定事件发生时自动调用的回调脚本。就像你可以在手机「收到通知时」自动开启勿扰模式一样。">生命周期钩子</span>也是这样：在特定事件发生时，自动触发 claude-mem 注册的脚本。</p>
+
+      <div class="badge-list animate-in">
+        <div class="badge-item">
+          <code class="badge-code">Setup</code>
+          <span class="badge-desc">Claude Code 首次启动时 — 检查依赖是否安装</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">SessionStart</code>
+          <span class="badge-desc">新会话开始时 — 启动 Worker、注入历史记忆</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">UserPromptSubmit</code>
+          <span class="badge-desc">你每次发消息时 — 确保会话已在数据库中初始化</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">PreToolUse</code>
+          <span class="badge-desc">工具调用前 — 检查文件相关的上下文（目前仅 Read 工具）</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">PostToolUse</code>
+          <span class="badge-desc">工具调用完成后 — 捕获这次工具使用的输入输出，送去分析</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">Stop</code>
+          <span class="badge-desc">Claude 停止响应时 — 触发 AI 对本次工作的总结</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 2: Code translation of hooks.json -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">真实代码：钩子是怎么配置的</h2>
+      <p>这是 <code style="font-family:var(--font-mono); font-size:0.85em; background: var(--color-bg-code); color:#CBA6F7; padding:2px 6px; border-radius:4px;">plugin/hooks/hooks.json</code> 里 PostToolUse 钩子的实际配置。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">hooks.json</span>
+          <pre><code><span class="code-line"><span class="code-string">"PostToolUse"</span><span class="code-operator">:</span> [{</span>
+<span class="code-line">  <span class="code-property">"matcher"</span><span class="code-operator">:</span> <span class="code-string">"*"</span>,</span>
+<span class="code-line">  <span class="code-property">"hooks"</span><span class="code-operator">:</span> [{</span>
+<span class="code-line">    <span class="code-property">"type"</span><span class="code-operator">:</span> <span class="code-string">"command"</span>,</span>
+<span class="code-line">    <span class="code-property">"shell"</span><span class="code-operator">:</span> <span class="code-string">"bash"</span>,</span>
+<span class="code-line">    <span class="code-property">"command"</span><span class="code-operator">:</span> <span class="code-string">"node ... worker-service.cjs hook claude-code observation"</span>,</span>
+<span class="code-line">    <span class="code-property">"timeout"</span><span class="code-operator">:</span> <span class="code-number">120</span></span>
+<span class="code-line">  }]</span>
+<span class="code-line">}]</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">PLAIN ENGLISH</span>
+          <div class="translation-lines">
+            <p class="tl">"PostToolUse" — 每次任何工具（Bash/Read/Write/Edit...）执行完毕后</p>
+            <p class="tl">"matcher: *" — 匹配所有工具，不区分类型</p>
+            <p class="tl">"type: command" — 运行一个 shell 命令</p>
+            <p class="tl">"shell: bash" — 用 Bash 执行（确保跨平台兼容）</p>
+            <p class="tl">"command: ... observation" — 通知 Worker Service 有新观察需要处理</p>
+            <p class="tl">"timeout: 120" — 最多等 120 秒（防止卡死）</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">🔍</div>
+        <div class="callout-content">
+          <strong class="callout-title">为什么 matcher 是 "*"？</strong>
+          <p>claude-mem 想捕获所有类型的工具使用——无论 Claude 是在读文件、执行命令还是搜索代码。每次行动都是潜在的有价值信息。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 3: SessionStart hook — context injection code -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">会话启动时：记忆是怎么注入的</h2>
+      <p>SessionStart 钩子做三件事：安装检查、启动 Worker、然后调用记忆注入。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">src/services/context/ContextBuilder.ts</span>
+          <pre><code><span class="code-line"><span class="code-keyword">function</span> <span class="code-function">buildContextOutput</span>(</span>
+<span class="code-line">  project<span class="code-operator">:</span> <span class="code-keyword">string</span>,</span>
+<span class="code-line">  observations<span class="code-operator">:</span> Observation[],</span>
+<span class="code-line">  summaries<span class="code-operator">:</span> SessionSummary[],</span>
+<span class="code-line">  config<span class="code-operator">:</span> ContextConfig,</span>
+<span class="code-line">)<span class="code-operator">:</span> <span class="code-keyword">string</span> {</span>
+<span class="code-line">  <span class="code-keyword">const</span> output<span class="code-operator">:</span> <span class="code-keyword">string</span>[] <span class="code-operator">=</span> [];</span>
+<span class="code-line">  <span class="code-keyword">const</span> economics <span class="code-operator">=</span> <span class="code-function">calculateTokenEconomics</span>(observations);</span>
+<span class="code-line">  output.<span class="code-function">push</span>(...<span class="code-function">renderHeader</span>(project, economics, config));</span>
+<span class="code-line">  output.<span class="code-function">push</span>(...<span class="code-function">renderTimeline</span>(observations, summaries));</span>
+<span class="code-line">  output.<span class="code-function">push</span>(...<span class="code-function">renderFooter</span>());</span>
+<span class="code-line">  <span class="code-keyword">return</span> output.<span class="code-function">join</span>(<span class="code-string">'\n'</span>);</span>
+<span class="code-line">}</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">PLAIN ENGLISH</span>
+          <div class="translation-lines">
+            <p class="tl">这个函数负责把数据库里的记忆组装成文字</p>
+            <p class="tl">接收：项目名、观察记录列表、会话摘要列表、配置</p>
+            <p class="tl">先算出这些记忆要花多少 token（token 就像字数，AI 处理文字的计量单位）</p>
+            <p class="tl">添加头部（项目名、记忆统计）</p>
+            <p class="tl">添加时间线（按时间排列的观察 + 摘要）</p>
+            <p class="tl">添加尾部说明，然后拼成一整段文字返回</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 4: Flow animation of hook trigger -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">PostToolUse 钩子的完整触发流程</h2>
+      <p>当 Claude 执行完一次 <span class="term" data-definition="工具调用（Tool Use）是 Claude 执行实际操作的方式。当你让 Claude 读一个文件、运行一个命令或搜索代码时，Claude 会发出一个工具调用请求，系统执行它，然后把结果返回给 Claude。">工具调用</span>后，发生了什么？</p>
+
+      <div class="flow-animation" data-steps='[
+        {"highlight":"flow-actor-1","label":"Claude 完成了一次 Bash 工具调用，运行了 npm test"},
+        {"highlight":"flow-actor-1","label":"PostToolUse 钩子被触发，调用 worker-service.cjs hook observation","packet":true,"from":"actor-1","to":"actor-2"},
+        {"highlight":"flow-actor-2","label":"Worker Service 收到 HTTP 请求，把工具输入/输出写入待处理队列"},
+        {"highlight":"flow-actor-3","label":"SDK Agent 收到任务，向观察者 Claude 子进程发送压缩请求","packet":true,"from":"actor-2","to":"actor-3"},
+        {"highlight":"flow-actor-3","label":"观察者 Claude 分析：测试通过了哪些、失败了哪些、用了什么命令"},
+        {"highlight":"flow-actor-4","label":"结构化的观察记录写入 SQLite 数据库","packet":true,"from":"actor-3","to":"actor-4"}
+      ]'>
+        <div class="flow-actors">
+          <div class="flow-actor" id="flow-actor-1">
+            <div class="flow-actor-icon">💻</div>
+            <span>Claude Code</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-2">
+            <div class="flow-actor-icon">⚙️</div>
+            <span>Worker</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-3">
+            <div class="flow-actor-icon">🤖</div>
+            <span>SDK Agent</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-4">
+            <div class="flow-actor-icon">🗄️</div>
+            <span>SQLite</span>
+          </div>
+        </div>
+        <div class="flow-packet" id="flow-packet-m3"></div>
+        <div class="flow-step-label">点击"下一步"开始</div>
+        <div class="flow-controls">
+          <button class="btn flow-next-btn">下一步</button>
+          <button class="btn flow-reset-btn">重置</button>
+          <span class="flow-progress"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 5: Quiz -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">理解检验</h2>
+      <div class="quiz-container" id="quiz-m3">
+        <div class="quiz-question-block"
+             data-correct="b"
+             data-explanation-right="PostToolUse 钩子在每次工具执行完毕后触发，捕获那次工具调用的输入和输出。这是 claude-mem 知道 Claude 做了什么的主要方式。"
+             data-explanation-wrong="Stop 钩子是在 Claude 完全停止响应时触发的，用于生成总结——不是用来捕获单次工具调用的。">
+          <h3 class="quiz-question">你让 Claude 读了 10 个文件、运行了 5 个命令。claude-mem 是通过哪个钩子记录这 15 次操作的？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Stop 钩子，在最后统一处理</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>PostToolUse 钩子，每次操作后立即记录</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>SessionStart 钩子，在会话开始时预读所有文件</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <div class="quiz-question-block"
+             data-correct="c"
+             data-explanation-right="PostToolUse timeout 是 120 秒。如果 AI 压缩超时，那次观察可能会丢失，但 Claude Code 不会卡住——钩子超时只影响 claude-mem 自身。"
+             data-explanation-wrong="思考一下：如果 PostToolUse 钩子超时，Worker 收不到通知，那次工具调用的数据会怎样？">
+          <h3 class="quiz-question">如果 Worker Service 因为某些原因没有响应，PostToolUse 钩子超过了 120 秒超时上限，会发生什么？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Claude Code 主进程会崩溃</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Claude Code 会暂停等待，直到 Worker 恢复</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>那次工具调用的观察可能会丢失，但 Claude Code 继续正常工作</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-m3')">检验答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m3')">重新作答</button>
+      </div>
+    </section>
+  </div>
+</section>

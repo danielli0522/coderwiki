@@ -1,0 +1,326 @@
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 1: 初识 CocoIndex
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">初识 CocoIndex</h1>
+      <p class="module-subtitle">从安装到第一个管道——理解增量数据索引引擎的完整架构</p>
+    </header>
+
+    <!-- ── Screen 1: CocoIndex 是什么？ ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">CocoIndex 是什么？</h2>
+
+      <p>想象你有一个超级数据管家：它能自动读取代码仓库、PDF 文档、会议纪要，提取结构化信息，生成向量嵌入，存入数据库——而且每当数据变化时只重新处理变动的部分。这就是 <span class="term" data-definition="CocoIndex 是一个开源的增量数据索引引擎，用 Python 声明数据管道，Rust 引擎自动跟踪变化、只处理增量（delta），让 AI Agent 始终获得最新鲜的上下文数据。">CocoIndex</span>。</p>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">💡</div>
+        <div class="callout-content">
+          <strong class="callout-title">核心理念</strong>
+          <p>CocoIndex 不是传统的 ETL 工具——它是<strong>声明式的增量索引引擎</strong>。你只需声明"目标应该长什么样"，引擎自动跟踪源数据变化，只重新计算受影响的部分（delta）。就像 React 的状态驱动 UI 更新一样，但作用于数据管道。</p>
+        </div>
+      </div>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">🥥</div>
+          <h4 class="pattern-title">增量引擎</h4>
+          <p class="pattern-desc">只处理变化的数据（delta），不变的数据直接命中缓存。10,000 个文件改了 1 个，只重新处理那 1 个。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">🐍</div>
+          <h4 class="pattern-title">Python 声明式</h4>
+          <p class="pattern-desc">用纯 Python 声明数据管道，不需要 DAG、不需要配置文件。代码即管道，直觉即架构。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">🦀</div>
+          <h4 class="pattern-title">Rust 核心</h4>
+          <p class="pattern-desc">底层引擎用 Rust 编写，天然并行、零拷贝、故障隔离。生产级可靠性从第一天开始。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+          <div class="pattern-icon" style="background: var(--color-actor-4)">🔌</div>
+          <h4 class="pattern-title">丰富连接器</h4>
+          <p class="pattern-desc">内置 20+ 连接器：本地文件、S3、Google Drive、Postgres、Neo4j、Kafka、Qdrant……即插即用。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 2: 核心架构 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">核心架构：数据如何从源头流向目标？</h2>
+
+      <p>CocoIndex 的架构像一座精密的数据工厂——有<strong>原料仓库</strong>（Source 数据源）、<strong>加工车间</strong>（Transform 变换函数）、<strong>成品库房</strong>（Target 目标存储），以及一位永不疲倦的<strong>质检经理</strong>（增量引擎）。</p>
+
+      <div class="arch-diagram">
+        <div class="arch-zone">
+          <h4 class="arch-zone-label">数据源层 — 数据从哪里来</h4>
+          <div class="arch-component" data-desc="Source 是数据的来源。CocoIndex 支持 localfs（本地文件系统）、S3、Google Drive、Postgres 等多种数据源。每个 Source 连接器负责扫描数据变化并报告给引擎。">
+            <div class="arch-icon">📁</div>
+            <span>Source 连接器</span>
+          </div>
+          <div class="arch-component" data-desc="LocalFS 是最常用的数据源——监控本地目录中的文件变化。支持递归遍历、文件名模式匹配（如只读 .md 文件），并可以启用 live 模式持续监控。">
+            <div class="arch-icon">📂</div>
+            <span>LocalFS (本地文件)</span>
+          </div>
+          <div class="arch-component" data-desc="外部连接器包括 Amazon S3（对象存储）、Google Drive（云盘）、Kafka（消息队列）、Postgres（数据库源）等，覆盖企业级数据接入场景。">
+            <div class="arch-icon">☁️</div>
+            <span>外部连接器 (S3/GDrive/Kafka)</span>
+          </div>
+        </div>
+        <div class="arch-zone">
+          <h4 class="arch-zone-label">变换层 — 数据怎么处理</h4>
+          <div class="arch-component" data-desc="@coco.fn 装饰器将普通 Python 函数变成 CocoIndex 可识别的变换函数。引擎自动跟踪输入和代码的变化，决定是否需要重新执行。">
+            <div class="arch-icon">⚡</div>
+            <span>@coco.fn 变换函数</span>
+          </div>
+          <div class="arch-component" data-desc="内置变换操作包括文本分块（RecursiveSplitter）、代码语言检测、Embedding 生成等。基于 Rust 实现，高性能且语法感知。">
+            <div class="arch-icon">✂️</div>
+            <span>内置 Ops (分块/嵌入)</span>
+          </div>
+          <div class="arch-component" data-desc="memo=True 参数启用记忆化缓存。函数的输出按 hash(输入) + hash(代码) 缓存，只有输入或代码变化时才重新执行——这就是增量的核心。">
+            <div class="arch-icon">💾</div>
+            <span>Memo 记忆化缓存</span>
+          </div>
+        </div>
+        <div class="arch-zone">
+          <h4 class="arch-zone-label">目标层 — 数据存到哪里</h4>
+          <div class="arch-component" data-desc="Target 是数据最终存储的地方。CocoIndex 支持 Postgres（pgvector 向量搜索）、Neo4j（知识图谱）、LanceDB、Qdrant 等多种目标存储。">
+            <div class="arch-icon">🗄️</div>
+            <span>Target 目标存储</span>
+          </div>
+          <div class="arch-component" data-desc="TargetState 是 CocoIndex 的核心抽象——你声明'目标应该长什么样'，引擎自动计算增量并同步。插入新行、更新变化的行、删除过时的行，全自动。">
+            <div class="arch-icon">🎯</div>
+            <span>TargetState (声明式状态)</span>
+          </div>
+          <div class="arch-component" data-desc="每个处理组件（Processing Component）独立运行并尽快将结果写入目标——不需要等待整个管道完成。这意味着第一批处理完的数据立即可查询。">
+            <div class="arch-icon">📊</div>
+            <span>独立处理组件</span>
+          </div>
+        </div>
+        <div class="arch-description">点击任意组件，了解它在架构中的作用</div>
+      </div>
+    </section>
+
+    <!-- ── Screen 3: 消息流动画 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">数据旅程：从源文件到可查询的向量索引</h2>
+
+      <p>当你运行 CocoIndex 管道时，数据经历一段精心设计的旅程。想象一个自动化工厂流水线——原料进入、逐步加工、成品入库，全程由引擎调度。</p>
+
+      <div class="flow-animation" data-steps='[
+        {"highlight":"flow-actor-1","label":"Source 连接器扫描源目录，发现 markdown_files/ 中的 3 个文件"},
+        {"highlight":"flow-actor-1","label":"引擎为每个文件创建独立的 Processing Component（处理组件）","packet":true,"from":"actor-1","to":"actor-2"},
+        {"highlight":"flow-actor-2","label":"每个组件执行 @coco.fn 函数：读取文件内容、RecursiveSplitter 分块","packet":true,"from":"actor-2","to":"actor-3"},
+        {"highlight":"flow-actor-3","label":"Memo 缓存检查：如果文件内容和代码都没变，直接命中缓存跳过","packet":true,"from":"actor-3","to":"actor-2"},
+        {"highlight":"flow-actor-2","label":"对每个 chunk 调用 Embedding 模型生成向量，声明 TargetState 行","packet":true,"from":"actor-2","to":"actor-4"},
+        {"highlight":"flow-actor-4","label":"Target 连接器（Postgres）将新行插入、旧行更新、过时行删除——全自动同步"}
+      ]'>
+        <div class="flow-actors">
+          <div class="flow-actor" id="flow-actor-1">
+            <div class="flow-actor-icon">📁</div>
+            <span>数据源</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-2">
+            <div class="flow-actor-icon">⚡</div>
+            <span>变换处理</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-3">
+            <div class="flow-actor-icon">💾</div>
+            <span>Memo 缓存</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-4">
+            <div class="flow-actor-icon">🗄️</div>
+            <span>目标存储</span>
+          </div>
+        </div>
+
+        <div class="flow-packet" id="flow-packet"></div>
+        <div class="flow-step-label" id="flow-label">点击"下一步"开始旅程</div>
+
+        <div class="flow-controls">
+          <button class="btn flow-next-btn">下一步</button>
+          <button class="btn flow-reset-btn">重新开始</button>
+          <span class="flow-progress"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 4: 代码翻译 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">代码翻译：读懂第一个 CocoIndex 管道</h2>
+
+      <p>这是一个最小可运行的 CocoIndex 管道。左边是原始代码，右边是逐行中文解释：</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-keyword">import</span> cocoindex <span class="code-keyword">as</span> coco</span>
+<span class="code-line"><span class="code-keyword">from</span> cocoindex.connectors <span class="code-keyword">import</span> localfs</span>
+<span class="code-line"><span class="code-keyword">from</span> cocoindex.ops.text <span class="code-keyword">import</span> RecursiveSplitter</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 定义文件处理函数</span></span>
+<span class="code-line"><span class="code-keyword">@coco.fn</span>(<span class="code-property">memo</span>=<span class="code-keyword">True</span>)</span>
+<span class="code-line"><span class="code-keyword">async def</span> <span class="code-function">process_file</span>(file, table):</span>
+<span class="code-line">    text = <span class="code-keyword">await</span> file.<span class="code-function">read_text</span>()</span>
+<span class="code-line">    chunks = <span class="code-function">splitter.split</span>(text, <span class="code-property">chunk_size</span>=<span class="code-number">2000</span>)</span>
+<span class="code-line">    <span class="code-keyword">for</span> chunk <span class="code-keyword">in</span> chunks:</span>
+<span class="code-line">        table.<span class="code-function">declare_row</span>(</span>
+<span class="code-line">            text=chunk.text,</span>
+<span class="code-line">            embedding=<span class="code-function">embed</span>(chunk.text)</span>
+<span class="code-line">        )</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 创建 App 并运行</span></span>
+<span class="code-line">app = coco.<span class="code-function">App</span>(<span class="code-string">"my_index"</span>, main, <span class="code-property">src</span>=<span class="code-string">"./docs"</span>)</span>
+<span class="code-line">app.<span class="code-function">update_blocking</span>()</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">导入 CocoIndex 核心库</p>
+            <p class="tl">导入连接器：本地文件系统（localfs）</p>
+            <p class="tl">导入文本操作：递归分块器（RecursiveSplitter）</p>
+            <p class="tl">定义文件处理函数，memo=True 启用缓存</p>
+            <p class="tl">@coco.fn 装饰器——把普通函数变成 CocoIndex 变换组件</p>
+            <p class="tl">异步读取文件内容为字符串</p>
+            <p class="tl">用 RecursiveSplitter 将文本按 2000 字节分块</p>
+            <p class="tl">遍历每个分块</p>
+            <p class="tl">声明目标数据行：文本内容和嵌入向量</p>
+            <p class="tl">调用 Embedding 函数生成向量</p>
+            <p class="tl">创建名为 "my_index" 的 App，源目录为 ./docs</p>
+            <p class="tl">update_blocking() 同步运行：扫描→分块→嵌入→存储</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">📖</div>
+        <div class="callout-content">
+          <strong class="callout-title">@coco.fn 装饰器是什么？</strong>
+          <p><code>@coco.fn</code> 将普通 Python 函数转换为 CocoIndex 的处理单元。引擎会自动跟踪函数的输入参数和代码逻辑的变化——只要两者都没变，就复用之前的计算结果（Memo 缓存）。加上 <code>memo=True</code> 后，缓存粒度更细，按 hash(输入) + hash(代码) 存储。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 5: 安装与快速上手 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">安装与快速上手</h2>
+
+      <p>CocoIndex 的安装只需要一行命令。它是一个纯 Python 包（底层引擎用 Rust 编写，通过 PyO3 绑定）。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">TERMINAL</span>
+          <pre><code><span class="code-line"><span class="code-comment"># 安装 CocoIndex</span></span>
+<span class="code-line">pip install -U cocoindex</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 验证安装</span></span>
+<span class="code-line">python -c <span class="code-string">"import cocoindex; print(cocoindex.__version__)"</span></span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 创建项目目录</span></span>
+<span class="code-line">mkdir my-cocoindex-app && cd my-cocoindex-app</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 配置本地数据库（可选，默认使用 SQLite）</span></span>
+<span class="code-line"><span class="code-keyword">echo</span> <span class="code-string">"COCOINDEX_DB=./cocoindex.db"</span> > .env</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">通过 pip 安装最新版 CocoIndex</p>
+            <p class="tl">验证安装成功，打印版本号</p>
+            <p class="tl">CocoIndex 支持 Python 3.10 到 3.13</p>
+            <p class="tl">创建项目工作目录</p>
+            <p class="tl">配置环境变量，使用本地 SQLite 作为内部状态数据库</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">🎯</div>
+        <div class="callout-content">
+          <strong class="callout-title">关键概念对比</strong>
+          <p>CocoIndex 的思维模型就像 React——你声明<strong>目标状态</strong>（Target State），引擎自动计算<strong>差异</strong>（Delta）并同步。不需要手动写"插入/更新/删除"逻辑，框架帮你搞定。公式：<strong>TargetState = Transform(SourceState)</strong></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 6: 测验 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">检验你的理解</h2>
+
+      <div class="quiz-container" id="quiz-module1">
+        <div class="quiz-question-block"
+             data-correct="option-b"
+             data-explanation-right="正确！CocoIndex 的核心是增量引擎——你声明目标状态（TargetState = Transform(SourceState)），引擎自动跟踪变化、只处理 delta。就像 React 声明 UI = f(state) 一样。"
+             data-explanation-wrong="想一想：CocoIndex 的核心理念是什么？它不是手动写增删改查逻辑，而是你告诉它'目标应该长什么样'，引擎帮你自动同步。">
+          <h3 class="quiz-question">CocoIndex 的核心编程模型是什么？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>手动编写增量同步逻辑（insert/update/delete）</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>声明目标状态，引擎自动计算增量并同步</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>配置 DAG（有向无环图）定义数据流</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-a"
+             data-explanation-right="正确！memo=True 启用记忆化缓存——函数输出按 hash(输入) + hash(代码) 缓存。当文件内容没变且代码没改时，直接命中缓存，跳过重新计算。这是增量的核心机制。"
+             data-explanation-wrong="回忆一下 @coco.fn 的参数。memo=True 代表什么？它和'缓存'有关。">
+          <h3 class="quiz-question">@coco.fn(memo=True) 中 memo 参数的作用是什么？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>按 hash(输入) + hash(代码) 缓存函数结果，避免重复计算</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>将函数标记为记忆函数，用于存储聊天历史</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>启用数据库事务，确保数据一致性</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-c"
+             data-explanation-right="正确！CocoIndex 的核心引擎用 Rust 编写（通过 PyO3 绑定到 Python），保证生产级可靠性——并行处理、零拷贝变换、故障隔离。Python 层只负责声明式 API。"
+             data-explanation-wrong="CocoIndex 的性能和可靠性来自哪里？提示：它不是纯 Python 项目，底层引擎用了另一门语言。">
+          <h3 class="quiz-question">CocoIndex 的底层引擎用什么语言编写？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>纯 Python（使用 asyncio 并发）</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>C++（使用 PyBind11 绑定）</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Rust（使用 PyO3 绑定）</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">重新作答</button>
+      </div>
+    </section>
+
+  </div>
+</section>

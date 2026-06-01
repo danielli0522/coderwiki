@@ -1,0 +1,209 @@
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">省 Token 的魔法</h1>
+      <p class="module-subtitle">RTK 和 Caveman——两个让每次请求省 20-65% token 的黑科技</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Token cost problem -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Token 就是钱</h2>
+        <p>每次跟 AI 对话，你发送的每一个字都会被计算成 <span class="term" data-definition="Token 是 AI 模型处理文字的最小单位。大约 1 个中文字 = 1-2 个 token，1 个英文单词 ≈ 1 个 token。AI 按处理了多少 token 来计费。">token</span>。一个典型的编程会话，tool 的输出（git diff、grep 结果、文件列表...）经常占掉 30-50% 的 token 预算。</p>
+        <p><strong>9Router 内置了两个"省钱引擎"：</strong></p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent)">🗜️</div>
+            <h4 class="pattern-title">RTK Token Saver</h4>
+            <p class="pattern-desc">智能压缩工具输出——省 <strong>20-40% 输入 token</strong>。自动识别 git diff、grep、find 等输出格式，应用专门的压缩策略。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🦣</div>
+            <h4 class="pattern-title">Caveman Mode</h4>
+            <p class="pattern-desc">在 <span class="term" data-definition="System prompt 是你发给 AI 的隐藏指令，AI 每次回复都会遵循。比如"用简短专业的方式回答"就是一个 system prompt。">system prompt</span> 里注入"原始人指令"——让 AI 用更简短的方式回复。省 <strong>最高 65% 输出 token</strong>。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: RTK autodetect -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">RTK 怎么自动识别内容类型？</h2>
+        <p>RTK 不需要你配置——它会"偷看"每段 tool 输出的前 1KB，自动判断内容类型：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">export function</span> <span class="code-function">autoDetectFilter</span>(text) {</span>
+<span class="code-line">  <span class="code-keyword">const</span> head = text.<span class="code-function">slice</span>(<span class="code-number">0</span>, DETECT_WINDOW);</span>
+<span class="code-line">  <span class="code-keyword">if</span> (RE_GIT_DIFF.<span class="code-function">test</span>(head)) <span class="code-keyword">return</span> gitDiff;</span>
+<span class="code-line">  <span class="code-keyword">if</span> (RE_GIT_STATUS.<span class="code-function">test</span>(head)) <span class="code-keyword">return</span> gitStatus;</span>
+<span class="code-line">  <span class="code-keyword">if</span> (first5.<span class="code-function">some</span>(isGrepLine)) <span class="code-keyword">return</span> grep;</span>
+<span class="code-line">  <span class="code-keyword">if</span> (RE_TREE_GLYPH.<span class="code-function">test</span>(head)) <span class="code-keyword">return</span> tree;</span>
+<span class="code-line">  <span class="code-keyword">if</span> (text.<span class="code-function">split</span>(<span class="code-string">"\n"</span>).length >= MIN_LINES)</span>
+<span class="code-line">    <span class="code-keyword">return</span> smartTruncate;</span>
+<span class="code-line">  <span class="code-keyword">return null</span>;</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">定义"自动检测过滤器"函数，输入是 tool 输出的文本</p>
+              <p class="tl">只看文本的开头部分（就像你瞟一眼文件就知道它是什么类型）</p>
+              <p class="tl">看到"diff --git"？这是 git diff 输出 → 用 gitDiff 压缩器</p>
+              <p class="tl">看到"On branch"？这是 git status 输出 → 用 gitStatus 压缩器</p>
+              <p class="tl">前 5 行里有"文件名:行号:内容"格式？这是 grep 结果</p>
+              <p class="tl">看到树形结构字符（├── └──）？这是 tree 命令输出</p>
+              <p class="tl">行数太多？用智能截断，保留关键部分</p>
+              <p class="tl">都不匹配？返回 null（不压缩，保持原样）</p>
+              <p class="tl">函数结束</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Safe compression -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">安全网：压缩失败也不怕</h2>
+        <p>RTK 有一个关键设计哲学：<strong>永远不要因为压缩而破坏请求</strong>。看看它的安全机制：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">export function</span> <span class="code-function">safeApply</span>(fn, text) {</span>
+<span class="code-line">  <span class="code-keyword">try</span> {</span>
+<span class="code-line">    <span class="code-keyword">const</span> out = <span class="code-function">fn</span>(text);</span>
+<span class="code-line">    <span class="code-keyword">if</span> (<span class="code-keyword">typeof</span> out !== <span class="code-string">"string"</span>) <span class="code-keyword">return</span> text;</span>
+<span class="code-line">    <span class="code-keyword">return</span> out;</span>
+<span class="code-line">  } <span class="code-keyword">catch</span> (err) {</span>
+<span class="code-line">    console.<span class="code-function">warn</span>(<span class="code-string">"filter panicked"</span>);</span>
+<span class="code-line">    <span class="code-keyword">return</span> text;</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">定义一个"安全执行"函数，包裹任何压缩操作</p>
+              <p class="tl">尝试执行压缩...</p>
+              <p class="tl">调用压缩函数，得到结果</p>
+              <p class="tl">如果结果不是字符串（压缩器出错了）？返回原始文本</p>
+              <p class="tl">压缩成功，返回压缩后的文本</p>
+              <p class="tl">如果压缩过程中抛了异常...</p>
+              <p class="tl">打印一条警告日志（但不崩溃！）</p>
+              <p class="tl">返回原始文本（完全没有损失）</p>
+              <p class="tl">无论发生什么，用户都不会看到错误</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">设计原则</strong>
+            <p>"优化类"代码最重要的是：失败时回退到原始行为。这叫<span class="term" data-definition="优雅降级是指当某个高级功能不可用时，系统能自动回退到基本功能，而不是直接崩溃。就像手机没有 5G 信号时自动切换到 4G。">优雅降级</span>。你在指导 AI 做优化时，一定要说"失败时保持原样"。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Caveman -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Caveman：让 AI 说"短话"</h2>
+        <p>Caveman 的灵感来自一个爆款项目——"为什么要用很多词，明明几个字就能说清楚"。它在发送请求前，偷偷注入一段"原始人指令"：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">export function</span> <span class="code-function">injectCaveman</span>(body, format, level) {</span>
+<span class="code-line">  <span class="code-keyword">const</span> prompt = CAVEMAN_PROMPTS[level];</span>
+<span class="code-line">  <span class="code-keyword">switch</span> (format) {</span>
+<span class="code-line">    <span class="code-keyword">case</span> FORMATS.CLAUDE:</span>
+<span class="code-line">      <span class="code-function">injectClaudeSystem</span>(body, prompt);</span>
+<span class="code-line">      <span class="code-keyword">return</span>;</span>
+<span class="code-line">    <span class="code-keyword">default</span>:</span>
+<span class="code-line">      <span class="code-function">injectMessagesSystem</span>(body, prompt);</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">定义"注入原始人指令"的函数，输入是请求体、格式和压缩等级</p>
+              <p class="tl">根据等级选择对应的原始人提示词（"少说话，多干活"）</p>
+              <p class="tl">根据目标 AI 的格式来决定怎么注入...</p>
+              <p class="tl">如果是 Claude 格式...</p>
+              <p class="tl">把原始人指令插入到 Claude 的 system 字段里</p>
+              <p class="tl">返回</p>
+              <p class="tl">其他格式（OpenAI、Gemini 等）...</p>
+              <p class="tl">把指令插入到 messages 数组的 system 消息里</p>
+              <p class="tl">函数结束。AI 回复时就会用更简短的方式回答了</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">测验：Token 省钱术</h2>
+
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="对！RTK 会偷看每段 tool 输出的前 1KB，用正则匹配来判断内容类型（git diff、grep、find 等），然后自动选择合适的压缩策略。"
+               data-explanation-wrong="RTK 是怎么知道一段文本是 git diff 还是 grep 结果的？它需要先识别内容类型，再选择压缩方式。">
+            <h3 class="quiz-question">RTK 怎么知道该用哪种压缩策略？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>用户在设置里手动配置每种工具的压缩方式</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>自动分析文本内容的格式特征来判断</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>所有内容统一用同一种压缩算法</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="没错！safeApply 函数用 try-catch 包裹所有压缩操作，如果压缩失败或抛异常，就返回原始文本。这确保了压缩永远不会导致请求失败。"
+               data-explanation-wrong="如果一个压缩器崩溃了，9Router 会怎么处理？想想"安全第一"的设计哲学——绝不会让你的请求因此而失败。">
+            <h3 class="quiz-question">如果 RTK 的压缩器执行时崩溃了，会发生什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>整个请求失败，返回错误给用户</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>跳过压缩，但打印大量错误日志</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>静默回退到原始文本，请求正常执行</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

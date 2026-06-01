@@ -1,0 +1,260 @@
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">核心角色大盘点</h1>
+      <p class="module-subtitle">认识 9Router 里的五个关键"演员"，看看它们怎么分工合作</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Actors overview -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">一出好戏，五个主角</h2>
+        <p>想象一个机场。旅客要飞往不同目的地，但不可能自己开飞机。9Router 就像一个智能机场调度系统，每个模块都有明确的职责：</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🚪</div>
+            <div>
+              <strong>API 路由层 <code>src/app/api/</code></strong>
+              <p>前台接待——检查你的"登机牌"（<span class="term" data-definition="API Key 是一串字符，用来证明你有权访问某个服务。就像会员卡的卡号。">API Key</span>），识别你要去哪里（模型名），然后把请求交给调度中心</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🧠</div>
+            <div>
+              <strong>Chat 处理器 <code>chat.js / chatCore.js</code></strong>
+              <p>调度中心——决定用哪家航空公司（提供商），安排"翻译官"转换格式，协调整个飞行过程</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🔀</div>
+            <div>
+              <strong>翻译器 <code>translator/</code></strong>
+              <p>翻译官——不同 AI 服务商说不同的"语言"（OpenAI 格式、Claude 格式、Gemini 格式），翻译官帮你互相转换</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">🛫</div>
+            <div>
+              <strong>执行器 <code>executors/</code></strong>
+              <p>飞行员——真正飞向目标 AI 服务商的人。不同航司有不同飞行方式（OAuth 认证、API Key 认证...）</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-5)">💾</div>
+            <div>
+              <strong>持久化层 <code>localDb.js / usageDb.js</code></strong>
+              <p>档案室——记住所有配置（你的 API Key、套餐设置），以及每次飞行的记录（用了多少 <span class="term" data-definition="Token 是 AI 模型处理文字的基本单位。大约 1 个中文字 = 1-2 个 token。模型按 token 数量计费。">token</span>、花了多少钱）</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Group Chat -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">看它们互相对话</h2>
+        <p>当你发送一个聊天请求时，五个角色会像微信群聊一样互相配合：</p>
+
+        <div class="chat-window" id="chat-module2">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="api-route" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🚪</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">API 路由</span>
+                <p>收到请求！模型是 cc/claude-opus-4-7，API Key 验证通过。交给调度中心处理。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="chat-handler" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">🧠</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">Chat 处理器</span>
+                <p>OK，目标提供商是 Claude，需要从 OpenAI 格式翻译成 Claude 格式。翻译官，你来！</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="translator" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">🔀</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">翻译器</span>
+                <p>翻译完成！messages[] 已转成 Claude 的 system + messages 格式。执行器，可以起飞了。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="executor" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">🛫</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">执行器</span>
+                <p>Claude 返回了结果！流式数据正在推送中... 用了 2,340 tokens。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="storage" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">💾</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">持久化层</span>
+                <p>已记录：Claude opus-4-7，输入 1,200 + 输出 1,140 = 2,340 tokens，预估成本 $0.035。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-module2-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module2-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条消息</button>
+            <button class="btn chat-all-btn">播放全部</button>
+            <button class="btn chat-reset-btn">重播</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Executor code -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">执行器：每个提供商一个</h2>
+        <p>不同的 AI 服务商需要不同的"飞行方式"。9Router 给每个服务商写了一个专门的执行器：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">import</span> { BaseExecutor } <span class="code-keyword">from</span> <span class="code-string">"./base.js"</span>;</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-keyword">export class</span> <span class="code-function">KiroExecutor</span> <span class="code-keyword">extends</span> BaseExecutor {</span>
+<span class="code-line">  <span class="code-function">constructor</span>() {</span>
+<span class="code-line">    <span class="code-keyword">super</span>();</span>
+<span class="code-line">    <span class="code-keyword">this</span>.providerId = <span class="code-string">"kiro"</span>;</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">导入"基础飞行员"类，它已经实现了通用的飞行逻辑</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">Kiro 执行器继承基础类，就像"川航飞行员"继承了通用的飞行技能</p>
+              <p class="tl">构造函数初始化时...</p>
+              <p class="tl">调用父类的基础设置</p>
+              <p class="tl">标记自己是"kiro"（Kiro AI 服务商）的专属执行器</p>
+              <p class="tl">类定义结束</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">ℹ️</div>
+          <div class="callout-content">
+            <strong class="callout-title">扩展新提供商很简单</strong>
+            <p>如果要加一个新的 AI 服务商，只需要创建一个继承 <code>BaseExecutor</code> 的新类，实现该服务商特有的认证和 <span class="term" data-definition="HTTP 请求头是附在每次网络请求里的元数据，比如 Content-Type 表示数据格式，Authorization 表示身份验证信息。">请求头</span>逻辑就行。当前有 15+ 个专用执行器。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: File tree -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码目录结构</h2>
+        <p>9Router 的代码组织就像一个井井有条的办公室：</p>
+
+        <div class="file-tree animate-in">
+          <div class="ft-folder open">
+            <span class="ft-name">src/</span>
+            <span class="ft-desc">主应用代码</span>
+            <div class="ft-children">
+              <div class="ft-folder">
+                <span class="ft-name">app/api/</span>
+                <span class="ft-desc">所有 API 接口路由</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">sse/</span>
+                <span class="ft-desc">SSE 流式处理核心（调度中心）</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">lib/</span>
+                <span class="ft-desc">本地数据库（JSON 文件读写）</span>
+              </div>
+            </div>
+          </div>
+          <div class="ft-folder open">
+            <span class="ft-name">open-sse/</span>
+            <span class="ft-desc">核心引擎（跨环境共享）</span>
+            <div class="ft-children">
+              <div class="ft-folder">
+                <span class="ft-name">executors/</span>
+                <span class="ft-desc">每个 AI 服务商的专属执行器</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">translator/</span>
+                <span class="ft-desc">格式翻译器（OpenAI ↔ Claude ↔ Gemini...）</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">rtk/</span>
+                <span class="ft-desc">Token 省钱引擎（RTK 压缩 + Caveman 模式）</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">测验：角色认知</h2>
+
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！执行器（executors/）是真正与 AI 服务商通信的模块。每个执行器知道怎么跟特定的服务商对话——用什么 URL、什么请求头、什么认证方式。"
+               data-explanation-wrong="想想哪个角色是真正"飞向" AI 服务商的？它需要知道每家服务商的特殊规则。">
+            <h3 class="quiz-question">如果你要新增一个 AI 服务商的支持，应该修改哪个模块？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>API 路由层（src/app/api/）</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>执行器（open-sse/executors/）</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>持久化层（src/lib/）</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="对！翻译器就像同声传译——不同 AI 服务商用不同的数据格式"说话"，翻译器负责实时转换，让任何客户端都能跟任何服务商对话。"
+               data-explanation-wrong="提示：当你的工具说 OpenAI 格式，但目标服务商只接受 Claude 格式时，谁来做这个转换？">
+            <h3 class="quiz-question">翻译器（translator/）最像现实世界中的什么角色？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>同声传译——让说不同语言的人能互相沟通</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>保安——检查每个进来的人有没有权限</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>会计——记录每笔花销</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

@@ -1,0 +1,228 @@
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">架构选型：ComfyUI 适合你吗</h1>
+      <p class="module-subtitle">技术负责人的决策参考：问题、哲学、对比与边界</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Problem + Philosophy -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">它解决什么问题？</h2>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">核心问题</code>
+            <span class="badge-desc">AI 模型推理需要把多个处理步骤编排成流水线——加载模型、编码文本、采样、解码——但用户不想写代码</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">设计哲学</code>
+            <span class="badge-desc">节点图 = 可视化编程。每个节点是一个纯函数，连线就是数据流，画布就是 IDE</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">本质特征</code>
+            <span class="badge-desc">基于 <span class="term" data-definition="DAG（有向无环图）是一种数据结构，节点之间有方向性的连线，但不能绕回自己。就像河流只能从上游流向下游，不会循环。ComfyUI 的工作流就是一个 DAG。">DAG</span> 的数据流引擎 + 插件化的节点注册系统 + 动态显存管理</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">扩展模型</code>
+            <span class="badge-desc">通过 custom_nodes 目录自动发现并加载 Python 模块，每个模块可注册任意数量的节点类</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Comparison Table -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">与其他方案对比</h2>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#128218;</div>
+          <div class="callout-content">
+            <p>ComfyUI 的核心优势是<strong>可编程性和精确控制</strong>。如果你需要批量处理、条件分支、API 集成，它是最佳选择。</p>
+          </div>
+        </div>
+
+        <table style="width:100%; border-collapse:collapse; font-size:var(--text-sm); margin-top:var(--space-4);">
+          <thead>
+            <tr style="background:var(--color-bg-warm); text-align:left;">
+              <th style="padding:var(--space-3); border-bottom:2px solid var(--color-border);">维度</th>
+              <th style="padding:var(--space-3); border-bottom:2px solid var(--color-accent); color:var(--color-accent);">ComfyUI</th>
+              <th style="padding:var(--space-3); border-bottom:2px solid var(--color-border);">Automatic1111</th>
+              <th style="padding:var(--space-3); border-bottom:2px solid var(--color-border);">InvokeAI</th>
+              <th style="padding:var(--space-3); border-bottom:2px solid var(--color-border);">Fooocus</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);"><strong>操作方式</strong></td>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);">
+                <ul><li>节点图拖拽</li><li>精确控制每一步</li></ul>
+              </td>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);">
+                <ul><li>表单填参数</li><li>插件扩展</li></ul>
+              </td>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);">
+                <ul><li>画布 + 工具栏</li><li>面向设计师</li></ul>
+              </td>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);">
+                <ul><li>极简界面</li><li>开箱即用</li></ul>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);"><strong>学习曲线</strong></td>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);">
+                <ul><li>较陡</li><li>需理解节点概念</li></ul>
+              </td>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);">
+                <ul><li>中等</li><li>参数多但直观</li></ul>
+              </td>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);">
+                <ul><li>较低</li><li>操作贴近 Photoshop</li></ul>
+              </td>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);">
+                <ul><li>最低</li><li>输入文字就出图</li></ul>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);"><strong>可编程性</strong></td>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);">
+                <ul><li>极强</li><li>条件分支/循环/API调用</li></ul>
+              </td>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);">
+                <ul><li>中等</li><li>依赖插件脚本</li></ul>
+              </td>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);">
+                <ul><li>有限</li><li>侧重手动操作</li></ul>
+              </td>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);">
+                <ul><li>无</li><li>纯预设驱动</li></ul>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);"><strong>API 集成</strong></td>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);">
+                <ul><li>原生 HTTP + WebSocket</li><li>完整的 REST API</li></ul>
+              </td>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);">
+                <ul><li>有 API 扩展</li><li>功能有限</li></ul>
+              </td>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);">
+                <ul><li>基础 API</li><li>面向手动使用</li></ul>
+              </td>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);">
+                <ul><li>无 API</li><li>纯桌面应用</li></ul>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:var(--space-3);"><strong>生态规模</strong></td>
+              <td style="padding:var(--space-3);">
+                <ul><li>数千自定义节点</li><li>ComfyUI Manager 管理</li></ul>
+              </td>
+              <td style="padding:var(--space-3);">
+                <ul><li>大量插件</li><li>历史最久</li></ul>
+              </td>
+              <td style="padding:var(--space-3);">
+                <ul><li>适中</li><li>精选节点</li></ul>
+              </td>
+              <td style="padding:var(--space-3);">
+                <ul><li>极简</li><li>几乎无扩展</li></ul>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Screen 3: Suitable vs Not Suitable -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">适用 vs 不适用场景</h2>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: var(--space-6);">
+          <div style="background:var(--color-success-light); border-radius:var(--radius-md); padding:var(--space-6);">
+            <h4 style="color:var(--color-success); margin-bottom:var(--space-3);">&#9989; 适合</h4>
+            <ul style="list-style:none; padding:0;">
+              <li style="padding:var(--space-2) 0;">&#10003; 需要精确控制每一步参数的高级用户</li>
+              <li style="padding:var(--space-2) 0;">&#10003; 批量处理：一次生成几百张图</li>
+              <li style="padding:var(--space-2) 0;">&#10003; API 集成：把 AI 生成嵌入产品后端</li>
+              <li style="padding:var(--space-2) 0;">&#10003; 复杂工作流：ControlNet 组合、多模型串联</li>
+              <li style="padding:var(--space-2) 0;">&#10003; 自定义开发：写自己的节点扩展功能</li>
+              <li style="padding:var(--space-2) 0;">&#10003; 研究用途：对比不同采样器、调度器效果</li>
+            </ul>
+          </div>
+          <div style="background:var(--color-error-light); border-radius:var(--radius-md); padding:var(--space-6);">
+            <h4 style="color:var(--color-error); margin-bottom:var(--space-3);">&#10060; 不适合</h4>
+            <ul style="list-style:none; padding:0;">
+              <li style="padding:var(--space-2) 0;">&#10007; 只想快速出图、不想学习的轻度用户</li>
+              <li style="padding:var(--space-2) 0;">&#10007; 需要 Photoshop 级别手动修图的设计师</li>
+              <li style="padding:var(--space-2) 0;">&#10007; 对节点图界面有强烈抵触的用户</li>
+              <li style="padding:var(--space-2) 0;">&#10007; 纯移动端使用场景（只有桌面端）</li>
+              <li style="padding:var(--space-2) 0;">&#10007; 追求一键出效果、不想调参的场景</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Hard Limits from Source Code -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">硬限制（从源码提取）</h2>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">MAX_RESOLUTION = 16384</code>
+            <span class="badge-desc">内置节点的最大分辨率限制。超过此值的宽高参数会被拒绝。</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">MAXIMUM_HISTORY_SIZE = 10000</code>
+            <span class="badge-desc">PromptQueue 的历史记录上限。超过时自动丢弃最老的记录。</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">supported_pt_extensions</code>
+            <span class="badge-desc">模型文件只识别 .ckpt, .pt, .pt2, .bin, .pth, .safetensors, .pkl, .sft 扩展名</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">license: GPL-3.0</code>
+            <span class="badge-desc">开源协议为 GPL-3.0——商业使用需注意传染性条款。你的衍生作品也必须开源。</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Costs + Conclusion -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">成本与风险</h2>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>硬件成本</strong>
+              <p>推荐至少 8GB VRAM 的 NVIDIA GPU（SDXL 最低要求）。理想配置 12-24GB。无 GPU 可用 CPU 但极慢。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>学习成本</strong>
+              <p>节点图思维需要适应期。复杂工作流需要理解模型架构（CLIP/VAE/UNet）。预计 2-5 天熟悉基础。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>维护成本</strong>
+              <p>自定义节点可能跟不上 ComfyUI 版本更新。依赖管理需要 Python 环境。Docker 部署可行但需要配置。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent" style="margin-top:var(--space-8);">
+          <div class="callout-icon">&#127919;</div>
+          <div class="callout-content">
+            <strong class="callout-title">最终判定</strong>
+            <p>ComfyUI 是 AI 图像生成领域最灵活、最强大的编排工具。如果你的需求超出'输入文字出图'的范畴——需要批处理、API 集成、复杂流水线、或者想深入理解 AI 绘图的每一步——ComfyUI 是最佳选择。代价是学习曲线和硬件要求。</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

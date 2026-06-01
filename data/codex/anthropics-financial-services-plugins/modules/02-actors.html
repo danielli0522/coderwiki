@@ -1,0 +1,245 @@
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">认识角色</h1>
+      <p class="module-subtitle">四层架构：Agent → Skill → Command → Connector</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: The layered architecture metaphor -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">像一个会计师事务所</h2>
+        <p>想象一家大型会计师事务所。合伙人负责和客户沟通，经理分配任务，高级审计员执行具体工作，实习生负责搬资料。每一层只做自己的事，层层配合。</p>
+        <p>这个项目的架构也是分层的：</p>
+
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <p><strong>Agent</strong><br/>「合伙人」— 接到任务，分配给下属</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <p><strong>Skill</strong><br/>「方法论手册」— 怎么做可比公司分析</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <p><strong>Command</strong><br/>「快捷指令」— 输入 /comps 触发</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">4</div>
+            <p><strong>Connector</strong><br/>「数据通道」— 连 Bloomberg、FactSet 等</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Architecture diagram interactive -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">点一层看看</h2>
+
+        <div class="arch-diagram">
+          <div class="arch-zone arch-zone-browser">
+            <h4 class="arch-zone-label">Agent 层（AI 员工）</h4>
+            <div class="arch-component" data-desc="每个 Agent 是一个独立的插件，包含自己的系统提示词 + 所需技能。比如 Pitch Agent 负责「可比公司分析 → LBO → 品牌 PPT」的完整流程。"
+                 onclick="showArchDesc(this)">
+              <div class="arch-icon">🤖</div>
+              <span>Agent Plugin</span>
+            </div>
+          </div>
+          <div class="arch-zone arch-zone-external">
+            <h4 class="arch-zone-label">Skill 层（专业技能）</h4>
+            <div class="arch-component" data-desc="技能文件是 Markdown 格式的「工作手册」，教 AI 怎么做具体任务。比如 comps-analysis/SKILL.md 详细写了怎么做可比公司分析：数据优先从哪里取、表格怎么排、图表怎么画。"
+                 onclick="showArchDesc(this)">
+              <div class="arch-icon">📘</div>
+              <span>Skill (SKILL.md)</span>
+            </div>
+          </div>
+          <div class="arch-zone arch-zone-external">
+            <h4 class="arch-zone-label">Command 层（快捷键）</h4>
+            <div class="arch-component" data-desc="命令是用户主动触发的快捷操作，用 / 开头。比如 /comps 触发可比公司分析，/earnings 触发财报分析。每个命令也是一个 Markdown 文件，描述了用户该提供什么信息。"
+                 onclick="showArchDesc(this)">
+              <div class="arch-icon">⌨️</div>
+              <span>Command (/xxx)</span>
+            </div>
+          </div>
+          <div class="arch-zone arch-zone-external">
+            <h4 class="arch-zone-label">Connector 层（数据通道）</h4>
+            <div class="arch-component" data-desc="连接器是 MCP 服务器配置，让 AI 能访问外部数据源。这个项目接入了 11 个数据供应商：Daloopa、Morningstar、S&P、FactSet、Moody's 等。所有连接器集中在 financial-analysis 插件里。"
+                 onclick="showArchDesc(this)">
+              <div class="arch-icon">🔌</div>
+              <span>MCP Connector</span>
+            </div>
+          </div>
+          <div class="arch-description" id="arch-desc">点击任意组件查看详细说明</div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Code translation — plugin.json -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Agent 的身份证</h2>
+        <p>每个 Agent 都有一个 <code>plugin.json</code> 文件，就像身份证一样记录了它的名字和职能：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line">{</span>
+<span class="code-line">  <span class="code-property">"name"</span>: <span class="code-string">"pitch-agent"</span>,</span>
+<span class="code-line">  <span class="code-property">"version"</span>: <span class="code-string">"0.1.0"</span>,</span>
+<span class="code-line">  <span class="code-property">"description"</span>: <span class="code-string">"Comps, precedents, LBO to a branded pitch deck, end to end"</span>,</span>
+<span class="code-line">  <span class="code-property">"author"</span>: {</span>
+<span class="code-line">    <span class="code-property">"name"</span>: <span class="code-string">"Anthropic FSI"</span></span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">这是一个 JSON 配置文件，描述这个插件的基本信息。</p>
+              <p class="tl">名字叫 pitch-agent（投行 Pitch 专用）。</p>
+              <p class="tl">版本号 0.1.0，说明还在早期开发阶段。</p>
+              <p class="tl">一句话描述它干什么：从可比公司分析到 LBO 到品牌 PPT，端到端。</p>
+              <p class="tl">作者是 Anthropic 的金融服务团队。</p>
+              <p class="tl">结束。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: File tree of a plugin -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">一个 Agent 插件里面有什么？</h2>
+
+        <div class="file-tree">
+          <div class="ft-folder open">
+            <span class="ft-name">pitch-agent/</span>
+            <span class="ft-desc">一个完整的 Agent 插件</span>
+            <div class="ft-children">
+              <div class="ft-folder">
+                <span class="ft-name">.claude-plugin/</span>
+                <span class="ft-desc">插件的元数据（名字、版本号）</span>
+                <div class="ft-children">
+                  <div class="ft-file">
+                    <span class="ft-name">plugin.json</span>
+                    <span class="ft-desc">「身份证」文件</span>
+                  </div>
+                </div>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">agents/</span>
+                <span class="ft-desc">AI 的「角色说明书」</span>
+                <div class="ft-children">
+                  <div class="ft-file">
+                    <span class="ft-name">pitch-agent.md</span>
+                    <span class="ft-desc">系统提示词 — 告诉 AI 它是谁、怎么工作</span>
+                  </div>
+                </div>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">skills/</span>
+                <span class="ft-desc">打包好的技能文件（从 vertical-plugins 同步来的）</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">📌</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键概念：自包含</strong>
+            <p>每个 Agent 插件都是<strong>自包含</strong>的 —— 它把所需的技能文件都打包进来了。安装一个 Agent 就够了，不需要再单独安装底层技能。就像你雇了一个会做 Excel 的分析师，不需要再去单独买 Excel 教材。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Vertical plugins vs agent plugins -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">两套插件，一个源头</h2>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🏭</div>
+            <div>
+              <strong>vertical-plugins/（行业技能源）</strong>
+              <p>7 个行业目录，每个包含技能、命令、连接器。这是技能文件的「原产地」，所有修改都在这里做。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">📦</div>
+            <div>
+              <strong>agent-plugins/（打包好的 Agent）</strong>
+              <p>10 个独立 Agent，每个把需要的技能从 vertical-plugins 复制过来打包。用同步脚本保持一致。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">🤝</div>
+            <div>
+              <strong>partner-built/（合作方插件）</strong>
+              <p>LSEG（伦敦交易所）、S&P Global 等数据供应商自己写的插件。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 6: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验你的理解</h2>
+
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！技能文件 (SKILL.md) 的源文件在 vertical-plugins/ 里。agent-plugins/ 里的技能是从那里同步过来的副本。修改时要改源文件，然后运行同步脚本。"
+               data-explanation-wrong="想一想：如果 10 个 Agent 都需要同一个技能（比如 comps-analysis），你会在哪里写这个技能？当然是在一个公共的地方，然后同步给各个 Agent。">
+            <h3 class="quiz-question">如果你想修改「可比公司分析」的技能文件，应该改哪里？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>agent-plugins/pitch-agent/skills/ 里的文件</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>vertical-plugins/financial-analysis/skills/ 里的文件</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>managed-agent-cookbooks/ 里的 YAML 文件</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="没错！11 个数据连接器（Daloopa、Morningstar、S&P、FactSet 等）全部集中在 financial-analysis 这个 vertical-plugin 里，其他 Agent 共享这些连接器。"
+               data-explanation-wrong="数据连接器不是分散在各处的。它们集中在 financial-analysis 这个核心插件里，所有 Agent 共享。">
+            <h3 class="quiz-question">Bloomberg、FactSet 这些数据连接器配置在哪个文件里？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>每个 Agent 插件都有自己的 .mcp.json</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>managed-agent-cookbooks/ 里的 agent.yaml</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>vertical-plugins/financial-analysis/.mcp.json</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">再试一次</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

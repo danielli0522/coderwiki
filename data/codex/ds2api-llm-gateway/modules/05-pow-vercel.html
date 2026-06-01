@@ -1,0 +1,300 @@
+    <section class="module" id="module-5">
+      <div class="module-inner">
+
+        <header class="module-header">
+          <span class="module-number">05</span>
+          <h1 class="module-title">PoW + Vercel：进门先做 100 个深蹲，又快又能在云上跑</h1>
+          <p class="module-tagline">DeepSeek 网页要求每个请求先解一道哈希难题（PoW）。ds2api 用纯 Go 实现的解算器把它压到毫秒级，并在 Vercel 上用 Go+Node 双语接力。</p>
+        </header>
+
+        <section class="screen">
+          <h2>什么是 PoW，为什么 DeepSeek 要</h2>
+          <p><span class="term" data-definition="PoW = Proof of Work，工作量证明。要求请求方先做一段算力开销足够大的计算，把答案附在请求里。机器人想发海量请求会被这道题拖垮。">PoW</span> 是反爬手段。DeepSeek 网页给每个请求发一道题：<em>"在 [0, 1,000,000) 内找一个 nonce，使得 DeepSeekHashV1(salt + expireAt + nonce) 的前缀等于这个 challenge"</em>。你不解出来，发请求会被拒。</p>
+
+          <div class="callout callout-accent">
+            <div class="callout-icon">🏋️</div>
+            <div class="callout-content">
+              <strong class="callout-title">健身房门禁比喻</strong>
+              <p>会员卡进门免费 —— 但要做 100 个深蹲。机器人没有耐心做深蹲，<strong>不是不能进，是性价比太低</strong>。PoW 把"发请求的边际成本"从近零拉到几毫秒 CPU，海量爬取就不划算了。</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>DeepSeekHashV1：被改一刀的 SHA3-256</h2>
+          <p>注释里直接写明：<em>"DeepSeekHashV1 = SHA3-256 但跳过 Keccak-f[1600] round 0 (只做 rounds 1..23)"</em>。意思是它<strong>故意改了标准 SHA3 的一行</strong>，让外部 OpenSSL/通用库算不出来 —— 想解 PoW 必须自己实现。</p>
+
+          <div class="translation-block animate-in">
+            <div class="translation-code">
+              <span class="translation-label">CODE · pow/deepseek_hash.go 注释</span>
+              <pre><code><span class="code-line"><span class="code-comment">// Package pow 提供 DeepSeekHashV1 纯 Go 实现。</span></span>
+<span class="code-line"><span class="code-comment">// DeepSeekHashV1 = SHA3-256 但跳过 Keccak-f[1600] round 0</span></span>
+<span class="code-line"><span class="code-comment">// (只做 rounds 1..23)。</span></span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-keyword">func</span> <span class="code-function">keccakF23</span>(s *[<span class="code-property">25</span>]uint64) {</span>
+<span class="code-line">  <span class="code-comment">// 标准 Keccak-f[1600] 是 24 轮（0..23），</span></span>
+<span class="code-line">  <span class="code-comment">// 这里从 r=1 开始，等于跳过第 0 轮。</span></span>
+<span class="code-line">  <span class="code-keyword">for</span> r := <span class="code-property">1</span>; r &lt; <span class="code-property">24</span>; r++ {</span>
+<span class="code-line">    ...</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span></code></pre>
+            </div>
+            <div class="translation-english">
+              <span class="translation-label">中文翻译</span>
+              <div class="translation-lines">
+                <p class="tl">SHA3-256 标准里 Keccak 置换是 24 轮，编号 0..23。</p>
+                <p class="tl">DeepSeekHashV1 只跑 1..23 这 23 轮，等于把第 0 轮跳过。</p>
+                <p class="tl">这一改，标准库的 SHA3 实现就不能直接用了 —— 你必须深入算法层手写一份。</p>
+                <p class="tl">这是 DeepSeek 反爬的"额外门槛"：不光算 PoW 要 CPU，连<strong>能算 PoW 的实现都要自己写</strong>。</p>
+                <p class="tl">ds2api 的卖点之一就是这份纯 Go 实现，不依赖 Python / OpenSSL，毫秒级解题，编译进单二进制。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>SolvePow：在 [0, difficulty) 里碰运气</h2>
+
+          <div class="translation-block animate-in">
+            <div class="translation-code">
+              <span class="translation-label">CODE · pow/deepseek_pow.go（节选）</span>
+              <pre><code><span class="code-line"><span class="code-keyword">func</span> <span class="code-function">SolvePow</span>(ctx context.Context, challengeHex, salt string,</span>
+<span class="code-line">    expireAt, difficulty int64) (int64, error) {</span>
+<span class="code-line">  prefix := []<span class="code-keyword">byte</span>(<span class="code-function">BuildPrefix</span>(salt, expireAt))</span>
+<span class="code-line">  <span class="code-comment">// 把 prefix 预吸收进 Keccak 状态，循环里零分配</span></span>
+<span class="code-line">  <span class="code-keyword">var</span> baseState [<span class="code-property">25</span>]uint64</span>
+<span class="code-line">  <span class="code-comment">// ... prefix 吸收逻辑 ...</span></span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">for</span> n := int64(<span class="code-property">0</span>); n &lt; difficulty; n++ {</span>
+<span class="code-line">    <span class="code-keyword">if</span> n&amp;<span class="code-property">0x3FF</span> == <span class="code-property">0</span> {</span>
+<span class="code-line">      <span class="code-keyword">if</span> err := ctx.<span class="code-function">Err</span>(); err != <span class="code-keyword">nil</span> { <span class="code-keyword">return</span> <span class="code-property">0</span>, err }</span>
+<span class="code-line">    }</span>
+<span class="code-line">    s := baseState</span>
+<span class="code-line">    <span class="code-comment">// 把当前 nonce 写进 numBuf，吸收进 s，跑 keccakF23</span></span>
+<span class="code-line">    <span class="code-comment">// 比较输出前 32 字节是否等于 challenge</span></span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span></code></pre>
+            </div>
+            <div class="translation-english">
+              <span class="translation-label">中文翻译</span>
+              <div class="translation-lines">
+                <p class="tl">入参：上下文、挑战的目标哈希值、盐、过期时间戳、难度上限。</p>
+                <p class="tl">先用 salt 和 expireAt 拼成固定前缀，把它"吸收"进 Keccak 内部状态。这一步只做一次，下面循环里就不重做了 —— 经典优化。</p>
+                <p class="tl">从 0 数到 difficulty，每个 n 当成候选 nonce 试一次。</p>
+                <p class="tl">每 1024 次循环检查一下 context —— 如果客户端断开 / 超时，立刻退出，<strong>不浪费 CPU 在没人要的答案上</strong>。</p>
+                <p class="tl">复制基础状态（不污染原状态），把当前 nonce 的字符串形式吸收进去，跑剩下的 23 轮 Keccak。</p>
+                <p class="tl">输出的 32 字节如果等于 challenge，就找到了，返回这个 nonce。</p>
+                <p class="tl">这就是 PoW 的本质：<span class="term" data-definition="暴力穷举 = 没有数学捷径，从 0 试到上限挨个验证。算力变高就更快，没法投机取巧。">暴力穷举</span>。靠纯 Go 写得足够快（零分配、状态预吸收），DeepSeek 看到的请求带 nonce 才放行。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout callout-info">
+            <div class="callout-icon">⚡</div>
+            <div class="callout-content">
+              <strong class="callout-title">为什么纯 Go 是卖点</strong>
+              <p>很多反向 DeepSeek 项目用 Python 或 wrap C 库实现 PoW —— 部署时要装 OpenSSL、要管 Python 环境。<strong>ds2api 单一 Go 二进制部署</strong>：拷一个文件、改个配置就能跑，Docker 镜像也能小到几兆。这种"零依赖"是它在小团队里被选中的核心原因。</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>Vercel 双语接力：Go 管账，Node 接管直播</h2>
+          <p>本地部署一切都是 Go。但部署到 <span class="term" data-definition="Vercel = 一个 serverless 平台，专门跑前端和 API。Node.js 是它的主语言；Go 也支持，但流式响应的支持没 Node 顺。">Vercel</span> 时遇到一个工程难题：</p>
+
+          <div class="pattern-cards">
+            <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+              <div class="pattern-icon" style="background: var(--color-actor-1)">🐹</div>
+              <h4 class="pattern-title">Go 函数擅长</h4>
+              <p class="pattern-desc">拿 PoW、做鉴权、操作账号池 —— 因为整个核心都在 Go 这边。Vercel 的 Go runtime 在这些事上跑得很好。</p>
+            </div>
+            <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+              <div class="pattern-icon" style="background: var(--color-actor-2)">🟢</div>
+              <h4 class="pattern-title">Node 函数擅长</h4>
+              <p class="pattern-desc">Vercel 上 Node 的<strong>流式响应支持更顺</strong>：能稳定保持长连接、SSE 转发延迟低。Go runtime 在这件事上有时会 buffer 住。</p>
+            </div>
+            <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+              <div class="pattern-icon" style="background: var(--color-actor-3)">🤝</div>
+              <h4 class="pattern-title">于是接力</h4>
+              <p class="pattern-desc">Node 函数收请求 → 调 Go 那边的 prepare（解 PoW、租账号、构造上游请求） → Node 自己直接和 DeepSeek 拉 SSE 流 → 完成后调 Go 的 release（还账号）。</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>Node 桥的入口长这样</h2>
+
+          <div class="translation-block animate-in">
+            <div class="translation-code">
+              <span class="translation-label">CODE · internal/js/chat-stream/index.js（节选）</span>
+              <pre><code><span class="code-line"><span class="code-keyword">async function</span> <span class="code-function">handler</span>(req, res) {</span>
+<span class="code-line">  <span class="code-function">setCorsHeaders</span>(res, req);</span>
+<span class="code-line">  <span class="code-keyword">if</span> (req.method === <span class="code-string">'OPTIONS'</span>) { res.statusCode = <span class="code-property">204</span>; res.<span class="code-function">end</span>(); <span class="code-keyword">return</span>; }</span>
+<span class="code-line">  <span class="code-keyword">const</span> rawBody = <span class="code-keyword">await</span> <span class="code-function">readRawBody</span>(req);</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-comment">// 非 Vercel 环境一律转发给 Go</span></span>
+<span class="code-line">  <span class="code-keyword">if</span> (!<span class="code-function">isVercelRuntime</span>()) {</span>
+<span class="code-line">    <span class="code-keyword">await</span> <span class="code-function">proxyToGo</span>(req, res, rawBody); <span class="code-keyword">return</span>;</span>
+<span class="code-line">  }</span>
+<span class="code-line">  <span class="code-keyword">const</span> payload = <span class="code-function">JSON.parse</span>(rawBody.<span class="code-function">toString</span>(<span class="code-string">'utf8'</span>));</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-comment">// 非流式 / 非 OpenAI chat 路径 → 也丢给 Go</span></span>
+<span class="code-line">  <span class="code-keyword">if</span> (!<span class="code-function">toBool</span>(payload.stream) || !<span class="code-function">isNodeStreamSupportedPath</span>(req.url)) {</span>
+<span class="code-line">    <span class="code-keyword">await</span> <span class="code-function">proxyToGo</span>(req, res, rawBody); <span class="code-keyword">return</span>;</span>
+<span class="code-line">  }</span>
+<span class="code-line">  <span class="code-keyword">await</span> <span class="code-function">handleVercelStream</span>(req, res, rawBody, payload);</span>
+<span class="code-line">}</span></code></pre>
+            </div>
+            <div class="translation-english">
+              <span class="translation-label">中文翻译</span>
+              <div class="translation-lines">
+                <p class="tl">这是 Node 函数的入口。先处理 <span class="term" data-definition="CORS = 跨域资源共享。浏览器为了安全，默认禁止网页跨域请求；服务端写对响应头才放行。">CORS</span> 预检请求。</p>
+                <p class="tl">读完整请求体到 rawBody。</p>
+                <p class="tl">关键判断 1：如果不是 Vercel 环境（比如本地 docker），Node 啥都不做，直接代理给 Go 的 5001 端口。这保证只有云上才用 Node 路径。</p>
+                <p class="tl">关键判断 2：解析 body，看 stream 是不是 true、URL 是不是 OpenAI chat 路径。</p>
+                <p class="tl">如果不是流式、或者是 Claude/Gemini 路径，仍然交给 Go 处理（Go 实现完整、协议形状容易出错的事还是 Go 强）。</p>
+                <p class="tl">只有"OpenAI 风格 + 流式"才交给 Node 自己跑 —— 因为 Vercel 上 Node 流式更稳，这是它唯一的优势区间。</p>
+                <p class="tl">这种"默认 Go，少数情况让 Node 接管"的设计叫<strong>双 runtime 协同</strong>：保留单语言简洁，只在必要时引入第二语言。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>设计哲学</h2>
+          <div class="callout callout-accent">
+            <div class="callout-icon">🎓</div>
+            <div class="callout-content">
+              <strong class="callout-title">这堂课最大的工程教训</strong>
+              <p>当你必须在多个 runtime 之间分工，<strong>把"哪一段在哪边"写成清晰的判断规则</strong>，而不是让两边各做一半。这里 Node 的判断逻辑只有 3 行：不在 Vercel？滚回 Go。不是 stream？滚回 Go。不是 OpenAI 路径？滚回 Go。剩下的才自己干。<strong>简单的边界让协议形状漂移最小化。</strong></p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>检查理解</h2>
+          <div class="quiz-container" id="quiz-module5">
+
+            <div class="quiz-question-block"
+                 data-correct="b"
+                 data-explanation-right="对。SHA3-256 是 24 轮，DeepSeekHashV1 跳过第 0 轮只做 23 轮 —— 一个标准库改不了的小修改，让所有反向项目必须自己手写算法。"
+                 data-explanation-wrong="再读一遍 keccakF23 的代码：循环从 r=1 开始，到 r=23，刚好是 23 轮。">
+              <h3 class="quiz-question">DeepSeekHashV1 跟标准 SHA3-256 最关键的差别是？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>使用了不同的初始化向量。</span>
+                </button>
+                <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>跳过 Keccak 置换的第 0 轮，只做 1..23 共 23 轮。</span>
+                </button>
+                <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>使用更长的输出（512 位而不是 256 位）。</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <div class="quiz-question-block"
+                 data-correct="c"
+                 data-explanation-right="对。客户端断开后继续算 PoW 就是浪费 CPU，所以每 1024 次循环检查一次 ctx.Err()，及时退出。这种"周期性看一眼上下文"的写法是 Go 长循环的标配。"
+                 data-explanation-wrong="再看 if n&0x3FF == 0 那一段：每 1024 次检查一下 context 是不是被取消，是为了避免无意义的算力浪费。">
+              <h3 class="quiz-question">SolvePow 的循环里 <code>if n&amp;0x3FF == 0 { ctx.Err() }</code> 这段是干嘛的？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>性能采样：每 1024 次记一次时长。</span>
+                </button>
+                <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>难度调整：让 PoW 自动变难。</span>
+                </button>
+                <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>每 1024 次检查上下文是不是被取消，客户端断开就立刻退出避免空算。</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <div class="quiz-question-block"
+                 data-correct="b"
+                 data-explanation-right="对。Vercel 上 Node 流式更稳，所以 OpenAI 风格 + stream 这种最高频的路径让 Node 接管；其他场景（Claude/Gemini 协议、非流式、非 Vercel）都让 Go 处理，避免在两个 runtime 各维护一半逻辑。"
+                 data-explanation-wrong="再看入口的判断：Node 只在"Vercel 环境 + stream + OpenAI 路径"三件事都成立时才自己干，否则一律交给 Go。">
+              <h3 class="quiz-question">为什么 Vercel 上的 Node 入口大部分情况会把请求转发给 Go？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>Node 比 Go 慢，所以默认走 Go。</span>
+                </button>
+                <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>只让 Node 处理它真正擅长的"Vercel + 流式 + OpenAI 路径"，其他路径交给 Go 维护单一实现。</span>
+                </button>
+                <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>Node 的鉴权能力不够。</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">检查答案</button>
+            <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">重做</button>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>课程小结</h2>
+          <p>你看完了 ds2api 五个最值钱的设计：</p>
+          <div class="step-cards">
+            <div class="step-card">
+              <div class="step-num">1</div>
+              <div class="step-body">
+                <strong>它是协议层网关</strong>
+                <p>不训新模型，只让上游 DeepSeek 网页假装成 OpenAI/Claude/Gemini API。</p>
+              </div>
+            </div>
+            <div class="step-card">
+              <div class="step-num">2</div>
+              <div class="step-body">
+                <strong>PromptCompat 是灵魂</strong>
+                <p>三种协议归一到一种"扁平消息中转格式"，再压扁成纯文本剧本。Hub-and-spoke。</p>
+              </div>
+            </div>
+            <div class="step-card">
+              <div class="step-num">3</div>
+              <div class="step-body">
+                <strong>账号池公平排队</strong>
+                <p>每账号 in-flight 上限 + waiters channel 列表，FIFO 唤醒，背压双保险。</p>
+              </div>
+            </div>
+            <div class="step-card">
+              <div class="step-num">4</div>
+              <div class="step-body">
+                <strong>Tool Sieve 防泄漏</strong>
+                <p>状态机 passthrough/capturing 切换，可疑前缀就缓冲，宁慢不漏。</p>
+              </div>
+            </div>
+            <div class="step-card">
+              <div class="step-num">5</div>
+              <div class="step-body">
+                <strong>PoW + 双 runtime 接力</strong>
+                <p>纯 Go 解 DeepSeekHashV1，单二进制零依赖；Vercel 上 Node 只在它擅长的路径接管。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout callout-info">
+            <div class="callout-icon">🚀</div>
+            <div class="callout-content">
+              <strong class="callout-title">把这些用到你自己的项目</strong>
+              <p>下次你要兼容多种输入形状，想想 hub-and-spoke。下次你要并发限速，想想"每实例 in-flight 上限 + 等待队列"。下次你要在流上识别特殊标记，想想"状态机 + 缓冲 + 失败回放"。这些就是真实工程师写代码的肌肉记忆。</p>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </section>

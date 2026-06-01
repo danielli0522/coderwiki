@@ -1,0 +1,410 @@
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 5: 安全、签名验证与生产部署
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">安全、签名验证与生产部署</h1>
+      <p class="module-subtitle">深入 DocuSeal 的安全机制——电子签名原理、PDF 签名验证、审计日志和生产环境最佳实践</p>
+    </header>
+
+    <!-- ── Screen 1: 电子签名原理 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">电子签名原理：从手写到 PDF 嵌入</h2>
+
+      <p>DocuSeal 的电子签名流程涉及三个关键步骤：手写签名采集、PDF 签名嵌入和签名验证。理解这个流程，就理解了 DocuSeal 的核心技术价值。</p>
+
+      <div class="step-cards">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>签名采集（Signature Pad）</strong>
+            <p>前端使用 Signature Pad（signature_pad JavaScript 库）采集手写签名。签署人在画板上用鼠标或手指绘制签名，数据以 SVG 路径点坐标的形式保存。同时 DocuSeal 支持 Dancing Script 字体生成"手写风格"的文本签名作为备选。</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>PDF 签名嵌入（ProcessSubmitterCompletionJob）</strong>
+            <p>签署完成后，异步任务将签名图片渲染到 PDF 文档的指定位置（基于 fields 中 areas 定义的 x/y/w/h 坐标）。使用 Vips（高性能图像处理库）处理签名图片，确保清晰度和尺寸适配。</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>审计日志生成（EnsureAuditGenerated）</strong>
+            <p>生成一份独立的审计日志 PDF，记录每个签署人的签署时间、IP 地址、User-Agent、地理位置等信息。审计日志附加到 Submission 的 audit_trail 附件中，与签署文档一起提供给管理员。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 2: PDF 签名验证 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">代码翻译：PDF 签名验证 API</h2>
+
+      <p>DocuSeal 提供 <span class="term" data-definition="PDF 签名验证是检查 PDF 文档中嵌入的数字签名是否有效的过程。DocuSeal 使用 HexaPDF 库解析 PDF 签名，验证签名证书、签名时间和签名完整性。同时通过 SHA256 校验和检查文档是否被篡改。">PDF 签名验证</span> API（POST /api/tools/verify），使用 HexaPDF 库解析和验证 PDF 中的数字签名：</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-comment"># app/controllers/api/tools_controller.rb</span></span>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">verify</span></span>
+<span class="code-line">  file = Base64.decode64(</span>
+<span class="code-line">    params[<span class="code-symbol">:file</span>]</span>
+<span class="code-line">  )</span>
+<span class="code-line">  pdf = HexaPDF::Document.<span class="code-keyword">new</span>(</span>
+<span class="code-line">    io: StringIO.<span class="code-keyword">new</span>(file)</span>
+<span class="code-line">  )</span>
+<span class="code-line"></span>
+<span class="code-line">  trusted_certs =</span>
+<span class="code-line">    Accounts.load_trusted_certs(</span>
+<span class="code-line">      current_account</span>
+<span class="code-line">    )</span>
+<span class="code-line"></span>
+<span class="code-line">  is_checksum_found =</span>
+<span class="code-line">    CompletedDocument.exists?(</span>
+<span class="code-line">      sha256: Digest::SHA256</span>
+<span class="code-line">        .digest(file)</span>
+<span class="code-line">        .then { |d|</span>
+<span class="code-line">          Base64.urlsafe_encode64(d)</span>
+<span class="code-line">        }</span>
+<span class="code-line">    )</span>
+<span class="code-line"></span>
+<span class="code-line">  render <span class="code-symbol">json</span>: {</span>
+<span class="code-line">    <span class="code-symbol">checksum_status</span>:</span>
+<span class="code-line">      is_checksum_found ?</span>
+<span class="code-line">        <span class="code-string">'verified'</span> :</span>
+<span class="code-line">        <span class="code-string">'not_found'</span>,</span>
+<span class="code-line">    <span class="code-symbol">signatures</span>:</span>
+<span class="code-line">      pdf.signatures.map { |sig|</span>
+<span class="code-line">        {</span>
+<span class="code-line">          signer_name:</span>
+<span class="code-line">            sig.signer_name,</span>
+<span class="code-line">          signing_time:</span>
+<span class="code-line">            sig.signing_time,</span>
+<span class="code-line">          signature_type:</span>
+<span class="code-line">            sig.signature_type,</span>
+<span class="code-line">          verification_result:</span>
+<span class="code-line">            sig.verify(</span>
+<span class="code-line">              trusted_certs:</span>
+<span class="code-line">            )</span>
+<span class="code-line">        }</span>
+<span class="code-line">      }</span>
+<span class="code-line">  }</span>
+<span class="code-line"><span class="code-keyword">end</span></span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">verify 方法：验证 PDF 文件的签名</p>
+            <p class="tl">Base64 解码传入的 PDF 文件内容</p>
+            <p class="tl">params[:file] 是客户端上传的 Base64 编码的 PDF</p>
+            <p class="tl">使用 HexaPDF 打开 PDF 文档进行解析</p>
+            <p class="tl">StringIO 将二进制数据转为文件流对象</p>
+            <p class="tl">空行</p>
+            <p class="tl">加载账户配置的受信证书——用于验证签名的合法性</p>
+            <p class="tl">从账户设置中加载 CA 证书链</p>
+            <p class="tl">空行</p>
+            <p class="tl">双重验证：检查 PDF 的 SHA256 校验和是否在系统中存在</p>
+            <p class="tl">在 CompletedDocument 表中查找匹配的 sha256 值</p>
+            <p class="tl">计算传入文件的 SHA256 哈希</p>
+            <p class="tl">转为 Base64 URL 安全编码格式</p>
+            <p class="tl">空行</p>
+            <p class="tl">返回 JSON 验证结果</p>
+            <p class="tl">checksum_status：如果在数据库中找到匹配 -> 'verified'，否则 -> 'not_found'</p>
+            <p class="tl">signatures 数组：PDF 中所有签名的详细信息</p>
+            <p class="tl">遍历 PDF 中的每个签名对象</p>
+            <p class="tl">签名信息对象开始</p>
+            <p class="tl">签名者名称（从签名证书中提取）</p>
+            <p class="tl">签名时间（签名发生的时间戳）</p>
+            <p class="tl">签名类型（如 PAdES、PKCS#7 等）</p>
+            <p class="tl">验证结果——使用受信证书验证签名有效性</p>
+            <p class="tl">传入受信证书列表</p>
+            <p class="tl">验证结果包含消息列表（警告、错误等）</p>
+            <p class="tl">签名信息对象结束</p>
+            <p class="tl">signatures 数组结束</p>
+            <p class="tl">JSON 响应结束</p>
+            <p class="tl">verify 方法结束</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 3: 安全机制全景 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">DocuSeal 安全机制全景</h2>
+
+      <p>除了电子签名验证，DocuSeal 还内置了多层安全机制。作为自行部署的开源平台，你可以审计每一行安全相关代码：</p>
+
+      <div class="icon-rows">
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-accent-light); color: var(--color-accent)">&#128273;</div>
+          <div>
+            <strong>认证与授权（Devise + CanCanCan）</strong>
+            <p>用户认证基于 Devise（支持密码登录、邀请制注册）。权限控制使用 CanCanCan，定义了细粒度的 Ability 规则。API 认证使用 Access Token，Webhook 认证使用 HMAC-SHA256 签名。支持 MFA（TOTP 双因素认证）。</p>
+          </div>
+        </div>
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-info-light); color: var(--color-info)">&#128274;</div>
+          <div>
+            <strong>数据加密（ActiveRecord Encryption）</strong>
+            <p>敏感字段使用 Rails 内置的 ActiveRecord Encryption 加密存储。包括 WebhookUrl 的 url、secret、hmac_secret，以及 EncryptedConfig 中的 SMTP 密码、SAML 证书等。密钥通过环境变量管理。</p>
+          </div>
+        </div>
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-success-light); color: var(--color-success)">&#128233;</div>
+          <div>
+            <strong>2FA 签署验证（Email / SMS）</strong>
+            <p>签署人打开链接时可要求邮件验证码或短信验证码验证身份。OTP 验证码通过 EmailVerificationCodes 生成，有时效性。在 SubmitFormController 中通过 require_email_2fa / require_phone_2fa 参数启用。</p>
+          </div>
+        </div>
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-error-light); color: var(--color-error)">&#128196;</div>
+          <div>
+            <strong>审计追踪（Audit Trail）</strong>
+            <p>每次签署完成自动生成审计日志 PDF。记录内容：签署人信息、IP 地址、User-Agent、签署时间、文档 SHA256 校验和。审计日志与签署文档一起归档，满足合规要求。</p>
+          </div>
+        </div>
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-bg-warm); color: var(--color-text-secondary)">&#128737;</div>
+          <div>
+            <strong>签署链接安全</strong>
+            <p>每个签署链接使用 Base58 编码的 14 位随机 slug，不可猜测。支持链接过期设置（expire_at）。链接分享模板还支持额外的 2FA 验证。拒绝（declined）和已完成（completed）的链接不可再修改。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 4: 生产部署最佳实践 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">生产部署最佳实践</h2>
+
+      <p>将 DocuSeal 部署到生产环境时，需要关注以下几个关键配置：</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-comment"># docker-compose.yml 生产配置</span></span>
+<span class="code-line"><span class="code-keyword">services</span>:</span>
+<span class="code-line">  <span class="code-property">app</span>:</span>
+<span class="code-line">    image: docuseal/docuseal:latest</span>
+<span class="code-line">    <span class="code-property">environment</span>:</span>
+<span class="code-line">      - <span class="code-string">DATABASE_URL=</span></span>
+<span class="code-line">        <span class="code-string">postgresql://user:pass@postgres/db</span></span>
+<span class="code-line">      - <span class="code-string">FORCE_SSL=${HOST}</span></span>
+<span class="code-line">    <span class="code-property">volumes</span>:</span>
+<span class="code-line">      - ./docuseal:/data/docuseal</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-property">postgres</span>:</span>
+<span class="code-line">    image: postgres:<span class="code-number">18</span></span>
+<span class="code-line">    <span class="code-property">environment</span>:</span>
+<span class="code-line">      POSTGRES_USER: docuseal</span>
+<span class="code-line">      POSTGRES_PASSWORD:</span>
+<span class="code-line">        <span class="code-string">${DB_PASSWORD}</span></span>
+<span class="code-line">    <span class="code-property">volumes</span>:</span>
+<span class="code-line">      - pg_data:/var/lib/postgresql</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-property">caddy</span>:</span>
+<span class="code-line">    image: caddy:latest</span>
+<span class="code-line">    <span class="code-property">command</span>:</span>
+<span class="code-line">      caddy reverse-proxy</span>
+<span class="code-line">        --from $HOST --to app:3000</span>
+<span class="code-line">    <span class="code-property">ports</span>:</span>
+<span class="code-line">      - <span class="code-number">80</span>:<span class="code-number">80</span></span>
+<span class="code-line">      - <span class="code-number">443</span>:<span class="code-number">443</span></span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">docker-compose.yml 生产环境配置</p>
+            <p class="tl">app 服务：DocuSeal 主应用</p>
+            <p class="tl">使用官方最新镜像（生产环境建议锁定版本号）</p>
+            <p class="tl">环境变量配置</p>
+            <p class="tl">DATABASE_URL：必须使用 PostgreSQL（不支持 SQLite 生产环境）</p>
+            <p class="tl">FORCE_SSL：设置为你的域名，强制 HTTPS 重定向</p>
+            <p class="tl">数据持久化：挂载本地目录到容器 /data/docuseal</p>
+            <p class="tl">空行</p>
+            <p class="tl">postgres 服务：PostgreSQL 数据库</p>
+            <p class="tl">使用 PostgreSQL 18 版本</p>
+            <p class="tl">数据库用户名和密码配置</p>
+            <p class="tl">密码从环境变量读取（不要硬编码在配置文件中）</p>
+            <p class="tl">数据库数据持久化挂载</p>
+            <p class="tl">空行</p>
+            <p class="tl">caddy 服务：自动 HTTPS 反向代理</p>
+            <p class="tl">使用 Caddy 最新版</p>
+            <p class="tl">反向代理配置：从你的域名转发到 app:3000</p>
+            <p class="tl">开放 80（HTTP）和 443（HTTPS）端口</p>
+            <p class="tl">Caddy 自动申请和续期 Let's Encrypt SSL 证书</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 5: 环境变量与文件存储 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">关键环境变量与文件存储配置</h2>
+
+      <p>DocuSeal 通过环境变量控制关键配置。以下是最重要的配置项：</p>
+
+      <div class="badge-list">
+        <div class="badge-item">
+          <code class="badge-code">DATABASE_URL</code>
+          <span class="badge-desc">数据库连接字符串。默认 SQLite（适合开发），生产环境推荐 postgresql://user:pass@host/dbname。支持 PostgreSQL 和 MySQL。</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">FORCE_SSL</code>
+          <span class="badge-desc">设置为域名后强制 HTTPS。所有 HTTP 请求自动 301 重定向到 HTTPS。</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">ACTIVE_STORAGE_SERVICE</code>
+          <span class="badge-desc">文件存储后端。默认 local（本地磁盘），可配置 amazon（AWS S3）、google（GCS）、azure（Azure Blob）、或 mirror（多后端冗余）。</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">SMTP_* / EMAIL_HOST</code>
+          <span class="badge-desc">邮件发送配置。DocuSeal 使用 ActionMailer 发送邮件，配置 SMTP 服务器地址、端口、认证信息。EMAIL_HOST 用于生成邮件中的链接。</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">RAILS_ENCRYPTOR_KEY</code>
+          <span class="badge-desc">ActiveRecord Encryption 的主密钥。用于加密 Webhook URL、SMTP 密码等敏感字段。丢失此密钥将无法解密已存储的敏感数据。</span>
+        </div>
+      </div>
+
+      <div class="callout callout-warning">
+        <div class="callout-icon">&#9888;</div>
+        <div class="callout-content">
+          <strong class="callout-title">数据安全提醒</strong>
+          <p>自行部署 DocuSeal 时，务必妥善保管 RAILS_ENCRYPTOR_KEY 和数据库密码。建议使用密钥管理服务（如 AWS KMS、HashiCorp Vault）存储加密密钥，而非直接写在 .env 文件中。数据库和文件存储（/data/docuseal）都需要定期备份。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 6: 嵌入式签署 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">嵌入式签署：把签署功能嵌入你的应用</h2>
+
+      <p>DocuSeal 支持将签署表单嵌入到你的网站或应用中。这对于 SaaS 产品特别有用——用户无需离开你的网站就能完成签署。实现方式是通过 <span class="term" data-definition="嵌入式签署（Embedded Signing）是通过 JavaScript SDK 将 DocuSeal 的签署表单嵌入到第三方网站的技术。使用 docuseal.js 脚本或 React/Vue/Angular 组件库，通过 /api/submissions/init 创建签署会话，获得嵌入 token 后渲染签署表单。">Embedded Signing</span> SDK：</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-comment">&lt;!-- 嵌入式签署 HTML 示例 --&gt;</span></span>
+<span class="code-line">&lt;<span class="code-tag">script</span></span>
+<span class="code-line">  <span class="code-attr">src</span>=<span class="code-string">"https://sign.example.com/js/embed.js"</span></span>
+<span class="code-line">  <span class="code-attr">data-token</span>=<span class="code-string">"SUBMITTER_TOKEN"</span></span>
+<span class="code-line">  <span class="code-attr">data-slug</span>=<span class="code-string">"SUBMITTER_SLUG"</span>&gt;</span>
+<span class="code-line">&lt;/<span class="code-tag">script</span>&gt;</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 后端：创建嵌入式签署会话</span></span>
+<span class="code-line">POST /api/submissions/init</span>
+<span class="code-line">{</span>
+<span class="code-line">  <span class="code-property">"template_id"</span>: <span class="code-number">42</span>,</span>
+<span class="code-line">  <span class="code-property">"send_email"</span>: <span class="code-keyword">false</span>,</span>
+<span class="code-line">  <span class="code-property">"submitters"</span>: [{</span>
+<span class="code-line">    <span class="code-property">"email"</span>: <span class="code-string">"user@example.com"</span>,</span>
+<span class="code-line">    <span class="code-property">"embedded"</span>: <span class="code-keyword">true</span></span>
+<span class="code-line">  }]</span>
+<span class="code-line">}</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">嵌入式签署的前端实现非常简单</p>
+            <p class="tl">引入 DocuSeal 的嵌入脚本（从你的实例域名加载）</p>
+            <p class="tl">data-token：签署人的认证令牌（从 API 获取）</p>
+            <p class="tl">data-slug：签署人的唯一链接标识</p>
+            <p class="tl">脚本会自动在页面中渲染签署表单</p>
+            <p class="tl">空行</p>
+            <p class="tl">后端需要先调用 /api/submissions/init 创建嵌入式签署会话</p>
+            <p class="tl">注意：这里用的是 /init 端点，不是普通的 /submissions</p>
+            <p class="tl">template_id 指定使用的模板</p>
+            <p class="tl">send_email: false——不发送邮件（因为签署人在你的网站内完成）</p>
+            <p class="tl">签署人配置</p>
+            <p class="tl">签署人邮箱</p>
+            <p class="tl">embedded: true 标记为嵌入式签署模式</p>
+            <p class="tl">响应返回 submitters 数组，每个包含 token 和 slug</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 7: 测验 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">检验你的理解</h2>
+
+      <div class="quiz-container" id="quiz-module5">
+        <div class="quiz-question-block"
+             data-correct="option-b"
+             data-explanation-right="正确！verify 方法使用双重验证：1) 使用 HexaPDF 解析 PDF 内嵌签名，验证签名证书和完整性；2) 计算文件 SHA256 哈希，与 CompletedDocument 表中的记录比对，确认文档未被篡改。"
+             data-explanation-wrong="回忆一下 verify 方法的实现。它做了几层验证？一层是 PDF 内嵌签名验证，另一层是什么？">
+          <h3 class="quiz-question">POST /api/tools/verify 接口做了哪两层验证？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>验证 PDF 格式正确性 + 检查文件大小是否合法</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>验证 PDF 内嵌数字签名 + SHA256 校验和比对数据库记录</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>验证签署人邮箱格式 + 检查签署时间是否在有效期内</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-a"
+             data-explanation-right="正确！敏感字段使用 ActiveRecord Encryption 加密存储。包括 Webhook URL、SMTP 密码、HMAC 密钥等。加密密钥通过 RAILS_ENCRYPTOR_KEY 环境变量管理，数据库中存储的是密文。"
+             data-explanation-wrong="想想 WebhookUrl 模型中的 encrypts :url, :secret, :hmac_secret。这些字段在数据库中是如何存储的？">
+          <h3 class="quiz-question">WebhookUrl 模型中的 url、secret、hmac_secret 字段在数据库中如何存储？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>使用 ActiveRecord Encryption 加密存储（密文）</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>明文存储，依赖数据库自身的访问控制</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>使用 Base64 编码存储（可逆编码，非加密）</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-c"
+             data-explanation-right="正确！嵌入式签署通过 /api/submissions/init 端点创建会话，设置 send_email: false 和 embedded: true。前端使用 docuseal.js 脚本渲染签署表单。用户无需离开你的网站即可完成签署。"
+             data-explanation-wrong="回忆一下嵌入式签署的实现方式。前端用的是什么脚本？后端调用的 API 端点和普通签署有什么区别？">
+          <h3 class="quiz-question">如何实现嵌入式签署（让用户在你的网站内完成签署）？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>使用 iframe 嵌入签署链接页面，设置 allow-same-origin 权限</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>复制 DocuSeal 的 Vue.js 组件到你的项目中，直接集成</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>调用 /api/submissions/init 获取 token，使用 docuseal.js 脚本渲染签署表单</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">重新作答</button>
+      </div>
+    </section>
+
+  </div>
+</section>

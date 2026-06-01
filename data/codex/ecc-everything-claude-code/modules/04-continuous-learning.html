@@ -1,0 +1,465 @@
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 4: 持续学习引擎 — Continuous Learning Engine
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+
+  <div class="module-content">
+
+    <!-- ── HEADER ──────────────────────────────────────────────── -->
+    <div class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h2 class="module-title">持续学习引擎</h2>
+      <p class="module-subtitle">想象你在健身房办了一张会员卡 —— 每次锻炼（会话）都在积累肌肉记忆（本能）。去的次数越多，力量越强。置信度分数就像你的个人记录 tracker，精确衡量每一次进步。</p>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         SCREEN 1: Why Continuous Learning Matters
+         ══════════════════════════════════════════════════════════ -->
+    <div class="screen animate-in">
+
+      <h3 class="screen-heading">为什么持续学习很重要？</h3>
+
+      <p>
+        普通的 Claude Code 每次启动都是一张白纸 —— 没有任何记忆，不认识你，不了解你的项目。
+      </p>
+
+      <p>
+        ECC 的 <span class="term" data-definition="Instinct（本能）：ECC 从历史会话中自动提取并持久保存的行为模式和工作偏好，比如'这个用户喜欢 TypeScript strict 模式'。每次会话结束时会更新，下次启动时自动加载。">instinct</span> 系统让 Claude 从你的每一次交互中学习，越用越懂你。
+      </p>
+
+      <div class="pattern-cards stagger-children">
+
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-accent-light);">
+            <span style="color: var(--color-accent);">🎨</span>
+          </div>
+          <div class="pattern-title">代码风格偏好</div>
+          <p class="pattern-desc">学习你的格式化选择 —— 缩进用 tab 还是空格、分号加不加、单引号还是双引号。ECC 的 <span class="term" data-definition="Pattern Recognition（模式识别）：从大量数据中自动发现重复出现的规律和特征。ECC 通过分析你的历史代码来识别编码偏好。">pattern recognition</span> 让它自动适配你的风格。</p>
+        </div>
+
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-info-light);">
+            <span style="color: var(--color-info);">🏗️</span>
+          </div>
+          <div class="pattern-title">项目结构认知</div>
+          <p class="pattern-desc">记住你的架构决策 —— 组件放哪个目录、状态管理用什么方案、API 路由怎么组织。就像健身教练了解你的身体结构一样。</p>
+        </div>
+
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: #FEF3E2;">
+            <span style="color: #E5A100;">🔍</span>
+          </div>
+          <div class="pattern-title">错误模式识别</div>
+          <p class="pattern-desc">更快发现重复出现的问题。如果你总是忘记处理某个 <span class="term" data-definition="Edge Case（边界情况）：在编程中指罕见但可能引发 bug 的特殊输入或状态，如空值、超大数字、并发冲突等。">edge case</span>，ECC 会主动提醒你。</p>
+        </div>
+
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-success-light);">
+            <span style="color: var(--color-success);">🛠️</span>
+          </div>
+          <div class="pattern-title">工具使用习惯</div>
+          <p class="pattern-desc">优化工具选择 —— 你更喜欢用 <code>grep</code> 还是 <code>find</code>？习惯先跑测试还是先写代码？ECC 会学着像你一样思考和行动。</p>
+        </div>
+
+      </div>
+
+      <!-- Aha! Callout -->
+      <div class="callout callout-accent animate-in">
+        <span class="callout-icon">💡</span>
+        <div class="callout-content">
+          <span class="callout-title">Aha! — 普通 AI 像金鱼</span>
+          <p>
+            普通 AI 像金鱼，每次对话都是全新的。ECC 让 AI 像你的私人教练，记得你上次练了什么、哪些动作做得好、哪里还需要加强。
+          </p>
+          <p style="margin-top: var(--space-2);">
+            关键区别在于 <span class="term" data-definition="Feedback Loop（反馈循环）：系统根据自身行为的输出结果来调整未来行为的持续循环。用户确认 → 置信度上升 → 下次自动应用 → 再次确认 → 置信度继续上升。">feedback loop</span>：每次你确认或纠正 ECC 的行为，它都在学习。这就是 <span class="term" data-definition="Machine Learning（机器学习）：让计算机从数据中自动学习规律并改进性能的技术。ECC 的 instinct 系统就是一种简化的机器学习：从历史行为中提取模式，不断优化决策。">machine learning</span> 思想在开发工具中的落地。
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         SCREEN 2: Instinct System — Code Translation
+         ══════════════════════════════════════════════════════════ -->
+    <div class="screen animate-in">
+
+      <h3 class="screen-heading">Instinct 系统 —— 读代码，看"肌肉记忆"怎么存</h3>
+
+      <p>
+        每个 <span class="term" data-definition="Instinct（本能）：ECC 中的一条学习记录，包含模式名称、置信度、数据来源、最后更新时间和适用范围。">instinct</span> 都是一个结构化对象。左边是代码，右边是它在"记录什么"：
+      </p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">javascript</span>
+<pre><code><span class="code-line"><span class="code-keyword">const</span> instinct = {</span>
+<span class="code-line">  pattern: <span class="code-string">"prefer-typescript-strict-mode"</span>,</span>
+<span class="code-line">  confidence: <span class="code-number">0.92</span>,</span>
+<span class="code-line">  source: <span class="code-string">"observed-across-8-sessions"</span>,</span>
+<span class="code-line">  lastUpdated: <span class="code-string">"2024-01-15"</span>,</span>
+<span class="code-line">  appliesTo: [<span class="code-string">"new-files"</span>, <span class="code-string">"refactoring"</span>]</span>
+<span class="code-line">};</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-keyword">if</span> (instinct.confidence >= confidenceThreshold) {</span>
+<span class="code-line">  <span class="code-function">applyInstinct</span>(instinct);</span>
+<span class="code-line">}</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文解读</span>
+          <div class="translation-lines">
+            <div class="tl"><strong>pattern</strong> — 模式名称：这个用户偏好 TypeScript 严格模式</div>
+            <div class="tl"><strong>confidence</strong> — <span class="term" data-definition="Confidence Score（置信度分数）：0 到 1 之间的数值，表示 ECC 对某个学习模式的确定程度。0.92 意味着 92% 的把握。越高越可能自动应用。">confidence score</span> = 0.92，即 92% 的把握。经过 8 次会话观察得出。</div>
+            <div class="tl"><strong>source</strong> — 数据来源：在 8 个会话中反复观察到这个偏好</div>
+            <div class="tl"><strong>lastUpdated</strong> — 最后更新时间，确保使用最新数据</div>
+            <div class="tl"><strong>appliesTo</strong> — 适用范围：创建新文件和重构代码时才生效</div>
+            <div class="tl">&nbsp;</div>
+            <div class="tl">如果置信度 >= <span class="term" data-definition="Threshold（阈值）：一个预设的判断标准线。只有 confidence score 超过这个阈值，instinct 才会被自动应用，防止低可信度的模式干扰正常工作。">threshold</span> 阈值...</div>
+            <div class="tl">就自动应用这个 instinct —— 像肌肉记忆一样，不需要你再次确认。</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-info animate-in">
+        <span class="callout-icon">🔍</span>
+        <div class="callout-content">
+          <span class="callout-title">为什么用 0.92 而不是 100%？</span>
+          <p>
+            置信度永远不会到 1.0，因为人的偏好可能随时改变。0.92 代表"我非常确定，但留了 8% 的余地"。如果连续几次你开始用 JavaScript 而不是 TypeScript，置信度会自动下降。这就是 <span class="term" data-definition="Heuristics（启发式规则）：基于经验总结的简化判断规则，不需要完美推理就能给出"足够好"的决策。ECC 的 confidence score 阈值就是一种启发式规则。">heuristics</span> 的智慧 —— 不追求绝对正确，追求持续适应。
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         SCREEN 3: Learning Loop — Group Chat Animation
+         ══════════════════════════════════════════════════════════ -->
+    <div class="screen animate-in">
+
+      <h3 class="screen-heading">学习闭环 —— 看一次完整的"肌肉记忆"形成过程</h3>
+
+      <p>
+        点击下面的按钮，看 Instinct Engine 如何在实时对话中学习你的偏好。注意置信度是如何一步步提升的。
+      </p>
+
+      <!-- Group Chat Window -->
+      <div class="chat-window" id="chat-module4">
+
+        <div class="chat-messages">
+
+          <!-- Message 1: User -->
+          <div class="chat-message" data-sender="user" style="display: none;">
+            <div class="chat-avatar" style="background: var(--color-actor-1);">U</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-1);">用户</span>
+              <p>帮我创建一个新组件。</p>
+            </div>
+          </div>
+
+          <!-- Message 2: Instinct Engine -->
+          <div class="chat-message" data-sender="engine" style="display: none;">
+            <div class="chat-avatar" style="background: var(--color-actor-5);">IE</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-5);">Instinct Engine</span>
+              <p>检测到用户偏好 React 函数组件 + TypeScript strict 模式，<span class="term" data-definition="Confidence Score（置信度分数）：0 到 1 之间的数值，表示 ECC 对某个学习模式的确定程度。">置信度</span> 92%。</p>
+            </div>
+          </div>
+
+          <!-- Message 3: Agent -->
+          <div class="chat-message" data-sender="agent" style="display: none;">
+            <div class="chat-avatar" style="background: var(--color-actor-1);">A</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-1);">Agent</span>
+              <p>好的，我会用 React FC + strict TS 来生成。</p>
+            </div>
+          </div>
+
+          <!-- Message 4: Instinct Engine -->
+          <div class="chat-message" data-sender="engine" style="display: none;">
+            <div class="chat-avatar" style="background: var(--color-actor-5);">IE</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-5);">Instinct Engine</span>
+              <p>已记录：用户确认了这次选择。置信度提升到 <strong>94%</strong>。模式写入 <span class="term" data-definition="Instinct DB（本能数据库）：ECC 用于持久化存储所有 instinct 记录的存储层，通常使用 JSON 文件。每次 session-end 时更新，session-start 时加载。">instinct DB</span>。</p>
+            </div>
+          </div>
+
+          <!-- Message 5: User -->
+          <div class="chat-message" data-sender="user" style="display: none;">
+            <div class="chat-avatar" style="background: var(--color-actor-1);">U</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-1);">用户</span>
+              <p>完美，继续保持这个风格。</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Typing indicator -->
+        <div class="chat-typing" style="display: none;">
+          <div class="chat-avatar" id="chat-module4-typing-avatar" style="background: var(--color-actor-5);">IE</div>
+          <div class="chat-typing-dots">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
+        </div>
+
+        <!-- Chat Controls -->
+        <div class="chat-controls">
+          <button class="btn btn-primary chat-next-btn">下一条</button>
+          <button class="btn chat-all-btn">全部播放</button>
+          <button class="btn chat-reset-btn">重置</button>
+          <span class="chat-progress">0 / 5 messages</span>
+        </div>
+
+      </div>
+
+      <div class="callout callout-accent animate-in">
+        <span class="callout-icon">💡</span>
+        <div class="callout-content">
+          <span class="callout-title">Aha! — 置信度就是这样一点点涨上去的</span>
+          <p>
+            注意第 4 条消息：你确认了一次选择，置信度就从 92% 涨到 94%。反过来，如果你说"不对，这次用 JavaScript"，它会立刻降到 88%。这就是 <span class="term" data-definition="Feedback Loop（反馈循环）：系统根据自身行为的输出结果来调整未来行为的持续循环。用户确认 → 置信度上升 → 下次自动应用 → 再次确认 → 置信度继续上升。">feedback loop</span> 的核心 —— 你的每一次反馈都在调整 AI 的"肌肉记忆"。
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         SCREEN 4: Confidence Score Visualization — Layer Toggle
+         ══════════════════════════════════════════════════════════ -->
+    <div class="screen animate-in">
+
+      <h3 class="screen-heading">置信度可视化 —— 三层透视</h3>
+
+      <p>
+        点击不同图层，从不同角度观察 instinct 数据。就像健身 app 里的不同数据面板 —— 原始记录、分布统计、应用效果。
+      </p>
+
+      <div class="layer-demo animate-in">
+        <div class="layer-tabs">
+          <button class="layer-tab active" onclick="showLayer('layer-raw', this)">原始数据</button>
+          <button class="layer-tab" onclick="showLayer('layer-dist', this)">置信度分布</button>
+          <button class="layer-tab" onclick="showLayer('layer-effect', this)">应用效果</button>
+        </div>
+        <div class="layer-viewport">
+
+          <!-- Layer 1: Raw Data -->
+          <div class="layer" id="layer-raw" style="display: block; padding: var(--space-6);">
+            <div style="font-family: var(--font-mono); font-size: var(--text-sm); line-height: 1.8; color: var(--color-text);">
+              <div style="padding: var(--space-2) 0; border-bottom: 1px solid var(--color-border-light);">
+                <span style="color: var(--color-accent);">pattern:</span> prefer-typescript-strict &nbsp;|&nbsp;
+                <span style="color: var(--color-success);">confidence:</span> 0.92 &nbsp;|&nbsp;
+                <span style="color: var(--color-text-muted);">sessions: 8</span>
+              </div>
+              <div style="padding: var(--space-2) 0; border-bottom: 1px solid var(--color-border-light);">
+                <span style="color: var(--color-accent);">pattern:</span> use-react-functional-components &nbsp;|&nbsp;
+                <span style="color: var(--color-success);">confidence:</span> 0.88 &nbsp;|&nbsp;
+                <span style="color: var(--color-text-muted);">sessions: 6</span>
+              </div>
+              <div style="padding: var(--space-2) 0; border-bottom: 1px solid var(--color-border-light);">
+                <span style="color: var(--color-accent);">pattern:</span> prefer-arrow-functions &nbsp;|&nbsp;
+                <span style="color: var(--color-success);">confidence:</span> 0.95 &nbsp;|&nbsp;
+                <span style="color: var(--color-text-muted);">sessions: 12</span>
+              </div>
+              <div style="padding: var(--space-2) 0; border-bottom: 1px solid var(--color-border-light);">
+                <span style="color: var(--color-accent);">pattern:</span> eslint-before-commit &nbsp;|&nbsp;
+                <span style="color: var(--color-success);">confidence:</span> 0.75 &nbsp;|&nbsp;
+                <span style="color: var(--color-text-muted);">sessions: 4</span>
+              </div>
+              <div style="padding: var(--space-2) 0; border-bottom: 1px solid var(--color-border-light);">
+                <span style="color: var(--color-accent);">pattern:</span> test-first-approach &nbsp;|&nbsp;
+                <span style="color: var(--color-success);">confidence:</span> 0.45 &nbsp;|&nbsp;
+                <span style="color: var(--color-text-muted);">sessions: 2</span>
+              </div>
+              <div style="padding: var(--space-2) 0;">
+                <span style="color: var(--color-accent);">pattern:</span> prefer-tailwind-css &nbsp;|&nbsp;
+                <span style="color: var(--color-success);">confidence:</span> 0.60 &nbsp;|&nbsp;
+                <span style="color: var(--color-text-muted);">sessions: 3</span>
+              </div>
+            </div>
+            <div class="layer-description">原始 instinct 条目 —— 每个 <span class="term" data-definition="Instinct（本能）：ECC 中的一条学习记录，包含模式名称、置信度、观察来源和适用范围。">instinct</span> 记录了模式名称、置信度和观察次数。</div>
+          </div>
+
+          <!-- Layer 2: Confidence Distribution -->
+          <div class="layer" id="layer-dist" style="display: none; padding: var(--space-6);">
+            <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+              <div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-1);">
+                  <span style="font-weight: 600; color: var(--color-success);">高置信度 (>= 0.8) — 自动应用</span>
+                  <span style="font-family: var(--font-mono); color: var(--color-success);">3 条</span>
+                </div>
+                <div style="background: var(--color-bg); border-radius: var(--radius-sm); height: 12px; overflow: hidden;">
+                  <div style="background: var(--color-success); width: 75%; height: 100%; border-radius: var(--radius-sm);"></div>
+                </div>
+                <div style="font-size: var(--text-xs); color: var(--color-text-muted); margin-top: var(--space-1);">
+                  prefer-typescript-strict (0.92) · use-react-functional-components (0.88) · prefer-arrow-functions (0.95)
+                </div>
+              </div>
+              <div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-1);">
+                  <span style="font-weight: 600; color: #E5A100;">中等置信度 (0.5-0.79) — 待确认</span>
+                  <span style="font-family: var(--font-mono); color: #E5A100;">2 条</span>
+                </div>
+                <div style="background: var(--color-bg); border-radius: var(--radius-sm); height: 12px; overflow: hidden;">
+                  <div style="background: #E5A100; width: 40%; height: 100%; border-radius: var(--radius-sm);"></div>
+                </div>
+                <div style="font-size: var(--text-xs); color: var(--color-text-muted); margin-top: var(--space-1);">
+                  eslint-before-commit (0.75) · prefer-tailwind-css (0.60)
+                </div>
+              </div>
+              <div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-1);">
+                  <span style="font-weight: 600; color: var(--color-text-muted);">低置信度 (< 0.5) — 观察中</span>
+                  <span style="font-family: var(--font-mono); color: var(--color-text-muted);">1 条</span>
+                </div>
+                <div style="background: var(--color-bg); border-radius: var(--radius-sm); height: 12px; overflow: hidden;">
+                  <div style="background: var(--color-text-muted); width: 15%; height: 100%; border-radius: var(--radius-sm);"></div>
+                </div>
+                <div style="font-size: var(--text-xs); color: var(--color-text-muted); margin-top: var(--space-1);">
+                  test-first-approach (0.45)
+                </div>
+              </div>
+            </div>
+            <div class="layer-description">置信度分布 —— 只有超过 <span class="term" data-definition="Threshold（阈值）：预设的判断标准线，通常设为 0.8。超过阈值的 instinct 才会被自动应用。">threshold</span> 的模式才会被自动应用。中等的需要确认，低置信度的还在观察。</div>
+          </div>
+
+          <!-- Layer 3: Applied Effects -->
+          <div class="layer" id="layer-effect" style="display: none; padding: var(--space-6);">
+            <div style="display: grid; gap: var(--space-3);">
+              <div style="display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); background: var(--color-success-light); border-radius: var(--radius-sm);">
+                <span style="font-size: 1.2em;">✅</span>
+                <div>
+                  <strong style="color: var(--color-success);">prefer-arrow-functions (0.95)</strong>
+                  <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">已自动应用 23 次 · 上次应用于 2 小时前 · 用户从未纠正</div>
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); background: var(--color-success-light); border-radius: var(--radius-sm);">
+                <span style="font-size: 1.2em;">✅</span>
+                <div>
+                  <strong style="color: var(--color-success);">prefer-typescript-strict (0.92)</strong>
+                  <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">已自动应用 18 次 · 上次应用于 30 分钟前 · 用户纠正 1 次后已修正</div>
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); background: var(--color-success-light); border-radius: var(--radius-sm);">
+                <span style="font-size: 1.2em;">✅</span>
+                <div>
+                  <strong style="color: var(--color-success);">use-react-functional-components (0.88)</strong>
+                  <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">已自动应用 15 次 · 上次应用于 1 天前 · <span class="term" data-definition="Scoring（评分）：ECC 根据 instinct 的应用次数、用户反馈和纠正率计算的综合效果评分。评分越高说明该 instinct 越可靠。">scoring</span> 优秀</div>
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); background: #FEF3E2; border-radius: var(--radius-sm);">
+                <span style="font-size: 1.2em;">⏳</span>
+                <div>
+                  <strong style="color: #E5A100;">eslint-before-commit (0.75)</strong>
+                  <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">等待置信度达到 0.8 阈值后自动激活 · 还需要 1-2 次确认</div>
+                </div>
+              </div>
+            </div>
+            <div class="layer-description">应用效果 —— 展示哪些 instinct 正在主动影响 AI 的行为。已激活的（绿色）会在对应场景下自动生效，等待中的（黄色）需要更多数据确认。</div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         SCREEN 5: Quiz
+         ══════════════════════════════════════════════════════════ -->
+    <div class="screen animate-in">
+
+      <h3 class="screen-heading">检验你的理解</h3>
+
+      <div class="quiz-container" id="quiz-module4">
+
+        <!-- Question 1 -->
+        <div class="quiz-question-block"
+             data-correct="b"
+             data-explanation-right="对。ECC 的 instinct 不只是'记住过去'，它通过 confidence score 精确衡量学习到的每个模式的可靠程度。只有经过反复验证的模式才会被自动应用，而且会根据你的反馈持续调整。普通 AI 记忆只是简单回放，ECC 的 instinct 是动态的、量化的、可进化的。"
+             data-explanation-wrong="关键区别在于'量化'和'自适应'。ECC 不只是记住你做过什么，而是用 confidence score 衡量'我有多确定你下次还会这么做'，并根据你的反馈动态调整。">
+
+          <div class="quiz-question">
+            ECC 的 instincts 系统和普通的 AI 记忆有什么不同？
+          </div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>instincts 系统可以记住更多的对话内容，存储容量更大</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>instincts 用 confidence score 量化每个学习模式的可靠程度，并根据反馈动态调整</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>instincts 和 AI 记忆本质相同，只是名字不同</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="quiz-question-block"
+             data-correct="a"
+             data-explanation-right="对。置信度的提升来自 feedback loop —— 用户多次确认同一个行为模式，每次确认都会让 confidence score 上升。8 次会话的观察加上多次确认，足以让一个 instinct 从 0.5（不确定）涨到 0.9（高度可信）。"
+             data-explanation-wrong="想一想 feedback loop 的机制。置信度从 0.5 涨到 0.9，需要的是反复的正向反馈 —— 用户多次确认'这样做是对的'。单次会话或随机数据做不到这一点。">
+
+          <div class="quiz-question">
+            一个 instinct 的置信度从 0.5 升到 0.9，最可能的原因是什么？
+          </div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>用户在多次会话中反复确认了同一个行为偏好</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>系统自动把所有 instinct 的置信度设为 0.9 以上</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>置信度只和时间有关，用得越久就越高</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="quiz-question-block"
+             data-correct="c"
+             data-explanation-right="对。设置 threshold 是为了防止'误伤'—— 低置信度的模式可能是偶然行为，不是真正的偏好。如果直接应用，可能会帮倒忙（比如你偶尔用了一次 JavaScript，ECC 就以为你以后都不用 TypeScript 了）。阈值机制确保只有经过充分验证的模式才自动生效。"
+             data-explanation-wrong="想想'宁可错过，不可用错'的原则。低置信度的模式可能是偶然行为，不是真正的偏好。如果直接应用，可能会'自作主张'做出错误的选择。threshold 就是那道质量关卡。">
+
+          <div class="quiz-question">
+            为什么 ECC 要设置置信度阈值，而不是直接应用所有学到的模式？
+          </div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>因为应用太多模式会拖慢系统运行速度</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>因为 <span class="term" data-definition="Database（数据库）：用于持久化存储结构化数据的系统。ECC 使用 JSON 文件作为轻量级数据库来存储 instinct 记录。">database</span> 存储空间有限，只能保存高置信度的模式</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>低置信度的模式可能是偶然行为，直接应用可能会做出错误选择</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重新作答</button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>

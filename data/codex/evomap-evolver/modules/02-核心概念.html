@@ -1,0 +1,253 @@
+<section class="module" id="module-2" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number" style="color: var(--color-accent)">02</span>
+      <h1 class="module-title" style="color: var(--color-accent)">核心概念</h1>
+      <p class="module-subtitle" style="color: var(--color-text-secondary)">深入理解进化算法、适应度函数与种群管理</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">进化算法如何工作？</h2>
+        <p>
+          想象你在养一盆花。你播下很多种子（<span class="term" data-definition="种群（Population）是一组候选解的集合，就像播下一整把种子，每一颗都代表一种可能的解决方案。">种群</span>），
+          让它们生长。有些长得好，有些长得差。你挑出最好的那些（<span class="term" data-definition="选择（Selection）是根据适应度评估来决定哪些个体能存活并繁殖的过程，就像挑选最强壮的植物来继续培育。">选择</span>），
+          用它们来培育下一代。这就是进化算法的核心思想。
+        </p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-keyword">class</span> <span class="code-function">Evolver</span> {
+  <span class="code-function">constructor</span>(config) {
+    <span class="code-keyword">this</span>.populationSize = config.populationSize;
+    <span class="code-keyword">this</span>.mutationRate = config.mutationRate;
+    <span class="code-keyword">this</span>.crossoverRate = config.crossoverRate;
+    <span class="code-keyword">this</span>.generations = <span class="code-number">0</span>;
+  }
+
+  <span class="code-function">run</span>(maxGenerations) {
+    <span class="code-keyword">let</span> population = <span class="code-keyword">this</span>.<span class="code-function">initialize</span>();
+    <span class="code-keyword">for</span> (<span class="code-keyword">let</span> i = <span class="code-number">0</span>; i &lt; maxGenerations; i++) {
+      <span class="code-keyword">const</span> fitness = <span class="code-keyword">this</span>.<span class="code-function">evaluate</span>(population);
+      population = <span class="code-keyword">this</span>.<span class="code-function">select</span>(population, fitness);
+      population = <span class="code-keyword">this</span>.<span class="code-function">crossover</span>(population);
+      population = <span class="code-keyword">this</span>.<span class="code-function">mutate</span>(population);
+      <span class="code-keyword">this</span>.generations++;
+    }
+    <span class="code-keyword">return</span> <span class="code-keyword">this</span>.<span class="code-function">getBest</span>(population);
+  }
+}
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">定义一个叫 Evolver 的"蓝图"（类），它管理整个进化过程...</p>
+              <p class="tl">设置种群大小、变异率和交叉率——就像设定花园的规模和培育策略...</p>
+              <p class="tl">用代数计数器跟踪进化进展...</p>
+              <p class="tl">开始进化：先生成初始种群（播下种子）...</p>
+              <p class="tl">循环 maxGenerations 次：评估、选择、交叉、变异...</p>
+              <p class="tl">评估每个个体的适应度（判断哪些植物长得最好）...</p>
+              <p class="tl">选择最优个体来繁殖（留下最强壮的种子）...</p>
+              <p class="tl">交叉：把两个优秀个体的特征组合起来（杂交）...</p>
+              <p class="tl">变异：随机改变一些特征（自然突变）...</p>
+              <p class="tl">最终返回最优个体（最好的那棵植物）...</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键洞察</strong>
+            <p>进化算法的美妙之处在于：你不需要知道问题的精确解法，只需要能判断一个解"好不好"（适应度函数）。这就像你不需要知道基因工程，也能通过选种培育出更好的花朵。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">进化流程</h2>
+        <p>下面展示了进化算法从初始化到输出的完整数据流：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"初始化：随机生成一组候选解（种群）"},
+          {"highlight":"flow-actor-1","label":"评估每个候选解的适应度","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-2","label":"根据适应度选择优秀个体"},
+          {"highlight":"flow-actor-2","label":"交叉：组合两个优秀个体的特征","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-3","label":"变异：随机改变部分特征"},
+          {"highlight":"flow-actor-3","label":"生成新一代种群，重复迭代","packet":true,"from":"actor-3","to":"actor-1"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon" style="background: var(--color-actor-1)">🌱</div>
+              <span>初始化 & 评估</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon" style="background: var(--color-actor-2)">🔬</div>
+              <span>选择 & 交叉</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon" style="background: var(--color-actor-3)">🧬</div>
+              <span>变异 & 新一代</span>
+            </div>
+          </div>
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击"下一步"开始进化之旅</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">适应度函数</h2>
+        <p>
+          <span class="term" data-definition="适应度函数（Fitness Function）是一个评分机制，它接收一个候选解并返回一个数值，表示这个解有多好。就像给每棵植物打分，越高分说明越优秀。">适应度函数</span>
+          是进化算法的核心——它决定了什么算"好"。下面是一个实际的适应度函数示例：
+        </p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-function">evaluateFitness</span>(individual) {
+  <span class="code-keyword">let</span> score = <span class="code-number">0</span>;
+  <span class="code-keyword">const</span> target = <span class="code-keyword">this</span>.targetSolution;
+
+  <span class="code-keyword">for</span> (<span class="code-keyword">let</span> i = <span class="code-number">0</span>; i &lt; individual.genes.length; i++) {
+    <span class="code-keyword">if</span> (individual.genes[i] === target[i]) {
+      score++;
+    }
+  }
+  <span class="code-keyword">return</span> score / target.length;
+}
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">定义适应度评估函数，接收一个候选个体...</p>
+              <p class="tl">初始化得分为 0...</p>
+              <p class="tl">获取目标解（正确答案）...</p>
+              <p class="tl">逐个比较候选解和目标解的每个基因...</p>
+              <p class="tl">如果某个位置的基因匹配，得分加 1...</p>
+              <p class="tl">返回匹配率（0 到 1 之间的小数）...</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">选择策略详解</h2>
+        <p>进化算法有多种选择策略，每种策略适合不同类型的问题。理解这些策略的差异，才能在实际使用中做出正确选择。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🎡</div>
+            <h4 class="pattern-title">轮盘赌选择</h4>
+            <p class="pattern-desc">适应度越高的个体被选中的概率越大，像轮盘赌一样——占的格子越大，被指到的概率越高。简单直观，但可能导致过早收敛。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🏆</div>
+            <h4 class="pattern-title">锦标赛选择</h4>
+            <p class="pattern-desc">随机选 K 个个体进行比较，选出最优的那个。通过调整 K 值控制选择压力，K 越大选择越激进。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">📊</div>
+            <h4 class="pattern-title">排名选择</h4>
+            <p class="pattern-desc">按适应度排名而非绝对值来分配选择概率，避免超级个体垄断种群，保持多样性。</p>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-comment">// 锦标赛选择实现</span>
+<span class="code-function">tournamentSelect</span>(population, fitness, k=<span class="code-number">3</span>) {
+  <span class="code-keyword">let</span> best = <span class="code-keyword">null</span>;
+  <span class="code-keyword">let</span> bestFitness = -<span class="code-number">Infinity</span>;
+
+  <span class="code-keyword">for</span> (<span class="code-keyword">let</span> i = <span class="code-number">0</span>; i &lt; k; i++) {
+    <span class="code-keyword">const</span> idx = Math.<span class="code-function">floor</span>(
+      Math.<span class="code-function">random</span>() * population.length
+    );
+    <span class="code-keyword">if</span> (fitness[idx] > bestFitness) {
+      best = population[idx];
+      bestFitness = fitness[idx];
+    }
+  }
+  <span class="code-keyword">return</span> best;
+}
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">锦标赛选择：随机抽 K 个个体 PK...</p>
+              <p class="tl">记录当前最佳个体和它的得分...</p>
+              <p class="tl">随机抽取一个个体...</p>
+              <p class="tl">如果比当前最好的还强，就替换...</p>
+              <p class="tl">K 次比较后，返回最强个体——这就是"锦标赛"的冠军。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">概念测验</h2>
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="完全正确！适应度函数负责给每个候选解打分，是进化算法的核心评分机制。"
+               data-explanation-wrong="再想想看——进化算法中什么机制负责判断一个解的好坏？">
+            <h3 class="quiz-question">进化算法中，什么决定了哪些个体会被选中繁殖？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>种群大小</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>变异率</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>适应度函数</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="没错！变异的作用是引入新的遗传多样性，防止种群陷入局部最优。"
+               data-explanation-wrong="变异的核心作用不是这些——想想看，变异会随机改变个体特征，这为什么重要？">
+            <h3 class="quiz-question">变异操作的主要目的是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>引入多样性，防止早熟收敛</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>提高适应度分数</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>减少种群大小</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重试</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,223 @@
+<!-- Module 4: 三位专家代理人 -->
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">三位专家代理人</h1>
+      <p class="module-subtitle">代码审查员、测试工程师、安全审计员——三个视角，一次全面体检</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- ─── SCREEN 1: 请三位专家来审你的代码 ─── -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">请三位专家来审你的代码</h2>
+
+        <p>想象你要开一家餐厅。开业之前，你会请三位检查官来验收：</p>
+
+        <div class="icon-rows stagger-children">
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-error-light); color: var(--color-error);">&#127813;</div>
+            <div>
+              <strong>卫生检查员</strong>
+              <p>检查食品安全——食材有没有过期、厨房有没有细菌</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-info-light); color: var(--color-info);">&#127860;</div>
+            <div>
+              <strong>美食评论家</strong>
+              <p>品尝菜品质量——味道好不好、摆盘精不精致、菜单合不合理</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-success-light); color: var(--color-success);">&#128293;</div>
+            <div>
+              <strong>消防检查员</strong>
+              <p>排查安全隐患——灭火器够不够、逃生通道通不通、电线有没有裸露</p>
+            </div>
+          </div>
+        </div>
+
+        <p>三位检查官看的都是同一家餐厅，但<strong>每个人看到的东西不一样</strong>。卫生检查员觉得没问题的，消防检查员可能发现逃生门被锁了。</p>
+
+        <p>Agent Skills 也是这样。在 REVIEW 审查阶段，它提供了三位"专家代理人"，从三个不同的角度审查你的代码：</p>
+
+        <div class="callout callout-accent animate-in">
+          <span class="callout-icon">&#128161;</span>
+          <div class="callout-content">
+            <span class="callout-title">核心洞察</span>
+            <p>一个人审查代码，难免有盲区。代码审查员关注质量，测试工程师关注覆盖，安全审计员关注漏洞——三者缺一不可。就像一家餐厅不可能只通过卫生检查就开业，代码也不能只通过一个维度的检查就上线。</p>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ─── SCREEN 2: 三位专家的身份卡片 ─── -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">三位专家的身份卡片</h2>
+
+        <p>下面是三位专家代理人的详细资料。每个人都有一套自己的审查哲学和铁律。</p>
+
+        <div class="pattern-cards stagger-children" style="grid-template-columns: 1fr; gap: var(--space-6);">
+
+          <!-- Code Reviewer -->
+          <div class="pattern-card animate-in" style="border-top-color: var(--color-actor-1);">
+            <div style="display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-4);">
+              <div class="pattern-icon" style="background: var(--color-actor-1); color: white; border-radius: var(--radius-sm); font-size: 1.4rem;">&#128065;</div>
+              <div>
+                <div class="pattern-title" style="color: var(--color-actor-1); margin-bottom: 0;">代码审查员（Code Reviewer）</div>
+              </div>
+            </div>
+            <p class="pattern-desc" style="margin-bottom: var(--space-4);">资深工程师的视角。从五个维度审查代码：正确性、可读性、架构、安全性、性能。就像一位经验丰富的编辑审稿——不只是挑错，更是帮你把文章写得更好。</p>
+            <div style="background: var(--color-bg-warm); border-radius: var(--radius-sm); padding: var(--space-3) var(--space-4); margin-bottom: var(--space-3);">
+              <div style="font-size: var(--text-xs); color: var(--color-text-muted); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-1);">铁律</div>
+              <p style="font-size: var(--text-sm); color: var(--color-text-secondary); margin: 0;">审查范围控制在约 100 行代码以内，太大了就拆分。一次看太多代码 = 走马观花 = 看不出问题。</p>
+            </div>
+            <div style="background: var(--color-actor-1); color: white; border-radius: var(--radius-full); padding: var(--space-2) var(--space-4); font-size: var(--text-xs); display: inline-block; font-weight: 600;">变更描述第一行用简短祈使句，正文说明是什么和为什么</div>
+          </div>
+
+          <!-- Test Engineer -->
+          <div class="pattern-card animate-in" style="border-top-color: var(--color-actor-2);">
+            <div style="display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-4);">
+              <div class="pattern-icon" style="background: var(--color-actor-2); color: white; border-radius: var(--radius-sm); font-size: 1.4rem;">&#129514;</div>
+              <div>
+                <div class="pattern-title" style="color: var(--color-actor-2); margin-bottom: 0;">测试工程师（Test Engineer）</div>
+              </div>
+            </div>
+            <p class="pattern-desc" style="margin-bottom: var(--space-4);">QA 专家的视角。关注<span class="term" data-definition="测试金字塔是一种测试策略：80% 单元测试（检查零件）、15% 集成测试（检查组装）、5% 端到端测试（检查整体）。就像工厂质检：先检查零件，再检查组装，最后整体验收。">测试金字塔</span>：80% <span class="term" data-definition="单元测试是针对代码中最小单元（一个函数、一个方法）的测试，确保它按预期工作。就像检查每个零件是否合格。">单元测试</span>、15% <span class="term" data-definition="集成测试是检查多个模块组合在一起是否正常工作的测试。就像把零件组装后试运行。">集成测试</span>、5% 端到端测试。就像质检员验货——不是抽一个看一眼，而是每种情况都测到。</p>
+            <div style="background: var(--color-bg-warm); border-radius: var(--radius-sm); padding: var(--space-3) var(--space-4); margin-bottom: var(--space-3);">
+              <div style="font-size: var(--text-xs); color: var(--color-text-muted); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-1);">铁律</div>
+              <p style="font-size: var(--text-sm); color: var(--color-text-secondary); margin: 0;">测试行为，不测实现细节。用 DAMP（描述性，好理解）而非 DRY（不重复，省代码）。测试代码写得清楚比写得短更重要。</p>
+            </div>
+            <div style="background: var(--color-actor-2); color: white; border-radius: var(--radius-full); padding: var(--space-2) var(--space-4); font-size: var(--text-xs); display: inline-block; font-weight: 600;">Beyonce 规则：如果它能出问题，就需要测试</div>
+          </div>
+
+          <!-- Security Auditor -->
+          <div class="pattern-card animate-in" style="border-top-color: var(--color-actor-5);">
+            <div style="display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-4);">
+              <div class="pattern-icon" style="background: var(--color-actor-5); color: white; border-radius: var(--radius-sm); font-size: 1.4rem;">&#128274;</div>
+              <div>
+                <div class="pattern-title" style="color: var(--color-actor-5); margin-bottom: 0;">安全审计员（Security Auditor）</div>
+              </div>
+            </div>
+            <p class="pattern-desc" style="margin-bottom: var(--space-4);">安全工程师的视角。对抗 <span class="term" data-definition="OWASP（Open Web Application Security Project）是一个开源的 Web 应用安全组织，他们发布的 Top 10 是全球公认的最重要 Web 安全风险列表。">OWASP</span> Top 10（十大 Web 安全漏洞），三层边界防护。就像保安巡逻——不放过任何可疑角落。</p>
+            <div style="background: var(--color-bg-warm); border-radius: var(--radius-sm); padding: var(--space-3) var(--space-4); margin-bottom: var(--space-3);">
+              <div style="font-size: var(--text-xs); color: var(--color-text-muted); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-1);">铁律</div>
+              <p style="font-size: var(--text-sm); color: var(--color-text-secondary); margin: 0;">所有外部输入都是恶意的，所有密钥都是神圣的，所有权限检查都是必须的。不信任任何人，包括你自己。</p>
+            </div>
+            <div style="background: var(--color-actor-5); color: white; border-radius: var(--radius-full); padding: var(--space-2) var(--space-4); font-size: var(--text-xs); display: inline-block; font-weight: 600;">三层边界：必须做 / 先确认 / 绝对不做</div>
+          </div>
+
+        </div>
+
+        <div class="callout callout-accent animate-in">
+          <span class="callout-icon">&#128161;</span>
+          <div class="callout-content">
+            <span class="callout-title">Beyonce 规则是什么？</span>
+            <p>这个名字来自 Beyonce 的歌词"If you liked it then you should have put a ring on it"——换个说法就是：如果你在乎它（某个功能、某个场景），你就应该给它写测试。"如果它能断，就测它。"这是测试工程师的核心信条。</p>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ─── SCREEN 3: 交互式架构图 ─── -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">三位专家如何分工</h2>
+
+        <p>下面这张架构图展示了三位专家是如何分工的。同一份代码提交上去，三位专家各自从不同角度审查。点击任意角色，了解它关注什么。</p>
+
+        <div class="arch-diagram animate-in">
+
+          <!-- Zone 1: 你的代码 -->
+          <div class="arch-zone" style="border-color: var(--color-accent-muted); background: var(--color-accent-light);">
+            <div class="arch-zone-label" style="color: var(--color-accent);">&#128187; 你的代码</div>
+            <div class="arch-component" data-desc="你完成了一个功能的代码，提交审查。这是三位专家共同的审查对象——同一份代码，三种不同视角。">
+              <span class="arch-icon">&#128196;</span>
+              <span>代码提交</span>
+            </div>
+          </div>
+
+          <!-- Zone 2: 三位专家 -->
+          <div class="arch-zone" style="border-color: var(--color-border);">
+            <div class="arch-zone-label">&#128101; 三位专家</div>
+            <div style="display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: center;">
+
+              <div class="arch-component" style="border-color: var(--color-actor-1);" data-desc="代码审查员：检查代码质量、架构、可读性。关注五个维度——正确性（逻辑对不对）、可读性（别人能不能看懂）、架构（组织合不合理）、安全性（有没有明显漏洞）、性能（会不会卡）。就像编辑审稿，每一句话都要推敲。">
+                <span class="arch-icon" style="color: var(--color-actor-1);">&#128065;</span>
+                <span>代码审查员</span>
+              </div>
+
+              <div class="arch-component" style="border-color: var(--color-actor-2);" data-desc="测试工程师：验证测试覆盖率、发现遗漏场景。关注测试金字塔的平衡——单元测试够不够、集成测试覆盖了哪些组合、端到端测了哪些关键路径。就像质检员验货，不是抽一个看一眼，而是每种情况都测到。">
+                <span class="arch-icon" style="color: var(--color-actor-2);">&#129514;</span>
+                <span>测试工程师</span>
+              </div>
+
+              <div class="arch-component" style="border-color: var(--color-actor-5);" data-desc="安全审计员：扫描安全漏洞、检查输入验证。对抗 OWASP Top 10——SQL 注入、跨站脚本、权限绕过……所有外部输入都是恶意的，所有密钥都是神圣的。就像保安巡逻，不放过任何可疑角落。">
+                <span class="arch-icon" style="color: var(--color-actor-5);">&#128274;</span>
+                <span>安全审计员</span>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="arch-description" id="arch-desc">点击任意角色了解它关注什么</div>
+
+        </div>
+
+        <div class="callout callout-info animate-in">
+          <span class="callout-icon">&#128218;</span>
+          <div class="callout-content">
+            <span class="callout-title">为什么需要三个视角？</span>
+            <p>代码审查员可能觉得"代码写得挺干净的"，但安全审计员会一眼看到密码明文存储。测试工程师可能觉得"测试覆盖率 90% 够了"，但代码审查员会发现测试全在测实现细节而不是行为。三个视角互补，才能发现更多问题。</p>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ─── SCREEN 4: 测验 ─── -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">你会怎么选？</h2>
+
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block" data-correct="option-c"
+            data-explanation-right="完全正确！在 Agent Skills 的安全技能中，安全不是一个阶段，而是每行代码的约束。安全漏洞必须立即修复。SQL 注入可以让黑客直接读取、修改甚至删除你的整个数据库——这是最高优先级的威胁。"
+            data-explanation-wrong="再想想看——如果你的用户数据正在被黑客窃取，你还有心思优化性能吗？安全问题永远是最高的优先级。">
+            <p class="quiz-question">你的代码要上线了，代码审查员发现一个性能问题，测试工程师发现测试覆盖率只有 40%，安全审计员发现一个 SQL 注入漏洞。你应该先修哪个？</p>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <span class="quiz-option-radio"></span>
+                <span>先修性能问题，用户体验最重要</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <span class="quiz-option-radio"></span>
+                <span>先补测试覆盖率，确保功能没问题</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <span class="quiz-option-radio"></span>
+                <span>先修 SQL 注入漏洞——安全问题永远是最高优先级</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <div>
+            <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">提交答案</button>
+            <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重新选择</button>
+          </div>
+        </div>
+
+        <div class="callout callout-info animate-in">
+          <span class="callout-icon">&#128218;</span>
+          <div class="callout-content">
+            <span class="callout-title">记住这个优先级</span>
+            <p>安全问题 > 功能正确性 > 测试覆盖 > 性能优化 > 代码美观。安全漏洞是"着火了"，性能问题是"灯不够亮"——你会先灭火还是先换灯泡？</p>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+  </div>
+</section>

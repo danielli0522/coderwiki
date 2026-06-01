@@ -1,0 +1,182 @@
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">ECC 是什么 -- 一键安装的 AI 编程副驾驶</h1>
+      <p class="module-subtitle">想象你有一个由 30 位专家组成的编程顾问团，ECC 就是让这些专家自动协作的操作系统。</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: What ECC Does -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">从一行命令到 30 个专家同时待命</h2>
+        <p>你正在用 <span class="term" data-definition="Claude Code 是 Anthropic 公司推出的 AI 编程工具，你可以在终端里用自然语言让它写代码、改 bug、做 code review。">Claude Code</span> 写代码。你敲下一行命令 <code>npx ecc install typescript</code>，几秒钟后，你的项目里就多出了 30 个专业 <span class="term" data-definition="Agent（代理）是 AI 世界里的专业助手，每个 Agent 只擅长一件事，比如 code review、测试、安全审计。就像医院里有内科医生、外科医生、放射科医生一样。">Agent</span>、135 个 <span class="term" data-definition="Skill（技能）是一套预设的工作流程和最佳实践，告诉 AI 在特定场景下应该怎么做。就像给厨师一本标准菜谱。">Skill</span>、60 个 <span class="term" data-definition="Command（命令）是你可以在终端里输入的快捷指令，比如 /tdd 代表启动测试驱动开发流程。">Command</span>。</p>
+
+        <p>ECC（Everything Claude Code）就是这样一个系统 -- 它把编程过程中需要的各种专业能力打包在一起，一键安装到你的开发环境里。</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">核心理念</strong>
+            <p>ECC 的哲学是 "Agent-First" -- 把工作尽早路由给最合适的专家。就像一个聪明的项目经理，不会自己写代码，而是找到最合适的工程师来干。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Install Flow Animation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">安装那一刻发生了什么</h2>
+        <p>点击 "Next Step" 看看当你运行安装命令时，系统内部经历了什么：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"你在终端输入 ecc install typescript"},
+          {"highlight":"flow-actor-2","label":"ECC CLI 解析你的意图 -- 你需要 TypeScript 相关的配置","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-3","label":"安装器从 135 个 Skill 中筛选出适合的模块","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-4","label":"选中的 Agent、Skill、Rule 被复制到你的 .claude/ 目录","packet":true,"from":"actor-3","to":"actor-4"},
+          {"highlight":"flow-actor-4","label":"安装完成！下次你用 Claude Code 时，所有专家已就位"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">⌨️</div>
+              <span>你的终端</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">⚙️</div>
+              <span>ECC CLI</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">📦</div>
+              <span>组件仓库</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">📁</div>
+              <span>.claude/ 目录</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击 "Next Step" 开始</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">Next Step</button>
+            <button class="btn flow-reset-btn">Restart</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: File Tree -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">安装后的目录长什么样</h2>
+        <p>安装完成后，你的项目里会出现这些文件：</p>
+
+        <div class="file-tree">
+          <div class="ft-folder open">
+            <span class="ft-name">.claude/</span>
+            <span class="ft-desc">ECC 管理的所有配置</span>
+            <div class="ft-children">
+              <div class="ft-folder">
+                <span class="ft-name">agents/</span>
+                <span class="ft-desc">30 个专业 Agent 定义文件</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">skills/</span>
+                <span class="ft-desc">135 个技能包 -- 工作流程和最佳实践</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">commands/</span>
+                <span class="ft-desc">60 个快捷命令 (/tdd, /plan 等)</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">hooks/</span>
+                <span class="ft-desc">自动化钩子 -- 在特定时机自动执行动作</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">rules/</span>
+                <span class="ft-desc">开发规范 -- AI 始终遵守的规则</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">📖</div>
+          <div class="callout-content">
+            <strong class="callout-title">跨平台支持</strong>
+            <p>ECC 不只支持 Claude Code。同样的配置可以安装到 Cursor、Codex、Gemini、OpenCode 等多种 AI 编程工具中。一套配置，多端复用。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Code Translation - agent.yaml -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">核心配置长什么样</h2>
+        <p>ECC 的身份定义在一个 <span class="term" data-definition="YAML 是一种人类易读的配置文件格式，用缩进来表示层级关系。很多 AI 工具和 DevOps 工具都用 YAML 做配置。">YAML</span> 文件中：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">spec_version</span>: <span class="code-string">"0.1.0"</span></span>
+<span class="code-line"><span class="code-keyword">name</span>: <span class="code-string">ecc</span></span>
+<span class="code-line"><span class="code-keyword">version</span>: <span class="code-string">2.0.0-rc.1</span></span>
+<span class="code-line"><span class="code-keyword">model</span>:</span>
+<span class="code-line">  <span class="code-keyword">preferred</span>: <span class="code-string">claude-opus-4-6</span></span>
+<span class="code-line">  <span class="code-keyword">fallback</span>:</span>
+<span class="code-line">    - <span class="code-string">claude-sonnet-4-6</span></span>
+<span class="code-line"><span class="code-keyword">skills</span>:</span>
+<span class="code-line">  - <span class="code-string">tdd-workflow</span></span>
+<span class="code-line">  - <span class="code-string">code-tour</span></span>
+<span class="code-line">  - <span class="code-string">security-review</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">配置格式版本是 0.1.0 -- 未来可能会升级</p>
+              <p class="tl">这个系统的名字叫 ECC</p>
+              <p class="tl">当前版本 2.0.0 候选版 1 -- 接近正式发布</p>
+              <p class="tl">模型配置：优先用最强模型 Opus 处理复杂任务</p>
+              <p class="tl">如果 Opus 不可用，降级到 Sonnet 继续工作</p>
+              <p class="tl">这是降级策略，保证系统不会因为一个模型挂掉就停摆</p>
+              <p class="tl">启用的技能包列表 -- 测试驱动开发</p>
+              <p class="tl">代码导览 -- 帮新人理解代码库</p>
+              <p class="tl">安全审查 -- 自动检查代码中的安全隐患</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正是如此！ECC 的核心价值就是把专业能力打包成可安装的组件，让 AI 编程工具从通用助手变成专家团队。"
+               data-explanation-wrong="再想想 -- ECC 不直接生成代码，也不只是配置管理。它关注的是给 AI 编程工具装上各种专业能力。">
+            <h3 class="quiz-question">你刚加入一个新团队，项目需要 TypeScript + TDD。你会怎么用 ECC？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>让 ECC 直接生成整个项目的代码</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>安装 TypeScript 相关的 Agent 和 TDD 技能包，让 AI 自动按 TDD 流程工作</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>只用 ECC 来管理 .env 环境变量</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

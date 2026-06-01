@@ -1,0 +1,228 @@
+
+<!-- ═══════════════════════════════════════════════════════════════
+     Module 02 — 知识图谱：鱼群游弋的水域
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">知识图谱：鱼群游弋的水域</h1>
+      <p class="module-subtitle">从新闻稿到关系网络——MiroFish 如何理解现实世界的复杂关联</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Metaphor -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">种子材料就像一滴水</h2>
+        <p>你给 MiroFish 一篇新闻报道、一份分析报告，甚至一部小说——它需要从这些<span class="term" data-definition="种子材料（Seed Material）是你提供给 MiroFish 的原始信息，比如新闻文本、分析报告、小说片段等。系统从这些材料中提取人物、关系和事件。">种子材料</span>中提取出所有重要的人物、机构、事件，以及它们之间的关系。</p>
+        <p>这就像往平静的池塘里滴入一滴墨水——MiroFish 需要理解这滴墨水的每一个分子，才能在后续模拟中让整池水真实地波动。</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>本体生成（Ontology）</strong>
+              <p>LLM 分析文本，定义"有哪些类型的角色和关系"——比如学生、教授、大学、媒体，以及它们之间可能存在的"就读于""隶属于""报道"等关系</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>图谱构建（Graph Building）</strong>
+              <p>将文本分块后发送给 <span class="term" data-definition="Zep 是一个知识图谱云服务，能从文本中自动提取实体（人物/机构）和关系，构建可查询的知识图谱。">Zep</span>，让它从文本中提取出具体的实体节点和关系边</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>人设生成（Profile）</strong>
+              <p>对图谱中每个实体，用 LLM 生成详细人设，并从 Zep 检索更多上下文信息来丰富人设</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Architecture Diagram -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">系统架构：三大核心组件</h2>
+        <p>点击下方组件，了解它们各自的职责：</p>
+
+        <div class="arch-diagram">
+          <div class="arch-zone">
+            <h4 class="arch-zone-label">文本分析层</h4>
+            <div class="arch-component" data-desc="使用 LLM 分析文本内容，定义实体类型（如 Student、MediaOutlet）和关系类型（如 WORKS_FOR、REPORTS_ON）。必须正好 10 种实体类型，其中 Person 和 Organization 是兜底类型。">
+              <div class="arch-icon">&#x1F4CB;</div>
+              <span>本体生成器</span>
+            </div>
+            <div class="arch-component" data-desc="使用 LLM 为每个实体生成详细人设（2000 字），区分个人实体（如学生）和群体实体（如大学），支持并行生成以加速处理。">
+              <div class="arch-icon">&#x1F9D1;</div>
+              <span>人设生成器</span>
+            </div>
+          </div>
+          <div class="arch-zone">
+            <h4 class="arch-zone-label">知识图谱层</h4>
+            <div class="arch-component" data-desc="调用 Zep API 创建图谱、设置本体、分批添加文本数据、等待处理完成，最终获取完整的节点和边数据。整个流程在后台线程中异步执行。">
+              <div class="arch-icon">&#x1F5FA;</div>
+              <span>图谱构建器</span>
+            </div>
+          </div>
+          <div class="arch-zone">
+            <h4 class="arch-zone-label">外部服务</h4>
+            <div class="arch-component" data-desc="Zep Cloud 知识图谱服务，负责从文本中自动提取实体和关系，并支持语义搜索、混合检索等功能。是 MiroFish 的核心记忆引擎。">
+              <div class="arch-icon">&#x2601;</div>
+              <span>Zep Cloud</span>
+            </div>
+            <div class="arch-component" data-desc="大语言模型（如阿里 Qwen），用于分析文本、生成本体、创建人设、以及后续的报告生成。是 MiroFish 的"大脑"。">
+              <div class="arch-icon">&#x1F9E0;</div>
+              <span>LLM</span>
+            </div>
+          </div>
+          <div class="arch-description" id="arch-desc">点击任意组件，了解它的职责</div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Code Translation — Ontology -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码翻译：本体是如何定义的</h2>
+        <p>MiroFish 让 LLM 分析文本后生成的<span class="term" data-definition="本体（Ontology）在知识图谱中定义了"世界中有哪些类型的角色"以及"它们之间可能存在哪些关系"。就像给一部电影定义角色类型和关系类型。">本体</span>包含实体类型和关系类型：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">Python 代码</span>
+            <pre><code><span class="code-line">ontology = {</span>
+<span class="code-line">  <span class="code-string">"entity_types"</span>: [</span>
+<span class="code-line">    {<span class="code-string">"name"</span>: <span class="code-string">"Student"</span>,</span>
+<span class="code-line">     <span class="code-string">"description"</span>: <span class="code-string">"在校学生"</span>,</span>
+<span class="code-line">     <span class="code-string">"attributes"</span>: [{<span class="code-string">"name"</span>: <span class="code-string">"full_name"</span>}]},</span>
+<span class="code-line">    {<span class="code-string">"name"</span>: <span class="code-string">"Person"</span>},  <span class="code-comment"># 兜底</span></span>
+<span class="code-line">    {<span class="code-string">"name"</span>: <span class="code-string">"Organization"</span>}  <span class="code-comment"># 兜底</span></span>
+<span class="code-line">  ],</span>
+<span class="code-line">  <span class="code-string">"edge_types"</span>: [</span>
+<span class="code-line">    {<span class="code-string">"name"</span>: <span class="code-string">"STUDIES_AT"</span>,</span>
+<span class="code-line">     <span class="code-string">"source_targets"</span>: [</span>
+<span class="code-line">       {<span class="code-string">"source"</span>: <span class="code-string">"Student"</span>,</span>
+<span class="code-line">        <span class="code-string">"target"</span>: <span class="code-string">"University"</span>}]}</span>
+<span class="code-line">  ]</span>
+<span class="code-line">}</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">通俗解释</span>
+            <div class="translation-lines">
+              <p class="tl">定义"世界中有哪些类型的角色和关系"</p>
+              <p class="tl">实体类型列表——这个世界中有哪几种角色</p>
+              <p class="tl">学生类型，有一个属性用来存全名</p>
+              <p class="tl">描述"在校学生"这个角色是什么</p>
+              <p class="tl">角色的属性，比如名字</p>
+              <p class="tl">兜底类型：任何不属于特定类型的个人</p>
+              <p class="tl">兜底类型：任何不属于特定类型的组织</p>
+              <p class="tl">关系类型列表——角色之间可以有什么联系</p>
+              <p class="tl">定义"学生就读于大学"这种关系</p>
+              <p class="tl">关系的方向：学生 → 大学</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Message Flow — Graph Building Pipeline -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">数据流：从文本到图谱</h2>
+        <p>点击"下一步"观看一篇新闻稿是如何变成知识图谱的：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"用户上传种子材料（新闻稿、分析报告等）"},
+          {"highlight":"flow-actor-1","label":"本体生成器调用 LLM，分析文本定义实体和关系类型","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-2","label":"LLM 返回本体定义（10 种实体 + 6-10 种关系）","packet":true,"from":"actor-2","to":"actor-1"},
+          {"highlight":"flow-actor-1","label":"图谱构建器将文本分块，分批发送给 Zep","packet":true,"from":"actor-1","to":"actor-3"},
+          {"highlight":"flow-actor-3","label":"Zep 从每个文本块中提取实体节点和关系边"},
+          {"highlight":"flow-actor-3","label":"Zep 返回完整的知识图谱数据","packet":true,"from":"actor-3","to":"actor-4"},
+          {"highlight":"flow-actor-4","label":"人设生成器为每个实体节点生成详细人设（LLM + Zep 检索）","packet":true,"from":"actor-4","to":"actor-2"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">M</div>
+              <span>MiroFish 核心</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">L</div>
+              <span>LLM 大脑</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">Z</div>
+              <span>Zep 图谱</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">P</div>
+              <span>人设工厂</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+
+          <div class="flow-step-label" id="flow-label">点击"下一步"开始</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">测验：你理解知识图谱了吗？</h2>
+
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！Person 和 Organization 是兜底类型——当文本中出现的人物或机构不属于任何具体类型时，就会被归入这两个类型。这确保所有实体都能被捕获。"
+               data-explanation-wrong="想一想——如果文本中出现了一个'路人甲'或'小商店'，它们不属于 Student 或 University 等具体类型。兜底类型就是为这种情况准备的。">
+            <h3 class="quiz-question">MiroFish 的本体定义中，为什么必须有 Person 和 Organization 这两个"兜底类型"？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为 Zep API 要求必须有这两个类型才能创建图谱</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>为了确保文本中所有人物和机构都能被分类，即使不属于任何具体类型</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为 LLM 只能识别这两种类型</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="没错！实体类型名必须用 PascalCase（每个单词首字母大写），关系类型名必须用 UPPER_SNAKE_CASE（全大写加下划线），这是 Zep API 的强制要求。代码中有专门的转换函数来确保格式正确。"
+               data-explanation-wrong="仔细看看代码——ontology_generator.py 中有 _to_pascal_case 函数，专门处理名称格式。Zep API 对命名格式有严格要求。">
+            <h3 class="quiz-question">在 MiroFish 的本体定义中，实体类型的命名格式有什么要求？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>实体类型用 PascalCase（如 MediaOutlet），关系类型用 UPPER_SNAKE_CASE（如 WORKS_FOR）</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>所有名称都用小写加下划线（如 media_outlet）</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>可以随意命名，系统会自动适配</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

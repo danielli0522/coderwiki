@@ -1,0 +1,160 @@
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">What Archon Does</h1>
+      <p class="module-subtitle">Imagine you could record your best debugging process and replay it perfectly every time — that's Archon.</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The problem every AI coder hits</h2>
+        <p>You ask <span class="term" data-definition="An AI coding tool like Claude Code, Cursor, or GitHub Copilot — software that writes, edits, and debugs code based on your natural language instructions.">an AI coding agent</span> to fix a bug. Sometimes it plans carefully, runs tests, and opens a polished pull request. Other times it skips right to editing files, breaks something else, and needs babysitting for an hour.</p>
+        <p>The same request, different outcomes. <strong>Why?</strong> Because AI agents improvise — they decide their own process each run. Archon's insight: what if the <em>process</em> was deterministic, even when the <em>intelligence</em> wasn't?</p>
+
+        <div class="callout callout-accent animate-in">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">The Key Insight</strong>
+            <p>Archon separates two things that AI tools usually mix together: the <em>structure</em> of what to do (plan → implement → test → review → PR) and the <em>intelligence</em> applied at each step. Structure is yours. Intelligence is the AI's.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What happens when you use Archon</h2>
+        <p>Imagine you type: <em>"Use Archon to add dark mode to the settings page."</em> Here's exactly what happens next:</p>
+
+        <div class="step-cards animate-in stagger-children">
+          <div class="step-card animate-in">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>An isolated workspace is created</strong>
+              <p>Archon creates a fresh <span class="term" data-definition="A git worktree is a separate copy of your project where changes can happen in parallel without affecting your main code. Like a sandbox play area that shares the same toy box.">git worktree</span> — your main code is untouched while the AI works.</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>The workflow YAML is loaded</strong>
+              <p>Archon reads your <code>.archon/workflows/build-feature.yaml</code> file — a recipe that defines phases: plan, implement, test, review, approve, PR.</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Each node runs in sequence</strong>
+              <p>AI nodes send prompts to Claude. <span class="term" data-definition="A bash node is a workflow step that runs a shell command like 'npm test' — it produces the same result every time, with no AI involved.">Bash nodes</span> run deterministic commands. Human-approval nodes pause and wait for you.</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>A PR appears when done</strong>
+              <p>You come back to a finished pull request with tests passing and review comments addressed — without babysitting a single step.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The recipe that makes it all work</h2>
+        <p>Here's an actual Archon workflow from the codebase. Notice how it reads almost like a to-do list — that's intentional:</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-property">nodes</span>:</span>
+<span class="code-line">  - <span class="code-property">id</span>: <span class="code-string">plan</span></span>
+<span class="code-line">    <span class="code-property">prompt</span>: <span class="code-string">"Explore the codebase and create an implementation plan"</span></span>
+<span class="code-line"></span>
+<span class="code-line">  - <span class="code-property">id</span>: <span class="code-string">implement</span></span>
+<span class="code-line">    <span class="code-property">depends_on</span>: [<span class="code-string">plan</span>]</span>
+<span class="code-line">    <span class="code-property">loop</span>:</span>
+<span class="code-line">      <span class="code-property">prompt</span>: <span class="code-string">"Read the plan. Implement the next task."</span></span>
+<span class="code-line">      <span class="code-property">until</span>: <span class="code-string">ALL_TASKS_COMPLETE</span></span>
+<span class="code-line"></span>
+<span class="code-line">  - <span class="code-property">id</span>: <span class="code-string">run-tests</span></span>
+<span class="code-line">    <span class="code-property">depends_on</span>: [<span class="code-string">implement</span>]</span>
+<span class="code-line">    <span class="code-property">bash</span>: <span class="code-string">"bun run validate"</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">This is a list of tasks (nodes) that Archon will run in order.</p>
+              <p class="tl">First task: have the AI look through the codebase and write a plan.</p>
+              <p class="tl">Second task: start implementing. "depends_on: plan" means this only starts after planning finishes.</p>
+              <p class="tl">A loop means the AI keeps going until ALL_TASKS_COMPLETE — it self-monitors its own progress.</p>
+              <p class="tl">Third task: run the actual test suite. "bash" means this is a regular command, no AI needed — always the same result.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info animate-in">
+          <div class="callout-icon">🔑</div>
+          <div class="callout-content">
+            <strong class="callout-title">Why this vocabulary matters</strong>
+            <p>When you tell an AI coding agent "add a bash node after the tests step," it knows exactly what to do. You've acquired the precise language of Archon workflows — now you can steer AI changes to the workflow file itself.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Check your understanding</h2>
+
+        <div class="quiz-container animate-in" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly — the structure (sequence of phases) is owned by you in the YAML file, while the AI fills in the intelligence at each prompt node."
+               data-explanation-wrong="Not quite. Archon fixes non-determinism by separating the process structure from the AI intelligence — the structure is always the same, the AI still provides the smarts.">
+            <h3 class="quiz-question">Your AI agent sometimes skips writing tests. How does Archon solve this?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>It uses a smarter AI model that always writes tests</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>The workflow YAML has a dedicated test-running bash node that always executes after implementation</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>It adds "write tests" to every AI prompt so the model remembers</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="Right — git worktrees let Archon run multiple workflows in parallel without them interfering with each other or with your main branch."
+               data-explanation-wrong="Not quite. The isolation comes from git worktrees — separate working directories where each workflow run makes changes independently.">
+            <h3 class="quiz-question">You want to run 3 different bug fixes at the same time using Archon. What prevents them from interfering with each other?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Each run uses a different AI model</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>They run in separate Docker containers</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Each workflow run gets its own isolated git worktree</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

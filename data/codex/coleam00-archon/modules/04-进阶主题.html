@@ -1,0 +1,205 @@
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">与外部世界交互：API 和工具</h1>
+      <p class="module-subtitle">Archon 如何调用 AI 模型、使用工具、连接外部服务</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: External services -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Archon 的外部连接</h2>
+        <p>Archon 不是闭门造车。它需要和外部世界打交道——调用 AI 模型来「思考」，搜索网络来获取信息，访问数据库来存储结果。这些外部连接就像一个公司的各个供应商——公司本身不生产原料，但需要和供应商合作才能运作。</p>
+        <div class="arch-diagram">
+          <div class="arch-zone arch-zone-browser">
+            <h4 class="arch-zone-label">Archon 内部</h4>
+            <div class="arch-component" data-desc="推理者节点：调用 LLM 分析需求，制定执行计划。它是工作流的起点。"
+                 onclick="showArchDesc(this)">
+              <div class="arch-icon">🧠</div>
+              <span>推理者</span>
+            </div>
+            <div class="arch-component" data-desc="编码者节点：根据推理者的计划，调用 LLM 生成具体的 Agent 代码。"
+                 onclick="showArchDesc(this)">
+              <div class="arch-icon">💻</div>
+              <span>编码者</span>
+            </div>
+            <div class="arch-component" data-desc="审查者节点：检查生成的代码质量，调用 LLM 进行代码评审，返回改进建议。"
+                 onclick="showArchDesc(this)">
+              <div class="arch-icon">🔍</div>
+              <span>审查者</span>
+            </div>
+          </div>
+          <div class="arch-zone arch-zone-external">
+            <h4 class="arch-zone-label">外部服务</h4>
+            <div class="arch-component" data-desc="OpenAI 的 API：提供大语言模型能力，是 Archon 所有智能的来源。Archon 通过 API 调用来获取 AI 的推理、编码和审查能力。"
+                 onclick="showArchDesc(this)">
+              <div class="arch-icon">🤖</div>
+              <span>OpenAI API</span>
+            </div>
+            <div class="arch-component" data-desc="知识库服务：存储最佳实践、参考代码和项目模板，帮助生成更高质量的 Agent。"
+                 onclick="showArchDesc(this)">
+              <div class="arch-icon">📚</div>
+              <span>知识库</span>
+            </div>
+          </div>
+          <div class="arch-description" id="arch-desc">点击任意组件了解它的作用</div>
+        </div>
+      </section>
+
+      <!-- Screen 2: API calls -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">如何调用 AI 模型？</h2>
+        <p>Archon 通过 <span class="term" data-definition="API（Application Programming Interface，应用程序编程接口）是软件之间通信的桥梁。就像餐厅的服务员——你不需要自己进厨房，只需要告诉服务员你要什么，服务员会帮你传达给厨师，然后把菜端给你。">API</span> 调用 AI 模型。这是 Archon 获取「智能」的方式。</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">from</span> langchain_openai <span class="code-keyword">import</span> ChatOpenAI</span>
+<span class="code-line"></span>
+<span class="code-line">llm = <span class="code-function">ChatOpenAI</span>(</span>
+<span class="code-line">    model=<span class="code-string">"gpt-4o"</span>,</span>
+<span class="code-line">    temperature=<span class="code-number">0.7</span>,</span>
+<span class="code-line">    api_key=settings.api_key</span>
+<span class="code-line">)</span>
+<span class="code-line"></span>
+<span class="code-line">response = llm.<span class="code-function">invoke</span>(prompt)</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">导入 OpenAI 的聊天模型工具。</p>
+              <p class="tl">创建一个 AI 模型实例。</p>
+              <p class="tl">指定使用 GPT-4o 模型。</p>
+              <p class="tl">设置创造性参数为 0.7（越高越有创意）。</p>
+              <p class="tl">提供 API 密钥来验证身份。</p>
+              <p class="tl">发送提示词给 AI，等待回复。</p>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">常见陷阱：API 密钥安全</strong>
+            <p>API 密钥就像你的银行卡密码——绝对不能公开分享。Archon 使用 <span class="term" data-definition="环境变量是存储在操作系统中的配置值，程序运行时可以读取。它的好处是敏感信息（如密码、密钥）不会出现在代码中，降低了泄露风险。">环境变量</span> 来安全地存储密钥，而不是直接写在代码里。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Tools -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">工具系统：给 Agent 装上「手」</h2>
+        <p>AI Agent 只有「大脑」（LLM）是不够的。它还需要「手」——也就是能执行具体操作的工具。Archon 生成 Agent 时，会为它配备合适的工具。</p>
+        <div class="pattern-cards stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🌐</div>
+            <h4 class="pattern-title">网页搜索</h4>
+            <p class="pattern-desc">让 Agent 能搜索互联网获取最新信息。就像给它装了一个浏览器。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">📁</div>
+            <h4 class="pattern-title">文件操作</h4>
+            <p class="pattern-desc">让 Agent 能读写文件。就像给它装了一双手，能翻阅和编辑文档。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🔗</div>
+            <h4 class="pattern-title">API 调用</h4>
+            <p class="pattern-desc">让 Agent 能与外部服务通信。就像给它装了一部电话，能联系其他系统。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🗄️</div>
+            <h4 class="pattern-title">数据库查询</h4>
+            <p class="pattern-desc">让 Agent 能存取结构化数据。就像给它配了一个档案柜。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Tool definition code -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">定义一个工具</h2>
+        <p>下面是如何用代码定义一个工具——这是告诉 Agent「你有这个能力」的方式。</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">from</span> langchain_core.tools <span class="code-keyword">import</span> tool</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-decorator">@tool</span></span>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">search_web</span>(query: <span class="code-function">str</span>) -> <span class="code-function">str</span>:</span>
+<span class="code-line">    <span class="code-string">"""搜索互联网获取信息"""</span></span>
+<span class="code-line">    results = search_api.<span class="code-function">search</span>(query)</span>
+<span class="code-line">    <span class="code-keyword">return</span> results.<span class="code-function">to_string</span>()</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">导入工具定义装饰器。</p>
+              <p class="tl">@tool 标记表示这是一个 Agent 可以使用的工具。</p>
+              <p class="tl">定义一个搜索函数，接收搜索关键词。</p>
+              <p class="tl">用一句话描述这个工具的功能。</p>
+              <p class="tl">调用搜索 API 执行搜索。</p>
+              <p class="tl">将搜索结果转换为文本返回。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">外部交互测验</h2>
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！@tool 装饰器是告诉 LangChain 「这是一个 Agent 可以使用的工具」的标记。有了它，Agent 就知道自己有这个能力。"
+               data-explanation-wrong="不太对。@tool 的作用不是优化性能或保护安全，而是标记这个函数是一个 Agent 可用的工具。">
+            <h3 class="quiz-question">代码中的 @tool 装饰器的作用是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>优化函数的执行性能</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>标记这个函数是一个 Agent 可用的工具</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>加密 API 密钥以保护安全</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！环境变量是最安全的做法——密钥不会出现在代码中，降低了泄露风险。千万不要把密钥硬编码在代码里！"
+               data-explanation-wrong="再想想。把 API 密钥直接写在代码中是非常危险的做法。最安全的方式是用环境变量来存储。">
+            <h3 class="quiz-question">如果要安全地存储 API 密钥，最佳做法是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>直接写在代码里，方便使用</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>保存在 README 文档中</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>使用环境变量存储</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

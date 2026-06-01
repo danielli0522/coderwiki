@@ -1,0 +1,130 @@
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">UI-TARS 是什么：让 AI 看懂屏幕</h1>
+      <p class="module-subtitle">想象你对着电脑说"帮我在携程订一张北京到上海的机票"——AI 看着屏幕，找到按钮、填写表单、点击提交。这不是科幻，这就是 UI-TARS。</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">这个项目解决什么问题？</h2>
+        <p>传统自动化需要写死每个操作步骤——"点击坐标(320, 480)"、"在 id 为 username 的框里输入文字"。一旦界面改版，脚本全废。UI-TARS 换了个思路：让 AI <strong>看懂屏幕</strong>，像人一样理解和操作。</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">核心洞察</strong>
+            <p>UI-TARS 的哲学是：与其为每个应用写专门的 <span class="term" data-definition="API（Application Programming Interface）是程序之间通信的接口。就像你不需要知道飞机怎么造，只需要买票就能飞——API 就是那张机票，让一个程序能用另一个程序的能力。">API</span> 集成，不如让 AI 直接"看"屏幕，理解界面元素，像人一样操作。这样任何应用都能用，不需要逐个适配。</p>
+          </div>
+        </div>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🖥️</div>
+            <h4 class="pattern-title">Agent TARS</h4>
+            <p class="pattern-desc">多模态 AI Agent 框架，支持 CLI 和 Web UI，能通过视觉能力操作电脑和浏览器</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🎮</div>
+            <h4 class="pattern-title">UI-TARS Desktop</h4>
+            <p class="pattern-desc">Electron 桌面应用，提供本地和远程的电脑/浏览器 GUI 操作能力</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🧩</div>
+            <h4 class="pattern-title">Tarko 框架</h4>
+            <p class="pattern-desc">底层引擎，提供 Agent 循环、事件流、MCP 工具调用、LLM 通信等核心能力</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">项目结构一览</h2>
+        <p>UI-TARS 是一个 <span class="term" data-definition="Monorepo 是把多个相关的项目放在同一个代码仓库里管理的方式。就像一个大文件柜，不同抽屉放不同项目，但它们共享同一把钥匙。">monorepo</span>，包含两大产品线和一个核心引擎层。</p>
+
+        <div class="file-tree">
+          <div class="ft-folder open">
+            <span class="ft-name">UI-TARS-desktop/</span>
+            <span class="ft-desc">整个项目根目录</span>
+            <div class="ft-children">
+              <div class="ft-folder">
+                <span class="ft-name">apps/ui-tars/</span>
+                <span class="ft-desc">Electron 桌面应用（主进程 + 渲染进程）</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">multimodal/agent-tars/</span>
+                <span class="ft-desc">Agent TARS 核心（CLI + Web UI + Core）</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">multimodal/tarko/</span>
+                <span class="ft-desc">底层引擎：Agent 循环、MCP、LLM、事件流</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">multimodal/gui-agent/</span>
+                <span class="ft-desc">GUI 操作符（NutJS、ADB、浏览器、AIO）</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">packages/ui-tars/sdk/</span>
+                <span class="ft-desc">UI-TARS SDK：截图→分析→操作循环</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">"你好，世界"：GUIAgent 的入口</h2>
+        <p>所有复杂的 GUI Agent 操作，最终都归结为一个循环：截图→模型推理→执行操作。这段代码是 UI-TARS Desktop 中创建智能体的入口。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment">// apps/ui-tars/src/main/ipcRoutes/agent.ts</span></span>
+<span class="code-line"><span class="code-keyword">export class</span> <span class="code-function">GUIAgentManager</span> {</span>
+<span class="code-line">  <span class="code-keyword">private static</span> instance:</span>
+<span class="code-line">    GUIAgentManager;</span>
+<span class="code-line">  <span class="code-keyword">private</span> currentAgent:</span>
+<span class="code-line">    GUIAgent&lt;Operator&gt; | <span class="code-keyword">null</span>;</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">public</span> <span class="code-function">setAgent</span>(</span>
+<span class="code-line">    agent: GUIAgent&lt;Operator&gt;</span>
+<span class="code-line">  ) {</span>
+<span class="code-line">    <span class="code-keyword">this</span>.currentAgent = agent;</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">GUIAgentManager 是一个单例——全局只有一个实例...</p>
+              <p class="tl">它持有当前正在运行的 GUIAgent...</p>
+              <p class="tl">GUIAgent 使用泛型 Operator——可以是 NutJS、浏览器等不同的操作方式...</p>
+              <p class="tl">setAgent 方法把创建好的智能体存起来...</p>
+              <p class="tl">后续可以 pause/resume/stop 控制 Agent 的执行。</p>
+              <p class="tl">这个设计让桌面应用能统一管理 Agent 生命周期。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block" data-correct="option-b" data-explanation-right="UI-TARS 的核心创新是让 AI 能'看'屏幕并理解界面内容，像人一样做出操作决策，而不是依赖预先录制的固定脚本。" data-explanation-wrong="UI-TARS 不是训练模型的框架，而是使用视觉语言模型来操作 GUI 的应用框架。">
+            <h3 class="quiz-question">UI-TARS 与传统 RPA（机器人流程自动化）最本质的区别是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>UI-TARS 运行速度更快，响应时间更短</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>UI-TARS 能理解屏幕内容，自动适应界面变化，不需要预定义操作脚本</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>UI-TARS 只能在浏览器里工作，不支持桌面应用</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">Try Again</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>

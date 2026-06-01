@@ -1,0 +1,203 @@
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">RAG 管道：让 AI 读你的文档</h1>
+      <p class="module-subtitle">知识库是怎么建立的？AI 是怎么在你的文档里"找到"答案的？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: What is RAG and why -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">为什么 AI 需要"读"你的文档？</h2>
+        <p>LLM 的知识在训练时就固定了——它不认识你公司的产品手册，不知道你昨天发布的公告，也不了解你独特的业务规则。</p>
+        <p><span class="term" data-definition="RAG（Retrieval-Augmented Generation，检索增强生成）：先从文档库里搜索最相关的片段，再把这些片段塞进 Prompt 里一起发给 LLM——AI 就能基于你的私有文档回答问题了。">RAG</span> 解决这个问题的方式非常聪明：不是"训练 AI 学你的知识"（很贵），而是"回答时临时把相关文档页给 AI 看"（很便宜）。</p>
+
+        <div class="callout callout-info animate-in">
+          <div class="callout-icon">📖</div>
+          <div class="callout-content">
+            <strong class="callout-title">类比：开卷考试 vs. 闭卷考试</strong>
+            <p>微调（fine-tuning）让 AI 记住知识 = 闭卷考试。RAG 给 AI 相关页面 = 开卷考试。对于私有知识库，开卷考试便宜 100 倍，效果还往往更好。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: RAG pipeline step by step -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">从上传到回答：RAG 的完整管道</h2>
+        <p>Dify 的 RAG 分两个阶段：<strong>建索引</strong>（你上传文档时）和<strong>检索</strong>（用户提问时）。</p>
+
+        <div class="step-cards animate-in stagger-children">
+          <div class="step-card animate-in">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>提取文本 — ExtractSetting</strong>
+              <p>从 PDF/Word/网页中提取纯文本，支持 20+ 种格式。代码在 <code>api/core/rag/extractor/</code></p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>切块 — TextSplitter</strong>
+              <p>把长文档切成小段落（默认 500 token/段）。代码在 <code>api/core/rag/splitter/</code></p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>向量化 — EmbeddingModel</strong>
+              <p>每个段落被转成一个数字向量（<span class="term" data-definition="向量（Vector）：把文字的语义转成一串数字——语义相近的文字，数字也相近。就像颜色可以用 RGB 三个数字表示一样。">向量</span>），存入向量数据库</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>检索 — 用户提问时</strong>
+              <p>用户的问题也被向量化，在数据库里找"最相似的段落"——余弦相似度计算</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>注入 Prompt — 生成答案</strong>
+              <p>把检索到的段落塞进 Prompt："基于以下资料回答：[检索结果]"，LLM 生成答案</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Code translation - IndexingRunner -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码翻译：索引构建器</h2>
+        <p><code>api/core/indexing_runner.py</code> 里的 <code>IndexingRunner</code> 负责整个建索引流程。看看它的错误处理有多严谨：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-keyword">def</span> <span class="code-function">_handle_indexing_error</span>(</span>
+<span class="code-line">    <span class="code-keyword">self</span>,</span>
+<span class="code-line">    document_id: str,</span>
+<span class="code-line">    error: Exception</span>
+<span class="code-line">) -> <span class="code-keyword">None</span>:</span>
+<span class="code-line">    document = db.session.get(</span>
+<span class="code-line">        DatasetDocument, document_id)</span>
+<span class="code-line">    <span class="code-keyword">if</span> document:</span>
+<span class="code-line">        document.indexing_status = </span>
+<span class="code-line">            IndexingStatus.ERROR</span>
+<span class="code-line">        document.error = str(error_message)</span>
+<span class="code-line">        db.session.commit()</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">定义一个"处理建索引失败"的方法</p>
+              <p class="tl">（self 是类实例）</p>
+              <p class="tl">哪个文档出错了（用 ID 标识）</p>
+              <p class="tl">错误是什么（Python 里所有异常的基类）</p>
+              <p class="tl">返回类型是 None——这个方法只做副作用（更新数据库），不返回值</p>
+              <p class="tl">从数据库里查出这个文档的记录</p>
+              <p class="tl">如果文档还在（没有被删除）</p>
+              <p class="tl">把状态改为 ERROR——前端会显示"处理失败"</p>
+              <p class="tl">记录错误原因——方便用户和管理员排查</p>
+              <p class="tl">提交到数据库——这个修改正式生效</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent animate-in">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">生产级的标志：状态机</strong>
+            <p>注意 IndexingStatus.ERROR 这种模式——文档处理有明确的状态流转：pending → indexing → completed / error。这叫"<span class="term" data-definition="状态机（State Machine）：规定一个事物可以处于哪些状态、在什么条件下从一个状态变到另一个状态。就像交通灯只能是红/黄/绿，不能是紫色。">状态机</span>"。生产代码总是把状态显式化，而不是靠猜测。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Chunking strategy impact -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">切块策略：影响检索质量的隐藏参数</h2>
+        <p>切块大小是 RAG 质量最重要的调参点，也是最容易被忽略的。理解它，你才能在 Dify 里做出正确的配置选择：</p>
+
+        <div class="icon-rows animate-in">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-error)">✂️</div>
+            <div>
+              <strong>切太小（&lt;100 token）</strong>
+              <p>段落缺乏上下文，检索出来的片段 AI 看不懂——答案支离破碎</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-success)">✅</div>
+            <div>
+              <strong>适中（300-500 token）</strong>
+              <p>Dify 默认值。一般覆盖一个完整段落，语义连贯，检索精度和上下文长度平衡</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-error)">📏</div>
+            <div>
+              <strong>切太大（&gt;1000 token）</strong>
+              <p>每个段落包含多个主题，检索出来的内容不够精准，且占用更多 Prompt 空间</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">理解检验</h2>
+
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！RAG 不训练模型，它只是在回答时把相关文档片段临时注入 Prompt。更新文档就能马上生效，不需要重新训练任何东西。"
+               data-explanation-wrong="想想 RAG 和微调（fine-tuning）的本质区别——RAG 是回答时临时检索，不是让模型记住知识。更新文档后需要做什么？">
+            <h3 class="quiz-question">公司今天更新了一份产品手册，你想让知识库里的 AI 立刻用上新版本。你应该怎么做？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>重新训练 AI 模型（微调），让它记住新内容</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>在 Dify 知识库里上传新版手册并重建索引</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>在 Prompt 里把新手册全文贴进去</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="是的！RAG 只能帮 AI 找到"相关段落"，最终答案还是由 LLM 生成。如果找到的段落里根本没有这个信息，AI 就无法给出正确答案——或者会产生幻觉。"
+               data-explanation-wrong="RAG 确实很强大，但它有一个根本限制——想想 RAG 的第一步是"检索"，如果检索不到，会发生什么？">
+            <h3 class="quiz-question">你用 Dify 搭建了一个基于公司文档的 QA 机器人。一个用户问了一个问题，但相关信息根本没有在任何已上传的文档里。AI 最可能会怎么回答？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>AI 可能会"幻觉"出一个听起来合理但错误的答案</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>系统会自动报错，用户看到"未找到相关信息"</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>AI 会拒绝回答，因为 RAG 不让 AI 使用自己的训练知识</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">提交答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重新作答</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

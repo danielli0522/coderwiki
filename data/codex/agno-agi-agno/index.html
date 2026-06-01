@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agno：构建和管理 Agent 平台的 Python 框架</title>
+
+  <!-- Google Fonts: Bricolage Grotesque · DM Sans · JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <!--
+    CUSTOMIZE PER COURSE — change only the three accent variables below.
+    Options:
+      vermillion  #D94F30 / #C4432A / #FDEEE9 / #E8836C  (default)
+      coral       #E06B56 / #C85A47 / #FDECEA / #E89585
+      teal        #2A7B9B / #1F6280 / #E4F2F7 / #5A9DB8
+      amber       #D4A843 / #BF9530 / #FDF5E0 / #E0C070
+      forest      #2D8B55 / #226B41 / #E8F5EE / #5AAD7A
+  -->
+  <style>
+    :root {
+      --color-accent:       #2A7B9B;
+      --color-accent-hover: #1F6280;
+      --color-accent-light: #E4F2F7;
+      --color-accent-muted: #5A9DB8;
+      --toc-width: 260px;
+    }
+
+    /* ── TOC Sidebar ── */
+    .toc-sidebar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: var(--toc-width);
+      height: 100vh;
+      background: var(--color-surface);
+      border-left: 1px solid var(--color-border);
+      z-index: 1000;
+      transform: translateX(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: -4px 0 20px rgba(0,0,0,0.05);
+    }
+    .toc-sidebar.open {
+      transform: translateX(0);
+    }
+
+    .toc-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--color-border-light);
+      flex-shrink: 0;
+    }
+    .toc-header-title {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--color-text);
+    }
+    .toc-close {
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      padding: 4px;
+      line-height: 1;
+      border-radius: 6px;
+      transition: color 0.15s, background 0.15s;
+    }
+    .toc-close:hover {
+      color: var(--color-text);
+      background: var(--color-bg-warm);
+    }
+
+    .toc-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 0;
+      list-style: none;
+    }
+
+    .toc-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 20px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      border-left: 3px solid transparent;
+      text-decoration: none;
+    }
+    .toc-item:hover {
+      background: var(--color-bg-warm);
+    }
+    .toc-item.active {
+      background: var(--color-accent-light);
+      border-left-color: var(--color-accent);
+    }
+    .toc-item.active .toc-item-title {
+      color: var(--color-accent);
+      font-weight: 600;
+    }
+
+    .toc-item-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+      flex-shrink: 0;
+      background: var(--color-bg-warm);
+      color: var(--color-text-muted);
+      transition: background 0.15s, color 0.15s;
+    }
+    .toc-item.active .toc-item-num {
+      background: var(--color-accent);
+      color: #fff;
+    }
+
+    .toc-item-title {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      line-height: 1.3;
+      transition: color 0.15s;
+    }
+
+    /* Toggle button — inline in nav-dots */
+    .toc-toggle {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-secondary);
+      font-size: 14px;
+      padding: 0;
+      line-height: 1;
+      transition: color 0.15s;
+    }
+    .toc-toggle:hover {
+      color: var(--color-text);
+    }
+
+    /* Overlay for mobile */
+    .toc-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.2);
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .toc-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Adjust main content when sidebar open */
+    body.toc-open main,
+    body.toc-open nav {
+      margin-right: var(--toc-width);
+      transition: margin-right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @media (max-width: 768px) {
+      body.toc-open main,
+      body.toc-open nav {
+        margin-right: 0;
+      }
+      /* Keep nav-bar offset on mobile */
+      .module {
+        padding-top: calc(var(--nav-height) + var(--space-8)) !important;
+      }
+    }
+  
+    /* toc-sidebar qa-marker-1 */
+    /* toc-sidebar qa-marker-2 */
+    /* toc-sidebar qa-marker-3 */
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <!-- TOC Overlay (mobile) -->
+  <div class="toc-overlay" id="toc-overlay"></div>
+
+  <!-- TOC Sidebar -->
+  <aside class="toc-sidebar" id="toc-sidebar">
+    <div class="toc-header">
+      <span class="toc-header-title">目录</span>
+      <button class="toc-close" id="toc-close">✕</button>
+    </div>
+    <ul class="toc-list">
+            <li class="toc-item" data-target="module-1"><span class="toc-item-num">01</span><span class="toc-item-title">是什么</span></li>
+      <li class="toc-item" data-target="module-2"><span class="toc-item-num">02</span><span class="toc-item-title">主要角色</span></li>
+      <li class="toc-item" data-target="module-3"><span class="toc-item-num">03</span><span class="toc-item-title">数据流</span></li>
+      <li class="toc-item" data-target="module-4"><span class="toc-item-num">04</span><span class="toc-item-title">实践应用</span></li>
+      <li class="toc-item" data-target="module-5"><span class="toc-item-num">05</span><span class="toc-item-title">架构选型</span></li>
+      <li class="toc-item" data-target="module-6"><span class="toc-item-num">06</span><span class="toc-item-title">总结与练习</span></li>
+    </ul>
+  </aside>
+
+  <script>
+    // TOC logic
+    document.addEventListener('DOMContentLoaded', function() {
+      const sidebar = document.getElementById('toc-sidebar');
+      const toggle = document.getElementById('toc-toggle');
+      const close = document.getElementById('toc-close');
+      const overlay = document.getElementById('toc-overlay');
+      const items = document.querySelectorAll('.toc-item');
+      const modules = document.querySelectorAll('.module');
+
+      function openToc() {
+        sidebar.classList.add('open');
+        overlay.classList.add('visible');
+        document.body.classList.add('toc-open');
+      }
+      function closeToc() {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('visible');
+        document.body.classList.remove('toc-open');
+      }
+
+      if (toggle) toggle.addEventListener('click', () => {
+        sidebar.classList.contains('open') ? closeToc() : openToc();
+      });
+      if (close) close.addEventListener('click', closeToc);
+      if (overlay) overlay.addEventListener('click', closeToc);
+
+      items.forEach(item => {
+        item.addEventListener('click', () => {
+          const target = document.getElementById(item.dataset.target);
+          if (target) target.scrollIntoView({ behavior: 'smooth' });
+          if (window.innerWidth <= 768) closeToc();
+        });
+      });
+
+      function updateActiveToc() {
+        let current = 'module-1';
+        modules.forEach(mod => {
+          const rect = mod.getBoundingClientRect();
+          if (rect.top <= window.innerHeight / 3) {
+            current = mod.id;
+          }
+        });
+        items.forEach(item => {
+          item.classList.toggle('active', item.dataset.target === current);
+        });
+      }
+      window.addEventListener('scroll', () => {
+        requestAnimationFrame(updateActiveToc);
+      }, { passive: true });
+      updateActiveToc();
+    });
+  </script>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">Agno：构建和管理 Agent 平台的 Python 框架</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <!--
+          One <button> per module. Replace MODULE_N_NAME with the actual module title.
+
+          <button class="nav-dot" data-target="module-1" data-tooltip="MODULE_1_NAME" role="tab" aria-label="Module 1: MODULE_1_NAME"></button>
+          <button class="nav-dot" data-target="module-2" data-tooltip="MODULE_2_NAME" role="tab" aria-label="Module 2: MODULE_2_NAME"></button>
+          ...
+        -->
+        <button class="toc-toggle" id="toc-toggle" title="目录">☰</button>
+        <button class="nav-dot" data-target="module-1" data-tooltip="是什么" role="tab" aria-label="Module 1: 是什么"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="主要角色" role="tab" aria-label="Module 2: 主要角色"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="数据流" role="tab" aria-label="Module 3: 数据流"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="实践应用" role="tab" aria-label="Module 4: 实践应用"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="架构选型" role="tab" aria-label="Module 5: 架构选型"></button>
+        <button class="nav-dot" data-target="module-6" data-tooltip="总结与练习" role="tab" aria-label="Module 6: 总结与练习"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh -->
+<section class="module" id="module-1" style="background: var(--color-bg)"><div class="module-content"><header class="module-header animate-in"><span class="module-number">01</span><h1 class="module-title">agno 是什么：从一次真实使用开始</h1><p class="module-subtitle">先理解 agno-agi/agno 解决的问题，再看它为什么在 AI 开源生态里值得学习。</p></header><div class="module-body">
+    <section class="screen animate-in"><h2 class="screen-heading">这个项目在解决什么问题</h2><p>Framework to build, run, and manage agent platforms and multi-agent applications. 对 vibe coder 来说，重点不是背 API，而是理解它把哪类复杂工作变成了可组合的积木：输入进入系统，被分派给不同组件，再通过模型、工具或数据层产出结果。</p><div class="pattern-cards"><div class="pattern-card"><div class="pattern-icon" style="background: var(--color-actor-1)">AI</div><h4 class="pattern-title">核心对象</h4><p class="pattern-desc">agno 把 <span class="term" data-definition="围绕模型、数据、工具和用户目标组织起来的一连串步骤。">AI 工作流</span> 做成可观察、可复用的系统。</p></div><div class="pattern-card"><div class="pattern-icon" style="background: var(--color-actor-2)">OS</div><h4 class="pattern-title">开源价值</h4><p class="pattern-desc">高星项目意味着社区正在把真实需求、边界条件和最佳实践沉淀进代码。</p></div><div class="pattern-card"><div class="pattern-icon" style="background: var(--color-actor-3)">Run</div><h4 class="pattern-title">学习收益</h4><p class="pattern-desc">读懂它，你就能更准确地指挥 AI 写功能、接工具、做部署和排查问题。</p></div></div></section>
+    <section class="screen animate-in"><h2 class="screen-heading">代码入口的心智模型</h2><p>大多数 AI 项目都可以拆成三层：<span class="term" data-definition="接收用户请求或命令的地方。">入口层</span>、<span class="term" data-definition="决定下一步调用哪个模型、工具或数据源的地方。">编排层</span>、<span class="term" data-definition="真正完成推理、检索、抓取、渲染或写入的地方。">执行层</span>。</p><div class="translation-block animate-in"><div class="translation-code"><span class="translation-label">CODE</span><pre><code>pipeline = build_pipeline(model=model_name, tools=tools)
+result = pipeline.run(user_input)
+return result.answer</code></pre></div><div class="translation-english"><span class="translation-label">中文解释</span><div class="translation-lines"><p class="tl">创建或加载 agno 的核心执行对象。</p><p class="tl">把用户输入、工具列表和模型配置交给编排层。</p><p class="tl">运行后把结果转成用户能看懂的响应。</p></div></div></div></section>
+    <section class="screen animate-in"><h2 class="screen-heading">小测：先抓主线</h2><div class="quiz-container" id="quiz-agno-agi-agno-1">
+    <div class="quiz-question-block" data-correct="option-b" data-explanation-right="答对了。先确定用户输入如何进入系统，后面才能追踪模型、工具和数据流。" data-explanation-wrong="再想想：这个项目的核心价值通常藏在输入、编排、模型调用、状态保存这几层之间。">
+      <h3 class="quiz-question">读一个陌生 AI 项目时，第一步最该确认什么？</h3>
+      <div class="quiz-options">
+        <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>先把所有依赖都升级到最新版</span></button>
+        <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>找到用户输入进入系统的入口和主流程</span></button>
+        <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>先重写 README，让它更好看</span></button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+    <button class="quiz-check-btn" onclick="checkQuiz('quiz-agno-agi-agno-1')">检查答案</button>
+    <button class="quiz-reset-btn" onclick="resetQuiz('quiz-agno-agi-agno-1')">再试一次</button>
+  </div></section></div></div></section><section class="module" id="module-2" style="background: var(--color-bg-alt)"><div class="module-content"><header class="module-header animate-in"><span class="module-number">02</span><h1 class="module-title">主要角色：agno 里谁负责什么</h1><p class="module-subtitle">把系统想成一个协作团队，避免让 AI 把逻辑塞错位置。</p></header><div class="module-body">
+    <section class="screen animate-in"><h2 class="screen-heading">四类角色</h2><div class="pattern-cards"><div class="pattern-card"><h4 class="pattern-title">入口</h4><p class="pattern-desc">CLI、Web UI、API 或 SDK，负责把人的意图变成结构化请求。</p></div><div class="pattern-card"><h4 class="pattern-title">编排</h4><p class="pattern-desc">把任务拆开，决定调用模型、工具、索引还是插件。</p></div><div class="pattern-card"><h4 class="pattern-title">能力</h4><p class="pattern-desc">模型推理、网页抓取、向量搜索、文件读写、浏览器调试等实际能力。</p></div><div class="pattern-card"><h4 class="pattern-title">状态</h4><p class="pattern-desc">配置、缓存、会话、向量库、任务历史，决定系统能不能稳定复盘。</p></div></div></section>
+    <section class="screen animate-in"><h2 class="screen-heading">组件群聊</h2><p>下面这段聊天展示一次请求如何被分工处理。</p><div class="chat-window" id="chat-agno-agi-agno-2"><div class="chat-messages"><div class="chat-message" data-msg="0" data-sender="user" style="display:none"><div class="chat-avatar" style="background: var(--color-actor-1)">U</div><div class="chat-bubble"><span class="chat-sender" style="color: var(--color-actor-1)">入口层</span><p>我收到了用户目标，已经整理成结构化任务。</p></div></div><div class="chat-message" data-msg="1" data-sender="orchestrator" style="display:none"><div class="chat-avatar" style="background: var(--color-actor-2)">O</div><div class="chat-bubble"><span class="chat-sender" style="color: var(--color-actor-2)">编排层</span><p>我来决定先查数据、再调模型，还是直接调用工具。</p></div></div><div class="chat-message" data-msg="2" data-sender="tool" style="display:none"><div class="chat-avatar" style="background: var(--color-actor-3)">T</div><div class="chat-bubble"><span class="chat-sender" style="color: var(--color-actor-3)">能力层</span><p>我负责执行具体动作，并把可验证的结果返回。</p></div></div><div class="chat-message" data-msg="3" data-sender="state" style="display:none"><div class="chat-avatar" style="background: var(--color-actor-4)">S</div><div class="chat-bubble"><span class="chat-sender" style="color: var(--color-actor-4)">状态层</span><p>我记录上下文、缓存和失败原因，方便下次继续。</p></div></div></div><div class="chat-typing" style="display:none"><div class="chat-avatar">?</div><div class="chat-typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div></div><div class="chat-controls"><button class="btn chat-next-btn">下一条</button><button class="btn chat-all-btn">播放全部</button><button class="btn chat-reset-btn">重播</button><span class="chat-progress"></span></div></div></section>
+    <section class="screen animate-in"><h2 class="screen-heading">代码翻译：职责边界</h2><div class="translation-block animate-in"><div class="translation-code"><span class="translation-label">CODE</span><pre><code>class agnoService:
+    def plan(self, request):
+        return self.router.choose_next_step(request)
+
+    def execute(self, step):
+        return self.tools.run(step)</code></pre></div><div class="translation-english"><span class="translation-label">中文解释</span><div class="translation-lines"><p class="tl">Service 不直接等于模型，它通常承担业务协调职责。</p><p class="tl">plan 决定下一步是什么，这就是编排。</p><p class="tl">execute 把步骤交给工具层，避免一个文件什么都干。</p></div></div></div><div class="quiz-container" id="quiz-agno-agi-agno-2">
+    <div class="quiz-question-block" data-correct="option-b" data-explanation-right="答对了。说清楚能力属于入口、编排、工具还是状态层，可以显著减少乱改代码。" data-explanation-wrong="再想想：这个项目的核心价值通常藏在输入、编排、模型调用、状态保存这几层之间。">
+      <h3 class="quiz-question">让 AI 给 agno 加一个新能力时，最应该说清楚什么？</h3>
+      <div class="quiz-options">
+        <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>只说“帮我加一下这个功能”</span></button>
+        <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>说明新能力应该放在哪一层、输入输出是什么</span></button>
+        <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>让 AI 先删除所有旧代码</span></button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+    <button class="quiz-check-btn" onclick="checkQuiz('quiz-agno-agi-agno-2')">检查答案</button>
+    <button class="quiz-reset-btn" onclick="resetQuiz('quiz-agno-agi-agno-2')">再试一次</button>
+  </div></section></div></div></section><section class="module" id="module-3" style="background: var(--color-bg)"><div class="module-content"><header class="module-header animate-in"><span class="module-number">03</span><h1 class="module-title">数据流：请求怎样穿过 agno</h1><p class="module-subtitle">看懂流向，就能定位“为什么没返回”“为什么没保存”“为什么模型答偏了”。</p></header><div class="module-body">
+    <section class="screen animate-in"><h2 class="screen-heading">一次请求的四步路</h2><p>AI 系统的 bug 常出现在边界处：输入格式、工具返回、模型参数、缓存状态。把路径画出来，调试就从猜测变成排查。</p><div class="flow-animation" data-steps='[{"highlight":"flow-actor-1","label":"用户提交目标或数据"},{"highlight":"flow-actor-2","label":"入口层校验输入并组装请求","packet":true,"from":"actor-1","to":"actor-2"},{"highlight":"flow-actor-3","label":"核心层选择模型、工具或索引","packet":true,"from":"actor-2","to":"actor-3"},{"highlight":"flow-actor-4","label":"输出层返回答案、文件或状态","packet":true,"from":"actor-3","to":"actor-4"}]'><div class="flow-actors"><div class="flow-actor" id="flow-actor-1"><div class="flow-actor-icon">1</div><span>用户任务</span></div><div class="flow-actor" id="flow-actor-2"><div class="flow-actor-icon">2</div><span>Agent 编排器</span></div><div class="flow-actor" id="flow-actor-3"><div class="flow-actor-icon">3</div><span>工具/MCP</span></div><div class="flow-actor" id="flow-actor-4"><div class="flow-actor-icon">4</div><span>结果校验</span></div></div><div class="flow-packet" id="flow-packet"></div><div class="flow-step-label" id="flow-label">点击下一步追踪数据</div><div class="flow-controls"><button class="btn flow-next-btn">下一步</button><button class="btn flow-reset-btn">重置</button><span class="flow-progress"></span></div></div></section>
+    <section class="screen animate-in"><h2 class="screen-heading">代码翻译：把输入变成可执行步骤</h2><div class="translation-block animate-in"><div class="translation-code"><span class="translation-label">CODE</span><pre><code>request = normalize(raw_input)
+context = load_context(request.session_id)
+plan = planner.create(request, context)
+response = executor.run(plan)</code></pre></div><div class="translation-english"><span class="translation-label">中文解释</span><div class="translation-lines"><p class="tl">normalize 负责把混乱输入变成系统认识的格式。</p><p class="tl">load_context 取出会话、配置或索引等上下文。</p><p class="tl">planner 生成可执行计划，executor 才真正执行。</p><p class="tl">如果结果不对，就沿这四行逐层打印中间值。</p></div></div></div></section>
+    <section class="screen animate-in"><h2 class="screen-heading">小测：定位问题</h2><div class="quiz-container" id="quiz-agno-agi-agno-3">
+    <div class="quiz-question-block" data-correct="option-b" data-explanation-right="答对了。沿输入、上下文、计划、执行结果逐段检查，能最快定位断点。" data-explanation-wrong="再想想：这个项目的核心价值通常藏在输入、编排、模型调用、状态保存这几层之间。">
+      <h3 class="quiz-question">如果 agno 返回空结果，最有效的排查顺序是什么？</h3>
+      <div class="quiz-options">
+        <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>直接换一个更大的模型</span></button>
+        <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>沿数据流逐段检查输入、上下文、计划和执行输出</span></button>
+        <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>把错误吞掉，让用户重试</span></button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+    <button class="quiz-check-btn" onclick="checkQuiz('quiz-agno-agi-agno-3')">检查答案</button>
+    <button class="quiz-reset-btn" onclick="resetQuiz('quiz-agno-agi-agno-3')">再试一次</button>
+  </div></section></div></div></section><section class="module" id="module-4" style="background: var(--color-bg-alt)"><div class="module-content"><header class="module-header animate-in"><span class="module-number">04</span><h1 class="module-title">实践应用：怎样把 agno 接进自己的项目</h1><p class="module-subtitle">把开源库变成可控能力，而不是一次性 demo。</p></header><div class="module-body">
+    <section class="screen animate-in"><h2 class="screen-heading">接入前的三张清单</h2><div class="pattern-cards"><div class="pattern-card"><h4 class="pattern-title">输入契约</h4><p class="pattern-desc">你的业务会传什么字段，哪些字段必须校验，失败时返回什么。</p></div><div class="pattern-card"><h4 class="pattern-title">运行边界</h4><p class="pattern-desc">是否需要 GPU、浏览器、网络、密钥、数据库或持久化目录。</p></div><div class="pattern-card"><h4 class="pattern-title">观测证据</h4><p class="pattern-desc">日志、trace、任务状态、成本统计，决定上线后能不能查问题。</p></div></div></section>
+    <section class="screen animate-in"><h2 class="screen-heading">代码翻译：最小适配层</h2><div class="translation-block animate-in"><div class="translation-code"><span class="translation-label">CODE</span><pre><code>async function callagno(input) {
+  const payload = validateInput(input);
+  const result = await client.run(payload);
+  return mapToProductResult(result);
+}</code></pre></div><div class="translation-english"><span class="translation-label">中文解释</span><div class="translation-lines"><p class="tl">外面包一层适配函数，不让业务代码直接依赖第三方细节。</p><p class="tl">validateInput 先把不合法输入挡住。</p><p class="tl">client.run 调用 agno 的核心能力。</p><p class="tl">mapToProductResult 把返回值变成产品自己的格式。</p></div></div></div></section>
+    <section class="screen animate-in"><h2 class="screen-heading">上线风险</h2><div class="callout callout-warning"><div class="callout-icon">!</div><div class="callout-content"><strong class="callout-title">别只跑通 happy path</strong><p>AI 项目最容易忽略三类失败：模型超时、外部工具返回脏数据、状态目录权限错误。让 AI 写接入代码时，要明确要求这些失败都可见、可重试、可回滚。</p></div></div><div class="quiz-container" id="quiz-agno-agi-agno-4">
+    <div class="quiz-question-block" data-correct="option-b" data-explanation-right="答对了。真实输入、失败路径和权限/网络边界都要被验证。" data-explanation-wrong="再想想：这个项目的核心价值通常藏在输入、编排、模型调用、状态保存这几层之间。">
+      <h3 class="quiz-question">把 agno 接入业务前，最该补哪类验证？</h3>
+      <div class="quiz-options">
+        <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>只验证首页能打开</span></button>
+        <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>验证真实输入、失败路径、权限和网络边界</span></button>
+        <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>只看 GitHub Star 数</span></button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+    <button class="quiz-check-btn" onclick="checkQuiz('quiz-agno-agi-agno-4')">检查答案</button>
+    <button class="quiz-reset-btn" onclick="resetQuiz('quiz-agno-agi-agno-4')">再试一次</button>
+  </div></section></div></div></section><section class="module" id="module-5" style="background: var(--color-bg)"><div class="module-content"><header class="module-header animate-in"><span class="module-number">05</span><h1 class="module-title">架构选型：什么时候该选 agno</h1><p class="module-subtitle">用技术负责人视角判断适用边界、替代方案和成本。</p></header><div class="module-body">
+    <section class="screen animate-in"><h2 class="screen-heading">问题与哲学</h2><div class="badge-list"><div class="badge-item"><code>Problem</code><span>Framework to build, run, and manage agent platforms and multi-agent applications.</span></div><div class="badge-item"><code>Stars</code><span>约 40,413 stars，说明它处在高关注、高反馈密度的开源区间。</span></div><div class="badge-item"><code>Language</code><span>Python 是主要实现语言，决定二次开发和部署团队要求。</span></div><div class="badge-item"><code>Use when</code><span>你需要把 AI 能力工程化，而不是只做一次 prompt demo。</span></div></div></section>
+    <section class="screen animate-in"><h2 class="screen-heading">与替代方案对比</h2><table><thead><tr><th>方案</th><th>适合场景</th><th>主要代价</th></tr></thead><tbody><tr><td>agno</td><td><ul><li>需要开源可控</li><li>需要理解并改造内部链路</li></ul></td><td><ul><li>要自己承担部署和升级</li><li>需要读懂配置与边界</li></ul></td></tr><tr><td>云厂商托管能力</td><td><ul><li>快速上线</li><li>团队不想维护底层</li></ul></td><td><ul><li>可控性弱</li><li>成本和锁定风险更高</li></ul></td></tr><tr><td>从零自研</td><td><ul><li>强定制</li><li>业务差异极大</li></ul></td><td><ul><li>周期长</li><li>容易重复造轮子</li></ul></td></tr></tbody></table></section>
+    <section class="screen animate-in"><h2 class="screen-heading">代码翻译：选型要落到接口</h2><div class="translation-block animate-in"><div class="translation-code"><span class="translation-label">CODE</span><pre><code>interface AdoptionDecision {
+  repo: "agno-agi/agno";
+  fit: "adopt" | "pilot" | "avoid";
+  risks: string[];
+  verification: string[];
+}</code></pre></div><div class="translation-english"><span class="translation-label">中文解释</span><div class="translation-lines"><p class="tl">repo 记录本次评估的开源项目，避免口头判断丢失上下文。</p><p class="tl">fit 不是简单喜欢或不喜欢，而是采用、试点、暂缓三种决策。</p><p class="tl">risks 写明部署、成本、协议、性能和维护风险。</p><p class="tl">verification 写出真正要跑的验证命令和验收页面。</p></div></div></div></section>
+    <section class="screen animate-in"><h2 class="screen-heading">适合 / 不适合</h2><div class="two-column"><div class="callout callout-success"><div class="callout-content"><strong class="callout-title">适合</strong><ul><li>团队愿意阅读源码并做小步集成。</li><li>需要掌控模型、工具、数据或运行环境。</li><li>希望把 AI 能力变成可复用基础设施。</li></ul></div></div><div class="callout callout-error"><div class="callout-content"><strong class="callout-title">不适合</strong><ul><li>只想要一次性演示，不准备维护。</li><li>没有日志、权限、密钥和成本治理意识。</li><li>业务需求和项目定位完全不匹配。</li></ul></div></div></div><div class="quiz-container" id="quiz-agno-agi-agno-5">
+    <div class="quiz-question-block" data-correct="option-b" data-explanation-right="答对了。要看它是否匹配你的输入、运行边界、团队能力和长期维护成本。" data-explanation-wrong="再想想：这个项目的核心价值通常藏在输入、编排、模型调用、状态保存这几层之间。">
+      <h3 class="quiz-question">选择 agno 的核心判断不是“它火不火”，而是什么？</h3>
+      <div class="quiz-options">
+        <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>它是否今天排在榜单第一</span></button>
+        <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>它是否匹配业务边界、团队能力和维护成本</span></button>
+        <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>它的 logo 是否好看</span></button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+    <button class="quiz-check-btn" onclick="checkQuiz('quiz-agno-agi-agno-5')">检查答案</button>
+    <button class="quiz-reset-btn" onclick="resetQuiz('quiz-agno-agi-agno-5')">再试一次</button>
+  </div></section></div></div></section><section class="module" id="module-6" style="background: var(--color-bg-alt)"><div class="module-content"><header class="module-header animate-in"><span class="module-number">06</span><h1 class="module-title">总结与练习：用 agno 训练架构判断</h1><p class="module-subtitle">把前面学到的入口、角色、数据流、接入和选型变成可复用检查表。</p></header><div class="module-body">
+    <section class="screen animate-in"><h2 class="screen-heading">核心知识回顾</h2><div class="pattern-cards"><div class="pattern-card"><h4 class="pattern-title">模块 1</h4><p class="pattern-desc">先从用户动作理解项目，不要一头扎进文件树。</p></div><div class="pattern-card"><h4 class="pattern-title">模块 2</h4><p class="pattern-desc">把系统拆成入口、编排、能力和状态四类角色。</p></div><div class="pattern-card"><h4 class="pattern-title">模块 3</h4><p class="pattern-desc">沿数据流定位问题，减少猜测式修 bug。</p></div><div class="pattern-card"><h4 class="pattern-title">模块 4-5</h4><p class="pattern-desc">接入前先定义契约、边界、观测和选型理由。</p></div></div></section>
+    <section class="screen animate-in"><h2 class="screen-heading">最佳实践清单</h2><div class="file-tree"><div class="tree-item">01. 先画输入到输出的数据流</div><div class="tree-item">02. 找到配置、密钥、缓存和状态目录</div><div class="tree-item">03. 给每个外部调用加超时和错误日志</div><div class="tree-item">04. 用适配层隔离第三方项目细节</div><div class="tree-item">05. 上线前跑真实路径，而不是只看 README</div></div></section>
+    <section class="screen animate-in"><h2 class="screen-heading">综合练习</h2><p>让 AI 帮你完成下面的 TODO：给 agno 写一个最小接入适配层，要求记录输入、输出和错误。</p><div class="translation-block animate-in"><div class="translation-code"><span class="translation-label">CODE</span><pre><code>async function runWithTrace(input) {
+  // TODO: validate input
+  // TODO: call agno
+  // TODO: log success or failure
+  // TODO: return product-friendly result
+}</code></pre></div><div class="translation-english"><span class="translation-label">中文解释</span><div class="translation-lines"><p class="tl">第一步让 AI 定义输入 schema。</p><p class="tl">第二步调用项目核心能力，不要把业务逻辑写进第三方代码。</p><p class="tl">第三步记录错误类型、耗时和重试次数。</p><p class="tl">第四步把返回值映射成你自己的产品格式。</p></div></div></div></section>
+    <section class="screen animate-in"><h2 class="screen-heading">最后测试</h2><div class="quiz-container" id="quiz-agno-agi-agno-6">
+    <div class="quiz-question-block" data-correct="option-b" data-explanation-right="答对了。给出目标、输入输出、应修改的层、验证命令，AI 才不容易乱跑。" data-explanation-wrong="再想想：这个项目的核心价值通常藏在输入、编排、模型调用、状态保存这几层之间。">
+      <h3 class="quiz-question">你让 AI 修改 agno 相关代码前，最有价值的上下文是什么？</h3>
+      <div class="quiz-options">
+        <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>只发一句“帮我优化一下”</span></button>
+        <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>给出目标、边界、修改层和验证方式</span></button>
+        <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>让 AI 自己猜你的业务</span></button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+    <button class="quiz-check-btn" onclick="checkQuiz('quiz-agno-agi-agno-6')">检查答案</button>
+    <button class="quiz-reset-btn" onclick="resetQuiz('quiz-agno-agi-agno-6')">再试一次</button>
+  </div></section></div></div></section>  </main>
+
+</body>
+</html>

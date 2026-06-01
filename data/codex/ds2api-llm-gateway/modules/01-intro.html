@@ -1,0 +1,244 @@
+    <section class="module" id="module-1">
+      <div class="module-inner">
+
+        <header class="module-header">
+          <span class="module-number">01</span>
+          <h1 class="module-title">没有官方 API？我们自己造一个</h1>
+          <p class="module-tagline">把 DeepSeek 网页对话伪装成 OpenAI / Claude / Gemini API，让既有 SDK 不改一行代码就能跑。</p>
+        </header>
+
+        <section class="screen">
+          <h2>痛点：你的代码不会变，但模型没 API</h2>
+          <p>你已经写好了一套调用 <span class="term" data-definition="SDK = 软件开发工具包。第三方提供的一套现成函数库，你不用自己拼 HTTP 请求，调几个方法就能用它的服务。">SDK</span> 的代码 —— 比如 OpenAI 的 <code>openai.chat.completions.create()</code>。某天你想换成 DeepSeek，结果发现：DeepSeek 只开放网页聊天，没有官方 <span class="term" data-definition="API = 应用程序接口。一个程序对外暴露的"插孔"，别的程序按约定的格式发请求过来就能用它的能力。">API</span>。</p>
+
+          <div class="callout callout-accent">
+            <div class="callout-icon">💡</div>
+            <div class="callout-content">
+              <strong class="callout-title">ds2api 的定位</strong>
+              <p>它是一个 <span class="term" data-definition="网关 = 站在你和真正服务之间的一台中转机。它接你的请求、改写一下、再去问后端、把答案翻译回你期望的格式。">网关</span>：对外假装成 OpenAI / Claude / Gemini API，对内把请求翻译成 DeepSeek 网页能听懂的对话，再把网页的流式回复包装回你期待的 API 格式。<strong>SDK 一行不动，模型已经悄悄换掉了。</strong></p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>谁会用它，为什么有意思</h2>
+          <div class="pattern-cards">
+            <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+              <div class="pattern-icon" style="background: var(--color-actor-1)">🧑‍💻</div>
+              <h4 class="pattern-title">个人开发者</h4>
+              <p class="pattern-desc">想把自己的 AI 工具切到 DeepSeek 省钱，但代码用了一堆 OpenAI SDK，不想全部重写。</p>
+            </div>
+            <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+              <div class="pattern-icon" style="background: var(--color-actor-2)">🏢</div>
+              <h4 class="pattern-title">小团队</h4>
+              <p class="pattern-desc">已经在用 Claude Code / Codex CLI / LangChain，想接入 DeepSeek 做对比实验，又不想改框架。</p>
+            </div>
+            <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+              <div class="pattern-icon" style="background: var(--color-actor-3)">🔧</div>
+              <h4 class="pattern-title">工程学习者</h4>
+              <p class="pattern-desc">想拆解一个真实的"协议适配 + 并发控制 + 流式转发"工程是怎么搭起来的。</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>一次请求会经历什么 —— 跟着数据走</h2>
+          <p>想象你在终端运行 <code>claude "解释一下闭包"</code>。Claude Code 以为它在跟 Anthropic 服务器说话，但环境变量里 <code>ANTHROPIC_BASE_URL</code> 偷偷指向了本地的 ds2api。接下来发生的事：</p>
+
+          <div class="flow-animation" data-steps='[
+            {"highlight":"flow-actor-1","label":"Claude Code 发出 POST /v1/messages，body 是 Anthropic 协议的 JSON"},
+            {"highlight":"flow-actor-2","label":"ds2api 路由器收到请求，认出是 Claude 形状","packet":true,"from":"actor-1","to":"actor-2"},
+            {"highlight":"flow-actor-3","label":"PromptCompat 把 Claude messages 拍扁成纯文本上下文","packet":true,"from":"actor-2","to":"actor-3"},
+            {"highlight":"flow-actor-4","label":"账号池借出一个空闲 DeepSeek 账号槽位","packet":true,"from":"actor-3","to":"actor-4"},
+            {"highlight":"flow-actor-5","label":"DeepSeek 客户端先解 PoW，再发起网页 completion","packet":true,"from":"actor-4","to":"actor-5"},
+            {"highlight":"flow-actor-5","label":"DeepSeek 网页流式吐字（SSE 事件流）"},
+            {"highlight":"flow-actor-2","label":"ds2api 实时把每个 token 包装成 Anthropic 流格式回吐","packet":true,"from":"actor-5","to":"actor-2"},
+            {"highlight":"flow-actor-1","label":"Claude Code 看到熟悉的 Anthropic SSE 流，毫无察觉"}
+          ]'>
+            <div class="flow-actors">
+              <div class="flow-actor" id="flow-actor-1">
+                <div class="flow-actor-icon">CC</div>
+                <span>Claude Code</span>
+              </div>
+              <div class="flow-actor" id="flow-actor-2">
+                <div class="flow-actor-icon">RT</div>
+                <span>chi 路由</span>
+              </div>
+              <div class="flow-actor" id="flow-actor-3">
+                <div class="flow-actor-icon">PC</div>
+                <span>PromptCompat</span>
+              </div>
+              <div class="flow-actor" id="flow-actor-4">
+                <div class="flow-actor-icon">AP</div>
+                <span>账号池</span>
+              </div>
+              <div class="flow-actor" id="flow-actor-5">
+                <div class="flow-actor-icon">DS</div>
+                <span>DeepSeek 网页</span>
+              </div>
+            </div>
+
+            <div class="flow-packet" id="flow-packet"></div>
+            <div class="flow-step-label" id="flow-label">点击"下一步"开始追踪请求</div>
+
+            <div class="flow-controls">
+              <button class="btn flow-next-btn">下一步</button>
+              <button class="btn flow-reset-btn">重新播放</button>
+              <span class="flow-progress"></span>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>仓库结构 —— 五个核心目录</h2>
+          <p>你不需要记目录名。但知道每件事住在哪里，能让你跟 AI 协作时一句话说清要改哪：<em>"去 internal/promptcompat 改一下 Claude 的 system 注入"</em>。</p>
+
+          <div class="file-tree">
+            <div class="ft-folder open">
+              <span class="ft-name">internal/server/</span>
+              <span class="ft-desc">chi 路由 + 中间件，所有 HTTP 请求的第一站</span>
+            </div>
+            <div class="ft-folder">
+              <span class="ft-name">internal/httpapi/</span>
+              <span class="ft-desc">三套协议适配器：openai/ · claude/ · gemini/ · admin/</span>
+            </div>
+            <div class="ft-folder">
+              <span class="ft-name">internal/promptcompat/</span>
+              <span class="ft-desc">把三种协议的消息归一成 DeepSeek 网页能吃的纯文本上下文</span>
+            </div>
+            <div class="ft-folder">
+              <span class="ft-name">internal/account/</span>
+              <span class="ft-desc">账号池 + 并发槽位 + 等待队列</span>
+            </div>
+            <div class="ft-folder">
+              <span class="ft-name">internal/deepseek/</span>
+              <span class="ft-desc">真正去敲 DeepSeek 网页的客户端：登录 / PoW / completion</span>
+            </div>
+            <div class="ft-folder">
+              <span class="ft-name">pow/</span>
+              <span class="ft-desc">DeepSeekHashV1 工作量证明的纯 Go 实现</span>
+            </div>
+            <div class="ft-folder">
+              <span class="ft-name">api/ + internal/js/</span>
+              <span class="ft-desc">Vercel Node Runtime 流式桥接，仅在 serverless 部署生效</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>记一下：路由就是个分检员</h2>
+          <p>Go 后端启动时，<code>internal/server/router.go</code> 把所有协议入口挂到同一棵 chi 路由树上。每条路径只对应一种协议适配器：</p>
+
+          <div class="translation-block animate-in">
+            <div class="translation-code">
+              <span class="translation-label">CODE · internal/server/NewApp()</span>
+              <pre><code><span class="code-line"><span class="code-keyword">store</span>, _ := config.LoadStoreWithError()</span>
+<span class="code-line"><span class="code-keyword">pool</span> := account.NewPool(store)</span>
+<span class="code-line"><span class="code-keyword">resolver</span> := auth.NewResolver(store, pool, ...)</span>
+<span class="code-line"><span class="code-keyword">dsClient</span> := dsclient.NewClient(store, resolver)</span>
+<span class="code-line"><span class="code-keyword">if</span> err := dsClient.PreloadPow(ctx); err != <span class="code-keyword">nil</span> {</span>
+<span class="code-line">  config.Logger.Warn(<span class="code-string">"[PoW] init failed"</span>, ...)</span>
+<span class="code-line">} <span class="code-keyword">else</span> {</span>
+<span class="code-line">  config.Logger.Info(<span class="code-string">"[PoW] pure Go solver ready"</span>)</span>
+<span class="code-line">}</span></code></pre>
+            </div>
+            <div class="translation-english">
+              <span class="translation-label">中文翻译</span>
+              <div class="translation-lines">
+                <p class="tl">先把配置读出来 —— 账号、密钥、阈值这些都在里面。</p>
+                <p class="tl">用配置造一个账号池，专门管"哪个 DeepSeek 账号现在空闲"。</p>
+                <p class="tl">造一个鉴权解析器，把客户端发来的 API key 翻译成具体哪个 DeepSeek 账号该接这单。</p>
+                <p class="tl">造一个 DeepSeek 客户端，真正去敲网页那边。</p>
+                <p class="tl">服务还没接客之前，先把 PoW（工作量证明）的求解器预热一下。</p>
+                <p class="tl">预热失败也不挂 —— 写一条警告，让接到第一单时再现算。</p>
+                <p class="tl">预热成功就打日志说"纯 Go PoW 解算器就绪"，这是它的招牌之一。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout callout-info">
+            <div class="callout-icon">📝</div>
+            <div class="callout-content">
+              <strong class="callout-title">为什么开服前要预热 PoW</strong>
+              <p>DeepSeek 网页每次发对话前要求客户端先算一道哈希难题（防爬）。冷启动时算一次得花几百毫秒，会让第一个用户感觉很慢。预热就是开门前先把灶火点上。</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>检查一下：你抓住了主干吗？</h2>
+          <div class="quiz-container" id="quiz-module1">
+
+            <div class="quiz-question-block"
+                 data-correct="b"
+                 data-explanation-right="对。ds2api 是协议层网关，它不重新训练任何模型，也不改 SDK 代码 —— 它只让上游网页 DeepSeek 看起来像是 3 种主流官方 API。"
+                 data-explanation-wrong="再想想。ds2api 没训练新模型，也不要求你改 SDK；它做的事更接近"翻译大堂"。">
+              <h3 class="quiz-question">朋友问你 ds2api 到底是什么，下面哪个解释最准确？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>它是一个新模型，比 DeepSeek 更便宜。</span>
+                </button>
+                <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>它把 DeepSeek 网页对话伪装成 OpenAI/Claude/Gemini API，让旧代码不改一行就能换模型。</span>
+                </button>
+                <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>它是一个 SDK，要你换掉所有 OpenAI 调用代码。</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <div class="quiz-question-block"
+                 data-correct="c"
+                 data-explanation-right="对。所有协议先汇集到 PromptCompat，统一成纯文本上下文交给 DeepSeek 网页。这一步是整个项目的灵魂。"
+                 data-explanation-wrong="再看一下流程图：三种协议表面不同，但都会先在 PromptCompat 收口，再丢给上游。">
+              <h3 class="quiz-question">在追踪一个 Claude Code 请求时，下一步它会撞到哪个组件？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>账号池 —— 直接抢账号去发请求。</span>
+                </button>
+                <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>PoW 求解器 —— 一切先解题。</span>
+                </button>
+                <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>PromptCompat —— 先把 Claude messages 翻成纯文本上下文。</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <div class="quiz-question-block"
+                 data-correct="b"
+                 data-explanation-right="对。internal/server 只负责把请求分流到对的协议适配器，类似快递分检中心。具体怎么把消息转成 DeepSeek 网页能吃的格式，是 promptcompat 的事。"
+                 data-explanation-wrong="不对。internal/server 是路由 + 中间件层，不做协议翻译。把 Claude/OpenAI 消息归一成 DeepSeek 上下文是 promptcompat 的事。">
+              <h3 class="quiz-question">你想改"Claude 的 system prompt 注入逻辑"，应该改哪个目录？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>internal/server/ —— 因为请求一进来就在这。</span>
+                </button>
+                <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>internal/promptcompat/ —— 因为 system 注入是协议归一这一层的事。</span>
+                </button>
+                <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>internal/account/ —— 因为它管所有账号。</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">检查答案</button>
+            <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">重做</button>
+          </div>
+        </section>
+
+      </div>
+    </section>

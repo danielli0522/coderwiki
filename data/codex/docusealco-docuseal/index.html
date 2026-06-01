@@ -1,0 +1,1895 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DocuSeal 文档签署平台实战</title>
+
+  <!-- Google Fonts: Bricolage Grotesque · DM Sans · JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Amber accent -->
+  <style>
+    :root {
+      --color-accent:       #D4A843;
+      --color-accent-hover: #BF9530;
+      --color-accent-light: #FDF5E0;
+      --color-accent-muted: #E0C070;
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">DocuSeal 文档签署平台实战</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <button class="nav-dot" data-target="module-1" data-tooltip="平台概览与部署" role="tab" aria-label="Module 1: 平台概览与部署"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="模板与表单构建" role="tab" aria-label="Module 2: 模板与表单构建"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="提交与签署流程" role="tab" aria-label="Module 3: 提交与签署流程"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="API 与 Webhook 集成" role="tab" aria-label="Module 4: API 与 Webhook 集成"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="安全、签名验证与生产部署" role="tab" aria-label="Module 5: 安全、签名验证与生产部署"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh -->
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 1: 平台概览与部署
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">平台概览与部署</h1>
+      <p class="module-subtitle">理解 DocuSeal 的核心定位与架构，掌握 Docker 一键部署——从零到运行只需一条命令</p>
+    </header>
+
+    <!-- ── Screen 1: DocuSeal 是什么？ ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">DocuSeal 是什么？</h2>
+
+      <p>想象你需要让 50 个合作伙伴签署一份保密协议（NDA）。传统方式是发邮件、打印、签字、扫描、回传——一轮下来至少三天。现在有一个开源工具，能让你上传 PDF、拖拽设置签名区域、一键发送给所有签署人、自动追踪状态、生成审计日志。这就是 <span class="term" data-definition="DocuSeal 是一个开源的文档签署和表单填写平台。它提供 PDF 表单构建器（WYSIWYG）、12 种字段类型、多方签署、自动化邮件、电子签名验证等功能，可自行部署或使用云服务。">DocuSeal</span>。</p>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">&#128161;</div>
+        <div class="callout-content">
+          <strong class="callout-title">核心理念</strong>
+          <p>DocuSeal 不只是"电子签名"——它是<strong>完整的文档处理流水线</strong>。从创建模板、分配签署人、发送邀请、追踪状态，到生成审计日志和签名验证，覆盖文档签署的全生命周期。而且它是开源的，你可以部署在自己的服务器上，数据完全由你掌控。</p>
+        </div>
+      </div>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">&#128196;</div>
+          <h4 class="pattern-title">PDF 表单构建器</h4>
+          <p class="pattern-desc">所见即所得的拖拽式编辑器，支持 12 种字段类型：签名、日期、文件上传、复选框、文本、下拉框等。每个字段可绑定到特定签署人角色。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">&#9993;</div>
+          <h4 class="pattern-title">自动化邮件通知</h4>
+          <p class="pattern-desc">通过 SMTP 自动发送签署邀请、完成通知、拒绝通知。支持自定义邮件模板和回复地址，每个签署人收到个性化的签署链接。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">&#128274;</div>
+          <h4 class="pattern-title">电子签名验证</h4>
+          <p class="pattern-desc">自动在 PDF 中嵌入电子签名，支持签名验证（HexaPDF）、审计日志生成，确保文档的完整性和不可抵赖性。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+          <div class="pattern-icon" style="background: var(--color-actor-4)">&#127760;</div>
+          <h4 class="pattern-title">开放 API 与 Webhook</h4>
+          <p class="pattern-desc">RESTful API 支持创建模板、发起签署、查询状态。Webhook 实时推送事件通知，方便与你的业务系统深度集成。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 2: 核心架构 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">核心架构：四层模型</h2>
+
+      <p>DocuSeal 基于 <span class="term" data-definition="Ruby on Rails 是一个成熟的 Web 应用框架，遵循 MVC（模型-视图-控制器）模式。DocuSeal 使用 Rails 7 + Shakapacker 构建，后端 Ruby，前端 Vue.js + Tailwind CSS。">Ruby on Rails</span> 构建，采用经典的三层架构加上一个外部集成层。理解这四层模型，就能快速定位任何功能的代码位置。</p>
+
+      <div class="arch-diagram">
+        <div class="arch-zone">
+          <h4 class="arch-zone-label">用户界面层 — 用户看到和操作的部分</h4>
+          <div class="arch-component" data-desc="Vue.js 3 构建的单页应用组件，包括模板构建器（template_builder）、签署表单（submission_form）、签名画板（draw.js）等。使用 Tailwind CSS + DaisyUI 样式。">
+            <div class="arch-icon">&#127912;</div>
+            <span>Vue.js 前端组件</span>
+          </div>
+          <div class="arch-component" data-desc="移动端优先的签署表单，通过 /s/:slug 路径访问。签署人无需登录，直接打开链接即可填写和签署。支持 14 种语言。">
+            <div class="arch-icon">&#128241;</div>
+            <span>移动签署表单</span>
+          </div>
+          <div class="arch-component" data-desc="嵌入式签署（Embedded Signing），通过 JavaScript SDK 将签署表单嵌入你的网站。支持 React、Vue、Angular。">
+            <div class="arch-icon">&#128268;</div>
+            <span>嵌入式 SDK</span>
+          </div>
+        </div>
+        <div class="arch-zone">
+          <h4 class="arch-zone-label">业务逻辑层 — 处理核心工作流</h4>
+          <div class="arch-component" data-desc="模板（Template）是核心数据模型。一个模板定义了文档结构、字段配置（fields）、签署人角色（submitters）和展示布局（schema）。所有签署都从模板创建。">
+            <div class="arch-icon">&#128203;</div>
+            <span>模板管理 (Template)</span>
+          </div>
+          <div class="arch-component" data-desc="提交（Submission）代表一次签署流程。一个 Submission 包含多个 Submitter（签署人），追踪每个签署人的状态：awaiting → sent → opened → completed/declined。">
+            <div class="arch-icon">&#128230;</div>
+            <span>提交流程 (Submission)</span>
+          </div>
+          <div class="arch-component" data-desc="后台任务队列（Sidekiq 异步 Job）处理邮件发送、PDF 生成、Webhook 推送等耗时操作。包括 ProcessSubmitterCompletionJob、GeneratePreviewImagesJob 等 20+ 个 Job。">
+            <div class="arch-icon">&#9881;</div>
+            <span>异步任务队列</span>
+          </div>
+        </div>
+        <div class="arch-zone">
+          <h4 class="arch-zone-label">数据持久层 — 存储核心数据</h4>
+          <div class="arch-component" data-desc="支持 SQLite（默认，适合小规模部署）、PostgreSQL（推荐生产环境）和 MySQL。通过 DATABASE_URL 环境变量切换。">
+            <div class="arch-icon">&#128451;</div>
+            <span>关系型数据库</span>
+          </div>
+          <div class="arch-component" data-desc="Active Storage 管理文件存储。默认存本地磁盘，可配置 AWS S3、Google Cloud Storage、Azure Blob Storage。支持文档预览和签名生成。">
+            <div class="arch-icon">&#128193;</div>
+            <span>文件存储 (Active Storage)</span>
+          </div>
+        </div>
+        <div class="arch-zone">
+          <h4 class="arch-zone-label">集成层 — 连接外部世界</h4>
+          <div class="arch-component" data-desc="RESTful JSON API，路径前缀 /api/。支持创建/查询/删除模板和提交、管理签署人、合并 PDF、验证签名等操作。使用 Devise + CanCanCan 认证授权。">
+            <div class="arch-icon">&#128268;</div>
+            <span>REST API</span>
+          </div>
+          <div class="arch-component" data-desc="支持 11 种事件类型的 Webhook 通知：form.viewed、form.started、form.completed、submission.created 等。使用 HMAC-SHA256 签名验证。">
+            <div class="arch-icon">&#128279;</div>
+            <span>Webhook 事件</span>
+          </div>
+          <div class="arch-component" data-desc="SMTP 邮件系统（SubmitterMailer），发送邀请邮件、完成通知、拒绝通知。支持自定义邮件模板和 2FA 验证邮件。">
+            <div class="arch-icon">&#9993;</div>
+            <span>邮件服务 (SMTP)</span>
+          </div>
+        </div>
+        <div class="arch-description">点击任意组件，了解它在架构中的作用</div>
+      </div>
+    </section>
+
+    <!-- ── Screen 3: Docker 一键部署 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">Docker 一键部署：从零到运行</h2>
+
+      <p>DocuSeal 最吸引人的地方之一就是部署极简。一条 <span class="term" data-definition="Docker 是一种容器化技术，将应用及其依赖打包在一个隔离的环境中运行。DocuSeal 提供官方 Docker 镜像 docuseal/docuseal，包含完整的应用运行时。">Docker</span> 命令就能启动完整的签署平台：</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-comment"># 最简启动 — SQLite + 本地磁盘存储</span></span>
+<span class="code-line">docker run --name docuseal \</span>
+<span class="code-line">  -p 3000:3000 \</span>
+<span class="code-line">  -v .:/data \</span>
+<span class="code-line">  docuseal/docuseal</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 生产级启动 — PostgreSQL + 自动 HTTPS</span></span>
+<span class="code-line">curl -O https://raw.githubusercontent.com/</span>
+<span class="code-line">  docusealco/docuseal/master/</span>
+<span class="code-line">  docker-compose.yml</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 设置你的域名，Caddy 自动签发 SSL 证书</span></span>
+<span class="code-line">sudo HOST=sign.yourcompany.com \</span>
+<span class="code-line">  docker compose up -d</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">这是最简启动命令——只需一个容器，端口映射到 3000</p>
+            <p class="tl">-p 3000:3000 把容器内 3000 端口映射到宿主机 3000 端口</p>
+            <p class="tl">-v .:/data 把当前目录挂载为数据目录，SQLite 数据库和上传文件都存在这里</p>
+            <p class="tl">docuseal/docuseal 是官方 Docker 镜像，基于 Ruby 4.0 + Alpine Linux</p>
+            <p class="tl">空行分隔——下面是生产级部署方式</p>
+            <p class="tl">下载官方 docker-compose.yml，包含三个服务：app + PostgreSQL + Caddy</p>
+            <p class="tl">空行</p>
+            <p class="tl">设置 HOST 环境变量为你的域名</p>
+            <p class="tl">Caddy 会自动签发 Let's Encrypt SSL 证书，反向代理到 app:3000</p>
+            <p class="tl">-d 参数让容器在后台运行</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">&#128218;</div>
+        <div class="callout-content">
+          <strong class="callout-title">Docker Compose 三服务架构</strong>
+          <p>生产部署推荐使用 Docker Compose，它包含三个服务：<strong>app</strong>（DocuSeal 主应用，端口 3000）、<strong>postgres</strong>（PostgreSQL 18 数据库，带健康检查）、<strong>caddy</strong>（自动 HTTPS 反向代理）。数据持久化通过 volume 挂载：./docuseal 映射应用数据，./pg_data 映射数据库数据。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 4: Dockerfile 解读 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">代码翻译：Dockerfile 多阶段构建</h2>
+
+      <p>DocuSeal 的 Dockerfile 使用了三个构建阶段。这是 <span class="term" data-definition="多阶段构建（Multi-stage Build）是 Docker 的一种优化技术。每个 FROM 指令开始一个新的构建阶段，最终镜像只包含最后一个阶段的产物，大幅减小镜像体积。">多阶段构建</span> 的经典实践——最终镜像只包含运行时必需的文件。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-keyword">FROM</span> ruby:4.0.1-alpine <span class="code-keyword">AS</span> download</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-keyword">WORKDIR</span> /fonts</span>
+<span class="code-line"><span class="code-keyword">RUN</span> wget GoNotoKurrent-Regular.ttf \</span>
+<span class="code-line">  &amp;&amp; wget DancingScript-Regular.otf \</span>
+<span class="code-line">  &amp;&amp; wget model_704_int8.onnx \</span>
+<span class="code-line">  &amp;&amp; wget pdfium-linux.tgz</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-keyword">FROM</span> ruby:4.0.1-alpine <span class="code-keyword">AS</span> webpack</span>
+<span class="code-line"><span class="code-keyword">RUN</span> apk add nodejs yarn \</span>
+<span class="code-line">  &amp;&amp; yarn install</span>
+<span class="code-line"><span class="code-keyword">RUN</span> ./bin/shakapacker</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-keyword">FROM</span> ruby:4.0.1-alpine <span class="code-keyword">AS</span> app</span>
+<span class="code-line"><span class="code-keyword">RUN</span> apk add libpq vips redis \</span>
+<span class="code-line">  onnxruntime</span>
+<span class="code-line"><span class="code-keyword">COPY</span> --from=download /fonts/ /fonts/</span>
+<span class="code-line"><span class="code-keyword">COPY</span> --from=webpack /app/public/packs ./</span>
+<span class="code-line"><span class="code-keyword">CMD</span> ["bundle", "exec", "puma"]</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">第一阶段 download：下载字体和 AI 模型文件</p>
+            <p class="tl">Noto 字体支持多语言渲染，Dancing Script 用于手写签名样式</p>
+            <p class="tl">model_704_int8.onnx 是 ONNX 格式的字段检测 AI 模型（自动识别 PDF 中的表单字段）</p>
+            <p class="tl">pdfium 是 PDF 渲染引擎（Google 出品），用于 PDF 预览和合并</p>
+            <p class="tl">第二阶段 webpack：编译前端 JavaScript</p>
+            <p class="tl">安装 Node.js + Yarn，下载前端依赖（Vue.js、Tailwind CSS 等）</p>
+            <p class="tl">运行 Shakapacker（Webpack 封装）编译前端资源到 public/packs/</p>
+            <p class="tl">第三阶段 app：最终运行时镜像</p>
+            <p class="tl">安装运行时依赖：libpq（PostgreSQL 客户端）、vips（图像处理）、Redis（缓存）、onnxruntime（AI 推理）</p>
+            <p class="tl">从 download 阶段复制字体和 AI 模型</p>
+            <p class="tl">从 webpack 阶段复制编译好的前端资源</p>
+            <p class="tl">启动 Puma Web 服务器，监听 3000 端口</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 5: 目录结构 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">项目目录结构</h2>
+
+      <p>DocuSeal 遵循 Ruby on Rails 标准目录结构。了解目录布局，就能快速定位功能代码：</p>
+
+      <div class="file-tree animate-in">
+        <div class="ft-folder open">
+          <span class="ft-name">app/</span>
+          <span class="ft-desc">应用核心代码</span>
+          <div class="ft-children">
+            <div class="ft-folder">
+              <span class="ft-name">models/</span>
+              <span class="ft-desc">数据模型：Template、Submission、Submitter、WebhookUrl 等 25+ 个模型</span>
+            </div>
+            <div class="ft-folder">
+              <span class="ft-name">controllers/</span>
+              <span class="ft-desc">控制器：API 控制器、签署表单控制器、设置控制器等 80+ 个控制器</span>
+            </div>
+            <div class="ft-folder">
+              <span class="ft-name">javascript/</span>
+              <span class="ft-desc">前端代码：Vue.js 组件、签名画板、模板构建器</span>
+            </div>
+            <div class="ft-folder">
+              <span class="ft-name">jobs/</span>
+              <span class="ft-desc">异步任务：邮件发送、PDF 生成、Webhook 推送等 20+ 个 Job</span>
+            </div>
+            <div class="ft-folder">
+              <span class="ft-name">mailers/</span>
+              <span class="ft-desc">邮件器：签署邀请、完成通知、拒绝通知、2FA 验证</span>
+            </div>
+            <div class="ft-folder">
+              <span class="ft-name">views/</span>
+              <span class="ft-desc">ERB 模板：HTML 页面和邮件模板</span>
+            </div>
+          </div>
+        </div>
+        <div class="ft-folder">
+          <span class="ft-name">config/routes.rb</span>
+          <span class="ft-desc">路由定义：Web 路由 + /api/ 命名空间路由</span>
+        </div>
+        <div class="ft-folder">
+          <span class="ft-name">db/migrate/</span>
+          <span class="ft-desc">数据库迁移：从建表到字段变更的完整历史</span>
+        </div>
+        <div class="ft-folder">
+          <span class="ft-name">docker-compose.yml</span>
+          <span class="ft-desc">生产部署配置：app + PostgreSQL + Caddy</span>
+        </div>
+        <div class="ft-folder">
+          <span class="ft-name">Dockerfile</span>
+          <span class="ft-desc">多阶段 Docker 构建：download -> webpack -> app</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 6: 数据流动画 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">签署流程的数据旅程</h2>
+
+      <p>当用户发起一个签署请求时，数据在系统各个组件之间流转。想象一条流水线——PDF 模板是原材料，经过构建、发送、签署、验证，最终产出一份合法的电子签文档。</p>
+
+      <div class="flow-animation" data-steps='[
+        {"highlight":"flow-actor-1","label":"管理员上传 PDF，使用模板构建器定义字段和签署人角色"},
+        {"highlight":"flow-actor-1","label":"系统创建 Template 记录，保存 fields（字段配置）、schema（文档布局）、submitters（角色定义）","packet":true,"from":"actor-1","to":"actor-2"},
+        {"highlight":"flow-actor-2","label":"管理员通过 API 或界面发起签署，创建 Submission 记录"},
+        {"highlight":"flow-actor-2","label":"系统为每个签署人创建 Submitter 记录，生成唯一签署链接（/s/:slug）","packet":true,"from":"actor-2","to":"actor-3"},
+        {"highlight":"flow-actor-3","label":"SendSubmitterInvitationEmailJob 异步发送邀请邮件，附带签署链接"},
+        {"highlight":"flow-actor-3","label":"签署人打开链接，填写表单并签名，SubmitFormController 处理提交","packet":true,"from":"actor-3","to":"actor-4"},
+        {"highlight":"flow-actor-4","label">"ProcessSubmitterCompletionJob 生成签署后 PDF + 审计日志，触发 Webhook 通知"}
+      ]'>
+        <div class="flow-actors">
+          <div class="flow-actor" id="flow-actor-1">
+            <div class="flow-actor-icon">&#128196;</div>
+            <span>模板构建</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-2">
+            <div class="flow-actor-icon">&#128230;</div>
+            <span>发起签署</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-3">
+            <div class="flow-actor-icon">&#128231;</div>
+            <span>邮件/签署</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-4">
+            <div class="flow-actor-icon">&#9989;</div>
+            <span>完成处理</span>
+          </div>
+        </div>
+
+        <div class="flow-packet" id="flow-packet"></div>
+        <div class="flow-step-label" id="flow-label">点击"下一步"开始旅程</div>
+
+        <div class="flow-controls">
+          <button class="btn flow-next-btn">下一步</button>
+          <button class="btn flow-reset-btn">重新开始</button>
+          <span class="flow-progress"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 7: 测验 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">检验你的理解</h2>
+
+      <div class="quiz-container" id="quiz-module1">
+        <div class="quiz-question-block"
+             data-correct="option-c"
+             data-explanation-right="正确！DocuSeal 的核心数据模型是 Template（模板）-> Submission（提交）-> Submitter（签署人）。模板定义文档结构和字段，提交代表一次签署流程，签署人是具体的填写人。"
+             data-explanation-wrong="想一想 DocuSeal 的三层核心模型：谁定义了文档结构？谁代表一次签署实例？谁代表具体的签署人？">
+          <h3 class="quiz-question">DocuSeal 中，哪个模型定义了文档的字段配置和签署人角色？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Submission（提交）</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Submitter（签署人）</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Template（模板）</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-b"
+             data-explanation-right="正确！docker-compose.yml 包含三个服务：app（DocuSeal 主应用）、postgres（PostgreSQL 数据库）、caddy（自动 HTTPS 反向代理）。Caddy 会自动签发 Let's Encrypt 证书。"
+             data-explanation-wrong="回忆一下 docker-compose.yml 的内容。它除了 app 服务，还有哪两个服务？一个是数据库，一个是反向代理。">
+          <h3 class="quiz-question">使用 Docker Compose 生产部署时，app 服务依赖哪个服务的健康检查？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>caddy（反向代理）</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>postgres（数据库）</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>redis（缓存）</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-a"
+             data-explanation-right="正确！Dockerfile 使用多阶段构建（download -> webpack -> app），最终镜像只包含 app 阶段的产物。这样可以大幅减小镜像体积，因为编译工具和中间产物都被丢弃了。"
+             data-explanation-wrong="想想为什么 Dockerfile 要分三个 FROM 阶段。如果所有东西都在一个阶段里，镜像会有多大？编译工具、Node.js、yarn 缓存这些运行时需要吗？">
+          <h3 class="quiz-question">DocuSeal 的 Dockerfile 为什么要使用多阶段构建？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>减小最终镜像体积，只包含运行时必需的文件</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>提高编译速度，每个阶段可以并行执行</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>支持多种 CPU 架构（x86、ARM）的镜像构建</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">重新作答</button>
+      </div>
+    </section>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 2: 模板与表单构建
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">模板与表单构建</h1>
+      <p class="module-subtitle">深入 Template 模型的字段定义、Schema 布局和签署人角色——理解 PDF 表单是如何被描述的</p>
+    </header>
+
+    <!-- ── Screen 1: Template 模型核心字段 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">Template 模型：文档的 DNA</h2>
+
+      <p>在 DocuSeal 中，<span class="term" data-definition="Template（模板）是 DocuSeal 的核心数据模型。它定义了一份可复用文档的完整结构：包含哪些字段（fields）、谁需要签署（submitters）、文档布局（schema）和偏好设置（preferences）。每个签署流程都从模板创建。">Template</span> 就像一份文档的 DNA——它编码了"这份文档长什么样、谁需要填什么、字段放在哪里"。理解 Template 的五个核心序列化字段，就掌握了 DocuSeal 的精髓。</p>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">&#128209;</div>
+          <h4 class="pattern-title">fields（字段定义）</h4>
+          <p class="pattern-desc">JSON 数组，定义所有表单字段。每个字段包含 uuid、name、type（signature/date/text/checkbox/file 等 12 种）、required、readonly 等属性，以及 areas（字段在 PDF 页面上的坐标位置）。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">&#128101;</div>
+          <h4 class="pattern-title">submitters（签署人角色）</h4>
+          <p class="pattern-desc">JSON 数组，定义签署方角色。每个角色有 name（如"甲方"、"乙方"）和 uuid。创建签署时，每个角色对应一个实际的签署人（Submitter）。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">&#128202;</div>
+          <h4 class="pattern-title">schema（文档布局）</h4>
+          <p class="pattern-desc">JSON 数组，描述文档结构。每个条目对应一个 PDF 附件，包含 attachment_uuid 和页面信息。支持动态文档（dynamic: true），允许在签署时替换文档内容。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+          <div class="pattern-icon" style="background: var(--color-actor-4)">&#9881;</div>
+          <h4 class="pattern-title">preferences（偏好设置）</h4>
+          <p class="pattern-desc">JSON 对象，存储模板级别的配置：邮件模板（request_email_subject/body）、签署顺序（submitters_order）、完成通知设置等。控制签署流程的行为。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 2: 字段定义详解 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">代码翻译：fields 字段定义结构</h2>
+
+      <p>每个字段是一个 JSON 对象，包含丰富的配置。左边是实际代码，右边是逐项解释：</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line">{</span>
+<span class="code-line">  <span class="code-property">"uuid"</span>: <span class="code-string">"a1b2c3d4"</span>,</span>
+<span class="code-line">  <span class="code-property">"submitter_uuid"</span>: <span class="code-string">"sub-001"</span>,</span>
+<span class="code-line">  <span class="code-property">"name"</span>: <span class="code-string">"employee_signature"</span>,</span>
+<span class="code-line">  <span class="code-property">"type"</span>: <span class="code-string">"signature"</span>,</span>
+<span class="code-line">  <span class="code-property">"required"</span>: <span class="code-keyword">true</span>,</span>
+<span class="code-line">  <span class="code-property">"readonly"</span>: <span class="code-keyword">false</span>,</span>
+<span class="code-line">  <span class="code-property">"title"</span>: <span class="code-string">"Employee Signature"</span>,</span>
+<span class="code-line">  <span class="code-property">"description"</span>: <span class="code-string">"Please sign here"</span>,</span>
+<span class="code-line">  <span class="code-property">"default_value"</span>: <span class="code-keyword">null</span>,</span>
+<span class="code-line">  <span class="code-property">"areas"</span>: [{</span>
+<span class="code-line">    <span class="code-property">"uuid"</span>: <span class="code-string">"area-001"</span>,</span>
+<span class="code-line">    <span class="code-property">"x"</span>: <span class="code-number">0.15</span>,</span>
+<span class="code-line">    <span class="code-property">"y"</span>: <span class="code-number">0.72</span>,</span>
+<span class="code-line">    <span class="code-property">"w"</span>: <span class="code-number">0.30</span>,</span>
+<span class="code-line">    <span class="code-property">"h"</span>: <span class="code-number">0.08</span>,</span>
+<span class="code-line">    <span class="code-property">"page"</span>: <span class="code-number">1</span>,</span>
+<span class="code-line">    <span class="code-property">"attachment_uuid"</span>: <span class="code-string">"doc-001"</span></span>
+<span class="code-line">  }],</span>
+<span class="code-line">  <span class="code-property">"conditions"</span>: [],</span>
+<span class="code-line">  <span class="code-property">"validation"</span>: {}</span>
+<span class="code-line">}</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">字段的唯一标识符（UUID 格式），用于关联签署人的填写值</p>
+            <p class="tl">绑定到哪个签署人角色——只有这个角色的签署人能填写此字段</p>
+            <p class="tl">字段名称，API 创建签署时可用来预填值</p>
+            <p class="tl">字段类型：signature（签名）、date（日期）、text（文本）、checkbox（复选框）、file（文件上传）、dropdown（下拉框）、radio（单选）、number（数字）、initials（首字母缩写）、image（图片）、stamp（印章）、cells（表格单元格）——共 12 种</p>
+            <p class="tl">是否必填——提交时会验证</p>
+            <p class="tl">是否只读——只读字段会显示但不允许修改（用于预填值场景）</p>
+            <p class="tl">显示给签署人的字段标题</p>
+            <p class="tl">字段描述/提示文字</p>
+            <p class="tl">默认值——可以为数组（如多选框）</p>
+            <p class="tl">areas 数组：字段在 PDF 页面上的位置区域</p>
+            <p class="tl">x/y 是相对坐标（0~1），w/h 是相对宽高，page 是页码</p>
+            <p class="tl">attachment_uuid 指向对应的 PDF 文档附件</p>
+            <p class="tl">条件字段配置（Pro 功能）：满足条件时才显示此字段</p>
+            <p class="tl">验证规则：支持正则（pattern）、范围（min/max）、错误提示（message）</p>
+            <p class="tl">字段定义结束</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 3: 12 种字段类型 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">12 种字段类型一览</h2>
+
+      <p>DocuSeal 支持 12 种表单字段类型，覆盖了文档签署和表单填写的各种场景。每种字段类型在渲染、验证和存储上有不同的行为：</p>
+
+      <div class="icon-rows">
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-accent-light); color: var(--color-accent)">&#9999;</div>
+          <div>
+            <strong>signature / initials</strong>
+            <p>签名和首字母缩写。使用 Signature Pad（签名画板）组件，支持手写签名绘制。签署后自动嵌入 PDF 的指定位置。这是 DocuSeal 最核心的字段类型。</p>
+          </div>
+        </div>
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-info-light); color: var(--color-info)">&#128196;</div>
+          <div>
+            <strong>text / number / date</strong>
+            <p>基础输入字段。text 是通用文本输入，number 限制数字输入（支持 min/max/step 验证），date 显示日期选择器。都支持默认值和只读模式。</p>
+          </div>
+        </div>
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-success-light); color: var(--color-success)">&#9745;</div>
+          <div>
+            <strong>checkbox / radio / dropdown</strong>
+            <p>选择类字段。checkbox 是复选框（多选），radio 是单选按钮，dropdown 是下拉选择框。每个选项通过 options 数组定义，包含 value 和 uuid。</p>
+          </div>
+        </div>
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-error-light); color: var(--color-error)">&#128206;</div>
+          <div>
+            <strong>file / image / stamp</strong>
+            <p>文件和图像类字段。file 允许上传任意文件，image 限制为图片格式，stamp 是印章字段（类似签名但通常是公司公章或认证章）。</p>
+          </div>
+        </div>
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-bg-warm); color: var(--color-text-secondary)">&#128202;</div>
+          <div>
+            <strong>cells</strong>
+            <p>表格单元格字段。用于需要填写表格数据的场景，支持 cell_w（单元格宽度）配置。适合发票、报价单等结构化表格填写。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 4: Template 模型源码解读 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">代码翻译：Template 模型定义</h2>
+
+      <p>来看 Template 模型的 Ruby 源码。这个模型虽然不到 100 行，但承载了整个系统的核心数据结构：</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-keyword">class</span> <span class="code-function">Template</span> &lt; ApplicationRecord</span>
+<span class="code-line">  belongs_to <span class="code-symbol">:author</span>,</span>
+<span class="code-line">    class_name: <span class="code-string">'User'</span></span>
+<span class="code-line">  belongs_to <span class="code-symbol">:account</span></span>
+<span class="code-line">  belongs_to <span class="code-symbol">:folder</span>,</span>
+<span class="code-line">    class_name: <span class="code-string">'TemplateFolder'</span></span>
+<span class="code-line"></span>
+<span class="code-line">  serialize <span class="code-symbol">:preferences</span>,</span>
+<span class="code-line">    coder: <span class="code-constant">JSON</span></span>
+<span class="code-line">  serialize <span class="code-symbol">:fields</span>,</span>
+<span class="code-line">    coder: <span class="code-constant">JSON</span></span>
+<span class="code-line">  serialize <span class="code-symbol">:schema</span>,</span>
+<span class="code-line">    coder: <span class="code-constant">JSON</span></span>
+<span class="code-line">  serialize <span class="code-symbol">:submitters</span>,</span>
+<span class="code-line">    coder: <span class="code-constant">JSON</span></span>
+<span class="code-line"></span>
+<span class="code-line">  has_many_attached <span class="code-symbol">:documents</span></span>
+<span class="code-line">  has_many <span class="code-symbol">:submissions</span>,</span>
+<span class="code-line">    dependent: <span class="code-symbol">:destroy</span></span>
+<span class="code-line">  has_many <span class="code-symbol">:template_versions</span>,</span>
+<span class="code-line">    dependent: <span class="code-symbol">:destroy</span></span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">attribute</span> <span class="code-symbol">:slug</span>,</span>
+<span class="code-line">    default: -&gt; {</span>
+<span class="code-line">      SecureRandom.base58(<span class="code-number">14</span>)</span>
+<span class="code-line">    }</span>
+<span class="code-line"><span class="code-keyword">end</span></span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">Template 继承自 ApplicationRecord（Rails 基类），映射到 templates 数据表</p>
+            <p class="tl">模板作者——指向 User 模型，记录是谁创建了这个模板</p>
+            <p class="tl">所属账户——多租户隔离，每个模板属于一个 Account</p>
+            <p class="tl">所属文件夹——模板可以组织在文件夹中，支持多级嵌套</p>
+            <p class="tl">空行</p>
+            <p class="tl">序列化字段：Rails 的 serialize 将 JSON 字符串自动转换为 Ruby 对象</p>
+            <p class="tl">preferences 存储偏好设置（邮件模板、签署顺序等）</p>
+            <p class="tl">fields 存储字段定义数组（上文详解的结构）</p>
+            <p class="tl">schema 存储文档布局（关联的 PDF 附件和页面信息）</p>
+            <p class="tl">submitters 存储签署人角色定义</p>
+            <p class="tl">空行</p>
+            <p class="tl">Active Storage 多文件附件——模板可以关联多个 PDF 文档</p>
+            <p class="tl">一对多关联：一个模板可以有多个签署提交（Submission）</p>
+            <p class="tl">模板版本历史——每次编辑自动创建版本快照</p>
+            <p class="tl">空行</p>
+            <p class="tl">slug 是模板的唯一短链接标识，使用 Base58 编码生成 14 位随机字符串</p>
+            <p class="tl">Base58 比 UUID 更短、更适合 URL（去掉了容易混淆的 0/O、1/I/l 等字符）</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 5: 多签署人角色 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">多签署人角色：一份合同，多方签署</h2>
+
+      <p>DocuSeal 的模板支持多个 <span class="term" data-definition="签署人角色（Submitter Role）是模板中定义的签署方。例如一份合同可以有"甲方"和"乙方"两个角色。每个角色在发起签署时绑定到具体的签署人（姓名、邮箱），每个字段通过 submitter_uuid 绑定到特定角色。">签署人角色</span>。这是 DocuSeal 的核心设计——每个字段都通过 submitter_uuid 绑定到特定的角色。当发起签署时，每个角色对应一个实际的签署人。</p>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">&#128161;</div>
+        <div class="callout-content">
+          <strong class="callout-title">角色与字段绑定机制</strong>
+          <p>假设一份 NDA 模板定义了两个角色：<strong>"Disclosing Party"</strong>（披露方）和 <strong>"Receiving Party"</strong>（接收方）。模板中的"公司名称"字段绑定到披露方，"签字人"字段绑定到接收方。发起签署时，系统分别为两方创建签署链接，各方只能看到和填写自己的字段。</p>
+        </div>
+      </div>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-comment">// submitters JSON 结构</span></span>
+<span class="code-line">[</span>
+<span class="code-line">  {</span>
+<span class="code-line">    <span class="code-property">"name"</span>: <span class="code-string">"First Party"</span>,</span>
+<span class="code-line">    <span class="code-property">"uuid"</span>: <span class="code-string">"sub-001"</span>,</span>
+<span class="code-line">    <span class="code-property">"is_requester"</span>: <span class="code-keyword">true</span></span>
+<span class="code-line">  },</span>
+<span class="code-line">  {</span>
+<span class="code-line">    <span class="code-property">"name"</span>: <span class="code-string">"Second Party"</span>,</span>
+<span class="code-line">    <span class="code-property">"uuid"</span>: <span class="code-string">"sub-002"</span>,</span>
+<span class="code-line">    <span class="code-property">"invite_by"</span>: <span class="code-string">"email"</span></span>
+<span class="code-line">  }</span>
+<span class="code-line">]</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment">// 字段绑定到角色</span></span>
+<span class="code-line">{</span>
+<span class="code-line">  <span class="code-property">"name"</span>: <span class="code-string">"party1_signature"</span>,</span>
+<span class="code-line">  <span class="code-property">"submitter_uuid"</span>: <span class="code-string">"sub-001"</span></span>
+<span class="code-line">}</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">submitters 数组：定义模板中的签署方角色</p>
+            <p class="tl">第一个角色："First Party"（甲方）</p>
+            <p class="tl">UUID 用于字段绑定——字段通过这个 UUID 关联到此角色</p>
+            <p class="tl">is_requester: true 标记为发起方（通常是创建签署的人）</p>
+            <p class="tl">第二个角色："Second Party"（乙方）</p>
+            <p class="tl">独立的 UUID，确保字段隔离</p>
+            <p class="tl">invite_by: "email" 指定通过邮件邀请此角色的签署人</p>
+            <p class="tl">角色数组结束</p>
+            <p class="tl">空行</p>
+            <p class="tl">字段通过 submitter_uuid 绑定到特定角色</p>
+            <p class="tl">只有 submitter_uuid="sub-001" 的签署人（甲方）能填写此签名字段</p>
+            <p class="tl">乙方打开签署页面时，看不到甲方的字段</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 6: 测验 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">检验你的理解</h2>
+
+      <div class="quiz-container" id="quiz-module2">
+        <div class="quiz-question-block"
+             data-correct="option-b"
+             data-explanation-right="正确！fields 是 JSON 数组，存储所有表单字段的完整定义：类型、位置（areas）、验证规则、绑定角色（submitter_uuid）等。这是模板中最核心的字段。"
+             data-explanation-wrong="回忆一下：哪个字段存储了"签名框放在 PDF 的哪个位置、是谁需要签署、是否必填"这些信息？">
+          <h3 class="quiz-question">Template 模型中，哪个字段存储了"字段类型、在 PDF 上的位置、绑定到哪个签署人"这些信息？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>schema（文档布局）</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>fields（字段定义）</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>submitters（签署人角色）</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-c"
+             data-explanation-right="正确！fields 中每个字段的 areas 数组定义了该字段在 PDF 页面上的位置。坐标是相对值（0~1），包含 x、y（左上角）、w、h（宽高）和 page（页码）。"
+             data-explanation-wrong="想想签名的位置信息存储在哪里。提示：每个字段都有自己的坐标区域定义。">
+          <h3 class="quiz-question">签名框在 PDF 第二页的位置信息存储在哪里？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Template.preferences 中的 page_layout 字段</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Template.schema 中的 coordinates 字段</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Field.areas 数组中的 { x, y, w, h, page } 对象</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-a"
+             data-explanation-right="正确！submitter_uuid 是字段与角色之间的桥梁。每个字段通过 submitter_uuid 绑定到一个特定的签署人角色，确保各方只能看到和填写属于自己的字段。"
+             data-explanation-wrong="想想模板如何确保"甲方只能签甲方的字段，乙方只能签乙方的字段"。字段上哪个属性建立了这个关联？">
+          <h3 class="quiz-question">如何实现"甲方只能看到甲方的字段，乙方只能看到乙方的字段"？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>每个字段通过 submitter_uuid 绑定到特定的签署人角色</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>通过 Template.preferences 中的 field_visibility 配置</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>前端 Vue.js 组件根据字段 type 动态过滤显示</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重新作答</button>
+      </div>
+    </section>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 3: 提交与签署流程
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">提交与签署流程</h1>
+      <p class="module-subtitle">追踪 Submission 从创建到完成的完整生命周期——状态机、签署表单、邮件通知和异步任务</p>
+    </header>
+
+    <!-- ── Screen 1: Submission 生命周期 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">Submission 生命周期：从创建到完成</h2>
+
+      <p><span class="term" data-definition="Submission（提交）代表一次签署流程实例。它从模板创建，包含多个 Submitter（签署人）。Submission 追踪整个签署流程的状态：待签署、进行中、已完成、已过期、已拒绝、已归档。">Submission</span> 的生命周期就像一个快递包裹——从"已下单"到"已送达"，中间经历多个状态转换。DocuSeal 用 scope（查询范围）来定义这些状态。</p>
+
+      <div class="step-cards">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>创建（submission.created）</strong>
+            <p>管理员通过 API 或界面发起签署。系统创建 Submission 记录，从模板复制 fields、schema、submitters 配置。source 字段记录来源：link（链接分享）、api（API 调用）、embed（嵌入式）、invite（邀请）、bulk（批量发送）。</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>分配签署人（Submitter 创建）</strong>
+            <p>为每个角色创建 Submitter 记录，生成唯一的签署链接 slug。每个 Submitter 有独立的状态：awaiting -> sent -> opened -> completed/declined。metadata 字段可以存储自定义数据（如用户 ID、订单号）。</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>发送邀请（send_email）</strong>
+            <p>SendSubmitterInvitationEmailJob 异步发送邀请邮件。邮件包含签署链接（/s/:slug），支持自定义邮件模板和回复地址。sent_at 字段记录发送时间。也可以通过 SMS 发送（Pro 功能）。</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>签署人填写（form.viewed -> form.started）</strong>
+            <p>签署人打开链接，SubmitFormController#show 渲染签署表单。opened_at 记录打开时间。支持签署顺序控制（enforce_signing_order）和 2FA 验证（邮件验证码/手机验证码）。</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <strong>完成签署（form.completed）</strong>
+            <p>签署人提交表单，SubmitFormController#update 调用 Submitters::SubmitValues 处理。ProcessSubmitterCompletionJob 异步生成签署后的 PDF、嵌入电子签名、创建审计日志、触发 Webhook 通知。completed_at 记录完成时间。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 2: Submitter 状态机 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">Submitter 的五种状态</h2>
+
+      <p>每个 <span class="term" data-definition="Submitter（签署人）代表一个签署流程中的具体参与者。每个 Submitter 有独立的状态追踪：awaiting（等待中）→ sent（已发送邀请）→ opened（已打开链接）→ completed（已完成）或 declined（已拒绝）。">Submitter</span> 有独立的状态追踪。Submitter 模型的 status 方法是一个简单的状态机：</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-comment"># app/models/submitter.rb</span></span>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">status</span></span>
+<span class="code-line">  <span class="code-keyword">if</span> declined_at?</span>
+<span class="code-line">    <span class="code-string">'declined'</span></span>
+<span class="code-line">  <span class="code-keyword">elsif</span> completed_at?</span>
+<span class="code-line">    <span class="code-string">'completed'</span></span>
+<span class="code-line">  <span class="code-keyword">elsif</span> opened_at?</span>
+<span class="code-line">    <span class="code-string">'opened'</span></span>
+<span class="code-line">  <span class="code-keyword">elsif</span> sent_at?</span>
+<span class="code-line">    <span class="code-string">'sent'</span></span>
+<span class="code-line">  <span class="code-keyword">else</span></span>
+<span class="code-line">    <span class="code-string">'awaiting'</span></span>
+<span class="code-line">  <span class="code-keyword">end</span></span>
+<span class="code-line"><span class="code-keyword">end</span></span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">status 方法使用时间戳字段判断当前状态</p>
+            <p class="tl">declined_at 不为空 = 签署人已拒绝签署</p>
+            <p class="tl">declined 状态——签署人点击了"拒绝"按钮</p>
+            <p class="tl">completed_at 不为空 = 签署人已完成签署</p>
+            <p class="tl">completed 状态——签署人填写完所有必填字段并提交</p>
+            <p class="tl">opened_at 不为空 = 签署人已打开签署链接</p>
+            <p class="tl">opened 状态——签署人正在查看/填写表单</p>
+            <p class="tl">sent_at 不为空 = 邀请邮件已发送</p>
+            <p class="tl">sent 状态——邀请已发出，等待签署人打开</p>
+            <p class="tl">以上时间戳都为空 = 尚未发送邀请</p>
+            <p class="tl">awaiting 状态——等待管理员发送邀请</p>
+            <p class="tl">状态判断结束</p>
+            <p class="tl">方法结束</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">&#128218;</div>
+        <div class="callout-content">
+          <strong class="callout-title">时间戳驱动的状态机</strong>
+          <p>DocuSeal 使用时间戳（declined_at、completed_at、opened_at、sent_at）而非枚举字段来实现状态机。这种设计的好处是：状态判断和数据审计合二为一——你不仅能知道当前状态，还能精确知道状态变化的时间。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 3: SubmitFormController 签署表单处理 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">代码翻译：签署表单控制器</h2>
+
+      <p>SubmitFormController 是签署人直接交互的入口。当签署人打开链接 /s/:slug 时，show 方法渲染签署表单；当签署人提交表单时，update 方法处理数据。这段代码体现了 DocuSeal 的核心安全设计：</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-comment"># app/controllers/submit_form_controller.rb</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">SubmitFormController</span></span>
+<span class="code-line">  skip_before_action</span>
+<span class="code-line">    <span class="code-symbol">:authenticate_user!</span></span>
+<span class="code-line">  skip_authorization_check</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">def</span> <span class="code-function">show</span></span>
+<span class="code-line">    <span class="code-keyword">return</span> render <span class="code-symbol">:email_2fa</span></span>
+<span class="code-line">      <span class="code-keyword">unless</span> authorized?</span>
+<span class="code-line">    <span class="code-keyword">return</span> redirect_to <span class="code-symbol">:completed</span></span>
+<span class="code-line">      <span class="code-keyword">if</span> submitter.completed_at?</span>
+<span class="code-line">    <span class="code-keyword">return</span> render <span class="code-symbol">:awaiting</span></span>
+<span class="code-line">      <span class="code-keyword">if</span> enforce_order?</span>
+<span class="code-line">  <span class="code-keyword">end</span></span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">def</span> <span class="code-function">update</span></span>
+<span class="code-line">    <span class="code-keyword">return</span> error <span class="code-keyword">if</span> completed?</span>
+<span class="code-line">    <span class="code-keyword">return</span> error <span class="code-keyword">if</span> archived?</span>
+<span class="code-line">    <span class="code-keyword">return</span> error <span class="code-keyword">if</span> expired?</span>
+<span class="code-line">    <span class="code-keyword">return</span> error <span class="code-keyword">if</span> declined?</span>
+<span class="code-line"></span>
+<span class="code-line">    Submitters::SubmitValues.call(</span>
+<span class="code-line">      submitter, params, request</span>
+<span class="code-line">    )</span>
+<span class="code-line">    head <span class="code-symbol">:ok</span></span>
+<span class="code-line">  <span class="code-keyword">end</span></span>
+<span class="code-line"><span class="code-keyword">end</span></span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">控制器定义</p>
+            <p class="tl">跳过身份认证——签署人无需登录（签署链接本身就是认证凭证）</p>
+            <p class="tl">跳过权限检查——签署链接已包含授权信息</p>
+            <p class="tl">空行</p>
+            <p class="tl">show 方法：渲染签署表单页面</p>
+            <p class="tl">安全检查 1：如果需要 2FA 验证且未通过，显示验证码页面</p>
+            <p class="tl">安全检查 2：如果已完成签署，重定向到完成页面</p>
+            <p class="tl">安全检查 3：如果启用签署顺序且轮到别人，显示等待页面</p>
+            <p class="tl">show 方法结束</p>
+            <p class="tl">空行</p>
+            <p class="tl">update 方法：处理签署人提交的表单数据</p>
+            <p class="tl">防御性检查：已完成签署 -> 拒绝（防重复提交）</p>
+            <p class="tl">防御性检查：模板或提交已归档 -> 拒绝</p>
+            <p class="tl">防御性检查：签署链接已过期 -> 拒绝（expire_at 检查）</p>
+            <p class="tl">防御性检查：签署人已拒绝 -> 拒绝（不能再修改）</p>
+            <p class="tl">空行</p>
+            <p class="tl">所有检查通过，调用 SubmitValues 服务处理表单数据</p>
+            <p class="tl">传入 submitter、params（表单数据）和 request（用于审计追踪）</p>
+            <p class="tl">返回 200 OK</p>
+            <p class="tl">update 方法结束</p>
+            <p class="tl">控制器结束</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 4: 异步任务管道 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">异步任务管道：签署完成后的幕后工作</h2>
+
+      <p>当签署人提交表单后，系统不会同步执行所有操作——那样会让用户等待太久。DocuSeal 使用 <span class="term" data-definition="Sidekiq 是 Ruby 生态最流行的异步任务处理框架。它将任务（Job）放入 Redis 队列，后台 Worker 进程异步执行。DocuSeal 用它处理邮件发送、PDF 生成、Webhook 推送等耗时操作。">Sidekiq</span> 异步任务队列来处理后续工作。</p>
+
+      <div class="flow-animation" data-steps='[
+        {"highlight":"flow-actor-1","label":"签署人提交表单，SubmitFormController#update 调用 Submitters::SubmitValues"},
+        {"highlight":"flow-actor-1","label":"SubmitValues 验证必填字段，保存 values 数据，设置 completed_at 时间戳","packet":true,"from":"actor-1","to":"actor-2"},
+        {"highlight":"flow-actor-2","label":"ProcessSubmitterCompletionJob 启动——生成签署后的 PDF，嵌入电子签名到指定区域"},
+        {"highlight":"flow-actor-2","label":"生成审计日志（audit_trail）——记录签署人 IP、时间戳、UA 等信息，附加到 Submission","packet":true,"from":"actor-2","to":"actor-3"},
+        {"highlight":"flow-actor-3","label">"SendFormCompletedWebhookRequestJob——向配置的 Webhook URL 发送 form.completed 事件通知"},
+        {"highlight":"flow-actor-3","label":"SubmitterMailer.completed_email——向管理员发送签署完成通知，附件包含签署后 PDF","packet":true,"from":"actor-3","to":"actor-4"},
+        {"highlight":"flow-actor-4","label":"如果所有签署人都完成——GeneratePreviewImagesJob 更新文档预览图，标记 Submission 为 completed 状态"}
+      ]'>
+        <div class="flow-actors">
+          <div class="flow-actor" id="flow-actor-1">
+            <div class="flow-actor-icon">&#9999;</div>
+            <span>表单提交</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-2">
+            <div class="flow-actor-icon">&#128196;</div>
+            <span>PDF 生成</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-3">
+            <div class="flow-actor-icon">&#128279;</div>
+            <span>通知推送</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-4">
+            <div class="flow-actor-icon">&#9989;</div>
+            <span>状态更新</span>
+          </div>
+        </div>
+
+        <div class="flow-packet" id="flow-packet"></div>
+        <div class="flow-step-label" id="flow-label">点击"下一步"开始旅程</div>
+
+        <div class="flow-controls">
+          <button class="btn flow-next-btn">下一步</button>
+          <button class="btn flow-reset-btn">重新开始</button>
+          <span class="flow-progress"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 5: 邮件通知系统 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">邮件通知系统：四种核心邮件</h2>
+
+      <p>DocuSeal 的邮件系统（SubmitterMailer）负责签署流程中所有与用户的邮件交互。理解这四种核心邮件，就掌握了签署流程的用户体验设计：</p>
+
+      <div class="icon-rows">
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-accent-light); color: var(--color-accent)">&#128233;</div>
+          <div>
+            <strong>invitation_email（签署邀请）</strong>
+            <p>发送给签署人的邀请邮件，包含签署链接 /s/:slug。支持自定义邮件标题和正文（request_email_subject/body），可使用变量替换（如 {{submitter.name}}）。这是签署流程的起点。</p>
+          </div>
+        </div>
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-success-light); color: var(--color-success)">&#9989;</div>
+          <div>
+            <strong>completed_email（完成通知）</strong>
+            <p>当签署人完成签署后，发送给模板创建者的通知邮件。附件自动包含签署后的 PDF 文档和审计日志（总计不超过 10MB）。支持自定义邮件模板。</p>
+          </div>
+        </div>
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-error-light); color: var(--color-error)">&#10060;</div>
+          <div>
+            <strong>declined_email（拒绝通知）</strong>
+            <p>当签署人拒绝签署时，发送给创建者的通知邮件。reply_to 设置为签署人邮箱，方便创建者直接回复了解拒绝原因。</p>
+          </div>
+        </div>
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-info-light); color: var(--color-info)">&#128230;</div>
+          <div>
+            <strong>documents_copy_email（文档副本）</strong>
+            <p>签署完成后，发送给签署人的文档副本邮件。包含签署后的 PDF 和审计日志。确保签署人保留一份完整记录。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 6: 测验 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">检验你的理解</h2>
+
+      <div class="quiz-container" id="quiz-module3">
+        <div class="quiz-question-block"
+             data-correct="option-b"
+             data-explanation-right="正确！Submitter 使用时间戳字段（declined_at、completed_at、opened_at、sent_at）来判断状态。这种方式的好处是：既知道状态，又知道状态变化的精确时间，数据审计天然集成。"
+             data-explanation-wrong="回忆一下 Submitter 的 status 方法。它是如何判断当前状态的？用了枚举字段还是时间戳？">
+          <h3 class="quiz-question">Submitter 模型如何判断签署人的当前状态？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>使用 status 枚举字段（0=awaiting, 1=sent, 2=opened...）</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>使用时间戳字段（sent_at、opened_at、completed_at、declined_at）是否为空</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>使用独立的 SubmissionEvent 事件记录查询最新状态</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-a"
+             data-explanation-right="正确！SubmitFormController 使用 skip_before_action :authenticate_user! 和 skip_authorization_check。签署人无需登录，签署链接中的 slug 本身就是认证凭证。这是签署场景的典型设计——降低签署门槛。"
+             data-explanation-wrong="想想签署人打开链接 /s/:slug 时需要登录吗？如果需要登录，签署体验会怎样？">
+          <h3 class="quiz-question">签署人打开签署链接时，需要登录吗？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>不需要——签署链接（slug）本身就是认证凭证</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>需要——签署人必须先注册 DocuSeal 账户</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>取决于模板配置——有些模板需要登录，有些不需要</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-c"
+             data-explanation-right="正确！ProcessSubmitterCompletionJob 是签署完成后的核心异步任务。它负责：生成签署后的 PDF（嵌入电子签名到指定区域）、创建审计日志（记录 IP、时间、UA）、触发后续 Webhook 通知和邮件发送。"
+             data-explanation-wrong="想想签署人提交表单后，谁负责把签名'印'到 PDF 上？这是一个异步任务。">
+          <h3 class="quiz-question">哪个异步任务负责将签名嵌入到 PDF 文档中？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>GeneratePreviewImagesJob（生成预览图）</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>SendFormCompletedWebhookRequestJob（发送 Webhook 通知）</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>ProcessSubmitterCompletionJob（处理签署完成）</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重新作答</button>
+      </div>
+    </section>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 4: API 与 Webhook 集成
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">API 与 Webhook 集成</h1>
+      <p class="module-subtitle">掌握 DocuSeal 的 RESTful API、认证机制和 Webhook 事件系统——把签署功能嵌入你的业务</p>
+    </header>
+
+    <!-- ── Screen 1: API 概览 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">API 概览：所有路径都在 /api/ 命名空间下</h2>
+
+      <p>DocuSeal 的 <span class="term" data-definition="REST API（表述性状态转移 API）是一种 Web 服务接口设计风格。DocuSeal 的 API 路径都在 /api/ 命名空间下，返回 JSON 格式数据。使用 HTTP 方法表示操作：GET 查询、POST 创建、PUT/PATCH 更新、DELETE 删除。">REST API</span> 路径集中在 <code>/api/</code> 命名空间下。从 routes.rb 中可以看到，API 分为以下几个核心资源：</p>
+
+      <div class="badge-list">
+        <div class="badge-item">
+          <code class="badge-code">GET /api/templates</code>
+          <span class="badge-desc">列出所有模板（支持分页、搜索、文件夹过滤）</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">GET /api/templates/:id</code>
+          <span class="badge-desc">获取模板详情（包含字段定义、签署人角色、文档 URL）</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">PATCH /api/templates/:id</code>
+          <span class="badge-desc">更新模板（修改字段、角色、偏好设置）</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">POST /api/submissions</code>
+          <span class="badge-desc">创建签署提交（核心接口——发起一次签署流程）</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">GET /api/submissions/:id</code>
+          <span class="badge-desc">获取提交详情（包含签署人状态、签署后文档 URL）</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">POST /api/submissions/init</code>
+          <span class="badge-desc">创建并初始化提交（返回结构化数据，适合嵌入式场景）</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">GET /api/submitters/:id</code>
+          <span class="badge-desc">获取签署人详情（包含签署链接、填写值、状态）</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">POST /api/tools/merge</code>
+          <span class="badge-desc">合并多个 PDF 文件（Base64 编码输入输出）</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">POST /api/tools/verify</code>
+          <span class="badge-desc">验证 PDF 签名（检查签名有效性和文档完整性）</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 2: 认证机制 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">认证机制：Access Token</h2>
+
+      <p>API 认证使用 <span class="term" data-definition="Access Token（访问令牌）是 DocuSeal API 的认证凭证。每个用户可以生成一个唯一的 token，通过 HTTP Header X-Auth-Token 传递。Token 与用户权限绑定，支持 CanCanCan 权限控制。">Access Token</span>（访问令牌）。每个用户可以在设置页面生成一个 token，所有 API 请求都需要在 HTTP Header 中携带它：</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-comment"># 创建签署提交的 API 调用示例</span></span>
+<span class="code-line">curl -X POST \</span>
+<span class="code-line">  https://sign.example.com/api/submissions \</span>
+<span class="code-line">  -H <span class="code-string">"X-Auth-Token: YOUR_TOKEN"</span> \</span>
+<span class="code-line">  -H <span class="code-string">"Content-Type: application/json"</span> \</span>
+<span class="code-line">  -d <span class="code-string">'{</span></span>
+<span class="code-line"><span class="code-string">    "template_id": 42,</span></span>
+<span class="code-line"><span class="code-string">    "send_email": true,</span></span>
+<span class="code-line"><span class="code-string">    "submitters": [{</span></span>
+<span class="code-line"><span class="code-string">      "email": "alice@example.com",</span></span>
+<span class="code-line"><span class="code-string">      "name": "Alice Chen",</span></span>
+<span class="code-line"><span class="code-string">      "uuid": "sub-001",</span></span>
+<span class="code-line"><span class="code-string">      "values": {</span></span>
+<span class="code-line"><span class="code-string">        "company_name": "Acme Corp"</span></span>
+<span class="code-line"><span class="code-string">      }</span></span>
+<span class="code-line"><span class="code-string">    }]</span></span>
+<span class="code-line"><span class="code-string">  }'</span></span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">使用 curl 命令调用创建签署提交的 API</p>
+            <p class="tl">POST 请求到 /api/submissions 端点</p>
+            <p class="tl">请求地址——你的 DocuSeal 实例域名</p>
+            <p class="tl">认证 Header：X-Auth-Token 携带你的 API 访问令牌</p>
+            <p class="tl">内容类型：JSON 格式的请求体</p>
+            <p class="tl">JSON 请求体开始</p>
+            <p class="tl">template_id：使用哪个模板创建签署——这里用 ID 42 的模板</p>
+            <p class="tl">send_email: true——创建后自动发送邀请邮件给签署人</p>
+            <p class="tl">submitters 数组：定义实际的签署人</p>
+            <p class="tl">签署人邮箱——邀请邮件会发到这个地址</p>
+            <p class="tl">签署人姓名——显示在邮件和文档中</p>
+            <p class="tl">uuid：对应模板中的签署人角色（绑定到此角色的字段）</p>
+            <p class="tl">values：预填值——自动填充 "company_name" 字段</p>
+            <p class="tl">这里预填了公司名称为 "Acme Corp"</p>
+            <p class="tl">预填值结束</p>
+            <p class="tl">签署人数组结束</p>
+            <p class="tl">JSON 请求体结束</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">&#128218;</div>
+        <div class="callout-content">
+          <strong class="callout-title">API 权限控制</strong>
+          <p>DocuSeal 使用 CanCanCan（ability.rb）进行权限控制。API 控制器通过 load_and_authorize_resource 宏自动加载资源并检查权限。AccessToken 模型关联到 User，User 又属于 Account，确保多租户数据隔离。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 3: 创建签署的 API 源码 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">代码翻译：API 创建签署的核心逻辑</h2>
+
+      <p>看 Api::SubmissionsController#create 的源码——这个方法是 API 集成的核心入口：</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-comment"># app/controllers/api/submissions_controller.rb</span></span>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">create</span></span>
+<span class="code-line">  Params::SubmissionCreateValidator</span>
+<span class="code-line">    .call(params)</span>
+<span class="code-line"></span>
+<span class="code-line">  submissions = <span class="code-keyword">if</span> emails?</span>
+<span class="code-line">    Submissions.create_from_emails(</span>
+<span class="code-line">      template:, user:,</span>
+<span class="code-line">      source: <span class="code-symbol">:api</span>,</span>
+<span class="code-line">      emails:, params:</span>
+<span class="code-line">    )</span>
+<span class="code-line">  <span class="code-keyword">else</span></span>
+<span class="code-line">    Submissions.create_from_submitters(</span>
+<span class="code-line">      template:, user:,</span>
+<span class="code-line">      source: <span class="code-symbol">:api</span>,</span>
+<span class="code-line">      submitters_order:,</span>
+<span class="code-line">      submissions_attrs:</span>
+<span class="code-line">    )</span>
+<span class="code-line">  <span class="code-keyword">end</span></span>
+<span class="code-line"></span>
+<span class="code-line">  WebhookUrls.enqueue_events(</span>
+<span class="code-line">    submissions,</span>
+<span class="code-line">    <span class="code-string">'submission.created'</span></span>
+<span class="code-line">  )</span>
+<span class="code-line"><span class="code-keyword">end</span></span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">create 方法：创建签署提交的核心入口</p>
+            <p class="tl">第一步：参数验证——检查必填参数、邮箱格式、字段合法性等</p>
+            <p class="tl">SubmissionCreateValidator 是自定义验证器</p>
+            <p class="tl">空行</p>
+            <p class="tl">根据参数类型选择不同的创建方式</p>
+            <p class="tl">如果传了 emails 参数（简单模式）——一行一个邮箱，自动创建签署人</p>
+            <p class="tl">create_from_emails：为每个邮箱创建 Submission + Submitter</p>
+            <p class="tl">template 是模板对象，user 是当前 API 调用者</p>
+            <p class="tl">source: :api 标记来源为 API 调用（用于统计和审计）</p>
+            <p class="tl">emails 是签署人邮箱列表，params 是额外配置</p>
+            <p class="tl">否则使用详细模式——传入完整的 submitters 配置</p>
+            <p class="tl">create_from_submitters：支持预填值、自定义字段、元数据等</p>
+            <p class="tl">submitters_order：签署顺序（random 随机 / preserved 按顺序）</p>
+            <p class="tl">submissions_attrs：签署人属性数组（邮箱、姓名、预填值、元数据等）</p>
+            <p class="tl">条件分支结束</p>
+            <p class="tl">空行</p>
+            <p class="tl">创建完成后，触发 submission.created Webhook 事件</p>
+            <p class="tl">传入创建的 submissions 数组和事件名称</p>
+            <p class="tl">Webhook 事件会异步推送到所有配置了此事件的 Webhook URL</p>
+            <p class="tl">create 方法结束</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 4: Webhook 事件系统 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">Webhook 事件系统：11 种实时通知</h2>
+
+      <p>Webhook 是 DocuSeal 与外部系统集成的关键桥梁。当特定事件发生时，系统会向配置的 URL 发送 HTTP POST 请求，携带事件数据。</p>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">&#128065;</div>
+          <h4 class="pattern-title">form.viewed</h4>
+          <p class="pattern-desc">签署人打开了签署链接。触发时机：SubmitFormController#show 被调用。数据包含 submitter 信息和时间戳。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">&#9999;</div>
+          <h4 class="pattern-title">form.started</h4>
+          <p class="pattern-desc">签署人开始填写表单（第一个字段被修改时触发）。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">&#9989;</div>
+          <h4 class="pattern-title">form.completed</h4>
+          <p class="pattern-desc">签署人完成签署。最常用的 Webhook 事件——用于触发后续业务流程（如更新订单状态、发送确认邮件等）。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+          <div class="pattern-icon" style="background: var(--color-actor-4)">&#10060;</div>
+          <h4 class="pattern-title">form.declined</h4>
+          <p class="pattern-desc">签署人拒绝签署。可用于通知销售团队跟进、记录拒绝原因。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+          <div class="pattern-icon" style="background: var(--color-actor-5)">&#128230;</div>
+          <h4 class="pattern-title">submission.created / completed / expired / archived</h4>
+          <p class="pattern-desc">提交级别事件：创建、全部完成、已过期、已归档。适合整体流程追踪。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-accent)">
+          <div class="pattern-icon" style="background: var(--color-accent)">&#128203;</div>
+          <h4 class="pattern-title">template.created / updated / archived</h4>
+          <p class="pattern-desc">模板级别事件：模板被创建、更新或归档时触发。用于同步模板变更到外部系统。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 5: Webhook HMAC 签名验证 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">代码翻译：Webhook HMAC 签名验证</h2>
+
+      <p>安全是 Webhook 的核心问题——你怎么确认收到的请求真的来自 DocuSeal？DocuSeal 使用 <span class="term" data-definition="HMAC（Hash-based Message Authentication Code）是一种使用密钥的哈希签名算法。DocuSeal 为每个 Webhook URL 生成一个 hmac_secret，用 SHA256 对请求体签名。接收方用相同的密钥验证签名，确保请求未被篡改。">HMAC-SHA256</span> 签名来保证请求的完整性和真实性：</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-comment"># WebhookUrl 模型中的签名配置</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">WebhookUrl</span> &lt; ApplicationRecord</span>
+<span class="code-line">  EVENTS = <span class="code-string">%w[</span></span>
+<span class="code-line">    <span class="code-string">form.viewed</span></span>
+<span class="code-line">    <span class="code-string">form.started</span></span>
+<span class="code-line">    <span class="code-string">form.completed</span></span>
+<span class="code-line">    <span class="code-string">form.declined</span></span>
+<span class="code-line">    <span class="code-string">submission.created</span></span>
+<span class="code-line">    <span class="code-string">submission.completed</span></span>
+<span class="code-line">    <span class="code-string">submission.expired</span></span>
+<span class="code-line">    <span class="code-string">submission.archived</span></span>
+<span class="code-line">    <span class="code-string">template.created</span></span>
+<span class="code-line">    <span class="code-string">template.updated</span></span>
+<span class="code-line">    <span class="code-string">template.archived</span></span>
+<span class="code-line">  <span class="code-string">]</span></span>
+<span class="code-line"></span>
+<span class="code-line">  encrypts <span class="code-symbol">:url</span>,</span>
+<span class="code-line">    <span class="code-symbol">:secret</span>,</span>
+<span class="code-line">    <span class="code-symbol">:hmac_secret</span></span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">def</span> <span class="code-function">set_hmac_secret</span></span>
+<span class="code-line">    self.hmac_secret ||=</span>
+<span class="code-line">      WebhookUrls::Signatures</span>
+<span class="code-line">        .generate_secret</span>
+<span class="code-line">  <span class="code-keyword">end</span></span>
+<span class="code-line"><span class="code-keyword">end</span></span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">WebhookUrl 模型——管理 Webhook 端点配置</p>
+            <p class="tl">EVENTS 常量：定义所有支持的 Webhook 事件类型</p>
+            <p class="tl">表单级事件：签署人查看、开始填写、完成签署、拒绝</p>
+            <p class="tl">提交级事件：创建、全部完成、已过期、已归档</p>
+            <p class="tl">模板级事件：创建、更新、归档</p>
+            <p class="tl">总共 11 种事件类型</p>
+            <p class="tl">空行</p>
+            <p class="tl">加密存储：url、secret、hmac_secret 使用 ActiveRecord 加密</p>
+            <p class="tl">这些敏感字段在数据库中是加密存储的，即使数据库泄露也无法直接读取</p>
+            <p class="tl">hmac_secret 是签名密钥，用于生成请求签名</p>
+            <p class="tl">空行</p>
+            <p class="tl">自动生成 HMAC 密钥（如果未设置）</p>
+            <p class="tl">使用 WebhookUrls::Signatures 服务生成安全的随机密钥</p>
+            <p class="tl">方法结束</p>
+            <p class="tl">模型结束</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">&#128274;</div>
+        <div class="callout-content">
+          <strong class="callout-title">Webhook 安全最佳实践</strong>
+          <p>验证 Webhook 请求的步骤：1) 从 HTTP Header 中取出 X-Webhook-Signature；2) 用 hmac_secret 对请求体做 HMAC-SHA256 签名；3) 比较两个签名是否一致。DocuSeal 还支持 Webhook 事件重发（resend）和事件日志查看，方便调试和故障排查。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 6: 测验 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">检验你的理解</h2>
+
+      <div class="quiz-container" id="quiz-module4">
+        <div class="quiz-question-block"
+             data-correct="option-b"
+             data-explanation-right="正确！API 认证使用 X-Auth-Token HTTP Header，携带用户的 Access Token。每个用户可以在设置页面生成自己的 token，token 与用户权限绑定。"
+             data-explanation-wrong="回忆一下 API 调用示例中的认证方式。Token 放在 HTTP Header 的哪个字段里？">
+          <h3 class="quiz-question">调用 DocuSeal API 时，认证 Token 应该放在哪里？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>URL 查询参数 ?token=YOUR_TOKEN</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>HTTP Header X-Auth-Token: YOUR_TOKEN</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>HTTP Header Authorization: Bearer YOUR_TOKEN</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-c"
+             data-explanation-right="正确！POST /api/submissions 是发起签署的核心接口。它接受 template_id（使用哪个模板）和 submitters（签署人配置），创建 Submission 和 Submitter 记录，发送邀请邮件，触发 Webhook 事件。"
+             data-explanation-wrong="想想"发起一次签署"对应哪个 API 操作。你是在创建什么资源？">
+          <h3 class="quiz-question">发起一次签署流程，应该调用哪个 API 端点？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>POST /api/templates/:id/submitters</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>POST /api/submitters</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>POST /api/submissions</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-a"
+             data-explanation-right="正确！Webhook 使用 HMAC-SHA256 签名验证。每个 Webhook URL 有一个 hmac_secret，发送请求时用这个密钥对请求体签名，接收方用相同的密钥验证。确保请求未被篡改且确实来自 DocuSeal。"
+             data-explanation-wrong="想想 Webhook 的安全验证机制。它是如何确保请求确实来自你的 DocuSeal 实例，而不是恶意伪造的？">
+          <h3 class="quiz-question">Webhook 如何保证请求的真实性和完整性？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>HMAC-SHA256 签名——用密钥对请求体签名，接收方验证签名</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>HTTPS 加密——所有 Webhook 请求都通过 HTTPS 发送</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>IP 白名单——只接受来自 DocuSeal 服务器 IP 的请求</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重新作答</button>
+      </div>
+    </section>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 5: 安全、签名验证与生产部署
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">安全、签名验证与生产部署</h1>
+      <p class="module-subtitle">深入 DocuSeal 的安全机制——电子签名原理、PDF 签名验证、审计日志和生产环境最佳实践</p>
+    </header>
+
+    <!-- ── Screen 1: 电子签名原理 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">电子签名原理：从手写到 PDF 嵌入</h2>
+
+      <p>DocuSeal 的电子签名流程涉及三个关键步骤：手写签名采集、PDF 签名嵌入和签名验证。理解这个流程，就理解了 DocuSeal 的核心技术价值。</p>
+
+      <div class="step-cards">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>签名采集（Signature Pad）</strong>
+            <p>前端使用 Signature Pad（signature_pad JavaScript 库）采集手写签名。签署人在画板上用鼠标或手指绘制签名，数据以 SVG 路径点坐标的形式保存。同时 DocuSeal 支持 Dancing Script 字体生成"手写风格"的文本签名作为备选。</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>PDF 签名嵌入（ProcessSubmitterCompletionJob）</strong>
+            <p>签署完成后，异步任务将签名图片渲染到 PDF 文档的指定位置（基于 fields 中 areas 定义的 x/y/w/h 坐标）。使用 Vips（高性能图像处理库）处理签名图片，确保清晰度和尺寸适配。</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>审计日志生成（EnsureAuditGenerated）</strong>
+            <p>生成一份独立的审计日志 PDF，记录每个签署人的签署时间、IP 地址、User-Agent、地理位置等信息。审计日志附加到 Submission 的 audit_trail 附件中，与签署文档一起提供给管理员。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 2: PDF 签名验证 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">代码翻译：PDF 签名验证 API</h2>
+
+      <p>DocuSeal 提供 <span class="term" data-definition="PDF 签名验证是检查 PDF 文档中嵌入的数字签名是否有效的过程。DocuSeal 使用 HexaPDF 库解析 PDF 签名，验证签名证书、签名时间和签名完整性。同时通过 SHA256 校验和检查文档是否被篡改。">PDF 签名验证</span> API（POST /api/tools/verify），使用 HexaPDF 库解析和验证 PDF 中的数字签名：</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-comment"># app/controllers/api/tools_controller.rb</span></span>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">verify</span></span>
+<span class="code-line">  file = Base64.decode64(</span>
+<span class="code-line">    params[<span class="code-symbol">:file</span>]</span>
+<span class="code-line">  )</span>
+<span class="code-line">  pdf = HexaPDF::Document.<span class="code-keyword">new</span>(</span>
+<span class="code-line">    io: StringIO.<span class="code-keyword">new</span>(file)</span>
+<span class="code-line">  )</span>
+<span class="code-line"></span>
+<span class="code-line">  trusted_certs =</span>
+<span class="code-line">    Accounts.load_trusted_certs(</span>
+<span class="code-line">      current_account</span>
+<span class="code-line">    )</span>
+<span class="code-line"></span>
+<span class="code-line">  is_checksum_found =</span>
+<span class="code-line">    CompletedDocument.exists?(</span>
+<span class="code-line">      sha256: Digest::SHA256</span>
+<span class="code-line">        .digest(file)</span>
+<span class="code-line">        .then { |d|</span>
+<span class="code-line">          Base64.urlsafe_encode64(d)</span>
+<span class="code-line">        }</span>
+<span class="code-line">    )</span>
+<span class="code-line"></span>
+<span class="code-line">  render <span class="code-symbol">json</span>: {</span>
+<span class="code-line">    <span class="code-symbol">checksum_status</span>:</span>
+<span class="code-line">      is_checksum_found ?</span>
+<span class="code-line">        <span class="code-string">'verified'</span> :</span>
+<span class="code-line">        <span class="code-string">'not_found'</span>,</span>
+<span class="code-line">    <span class="code-symbol">signatures</span>:</span>
+<span class="code-line">      pdf.signatures.map { |sig|</span>
+<span class="code-line">        {</span>
+<span class="code-line">          signer_name:</span>
+<span class="code-line">            sig.signer_name,</span>
+<span class="code-line">          signing_time:</span>
+<span class="code-line">            sig.signing_time,</span>
+<span class="code-line">          signature_type:</span>
+<span class="code-line">            sig.signature_type,</span>
+<span class="code-line">          verification_result:</span>
+<span class="code-line">            sig.verify(</span>
+<span class="code-line">              trusted_certs:</span>
+<span class="code-line">            )</span>
+<span class="code-line">        }</span>
+<span class="code-line">      }</span>
+<span class="code-line">  }</span>
+<span class="code-line"><span class="code-keyword">end</span></span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">verify 方法：验证 PDF 文件的签名</p>
+            <p class="tl">Base64 解码传入的 PDF 文件内容</p>
+            <p class="tl">params[:file] 是客户端上传的 Base64 编码的 PDF</p>
+            <p class="tl">使用 HexaPDF 打开 PDF 文档进行解析</p>
+            <p class="tl">StringIO 将二进制数据转为文件流对象</p>
+            <p class="tl">空行</p>
+            <p class="tl">加载账户配置的受信证书——用于验证签名的合法性</p>
+            <p class="tl">从账户设置中加载 CA 证书链</p>
+            <p class="tl">空行</p>
+            <p class="tl">双重验证：检查 PDF 的 SHA256 校验和是否在系统中存在</p>
+            <p class="tl">在 CompletedDocument 表中查找匹配的 sha256 值</p>
+            <p class="tl">计算传入文件的 SHA256 哈希</p>
+            <p class="tl">转为 Base64 URL 安全编码格式</p>
+            <p class="tl">空行</p>
+            <p class="tl">返回 JSON 验证结果</p>
+            <p class="tl">checksum_status：如果在数据库中找到匹配 -> 'verified'，否则 -> 'not_found'</p>
+            <p class="tl">signatures 数组：PDF 中所有签名的详细信息</p>
+            <p class="tl">遍历 PDF 中的每个签名对象</p>
+            <p class="tl">签名信息对象开始</p>
+            <p class="tl">签名者名称（从签名证书中提取）</p>
+            <p class="tl">签名时间（签名发生的时间戳）</p>
+            <p class="tl">签名类型（如 PAdES、PKCS#7 等）</p>
+            <p class="tl">验证结果——使用受信证书验证签名有效性</p>
+            <p class="tl">传入受信证书列表</p>
+            <p class="tl">验证结果包含消息列表（警告、错误等）</p>
+            <p class="tl">签名信息对象结束</p>
+            <p class="tl">signatures 数组结束</p>
+            <p class="tl">JSON 响应结束</p>
+            <p class="tl">verify 方法结束</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 3: 安全机制全景 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">DocuSeal 安全机制全景</h2>
+
+      <p>除了电子签名验证，DocuSeal 还内置了多层安全机制。作为自行部署的开源平台，你可以审计每一行安全相关代码：</p>
+
+      <div class="icon-rows">
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-accent-light); color: var(--color-accent)">&#128273;</div>
+          <div>
+            <strong>认证与授权（Devise + CanCanCan）</strong>
+            <p>用户认证基于 Devise（支持密码登录、邀请制注册）。权限控制使用 CanCanCan，定义了细粒度的 Ability 规则。API 认证使用 Access Token，Webhook 认证使用 HMAC-SHA256 签名。支持 MFA（TOTP 双因素认证）。</p>
+          </div>
+        </div>
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-info-light); color: var(--color-info)">&#128274;</div>
+          <div>
+            <strong>数据加密（ActiveRecord Encryption）</strong>
+            <p>敏感字段使用 Rails 内置的 ActiveRecord Encryption 加密存储。包括 WebhookUrl 的 url、secret、hmac_secret，以及 EncryptedConfig 中的 SMTP 密码、SAML 证书等。密钥通过环境变量管理。</p>
+          </div>
+        </div>
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-success-light); color: var(--color-success)">&#128233;</div>
+          <div>
+            <strong>2FA 签署验证（Email / SMS）</strong>
+            <p>签署人打开链接时可要求邮件验证码或短信验证码验证身份。OTP 验证码通过 EmailVerificationCodes 生成，有时效性。在 SubmitFormController 中通过 require_email_2fa / require_phone_2fa 参数启用。</p>
+          </div>
+        </div>
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-error-light); color: var(--color-error)">&#128196;</div>
+          <div>
+            <strong>审计追踪（Audit Trail）</strong>
+            <p>每次签署完成自动生成审计日志 PDF。记录内容：签署人信息、IP 地址、User-Agent、签署时间、文档 SHA256 校验和。审计日志与签署文档一起归档，满足合规要求。</p>
+          </div>
+        </div>
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-bg-warm); color: var(--color-text-secondary)">&#128737;</div>
+          <div>
+            <strong>签署链接安全</strong>
+            <p>每个签署链接使用 Base58 编码的 14 位随机 slug，不可猜测。支持链接过期设置（expire_at）。链接分享模板还支持额外的 2FA 验证。拒绝（declined）和已完成（completed）的链接不可再修改。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 4: 生产部署最佳实践 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">生产部署最佳实践</h2>
+
+      <p>将 DocuSeal 部署到生产环境时，需要关注以下几个关键配置：</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-comment"># docker-compose.yml 生产配置</span></span>
+<span class="code-line"><span class="code-keyword">services</span>:</span>
+<span class="code-line">  <span class="code-property">app</span>:</span>
+<span class="code-line">    image: docuseal/docuseal:latest</span>
+<span class="code-line">    <span class="code-property">environment</span>:</span>
+<span class="code-line">      - <span class="code-string">DATABASE_URL=</span></span>
+<span class="code-line">        <span class="code-string">postgresql://user:pass@postgres/db</span></span>
+<span class="code-line">      - <span class="code-string">FORCE_SSL=${HOST}</span></span>
+<span class="code-line">    <span class="code-property">volumes</span>:</span>
+<span class="code-line">      - ./docuseal:/data/docuseal</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-property">postgres</span>:</span>
+<span class="code-line">    image: postgres:<span class="code-number">18</span></span>
+<span class="code-line">    <span class="code-property">environment</span>:</span>
+<span class="code-line">      POSTGRES_USER: docuseal</span>
+<span class="code-line">      POSTGRES_PASSWORD:</span>
+<span class="code-line">        <span class="code-string">${DB_PASSWORD}</span></span>
+<span class="code-line">    <span class="code-property">volumes</span>:</span>
+<span class="code-line">      - pg_data:/var/lib/postgresql</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-property">caddy</span>:</span>
+<span class="code-line">    image: caddy:latest</span>
+<span class="code-line">    <span class="code-property">command</span>:</span>
+<span class="code-line">      caddy reverse-proxy</span>
+<span class="code-line">        --from $HOST --to app:3000</span>
+<span class="code-line">    <span class="code-property">ports</span>:</span>
+<span class="code-line">      - <span class="code-number">80</span>:<span class="code-number">80</span></span>
+<span class="code-line">      - <span class="code-number">443</span>:<span class="code-number">443</span></span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">docker-compose.yml 生产环境配置</p>
+            <p class="tl">app 服务：DocuSeal 主应用</p>
+            <p class="tl">使用官方最新镜像（生产环境建议锁定版本号）</p>
+            <p class="tl">环境变量配置</p>
+            <p class="tl">DATABASE_URL：必须使用 PostgreSQL（不支持 SQLite 生产环境）</p>
+            <p class="tl">FORCE_SSL：设置为你的域名，强制 HTTPS 重定向</p>
+            <p class="tl">数据持久化：挂载本地目录到容器 /data/docuseal</p>
+            <p class="tl">空行</p>
+            <p class="tl">postgres 服务：PostgreSQL 数据库</p>
+            <p class="tl">使用 PostgreSQL 18 版本</p>
+            <p class="tl">数据库用户名和密码配置</p>
+            <p class="tl">密码从环境变量读取（不要硬编码在配置文件中）</p>
+            <p class="tl">数据库数据持久化挂载</p>
+            <p class="tl">空行</p>
+            <p class="tl">caddy 服务：自动 HTTPS 反向代理</p>
+            <p class="tl">使用 Caddy 最新版</p>
+            <p class="tl">反向代理配置：从你的域名转发到 app:3000</p>
+            <p class="tl">开放 80（HTTP）和 443（HTTPS）端口</p>
+            <p class="tl">Caddy 自动申请和续期 Let's Encrypt SSL 证书</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 5: 环境变量与文件存储 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">关键环境变量与文件存储配置</h2>
+
+      <p>DocuSeal 通过环境变量控制关键配置。以下是最重要的配置项：</p>
+
+      <div class="badge-list">
+        <div class="badge-item">
+          <code class="badge-code">DATABASE_URL</code>
+          <span class="badge-desc">数据库连接字符串。默认 SQLite（适合开发），生产环境推荐 postgresql://user:pass@host/dbname。支持 PostgreSQL 和 MySQL。</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">FORCE_SSL</code>
+          <span class="badge-desc">设置为域名后强制 HTTPS。所有 HTTP 请求自动 301 重定向到 HTTPS。</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">ACTIVE_STORAGE_SERVICE</code>
+          <span class="badge-desc">文件存储后端。默认 local（本地磁盘），可配置 amazon（AWS S3）、google（GCS）、azure（Azure Blob）、或 mirror（多后端冗余）。</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">SMTP_* / EMAIL_HOST</code>
+          <span class="badge-desc">邮件发送配置。DocuSeal 使用 ActionMailer 发送邮件，配置 SMTP 服务器地址、端口、认证信息。EMAIL_HOST 用于生成邮件中的链接。</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">RAILS_ENCRYPTOR_KEY</code>
+          <span class="badge-desc">ActiveRecord Encryption 的主密钥。用于加密 Webhook URL、SMTP 密码等敏感字段。丢失此密钥将无法解密已存储的敏感数据。</span>
+        </div>
+      </div>
+
+      <div class="callout callout-warning">
+        <div class="callout-icon">&#9888;</div>
+        <div class="callout-content">
+          <strong class="callout-title">数据安全提醒</strong>
+          <p>自行部署 DocuSeal 时，务必妥善保管 RAILS_ENCRYPTOR_KEY 和数据库密码。建议使用密钥管理服务（如 AWS KMS、HashiCorp Vault）存储加密密钥，而非直接写在 .env 文件中。数据库和文件存储（/data/docuseal）都需要定期备份。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 6: 嵌入式签署 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">嵌入式签署：把签署功能嵌入你的应用</h2>
+
+      <p>DocuSeal 支持将签署表单嵌入到你的网站或应用中。这对于 SaaS 产品特别有用——用户无需离开你的网站就能完成签署。实现方式是通过 <span class="term" data-definition="嵌入式签署（Embedded Signing）是通过 JavaScript SDK 将 DocuSeal 的签署表单嵌入到第三方网站的技术。使用 docuseal.js 脚本或 React/Vue/Angular 组件库，通过 /api/submissions/init 创建签署会话，获得嵌入 token 后渲染签署表单。">Embedded Signing</span> SDK：</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-comment">&lt;!-- 嵌入式签署 HTML 示例 --&gt;</span></span>
+<span class="code-line">&lt;<span class="code-tag">script</span></span>
+<span class="code-line">  <span class="code-attr">src</span>=<span class="code-string">"https://sign.example.com/js/embed.js"</span></span>
+<span class="code-line">  <span class="code-attr">data-token</span>=<span class="code-string">"SUBMITTER_TOKEN"</span></span>
+<span class="code-line">  <span class="code-attr">data-slug</span>=<span class="code-string">"SUBMITTER_SLUG"</span>&gt;</span>
+<span class="code-line">&lt;/<span class="code-tag">script</span>&gt;</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 后端：创建嵌入式签署会话</span></span>
+<span class="code-line">POST /api/submissions/init</span>
+<span class="code-line">{</span>
+<span class="code-line">  <span class="code-property">"template_id"</span>: <span class="code-number">42</span>,</span>
+<span class="code-line">  <span class="code-property">"send_email"</span>: <span class="code-keyword">false</span>,</span>
+<span class="code-line">  <span class="code-property">"submitters"</span>: [{</span>
+<span class="code-line">    <span class="code-property">"email"</span>: <span class="code-string">"user@example.com"</span>,</span>
+<span class="code-line">    <span class="code-property">"embedded"</span>: <span class="code-keyword">true</span></span>
+<span class="code-line">  }]</span>
+<span class="code-line">}</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">嵌入式签署的前端实现非常简单</p>
+            <p class="tl">引入 DocuSeal 的嵌入脚本（从你的实例域名加载）</p>
+            <p class="tl">data-token：签署人的认证令牌（从 API 获取）</p>
+            <p class="tl">data-slug：签署人的唯一链接标识</p>
+            <p class="tl">脚本会自动在页面中渲染签署表单</p>
+            <p class="tl">空行</p>
+            <p class="tl">后端需要先调用 /api/submissions/init 创建嵌入式签署会话</p>
+            <p class="tl">注意：这里用的是 /init 端点，不是普通的 /submissions</p>
+            <p class="tl">template_id 指定使用的模板</p>
+            <p class="tl">send_email: false——不发送邮件（因为签署人在你的网站内完成）</p>
+            <p class="tl">签署人配置</p>
+            <p class="tl">签署人邮箱</p>
+            <p class="tl">embedded: true 标记为嵌入式签署模式</p>
+            <p class="tl">响应返回 submitters 数组，每个包含 token 和 slug</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 7: 测验 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">检验你的理解</h2>
+
+      <div class="quiz-container" id="quiz-module5">
+        <div class="quiz-question-block"
+             data-correct="option-b"
+             data-explanation-right="正确！verify 方法使用双重验证：1) 使用 HexaPDF 解析 PDF 内嵌签名，验证签名证书和完整性；2) 计算文件 SHA256 哈希，与 CompletedDocument 表中的记录比对，确认文档未被篡改。"
+             data-explanation-wrong="回忆一下 verify 方法的实现。它做了几层验证？一层是 PDF 内嵌签名验证，另一层是什么？">
+          <h3 class="quiz-question">POST /api/tools/verify 接口做了哪两层验证？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>验证 PDF 格式正确性 + 检查文件大小是否合法</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>验证 PDF 内嵌数字签名 + SHA256 校验和比对数据库记录</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>验证签署人邮箱格式 + 检查签署时间是否在有效期内</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-a"
+             data-explanation-right="正确！敏感字段使用 ActiveRecord Encryption 加密存储。包括 Webhook URL、SMTP 密码、HMAC 密钥等。加密密钥通过 RAILS_ENCRYPTOR_KEY 环境变量管理，数据库中存储的是密文。"
+             data-explanation-wrong="想想 WebhookUrl 模型中的 encrypts :url, :secret, :hmac_secret。这些字段在数据库中是如何存储的？">
+          <h3 class="quiz-question">WebhookUrl 模型中的 url、secret、hmac_secret 字段在数据库中如何存储？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>使用 ActiveRecord Encryption 加密存储（密文）</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>明文存储，依赖数据库自身的访问控制</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>使用 Base64 编码存储（可逆编码，非加密）</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-c"
+             data-explanation-right="正确！嵌入式签署通过 /api/submissions/init 端点创建会话，设置 send_email: false 和 embedded: true。前端使用 docuseal.js 脚本渲染签署表单。用户无需离开你的网站即可完成签署。"
+             data-explanation-wrong="回忆一下嵌入式签署的实现方式。前端用的是什么脚本？后端调用的 API 端点和普通签署有什么区别？">
+          <h3 class="quiz-question">如何实现嵌入式签署（让用户在你的网站内完成签署）？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>使用 iframe 嵌入签署链接页面，设置 allow-same-origin 权限</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>复制 DocuSeal 的 Vue.js 组件到你的项目中，直接集成</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>调用 /api/submissions/init 获取 token，使用 docuseal.js 脚本渲染签署表单</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">重新作答</button>
+      </div>
+    </section>
+
+  </div>
+</section>
+  </main>
+
+</body>
+</html>

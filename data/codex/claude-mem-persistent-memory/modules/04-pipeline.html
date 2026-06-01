@@ -1,0 +1,192 @@
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">压缩与注入：记忆管道</h1>
+      <p class="module-subtitle">原始工具输出是噪音，结构化观察是信号。这一模块讲清楚信号是怎么提炼出来的。</p>
+    </header>
+
+    <!-- Screen 1: The compression problem -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">为什么不直接存储原始输出？</h2>
+      <p>想象一位编辑看完一部 300 页的初稿，然后写了一段 3 句话的摘要。他不会一字不差地复述全书——他提炼了核心决策、关键转折点、重要发现。</p>
+      <p>claude-mem 的压缩机制做的正是同样的事：把可能长达数千行的工具输出，提炼成一条简洁的 <span class="term" data-definition="观察（Observation）是 claude-mem 存储记忆的基本单元。一条观察包含：类型标签、标题、摘要、关键事实列表、涉及文件等结构化字段。">观察</span>记录。</p>
+
+      <div class="pattern-cards stagger-children">
+        <div class="pattern-card animate-in" style="border-top-color: var(--color-error)">
+          <div class="pattern-icon" style="background: var(--color-error-light)">📄</div>
+          <h4 class="pattern-title">原始输出</h4>
+          <p class="pattern-desc">npm test 的完整输出可能有 500 行：每个测试的详细日志、堆栈追踪、覆盖率报告……</p>
+        </div>
+        <div class="pattern-card animate-in" style="border-top-color: var(--color-accent)">
+          <div class="pattern-icon" style="background: var(--color-accent-light)">💡</div>
+          <h4 class="pattern-title">提炼后观察</h4>
+          <p class="pattern-desc">类型: testing | 标题: 认证模块测试 | 结果: 47/48 通过 | 失败: token_refresh_race_test | 原因: 竞争条件</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 2: The observation format -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">一条观察长什么样</h2>
+      <p>SDK Agent 使用固定的 <span class="term" data-definition="XML 是一种结构化数据格式，用尖括号标签来组织信息。就像 Word 文档里的标题、段落、列表是有层级的，XML 用标签定义这种层级关系。">XML</span> 格式输出观察，这让结构化存储和检索变得非常可靠。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">SDK 输出格式（src/sdk/prompts.ts）</span>
+          <pre><code><span class="code-line"><span class="code-tag">&lt;observation&gt;</span></span>
+<span class="code-line">  <span class="code-tag">&lt;type&gt;</span><span class="code-string">bugfix</span><span class="code-tag">&lt;/type&gt;</span></span>
+<span class="code-line">  <span class="code-tag">&lt;title&gt;</span><span class="code-string">JWT 刷新竞争条件修复</span><span class="code-tag">&lt;/title&gt;</span></span>
+<span class="code-line">  <span class="code-tag">&lt;subtitle&gt;</span><span class="code-string">Redis GETSET 原子性问题</span><span class="code-tag">&lt;/subtitle&gt;</span></span>
+<span class="code-line">  <span class="code-tag">&lt;facts&gt;</span></span>
+<span class="code-line">    <span class="code-tag">&lt;fact&gt;</span><span class="code-string">并发刷新触发双写</span><span class="code-tag">&lt;/fact&gt;</span></span>
+<span class="code-line">    <span class="code-tag">&lt;fact&gt;</span><span class="code-string">用 Lua 脚本解决原子性</span><span class="code-tag">&lt;/fact&gt;</span></span>
+<span class="code-line">  <span class="code-tag">&lt;/facts&gt;</span></span>
+<span class="code-line">  <span class="code-tag">&lt;files_modified&gt;</span></span>
+<span class="code-line">    <span class="code-string">src/auth/token-refresh.ts</span></span>
+<span class="code-line">  <span class="code-tag">&lt;/files_modified&gt;</span></span>
+<span class="code-line"><span class="code-tag">&lt;/observation&gt;</span></span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">PLAIN ENGLISH</span>
+          <div class="translation-lines">
+            <p class="tl">一条观察记录的开始标签</p>
+            <p class="tl">类型：bugfix（还有 feature、analysis、investigation 等）</p>
+            <p class="tl">这次工作的简短标题（一眼看懂做了什么）</p>
+            <p class="tl">更具体的副标题（技术细节）</p>
+            <p class="tl">关键事实列表开始——这是记忆的核心内容</p>
+            <p class="tl">关键事实一：发现了什么问题</p>
+            <p class="tl">关键事实二：用什么方案解决的</p>
+            <p class="tl">修改了哪些文件——未来搜索时可以按文件过滤</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 3: The injection mechanism -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">记忆是怎么注入到新会话的</h2>
+      <p>SessionStart 钩子触发时，Context Generator 从数据库检索与当前项目相关的记忆，然后把它们格式化成一段文字，悄悄插入到你给 Claude 的第一条消息之前。</p>
+      <p>Claude 看到的实际上是：</p>
+
+      <div style="background: var(--color-bg-code); border-radius: var(--radius-md); padding: var(--space-6); margin: var(--space-6) 0;">
+        <pre style="color: #6C7086; font-family: var(--font-mono); font-size: var(--text-sm); white-space: pre-wrap;"><span style="color: #CBA6F7;"># 项目记忆（由 claude-mem 自动注入）</span>
+<span style="color: #A6E3A1;">项目：my-saas-app | 记忆：23 条 | 最近：2 天前</span>
+
+<span style="color: #F9E2AF;">[2025-05-01] bugfix: JWT 刷新竞争条件修复</span>
+  并发刷新触发双写；用 Lua 脚本解决原子性
+  文件：src/auth/token-refresh.ts
+
+<span style="color: #F9E2AF;">[2025-04-30] feature: 用户档案页面</span>
+  实现头像上传 + 压缩；使用 sharp 库
+  文件：src/pages/profile.tsx
+
+<span style="color: #6C7086;">... 还有 21 条记忆（使用 mem-search 查询更多）</span></pre>
+      </div>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">💡</div>
+        <div class="callout-content">
+          <strong class="callout-title">渐进式披露（Progressive Disclosure）</strong>
+          <p>claude-mem 不会把所有记忆一股脑丢进上下文——那会浪费大量 token 预算。它只注入最相关的摘要，并告诉 Claude 可以用 mem-search 工具查询更多。这是一个智能的"按需展开"设计。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 4: Full pipeline flow animation -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">完整记忆管道：捕获 → 压缩 → 存储 → 注入</h2>
+
+      <div class="flow-animation" data-steps='[
+        {"highlight":"flow-actor-1","label":"你对 Claude 说：帮我重构认证模块"},
+        {"highlight":"flow-actor-1","label":"Claude 读了 5 个文件，修改了 3 个，运行了测试","packet":true,"from":"actor-1","to":"actor-2"},
+        {"highlight":"flow-actor-2","label":"PostToolUse 触发，Worker Service 收到 8 条原始事件"},
+        {"highlight":"flow-actor-3","label":"SDK Agent 把 8 条事件压缩成 1 条结构化观察","packet":true,"from":"actor-2","to":"actor-3"},
+        {"highlight":"flow-actor-4","label":"观察写入 SQLite，同步到 Chroma 向量索引","packet":true,"from":"actor-3","to":"actor-4"},
+        {"highlight":"flow-actor-5","label":"Stop 钩子触发，AI 生成本次工作的总结"},
+        {"highlight":"flow-actor-1","label":"明天新会话启动，Context Generator 检索相关记忆注入进来","packet":true,"from":"actor-4","to":"actor-1"}
+      ]'>
+        <div class="flow-actors">
+          <div class="flow-actor" id="flow-actor-1">
+            <div class="flow-actor-icon">💻</div>
+            <span>Claude Code</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-2">
+            <div class="flow-actor-icon">⚙️</div>
+            <span>Worker</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-3">
+            <div class="flow-actor-icon">🤖</div>
+            <span>AI 压缩</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-4">
+            <div class="flow-actor-icon">🗄️</div>
+            <span>存储</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-5">
+            <div class="flow-actor-icon">📝</div>
+            <span>总结</span>
+          </div>
+        </div>
+        <div class="flow-packet" id="flow-packet-m4"></div>
+        <div class="flow-step-label">点击"下一步"跟踪一条记忆从诞生到注入的完整旅程</div>
+        <div class="flow-controls">
+          <button class="btn flow-next-btn">下一步</button>
+          <button class="btn flow-reset-btn">重置</button>
+          <span class="flow-progress"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 5: Quiz -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">理解检验</h2>
+      <div class="quiz-container" id="quiz-m4">
+        <div class="quiz-question-block"
+             data-correct="b"
+             data-explanation-right="对！SDK Agent 只负责压缩，ContextBuilder 负责注入。两个不同组件，职责分离。理解这一点，当记忆丢失或注入失败时，你就知道去哪里排查。"
+             data-explanation-wrong="SDK Agent 的任务是在会话进行中把工具输出压缩成观察，Context Generator 才是会话开始时把记忆注入进去的组件。">
+          <h3 class="quiz-question">你发现 Claude 知道昨天的工作（记忆注入正常），但今天做的事情没有被记录下来。你应该排查哪个组件？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Context Generator（记忆注入器）</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>SDK Agent + PostToolUse 钩子（记忆捕获流程）</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>SQLite 数据库（存储层）</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <div class="quiz-question-block"
+             data-correct="a"
+             data-explanation-right="渐进式披露设计故意这样做：先注入摘要（省 token），让 Claude 用 mem-search 按需查询详情。这比一次性倾倒所有记忆高效得多。"
+             data-explanation-wrong="claude-mem 不是因为数据库满了，而是刻意设计成只注入摘要——完整细节通过 mem-search 按需检索，避免消耗大量 token 预算。">
+          <h3 class="quiz-question">你问 Claude 关于两个月前修复的一个 bug，它说它知道这个 bug 修复了（因为记忆摘要里提到了），但不知道详细步骤。这是为什么？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>渐进式披露设计：摘要先注入，详情用 mem-search 按需查询</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>SQLite 数据库容量满了，旧记录被清理</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>SDK Agent 压缩时丢失了细节</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-m4')">检验答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m4')">重新作答</button>
+      </div>
+    </section>
+  </div>
+</section>

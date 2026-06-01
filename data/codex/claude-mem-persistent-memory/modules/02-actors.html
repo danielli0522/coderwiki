@@ -1,0 +1,186 @@
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">认识五大角色</h1>
+      <p class="module-subtitle">claude-mem 不是一个脚本——它是一个分工明确的小团队，每个成员有自己的专属职责。</p>
+    </header>
+
+    <!-- Screen 1: The cast -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">backstage 的五个演员</h2>
+      <p>就像一台电影的幕后团队——导演、摄影师、剪辑师各司其职，claude-mem 的五个组件各自负责记忆流水线的一个环节。</p>
+
+      <div class="icon-rows stagger-children">
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-actor-1)">🪝</div>
+          <div>
+            <strong>生命周期钩子 (Hooks)</strong>
+            <p>Claude Code 的"事件监听器"——在会话开始、每次工具调用后、会话结束时被触发</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-actor-2)">⚙️</div>
+          <div>
+            <strong>Worker Service（工作进程）</strong>
+            <p>后台常驻的 HTTP 服务，监听 37777 端口，接收 Hook 发来的事件并处理</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-actor-3)">🤖</div>
+          <div>
+            <strong>SDK Agent（AI 观察者）</strong>
+            <p>一个独立的 Claude 子进程，专门负责把原始工具调用数据压缩成结构化"观察"</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-actor-4)">🗄️</div>
+          <div>
+            <strong>SQLite + Chroma（记忆仓库）</strong>
+            <p>持久化存储所有观察和摘要；Chroma 提供语义向量搜索能力</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-actor-5)">💉</div>
+          <div>
+            <strong>Context Generator（注入器）</strong>
+            <p>会话启动时从数据库检索相关记忆，格式化成 XML 注入到 Claude 的上下文窗口</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 2: Architecture diagram -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">点击探索每个组件</h2>
+
+      <div class="arch-diagram">
+        <div class="arch-zone">
+          <h4 class="arch-zone-label">Claude Code 进程（主角）</h4>
+          <div class="arch-component"
+               data-desc="你每次打开终端使用的 Claude Code 主进程。它不知道 claude-mem 在监视它——Hook 系统是在它背后悄悄挂上的。"
+               onclick="this.closest('.arch-diagram').querySelector('.arch-description').textContent = this.dataset.desc; this.closest('.arch-diagram').querySelectorAll('.arch-component').forEach(c=>c.classList.remove('active')); this.classList.add('active')">
+            <div class="arch-icon">💻</div>
+            <span>Claude Code</span>
+          </div>
+          <div class="arch-component"
+               data-desc="生命周期钩子是 Claude Code 内置的事件系统。就像手机的通知权限——你授权 claude-mem 在特定事件发生时运行脚本。共有 6 个钩子：Setup、SessionStart、UserPromptSubmit、PreToolUse、PostToolUse、Stop。"
+               onclick="this.closest('.arch-diagram').querySelector('.arch-description').textContent = this.dataset.desc; this.closest('.arch-diagram').querySelectorAll('.arch-component').forEach(c=>c.classList.remove('active')); this.classList.add('active')">
+            <div class="arch-icon">🪝</div>
+            <span>Hooks 系统</span>
+          </div>
+        </div>
+        <div class="arch-zone">
+          <h4 class="arch-zone-label">后台服务（常驻运行）</h4>
+          <div class="arch-component"
+               data-desc="Worker Service 是一个用 Bun 运行时启动的 HTTP 服务器，监听本地 37777 端口。它是整个记忆系统的大脑，负责协调所有其他组件。你可以在浏览器打开 http://localhost:37777 看到实时记忆流。"
+               onclick="this.closest('.arch-diagram').querySelector('.arch-description').textContent = this.dataset.desc; this.closest('.arch-diagram').querySelectorAll('.arch-component').forEach(c=>c.classList.remove('active')); this.classList.add('active')">
+            <div class="arch-icon">⚙️</div>
+            <span>Worker :37777</span>
+          </div>
+          <div class="arch-component"
+               data-desc="SDK Agent 是 claude-mem 启动的一个独立 Claude 子进程。它的唯一职责是'观察并记录'——把杂乱的工具调用输出压缩成结构化的 XML 观察记录。它被刻意禁用了 Bash、Read、Write 等工具，防止它干扰主进程。"
+               onclick="this.closest('.arch-diagram').querySelector('.arch-description').textContent = this.dataset.desc; this.closest('.arch-diagram').querySelectorAll('.arch-component').forEach(c=>c.classList.remove('active')); this.classList.add('active')">
+            <div class="arch-icon">🤖</div>
+            <span>SDK Agent</span>
+          </div>
+        </div>
+        <div class="arch-zone">
+          <h4 class="arch-zone-label">存储层（持久化记忆）</h4>
+          <div class="arch-component"
+               data-desc="SQLite 是一个轻量级数据库文件，存储在 ~/.claude-mem/data/ 目录。它保存所有的会话记录、观察和摘要。无需安装数据库服务器——整个记忆库就是你本机上的一个文件。"
+               onclick="this.closest('.arch-diagram').querySelector('.arch-description').textContent = this.dataset.desc; this.closest('.arch-diagram').querySelectorAll('.arch-component').forEach(c=>c.classList.remove('active')); this.classList.add('active')">
+            <div class="arch-icon">📦</div>
+            <span>SQLite DB</span>
+          </div>
+          <div class="arch-component"
+               data-desc="Chroma 是一个向量数据库，让你可以用语义搜索找到相关记忆（而不只是关键字匹配）。例如搜索'认证问题'可以找到记录为'JWT 过期竞争条件'的观察，因为它们语义相近。"
+               onclick="this.closest('.arch-diagram').querySelector('.arch-description').textContent = this.dataset.desc; this.closest('.arch-diagram').querySelectorAll('.arch-component').forEach(c=>c.classList.remove('active')); this.classList.add('active')">
+            <div class="arch-icon">🔍</div>
+            <span>Chroma 向量库</span>
+          </div>
+        </div>
+        <div class="arch-description">点击任意组件查看它的职责详解</div>
+      </div>
+    </section>
+
+    <!-- Screen 3: File tree -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">在代码里找到它们</h2>
+      <p>了解文件结构，你就知道当 claude-mem 出问题时该去哪里找原因。</p>
+
+      <div class="file-tree animate-in">
+        <div class="ft-folder">
+          <span class="ft-name">plugin/</span>
+          <span class="ft-desc">插件入口——Claude Code 读取的配置</span>
+          <div class="ft-children">
+            <div class="ft-file"><span class="ft-name">hooks/hooks.json</span><span class="ft-desc">定义所有 6 个 Hook 的触发时机和命令</span></div>
+            <div class="ft-file"><span class="ft-name">scripts/worker-service.cjs</span><span class="ft-desc">打包后的 Worker Service 入口</span></div>
+            <div class="ft-file"><span class="ft-name">scripts/bun-runner.js</span><span class="ft-desc">用 Bun 启动 Worker 的启动器</span></div>
+          </div>
+        </div>
+        <div class="ft-folder">
+          <span class="ft-name">src/services/</span>
+          <span class="ft-desc">核心业务逻辑（TypeScript 源码）</span>
+          <div class="ft-children">
+            <div class="ft-file"><span class="ft-name">worker-service.ts</span><span class="ft-desc">Worker 主编排器，协调所有子模块</span></div>
+            <div class="ft-file"><span class="ft-name">worker/SDKAgent.ts</span><span class="ft-desc">启动观察者 Claude 子进程</span></div>
+            <div class="ft-file"><span class="ft-name">context/ContextBuilder.ts</span><span class="ft-desc">生成要注入的记忆内容</span></div>
+            <div class="ft-file"><span class="ft-name">sqlite/SessionStore.ts</span><span class="ft-desc">SQLite 数据库读写操作</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 4: Quiz -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">理解检验</h2>
+      <div class="quiz-container" id="quiz-m2">
+        <div class="quiz-question-block"
+             data-correct="b"
+             data-explanation-right="SDK Agent 是一个独立的 Claude 子进程，专门负责把工具调用输出压缩成结构化观察。它被刻意限制工具权限，只能观察，不能干预主进程工作。"
+             data-explanation-wrong="Worker Service 负责 HTTP 服务和路由；Context Generator 负责注入；SDK Agent 才是做 AI 压缩的角色。">
+          <h3 class="quiz-question">claude-mem 里，谁负责把"Claude 读了 main.ts 并返回了 500 行输出"这个原始事件，压缩成一条结构化的观察记录？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Worker Service</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>SDK Agent（AI 观察者子进程）</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Context Generator</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <div class="quiz-question-block"
+             data-correct="a"
+             data-explanation-right="正确！你的团队引入新工具时，Claude 很可能不知道这个库的用法。如果之前有会话分析过它，claude-mem 会把那份分析注入进来，让 Claude 不用重新学习。"
+             data-explanation-wrong="claude-mem 确实能帮上很多，但最大价值在于跨会话传递项目专有知识——尤其是那些 Claude 默认训练数据里没有的东西。">
+          <h3 class="quiz-question">你的团队使用了一个公司内部的 SDK（外部没有文档）。你在一次会话里花时间向 Claude 解释了这个 SDK 的用法。claude-mem 对下次会话最大的帮助是？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>把之前会话里对这个 SDK 的分析自动带入新会话，不需要重新解释</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>自动爬取互联网找到这个 SDK 的文档</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>把 SDK 的源码直接写入 CLAUDE.md</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-m2')">检验答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m2')">重新作答</button>
+      </div>
+    </section>
+  </div>
+</section>

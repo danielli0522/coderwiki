@@ -1,0 +1,209 @@
+
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">架构选型总览</h1>
+      <p class="module-subtitle">给技术负责人的决策参考——DeerFlow 解决什么问题、适用什么场景、和同类框架的对比</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: 问题 + 哲学 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">DeerFlow 解决什么问题</h2>
+        <p>核心哲学：<strong>"用一个超级 Agent 编排多个子 Agent，让 AI 真正完成复杂任务"</strong>。</p>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">Super Agent Harness</code>
+            <span class="badge-desc">不是单个 LLM 调用，而是编排多个 Agent 协同工作的完整框架</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">Sub-Agent Decomposition</code>
+            <span class="badge-desc">复杂任务自动拆解为最多 3 个并行子任务，分而治之</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">Sandbox Isolation</code>
+            <span class="badge-desc">所有代码执行在 Docker 容器中隔离运行，保障安全</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">Extensible Skills</code>
+            <span class="badge-desc">20+ 内置技能 + 自定义技能系统，渐进式加载节省 token</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">Long-Term Memory</code>
+            <span class="badge-desc">结构化记忆存储，跨会话保留用户偏好和项目上下文</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">Multi-Channel</code>
+            <span class="badge-desc">网页 / 飞书 / 钉钉 / Telegram / Discord / 微信统一接入</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: 对比表 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">和同类框架的对比</h2>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">📋</div>
+          <div class="callout-content">
+            <strong class="callout-title">定位差异</strong>
+            <p>DeerFlow 是一个"超级 Agent 编排框架"，不是 ChatBot 框架、不是 Workflow 引擎、不是单纯的 LLM Gateway。</p>
+          </div>
+        </div>
+
+        <table style="width:100%;border-collapse:collapse;margin-top:var(--space-6);font-size:var(--text-sm)">
+          <thead>
+            <tr style="background:var(--color-bg-warm)">
+              <th style="padding:var(--space-3);text-align:left;border:1px solid var(--color-border)">维度</th>
+              <th style="padding:var(--space-3);text-align:left;border:1px solid var(--color-border)">DeerFlow 2.0</th>
+              <th style="padding:var(--space-3);text-align:left;border:1px solid var(--color-border)">LangGraph</th>
+              <th style="padding:var(--space-3);text-align:left;border:1px solid var(--color-border)">AutoGen</th>
+              <th style="padding:var(--space-3);text-align:left;border:1px solid var(--color-border)">CrewAI</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding:var(--space-3);border:1px solid var(--color-border)"><strong>定位</strong></td>
+              <td style="padding:var(--space-3);border:1px solid var(--color-border)"><ul><li>超级 Agent 驾驶舱</li><li>开箱即用的完整系统</li></ul></td>
+              <td style="padding:var(--space-3);border:1px solid var(--color-border)"><ul><li>工作流编排引擎</li><li>底层框架，需自建上层</li></ul></td>
+              <td style="padding:var(--space-3);border:1px solid var(--color-border)"><ul><li>多 Agent 对话框架</li><li>偏研究/实验性质</li></ul></td>
+              <td style="padding:var(--space-3);border:1px solid var(--color-border)"><ul><li>多角色协作框架</li><li>角色扮演隐喻</li></ul></td>
+            </tr>
+            <tr>
+              <td style="padding:var(--space-3);border:1px solid var(--color-border)"><strong>沙箱</strong></td>
+              <td style="padding:var(--space-3);border:1px solid var(--color-border)"><ul><li>Docker 沙箱</li><li>文件系统隔离</li></ul></td>
+              <td style="padding:var(--space-3);border:1px solid var(--color-border)"><ul><li>不内置</li><li>需自建</li></ul></td>
+              <td style="padding:var(--space-3);border:1px solid var(--color-border)"><ul><li>代码执行器</li><li>基础沙箱</li></ul></td>
+              <td style="padding:var(--space-3);border:1px solid var(--color-border)"><ul><li>不内置</li><li>需自建</li></ul></td>
+            </tr>
+            <tr>
+              <td style="padding:var(--space-3);border:1px solid var(--color-border)"><strong>技能系统</strong></td>
+              <td style="padding:var(--space-3);border:1px solid var(--color-border)"><ul><li>20+ 内置技能</li><li>渐进式加载</li></ul></td>
+              <td style="padding:var(--space-3);border:1px solid var(--color-border)"><ul><li>不内置</li><li>纯工具调用</li></ul></td>
+              <td style="padding:var(--space-3);border:1px solid var(--color-border)"><ul><li>不内置</li><li>函数调用</li></ul></td>
+              <td style="padding:var(--space-3);border:1px solid var(--color-border)"><ul><li>工具集</li><li>无渐进加载</li></ul></td>
+            </tr>
+            <tr>
+              <td style="padding:var(--space-3);border:1px solid var(--color-border)"><strong>长期记忆</strong></td>
+              <td style="padding:var(--space-3);border:1px solid var(--color-border)"><ul><li>结构化记忆</li><li>跨会话持久化</li></ul></td>
+              <td style="padding:var(--space-3);border:1px solid var(--color-border)"><ul><li>检查点机制</li><li>非语义记忆</li></ul></td>
+              <td style="padding:var(--space-3);border:1px solid var(--color-border)"><ul><li>基础对话历史</li><li>无结构化记忆</li></ul></td>
+              <td style="padding:var(--space-3);border:1px solid var(--color-border)"><ul><li>短期记忆</li><li>需自建长期</li></ul></td>
+            </tr>
+            <tr>
+              <td style="padding:var(--space-3);border:1px solid var(--color-border)"><strong>部署</strong></td>
+              <td style="padding:var(--space-3);border:1px solid var(--color-border)"><ul><li>Docker Compose</li><li>一键部署</li></ul></td>
+              <td style="padding:var(--space-3);border:1px solid var(--color-border)"><ul><li>LangGraph Cloud</li><li>或自部署</li></ul></td>
+              <td style="padding:var(--space-3);border:1px solid var(--color-border)"><ul><li>Python 包</li><li>需自建服务</li></ul></td>
+              <td style="padding:var(--space-3);border:1px solid var(--color-border)"><ul><li>Python 包</li><li>需自建服务</li></ul></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Screen 3: 适合 vs 不适合 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">适用场景分析</h2>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-6);margin-top:var(--space-4)">
+          <div style="background:var(--color-success-light);padding:var(--space-6);border-radius:var(--radius-md)">
+            <h3 style="color:var(--color-success);margin-bottom:var(--space-4)">✅ 适合</h3>
+            <ul style="list-style:none;padding:0">
+              <li style="padding:var(--space-2) 0">✓ 需要多步骤研究的任务（市场分析、竞品调研）</li>
+              <li style="padding:var(--space-2) 0">✓ 需要代码执行的 AI 助手（数据分析、自动化脚本）</li>
+              <li style="padding:var(--space-2) 0">✓ 企业内部 AI 助手（对接飞书/钉钉）</li>
+              <li style="padding:var(--space-2) 0">✓ 需要自定义 Agent 人格和技能的场景</li>
+              <li style="padding:var(--space-2) 0">✓ 技术团队想快速搭建可扩展的 Agent 平台</li>
+            </ul>
+          </div>
+          <div style="background:var(--color-error-light);padding:var(--space-6);border-radius:var(--radius-md)">
+            <h3 style="color:var(--color-error);margin-bottom:var(--space-4)">❌ 不适合</h3>
+            <ul style="list-style:none;padding:0">
+              <li style="padding:var(--space-2) 0">✗ 只需要简单对话问答（杀鸡用牛刀）</li>
+              <li style="padding:var(--space-2) 0">✗ 无 Docker 环境的轻量部署场景</li>
+              <li style="padding:var(--space-2) 0">✗ 需要实时低延迟响应（子 Agent 有启动开销）</li>
+              <li style="padding:var(--space-2) 0">✗ 纯前端应用（DeerFlow 是后端重架构）</li>
+              <li style="padding:var(--space-2) 0">✗ 对 LLM 成本极度敏感（多 Agent 调用消耗更多 token）</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: 硬限制 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">源码中的硬限制</h2>
+        <p>这些是从源码中提取的实际常量——了解它们能帮你判断 DeerFlow 是否满足你的规模需求：</p>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">MAX_CONCURRENT_SUBAGENTS = 3</code>
+            <span class="badge-desc">每个 Lead Agent 响应最多并行 3 个子 Agent，超出部分被静默丢弃</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">_MAX_DOWNLOAD_SIZE = 100MB</code>
+            <span class="badge-desc">沙箱中单个文件下载上限 100MB</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">_DEFAULT_NO_CHANGE_TIMEOUT = 600s</code>
+            <span class="badge-desc">沙箱命令无输出超过 10 分钟自动终止</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">_scheduler_pool max_workers = 3</code>
+            <span class="badge-desc">后台调度线程池大小固定为 3</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">_ENABLED_SKILLS_REFRESH_WAIT = 5s</code>
+            <span class="badge-desc">技能缓存刷新等待超时 5 秒</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: 成本 + 结论 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">成本考量与结论</h2>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>LLM Token 成本</strong>
+              <p>每次用户请求可能触发 1 次 Lead Agent 调用 + 最多 3 次子 Agent 调用，每次都消耗 token。建议用 DeepSeek 或 GLM 等低成本模型。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>基础设施成本</strong>
+              <p>需要 Docker 环境运行沙箱，最低配置 4GB RAM。推荐 8GB+ 以支持并行子 Agent。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>运维复杂度</strong>
+              <p>Docker Compose 部署，包含 Nginx + FastAPI + LangGraph + Sandbox 多个组件。需要有基本的 DevOps 能力。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>许可证</strong>
+              <p>MIT 开源协议，可商用。字节跳动维护，GitHub Trending #1 项目，社区活跃。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">🎯</div>
+          <div class="callout-content">
+            <strong class="callout-title">一句话结论</strong>
+            <p>DeerFlow 2.0 是目前最完整的开源 Agent 编排框架之一——它不只是一个 SDK，而是一个开箱即用的完整系统（沙箱 + 记忆 + 技能 + 多渠道）。如果你需要一个能"真干活"的 AI Agent 平台，DeerFlow 值得认真评估。但要注意它的部署和运维需要一定的技术能力。</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

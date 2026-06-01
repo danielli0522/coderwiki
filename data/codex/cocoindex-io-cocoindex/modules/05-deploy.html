@@ -1,0 +1,393 @@
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 5: 部署实战
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">部署实战</h1>
+      <p class="module-subtitle">从 CLI 命令到生产部署——掌握 CocoIndex 的完整运维工具链</p>
+    </header>
+
+    <!-- ── Screen 1: CLI 命令 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">CocoIndex CLI：命令行工具</h2>
+
+      <p>CocoIndex 提供了完整的 CLI 工具链。安装后即可使用 <code>cocoindex</code> 命令管理应用、运行更新、查看状态。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">TERMINAL — CLI 命令大全</span>
+          <pre><code><span class="code-line"><span class="code-comment"># 查看帮助</span></span>
+<span class="code-line">$ cocoindex --help</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 运行更新（一次性）</span></span>
+<span class="code-line">$ cocoindex update main</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 运行更新（Live 模式，持续监控）</span></span>
+<span class="code-line">$ cocoindex update -L main</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 显示进度详情</span></span>
+<span class="code-line">$ cocoindex update --report main</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 删除应用（清除所有目标状态）</span></span>
+<span class="code-line">$ cocoindex drop main</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 列出所有应用</span></span>
+<span class="code-line">$ cocoindex ls</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 全量重处理（忽略缓存）</span></span>
+<span class="code-line">$ cocoindex update --full-reprocess main</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">查看 CLI 帮助信息</p>
+            <p class="tl">update main 运行名为 "main" 的应用（一次性）</p>
+            <p class="tl">-L 标志启用 Live 模式——持续监控数据源变化</p>
+            <p class="tl">--report 在终端显示处理进度详情</p>
+            <p class="tl">drop main 删除应用的所有目标状态和内部数据</p>
+            <p class="tl">ls 列出所有已注册的应用</p>
+            <p class="tl">--full-reprocess 忽略所有缓存，全量重新处理</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 2: App 配置与运行模式 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">App 配置与运行模式</h2>
+
+      <p>CocoIndex 的 <code>App</code> 类支持多种运行模式——同步阻塞、异步非阻塞、Live 模式。理解这些模式的区别是生产部署的基础。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE — App 运行模式对比</span>
+          <pre><code><span class="code-line"><span class="code-comment"># 创建 App</span></span>
+<span class="code-line">app = coco.<span class="code-function">App</span>(</span>
+<span class="code-line">    coco.<span class="code-function">AppConfig</span>(</span>
+<span class="code-line">        <span class="code-property">name</span>=<span class="code-string">"CodeEmbedding"</span>,</span>
+<span class="code-line">        <span class="code-property">max_inflight_components</span>=<span class="code-number">1024</span>,</span>
+<span class="code-line">    ),</span>
+<span class="code-line">    app_main,</span>
+<span class="code-line">    sourcedir=pathlib.Path(<span class="code-string">"./src"</span>),</span>
+<span class="code-line">)</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 模式 1：同步阻塞（适合脚本、CLI）</span></span>
+<span class="code-line">result = app.<span class="code-function">update_blocking</span>(</span>
+<span class="code-line">    <span class="code-property">report_to_stdout</span>=<span class="code-keyword">True</span>,</span>
+<span class="code-line">)</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 模式 2：异步非阻塞（适合 Web 服务）</span></span>
+<span class="code-line">handle = app.<span class="code-function">update</span>()</span>
+<span class="code-line">result = <span class="code-keyword">await</span> handle.<span class="code-function">result</span>()</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 模式 3：Live 模式（持续监控）</span></span>
+<span class="code-line">handle = app.<span class="code-function">update</span>(<span class="code-property">live</span>=<span class="code-keyword">True</span>)</span>
+<span class="code-line"><span class="code-keyword">async for</span> snap <span class="code-keyword">in</span> handle.<span class="code-function">watch</span>():</span>
+<span class="code-line">    <span class="code-keyword">if</span> snap.status == UpdateStatus.READY:</span>
+<span class="code-line">        <span class="code-function">print</span>(<span class="code-string">"Initial processing complete!"</span>)</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">创建 App 并配置参数</p>
+            <p class="tl">AppConfig 指定应用名和并发参数</p>
+            <p class="tl">max_inflight_components 控制最大并发组件数</p>
+            <p class="tl">模式 1：同步阻塞——运行完成后返回结果</p>
+            <p class="tl">report_to_stdout 在终端显示进度</p>
+            <p class="tl">模式 2：异步非阻塞——返回 UpdateHandle</p>
+            <p class="tl">await handle.result() 等待完成</p>
+            <p class="tl">模式 3：Live 模式——持续监控数据源</p>
+            <p class="tl">watch() 返回异步迭代器，实时获取进度</p>
+            <p class="tl">READY 状态表示初始处理完成</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 3: 内部存储与状态管理 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">内部存储：引擎如何追踪状态？</h2>
+
+      <p>CocoIndex 的增量引擎需要一个内部数据库来追踪状态——Memo 缓存、处理组件指纹、TargetState 版本等。默认使用 SQLite，也可以配置为 Postgres。</p>
+
+      <div class="arch-diagram">
+        <div class="arch-zone">
+          <h4 class="arch-zone-label">内部存储 — 引擎状态追踪</h4>
+          <div class="arch-component" data-desc="COCOINDEX_DB 环境变量配置内部数据库路径。默认使用 SQLite（./cocoindex.db），生产环境推荐使用 Postgres。所有状态——Memo 缓存、指纹、版本——都存在这里。">
+            <div class="arch-icon">🗄️</div>
+            <span>COCOINDEX_DB 配置</span>
+          </div>
+          <div class="arch-component" data-desc="Memo 缓存存储 @coco.fn(memo=True) 函数的执行结果。键是 hash(输入) + hash(代码)，值是函数输出。引擎在每次执行前检查缓存，命中则跳过。">
+            <div class="arch-icon">💾</div>
+            <span>Memo 缓存存储</span>
+          </div>
+          <div class="arch-component" data-desc="Fingerprint（指纹）是引擎追踪变化的核心数据结构。每个处理组件和数据项都有指纹——内容或代码变化时指纹不同，触发重算。">
+            <div class="arch-icon">🔍</div>
+            <span>Fingerprint 指纹追踪</span>
+          </div>
+        </div>
+        <div class="arch-zone">
+          <h4 class="arch-zone-label">环境配置 — 连接外部服务</h4>
+          <div class="arch-component" data-desc="Environment（环境）是 CocoIndex 的依赖注入容器。通过 @coco.lifespan 定义生命周期，在 builder.provide() 中注册 ContextKey。多个 App 可以共享同一个 Environment。">
+            <div class="arch-icon">🌍</div>
+            <span>Environment 环境</span>
+          </div>
+          <div class="arch-component" data-desc="多环境支持：你可以创建多个 Environment（如 'dev' 和 'prod'），每个环境有独立的数据库连接和资源配置。App 通过 AppConfig.environment 指定所属环境。">
+            <div class="arch-icon">🔧</div>
+            <span>多环境支持</span>
+          </div>
+          <div class="arch-component" data-desc="Settings（设置）通过 cocoindex.Settings 类配置全局参数，如数据库 URL、日志级别等。也可以通过 .env 文件或环境变量配置。">
+            <div class="arch-icon">⚙️</div>
+            <span>Settings 全局配置</span>
+          </div>
+        </div>
+        <div class="arch-description">点击任意组件，了解内部存储和配置的细节</div>
+      </div>
+    </section>
+
+    <!-- ── Screen 4: 生产部署最佳实践 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">生产部署最佳实践</h2>
+
+      <p>将 CocoIndex 从开发环境迁移到生产环境需要关注几个关键点：数据库选型、并发控制、故障恢复和监控。</p>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">🐘</div>
+          <h4 class="pattern-title">使用 Postgres 作为内部存储</h4>
+          <p class="pattern-desc">生产环境推荐将 COCOINDEX_DB 配置为 Postgres 连接字符串。SQLite 在高并发写入时可能出现锁竞争，Postgres 更可靠。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">🔄</div>
+          <h4 class="pattern-title">并发控制</h4>
+          <p class="pattern-desc">通过 max_inflight_components 和 COCOINDEX_MAX_INFLIGHT_COMPONENTS 环境变量控制并发处理组件数量。Embedding API 通常有速率限制，需要合理配置。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">🛡️</div>
+          <h4 class="pattern-title">异常处理与重试</h4>
+          <p class="pattern-desc">使用 @coco.exception_handler 注册异常处理器。Rust 核心引擎内置重试和指数退避。单个组件失败不影响其他组件。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+          <div class="pattern-icon" style="background: var(--color-actor-4)">📊</div>
+          <h4 class="pattern-title">监控与进度追踪</h4>
+          <p class="pattern-desc">通过 UpdateHandle.watch() 实时获取处理统计。UpdateStats 包含每个组件的处理行数、缓存命中数等指标，便于性能分析。</p>
+        </div>
+      </div>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE — 异常处理与监控</span>
+          <pre><code><span class="code-line"><span class="code-comment"># 注册异常处理器</span></span>
+<span class="code-line"><span class="code-keyword">@coco.exception_handler</span></span>
+<span class="code-line"><span class="code-keyword">async def</span> <span class="code-function">handle_error</span>(exc, ctx):</span>
+<span class="code-line">    logger.<span class="code-function">error</span>(</span>
+<span class="code-line">        <span class="code-string">f"Component {ctx.stable_path} failed: "</span></span>
+<span class="code-line">        <span class="code-string">f"{ctx.processor_name} in {ctx.env_name}"</span></span>
+<span class="code-line">    )</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 监控更新进度</span></span>
+<span class="code-line">handle = app.<span class="code-function">update</span>(<span class="code-property">live</span>=<span class="code-keyword">True</span>)</span>
+<span class="code-line"><span class="code-keyword">async for</span> snapshot <span class="code-keyword">in</span> handle.<span class="code-function">watch</span>():</span>
+<span class="code-line">    <span class="code-keyword">for</span> name, stats <span class="code-keyword">in</span> snapshot.stats.by_component.<span class="code-function">items</span>():</span>
+<span class="code-line">        <span class="code-function">print</span>(<span class="code-string">f"[{name}] "</span></span>
+<span class="code-line">              <span class="code-string">f"processed={stats.num_processed} "</span></span>
+<span class="code-line">              <span class="code-string">f"cached={stats.num_cached}"</span>)</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">使用 @coco.exception_handler 注册自定义异常处理器</p>
+            <p class="tl">exc 是异常对象，ctx 包含上下文信息</p>
+            <p class="tl">ctx.stable_path 是失败组件的路径</p>
+            <p class="tl">ctx.processor_name 是处理函数名</p>
+            <p class="tl">监控更新进度</p>
+            <p class="tl">watch() 返回异步迭代器</p>
+            <p class="tl">遍历每个组件的统计信息</p>
+            <p class="tl">num_processed 已处理的行数</p>
+            <p class="tl">num_cached 命中缓存的行数</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 5: AI Agent 集成 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">与 AI Agent 集成：CocoIndex-code</h2>
+
+      <p>CocoIndex 的旗舰产品 <span class="term" data-definition="CocoIndex-code 是基于 CocoIndex 构建的 MCP 服务器，为 AI 编程 Agent（Claude Code、Cursor 等）提供代码库的语义索引。支持 AST 感知分块、增量更新、调用图分析。安装后 Agent 能'看到'整个代码仓库。">CocoIndex-code</span> 将 CocoIndex 变成 AI 编程 Agent 的"眼睛"——让 Claude Code、Cursor 等 Agent 能语义搜索代码、分析调用图、理解项目架构。</p>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">🥥</div>
+        <div class="callout-content">
+          <strong class="callout-title">CocoIndex-code 的关键能力</strong>
+          <p>
+            <strong>AST 感知分块</strong>：基于 tree-sitter，不会在函数/类中间切分。<br>
+            <strong>增量更新</strong>：每次 commit 只重新索引变化的文件，80-90% 缓存命中。<br>
+            <strong>语义搜索</strong>：按含义搜索代码，不是 grep 关键字匹配。<br>
+            <strong>调用图分析</strong>：追踪函数调用链，分析修改的影响范围。<br>
+            <strong>MCP 协议</strong>：一个安装包，Claude Code 和 Cursor 都能用。
+          </p>
+        </div>
+      </div>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE — 在 Claude Code 中使用 CocoIndex skill</span>
+          <pre><code><span class="code-line"><span class="code-comment"># 1. 将 CocoIndex skill 添加到项目</span></span>
+<span class="code-line"><span class="code-comment"># 复制 skills/cocoindex/ 到 .claude/skills/</span></span>
+<span class="code-line">cp -r skills/cocoindex/ .claude/skills/</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 2. Claude Code 自动识别 CocoIndex API</span></span>
+<span class="code-line"><span class="code-comment"># 正确使用 @coco.fn、mount_each、ContextKey 等</span></span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 3. 管道代码示例</span></span>
+<span class="code-line"><span class="code-keyword">@coco.fn</span>(<span class="code-property">memo</span>=<span class="code-keyword">True</span>)</span>
+<span class="code-line"><span class="code-keyword">async def</span> <span class="code-function">index_file</span>(file, table):</span>
+<span class="code-line">    <span class="code-keyword">for</span> chunk <span class="code-keyword">in</span> RecursiveSplitter().<span class="code-function">split</span>(</span>
+<span class="code-line">        <span class="code-keyword">await</span> file.<span class="code-function">read_text</span>()</span>
+<span class="code-line">    ):</span>
+<span class="code-line">        table.<span class="code-function">declare_row</span>(</span>
+<span class="code-line">            text=chunk.text,</span>
+<span class="code-line">            embedding=<span class="code-function">embed</span>(chunk.text)</span>
+<span class="code-line">        )</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">第一步：将 CocoIndex skill 复制到项目的 .claude/skills/ 目录</p>
+            <p class="tl">Skill 包含 API 概念、模式、最佳实践的完整知识</p>
+            <p class="tl">第二步：Claude Code 自动使用 skill 中的知识</p>
+            <p class="tl">确保生成的代码使用正确的 v1 API</p>
+            <p class="tl">第三步：Claude Code 生成的管道代码示例</p>
+            <p class="tl">自动使用 @coco.fn(memo=True) 启用缓存</p>
+            <p class="tl">正确使用 RecursiveSplitter 和 declare_row</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 6: 完整管道回顾 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">完整管道回顾：从零到生产的全流程</h2>
+
+      <p>让我们回顾整个 CocoIndex 管道——从安装到生产部署的完整流程。每一步都建立在前面学过的概念之上。</p>
+
+      <div class="flow-animation" data-steps='[
+        {"highlight":"flow-actor-1","label":"安装 CocoIndex：pip install -U cocoindex"},
+        {"highlight":"flow-actor-1","label":"定义数据结构和处理函数：@dataclass + @coco.fn(memo=True)","packet":true,"from":"actor-1","to":"actor-2"},
+        {"highlight":"flow-actor-2","label":"配置 Source、Target、ContextKey 和 lifespan","packet":true,"from":"actor-2","to":"actor-3"},
+        {"highlight":"flow-actor-3","label":"创建 App 并运行：update_blocking() 或 update(live=True)","packet":true,"from":"actor-3","to":"actor-4"},
+        {"highlight":"flow-actor-4","label":"查询检索：SQL 向量搜索 或 知识图谱 Cypher 查询","packet":true,"from":"actor-4","to":"actor-1"},
+        {"highlight":"flow-actor-1","label":"生产部署：Postgres 内部存储 + Live 模式 + 监控"}
+      ]'>
+        <div class="flow-actors">
+          <div class="flow-actor" id="flow-actor-1">
+            <div class="flow-actor-icon">📦</div>
+            <span>安装/定义</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-2">
+            <div class="flow-actor-icon">🔧</div>
+            <span>配置管道</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-3">
+            <div class="flow-actor-icon">🚀</div>
+            <span>运行更新</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-4">
+            <div class="flow-actor-icon">🔍</div>
+            <span>查询检索</span>
+          </div>
+        </div>
+
+        <div class="flow-packet" id="flow-packet"></div>
+        <div class="flow-step-label" id="flow-label">点击"下一步"开始全流程回顾</div>
+
+        <div class="flow-controls">
+          <button class="btn flow-next-btn">下一步</button>
+          <button class="btn flow-reset-btn">重新开始</button>
+          <span class="flow-progress"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 7: 测验 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">检验你的理解</h2>
+
+      <div class="quiz-container" id="quiz-module5">
+        <div class="quiz-question-block"
+             data-correct="option-b"
+             data-explanation-right="正确！update_blocking() 是同步方法，会阻塞当前线程直到处理完成。适合脚本和 CLI 场景。update() 是异步方法，返回 UpdateHandle，可以监控进度。适合 Web 服务和 Live 模式。"
+             data-explanation-wrong="回忆一下两种运行模式。一个在当前线程阻塞直到完成，另一个返回 handle 可以异步监控。">
+          <h3 class="quiz-question">update_blocking() 和 update() 的核心区别是什么？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>update_blocking() 更快，update() 更安全</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>update_blocking() 同步阻塞当前线程，update() 异步返回 UpdateHandle</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>没有区别，只是命名不同</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-c"
+             data-explanation-right="正确！--full-reprocess 标志忽略所有 Memo 缓存，强制全量重新处理。适用于 Embedding 模型更换、管道逻辑大幅修改等场景。正常增量更新不需要此标志。"
+             data-explanation-wrong="--full-reprocess 是一个特殊标志，只有在特定场景下才需要使用。">
+          <h3 class="quiz-question">什么时候需要使用 --full-reprocess 标志？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>每次更新都应该使用，确保数据一致性</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>只在 Live 模式下使用</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>当 Embedding 模型更换或管道逻辑大幅修改时，需要忽略缓存全量重算</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-a"
+             data-explanation-right="正确！CocoIndex-code 是基于 CocoIndex 构建的 MCP 服务器，为 AI 编程 Agent 提供代码库的语义索引。它使用 AST 感知分块、增量更新，让 Claude Code 和 Cursor 等 Agent 能'看到'整个代码仓库。"
+             data-explanation-wrong="CocoIndex-code 是 CocoIndex 生态中的旗舰产品，专为 AI 编程 Agent 设计。">
+          <h3 class="quiz-question">CocoIndex-code 的主要用途是什么？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>为 AI 编程 Agent（Claude Code、Cursor）提供代码库的语义索引</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>替代传统搜索引擎</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>用于管理和部署 Kubernetes 集群</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">重新作答</button>
+      </div>
+    </section>
+
+  </div>
+</section>

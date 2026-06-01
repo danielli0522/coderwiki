@@ -1,0 +1,201 @@
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+
+    <div class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">Answering the AI in Milliseconds</h1>
+      <p class="module-subtitle">How a query from Claude Code travels through CodeGraph and comes back as structured context</p>
+    </div>
+
+    <!-- Screen 1: MCP Protocol -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">The AI's Hotline: Model Context Protocol</h2>
+      <p>When Claude Code, Cursor, or Codex wants to ask CodeGraph a question, it doesn't make an HTTP request to a web server. Instead, it communicates through <span class="term" data-definition="Model Context Protocol — an open standard for AI assistants to call external tools. Communication happens over stdin/stdout as JSON messages. No network port, no authentication, no latency — just a direct pipe between the AI and the tool.">MCP (Model Context Protocol)</span>.</p>
+      <p>Think of it as a private telephone line between the AI assistant and CodeGraph. When Claude sends a message, CodeGraph reads it from standard input, processes it, and writes the answer back to standard output — all in the same process, with zero network hops.</p>
+
+      <div class="badge-list animate-in">
+        <div class="badge-item">
+          <div class="badge-code">codegraph_explore</div>
+          <div class="badge-desc">Search symbols by name and get full context: callers, callees, and code snippets formatted for AI</div>
+        </div>
+        <div class="badge-item">
+          <div class="badge-code">codegraph_query</div>
+          <div class="badge-desc">Run a raw full-text search and get back matching nodes with file paths and line numbers</div>
+        </div>
+        <div class="badge-item">
+          <div class="badge-code">codegraph_affected</div>
+          <div class="badge-desc">Given a list of changed files, find which test files should be re-run based on the dependency graph</div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent animate-in">
+        <span class="callout-icon">🔌</span>
+        <div class="callout-content">
+          <span class="callout-title">Install Once, Works in All AI Tools</span>
+          <p>Run <code>npx @colbymchenry/codegraph</code> — the installer detects which AI tools you have (Claude Code, Cursor, Codex, opencode) and writes the MCP configuration into each one automatically. One command, all tools configured.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 2: Group Chat Animation — The Star of This Module -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">A Query in Action: Inside the Black Box</h2>
+      <p>Here's what happens — in real time — when Claude asks CodeGraph "how does login work?" The whole exchange takes under 200ms.</p>
+
+      <div class="chat-window" id="chat-m4">
+        <div class="chat-messages">
+          <div class="chat-message" data-sender="claude" style="display:none">
+            <div class="chat-avatar" style="background: #D94F30">AI</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: #D94F30">Claude Code</span>
+              <p><strong>codegraph_explore</strong>: "how does user login work?" — I need to understand the authentication flow to help this developer.</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="mcp" style="display:none">
+            <div class="chat-avatar" style="background: #2A7B9B">M</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: #2A7B9B">MCPServer</span>
+              <p>Received. Parsing query text… triggering FTS5 full-text search for "login" and "auth".</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="sqlite" style="display:none">
+            <div class="chat-avatar" style="background: #D4A843">DB</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: #D4A843">SQLite (FTS5)</span>
+              <p>FTS5 search complete. 12 matches ranked by relevance: <code>LoginController</code> (score: 8.4), <code>AuthService.login()</code> (8.1), <code>UserRepository.findByEmail()</code> (6.2)…</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="mcp" style="display:none">
+            <div class="chat-avatar" style="background: #2A7B9B">M</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: #2A7B9B">MCPServer</span>
+              <p>Top results found. Now traversing the call graph outward from <code>AuthService.login</code>…</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="graph" style="display:none">
+            <div class="chat-avatar" style="background: #2D8B55">G</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: #2D8B55">GraphTraverser</span>
+              <p>BFS complete. <strong>Callers:</strong> LoginController.handlePost() (line 34), OAuthController.callback() (line 89). <strong>Callees:</strong> UserRepository.findByEmail(), PasswordHasher.verify(), JwtService.sign(). Full chain: 3 levels deep.</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="ctx" style="display:none">
+            <div class="chat-avatar" style="background: #7B6DAA">CB</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: #7B6DAA">ContextBuilder</span>
+              <p>Formatting for AI… Done. 2,400 chars of structured markdown: entry points → call chain → code snippets → impact analysis.</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="claude" style="display:none">
+            <div class="chat-avatar" style="background: #D94F30">AI</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: #D94F30">Claude Code</span>
+              <p>🎯 Got it. Total tool calls: <strong>3</strong>. I now have the full login flow and can help precisely. Without CodeGraph, that would have taken 40+ file reads.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-typing" style="display:none">
+          <div class="chat-avatar" id="chat-m4-typing-avatar" style="background: #2A7B9B">?</div>
+          <div class="chat-bubble chat-typing-dots">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
+        </div>
+
+        <div class="chat-controls">
+          <button class="btn btn-sm chat-next-btn" style="padding: var(--space-2) var(--space-4); background: var(--color-accent); color: white; border: none; border-radius: var(--radius-sm); font-family: var(--font-body); font-size: var(--text-sm); font-weight: 600; cursor: pointer;">Next Message</button>
+          <button class="btn btn-sm chat-all-btn" style="padding: var(--space-2) var(--space-4); background: var(--color-surface); color: var(--color-text-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-family: var(--font-body); font-size: var(--text-sm); cursor: pointer;">Play All</button>
+          <button class="btn btn-sm chat-reset-btn" style="padding: var(--space-2) var(--space-4); background: transparent; color: var(--color-text-muted); border: none; font-family: var(--font-body); font-size: var(--text-sm); cursor: pointer;">Reset</button>
+          <span class="chat-progress">0 / 7 messages</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 3: FTS5 Code Translation -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">The Search Engine Inside: SQLite FTS5</h2>
+      <p>The "instant search" you saw above is powered by <span class="term" data-definition="Full-Text Search version 5 — a SQLite extension that creates an inverted index over text columns, similar to how a search engine like Elasticsearch works. Queries against FTS5 tables are 100–1000x faster than LIKE queries on regular tables.">FTS5</span>, a full-text search extension built right into SQLite. CodeGraph creates a virtual FTS5 table over the nodes, and a trigger keeps it in sync automatically.</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">src/db/schema.sql (key parts)</span>
+          <span class="code-line"><span class="code-comment">-- The main nodes table</span></span>
+          <span class="code-line"><span class="code-keyword">CREATE TABLE</span> <span class="code-function">nodes</span> (</span>
+          <span class="code-line">  id <span class="code-function">TEXT</span> <span class="code-keyword">PRIMARY KEY</span>,</span>
+          <span class="code-line">  name <span class="code-function">TEXT</span>, qualified_name <span class="code-function">TEXT</span>,</span>
+          <span class="code-line">  kind <span class="code-function">TEXT</span>, file_path <span class="code-function">TEXT</span></span>
+          <span class="code-line">);</span>
+          <span class="code-line"> </span>
+          <span class="code-line"><span class="code-comment">-- Virtual FTS5 search index</span></span>
+          <span class="code-line"><span class="code-keyword">CREATE VIRTUAL TABLE</span> nodes_fts</span>
+          <span class="code-line"><span class="code-keyword">USING</span> fts5(name, qualified_name,</span>
+          <span class="code-line">  docstring, signature,</span>
+          <span class="code-line">  content=<span class="code-string">'nodes'</span>);</span>
+          <span class="code-line"> </span>
+          <span class="code-line"><span class="code-comment">-- Auto-sync trigger on insert</span></span>
+          <span class="code-line"><span class="code-keyword">CREATE TRIGGER</span> nodes_ai</span>
+          <span class="code-line"><span class="code-keyword">AFTER INSERT ON</span> nodes <span class="code-keyword">BEGIN</span></span>
+          <span class="code-line">  <span class="code-keyword">INSERT INTO</span> nodes_fts ... <span class="code-keyword">END</span>;</span>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">Plain English</span>
+          <div class="translation-lines">
+            <div class="tl">The main table — one row per symbol</div>
+            <div class="tl">Each symbol has a unique ID</div>
+            <div class="tl">Its short name and its full dotted name</div>
+            <div class="tl">What kind of symbol (function/class/method) and where it lives</div>
+            <div class="tl"> </div>
+            <div class="tl">A "virtual" search table — like an index at the back of a book</div>
+            <div class="tl">Search across these four text fields simultaneously…</div>
+            <div class="tl">…with automatic ranking by relevance</div>
+            <div class="tl">Backed by the real nodes table (stays in sync)</div>
+            <div class="tl"> </div>
+            <div class="tl">Every time a node is inserted…</div>
+            <div class="tl">…the database automatically adds it to the search index too</div>
+            <div class="tl">No manual sync required — the database handles it</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 4: Quiz -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">Check Your Understanding</h2>
+
+      <div class="quiz-container" id="quiz-m4">
+
+        <div class="quiz-question-block" data-correct="b"
+          data-explanation-right="Correct! MCP uses stdin/stdout JSON-RPC — no network port, no HTTP, no authentication. It's a direct pipe in the same process, which makes it faster and simpler than a web server."
+          data-explanation-wrong="MCP doesn't use HTTP or network ports. It communicates through stdin/stdout — standard process I/O streams that every program has. That's why it needs no authentication and has no network latency.">
+          <p class="quiz-question">How does Claude Code communicate with the CodeGraph MCP server?</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)"><span class="quiz-option-radio"></span>Via HTTP requests to a local web server on a specific port</button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)"><span class="quiz-option-radio"></span>Via stdin/stdout JSON-RPC — a direct pipe with no network overhead</button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)"><span class="quiz-option-radio"></span>Via WebSocket connection on localhost</button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block" data-correct="a"
+          data-explanation-right="Exactly! The FTS5 trigger fires automatically after every INSERT on the nodes table, keeping the search index perfectly in sync without any manual synchronization code."
+          data-explanation-wrong="The key is the SQLite TRIGGER — it fires automatically on every insert. CodeGraph never manually syncs the FTS5 index; the database handles it transparently.">
+          <p class="quiz-question">How does CodeGraph keep the FTS5 search index in sync with the nodes table?</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)"><span class="quiz-option-radio"></span>A SQLite trigger fires automatically after every INSERT on the nodes table</button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)"><span class="quiz-option-radio"></span>A background job runs every 30 seconds to rebuild the FTS index</button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)"><span class="quiz-option-radio"></span>It drops and rebuilds the FTS index after each full indexing pass</button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div style="margin-top: var(--space-6); display: flex; gap: var(--space-3);">
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m4')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m4')">Reset</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>

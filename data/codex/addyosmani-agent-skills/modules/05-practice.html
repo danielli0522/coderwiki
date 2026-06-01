@@ -1,0 +1,262 @@
+<!-- Module 5: 你的第一个实战项目 -->
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">你的第一个实战项目</h1>
+      <p class="module-subtitle">跟踪"用户登录功能"从想法到上线的完整旅程</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- ─── SCREEN 1: 跟踪一个真实功能从想法到上线 ─── -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">跟踪一个真实功能从想法到上线</h2>
+
+        <p>你有一个想法：给 App 加一个用户登录功能。看起来很简单对吧？但在真实项目中，一个"简单"的登录功能背后要经过多少道关卡？让我们看看 Agent Skills 如何帮你从零到上线。</p>
+
+        <div class="step-cards stagger-children">
+
+          <div class="step-card animate-in">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>你告诉 AI："我想加一个用户登录功能"</strong>
+              <p>这就是起点——一个模糊的想法。</p>
+            </div>
+          </div>
+
+          <div class="step-card animate-in">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>idea-refine 激活</strong>
+              <p>AI 问你澄清问题："支持哪些登录方式？忘记密码怎么处理？需要手机号登录吗？"</p>
+            </div>
+          </div>
+
+          <div class="step-card animate-in">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>spec-driven-development 激活</strong>
+              <p>AI 帮你写一份完整的需求文档——目标是什么、用户故事是什么、边界在哪里。</p>
+            </div>
+          </div>
+
+          <div class="step-card animate-in">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>planning-and-task-breakdown 激活</strong>
+              <p>AI 把需求拆成 5 个任务：数据库设计、注册接口、登录接口、忘记密码、前端表单。</p>
+            </div>
+          </div>
+
+          <div class="step-card animate-in">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>incremental-implementation 激活</strong>
+              <p>AI 一个任务一个任务地写代码，每完成一个就验证一个，绝不一口气全写完。</p>
+            </div>
+          </div>
+
+          <div class="step-card animate-in">
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <strong>test-driven-development 激活</strong>
+              <p>每写一段代码前先写测试。"注册时邮箱格式不对应该报错"——测试先写，代码跟上。</p>
+            </div>
+          </div>
+
+          <div class="step-card animate-in">
+            <div class="step-num">7</div>
+            <div class="step-body">
+              <strong>debugging-and-error-recovery 激活</strong>
+              <p>发现 bug？不慌。系统化排查：复现问题 → 定位原因 → 修复 → 验证。不做"试试看"式的瞎改。</p>
+            </div>
+          </div>
+
+          <div class="step-card animate-in">
+            <div class="step-num">8</div>
+            <div class="step-body">
+              <strong>code-review-and-quality 激活</strong>
+              <p>五维度审查代码：正确性、可读性、可维护性、性能、一致性。像资深同事帮你 review。</p>
+            </div>
+          </div>
+
+          <div class="step-card animate-in">
+            <div class="step-num">9</div>
+            <div class="step-body">
+              <strong>security-and-hardening 激活</strong>
+              <p>检查 <span class="term" data-definition="SQL 注入是一种攻击方式，黑客在输入框里填入恶意 SQL 代码，骗过数据库执行。就像有人在你家门锁里塞了一张纸条，假装是钥匙。">SQL 注入</span>、<span class="term" data-definition="XSS（跨站脚本攻击）是黑客在网页里注入恶意 JavaScript 代码，盗取用户信息。就像有人在你的信封里偷偷塞了一张假名片。">XSS</span>、密码加密、会话管理——安全无小事。</p>
+            </div>
+          </div>
+
+          <div class="step-card animate-in">
+            <div class="step-num">10</div>
+            <div class="step-body">
+              <strong>shipping-and-launch 激活</strong>
+              <p>部署上线：先上测试环境确认，再推生产环境，最后监控运行状态。完美收工。</p>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="callout callout-accent animate-in">
+          <span class="callout-icon">&#128161;</span>
+          <div class="callout-content">
+            <span class="callout-title">注意到什么了吗？</span>
+            <p>从第 1 步到第 10 步，没有一步是"跳过"的。每个阶段都有专门的技能负责，每个成果物都经过验证后才传递给下一步。这就是 Agent Skills 的力量——不是让你更快地写代码，而是让你<strong>每一步都走稳</strong>。</p>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ─── SCREEN 2: Code ↔ English — The Spec ─── -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Spec 长什么样？</h2>
+
+        <p>还记得 Module 2 里介绍的 Spec 格式吗？下面是一个真实的"用户登录功能"Spec，左边是 AI 看到的格式，右边是每一条的中文解释。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">SPEC FILE</span>
+            <code class="code-line"><span class="code-keyword">## Objective</span></code>
+            <code class="code-line">&#29992;&#25143;&#30331;&#24405;&#21151;&#33021;&#65292;&#25903;&#25345;&#37038;&#31665;+&#23494;&#30721;&#27880;&#20876;&#21644;&#30331;&#24405;&#12290;</code>
+            <code class="code-line">&nbsp;</code>
+            <code class="code-line"><span class="code-keyword">## Commands</span></code>
+            <code class="code-line">npm test        <span class="code-comment"># &#36816;&#34892;&#25152;&#26377;&#27979;&#35797;</span></code>
+            <code class="code-line">npm run dev     <span class="code-comment"># &#21551;&#21160;&#24320;&#21457;&#26381;&#21153;&#22120;</span></code>
+            <code class="code-line">npm run build   <span class="code-comment"># &#26500;&#24314;&#29983;&#20135;&#29256;&#26412;</span></code>
+            <code class="code-line">&nbsp;</code>
+            <code class="code-line"><span class="code-keyword">## Boundaries</span></code>
+            <code class="code-line"><span class="code-string">- Always: &#23494;&#30721;&#29992; bcrypt &#21152;&#23494;&#23384;&#20648;</span></code>
+            <code class="code-line"><span class="code-string">- Always: &#25152;&#26377; API &#36755;&#20837;&#24517;&#39035;&#39564;&#35777;</span></code>
+            <code class="code-line"><span class="code-string">- Never: &#19981;&#23384;&#20648;&#26126;&#25991;&#23494;&#30721;</span></code>
+            <code class="code-line"><span class="code-string">- Never: &#19981;&#22312;&#26085;&#24535;&#20013;&#25171;&#21360;&#23494;&#30721;</span></code>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文翻译</span>
+            <div class="translation-lines">
+              <div class="tl"><strong>目标：</strong>用户可以用邮箱和密码注册、登录。</div>
+              <div class="tl"><strong>命令：</strong>测试代码、启动服务器、打包发布的具体命令。AI 每次操作前都会看这些命令，确保用的是正确的方式。</div>
+              <div class="tl"><strong>边界——必须做：</strong>密码加密存储、所有输入验证。这些是铁律，AI 不能跳过。</div>
+              <div class="tl"><strong>边界——绝对不做：</strong>不存明文密码、不在日志里泄露密码。违反这些就是安全事故。</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info animate-in">
+          <span class="callout-icon">&#128218;</span>
+          <div class="callout-content">
+            <span class="callout-title">为什么 Boundaries 这么重要？</span>
+            <p>Boundaries 就是给 AI 划红线。"必须做"的事情 AI 每一步都会检查，"绝对不做"的事情 AI 碰都不会碰。没有 Boundaries，AI 可能为图方便把密码明文存在数据库里——这不是 AI 坏，是没人告诉它规矩。</p>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ─── SCREEN 3: 你需要记住的最重要的三件事 ─── -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">你需要记住的最重要的三件事</h2>
+
+        <div class="callout callout-accent animate-in">
+          <span class="callout-icon">&#128161;</span>
+          <div class="callout-content">
+            <span class="callout-title">Agent Skills 的三条核心理念</span>
+            <p>
+              <strong>1. 先想清楚再动手</strong> — 写代码前先写需求文档和计划。就像盖房子先画图纸，不画图纸直接砌墙，盖到一半发现忘了留门。<br><br>
+              <strong>2. 每一步都有验证</strong> — 测试驱动、代码审查、安全检查。就像工厂流水线的质检站，每个零件出厂前都要检测。<br><br>
+              <strong>3. 做减法不做加法</strong> — 用最少的代码解决问题，发现复杂代码就简化。代码越少，bug 越少，维护越容易。
+            </p>
+          </div>
+        </div>
+
+        <div class="callout callout-info animate-in">
+          <span class="callout-icon">&#128204;</span>
+          <div class="callout-content">
+            <span class="callout-title">下一步你可以做什么？</span>
+            <p>
+              <strong>在 Claude Code 中</strong>安装 Agent Skills，用 <code style="font-family: var(--font-mono); background: var(--color-bg-code); color: #CBA6F7; padding: 2px 6px; border-radius: 4px;">/spec</code> 开始你的第一个项目。<br><br>
+              <strong>在 Cursor 中</strong>把 skills/ 文件夹复制到 .cursor/rules/ 目录下。<br><br>
+              <strong>在 Gemini CLI 中</strong>使用内置的技能支持。<br><br>
+              <strong>GitHub 仓库：</strong>github.com/addyosmani/agent-skills
+            </p>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ─── SCREEN 4: Final Quiz — Scenario ─── -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">最终测验</h2>
+
+        <div class="scenario-block animate-in">
+          <div class="scenario-context">
+            <span class="scenario-label">情景模拟</span>
+            <p>你是一个独立开发者，用 AI 助手开发一个电商网站。你刚写完购物车功能的代码，接下来要做什么？</p>
+          </div>
+        </div>
+
+        <div class="quiz-container animate-in" id="quiz-module5">
+
+          <div class="quiz-question-block" data-correct="option-b"
+               data-explanation-right="验证当前功能是第一步。写一段测一段，保持代码始终可用。就像每搭一块砖就检查墙是不是直的——不要等整面墙砌完才发现歪了。"
+               data-explanation-wrong="先验证当前功能再继续，否则 bug 会像雪球越滚越大。看看选项 B 怎么说。">
+            <p class="quiz-question">购物车代码写完后，第一步应该？</p>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <span class="quiz-option-radio"></span>
+                <span>直接写下一个功能</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <span class="quiz-option-radio"></span>
+                <span>跑测试确认购物车功能正常</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <span class="quiz-option-radio"></span>
+                <span>把代码发到生产环境让朋友试</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block" data-correct="option-c"
+               data-explanation-right="这就是 Spec 中 Boundaries 的作用——'必须做'的事情不是可选的。错误处理就像安全带，不是装饰品，是上车就系好的。"
+               data-explanation-wrong="错误处理不是可选的附加项。想想 Boundaries 的意思——有些事情是'必须做'的，不是'方便的时候再做'的。">
+            <p class="quiz-question">AI 助手建议"先跳过错误处理，功能做完再加"。你应该？</p>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <span class="quiz-option-radio"></span>
+                <span>听 AI 的，先做完再说</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <span class="quiz-option-radio"></span>
+                <span>让 AI 写完功能后自己加错误处理</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <span class="quiz-option-radio"></span>
+                <span>告诉 AI"每个功能都要包含错误处理"，这是边界规则不是可选的</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div>
+            <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">提交答案</button>
+            <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">重新选择</button>
+          </div>
+
+        </div>
+
+        <div class="callout callout-accent animate-in" style="margin-top: var(--space-8);">
+          <span class="callout-icon">&#127881;</span>
+          <div class="callout-content">
+            <span class="callout-title">恭喜你完成了全部课程！</span>
+            <p>你现在已经了解了 Agent Skills 的核心概念：六阶段流水线、21 个技能的分工、三位专家代理人的协作方式，以及如何跟踪一个真实功能从想法到上线。接下来，打开你的 AI 编程工具，用 Agent Skills 开始你的第一个项目吧。记住：先想清楚再动手，每一步都有验证，做减法不做加法。祝你写出高质量的代码！</p>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+  </div>
+</section>

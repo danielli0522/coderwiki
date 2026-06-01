@@ -1,0 +1,177 @@
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">初识 Archon：AI Agent 的工厂</h1>
+      <p class="module-subtitle">从用户视角理解 Archon 做了什么，以及它为什么如此有趣</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: What is Archon -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Archon 是什么？</h2>
+        <p>想象你有一个「AI 助手工厂」。你不需要亲手去造每一个 AI 助手，而是告诉工厂：「我需要一个能帮我管理日历的助手，它要能读懂邮件、理解时间冲突、还会自动回复」。工厂就会帮你把这个助手造出来。</p>
+        <p><strong>Archon 就是这样一个工厂。</strong> 它是一个开源项目，专门用来自动生成 <span class="term" data-definition="AI Agent 就是 AI 智能体——一个可以自主完成任务的程序。你可以把它想象成一个数字员工，它能理解你的指令、查阅资料、做出决策并执行操作。">AI Agent</span>。你描述你想要的 Agent 的能力，Archon 就会帮你生成它的代码。</p>
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">核心概念：AI Agent</strong>
+            <p>AI Agent 不是普通的聊天机器人。聊天机器人只能对话，而 Agent 能够<span class="term" data-definition="工具调用是指 AI 主动使用外部工具来完成操作。就像一个人不只是会说话，还会打电话、查资料、写邮件一样。">调用工具</span>、执行操作、查阅知识库，甚至能自我反思和改进。它更像是一个能动手干活的智能助手。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: The problem Archon solves -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">它解决什么问题？</h2>
+        <p>创建一个真正有用的 AI Agent 很难。你需要设计它的「思考流程」、选择合适的工具、编写提示词（<span class="term" data-definition="Prompt 即提示词，就是你告诉 AI 要做什么的那段文字。好的提示词能让 AI 精准理解你的意图，差的提示词会让 AI 胡说八道。">Prompt</span>）、处理错误情况……这一切都需要大量的编程知识和经验。</p>
+        <div class="pattern-cards stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🎯</div>
+            <h4 class="pattern-title">自动化 Agent 设计</h4>
+            <p class="pattern-desc">你只需要描述需求，Archon 帮你设计 Agent 的完整架构。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🔧</div>
+            <h4 class="pattern-title">工具集成</h4>
+            <p class="pattern-desc">自动为 Agent 选择和配置合适的工具（搜索引擎、数据库、API 等）。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🔁</div>
+            <h4 class="pattern-title">迭代优化</h4>
+            <p class="pattern-desc">Archon 会测试生成的 Agent，发现问题后自动优化代码。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Tech Stack Overview -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">技术栈一览</h2>
+        <p>Archon 用到了这些关键技术。别被术语吓到——我们后面会逐一解释。</p>
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🐍</div>
+            <div>
+              <strong>Python</strong>
+              <p>Archon 的主要编程语言，以简洁易读著称</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🧠</div>
+            <div>
+              <strong>LangGraph</strong>
+              <p>用于构建 AI Agent 工作流的框架，让 Agent 能按步骤思考</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🌐</div>
+            <div>
+              <strong>Streamlit</strong>
+              <p>快速搭建 Web 界面的工具，让你能和 Agent 交互</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">📦</div>
+            <div>
+              <strong>Pydantic</strong>
+              <p>数据验证工具，确保信息格式正确不出错</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: A first look at the code -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">第一次看代码：Archon 的入口</h2>
+        <p>让我们看看 Archon 项目最核心的入口文件。不要担心看不懂——右边的白话翻译会帮你理解每一行的含义。</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment"># archon.py 入口文件</span></span>
+<span class="code-line"><span class="code-keyword">from</span> langgraph.graph <span class="code-keyword">import</span> StateGraph</span>
+<span class="code-line"></span>
+<span class="code-line">workflow = <span class="code-function">StateGraph</span>(AgentState)</span>
+<span class="code-line">workflow.<span class="code-function">add_node</span>(<span class="code-string">"reasoner"</span>, reasoner)</span>
+<span class="code-line">workflow.<span class="code-function">add_node</span>(<span class="code-string">"coder"</span>, coder)</span>
+<span class="code-line">workflow.<span class="code-function">add_node</span>(<span class="code-string">"reviewer"</span>, reviewer)</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl"># 这是注释，说明这个文件叫 archon.py</p>
+              <p class="tl">导入 LangGraph 的图结构——可以理解为一条「流水线」</p>
+              <p class="tl">创建一条新的工作流，传入 Agent 的状态信息</p>
+              <p class="tl">在工作流上添加一个「推理者」节点——负责思考问题</p>
+              <p class="tl">添加一个「编码者」节点——负责写代码</p>
+              <p class="tl">添加一个「审查者」节点——负责检查代码质量</p>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-info">
+          <div class="callout-icon">📖</div>
+          <div class="callout-content">
+            <strong class="callout-title">好知识点：图（Graph）</strong>
+            <p>这里的「图」不是指图片。在计算机科学中，<span class="term" data-definition="在计算机科学中，图（Graph）是由节点和连接组成的结构。你可以把它想象成一张地铁线路图——每个站是一个节点，线路是连接。程序通过图来组织工作流程。">图</span>是一种组织工作流程的方式。Archon 用图来定义 Agent 的思考步骤：先推理，再编码，最后审查。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">理解检测</h2>
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="完全正确！Archon 的核心定位就是一个 AI Agent 的自动化工厂——你描述需求，它帮你生成 Agent。"
+               data-explanation-wrong="不太对哦。Archon 不是聊天机器人，也不是普通的代码工具。它专门用来生成 AI Agent。">
+            <h3 class="quiz-question">如果用一句话描述 Archon，你会怎么说？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>一个能和人聊天的 AI 助手</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>一个能自动生成 AI Agent 的工厂</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>一个用来写 Python 代码的编辑器</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="没错！LangGraph 是 Archon 用来构建 Agent 工作流的核心框架。它让 Agent 可以按步骤推理和行动。"
+               data-explanation-wrong="再想想。Archon 用的是 LangGraph 来定义 Agent 的思考和行动流程，而不是其他选项。">
+            <h3 class="quiz-question">Archon 用什么框架来构建 Agent 的工作流？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Django（Web 框架）</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>TensorFlow（机器学习库）</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>LangGraph（Agent 工作流框架）</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

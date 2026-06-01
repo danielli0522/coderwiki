@@ -1,0 +1,358 @@
+<!-- ═══════════════════════════════════════════════════════════════
+     Module 1: ECC 是什么？
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-1" style="background: var(--color-bg)">
+
+  <div class="module-content">
+
+    <!-- ── MODULE HEADER ─────────────────────────────────────── -->
+    <div class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h2 class="module-title">ECC 是什么？</h2>
+      <p class="module-subtitle">180,000 个程序员都在用的秘密武器，到底是什么？</p>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════
+         SCREEN 1: Hook — "180,000 个程序员都在用的秘密武器"
+         ════════════════════════════════════════════════════════ -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">180,000 个程序员都在用的秘密武器</h3>
+
+      <p class="animate-in">
+        ECC 全称 <strong>"Everything Claude Code"</strong> — 一个为
+        <span class="term" data-definition="Claude Code 是 Anthropic 公司推出的 AI 编程助手命令行工具，你可以直接在终端里用自然语言让它帮你写代码、改代码、调试。">Claude Code</span>
+        打造的
+        <span class="term" data-definition="开源（open-source）意味着代码完全公开，任何人都能免费使用、查看和修改。">开源</span>
+        <span class="term" data-definition="插件（plugin）是一种可安装的扩展模块，给原有软件添加新功能，就像给手机装 App。">插件</span> 系统。
+      </p>
+
+      <p class="animate-in">
+        它由开发者 affaan-m 创建，在
+        <span class="term" data-definition="GitHub 是全球最大的代码托管平台，程序员在这里协作开发项目。Stars（星标）类似于'点赞'，星越多说明项目越受欢迎。">GitHub</span>
+        上已收获 <strong>182K+ stars</strong>，采用
+        <span class="term" data-definition="MIT License 是一种最宽松的开源许可证，意味着你可以几乎不受限制地免费使用、修改和分发这个软件。">MIT 许可证</span>
+        发布。
+      </p>
+
+      <div class="pattern-cards animate-in stagger-children">
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-accent-light);">
+            <span style="color: var(--color-accent);">🤖</span>
+          </div>
+          <div class="pattern-title">60 个 <span class="term" data-definition="Agent（智能体）是一个具有特定角色和能力的 AI 助手，比如'代码审查专家'、'测试工程师'等，每个都有自己的行为规则。">Agent</span></div>
+          <p class="pattern-desc">专属 AI 角色，从架构师到测试员，各司其职</p>
+        </div>
+
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-info-light);">
+            <span style="color: var(--color-info);">⚡</span>
+          </div>
+          <div class="pattern-title">232 个 <span class="term" data-definition="Skill（技能）是预定义的能力模板，告诉 AI 在特定场景下该怎么做，比如'写测试'、'做代码审查'。">Skill</span></div>
+          <p class="pattern-desc">即插即用的能力模板，覆盖开发全流程</p>
+        </div>
+
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-success-light);">
+            <span style="color: var(--color-success);">⌨️</span>
+          </div>
+          <div class="pattern-title">75 个 <span class="term" data-definition="Command（命令）是你输入给 AI 的具体指令，比如 /review 表示做代码审查，/test 表示运行测试。">Command</span></div>
+          <p class="pattern-desc">一句话触发的快捷指令，省时省力</p>
+        </div>
+      </div>
+
+      <p class="animate-in">
+        ECC 的工作范围远不止 Claude Code — 它同时支持
+        <span class="term" data-definition="Cursor 是一款集成了 AI 能力的代码编辑器，能直接在编辑器中与 AI 对话来编写和修改代码。">Cursor</span>、
+        <span class="term" data-definition="Codex 是 OpenAI 推出的 AI 编程代理，能在云端自主完成编码任务。">Codex</span>、
+        <span class="term" data-definition="OpenCode 是一个开源的 AI 编程助手框架。">OpenCode</span>、
+        <span class="term" data-definition="Gemini CLI 是 Google 推出的 Gemini AI 模型的命令行接口，让你在终端中使用 Gemini。">Gemini CLI</span>、
+        <span class="term" data-definition="Zed 是一款高性能的开源代码编辑器，内置 AI 协作功能。">Zed</span>
+        和
+        <span class="term" data-definition="GitHub Copilot 是 GitHub 推出的 AI 编程助手，能在你写代码时实时提供建议和补全。">GitHub Copilot</span>
+        六大平台。
+      </p>
+
+      <!-- Before vs After ECC -->
+      <div class="animate-in" style="margin-top: var(--space-8);">
+        <div class="step-cards">
+          <div class="step-card" style="border-left-color: var(--color-text-muted);">
+            <div class="step-num" style="background: var(--color-text-muted);">0</div>
+            <div class="step-body">
+              <strong>没有 ECC — 原始 Claude Code</strong>
+              <p>一个聪明的 AI 助手，但你需要手动描述每个细节。没有预设角色、没有快捷指令、没有自动化的开发流程。</p>
+            </div>
+          </div>
+
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>安装 ECC</strong>
+              <p>一条命令，把 60 个专业 Agent、232 个 Skill、75 个 Command 全部加载到你的 Claude Code 中。</p>
+            </div>
+          </div>
+
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>瞬间变"超级开发者"</strong>
+              <p>输入 <code>/review</code> 自动做代码审查；输入 <code>/test</code> 自动生成测试。就像给一个武林高手配上了全套神兵利器。</p>
+            </div>
+          </div>
+
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>六大平台通用</strong>
+              <p>同一套 ECC 配置，在 Cursor、Codex、Gemini CLI 等不同 AI 编程工具中都能使用，学一次到处用。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aha! Callout -->
+      <div class="callout callout-accent animate-in">
+        <span class="callout-icon">💡</span>
+        <div class="callout-content">
+          <span class="callout-title">Aha! — "应用商店"类比</span>
+          <p>
+            没有 <span class="term" data-definition="插件（plugin）是一种可安装的扩展模块，给原有软件添加新功能，就像给手机装 App。">插件</span> 的 Claude Code，就像一部没有 App 的智能手机 — 硬件很强，但发挥不了全部潜力。
+            ECC 就是 AI 编程世界的"应用商店"，一键安装就能解锁全部能力。
+          </p>
+          <p style="margin-top: var(--space-2);">
+            更形象地说：Claude Code 是钢铁侠（Tony Stark），ECC 就是他的 Mark 战甲 — 基础能力不变，但加上战甲之后，战斗力指数级飞跃。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════
+         SCREEN 2: Plugin Architecture — Code Translation
+         ════════════════════════════════════════════════════════ -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">插件架构：一段配置看清全貌</h3>
+
+      <p class="animate-in">
+        ECC 的核心是一份
+        <span class="term" data-definition="配置文件（configuration file）是一个文本文件，用特定格式（如 JSON）描述软件应该如何运行，包含各种设置参数。">配置文件</span>
+        <code>plugin.json</code>。它告诉 Claude Code："加载哪些
+        <span class="term" data-definition="Hook（钩子）是一种在特定事件发生时自动执行的程序，比如在你提交代码前自动运行检查。">Hook</span>、哪些
+        <span class="term" data-definition="Agent（智能体）是一个具有特定角色和能力的 AI 助手，比如'代码审查专家'、'测试工程师'等，每个都有自己的行为规则。">Agent</span>、哪些
+        <span class="term" data-definition="Command（命令）是你输入给 AI 的具体指令，比如 /review 表示做代码审查，/test 表示运行测试。">Command</span>。"
+      </p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">plugin.json</span>
+<span class="code-line"><span class="code-punctuation">{</span></span>
+<span class="code-line">  <span class="code-property">"name"</span>: <span class="code-string">"everything-claude-code"</span>,</span>
+<span class="code-line">  <span class="code-property">"version"</span>: <span class="code-string">"2.0.0-rc.1"</span>,</span>
+<span class="code-line">  <span class="code-property">"description"</span>: <span class="code-string">"The ultimate Claude Code framework"</span>,</span>
+<span class="code-line">  <span class="code-property">"hooks"</span>: [<span class="code-string">"hooks/hooks.json"</span>],</span>
+<span class="code-line">  <span class="code-property">"agents"</span>: [<span class="code-string">"agents/*.md"</span>],</span>
+<span class="code-line">  <span class="code-property">"commands"</span>: [<span class="code-string">"commands/*.md"</span>],</span>
+<span class="code-line">  <span class="code-property">"skills"</span>: [<span class="code-string">"skills/*.md"</span>]</span>
+<span class="code-line"><span class="code-punctuation">}</span></span>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文解读</span>
+          <div class="translation-lines">
+            <div class="tl"><strong>name</strong> — 插件的名字叫 "everything-claude-code"，即"万物 Claude Code"</div>
+            <div class="tl"><strong>version</strong> — 当前版本号 2.0.0-rc.1，rc 表示"发布候选版"</div>
+            <div class="tl"><strong>description</strong> — 一句话描述："终极 Claude Code 框架"</div>
+            <div class="tl"><strong>hooks</strong> — 指向 <span class="term" data-definition="钩子配置文件，定义了在哪些时机自动执行什么操作，比如在工具使用前（PreToolUse）或之后（PostToolUse）。">hooks.json</span>，里面注册了各种自动化钩子</div>
+            <div class="tl"><strong>agents</strong> — 用通配符 <code>*.md</code> 加载 agents 目录下所有 60 个 Agent 定义</div>
+            <div class="tl"><strong>commands</strong> — 加载 commands 目录下所有 75 个命令定义</div>
+            <div class="tl"><strong>skills</strong> — 加载 skills 目录下所有 232 个技能定义</div>
+          </div>
+        </div>
+      </div>
+
+      <p class="animate-in">
+        注意 <code>*.md</code> 这个通配符写法 — 它的意思是"加载这个目录下所有的 Markdown 文件"。每个 Agent、Command、Skill 都是一个独立的 <code>.md</code> 文件，这种设计让你可以灵活增减功能。
+      </p>
+
+      <div class="callout callout-info animate-in">
+        <span class="callout-icon">🔍</span>
+        <div class="callout-content">
+          <span class="callout-title">设计亮点：配置与代码分离</span>
+          <p>
+            <code>plugin.json</code> 里的 <code>hooks</code> 字段指向的是 <code>hooks/hooks.json</code>（另一个配置文件），而不是直接写 Hook 代码。
+            这种"配置文件指向配置文件"的设计，让每个部分都能独立修改，互不影响。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════
+         SCREEN 3: What happens when you install ECC — Flow Animation
+         ════════════════════════════════════════════════════════ -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">安装 ECC 后发生了什么？</h3>
+
+      <p class="animate-in">
+        当你执行安装命令后，Claude Code 会按顺序完成六件事。点击"下一步"观看整个过程。
+      </p>
+
+      <div class="flow-animation animate-in"
+           data-steps='[
+             {"label": "用户在终端执行 ECC 安装命令", "highlight": "flow-user", "packet": true, "from": "user", "to": "loader"},
+             {"label": "Claude Code 读取 plugin.json 配置文件，识别需要加载的组件", "highlight": "flow-loader", "packet": true, "from": "loader", "to": "hooks"},
+             {"label": "注册所有 Hook 钩子：PreToolUse、PostToolUse、Stop 等，在关键节点自动触发", "highlight": "flow-hooks", "packet": true, "from": "hooks", "to": "agents"},
+             {"label": "加载 60 个 Agent 定义文件，每个 Agent 是一个专业 AI 角色", "highlight": "flow-agents", "packet": true, "from": "agents", "to": "skills"},
+             {"label": "加载 232 个 Skill 技能模板，覆盖代码审查、测试、部署等全场景", "highlight": "flow-skills", "packet": true, "from": "skills", "to": "commands"},
+             {"label": "注册 75 个 Command 快捷指令，输入 /xxx 即可一键触发", "highlight": "flow-commands"}
+           ]'>
+
+        <div class="flow-step-label">点击"下一步"开始演示</div>
+
+        <div class="flow-actors">
+          <div class="flow-actor" id="flow-user">
+            <div class="flow-actor-icon" style="background: var(--color-accent-light); border-color: var(--color-accent);">
+              <span style="color: var(--color-accent);">👤</span>
+            </div>
+            <span>用户</span>
+          </div>
+          <div class="flow-actor" id="flow-loader">
+            <div class="flow-actor-icon">
+              <span>📦</span>
+            </div>
+            <span>Plugin Loader</span>
+          </div>
+          <div class="flow-actor" id="flow-hooks">
+            <div class="flow-actor-icon">
+              <span>🪝</span>
+            </div>
+            <span>Hooks</span>
+          </div>
+          <div class="flow-actor" id="flow-agents">
+            <div class="flow-actor-icon">
+              <span>🤖</span>
+            </div>
+            <span>60 Agents</span>
+          </div>
+          <div class="flow-actor" id="flow-skills">
+            <div class="flow-actor-icon">
+              <span>⚡</span>
+            </div>
+            <span>232 Skills</span>
+          </div>
+          <div class="flow-actor" id="flow-commands">
+            <div class="flow-actor-icon">
+              <span>⌨️</span>
+            </div>
+            <span>75 Commands</span>
+          </div>
+        </div>
+
+        <div class="flow-packet"></div>
+
+        <div class="flow-controls">
+          <button class="btn btn-primary flow-next-btn">下一步</button>
+          <button class="btn flow-reset-btn">重置</button>
+          <span class="flow-progress">Step 0 / 6</span>
+        </div>
+      </div>
+
+      <p class="animate-in">
+        整个过程只需几秒钟。安装完成后，你的
+        <span class="term" data-definition="Claude Code 是 Anthropic 公司推出的 AI 编程助手命令行工具，你可以直接在终端里用自然语言让它帮你写代码、改代码、调试。">Claude Code</span>
+        就从一个"通用助手"升级成了拥有 60 个专家、232 项技能的"超级团队"。
+      </p>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════
+         SCREEN 4: Quiz
+         ════════════════════════════════════════════════════════ -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">检验你的理解</h3>
+
+      <div class="quiz-container animate-in" id="quiz-module-1">
+
+        <!-- Q1 -->
+        <div class="quiz-question-block"
+             data-correct="b"
+             data-explanation-right="没错！Claude Code 本身是通用助手，ECC 通过添加专业化的 Agent、Skill 和 Command，让 AI 在特定任务上更专业、更高效。就像给一个通才配上了各领域的专家工具。"
+             data-explanation-wrong="再想想。ECC 不是替代 Claude Code，而是在它基础上添加专业化能力 — Agent（专家角色）、Skill（技能模板）、Command（快捷指令），让 AI 在特定场景下更精准、更高效。">
+
+          <div class="quiz-question">
+            你是一个用 AI 写代码的独立开发者，Claude Code 已经能帮你写代码了。你为什么还需要 ECC？
+          </div>
+
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              ECC 可以让 Claude Code 的 AI 模型变得更聪明
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              ECC 提供了专业化的 Agent、Skill 和 Command，让 AI 在特定任务上更精准高效
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              ECC 是 Claude Code 的付费升级版，不装就无法使用
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="quiz-question-block"
+             data-correct="c"
+             data-explanation-right="完全正确！ECC 采用插件化架构，通过标准化的 plugin.json 配置接口，让同一套 Agent/Skill/Command 定义可以在不同平台上运行。这就是'一次编写，到处使用'。"
+             data-explanation-wrong="关键在于跨平台兼容性。ECC 采用标准化的插件架构（plugin.json 配置），把 Agent、Skill、Command 定义为独立文件，这些定义可以在任何支持该插件格式的平台上运行。">
+
+          <div class="quiz-question">
+            ECC 支持 Cursor 和 Gemini CLI，这说明它的架构有什么特点？
+          </div>
+
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              ECC 为每个平台维护了一套独立的代码副本
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              ECC 只是在每个平台上模拟 Claude Code 的行为
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              ECC 采用标准化的插件架构，一套定义可以跨平台运行
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="quiz-question-block"
+             data-correct="b"
+             data-explanation-right="正是如此！配置与逻辑分离是软件架构的经典原则。hooks 字段指向 hooks.json 而不是内联代码，意味着修改钩子规则不需要动 plugin.json，改 Agent 也不影响 Hook。每个部分独立维护、独立迭代。"
+             data-explanation-wrong="想想'关注点分离'这个设计原则。hooks 指向 hooks.json 而不是内联代码，是为了让配置和逻辑分离 — 修改钩子规则不需要动 plugin.json，改 Agent 也不影响 Hook，每个部分可以独立维护和迭代。">
+
+          <div class="quiz-question">
+            plugin.json 里的 hooks 字段指向 hooks.json，而不是直接写 Hook 代码。这种设计有什么好处？
+          </div>
+
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              让文件更小，加载更快
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              配置与逻辑分离，每个组件可以独立修改和维护
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              为了加密保护 Hook 代码不被用户看到
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module-1')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module-1')">重新作答</button>
+      </div>
+    </div>
+
+  </div><!-- .module-content -->
+</section>

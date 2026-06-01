@@ -1,0 +1,147 @@
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">给代码装上"神经系统"</h1>
+      <p class="module-subtitle">GitNexus 是什么？为什么 40k+ 开发者给它点了 Star？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: The Problem -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">AI 代理的致命盲区</h2>
+        <p>你让 Cursor 修改 <code>UserService.validate()</code>，它改了返回类型。看起来没问题。但它不知道：整个项目里有 47 个函数依赖这个返回类型。上线后，47 个地方全部报错。</p>
+        <p>这不是 AI 不够聪明，而是它根本<strong>看不到</strong>代码之间的依赖关系。它只能一个文件一个文件地 grep、read、guess——就像蒙着眼在迷宫里找路。</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">&#128161;</div>
+          <div class="callout-content">
+            <strong class="callout-title">核心问题</strong>
+            <p>Cursor、Claude Code、Codex 等 AI 工具能读写代码，但<strong>不真正理解代码库的结构</strong>。它们不知道谁调了谁、改一个函数会影响多少地方。GitNexus 就是来补这块拼图的。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: What GitNexus Does -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">GitNexus：代码的"神经系统"</h2>
+        <p>GitNexus 把你的整个代码库解析成一张 <span class="term" data-definition="知识图谱把信息用「节点」和「边」组织起来。节点是实体（函数、类、文件），边是关系（调用、继承、导入）。GitNexus 构建的就是代码的知识图谱。">知识图谱</span>——每个函数、每个类、每条调用链、每个依赖关系，全部预先计算好，存在本地图数据库里。AI 代理一次查询就能拿到完整的上下文。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#128373;</div>
+            <h4 class="pattern-title">预计算关系智能</h4>
+            <p class="pattern-desc">索引时就把聚类、执行流追踪、影响范围评分全部算好。查询时一次返回完整上下文，LLM 不可能遗漏。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">&#128176;</div>
+            <h4 class="pattern-title">Token 极省</h4>
+            <p class="pattern-desc">传统方式需要 10+ 次 grep/read 查询才能理解一个函数。GitNexus 一次查询就给完整答案，省掉 70%+ 的工具调用。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: #FDF5E0">&#127919;</div>
+            <h4 class="pattern-title">小模型也能用</h4>
+            <p class="pattern-desc">工具做了重活，LLM 只需要读懂结构化结果。即使较小的模型也能获得完整的架构视野。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-success-light)">&#128274;</div>
+            <h4 class="pattern-title">完全本地运行</h4>
+            <p class="pattern-desc">CLI 模式全部本机运行，不联网；Web 模式全部浏览器内运行，不上传代码。你的代码永远不离开你的机器。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Two Modes -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">两种使用方式，覆盖所有场景</h2>
+        <p>GitNexus 提供两种互补的使用模式：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CLI + MCP 模式</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment"># 一行命令索引整个代码库</span></span>
+<span class="code-line">npx gitnexus analyze</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 启动 MCP 服务器，AI 代理自动连接</span></span>
+<span class="code-line"><span class="code-comment"># Cursor / Claude Code / Codex / Windsurf</span></span>
+<span class="code-line"><span class="code-comment"># 都能直接使用 16 个图谱工具</span></span>
+<span class="code-line">gitnexus mcp</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">在项目根目录跑一行命令，GitNexus 就会把整个代码库解析成知识图谱。</p>
+              <p class="tl">启动 MCP 服务器后，你的 AI 编辑器（Cursor、Claude Code 等）就自动拥有了"代码透视"能力。</p>
+              <p class="tl">16 个工具覆盖：影响分析、上下文查询、变更检测、跨文件重命名、Cypher 图查询……</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Traditional RAG vs GitNexus -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">为什么比传统 Graph RAG 更强？</h2>
+        <p>传统方案把原始图谱边丢给 LLM，让它自己慢慢探索。GitNexus 在索引阶段就预计算好了结构——聚类、追踪、评分——工具一次调用返回完整上下文：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"传统 RAG：LLM 收到原始图谱边，开始自己探索"},
+          {"highlight":"flow-actor-1","label":"查询1：找调用者 → 查询2：哪些文件？→ 查询3：过滤测试？→ 查询4：高风险？"},
+          {"highlight":"flow-actor-2","label":"GitNexus：impact(UserService, upstream) 一次调用"},
+          {"highlight":"flow-actor-2","label":"返回：8 个调用者、3 个聚类、全部 90%+ 置信度","packet":true,"from":"actor-2","to":"actor-1"},
+          {"highlight":"flow-actor-1","label":"完整答案，1 次查询 vs 传统 4+ 次查询"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon" style="background: var(--color-accent); color: white;">RAG</div>
+              <span>传统方案</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon" style="background: var(--color-actor-2); color: white;">GN</div>
+              <span>GitNexus</span>
+            </div>
+          </div>
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击"下一步"看对比</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重播</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！GitNexus 的核心创新是预计算关系智能——索引时就完成聚类、追踪和评分，查询时一次返回完整结构化结果，LLM 不需要多轮探索。"
+               data-explanation-wrong="想想 GitNexus 和传统方案的本质区别：传统方案让 LLM 自己在图谱里探索，GitNexus 则在索引时就把重活干完了。答案跟搜索引擎的思路一样——Google 不会在你搜索时才去爬网页。">
+            <h3 class="quiz-question">GitNexus 相比传统 Graph RAG 的核心优势是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>使用更大的 LLM 模型来理解代码结构</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>索引时预计算好聚类、追踪和评分，查询一次返回完整结果</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>把代码上传到云端用 GPU 加速分析</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

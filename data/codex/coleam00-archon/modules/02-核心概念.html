@@ -1,0 +1,239 @@
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">认识核心角色：Archon 的演员表</h1>
+      <p class="module-subtitle">每个系统都有自己的「演员」，Archon 的演员们各司其职</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: The Cast -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Archon 里的角色们</h2>
+        <p>想象一部电影的拍摄现场。有导演、编剧、演员、剪辑师——每个人负责不同的事情，但都为了同一部电影服务。Archon 也一样，它有几个核心「角色」，每个角色各司其职。</p>
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🧠</div>
+            <div>
+              <strong>Reasoner（推理者）</strong>
+              <p>像导演一样统筹全局——分析用户需求，制定行动计划，决定下一步做什么</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">💻</div>
+            <div>
+              <strong>Coder（编码者）</strong>
+              <p>像编剧一样写出具体的「剧本」——根据推理者的计划生成代码</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🔍</div>
+            <div>
+              <strong>Reviewer（审查者）</strong>
+              <p>像剪辑师一样把关质量——检查生成的代码有没有问题，提出修改建议</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">📚</div>
+            <div>
+              <strong>Knowledge Base（知识库）</strong>
+              <p>像道具仓库一样提供背景资料——存储最佳实践和参考代码供其他角色使用</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Group Chat Animation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">角色之间的对话</h2>
+        <p>当你说「帮我创建一个能管理待办事项的 Agent」时，Archon 的角色们会这样交流：</p>
+        <div class="chat-window" id="chat-module2">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="user" style="display:none">
+              <div class="chat-avatar" style="background: #6B6560">👤</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: #6B6560">用户</span>
+                <p>帮我创建一个能管理待办事项的 Agent，它要能添加、删除、查询任务。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="reasoner" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🧠</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">推理者</span>
+                <p>收到需求。我需要分析一下：这个 Agent 需要哪些工具？我判断需要 CRUD 操作工具和一个状态管理系统。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="reasoner" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🧠</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">推理者</span>
+                <p>编码者，请你根据这个设计生成代码。需要用到 LangGraph 的 StateGraph。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="coder" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">💻</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">编码者</span>
+                <p>好的，我来写代码。我会创建状态模型、定义工具函数、搭建工作流图。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="coder" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">💻</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">编码者</span>
+                <p>代码生成完毕！审查者，请帮我检查一下质量。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="5" data-sender="reviewer" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">🔍</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">审查者</span>
+                <p>检查完毕。第 45 行的错误处理不够完善，建议增加重试机制。其他部分通过！</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-typing" style="display:none">
+            <div class="chat-avatar" id="typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条消息</button>
+            <button class="btn chat-all-btn">播放全部</button>
+            <button class="btn chat-reset-btn">重新播放</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Reasoner deep dive -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">深入推理者（Reasoner）</h2>
+        <p>推理者是整个系统的「大脑」。它的职责是理解用户需求，然后拆解成具体的执行步骤。</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">reasoner</span>(state: AgentState):</span>
+<span class="code-line">    <span class="code-string">"""分析需求，制定计划"""</span></span>
+<span class="code-line">    user_request = state[<span class="code-string">"user_request"</span>]</span>
+<span class="code-line">    plan = llm.<span class="code-function">invoke</span>(</span>
+<span class="code-line">        <span class="code-string">f"为以下需求制定执行计划:</span></span>
+<span class="code-line"><span class="code-string">        {user_request}"</span></span>
+<span class="code-line">    )</span>
+<span class="code-line">    state[<span class="code-string">"plan"</span>] = plan</span>
+<span class="code-line">    <span class="code-keyword">return</span> state</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">定义推理者函数，接收当前的 Agent 状态。</p>
+              <p class="tl">注释说明功能：分析需求并制定计划。</p>
+              <p class="tl">从状态中取出用户的需求描述。</p>
+              <p class="tl">调用大语言模型（LLM），让它分析需求。</p>
+              <p class="tl">告诉 LLM：「为这个需求制定计划」。</p>
+              <p class="tl">把 LLM 的回应传入。</p>
+              <p class="tl">把制定好的计划保存回状态中。</p>
+              <p class="tl">返回更新后的状态给下一步使用。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: File Structure -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">项目的文件结构</h2>
+        <p>Archon 的代码组织得非常清晰。下面是它的主要目录结构——每个文件夹都有自己的职责。</p>
+        <div class="file-tree">
+          <div class="ft-folder open">
+            <span class="ft-name">archon/</span>
+            <span class="ft-desc">项目根目录</span>
+            <div class="ft-children">
+              <div class="ft-folder">
+                <span class="ft-name">graph/</span>
+                <span class="ft-desc">LangGraph 工作流定义——Agent 的「大脑」在这里</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">services/</span>
+                <span class="ft-desc">与外部服务交互的代码（如 OpenAI API）</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">models/</span>
+                <span class="ft-desc">数据模型定义——描述信息的格式和结构</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">utils/</span>
+                <span class="ft-desc">工具函数——可复用的辅助代码</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">archon.py</span>
+                <span class="ft-desc">主入口文件，启动整个系统</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">角色理解测验</h2>
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！推理者负责分析需求和制定计划，是整个系统的起点。就像一部电影里导演先理解剧本再安排拍摄一样。"
+               data-explanation-wrong="不完全对。想一想：用户需求进来后，谁第一个处理？是推理者——它负责理解和规划。">
+            <h3 class="quiz-question">当用户提出需求时，哪个角色最先响应？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>编码者——立刻开始写代码</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>推理者——先分析需求再制定计划</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>审查者——先检查需求是否合理</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="没错！审查者负责检查代码质量，发现问题并提出修改建议。这确保了最终生成的代码是可靠的。"
+               data-explanation-wrong="再想想。代码生成后，需要有人检查质量——这就是审查者的工作。">
+            <h3 class="quiz-question">审查者的主要职责是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>检查代码质量并提出修改建议</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>分析用户需求并制定计划</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>与用户进行对话沟通</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

@@ -1,0 +1,132 @@
+<!-- Module 7: 总结与练习 -->
+<section class="module" id="module-7">
+  <div class="module-content">
+
+    <div class="module-header animate-in">
+      <span class="module-number">07</span>
+      <h1 class="module-title">总结与练习</h1>
+      <p class="module-subtitle">回顾核心知识，通过综合练习检验理解深度。</p>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">架构全景回顾</h2>
+      <p>Chrome DevTools MCP 的核心架构可以用五个层次来概括：</p>
+
+      <div class="arch-diagram">
+        <div class="arch-zone">
+          <div class="arch-zone-label">五层架构</div>
+          <div class="arch-component" data-desc="AI 编码助手（Claude、Cursor、Copilot 等）作为 MCP Client，通过 JSON-RPC 发送工具调用请求">&#x1F916; <span>LLM 层</span></div>
+          <div class="arch-component" data-desc="McpServer + ToolHandler，负责工具注册、参数校验、互斥锁、遥测记录">&#x2699; <span>MCP 协议层</span></div>
+          <div class="arch-component" data-desc="McpContext（全局状态）+ McpPage（单页状态），管理页面、网络、Console、快照">&#x1F4C1; <span>上下文层</span></div>
+          <div class="arch-component" data-desc="Puppeteer 驱动层，将 MCP 工具操作转换为 CDP/Puppeteer API 调用，通过 WaitForHelper 确保可靠性">&#x1F3A2; <span>驱动层</span></div>
+          <div class="arch-component" data-desc="Chrome 浏览器 + DevTools Frontend 引擎（Trace 解析、HeapSnapshot、格式化）">&#x1F310; <span>浏览器层</span></div>
+        </div>
+        <div class="arch-description">点击组件查看详细说明</div>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">关键设计模式总结</h2>
+
+      <div class="pattern-cards stagger-children">
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-accent-light); color: var(--color-accent);">&#x1F511;</div>
+          <h3 class="pattern-title">懒加载浏览器</h3>
+          <p class="pattern-desc">浏览器在第一个工具调用时才启动/连接（通过 getContext 闭包），MCP Server 注册工具时不需要浏览器实例。</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-info-light); color: var(--color-info);">&#x1F512;</div>
+          <h3 class="pattern-title">统一中间层</h3>
+          <p class="pattern-desc">ToolHandler 作为所有工具的统一入口，横切关注点（校验、互斥、遥测、错误处理）集中管理，工具本身只关注业务逻辑。</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-success-light); color: var(--color-success);">&#x1F504;</div>
+          <h3 class="pattern-title">稳定 uid 映射</h3>
+          <p class="pattern-desc">基于 loaderId + backendNodeId 的组合键跨快照复用 uid，让 LLM 的操作链（快照 -> 选择元素 -> 操作）不会因为页面刷新而断裂。</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-error-light); color: var(--color-error);">&#x1F9E9;</div>
+          <h3 class="pattern-title">引擎复用</h3>
+          <p class="pattern-desc">不重造轮子。直接复用 Chrome DevTools Frontend 的 Trace 解析、HeapSnapshot、格式化引擎，通过适配器桥接 Puppeteer 和 DevTools。</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: #FDF5E0; color: #D4A843;">&#x1F6E1;</div>
+          <h3 class="pattern-title">渐进式能力暴露</h3>
+          <p class="pattern-desc">Slim 模式只暴露 3 个基础工具，完整模式暴露 45+ 工具，Extensions/ThirdParty/WebMCP 默认关闭需显式启用。安全与功能的平衡。</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: #E8F5EE; color: #2D8B55;">&#x23F3;</div>
+          <h3 class="pattern-title">智能等待</h3>
+          <p class="pattern-desc">WaitForHelper 的 MutationObserver + 导航检测 + 节流适配，让 Puppeteer 自动化比 Selenium 等框架更可靠。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">综合练习</h2>
+
+      <div class="quiz-container" id="quiz-7">
+        <div class="scenario-block">
+          <div class="scenario-context">
+            <span class="scenario-label">场景</span>
+            <p>你的 AI 助手需要完成以下任务：打开一个网页、填写登录表单、提交后检查网络请求中是否有失败的 API 调用。请回答以下问题：</p>
+          </div>
+        </div>
+
+        <div class="quiz-question-block" data-correct="c" data-explanation-right="正确的工作流是：new_page 打开网页 -> take_snapshot 获取页面元素 -> fill 填写表单 -> list_network_requests 检查网络请求。" data-explanationwrong="按操作顺序思考：先打开页面，再看页面结构，再操作元素。">
+          <p class="quiz-question">以下哪个工具调用顺序是正确的？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)"><span class="quiz-option-radio"></span>fill -> take_snapshot -> new_page -> list_network_requests</button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)"><span class="quiz-option-radio"></span>take_snapshot -> new_page -> fill -> list_network_requests</button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)"><span class="quiz-option-radio"></span>new_page -> take_snapshot -> fill -> list_network_requests</button>
+            <button class="quiz-option" data-value="d" onclick="selectOption(this)"><span class="quiz-option-radio"></span>new_page -> fill -> take_snapshot -> list_network_requests</button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block" data-correct="b" data-explanation-right="fill 工具通过 uid 定位元素。uid 来自 take_snapshot 生成的无障碍树快照，每个元素都有唯一的 uid 标识。" data-explanationwrong="回顾 fill 工具的 schema 中 uid 参数的来源。">
+          <p class="quiz-question">fill 工具如何知道要填写哪个表单元素？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)"><span class="quiz-option-radio"></span>通过 CSS 选择器定位</button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)"><span class="quiz-option-radio"></span>通过 take_snapshot 生成的 uid 定位</button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)"><span class="quiz-option-radio"></span>通过 XPath 定位</button>
+            <button class="quiz-option" data-value="d" onclick="selectOption(this)"><span class="quiz-option-radio"></span>通过元素坐标定位</button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block" data-correct="a" data-explanation-right="ConsoleCollector 和 NetworkCollector 都支持 includePreserved 参数，可以获取最近 3 次导航前的数据。这是因为在导航时旧数据被保存到 preserved 队列中。" data-explanationwrong="回顾 list_network_requests 和 list_console_messages 的 includePreserved 参数。">
+          <p class="quiz-question">如果填写表单后页面发生了跳转（导航），之前页面的网络请求数据还能查看吗？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)"><span class="quiz-option-radio"></span>可以，使用 includePreserved=true 获取最近 3 次导航前的数据</button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)"><span class="quiz-option-radio"></span>不可以，导航会清空所有数据</button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)"><span class="quiz-option-radio"></span>只有性能数据可以保留，网络数据不行</button>
+            <button class="quiz-option" data-value="d" onclick="selectOption(this)"><span class="quiz-option-radio"></span>需要在导航前手动保存到文件</button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-7')">Check Answers</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-7')">Reset</button>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">拓展学习</h2>
+      <div class="callout callout-accent animate-in">
+        <span class="callout-icon">&#x1F4DA;</span>
+        <div class="callout-content">
+          <span class="callout-title">推荐深入学习</span>
+          <p>
+            <strong>MCP 协议规范</strong>：https://modelcontextprotocol.io/<br>
+            <strong>Puppeteer 文档</strong>：https://pptr.dev/<br>
+            <strong>Chrome DevTools Protocol</strong>：https://chromedevtools.github.io/devtools-protocol/<br>
+            <strong>项目源码</strong>：https://github.com/ChromeDevTools/chrome-devtools-mcp<br>
+            <strong>Lighthouse 性能分析</strong>：https://developer.chrome.com/docs/lighthouse/
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>

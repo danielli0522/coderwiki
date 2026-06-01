@@ -1,0 +1,245 @@
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">启动引擎</h1>
+      <p class="module-subtitle">当你写下 launch()，幕后发生了哪些精密操作？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: The Launch Sequence -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">启动就像发射火箭</h2>
+        <p>发射一枚火箭不是按一个按钮就完事了——需要检查燃料、校准轨道、加载载荷、倒计时。CloakBrowser 的启动过程也一样精密：</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>检查浏览器二进制文件</strong>
+              <p>定制的 Chromium 有没有下载好？校验 SHA-256 确保文件没被篡改</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>解析<span class="term" data-definition="代理是一种网络中间人。你的请求先发给代理服务器，代理再转发给目标网站，这样网站只能看到代理的 IP，看不到你的真实 IP。">代理</span>配置</strong>
+              <p>如果配了代理，解析代理 URL（支持 HTTP 和 SOCKS5），自动检测时区和地理位置</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>生成隐身参数</strong>
+              <p>创建随机种子，生成 57 个隐身参数（指纹、平台、GPU 等）</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>启动定制 Chromium</strong>
+              <p>用 Playwright（或 Patchright）启动浏览器，传入所有隐身参数</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>注入人类行为模拟（可选）</strong>
+              <p>如果开了 humanize 模式，给鼠标和键盘操作加上"人类节奏"</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Binary Download -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">定制浏览器的下载管理</h2>
+        <p>CloakBrowser 不用普通的 Chrome——它用的是经过 57 处 C++ 修改的定制版 Chromium。这个文件大约 200MB，下载和管理工作全靠 <code>download.py</code>：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE · download.py</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">ensure_binary</span>() -> Path:</span>
+<span class="code-line">    <span class="code-keyword">if</span> local := os.environ.<span class="code-function">get</span>(<span class="code-string">"CLOAKBROWSER_BIN"</span>):</span>
+<span class="code-line">        <span class="code-keyword">return</span> <span class="code-function">Path</span>(local)</span>
+<span class="code-line">    cached = _cache_dir() / _binary_name()</span>
+<span class="code-line">    <span class="code-keyword">if</span> cached.<span class="code-function">exists</span>() <span class="code-keyword">and</span> _sha256_ok(cached):</span>
+<span class="code-line">        <span class="code-keyword">return</span> cached</span>
+<span class="code-line">    <span class="code-keyword">return</span> <span class="code-function">_download_binary</span>(cached)</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">定义"确保浏览器可用"的函数</p>
+              <p class="tl">如果用户指定了自定义路径，直接用那个</p>
+              <p class="tl">返回用户指定的路径</p>
+              <p class="tl">计算缓存目录中二进制文件的路径</p>
+              <p class="tl">如果文件存在且 SHA-256 校验通过，直接用缓存</p>
+              <p class="tl">返回缓存的文件路径</p>
+              <p class="tl">否则，从 GitHub Releases 下载新文件</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Aha! SHA-256 校验</strong>
+            <p><span class="term" data-definition="SHA-256 是一种密码哈希算法。它可以为任何文件生成一个唯一的 64 位十六进制"指纹"。如果文件被哪怕改了一个字节，指纹就会完全不同。">SHA-256</span> 就像文件的"防伪标签"——如果有人篡改了这个 200MB 的浏览器文件（比如植入了恶意代码），校验就会失败，CloakBrowser 会拒绝使用它。这保证了你运行的是一个安全的、未被篡改的浏览器。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Stealth Args Generation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">隐身参数是怎么生成的</h2>
+        <p>每次启动时，CloakBrowser 都会生成一套全新的"假身份"。这个身份从哪来？答案是一个随机<span class="term" data-definition="种子（Seed）是随机数生成器的起点。给定同一个种子，就会生成完全相同的随机序列。在 CloakBrowser 中，种子决定了所有指纹参数——同一个种子永远产生同一套指纹。">种子（Seed）</span>：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE · config.py</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">get_default_stealth_args</span>() -> list[str]:</span>
+<span class="code-line">    seed = random.<span class="code-function">randint</span>(<span class="code-number">10000</span>, <span class="code-number">99999</span>)</span>
+<span class="code-line">    args = [</span>
+<span class="code-line">      <span class="code-string">f"--fingerprint-seed=</span>{seed}<span class="code-string">"</span>,</span>
+<span class="code-line">      <span class="code-string">f"--fingerprint-platform=</span>{platform}<span class="code-string">"</span>,</span>
+<span class="code-line">    ]</span>
+<span class="code-line">    <span class="code-keyword">return</span> args</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">定义生成隐身参数的函数</p>
+              <p class="tl">随机生成一个 5 位数的种子（10000 到 99999）</p>
+              <p class="tl">组装启动参数列表</p>
+              <p class="tl">传入种子——它决定了所有指纹细节</p>
+              <p class="tl">传入伪装的平台类型（比如把 Linux 伪装成 Windows）</p>
+              <p class="tl">返回完整的参数列表</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">--fingerprint-seed=42871</code>
+            <span class="badge-desc">种子决定了所有指纹参数：画布噪点、GPU 型号、屏幕分辨率、字体列表...</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">--fingerprint-platform=windows</code>
+            <span class="badge-desc">即使你的服务器是 Linux，网站也会认为你用的是 Windows</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">--disable-features=AutomationControl</code>
+            <span class="badge-desc">关闭 Chrome 的"自动化模式"标志，抹除最明显的 Bot 痕迹</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Full Launch Flow Animation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">完整启动流程</h2>
+        <p>从你写下 <code>launch()</code> 到浏览器窗口打开，中间经历了这些步骤：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"用户调用 launch(headless=True, proxy=...)"},
+          {"highlight":"flow-actor-2","label":"ensure_binary()：检查/下载定制 Chromium (~200MB)","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-2","label":"SHA-256 校验通过，二进制文件就绪"},
+          {"highlight":"flow-actor-3","label":"maybe_resolve_geoip()：通过代理 IP 检测地理位置","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-3","label":"自动设置时区和语言环境（如 Asia/Shanghai）"},
+          {"highlight":"flow-actor-4","label":"build_args()：生成种子 + 57 个隐身参数","packet":true,"from":"actor-3","to":"actor-4"},
+          {"highlight":"flow-actor-4","label":"Playwright 启动定制 Chromium，传入所有参数"},
+          {"highlight":"flow-actor-4","label":"（可选）注入 humanize 猴子补丁，添加人类行为模拟"},
+          {"highlight":"flow-actor-1","label":"返回浏览器实例——一切准备就绪！","packet":true,"from":"actor-4","to":"actor-1"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">👤</div>
+              <span>用户代码</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">📦</div>
+              <span>下载管理</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">🌍</div>
+              <span>GeoIP</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">🚀</div>
+              <span>Playwright</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击"下一步"开始</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="完全正确！SHA-256 校验确保下载的定制 Chromium 没有被篡改，保证运行的是安全的、经过 57 处修改的版本。"
+               data-explanation-wrong="想一想：如果有人在你不知情的情况下替换了这个浏览器文件，会发生什么？CloakBrowser 需要一个机制来确保文件是原版的。">
+            <h3 class="quiz-question">为什么 CloakBrowser 要对下载的 Chromium 做 SHA-256 校验？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>为了加速下载——校验通过就可以跳过解压</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>为了安全——确保文件没被篡改（比如植入恶意代码）</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>为了检查版本号——确保和 Playwright 版本匹配</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="对！种子是整个指纹系统的基石。同一个种子会生成完全一致的指纹——这意味着你可以"重现"同一个身份。"
+               data-explanation-wrong="种子（Seed）是 CloakBrowser 指纹系统的核心。想想看，为什么它叫做"种子"而不是"随机数"？">
+            <h3 class="quiz-question">在 CloakBrowser 的启动流程中，哪个参数决定了所有的指纹细节？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>--fingerprint-seed —— 同一个种子生成完全一致的指纹</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>--fingerprint-platform —— 平台类型决定了一切</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>headless 参数 —— 无头模式决定了指纹的伪装程度</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

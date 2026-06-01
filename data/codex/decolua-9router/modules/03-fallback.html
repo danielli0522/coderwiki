@@ -1,0 +1,212 @@
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">三层智能降级</h1>
+      <p class="module-subtitle">当一个 AI 服务挂了，9Router 怎么无缝切换到备用方案？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Fallback concept -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">像发电厂的备用发电机</h2>
+        <p>想象一栋大楼。主电源（订阅）停电了，自动切换到 <span class="term" data-definition="柴油发电机作为备用电源，主电停电时自动启动。类比 9Router 的降级策略：主力 AI 不可用时自动切换到备选方案。">备用发电机</span>（便宜方案）。发电机也烧完了？太阳能（免费方案）继续供电。</p>
+        <p>9Router 就是这样工作的——<strong>三层降级，永不停机</strong>：</p>
+
+        <div class="step-cards animate-in">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Tier 1：订阅服务（主力）</strong>
+              <p>Claude Code Pro $20/月、Codex Plus 等——你已经在付钱了，优先用完它</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Tier 2：便宜方案（备用）</strong>
+              <p>GLM-5.1（$0.6/百万 token）、MiniMax（$0.2/百万 token）——极低成本</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Tier 3：免费方案（兜底）</strong>
+              <p>Kiro AI（免费无限 Claude 4.5）、OpenCode Free——$0，永远不会断</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Combo system -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Combo：你的"套餐组合"</h2>
+        <p>你可以在 9Router 仪表盘里创建"Combo"——给多个模型排个优先级，就像给手机设置"WiFi 优先 → 4G 备用 → 3G 兜底"：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"请求到达，使用 combo: my-coding-stack"},
+          {"highlight":"flow-actor-1","label":"第一个模型: cc/claude-opus-4-7（订阅）","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-2","label":"Claude 返回 429（配额用完）——触发降级！"},
+          {"highlight":"flow-actor-3","label":"第二个模型: glm/glm-5.1（便宜备用，$0.6/1M）","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-3","label":"GLM 返回 429（也限流了）——继续降级！"},
+          {"highlight":"flow-actor-4","label":"第三个模型: kr/claude-sonnet-4.5（免费兜底）","packet":true,"from":"actor-3","to":"actor-4"},
+          {"highlight":"flow-actor-4","label":"Kiro 免费服务成功返回结果！全程自动，用户无感知"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">📋</div>
+              <span>Combo 选择器</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">💳</div>
+              <span>Tier 1 订阅</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">💰</div>
+              <span>Tier 2 便宜</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">🆓</div>
+              <span>Tier 3 免费</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击"下一步"观看降级过程</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Error detection code -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">怎么判断"该降级了"？</h2>
+        <p>9Router 用一套"错误规则"来判断什么时候该切换到下一个方案：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">export function</span> <span class="code-function">checkFallbackError</span>(status, errorText) {</span>
+<span class="code-line">  <span class="code-keyword">for</span> (<span class="code-keyword">const</span> rule <span class="code-keyword">of</span> ERROR_RULES) {</span>
+<span class="code-line">    <span class="code-keyword">if</span> (rule.text && lowerError.includes(rule.text)) {</span>
+<span class="code-line">      <span class="code-keyword">return</span> { shouldFallback: <span class="code-keyword">true</span> };</span>
+<span class="code-line">    }</span>
+<span class="code-line">    <span class="code-keyword">if</span> (rule.status && rule.status === status) {</span>
+<span class="code-line">      <span class="code-keyword">return</span> { shouldFallback: <span class="code-keyword">true</span> };</span>
+<span class="code-line">    }</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">定义一个"检查是否该降级"的函数，输入是状态码和错误信息</p>
+              <p class="tl">遍历所有预设的错误规则（从最具体的到最一般的）</p>
+              <p class="tl">如果是文字匹配规则，看错误信息里有没有包含关键字（比如"rate limit"）</p>
+              <p class="tl">匹配到了！返回"该降级了"</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">如果是状态码规则，看 HTTP 状态码是否匹配（比如 429 = 限流）</p>
+              <p class="tl">匹配到了！返回"该降级了"</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">所有规则都没匹配——默认也降级（宁可多试一个，不要直接失败）</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Exponential backoff -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">指数退避：越失败越慢</h2>
+        <p>当一个账户被限流时，9Router 不会疯狂重试。它用一个聪明的策略——<span class="term" data-definition="指数退避是一种错误重试策略：第一次等 1 秒，第二次等 2 秒，第三次等 4 秒... 每次翻倍。这样不会给服务器造成更大压力。">指数退避</span>：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">⏱️</div>
+            <h4 class="pattern-title">冷却时间翻倍</h4>
+            <p class="pattern-desc">第一次失败：等 1 秒。第二次：2 秒。第三次：4 秒。最多等 4 分钟。给服务器喘息的时间。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🔄</div>
+            <h4 class="pattern-title">多账户轮换</h4>
+            <p class="pattern-desc">同一个提供商可以有多个账户。账户 A 限流了？试账户 B。都限流了？才降级到下一个模型。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🔒</div>
+            <h4 class="pattern-title">模型级锁定</h4>
+            <p class="pattern-desc">不是整个提供商都挂了才切换——是具体的模型。比如 Claude Opus 限流了，但 Claude Sonnet 可能还能用。</p>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Aha！</strong>
+            <p>指数退避是分布式系统的黄金法则。Google、Amazon 的服务都在用。下次你告诉 AI "加重试逻辑"时，加上"用指数退避"——这是区分小白和专家的关键词。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">测验：降级策略</h2>
+
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！三层分别是：订阅服务（主力）→ 便宜方案（备用）→ 免费方案（兜底）。这确保了无论发生什么，你总能继续编码。"
+               data-explanation-wrong="回忆一下发电厂的比喻：主电源 → 备用发电机 → 太阳能。对应 9Router 的哪三个层级？">
+            <h3 class="quiz-question">9Router 的三层降级顺序是？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>免费 → 便宜 → 订阅</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>便宜 → 订阅 → 免费</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>订阅 → 便宜 → 免费</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="对！429 是 HTTP 标准状态码，表示"Too Many Requests"（请求太多，请稍后再试）。这是触发降级最常见的信号。"
+               data-explanation-wrong="想想 API 限流时，服务商会返回什么 HTTP 状态码？提示：4xx 系列表示客户端错误，其中有一个专门表示'请求太频繁'。">
+            <h3 class="quiz-question">当 AI 服务商限流时，通常返回什么 HTTP 状态码？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>429（请求过多）</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>200（成功）</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>404（未找到）</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

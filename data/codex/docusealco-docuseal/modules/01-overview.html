@@ -1,0 +1,395 @@
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 1: 平台概览与部署
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">平台概览与部署</h1>
+      <p class="module-subtitle">理解 DocuSeal 的核心定位与架构，掌握 Docker 一键部署——从零到运行只需一条命令</p>
+    </header>
+
+    <!-- ── Screen 1: DocuSeal 是什么？ ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">DocuSeal 是什么？</h2>
+
+      <p>想象你需要让 50 个合作伙伴签署一份保密协议（NDA）。传统方式是发邮件、打印、签字、扫描、回传——一轮下来至少三天。现在有一个开源工具，能让你上传 PDF、拖拽设置签名区域、一键发送给所有签署人、自动追踪状态、生成审计日志。这就是 <span class="term" data-definition="DocuSeal 是一个开源的文档签署和表单填写平台。它提供 PDF 表单构建器（WYSIWYG）、12 种字段类型、多方签署、自动化邮件、电子签名验证等功能，可自行部署或使用云服务。">DocuSeal</span>。</p>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">&#128161;</div>
+        <div class="callout-content">
+          <strong class="callout-title">核心理念</strong>
+          <p>DocuSeal 不只是"电子签名"——它是<strong>完整的文档处理流水线</strong>。从创建模板、分配签署人、发送邀请、追踪状态，到生成审计日志和签名验证，覆盖文档签署的全生命周期。而且它是开源的，你可以部署在自己的服务器上，数据完全由你掌控。</p>
+        </div>
+      </div>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">&#128196;</div>
+          <h4 class="pattern-title">PDF 表单构建器</h4>
+          <p class="pattern-desc">所见即所得的拖拽式编辑器，支持 12 种字段类型：签名、日期、文件上传、复选框、文本、下拉框等。每个字段可绑定到特定签署人角色。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">&#9993;</div>
+          <h4 class="pattern-title">自动化邮件通知</h4>
+          <p class="pattern-desc">通过 SMTP 自动发送签署邀请、完成通知、拒绝通知。支持自定义邮件模板和回复地址，每个签署人收到个性化的签署链接。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">&#128274;</div>
+          <h4 class="pattern-title">电子签名验证</h4>
+          <p class="pattern-desc">自动在 PDF 中嵌入电子签名，支持签名验证（HexaPDF）、审计日志生成，确保文档的完整性和不可抵赖性。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+          <div class="pattern-icon" style="background: var(--color-actor-4)">&#127760;</div>
+          <h4 class="pattern-title">开放 API 与 Webhook</h4>
+          <p class="pattern-desc">RESTful API 支持创建模板、发起签署、查询状态。Webhook 实时推送事件通知，方便与你的业务系统深度集成。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 2: 核心架构 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">核心架构：四层模型</h2>
+
+      <p>DocuSeal 基于 <span class="term" data-definition="Ruby on Rails 是一个成熟的 Web 应用框架，遵循 MVC（模型-视图-控制器）模式。DocuSeal 使用 Rails 7 + Shakapacker 构建，后端 Ruby，前端 Vue.js + Tailwind CSS。">Ruby on Rails</span> 构建，采用经典的三层架构加上一个外部集成层。理解这四层模型，就能快速定位任何功能的代码位置。</p>
+
+      <div class="arch-diagram">
+        <div class="arch-zone">
+          <h4 class="arch-zone-label">用户界面层 — 用户看到和操作的部分</h4>
+          <div class="arch-component" data-desc="Vue.js 3 构建的单页应用组件，包括模板构建器（template_builder）、签署表单（submission_form）、签名画板（draw.js）等。使用 Tailwind CSS + DaisyUI 样式。">
+            <div class="arch-icon">&#127912;</div>
+            <span>Vue.js 前端组件</span>
+          </div>
+          <div class="arch-component" data-desc="移动端优先的签署表单，通过 /s/:slug 路径访问。签署人无需登录，直接打开链接即可填写和签署。支持 14 种语言。">
+            <div class="arch-icon">&#128241;</div>
+            <span>移动签署表单</span>
+          </div>
+          <div class="arch-component" data-desc="嵌入式签署（Embedded Signing），通过 JavaScript SDK 将签署表单嵌入你的网站。支持 React、Vue、Angular。">
+            <div class="arch-icon">&#128268;</div>
+            <span>嵌入式 SDK</span>
+          </div>
+        </div>
+        <div class="arch-zone">
+          <h4 class="arch-zone-label">业务逻辑层 — 处理核心工作流</h4>
+          <div class="arch-component" data-desc="模板（Template）是核心数据模型。一个模板定义了文档结构、字段配置（fields）、签署人角色（submitters）和展示布局（schema）。所有签署都从模板创建。">
+            <div class="arch-icon">&#128203;</div>
+            <span>模板管理 (Template)</span>
+          </div>
+          <div class="arch-component" data-desc="提交（Submission）代表一次签署流程。一个 Submission 包含多个 Submitter（签署人），追踪每个签署人的状态：awaiting → sent → opened → completed/declined。">
+            <div class="arch-icon">&#128230;</div>
+            <span>提交流程 (Submission)</span>
+          </div>
+          <div class="arch-component" data-desc="后台任务队列（Sidekiq 异步 Job）处理邮件发送、PDF 生成、Webhook 推送等耗时操作。包括 ProcessSubmitterCompletionJob、GeneratePreviewImagesJob 等 20+ 个 Job。">
+            <div class="arch-icon">&#9881;</div>
+            <span>异步任务队列</span>
+          </div>
+        </div>
+        <div class="arch-zone">
+          <h4 class="arch-zone-label">数据持久层 — 存储核心数据</h4>
+          <div class="arch-component" data-desc="支持 SQLite（默认，适合小规模部署）、PostgreSQL（推荐生产环境）和 MySQL。通过 DATABASE_URL 环境变量切换。">
+            <div class="arch-icon">&#128451;</div>
+            <span>关系型数据库</span>
+          </div>
+          <div class="arch-component" data-desc="Active Storage 管理文件存储。默认存本地磁盘，可配置 AWS S3、Google Cloud Storage、Azure Blob Storage。支持文档预览和签名生成。">
+            <div class="arch-icon">&#128193;</div>
+            <span>文件存储 (Active Storage)</span>
+          </div>
+        </div>
+        <div class="arch-zone">
+          <h4 class="arch-zone-label">集成层 — 连接外部世界</h4>
+          <div class="arch-component" data-desc="RESTful JSON API，路径前缀 /api/。支持创建/查询/删除模板和提交、管理签署人、合并 PDF、验证签名等操作。使用 Devise + CanCanCan 认证授权。">
+            <div class="arch-icon">&#128268;</div>
+            <span>REST API</span>
+          </div>
+          <div class="arch-component" data-desc="支持 11 种事件类型的 Webhook 通知：form.viewed、form.started、form.completed、submission.created 等。使用 HMAC-SHA256 签名验证。">
+            <div class="arch-icon">&#128279;</div>
+            <span>Webhook 事件</span>
+          </div>
+          <div class="arch-component" data-desc="SMTP 邮件系统（SubmitterMailer），发送邀请邮件、完成通知、拒绝通知。支持自定义邮件模板和 2FA 验证邮件。">
+            <div class="arch-icon">&#9993;</div>
+            <span>邮件服务 (SMTP)</span>
+          </div>
+        </div>
+        <div class="arch-description">点击任意组件，了解它在架构中的作用</div>
+      </div>
+    </section>
+
+    <!-- ── Screen 3: Docker 一键部署 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">Docker 一键部署：从零到运行</h2>
+
+      <p>DocuSeal 最吸引人的地方之一就是部署极简。一条 <span class="term" data-definition="Docker 是一种容器化技术，将应用及其依赖打包在一个隔离的环境中运行。DocuSeal 提供官方 Docker 镜像 docuseal/docuseal，包含完整的应用运行时。">Docker</span> 命令就能启动完整的签署平台：</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-comment"># 最简启动 — SQLite + 本地磁盘存储</span></span>
+<span class="code-line">docker run --name docuseal \</span>
+<span class="code-line">  -p 3000:3000 \</span>
+<span class="code-line">  -v .:/data \</span>
+<span class="code-line">  docuseal/docuseal</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 生产级启动 — PostgreSQL + 自动 HTTPS</span></span>
+<span class="code-line">curl -O https://raw.githubusercontent.com/</span>
+<span class="code-line">  docusealco/docuseal/master/</span>
+<span class="code-line">  docker-compose.yml</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 设置你的域名，Caddy 自动签发 SSL 证书</span></span>
+<span class="code-line">sudo HOST=sign.yourcompany.com \</span>
+<span class="code-line">  docker compose up -d</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">这是最简启动命令——只需一个容器，端口映射到 3000</p>
+            <p class="tl">-p 3000:3000 把容器内 3000 端口映射到宿主机 3000 端口</p>
+            <p class="tl">-v .:/data 把当前目录挂载为数据目录，SQLite 数据库和上传文件都存在这里</p>
+            <p class="tl">docuseal/docuseal 是官方 Docker 镜像，基于 Ruby 4.0 + Alpine Linux</p>
+            <p class="tl">空行分隔——下面是生产级部署方式</p>
+            <p class="tl">下载官方 docker-compose.yml，包含三个服务：app + PostgreSQL + Caddy</p>
+            <p class="tl">空行</p>
+            <p class="tl">设置 HOST 环境变量为你的域名</p>
+            <p class="tl">Caddy 会自动签发 Let's Encrypt SSL 证书，反向代理到 app:3000</p>
+            <p class="tl">-d 参数让容器在后台运行</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">&#128218;</div>
+        <div class="callout-content">
+          <strong class="callout-title">Docker Compose 三服务架构</strong>
+          <p>生产部署推荐使用 Docker Compose，它包含三个服务：<strong>app</strong>（DocuSeal 主应用，端口 3000）、<strong>postgres</strong>（PostgreSQL 18 数据库，带健康检查）、<strong>caddy</strong>（自动 HTTPS 反向代理）。数据持久化通过 volume 挂载：./docuseal 映射应用数据，./pg_data 映射数据库数据。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 4: Dockerfile 解读 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">代码翻译：Dockerfile 多阶段构建</h2>
+
+      <p>DocuSeal 的 Dockerfile 使用了三个构建阶段。这是 <span class="term" data-definition="多阶段构建（Multi-stage Build）是 Docker 的一种优化技术。每个 FROM 指令开始一个新的构建阶段，最终镜像只包含最后一个阶段的产物，大幅减小镜像体积。">多阶段构建</span> 的经典实践——最终镜像只包含运行时必需的文件。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-keyword">FROM</span> ruby:4.0.1-alpine <span class="code-keyword">AS</span> download</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-keyword">WORKDIR</span> /fonts</span>
+<span class="code-line"><span class="code-keyword">RUN</span> wget GoNotoKurrent-Regular.ttf \</span>
+<span class="code-line">  &amp;&amp; wget DancingScript-Regular.otf \</span>
+<span class="code-line">  &amp;&amp; wget model_704_int8.onnx \</span>
+<span class="code-line">  &amp;&amp; wget pdfium-linux.tgz</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-keyword">FROM</span> ruby:4.0.1-alpine <span class="code-keyword">AS</span> webpack</span>
+<span class="code-line"><span class="code-keyword">RUN</span> apk add nodejs yarn \</span>
+<span class="code-line">  &amp;&amp; yarn install</span>
+<span class="code-line"><span class="code-keyword">RUN</span> ./bin/shakapacker</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-keyword">FROM</span> ruby:4.0.1-alpine <span class="code-keyword">AS</span> app</span>
+<span class="code-line"><span class="code-keyword">RUN</span> apk add libpq vips redis \</span>
+<span class="code-line">  onnxruntime</span>
+<span class="code-line"><span class="code-keyword">COPY</span> --from=download /fonts/ /fonts/</span>
+<span class="code-line"><span class="code-keyword">COPY</span> --from=webpack /app/public/packs ./</span>
+<span class="code-line"><span class="code-keyword">CMD</span> ["bundle", "exec", "puma"]</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">第一阶段 download：下载字体和 AI 模型文件</p>
+            <p class="tl">Noto 字体支持多语言渲染，Dancing Script 用于手写签名样式</p>
+            <p class="tl">model_704_int8.onnx 是 ONNX 格式的字段检测 AI 模型（自动识别 PDF 中的表单字段）</p>
+            <p class="tl">pdfium 是 PDF 渲染引擎（Google 出品），用于 PDF 预览和合并</p>
+            <p class="tl">第二阶段 webpack：编译前端 JavaScript</p>
+            <p class="tl">安装 Node.js + Yarn，下载前端依赖（Vue.js、Tailwind CSS 等）</p>
+            <p class="tl">运行 Shakapacker（Webpack 封装）编译前端资源到 public/packs/</p>
+            <p class="tl">第三阶段 app：最终运行时镜像</p>
+            <p class="tl">安装运行时依赖：libpq（PostgreSQL 客户端）、vips（图像处理）、Redis（缓存）、onnxruntime（AI 推理）</p>
+            <p class="tl">从 download 阶段复制字体和 AI 模型</p>
+            <p class="tl">从 webpack 阶段复制编译好的前端资源</p>
+            <p class="tl">启动 Puma Web 服务器，监听 3000 端口</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 5: 目录结构 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">项目目录结构</h2>
+
+      <p>DocuSeal 遵循 Ruby on Rails 标准目录结构。了解目录布局，就能快速定位功能代码：</p>
+
+      <div class="file-tree animate-in">
+        <div class="ft-folder open">
+          <span class="ft-name">app/</span>
+          <span class="ft-desc">应用核心代码</span>
+          <div class="ft-children">
+            <div class="ft-folder">
+              <span class="ft-name">models/</span>
+              <span class="ft-desc">数据模型：Template、Submission、Submitter、WebhookUrl 等 25+ 个模型</span>
+            </div>
+            <div class="ft-folder">
+              <span class="ft-name">controllers/</span>
+              <span class="ft-desc">控制器：API 控制器、签署表单控制器、设置控制器等 80+ 个控制器</span>
+            </div>
+            <div class="ft-folder">
+              <span class="ft-name">javascript/</span>
+              <span class="ft-desc">前端代码：Vue.js 组件、签名画板、模板构建器</span>
+            </div>
+            <div class="ft-folder">
+              <span class="ft-name">jobs/</span>
+              <span class="ft-desc">异步任务：邮件发送、PDF 生成、Webhook 推送等 20+ 个 Job</span>
+            </div>
+            <div class="ft-folder">
+              <span class="ft-name">mailers/</span>
+              <span class="ft-desc">邮件器：签署邀请、完成通知、拒绝通知、2FA 验证</span>
+            </div>
+            <div class="ft-folder">
+              <span class="ft-name">views/</span>
+              <span class="ft-desc">ERB 模板：HTML 页面和邮件模板</span>
+            </div>
+          </div>
+        </div>
+        <div class="ft-folder">
+          <span class="ft-name">config/routes.rb</span>
+          <span class="ft-desc">路由定义：Web 路由 + /api/ 命名空间路由</span>
+        </div>
+        <div class="ft-folder">
+          <span class="ft-name">db/migrate/</span>
+          <span class="ft-desc">数据库迁移：从建表到字段变更的完整历史</span>
+        </div>
+        <div class="ft-folder">
+          <span class="ft-name">docker-compose.yml</span>
+          <span class="ft-desc">生产部署配置：app + PostgreSQL + Caddy</span>
+        </div>
+        <div class="ft-folder">
+          <span class="ft-name">Dockerfile</span>
+          <span class="ft-desc">多阶段 Docker 构建：download -> webpack -> app</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 6: 数据流动画 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">签署流程的数据旅程</h2>
+
+      <p>当用户发起一个签署请求时，数据在系统各个组件之间流转。想象一条流水线——PDF 模板是原材料，经过构建、发送、签署、验证，最终产出一份合法的电子签文档。</p>
+
+      <div class="flow-animation" data-steps='[
+        {"highlight":"flow-actor-1","label":"管理员上传 PDF，使用模板构建器定义字段和签署人角色"},
+        {"highlight":"flow-actor-1","label":"系统创建 Template 记录，保存 fields（字段配置）、schema（文档布局）、submitters（角色定义）","packet":true,"from":"actor-1","to":"actor-2"},
+        {"highlight":"flow-actor-2","label":"管理员通过 API 或界面发起签署，创建 Submission 记录"},
+        {"highlight":"flow-actor-2","label":"系统为每个签署人创建 Submitter 记录，生成唯一签署链接（/s/:slug）","packet":true,"from":"actor-2","to":"actor-3"},
+        {"highlight":"flow-actor-3","label":"SendSubmitterInvitationEmailJob 异步发送邀请邮件，附带签署链接"},
+        {"highlight":"flow-actor-3","label":"签署人打开链接，填写表单并签名，SubmitFormController 处理提交","packet":true,"from":"actor-3","to":"actor-4"},
+        {"highlight":"flow-actor-4","label">"ProcessSubmitterCompletionJob 生成签署后 PDF + 审计日志，触发 Webhook 通知"}
+      ]'>
+        <div class="flow-actors">
+          <div class="flow-actor" id="flow-actor-1">
+            <div class="flow-actor-icon">&#128196;</div>
+            <span>模板构建</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-2">
+            <div class="flow-actor-icon">&#128230;</div>
+            <span>发起签署</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-3">
+            <div class="flow-actor-icon">&#128231;</div>
+            <span>邮件/签署</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-4">
+            <div class="flow-actor-icon">&#9989;</div>
+            <span>完成处理</span>
+          </div>
+        </div>
+
+        <div class="flow-packet" id="flow-packet"></div>
+        <div class="flow-step-label" id="flow-label">点击"下一步"开始旅程</div>
+
+        <div class="flow-controls">
+          <button class="btn flow-next-btn">下一步</button>
+          <button class="btn flow-reset-btn">重新开始</button>
+          <span class="flow-progress"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 7: 测验 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">检验你的理解</h2>
+
+      <div class="quiz-container" id="quiz-module1">
+        <div class="quiz-question-block"
+             data-correct="option-c"
+             data-explanation-right="正确！DocuSeal 的核心数据模型是 Template（模板）-> Submission（提交）-> Submitter（签署人）。模板定义文档结构和字段，提交代表一次签署流程，签署人是具体的填写人。"
+             data-explanation-wrong="想一想 DocuSeal 的三层核心模型：谁定义了文档结构？谁代表一次签署实例？谁代表具体的签署人？">
+          <h3 class="quiz-question">DocuSeal 中，哪个模型定义了文档的字段配置和签署人角色？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Submission（提交）</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Submitter（签署人）</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Template（模板）</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-b"
+             data-explanation-right="正确！docker-compose.yml 包含三个服务：app（DocuSeal 主应用）、postgres（PostgreSQL 数据库）、caddy（自动 HTTPS 反向代理）。Caddy 会自动签发 Let's Encrypt 证书。"
+             data-explanation-wrong="回忆一下 docker-compose.yml 的内容。它除了 app 服务，还有哪两个服务？一个是数据库，一个是反向代理。">
+          <h3 class="quiz-question">使用 Docker Compose 生产部署时，app 服务依赖哪个服务的健康检查？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>caddy（反向代理）</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>postgres（数据库）</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>redis（缓存）</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-a"
+             data-explanation-right="正确！Dockerfile 使用多阶段构建（download -> webpack -> app），最终镜像只包含 app 阶段的产物。这样可以大幅减小镜像体积，因为编译工具和中间产物都被丢弃了。"
+             data-explanation-wrong="想想为什么 Dockerfile 要分三个 FROM 阶段。如果所有东西都在一个阶段里，镜像会有多大？编译工具、Node.js、yarn 缓存这些运行时需要吗？">
+          <h3 class="quiz-question">DocuSeal 的 Dockerfile 为什么要使用多阶段构建？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>减小最终镜像体积，只包含运行时必需的文件</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>提高编译速度，每个阶段可以并行执行</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>支持多种 CPU 架构（x86、ARM）的镜像构建</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">重新作答</button>
+      </div>
+    </section>
+
+  </div>
+</section>

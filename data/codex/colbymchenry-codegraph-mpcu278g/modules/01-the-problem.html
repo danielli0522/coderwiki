@@ -1,0 +1,123 @@
+<section class="module" id="module-1">
+  <div class="module-content">
+
+    <div class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">The Problem: AI Assistants Are Flying Blind</h1>
+      <p class="module-subtitle">Why your AI coding tool spends most of its time just exploring — and how one local tool changes everything</p>
+    </div>
+
+    <!-- Screen 1: The Blind Guide -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">Your AI Guide Is Navigating Without a Map</h2>
+      <p>Picture a brilliant tour guide — knows history, architecture, local secrets — but has never visited this city. Every question you ask sends them reading every street sign, peeking into every building, flipping through directories. Forty minutes later: you have directions.</p>
+      <p>That's what Claude Code, Cursor, or Codex does with your codebase. Every single task starts from scratch. The AI reads files, searches for patterns, and pieces together how things connect — <em>every time you ask a question.</em></p>
+
+      <div class="callout callout-info animate-in">
+        <span class="callout-icon">📊</span>
+        <div class="callout-content">
+          <span class="callout-title">The Real Cost</span>
+          <p>On a typical codebase task, AI coding tools make <strong>40–50 tool calls</strong> just exploring before any real work begins. Most of that exploration is wasted — the same paths walked again and again, on every single query.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 2: The Solution -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">What If the Map Was Already Built?</h2>
+      <p><span class="term" data-definition="A CLI tool and npm library that pre-indexes your codebase into a local searchable database. Runs 100% offline — no API keys, no cloud. Gives AI tools instant answers instead of forcing them to explore files from scratch.">CodeGraph</span> indexes your entire project once and stores everything in a local <span class="term" data-definition="A lightweight, file-based database. No server to run, no setup needed. It lives in .codegraph/codegraph.db inside your project. Used by more devices than any other database in the world.">SQLite</span> database. Every function, every class, every method — and crucially, every <em>connection</em> between them: what calls what, what imports what, what extends what.</p>
+      <p>When your AI then asks "how does login work?", CodeGraph answers instantly: here's the function, here's who calls it, here's what it calls. No wandering required.</p>
+
+      <div class="pattern-cards animate-in stagger-children">
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-error-light)">🧭</div>
+          <div class="pattern-title">Before CodeGraph</div>
+          <p class="pattern-desc"><strong>40–50 tool calls</strong> per task. The AI reads dozens of files to understand relationships it could look up in milliseconds.</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-success-light)">⚡</div>
+          <div class="pattern-title">With CodeGraph</div>
+          <p class="pattern-desc"><strong>3–6 tool calls</strong> per task. The AI queries a pre-built graph and gets precise answers instantly. That's 94% fewer interruptions.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 3: Code Translation -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">What This Looks Like in Practice</h2>
+      <p>Below is the real CodeGraph <span class="term" data-definition="Application Programming Interface — the set of functions a library exposes for you to call. It's the 'official menu' of what a piece of software can do for you.">API</span>. You call <code>indexAll()</code> once. From then on, every question is instant.</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">TypeScript (src/index.ts)</span>
+          <span class="code-line"><span class="code-comment">// One-time setup</span></span>
+          <span class="code-line"><span class="code-keyword">const</span> cg = <span class="code-keyword">await</span> <span class="code-function">CodeGraph</span>.<span class="code-function">init</span>(<span class="code-string">'/my-project'</span>);</span>
+          <span class="code-line"><span class="code-keyword">await</span> cg.<span class="code-function">indexAll</span>();</span>
+          <span class="code-line"> </span>
+          <span class="code-line"><span class="code-comment">// Instant answers forever after</span></span>
+          <span class="code-line"><span class="code-keyword">const</span> callers = <span class="code-keyword">await</span> cg.<span class="code-function">getCallers</span>(<span class="code-string">'AuthService.login'</span>);</span>
+          <span class="code-line"><span class="code-keyword">const</span> callees = <span class="code-keyword">await</span> cg.<span class="code-function">getCallees</span>(<span class="code-string">'AuthService.login'</span>);</span>
+          <span class="code-line"><span class="code-keyword">const</span> ctx = <span class="code-keyword">await</span> cg.<span class="code-function">buildContext</span>(<span class="code-string">'explain login flow'</span>);</span>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">Plain English</span>
+          <div class="translation-lines">
+            <div class="tl">Start CodeGraph and point it at your project folder</div>
+            <div class="tl">Scan every file — store results in a local database</div>
+            <div class="tl"> </div>
+            <div class="tl">Now, whenever you (or Claude) want to know something…</div>
+            <div class="tl">"Who calls the login method?" → instant answer from database</div>
+            <div class="tl">"What does login call?" → instant answer from database</div>
+            <div class="tl">"Summarize the login flow" → formatted context for AI</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent animate-in">
+        <span class="callout-icon">🏎️</span>
+        <div class="callout-content">
+          <span class="callout-title">Tested on the Swift Compiler</span>
+          <p>CodeGraph was battle-tested on one of the largest open-source codebases: the Swift Compiler — <strong>25,874 files</strong>, <strong>272,898 symbols</strong>. Indexing takes minutes. Answering queries takes milliseconds.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 4: Quiz -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">Check Your Understanding</h2>
+
+      <div class="quiz-container" id="quiz-m1">
+
+        <div class="quiz-question-block" data-correct="b"
+          data-explanation-right="Exactly! CodeGraph is 100% offline — a SQLite file inside your project at .codegraph/codegraph.db. Nothing leaves your machine."
+          data-explanation-wrong="CodeGraph runs entirely locally with no cloud and no API keys. The database is a single file: .codegraph/codegraph.db inside your project.">
+          <p class="quiz-question">Where does CodeGraph store the index of your codebase?</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)"><span class="quiz-option-radio"></span>In the cloud, synced to your developer account</button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)"><span class="quiz-option-radio"></span>In a local SQLite file at .codegraph/codegraph.db inside your project</button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)"><span class="quiz-option-radio"></span>In your AI assistant's memory between sessions</button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block" data-correct="c"
+          data-explanation-right="Correct! Pre-building the map means the AI skips exploration entirely — 40–50 tool calls collapse to 3–6 targeted database lookups."
+          data-explanation-wrong="The key insight is about eliminating the 'exploration phase' that happens before every task — not about faster hardware or better prompts.">
+          <p class="quiz-question">What is the core insight behind CodeGraph's speed improvement?</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)"><span class="quiz-option-radio"></span>It uses a faster LLM model to process requests more quickly</button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)"><span class="quiz-option-radio"></span>It compresses source files so the AI reads less text</button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)"><span class="quiz-option-radio"></span>It replaces 40–50 file-reading tool calls with 3–6 targeted database lookups</button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div style="margin-top: var(--space-6); display: flex; gap: var(--space-3);">
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m1')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m1')">Reset</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>

@@ -1,0 +1,146 @@
+<section class="module" id="module-6" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">06</span>
+      <h1 class="module-title">Agent TARS：从桌面到终端</h1>
+      <p class="module-subtitle">如果说 UI-TARS Desktop 是一个有界面的应用，那 Agent TARS 就是一把瑞士军刀——CLI、Web UI、Server 模式，随需应变。</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Agent TARS 的三种使用方式</h2>
+        <p>Agent TARS 不只是桌面应用——它同时提供了 <span class="term" data-definition="CLI（Command Line Interface）是命令行界面——在终端里输入文字指令来操作程序。就像发短信控制电脑，而不是用鼠标点来点去。">CLI</span>、Web UI 和 Server 模式。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-comment"># 一行命令启动 Agent TARS</span>
+<span class="code-line">npx @agent-tars/cli@latest</span>
+<span class="code-line"></span>
+<span class="code-comment"># 指定模型和 API Key</span>
+<span class="code-line">agent-tars \</span>
+<span class="code-line">  --provider anthropic \</span>
+<span class="code-line">  --model claude-3-7-sonnet-latest \</span>
+<span class="code-line">  --apiKey your-api-key</span>
+<span class="code-line"></span>
+<span class="code-comment"># 或用国内模型</span>
+<span class="code-line">agent-tars \</span>
+<span class="code-line">  --provider volcengine \</span>
+<span class="code-line">  --model doubao-1-5-thinking-vision-pro \</span>
+<span class="code-line">  --apiKey your-api-key</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">用 npx 一行命令启动，不需要安装任何东西...</p>
+              <p class="tl">这会打开一个 Web UI 界面...</p>
+              <p class="tl">指定使用 Anthropic 的 Claude 模型...</p>
+              <p class="tl">使用 claude-3-7-sonnet 这个视觉语言模型...</p>
+              <p class="tl">传入你的 API 密钥进行身份验证...</p>
+              <p class="tl">也可以用国内的火山引擎模型...</p>
+              <p class="tl">使用豆包视觉思考模型——国内用户更友好...</p>
+              <p class="tl">同一个框架，多个模型提供商，按需切换。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">浏览器控制策略</h2>
+        <p>Agent TARS 控制浏览器有三种模式——这是它区别于其他 GUI Agent 的核心能力。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">👁️</div>
+            <h4 class="pattern-title">GUI Agent 模式</h4>
+            <p class="pattern-desc">像人一样"看"浏览器截图，理解视觉元素并操作。通用性最强，但速度较慢（每步需要截图+模型推理）</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🌲</div>
+            <h4 class="pattern-title">DOM 模式</h4>
+            <p class="pattern-desc">直接读取网页的 <span class="term" data-definition="DOM（Document Object Model）是网页的结构化表示——把网页变成一棵'元素树'，每个按钮、文字、图片都是一个节点。程序可以通过 DOM 精确找到和操作任何元素。">DOM</span> 结构，精确定位元素。速度快，准确性高，但只能用于浏览器</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🔄</div>
+            <h4 class="pattern-title">混合模式（Hybrid）</h4>
+            <p class="pattern-desc">智能切换：简单操作用 DOM 快速执行，复杂界面用视觉理解。兼顾速度和通用性</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Event Stream：事件驱动的架构</h2>
+        <p>Agent TARS 用 <span class="term" data-definition="Event Stream 是一种事件驱动的数据流——Agent 的每一步操作（思考、调用工具、返回结果）都作为事件发布。就像直播的弹幕流，UI 可以实时显示每一步。">Event Stream</span> 驱动整个 Agent 循环和 UI 渲染。</p>
+
+        <div class="chat-window" id="chat-module6">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="user" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">你</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">用户</span>
+                <p>帮我搜索杭州最近一个月的天气，然后画个图表</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="llm" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">LLM</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">大模型</span>
+                <p>分析任务：需要搜索天气数据。Event: tool_call(search, "杭州天气 2026年5月")</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="mcp" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">MCP</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">搜索工具</span>
+                <p>Event: tool_result(杭州5月天气数据：最高温28度，最低温18度，降雨15天...)</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="llm" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">LLM</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">大模型</span>
+                <p>需要用代码画图。Event: tool_call(shell, "python3 generate_chart.py")</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="shell" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">SH</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">代码执行</span>
+                <p>Event: tool_result(图表已生成：hangzhou_weather_may.png)</p>
+              </div>
+            </div>
+          </div>
+          <div class="chat-typing" id="chat-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module6-typing-avatar">?</div>
+            <div class="chat-typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>
+          </div>
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">Next Message</button>
+            <button class="btn chat-all-btn">Play All</button>
+            <button class="btn chat-reset-btn">Replay</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+        <div class="quiz-container" id="quiz-module6">
+          <div class="quiz-question-block" data-correct="option-b" data-explanation-right="混合模式（Hybrid）是 Agent TARS 的推荐策略——简单操作用 DOM 快速定位，复杂界面用视觉理解，自动在两者间切换。" data-explanation-wrong="GUI Agent 模式虽然通用，但每一步都需要截图+模型推理，速度较慢。对于浏览器场景，混合模式更高效。">
+            <h3 class="quiz-question">如果 Agent TARS 需要在网页上填写一个表单（输入框+下拉菜单+提交按钮），最高效的控制策略是？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>纯 GUI Agent 模式——每一步都截图分析再操作</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>混合模式——用 DOM 定位输入框和按钮，用视觉理解验证结果</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>纯 DOM 模式——直接操作页面元素，不需要视觉理解</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module6')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module6')">Try Again</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UI-TARS Desktop · 让 AI 操作电脑</title>
+
+  <!-- Google Fonts: Bricolage Grotesque · DM Sans · JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <!--
+    CUSTOMIZE PER COURSE — change only the three accent variables below.
+    Options:
+      vermillion  #D94F30 / #C4432A / #FDEEE9 / #E8836C  (default)
+      coral       #E06B56 / #C85A47 / #FDECEA / #E89585
+      teal        #2A7B9B / #1F6280 / #E4F2F7 / #5A9DB8
+      amber       #D4A843 / #BF9530 / #FDF5E0 / #E0C070
+      forest      #2D8B55 / #226B41 / #E8F5EE / #5AAD7A
+  -->
+  <style>
+    :root {
+      --color-accent:       #2A7B9B;
+      --color-accent-hover: #1F6280;
+      --color-accent-light: #E4F2F7;
+      --color-accent-muted: #5A9DB8;
+      --toc-width: 260px;
+    }
+
+    /* ── TOC Sidebar ── */
+    .toc-sidebar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: var(--toc-width);
+      height: 100vh;
+      background: var(--color-surface);
+      border-left: 1px solid var(--color-border);
+      z-index: 1000;
+      transform: translateX(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: -4px 0 20px rgba(0,0,0,0.05);
+    }
+    .toc-sidebar.open {
+      transform: translateX(0);
+    }
+
+    .toc-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--color-border-light);
+      flex-shrink: 0;
+    }
+    .toc-header-title {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--color-text);
+    }
+    .toc-close {
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      padding: 4px;
+      line-height: 1;
+      border-radius: 6px;
+      transition: color 0.15s, background 0.15s;
+    }
+    .toc-close:hover {
+      color: var(--color-text);
+      background: var(--color-bg-warm);
+    }
+
+    .toc-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 0;
+      list-style: none;
+    }
+
+    .toc-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 20px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      border-left: 3px solid transparent;
+      text-decoration: none;
+    }
+    .toc-item:hover {
+      background: var(--color-bg-warm);
+    }
+    .toc-item.active {
+      background: var(--color-accent-light);
+      border-left-color: var(--color-accent);
+    }
+    .toc-item.active .toc-item-title {
+      color: var(--color-accent);
+      font-weight: 600;
+    }
+
+    .toc-item-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+      flex-shrink: 0;
+      background: var(--color-bg-warm);
+      color: var(--color-text-muted);
+      transition: background 0.15s, color 0.15s;
+    }
+    .toc-item.active .toc-item-num {
+      background: var(--color-accent);
+      color: #fff;
+    }
+
+    .toc-item-title {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      line-height: 1.3;
+      transition: color 0.15s;
+    }
+
+    /* Toggle button — inline in nav-dots */
+    .toc-toggle {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-secondary);
+      font-size: 14px;
+      padding: 0;
+      line-height: 1;
+      transition: color 0.15s;
+    }
+    .toc-toggle:hover {
+      color: var(--color-text);
+    }
+
+    /* Overlay for mobile */
+    .toc-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.2);
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .toc-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Adjust main content when sidebar open */
+    body.toc-open main,
+    body.toc-open nav {
+      margin-right: var(--toc-width);
+      transition: margin-right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @media (max-width: 768px) {
+      body.toc-open main,
+      body.toc-open nav {
+        margin-right: 0;
+      }
+      /* Keep nav-bar offset on mobile */
+      .module {
+        padding-top: calc(var(--nav-height) + var(--space-8)) !important;
+      }
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <!-- TOC Overlay (mobile) -->
+  <div class="toc-overlay" id="toc-overlay"></div>
+
+  <!-- TOC Sidebar -->
+  <aside class="toc-sidebar" id="toc-sidebar">
+    <div class="toc-header">
+      <span class="toc-header-title">目录</span>
+      <button class="toc-close" id="toc-close">✕</button>
+    </div>
+    <ul class="toc-list">
+      <li class="toc-item" data-target="module-1"><span class="toc-item-num">01</span><span class="toc-item-title">从一次自动操作说起</span></li>
+      <li class="toc-item" data-target="module-2"><span class="toc-item-num">02</span><span class="toc-item-title">桌面智能体的角色分工</span></li>
+      <li class="toc-item" data-target="module-3"><span class="toc-item-num">03</span><span class="toc-item-title">指令如何变成鼠标动作</span></li>
+      <li class="toc-item" data-target="module-4"><span class="toc-item-num">04</span><span class="toc-item-title">视觉感知与工具调用</span></li>
+      <li class="toc-item" data-target="module-5"><span class="toc-item-num">05</span><span class="toc-item-title">状态、记忆与安全边界</span></li>
+      <li class="toc-item" data-target="module-6"><span class="toc-item-num">06</span><span class="toc-item-title">调试与扩展</span></li>
+      <li class="toc-item" data-target="module-7"><span class="toc-item-num">07</span><span class="toc-item-title">架构选型指南</span></li>
+    </ul>
+  </aside>
+
+  <script>
+    // TOC logic
+    document.addEventListener('DOMContentLoaded', function() {
+      const sidebar = document.getElementById('toc-sidebar');
+      const toggle = document.getElementById('toc-toggle');
+      const close = document.getElementById('toc-close');
+      const overlay = document.getElementById('toc-overlay');
+      const items = document.querySelectorAll('.toc-item');
+      const modules = document.querySelectorAll('.module');
+
+      function openToc() {
+        sidebar.classList.add('open');
+        overlay.classList.add('visible');
+        document.body.classList.add('toc-open');
+      }
+      function closeToc() {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('visible');
+        document.body.classList.remove('toc-open');
+      }
+
+      if (toggle) toggle.addEventListener('click', () => {
+        sidebar.classList.contains('open') ? closeToc() : openToc();
+      });
+      if (close) close.addEventListener('click', closeToc);
+      if (overlay) overlay.addEventListener('click', closeToc);
+
+      items.forEach(item => {
+        item.addEventListener('click', () => {
+          const target = document.getElementById(item.dataset.target);
+          if (target) target.scrollIntoView({ behavior: 'smooth' });
+          if (window.innerWidth <= 768) closeToc();
+        });
+      });
+
+      function updateActiveToc() {
+        let current = 'module-1';
+        modules.forEach(mod => {
+          const rect = mod.getBoundingClientRect();
+          if (rect.top <= window.innerHeight / 3) {
+            current = mod.id;
+          }
+        });
+        items.forEach(item => {
+          item.classList.toggle('active', item.dataset.target === current);
+        });
+      }
+      window.addEventListener('scroll', () => {
+        requestAnimationFrame(updateActiveToc);
+      }, { passive: true });
+      updateActiveToc();
+    });
+  </script>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">UI-TARS Desktop · 让 AI 操作电脑</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <!--
+          One <button> per module. Replace MODULE_N_NAME with the actual module title.
+
+          <button class="nav-dot" data-target="module-1" data-tooltip="MODULE_1_NAME" role="tab" aria-label="Module 1: MODULE_1_NAME"></button>
+          <button class="nav-dot" data-target="module-2" data-tooltip="MODULE_2_NAME" role="tab" aria-label="Module 2: MODULE_2_NAME"></button>
+          ...
+        -->
+        <button class="toc-toggle" id="toc-toggle" title="目录">☰</button>
+        <button class="nav-dot" data-target="module-1" data-tooltip="从一次自动操作说起" role="tab" aria-label="Module 1: 从一次自动操作说起"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="桌面智能体的角色分工" role="tab" aria-label="Module 2: 桌面智能体的角色分工"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="指令如何变成鼠标动作" role="tab" aria-label="Module 3: 指令如何变成鼠标动作"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="视觉感知与工具调用" role="tab" aria-label="Module 4: 视觉感知与工具调用"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="状态、记忆与安全边界" role="tab" aria-label="Module 5: 状态、记忆与安全边界"></button>
+        <button class="nav-dot" data-target="module-6" data-tooltip="调试与扩展" role="tab" aria-label="Module 6: 调试与扩展"></button>
+        <button class="nav-dot" data-target="module-7" data-tooltip="架构选型指南" role="tab" aria-label="Module 7: 架构选型指南"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh -->
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">UI-TARS 是什么：让 AI 看懂屏幕</h1>
+      <p class="module-subtitle">想象你对着电脑说"帮我在携程订一张北京到上海的机票"——AI 看着屏幕，找到按钮、填写表单、点击提交。这不是科幻，这就是 UI-TARS。</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">这个项目解决什么问题？</h2>
+        <p>传统自动化需要写死每个操作步骤——"点击坐标(320, 480)"、"在 id 为 username 的框里输入文字"。一旦界面改版，脚本全废。UI-TARS 换了个思路：让 AI <strong>看懂屏幕</strong>，像人一样理解和操作。</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">核心洞察</strong>
+            <p>UI-TARS 的哲学是：与其为每个应用写专门的 <span class="term" data-definition="API（Application Programming Interface）是程序之间通信的接口。就像你不需要知道飞机怎么造，只需要买票就能飞——API 就是那张机票，让一个程序能用另一个程序的能力。">API</span> 集成，不如让 AI 直接"看"屏幕，理解界面元素，像人一样操作。这样任何应用都能用，不需要逐个适配。</p>
+          </div>
+        </div>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🖥️</div>
+            <h4 class="pattern-title">Agent TARS</h4>
+            <p class="pattern-desc">多模态 AI Agent 框架，支持 CLI 和 Web UI，能通过视觉能力操作电脑和浏览器</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🎮</div>
+            <h4 class="pattern-title">UI-TARS Desktop</h4>
+            <p class="pattern-desc">Electron 桌面应用，提供本地和远程的电脑/浏览器 GUI 操作能力</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🧩</div>
+            <h4 class="pattern-title">Tarko 框架</h4>
+            <p class="pattern-desc">底层引擎，提供 Agent 循环、事件流、MCP 工具调用、LLM 通信等核心能力</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">项目结构一览</h2>
+        <p>UI-TARS 是一个 <span class="term" data-definition="Monorepo 是把多个相关的项目放在同一个代码仓库里管理的方式。就像一个大文件柜，不同抽屉放不同项目，但它们共享同一把钥匙。">monorepo</span>，包含两大产品线和一个核心引擎层。</p>
+
+        <div class="file-tree">
+          <div class="ft-folder open">
+            <span class="ft-name">UI-TARS-desktop/</span>
+            <span class="ft-desc">整个项目根目录</span>
+            <div class="ft-children">
+              <div class="ft-folder">
+                <span class="ft-name">apps/ui-tars/</span>
+                <span class="ft-desc">Electron 桌面应用（主进程 + 渲染进程）</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">multimodal/agent-tars/</span>
+                <span class="ft-desc">Agent TARS 核心（CLI + Web UI + Core）</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">multimodal/tarko/</span>
+                <span class="ft-desc">底层引擎：Agent 循环、MCP、LLM、事件流</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">multimodal/gui-agent/</span>
+                <span class="ft-desc">GUI 操作符（NutJS、ADB、浏览器、AIO）</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">packages/ui-tars/sdk/</span>
+                <span class="ft-desc">UI-TARS SDK：截图→分析→操作循环</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">"你好，世界"：GUIAgent 的入口</h2>
+        <p>所有复杂的 GUI Agent 操作，最终都归结为一个循环：截图→模型推理→执行操作。这段代码是 UI-TARS Desktop 中创建智能体的入口。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment">// apps/ui-tars/src/main/ipcRoutes/agent.ts</span></span>
+<span class="code-line"><span class="code-keyword">export class</span> <span class="code-function">GUIAgentManager</span> {</span>
+<span class="code-line">  <span class="code-keyword">private static</span> instance:</span>
+<span class="code-line">    GUIAgentManager;</span>
+<span class="code-line">  <span class="code-keyword">private</span> currentAgent:</span>
+<span class="code-line">    GUIAgent&lt;Operator&gt; | <span class="code-keyword">null</span>;</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">public</span> <span class="code-function">setAgent</span>(</span>
+<span class="code-line">    agent: GUIAgent&lt;Operator&gt;</span>
+<span class="code-line">  ) {</span>
+<span class="code-line">    <span class="code-keyword">this</span>.currentAgent = agent;</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">GUIAgentManager 是一个单例——全局只有一个实例...</p>
+              <p class="tl">它持有当前正在运行的 GUIAgent...</p>
+              <p class="tl">GUIAgent 使用泛型 Operator——可以是 NutJS、浏览器等不同的操作方式...</p>
+              <p class="tl">setAgent 方法把创建好的智能体存起来...</p>
+              <p class="tl">后续可以 pause/resume/stop 控制 Agent 的执行。</p>
+              <p class="tl">这个设计让桌面应用能统一管理 Agent 生命周期。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block" data-correct="option-b" data-explanation-right="UI-TARS 的核心创新是让 AI 能'看'屏幕并理解界面内容，像人一样做出操作决策，而不是依赖预先录制的固定脚本。" data-explanation-wrong="UI-TARS 不是训练模型的框架，而是使用视觉语言模型来操作 GUI 的应用框架。">
+            <h3 class="quiz-question">UI-TARS 与传统 RPA（机器人流程自动化）最本质的区别是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>UI-TARS 运行速度更快，响应时间更短</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>UI-TARS 能理解屏幕内容，自动适应界面变化，不需要预定义操作脚本</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>UI-TARS 只能在浏览器里工作，不支持桌面应用</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">Try Again</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section><section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">GUI Agent 循环：截图 → 思考 → 操作</h1>
+      <p class="module-subtitle">想象一个棋手：看棋盘、思考下一步、落子——然后重复。GUI Agent 就是 AI 版的棋手，只不过棋盘是你的电脑屏幕。</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">核心循环：看 → 想 → 做</h2>
+        <p>GUIAgent 类实现了 UI-TARS 最核心的循环。每一步都是：截取屏幕截图，交给视觉语言模型分析，模型返回"下一步该做什么"，然后执行操作。</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>截图（Screenshot）</strong>
+              <p>用 Electron 的 desktopCapturer 捕获屏幕图像，转为 <span class="term" data-definition="Base64 是一种把二进制数据（如图片）编码成纯文本的方法。就像把一幅画翻译成一串字母，方便在网络上传输。">base64</span> 编码</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>推理（Inference）</strong>
+              <p>多模态 <span class="term" data-definition="LLM（Large Language Model）是大型语言模型，如 GPT-4、Claude。多模态 LLM 不仅能读文字，还能'看'图片——这让 GUI Agent 成为可能。">LLM</span> 理解截图内容，输出 "Thought: ... Action: ..." 格式的指令</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>解析（Parse）</strong>
+              <p>action-parser 把文字指令解析成结构化操作：点击坐标、输入文字、按键组合等</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>执行（Execute）</strong>
+              <p>Operator（NutJS / 浏览器 / ADB）执行实际操作，然后回到第 1 步继续循环</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">GUIAgent 的循环代码</h2>
+        <p>这段代码是 GUIAgent.run() 的核心——一个 while(true) 循环，不断截图、推理、执行，直到任务完成或达到最大循环次数。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-comment">// packages/ui-tars/sdk/src/GUIAgent.ts</span>
+<span class="code-line"><span class="code-keyword">while</span> (<span class="code-keyword">true</span>) {</span>
+<span class="code-line">  <span class="code-keyword">if</span> (loopCnt >= maxLoopCount) {</span>
+<span class="code-line">    data.status = StatusEnum.ERROR;</span>
+<span class="code-line">    <span class="code-keyword">break</span>;</span>
+<span class="code-line">  }</span>
+<span class="code-line">  loopCnt += <span class="code-number">1</span>;</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-comment">// Step 1: 截图</span></span>
+<span class="code-line">  <span class="code-keyword">const</span> snapshot =</span>
+<span class="code-line">    <span class="code-keyword">await</span> operator.<span class="code-function">screenshot</span>();</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-comment">// Step 2: 模型推理</span></span>
+<span class="code-line">  <span class="code-keyword">const</span> { prediction,</span>
+<span class="code-line">    parsedPredictions } =</span>
+<span class="code-line">    <span class="code-keyword">await</span> model.<span class="code-function">invoke</span>(vlmParams);</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-comment">// Step 3: 执行每个操作</span></span>
+<span class="code-line">  <span class="code-keyword">for</span> (<span class="code-keyword">const</span> p <span class="code-keyword">of</span> parsedPredictions) {</span>
+<span class="code-line">    <span class="code-keyword">if</span> (p.action_type === <span class="code-string">'finished'</span>)</span>
+<span class="code-line">      <span class="code-keyword">break</span>;</span>
+<span class="code-line">    <span class="code-keyword">await</span> operator.<span class="code-function">execute</span>({</span>
+<span class="code-line">      parsedPrediction: p });</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">进入无限循环——直到任务完成才会退出...</p>
+              <p class="tl">安全阀：如果循环次数超过 maxLoopCount（默认 25），强制停止...</p>
+              <p class="tl">状态设为 ERROR，跳出循环...</p>
+              <p class="tl">循环计数器加 1...</p>
+              <p class="tl">第一步：调用 operator 截取当前屏幕...</p>
+              <p class="tl">第二步：把截图和历史对话发给视觉语言模型...</p>
+              <p class="tl">模型返回预测结果和解析后的操作列表...</p>
+              <p class="tl">第三步：逐个执行模型建议的操作...</p>
+              <p class="tl">如果模型说 finished，说明任务完成了，跳出循环...</p>
+              <p class="tl">否则执行操作（点击、输入、滚动等），然后回到循环开头继续截图。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">安全保护机制</h2>
+        <p>循环不能无限运行——万一 AI 陷入死循环怎么办？UI-TARS 设计了多重保护。</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"1. GUIAgent 开始执行任务循环"},
+          {"highlight":"flow-actor-1","label":"2. 每次循环检查：loopCnt < maxLoopCount(25)?","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-2","label":"3. 截图成功？检查 snapshotErrCnt < 10"},
+          {"highlight":"flow-actor-2","label":"4. 模型推理成功？带重试机制","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-3","label":"5. 操作执行成功？带重试机制","packet":true,"from":"actor-3","to":"actor-1"},
+          {"highlight":"flow-actor-1","label":"6. 任何保护触发 → 停止循环，报告错误"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">GA</div>
+              <span>GUIAgent<br/>循环控制</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">SC</div>
+              <span>截图 &<br/>推理引擎</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">OP</div>
+              <span>操作执行<br/>Operator</span>
+            </div>
+          </div>
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">Click "Next Step" to begin</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">Next Step</button>
+            <button class="btn flow-reset-btn">Restart</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+
+        <div class="badge-list">
+          <div class="badge-item"><code class="badge-code">MAX_LOOP_COUNT = 25</code><span class="badge-desc">默认最大循环次数，防止 Agent 陷入死循环</span></div>
+          <div class="badge-item"><code class="badge-code">MAX_SNAPSHOT_ERR_CNT = 10</code><span class="badge-desc">连续截图失败上限，超过则终止</span></div>
+          <div class="badge-item"><code class="badge-code">AbortController</code><span class="badge-desc">用户随时可以点击停止，中断当前操作</span></div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block" data-correct="option-c" data-explanation-right="GUIAgent 的核心是一个 while(true) 循环：截图 → 模型推理 → 执行操作，通过 maxLoopCount 和 snapshotErrCnt 做安全保护。" data-explanation-wrong="GUIAgent 不是直接执行固定指令，而是每一步都截图让模型重新分析再决定下一步。">
+            <h3 class="quiz-question">如果 GUIAgent 执行一个复杂任务（比如"帮我在携程订机票"），它的工作方式是？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>一次性生成所有操作步骤，然后批量执行</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>先截图分析界面布局，然后按固定流程操作</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>每次截图后重新分析当前界面，动态决定下一步操作</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">Try Again</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section><section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">Operator：从 AI 指令到鼠标点击</h1>
+      <p class="module-subtitle">AI 说"点击(335, 360)"，但电脑怎么知道你要点哪里？Operator 就是 AI 世界和真实电脑之间的翻译官。</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Operator 的角色</h2>
+        <p>模型输出的是文字指令——"click(start_box='[0.131, 0.25, 0.131, 0.25]')"。但电脑需要真实的鼠标移动和键盘输入。<span class="term" data-definition="Operator 在这里指'操作器'——把 AI 的抽象指令翻译成具体操作的组件。就像汽车的方向盘和踏板，把你的意图翻译成机械运动。">Operator</span> 就是这个翻译层。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🖱️</div>
+            <h4 class="pattern-title">NutJS Operator</h4>
+            <p class="pattern-desc">用 NutJS 库控制真实鼠标键盘，适用于本地桌面操作</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🌐</div>
+            <h4 class="pattern-title">Browser Operator</h4>
+            <p class="pattern-desc">控制浏览器内的 DOM 操作，支持 Playwright 和 CDP</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">📱</div>
+            <h4 class="pattern-title">ADB Operator</h4>
+            <p class="pattern-desc">通过 Android Debug Bridge 控制安卓手机界面</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Electron 桌面截图的实现</h2>
+        <p>在 Electron 桌面应用中，截图不是用浏览器 API，而是用 Electron 原生的 desktopCapturer。这段代码展示了如何获取高质量屏幕截图。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-comment">// apps/ui-tars/src/main/agent/operator.ts</span>
+<span class="code-line"><span class="code-keyword">export class</span> <span class="code-function">NutJSElectronOperator</span></span>
+<span class="code-line">  <span class="code-keyword">extends</span> NutJSOperator {</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">public async</span> <span class="code-function">screenshot</span>() {</span>
+<span class="code-line">    <span class="code-keyword">const</span> { physicalSize, logicalSize,</span>
+<span class="code-line">      scaleFactor } = <span class="code-function">getScreenSize</span>();</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">const</span> sources = <span class="code-keyword">await</span></span>
+<span class="code-line">      desktopCapturer.<span class="code-function">getSources</span>({</span>
+<span class="code-line">        types: [<span class="code-string">'screen'</span>],</span>
+<span class="code-line">        thumbnailSize: {</span>
+<span class="code-line">          width: logicalSize.width,</span>
+<span class="code-line">          height: logicalSize.height }</span>
+<span class="code-line">      });</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">const</span> screenshot =</span>
+<span class="code-line">      sources[<span class="code-number">0</span>].thumbnail;</span>
+<span class="code-line">    <span class="code-keyword">return</span> {</span>
+<span class="code-line">      base64: screenshot.toJPEG(<span class="code-number">75</span>)</span>
+<span class="code-line">        .toString(<span class="code-string">'base64'</span>),</span>
+<span class="code-line">      scaleFactor</span>
+<span class="code-line">    };</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">继承 NutJSOperator，扩展 Electron 特有的截图能力...</p>
+              <p class="tl">获取屏幕的物理尺寸、逻辑尺寸和缩放比例...</p>
+              <p class="tl">调用 Electron 的 desktopCapturer API 获取屏幕截图...</p>
+              <p class="tl">只截取屏幕（不是窗口）...</p>
+              <p class="tl">按逻辑尺寸获取缩略图（考虑 Retina 缩放）...</p>
+              <p class="tl">取第一个屏幕源（主显示器）...</p>
+              <p class="tl">转为 JPEG 格式（质量 75%），再转 base64 文本...</p>
+              <p class="tl">返回 base64 图片和缩放因子——供模型使用。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Windows 输入的特殊处理</h2>
+        <p>在 Windows 上直接用 keyboard.type() 输入中文会出问题。UI-TARS 用了一个聪明的替代方案：先复制到剪贴板，再 Ctrl+V 粘贴。</p>
+
+        <div class="chat-window" id="chat-module3">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="model" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">AI</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">AI 模型</span>
+                <p>我需要在这个搜索框里输入"北京到上海的机票"——执行 type(content="北京到上海的机票")</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="parser" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">PA</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">Action Parser</span>
+                <p>解析完成：action_type = type, content = "北京到上海的机票"</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="operator" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">OP</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">NutJS Operator</span>
+                <p>检测到是 Windows 系统，keyboard.type() 不支持中文。启用剪贴板方案...</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="os" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">OS</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">操作系统</span>
+                <p>clipboard.writeText("北京到上海的机票") → Ctrl+V → 输入完成！原剪贴板内容已恢复。</p>
+              </div>
+            </div>
+          </div>
+          <div class="chat-typing" id="chat-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module3-typing-avatar">?</div>
+            <div class="chat-typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>
+          </div>
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">Next Message</button>
+            <button class="btn chat-all-btn">Play All</button>
+            <button class="btn chat-reset-btn">Replay</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Action Space：AI 可以做哪些操作？</h2>
+        <p>模型的输出格式被限定在一组预定义的"动作空间"里。就像给棋手规定只能下在棋盘交叉点上一样。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-comment">// 定义 AI 可用的操作列表</span>
+<span class="code-line"><span class="code-keyword">static</span> MANUAL = {</span>
+<span class="code-line">  ACTION_SPACES: [</span>
+<span class="code-line">    <span class="code-string">"click(start_box='[x1,y1,x2,y2]')"</span>,</span>
+<span class="code-line">    <span class="code-string">"drag(start_box=..., end_box=...)"</span>,</span>
+<span class="code-line">    <span class="code-string">"type(content='xxx')"</span>,</span>
+<span class="code-line">    <span class="code-string">"scroll(start_box=..., direction=...)"</span>,</span>
+<span class="code-line">    <span class="code-string">"hotkey(key='ctrl c')"</span>,</span>
+<span class="code-line">    <span class="code-string">"finished()"</span>,</span>
+<span class="code-line">    <span class="code-string">"call_user()"</span>,</span>
+<span class="code-line">  ]</span>
+<span class="code-line">};</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">定义了 AI 能执行的所有操作类型...</p>
+              <p class="tl">click：点击某个区域（用坐标框表示）...</p>
+              <p class="tl">drag：从一个区域拖拽到另一个区域...</p>
+              <p class="tl">type：在当前位置输入文字内容...</p>
+              <p class="tl">scroll：在某个区域向指定方向滚动...</p>
+              <p class="tl">hotkey：模拟快捷键组合（如 Ctrl+C）...</p>
+              <p class="tl">finished：任务完成，停止循环...</p>
+              <p class="tl">call_user：遇到困难，请求用户帮助。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block" data-correct="option-a" data-explanation-right="Operator 是核心抽象层——同一个 AI 指令可以通过不同的 Operator 在不同平台上执行（桌面、浏览器、手机），这就是 Operator 模式的价值。" data-explanation-wrong="Operator 不是模型本身，而是模型和真实操作系统之间的翻译层。">
+            <h3 class="quiz-question">如果你想让 UI-TARS 控制一台 Android 手机而不是电脑桌面，你需要修改哪一层？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>只需要替换 Operator 为 ADB Operator，模型和循环逻辑不变</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>需要同时修改 GUIAgent 的循环逻辑和 Operator</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>需要重新训练一个专门针对手机屏幕的模型</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">Try Again</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section><section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">MCP Agent：工具调用引擎</h1>
+      <p class="module-subtitle">MCP 是 AI 世界的"万能插座"——任何工具只要插上，AI 就能用。搜索引擎、文件操作、代码执行，统统变成 AI 的手和脚。</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">什么是 MCP？</h2>
+        <p><span class="term" data-definition="MCP（Model Context Protocol）是 Anthropic 提出的开放协议，定义了 AI 模型如何与外部工具通信的标准。就像 USB-C 统一了手机充电线——MCP 统一了 AI 调用工具的方式。">MCP</span> 让 AI 智能体能调用外部工具——搜索引擎、网页爬虫、文件操作等。Tarko 框架的 MCPAgent 专门处理这些工具调用。</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"1. 用户提问：搜索最新的 AI Agent 论文"},
+          {"highlight":"flow-actor-1","label":"2. Agent 分析：需要调用搜索工具","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-2","label":"3. MCPAgent 连接 MCP Server，发现可用工具"},
+          {"highlight":"flow-actor-2","label":"4. 通过 MCP 协议调用 search 工具","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-3","label":"5. 外部服务（如 Tavily）返回搜索结果","packet":true,"from":"actor-3","to":"actor-2"},
+          {"highlight":"flow-actor-2","label":"6. MCPAgent 把工具返回值交给 LLM 处理","packet":true,"from":"actor-2","to":"actor-1"},
+          {"highlight":"flow-actor-1","label":"7. LLM 基于搜索结果生成最终回答给用户"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">LLM</div>
+              <span>大语言模型<br/>推理决策</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">MCP</div>
+              <span>MCPAgent<br/>工具调度</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">EXT</div>
+              <span>外部服务<br/>搜索/爬虫</span>
+            </div>
+          </div>
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">Click "Next Step" to begin</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">Next Step</button>
+            <button class="btn flow-reset-btn">Restart</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">MCPAgent 的代码实现</h2>
+        <p>MCPAgent 继承自 Tarko 的基础 Agent 类，在初始化时连接所有 <span class="term" data-definition="MCP Server 是提供工具能力的服务进程。就像自动售货机——你投入请求（硬币），它吐出结果（饮料）。每个 MCP Server 提供一类工具能力。">MCP Server</span>，把它们的工具注册到自己身上。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-comment">// multimodal/tarko/mcp-agent/src/mcp-agent.ts</span>
+<span class="code-line"><span class="code-keyword">export class</span> <span class="code-function">MCPAgent</span>&lt;T&gt;</span>
+<span class="code-line">  <span class="code-keyword">extends</span> Agent&lt;T&gt; {</span>
+<span class="code-line">  <span class="code-keyword">private</span> mcpClients:</span>
+<span class="code-line">    Map&lt;<span class="code-keyword">string</span>, IMCPClient&gt;;</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">async</span> <span class="code-function">initialize</span>() {</span>
+<span class="code-line">    <span class="code-keyword">for</span> (<span class="code-keyword">const</span> [name, config]</span>
+<span class="code-line">      <span class="code-keyword">of</span> Object.entries(mcpConfig)) {</span>
+<span class="code-line">      <span class="code-keyword">const</span> client =</span>
+<span class="code-line">        <span class="code-keyword">new</span> <span class="code-function">MCPClientV2</span>(name, config);</span>
+<span class="code-line">      <span class="code-keyword">await</span> client.<span class="code-function">initialize</span>();</span>
+<span class="code-line"></span>
+<span class="code-line">      <span class="code-keyword">const</span> tools = client.<span class="code-function">getTools</span>();</span>
+<span class="code-line">      <span class="code-keyword">for</span> (<span class="code-keyword">const</span> tool <span class="code-keyword">of</span> tools) {</span>
+<span class="code-line">        <span class="code-keyword">this</span>.<span class="code-function">registerTool</span>(</span>
+<span class="code-line">          <span class="code-keyword">new</span> <span class="code-function">Tool</span>({ id: tool.name,</span>
+<span class="code-line">            function: (args) =&gt;</span>
+<span class="code-line">              client.<span class="code-function">callTool</span>(tool.name, args)</span>
+<span class="code-line">          })</span>
+<span class="code-line">        );</span>
+<span class="code-line">      }</span>
+<span class="code-line">    }</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">MCPAgent 继承自基础 Agent 类，专门处理 MCP 工具调用...</p>
+              <p class="tl">用一个 Map 管理所有 MCP 客户端连接...</p>
+              <p class="tl">初始化时遍历配置中的所有 MCP Server...</p>
+              <p class="tl">取出每个 Server 的名称和连接配置...</p>
+              <p class="tl">创建 MCP 客户端并建立连接...</p>
+              <p class="tl">获取这个 Server 提供的所有工具...</p>
+              <p class="tl">逐个注册为 Agent 可用的工具...</p>
+              <p class="tl">工具的执行函数就是调用 MCP 客户端的 callTool 方法...</p>
+              <p class="tl">传入工具名和参数，等待结果返回。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🔑</div>
+          <div class="callout-content">
+            <strong class="callout-title">设计模式：依赖注入</strong>
+            <p>MCPAgent 不知道也不关心它调用的工具是怎么实现的。它只通过 MCP 协议和工具通信。你可以换掉底层的搜索引擎、换掉爬虫实现——Agent 的代码一行都不用改。这就是 <span class="term" data-definition="依赖注入（Dependency Injection）是一种设计模式——不自己创建依赖，而是从外部接收。就像你不自己发电，而是插上插座用电网的电。">依赖注入</span> 的威力。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Agent TARS：MCP + GUI 的融合</h2>
+        <p>AgentTARS 是 MCP 能力的集大成者——它继承自 MCPAgent，同时集成了浏览器控制、文件系统操作和搜索能力。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-comment">// multimodal/agent-tars/core/src/agent-tars.ts</span>
+<span class="code-line"><span class="code-keyword">export class</span> <span class="code-function">AgentTARS</span>&lt;T&gt;</span>
+<span class="code-line">  <span class="code-keyword">extends</span> MCPAgent&lt;T&gt; {</span>
+<span class="code-line">  <span class="code-keyword">private readonly</span> environment;</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-function">constructor</span>(options: T) {</span>
+<span class="code-line">    <span class="code-keyword">const</span> env = options.aioSandbox</span>
+<span class="code-line">      ? <span class="code-keyword">new</span> <span class="code-function">AIOEnvironment</span>(options)</span>
+<span class="code-line">      : <span class="code-keyword">new</span> <span class="code-function">LocalEnvironment</span>(options);</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">super</span>({</span>
+<span class="code-line">      ...processedOptions,</span>
+<span class="code-line">      mcpServers:</span>
+<span class="code-line">        env.<span class="code-function">getMCPServerRegistry</span>(),</span>
+<span class="code-line">    });</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">AgentTARS 继承自 MCPAgent——它天生就有工具调用能力...</p>
+              <p class="tl">environment 负责管理运行环境（本地或沙箱）...</p>
+              <p class="tl">构造函数根据配置选择环境...</p>
+              <p class="tl">如果启用 AIO 沙箱，用隔离的云端环境执行...</p>
+              <p class="tl">否则用本地环境——浏览器、文件系统都在本机...</p>
+              <p class="tl">调用父类 MCPAgent 的构造函数...</p>
+              <p class="tl">关键：从 environment 获取 MCP Server 注册表...</p>
+              <p class="tl">这样 MCPAgent 就能连接所有环境提供的工具了。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block" data-correct="option-b" data-explanation-right="MCPAgent 的设计通过依赖注入实现了松耦合——底层工具可以随意替换（Tavily 换成 Google），Agent 的核心逻辑不需要任何修改。" data-explanation-wrong="MCP 是一个工具调用协议，不是 GUI 操作协议。GUI 操作由 Operator 层负责。">
+            <h3 class="quiz-question">你的 Agent TARS 使用 Tavily 搜索引擎，现在想换成 Google Search。你需要做什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>修改 MCPAgent 的核心代码，把 Tavily 调用替换成 Google 调用</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>只需在配置里换一个 MCP Server（从 Tavily 换成 Google Search MCP），Agent 代码不用改</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>需要重新训练模型才能识别新的搜索结果格式</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">Try Again</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section><section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">模型与 Prompt：AI 的眼睛和大脑</h1>
+      <p class="module-subtitle">截图给谁看？AI 怎么理解屏幕上的元素？这背后是一套精心设计的 Prompt 模板和多版本适配系统。</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">模型适配层：UITarsModel</h2>
+        <p>UI-TARS 支持多个视觉语言模型。UITarsModel 封装了 OpenAI <span class="term" data-definition="SDK（Software Development Kit）是软件开发工具包——一个包含库、文档和示例的工具箱，让你更容易使用某个服务。就像宜家的组装工具包，让你不用自己找螺丝刀。">SDK</span>，统一了不同模型的调用方式。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-comment">// packages/ui-tars/sdk/src/Model.ts</span>
+<span class="code-line"><span class="code-keyword">export class</span> <span class="code-function">UITarsModel</span> <span class="code-keyword">extends</span> Model {</span>
+<span class="code-line">  <span class="code-keyword">async</span> <span class="code-function">invoke</span>(params: InvokeParams) {</span>
+<span class="code-line">    <span class="code-keyword">const</span> { conversations, images,</span>
+<span class="code-line">      screenContext, uiTarsVersion } = params;</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-comment">// 压缩图片：不超过模型像素上限</span></span>
+<span class="code-line">    <span class="code-keyword">const</span> compressed = <span class="code-keyword">await</span></span>
+<span class="code-line">      Promise.<span class="code-function">all</span>(images.<span class="code-function">map</span>(img =&gt;</span>
+<span class="code-line">        <span class="code-function">preprocessResizeImage</span>(</span>
+<span class="code-line">          img, maxPixels)));</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-comment">// 转换为 OpenAI 消息格式</span></span>
+<span class="code-line">    <span class="code-keyword">const</span> messages =</span>
+<span class="code-line">      <span class="code-function">convertToOpenAIMessages</span>(</span>
+<span class="code-line">        { conversations, images: compressed });</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-comment">// 调用模型并解析操作</span></span>
+<span class="code-line">    <span class="code-keyword">const</span> { prediction } =</span>
+<span class="code-line">      <span class="code-keyword">await</span> <span class="code-keyword">this</span>.<span class="code-function">invokeModelProvider</span>(...);</span>
+<span class="code-line">    <span class="code-keyword">const</span> { parsed } = <span class="code-function">actionParser</span>(</span>
+<span class="code-line">      { prediction, screenContext });</span>
+<span class="code-line">    <span class="code-keyword">return</span> { prediction, parsedPredictions: parsed };</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">UITarsModel 负责和视觉语言模型通信...</p>
+              <p class="tl">接收对话历史、图片、屏幕尺寸和模型版本...</p>
+              <p class="tl">第一步：压缩图片，确保不超过模型的像素上限...</p>
+              <p class="tl">每张图片独立压缩，用 Promise.all 并行处理...</p>
+              <p class="tl">第二步：把对话和图片转成 OpenAI 的消息格式...</p>
+              <p class="tl">截图作为 image_url 消息，文本作为 text 消息...</p>
+              <p class="tl">第三步：调用实际的模型 API...</p>
+              <p class="tl">第四步：用 actionParser 解析模型输出为结构化操作...</p>
+              <p class="tl">返回原始预测文本和解析后的操作列表。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Prompt 模板：教 AI 如何操作 GUI</h2>
+        <p>不同版本的模型有不同的能力，所以 Prompt 也要适配。UI-TARS 为每个模型版本准备了专门的 <span class="term" data-definition="System Prompt 是给 AI 的'角色说明书'——告诉它你是谁、你能做什么、你该怎么回答。就像给新员工一份岗位说明书。">System Prompt</span>。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-comment">// apps/ui-tars/src/main/agent/prompts.ts</span>
+<span class="code-line"><span class="code-keyword">export const</span> getSystemPromptV1_5 = (</span>
+<span class="code-line">  language: <span class="code-string">'zh'</span> | <span class="code-string">'en'</span>,</span>
+<span class="code-line">  useCase: <span class="code-string">'normal'</span> | <span class="code-string">'poki'</span></span>
+<span class="code-line">) =&gt; <span class="code-string">`You are a GUI agent...</span></span>
+<span class="code-line"><span class="code-string">## Action Space</span></span>
+<span class="code-line"><span class="code-string">click(point='&lt;point&gt;x1 y1&lt;/point&gt;')</span></span>
+<span class="code-line"><span class="code-string">drag(start_point=..., end_point=...)</span></span>
+<span class="code-line"><span class="code-string">type(content='xxx')</span></span>
+<span class="code-line"><span class="code-string">scroll(point=..., direction='down')</span></span>
+<span class="code-line"><span class="code-string">## Note</span></span>
+<span class="code-line"><span class="code-string">- Use ${language === 'zh' ? 'Chinese' : 'English'}</span></span>
+<span class="code-line"><span class="code-string">  in Thought part.`</span>;</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">V1.5 版本的 Prompt 生成函数...</p>
+              <p class="tl">接受语言和用途两个参数...</p>
+              <p class="tl">用途分为 normal（普通任务）和 poki（游戏）...</p>
+              <p class="tl">定义动作空间：V1.5 用 point 坐标（更精确）...</p>
+              <p class="tl">click 用单点坐标，不再用框选...</p>
+              <p class="tl">drag 用起点和终点...</p>
+              <p class="tl">type 输入文字，scroll 滚动页面...</p>
+              <p class="tl">指定思考过程使用中文或英文...</p>
+              <p class="tl">根据 useCase 选择不同的思考策略描述。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">模型版本适配</strong>
+            <p>注意 V1.0 用 <code>[x1, y1, x2, y2]</code> 框选坐标，V1.5 用 <code>&lt;point&gt;x y&lt;/point&gt;</code> 单点坐标，Doubao 20B 又回到了框选但增加了 <code>press/release</code> 组合键能力。每个模型的训练数据不同，Prompt 必须匹配模型的"语言"。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">图片压缩：平衡精度与成本</h2>
+        <p>一张 4K 截图可能有 800 万像素，但模型有像素上限。UI-TARS 会智能压缩图片，保留足够的细节让模型理解界面。</p>
+
+        <div class="badge-list">
+          <div class="badge-item"><code class="badge-code">MAX_PIXELS_V1_0 = 1350 * 28 * 28</code><span class="badge-desc">V1.0 模型最大支持约 105 万像素</span></div>
+          <div class="badge-item"><code class="badge-code">MAX_PIXELS_V1_5</code><span class="badge-desc">V1.5 模型支持更多像素，识别更精准</span></div>
+          <div class="badge-item"><code class="badge-code">MAX_IMAGE_LENGTH = 5</code><span class="badge-desc">对话历史中最多保留 5 张图片，超出则滑动窗口裁剪</span></div>
+          <div class="badge-item"><code class="badge-code">JPEG quality = 75</code><span class="badge-desc">截图用 75% 质量的 JPEG，在清晰度和 API 成本间取平衡</span></div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+        <div class="quiz-container" id="quiz-module5">
+          <div class="quiz-question-block" data-correct="option-c" data-explanation-right="UI-TARS 用滑动窗口裁剪历史图片（最多保留 5 张），并压缩图片像素到模型上限以下。这样既能保持上下文连贯，又不会让 API 调用超时或超预算。" data-explanation-wrong="UI-TARS 不是每次都传全量历史，也不是只看当前截图。它保留了最近 5 张图片的历史，让模型能看到操作前后的变化。">
+            <h3 class="quiz-question">如果 GUI Agent 已经执行了 20 步操作（每步一张截图），发给模型时会怎样？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>把 20 张截图全部发给模型，让模型看到完整历史</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>只发最新一张截图，之前的全部丢弃以节省成本</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>保留最近 5 张截图作为上下文，更早的图片被裁剪掉</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">Try Again</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section><section class="module" id="module-6" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">06</span>
+      <h1 class="module-title">Agent TARS：从桌面到终端</h1>
+      <p class="module-subtitle">如果说 UI-TARS Desktop 是一个有界面的应用，那 Agent TARS 就是一把瑞士军刀——CLI、Web UI、Server 模式，随需应变。</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Agent TARS 的三种使用方式</h2>
+        <p>Agent TARS 不只是桌面应用——它同时提供了 <span class="term" data-definition="CLI（Command Line Interface）是命令行界面——在终端里输入文字指令来操作程序。就像发短信控制电脑，而不是用鼠标点来点去。">CLI</span>、Web UI 和 Server 模式。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-comment"># 一行命令启动 Agent TARS</span>
+<span class="code-line">npx @agent-tars/cli@latest</span>
+<span class="code-line"></span>
+<span class="code-comment"># 指定模型和 API Key</span>
+<span class="code-line">agent-tars \</span>
+<span class="code-line">  --provider anthropic \</span>
+<span class="code-line">  --model claude-3-7-sonnet-latest \</span>
+<span class="code-line">  --apiKey your-api-key</span>
+<span class="code-line"></span>
+<span class="code-comment"># 或用国内模型</span>
+<span class="code-line">agent-tars \</span>
+<span class="code-line">  --provider volcengine \</span>
+<span class="code-line">  --model doubao-1-5-thinking-vision-pro \</span>
+<span class="code-line">  --apiKey your-api-key</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">用 npx 一行命令启动，不需要安装任何东西...</p>
+              <p class="tl">这会打开一个 Web UI 界面...</p>
+              <p class="tl">指定使用 Anthropic 的 Claude 模型...</p>
+              <p class="tl">使用 claude-3-7-sonnet 这个视觉语言模型...</p>
+              <p class="tl">传入你的 API 密钥进行身份验证...</p>
+              <p class="tl">也可以用国内的火山引擎模型...</p>
+              <p class="tl">使用豆包视觉思考模型——国内用户更友好...</p>
+              <p class="tl">同一个框架，多个模型提供商，按需切换。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">浏览器控制策略</h2>
+        <p>Agent TARS 控制浏览器有三种模式——这是它区别于其他 GUI Agent 的核心能力。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">👁️</div>
+            <h4 class="pattern-title">GUI Agent 模式</h4>
+            <p class="pattern-desc">像人一样"看"浏览器截图，理解视觉元素并操作。通用性最强，但速度较慢（每步需要截图+模型推理）</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🌲</div>
+            <h4 class="pattern-title">DOM 模式</h4>
+            <p class="pattern-desc">直接读取网页的 <span class="term" data-definition="DOM（Document Object Model）是网页的结构化表示——把网页变成一棵'元素树'，每个按钮、文字、图片都是一个节点。程序可以通过 DOM 精确找到和操作任何元素。">DOM</span> 结构，精确定位元素。速度快，准确性高，但只能用于浏览器</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🔄</div>
+            <h4 class="pattern-title">混合模式（Hybrid）</h4>
+            <p class="pattern-desc">智能切换：简单操作用 DOM 快速执行，复杂界面用视觉理解。兼顾速度和通用性</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Event Stream：事件驱动的架构</h2>
+        <p>Agent TARS 用 <span class="term" data-definition="Event Stream 是一种事件驱动的数据流——Agent 的每一步操作（思考、调用工具、返回结果）都作为事件发布。就像直播的弹幕流，UI 可以实时显示每一步。">Event Stream</span> 驱动整个 Agent 循环和 UI 渲染。</p>
+
+        <div class="chat-window" id="chat-module6">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="user" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">你</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">用户</span>
+                <p>帮我搜索杭州最近一个月的天气，然后画个图表</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="llm" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">LLM</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">大模型</span>
+                <p>分析任务：需要搜索天气数据。Event: tool_call(search, "杭州天气 2026年5月")</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="mcp" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">MCP</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">搜索工具</span>
+                <p>Event: tool_result(杭州5月天气数据：最高温28度，最低温18度，降雨15天...)</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="llm" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">LLM</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">大模型</span>
+                <p>需要用代码画图。Event: tool_call(shell, "python3 generate_chart.py")</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="shell" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">SH</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">代码执行</span>
+                <p>Event: tool_result(图表已生成：hangzhou_weather_may.png)</p>
+              </div>
+            </div>
+          </div>
+          <div class="chat-typing" id="chat-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module6-typing-avatar">?</div>
+            <div class="chat-typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>
+          </div>
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">Next Message</button>
+            <button class="btn chat-all-btn">Play All</button>
+            <button class="btn chat-reset-btn">Replay</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+        <div class="quiz-container" id="quiz-module6">
+          <div class="quiz-question-block" data-correct="option-b" data-explanation-right="混合模式（Hybrid）是 Agent TARS 的推荐策略——简单操作用 DOM 快速定位，复杂界面用视觉理解，自动在两者间切换。" data-explanation-wrong="GUI Agent 模式虽然通用，但每一步都需要截图+模型推理，速度较慢。对于浏览器场景，混合模式更高效。">
+            <h3 class="quiz-question">如果 Agent TARS 需要在网页上填写一个表单（输入框+下拉菜单+提交按钮），最高效的控制策略是？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>纯 GUI Agent 模式——每一步都截图分析再操作</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>混合模式——用 DOM 定位输入框和按钮，用视觉理解验证结果</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>纯 DOM 模式——直接操作页面元素，不需要视觉理解</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module6')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module6')">Try Again</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section><section class="module" id="module-7" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">07</span>
+      <h1 class="module-title">架构选型：UI-TARS 技术决策</h1>
+      <p class="module-subtitle">技术负责人视角——评估 UI-TARS 是否适合你的项目，以及它与竞品的核心差异。</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">核心定位</h2>
+        <div class="badge-list">
+          <div class="badge-item"><code class="badge-code">Multimodal AI Agent</code><span class="badge-desc">视觉+语言的多模态智能体框架——AI 能"看懂"屏幕并操作</span></div>
+          <div class="badge-item"><code class="badge-code">GUI + MCP 双引擎</code><span class="badge-desc">GUI Agent 处理界面操作，MCP Agent 处理工具调用，按需组合</span></div>
+          <div class="badge-item"><code class="badge-code">Tarko Agent Framework</code><span class="badge-desc">底层事件驱动的 Agent 循环框架，支持流式、重放、快照</span></div>
+          <div class="badge-item"><code class="badge-code">Desktop + CLI + Web + Server</code><span class="badge-desc">四种部署形态：桌面应用、命令行、Web UI、HTTP Server</span></div>
+          <div class="badge-item"><code class="badge-code">Apache-2.0 License</code><span class="badge-desc">开源可商用，无限制</span></div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">与同类方案对比</h2>
+        <table style="width:100%;border-collapse:collapse;margin:var(--space-6) 0;font-size:var(--text-sm);box-shadow:var(--shadow-md);border-radius:var(--radius-md);overflow:hidden;">
+          <thead>
+            <tr style="background:var(--color-bg-code);color:#CDD6F4;">
+              <th style="padding:var(--space-3) var(--space-4);text-align:left;">维度</th>
+              <th style="padding:var(--space-3) var(--space-4);text-align:left;">UI-TARS</th>
+              <th style="padding:var(--space-3) var(--space-4);text-align:left;">Playwright</th>
+              <th style="padding:var(--space-3) var(--space-4);text-align:left;">Computer Use (Anthropic)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background:var(--color-surface);"><td style="padding:var(--space-3) var(--space-4);"><strong>操作方式</strong></td><td style="padding:var(--space-3) var(--space-4);"><ul><li>视觉理解 + DOM + 混合模式</li><li>无需预定义选择器</li></ul></td><td style="padding:var(--space-3) var(--space-4);"><ul><li>脚本驱动</li><li>需要精确的 CSS 选择器</li></ul></td><td style="padding:var(--space-3) var(--space-4);"><ul><li>纯视觉理解</li><li>不支持 DOM 混合</li></ul></td></tr>
+            <tr style="background:var(--color-bg-warm);"><td style="padding:var(--space-3) var(--space-4);"><strong>适应性</strong></td><td style="padding:var(--space-3) var(--space-4);"><ul><li>自动适应界面变化</li><li>理解语义而非固定位置</li></ul></td><td style="padding:var(--space-3) var(--space-4);"><ul><li>界面变化可能脚本失效</li><li>依赖固定元素结构</li></ul></td><td style="padding:var(--space-3) var(--space-4);"><ul><li>自动适应界面变化</li><li>仅依赖视觉理解</li></ul></td></tr>
+            <tr style="background:var(--color-surface);"><td style="padding:var(--space-3) var(--space-4);"><strong>覆盖范围</strong></td><td style="padding:var(--space-3) var(--space-4);"><ul><li>桌面 + 浏览器 + 手机 (ADB)</li><li>本地 + 远程 + 沙箱</li></ul></td><td style="padding:var(--space-3) var(--space-4);"><ul><li>仅浏览器</li></ul></td><td style="padding:var(--space-3) var(--space-4);"><ul><li>桌面 + 浏览器</li><li>仅限 Anthropic 模型</li></ul></td></tr>
+            <tr style="background:var(--color-bg-warm);"><td style="padding:var(--space-3) var(--space-4);"><strong>成本</strong></td><td style="padding:var(--space-3) var(--space-4);"><ul><li>需多模态 LLM API</li><li>支持多个模型提供商</li></ul></td><td style="padding:var(--space-3) var(--space-4);"><ul><li>免费，本地运行</li></ul></td><td style="padding:var(--space-3) var(--space-4);"><ul><li>需 Claude API</li><li>仅 Anthropic 定价</li></ul></td></tr>
+            <tr style="background:var(--color-surface);"><td style="padding:var(--space-3) var(--space-4);"><strong>开源</strong></td><td style="padding:var(--space-3) var(--space-4);"><ul><li>Apache-2.0 完全开源</li></ul></td><td style="padding:var(--space-3) var(--space-4);"><ul><li>Apache-2.0 完全开源</li></ul></td><td style="padding:var(--space-3) var(--space-4);"><ul><li>API 闭源，按量计费</li></ul></td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">适合 vs 不适合</h2>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-6);margin:var(--space-6) 0;">
+          <div style="background:var(--color-success-light);padding:var(--space-6);border-radius:var(--radius-md);">
+            <h4 style="color:var(--color-success);margin-bottom:var(--space-4);">&#10003; 适合</h4>
+            <ul style="list-style:none;padding:0;">
+              <li style="margin-bottom:var(--space-2);">&#10003; 自动化操作没有 API 的桌面应用或网站</li>
+              <li style="margin-bottom:var(--space-2);">&#10003; 界面经常变化、难以维护固定选择器的自动化</li>
+              <li style="margin-bottom:var(--space-2);">&#10003; 需要跨平台（桌面+浏览器+手机）混合操作</li>
+              <li style="margin-bottom:var(--space-2);">&#10003; AI 驱动的 RPA 场景——客服、数据录入、流程自动化</li>
+              <li style="margin-bottom:var(--space-2);">&#10003; 快速原型验证——用自然语言描述任务即可执行</li>
+              <li>&#10003; 可接受 LLM API 调用成本的生产环境</li>
+            </ul>
+          </div>
+          <div style="background:var(--color-error-light);padding:var(--space-6);border-radius:var(--radius-md);">
+            <h4 style="color:var(--color-error);margin-bottom:var(--space-4);">&#10007; 不适合</h4>
+            <ul style="list-style:none;padding:0;">
+              <li style="margin-bottom:var(--space-2);">&#10007; 需要毫秒级精确操作的高频交易等场景</li>
+              <li style="margin-bottom:var(--space-2);">&#10007; 大规模批量数据处理（效率不如专用脚本）</li>
+              <li style="margin-bottom:var(--space-2);">&#10007; 预算有限无法承担 LLM API 费用</li>
+              <li style="margin-bottom:var(--space-2);">&#10007; 需要 100% 确定性的回归测试（AI 有随机性）</li>
+              <li style="margin-bottom:var(--space-2);">&#10007; 完全离线/无网络的环境</li>
+              <li>&#10007; 涉及高度敏感操作（金融交易）无人监督的自动化</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">&#9888;&#65039;</div>
+          <div class="callout-content">
+            <strong class="callout-title">成本估算</strong>
+            <p>GUI Agent 每次循环（截图+模型推理）是一次多模态 API 调用。复杂任务需要 10-50 次循环。以 Claude 3.5 Sonnet 为例，单次截图约 1000 tokens 输入 + 200 tokens 输出，一个 30 步任务大约消耗 $0.1-0.5。生产使用前务必评估成本。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">源码中的硬限制</h2>
+        <div class="badge-list">
+          <div class="badge-item"><code class="badge-code">MAX_LOOP_COUNT = 25</code><span class="badge-desc">单次任务最大循环次数，防止 Agent 无限运行（来源：GUIAgent.ts）</span></div>
+          <div class="badge-item"><code class="badge-code">MAX_SNAPSHOT_ERR_CNT = 10</code><span class="badge-desc">连续截图失败上限（来源：constants.ts）</span></div>
+          <div class="badge-item"><code class="badge-code">MAX_IMAGE_LENGTH = 5</code><span class="badge-desc">对话历史最大保留图片数，超出的老图片会被裁剪（来源：utils.ts）</span></div>
+          <div class="badge-item"><code class="badge-code">maxIterations = 1000</code><span class="badge-desc">Tarko Agent 框架默认最大迭代次数（来源：agent.ts）</span></div>
+          <div class="badge-item"><code class="badge-code">maxTokens: V1.0=1000, V1.5=65535</code><span class="badge-desc">不同模型版本的最大输出 token 数（来源：Model.ts）</span></div>
+          <div class="badge-item"><code class="badge-code">Node.js &gt;= 22</code><span class="badge-desc">Agent TARS CLI 要求 Node.js 22 或更高版本（来源：README.md）</span></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>  </main>
+
+</body>
+</html>

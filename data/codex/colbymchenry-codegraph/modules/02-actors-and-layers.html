@@ -1,0 +1,213 @@
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">核心角色：六大层如何协作</h1>
+      <p class="module-subtitle">CodeGraph 不是一个大黑盒，而是六个分工明确的团队</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Metaphor -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">想象一个图书馆</h2>
+        <p>要把几十万本书变成一个能快速查询的知识库，你需要六个角色：有人负责拆封阅读（<span class="term" data-definition="Extraction 即代码提取，负责把源文件解析成结构化的符号信息。就像图书管理员打开每本书，记录书名、目录和关键词。">Extraction</span>），有人负责关联标注（<span class="term" data-definition="Resolution 即引用解析，负责把代码中提到的名字（如 import 路径）对应到实际的代码符号。就像给书里的每个引用找到被引用的书。">Resolution</span>），有人负责整理入库（Database），有人负责查询服务（Graph），有人负责写摘要给读者（Context），还有人负责门面接待（MCP）。</p>
+      </section>
+
+      <!-- Screen 2: Architecture Diagram -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">六层管道架构</h2>
+
+        <div class="arch-diagram">
+          <div class="arch-zone" style="background: var(--color-accent-light); border-radius: var(--radius-md); padding: var(--space-4) var(--space-6);">
+            <h4 class="arch-zone-label" style="color: var(--color-accent)">AI 代理层</h4>
+            <div class="arch-component" data-desc="MCP Server 是 CodeGraph 暴露给 AI 代理的接口层。AI 不需要知道图谱怎么建的，只需要调用 codegraph_context 等工具就能获取信息。" onclick="showArchDesc(this)">
+              <div class="arch-icon">&#127760;</div>
+              <span>MCP Server</span>
+            </div>
+          </div>
+          <div style="text-align: center; padding: var(--space-2); color: var(--color-text-muted);">&#9660;</div>
+          <div class="arch-zone" style="background: var(--color-info-light); border-radius: var(--radius-md); padding: var(--space-4) var(--space-6);">
+            <h4 class="arch-zone-label" style="color: var(--color-info)">上下文层</h4>
+            <div class="arch-component" data-desc="ContextBuilder 把图谱查询结果整理成 AI 能直接理解的文本格式（Markdown 或 JSON），包含相关代码片段、调用关系和依赖说明。" onclick="showArchDesc(this)">
+              <div class="arch-icon">&#128196;</div>
+              <span>ContextBuilder</span>
+            </div>
+          </div>
+          <div style="text-align: center; padding: var(--space-2); color: var(--color-text-muted);">&#9660;</div>
+          <div class="arch-zone" style="background: #FDF5E0; border-radius: var(--radius-md); padding: var(--space-4) var(--space-6);">
+            <h4 class="arch-zone-label" style="color: var(--color-actor-4)">图谱层</h4>
+            <div class="arch-component" data-desc="GraphTraverser 负责在知识图谱上做 BFS/DFS 遍历，查找调用链、影响范围、最短路径等。GraphQueryManager 在它之上提供高级查询 API。" onclick="showArchDesc(this)">
+              <div class="arch-icon">&#128202;</div>
+              <span>GraphTraverser / QueryManager</span>
+            </div>
+          </div>
+          <div style="text-align: center; padding: var(--space-2); color: var(--color-text-muted);">&#9660;</div>
+          <div class="arch-zone" style="background: var(--color-success-light); border-radius: var(--radius-md); padding: var(--space-4) var(--space-6);">
+            <h4 class="arch-zone-label" style="color: var(--color-success)">解析层</h4>
+            <div style="display: flex; gap: var(--space-4); flex-wrap: wrap;">
+              <div class="arch-component" data-desc="ExtractionOrchestrator 用 tree-sitter 把源代码解析成语法树，从中提取函数、类、变量等符号（Node）和它们的关系（Edge）。支持 18+ 种编程语言。" onclick="showArchDesc(this)">
+                <div class="arch-icon">&#128269;</div>
+                <span>Extraction</span>
+              </div>
+              <div class="arch-component" data-desc="ReferenceResolver 把提取阶段留下的未解析引用（如函数调用名）对应到实际的符号定义，建立调用、继承等边关系。还识别 Express、Laravel 等框架的路由。" onclick="showArchDesc(this)">
+                <div class="arch-icon">&#128279;</div>
+                <span>Resolution</span>
+              </div>
+            </div>
+          </div>
+          <div style="text-align: center; padding: var(--space-2); color: var(--color-text-muted);">&#9660;</div>
+          <div class="arch-zone" style="background: var(--color-surface-warm); border-radius: var(--radius-md); padding: var(--space-4) var(--space-6); border: 1px solid var(--color-border);">
+            <h4 class="arch-zone-label">存储层</h4>
+            <div class="arch-component" data-desc="Database 是基于 SQLite 的本地存储，使用 FTS5 全文搜索索引。每个项目一个独立的 .codegraph/ 目录，数据完全留在本地，不发送到任何服务器。" onclick="showArchDesc(this)">
+              <div class="arch-icon">&#128451;</div>
+              <span>SQLite Database</span>
+            </div>
+          </div>
+          <div class="arch-description" id="arch-desc">点击任意组件查看它的职责说明</div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Group Chat -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">六层的协作对话</h2>
+        <p>当 AI 代理问出 "handlePayment 是怎么工作的？" 时，六层之间发生了什么？</p>
+
+        <div class="chat-window" id="chat-module2">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="mcp" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-accent)">MCP</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-accent)">MCP Server</span>
+                <p>收到 AI 代理的请求：codegraph_context("handlePayment 是怎么工作的")</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="context" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">CB</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">ContextBuilder</span>
+                <p>我先搜索 "handlePayment" 找到入口点，然后用 GraphTraverser 沿调用链展开。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="graph" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">GT</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">GraphTraverser</span>
+                <p>从数据库里查到 handlePayment 节点，它的调用链：validateCard -> processCharge -> sendReceipt，共 3 层深度。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="db" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">DB</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">SQLite Database</span>
+                <p>返回这些节点的源码片段和元信息。总共查了 12 个节点、18 条边。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="context" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">CB</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">ContextBuilder</span>
+                <p>整理成 Markdown 格式，包含调用图、关键代码和依赖说明。AI 代理一次调用就能完整回答问题。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module2-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条消息</button>
+            <button class="btn chat-all-btn">播放全部</button>
+            <button class="btn chat-reset-btn">重播</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Code Translation - Node and Edge types -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">图谱的两个基本概念：节点和边</h2>
+        <p>整张图谱只有两种东西——<span class="term" data-definition="Node（节点）代表代码中的一个符号，比如一个函数、一个类、一个变量。每个节点有名称、类型、所在文件和行号。">节点（Node）</span> 和 <span class="term" data-definition="Edge（边）代表两个节点之间的关系，比如函数 A 调用了函数 B，就有一条 calls 类型的边从 A 指向 B。">边（Edge）</span>。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment">// 节点类型（NodeKind）——代码里的"名词"</span></span>
+<span class="code-line"><span class="code-string">'function'</span>   <span class="code-comment">// 函数</span></span>
+<span class="code-line"><span class="code-string">'class'</span>      <span class="code-comment">// 类</span></span>
+<span class="code-line"><span class="code-string">'method'</span>     <span class="code-comment">// 方法</span></span>
+<span class="code-line"><span class="code-string">'interface'</span>  <span class="code-comment">// 接口</span></span>
+<span class="code-line"><span class="code-string">'route'</span>      <span class="code-comment">// 路由端点</span></span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment">// 边类型（EdgeKind）——代码里的"动词"</span></span>
+<span class="code-line"><span class="code-string">'calls'</span>      <span class="code-comment">// A 调用 B</span></span>
+<span class="code-line"><span class="code-string">'contains'</span>   <span class="code-comment">// 文件包含类，类包含方法</span></span>
+<span class="code-line"><span class="code-string">'extends'</span>    <span class="code-comment">// 类继承另一个类</span></span>
+<span class="code-line"><span class="code-string">'references'</span> <span class="code-comment">// 符号引用另一个符号</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">节点就是代码里的"东西"——函数、类、接口、路由等。</p>
+              <p class="tl">每个函数就是一个节点。</p>
+              <p class="tl">每个类也是一个节点。</p>
+              <p class="tl">接口定义了类的契约。</p>
+              <p class="tl">路由是 Web 服务的入口地址。</p>
+              <p class="tl">边就是这些"东西"之间的关系——谁调用了谁、谁包含了谁。</p>
+              <p class="tl">"调用"是最重要的边——函数 A 调用了函数 B。</p>
+              <p class="tl">"包含"描述层级关系——文件包含类，类包含方法。</p>
+              <p class="tl">"继承"是面向对象的核心——子类继承父类。</p>
+              <p class="tl">"引用"是最通用的关系——任何符号间的关联。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Glossary + Quiz -->
+      <section class="screen animate-in">
+        <div class="callout callout-info">
+          <div class="callout-icon">&#128218;</div>
+          <div class="callout-content">
+            <strong class="callout-title">核心词汇速查</strong>
+            <p><span class="term" data-definition="Tree-sitter 是一种代码解析器，能读懂代码的语法结构（就像语法分析器），支持几十种编程语言。CodeGraph 用它来把源码变成结构化的符号信息。">Tree-sitter</span> 把源码解析成语法树；<span class="term" data-definition="BFS（广度优先搜索）是一种图遍历策略，先看近的节点，再看远的。像水波纹一样一层层扩散出去。">BFS</span>/<span class="term" data-definition="DFS（深度优先搜索）是另一种图遍历策略，沿着一条路径一直走到尽头，再回来走另一条。像走迷宫时一直往深处走。">DFS</span> 是在图谱上查找路径的算法；<span class="term" data-definition="MCP（Model Context Protocol）是 AI 模型与外部工具通信的标准协议。AI 代理通过 MCP 调用 CodeGraph 提供的工具来查询代码图谱。">MCP</span> 是 AI 代理和工具之间的通信协议。</p>
+          </div>
+        </div>
+
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！Extraction 层负责从源代码中提取符号和初步关系，Resolution 层负责把这些引用对应到实际定义。两者是先后关系，不是并列关系。"
+               data-explanation-wrong="提示：Extraction 和 Resolution 是两个不同的阶段。第一个是从代码中提取信息，第二个是把这些信息关联起来。哪个先哪个后？">
+            <h3 class="quiz-question">如果你负责把一堆书变成可查询的索引，以下哪个步骤顺序是对的？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>先关联引用 -> 再提取内容 -> 最后存入数据库</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>先提取内容 -> 再关联引用 -> 最后存入数据库</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>提取和关联同时进行 -> 存入数据库</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

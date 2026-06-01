@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vibe Coding 系列三（工具）· 工具地图</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    :root {
+      --color-accent:       #2D8B55;
+      --color-accent-hover: #226B41;
+      --color-accent-light: #E8F5EE;
+      --color-accent-muted: #5AAD7A;
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">Vibe Coding · 工具</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <button class="nav-dot" data-target="module-1" data-tooltip="工具景观全图" role="tab" aria-label="模块 1：工具景观全图"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="浏览器派" role="tab" aria-label="模块 2：浏览器派"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="IDE 派" role="tab" aria-label="模块 3：IDE 派"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="CLI 派" role="tab" aria-label="模块 4：CLI 派"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="编排与文档标准" role="tab" aria-label="模块 5：编排与文档标准"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh -->
+<section class="module" id="module-1" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="hero-title module-title">工具景观全图</h1>
+      <p class="module-subtitle">30 款"一句话生成 App" + 50 款 IDE/CLI——先看地图再选车。</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">为什么需要一张工具地图</h2>
+        <p>过去两年，<span class="term" data-definition="Vibe coding 是 Andrej Karpathy 2025 年提出的说法：用自然语言对话生成代码，几乎不手写。它是一种节奏，不是某个工具。">vibe coding</span> 工具从 5 款爆炸到 100+ 款。每一款都说自己最快、最强、最 AI-native。</p>
+        <p>但你只有一双手、一个项目。问题从来不是"哪个最强"，而是"<strong>这一刻、这件事，哪个最合适</strong>"。</p>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">📜</div>
+          <div class="callout-content">
+            <strong class="callout-title">Karpathy 引言</strong>
+            <p>"There&apos;s a new kind of coding I call vibe coding, where you fully give in to the vibes, embrace exponentials, and forget that the code even exists."</p>
+          </div>
+        </div>
+
+        <p>这门课的目标：用一个下午，让你看清这片混乱的工具市场，然后挑出属于你的"少而精"组合。</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">交通工具光谱：同一个目的地，不同开法</h2>
+        <p>把 vibe coding 工具想成交通工具——每一档都对应一种"控制力 × 上手难度"的组合。</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🚲</div>
+            <div>
+              <strong>共享单车 · 浏览器派</strong>
+              <p>打开网页一句话出 demo。零安装、零配置。换来的是控制力——你不能拆开零件改。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🚗</div>
+            <div>
+              <strong>汽车 · IDE 派</strong>
+              <p>AI 副驾。你坐主驾、AI 提示路线、有时直接接管 5 公里。半人工，权衡最佳。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-5)">🏎️</div>
+            <div>
+              <strong>越野车 · CLI 派</strong>
+              <p>手动挡跑车。没有 UI 没有按钮，只有命令和上下文。陡峭曲线 + 极致控制。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🎼</div>
+            <div>
+              <strong>交响乐团 · 编排 + 文档标准</strong>
+              <p>当你同时开三辆车（多 agent 并行），你需要指挥——任务编排 + AGENTS.md 这类工具的工具。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">7 大类全景</h2>
+        <p>awesome-vibe-coding 仓库把所有工具分成 7 大类。先记代表选手，细节后面四个模块详讲。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🌐</div>
+            <h4 class="pattern-title">Browser-based</h4>
+            <p class="pattern-desc">代表：Lovable / Bolt.new / v0 / Replit。一句话 → 部署链接，零安装。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">💻</div>
+            <h4 class="pattern-title">IDEs &amp; Editors</h4>
+            <p class="pattern-desc">代表：Cursor / Windsurf / Zed / Trae。把 AI 装进 <span class="term" data-definition="IDE = Integrated Development Environment，集成开发环境。VS Code、Cursor、Windsurf 都是 IDE，是带 AI 的代码编辑器。">IDE</span>，主驾还是你。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🧩</div>
+            <h4 class="pattern-title">Plugins &amp; Extensions</h4>
+            <p class="pattern-desc">代表：GitHub Copilot / Cline / continue。给已有编辑器插一个 <span class="term" data-definition="Extension（插件 / 扩展）= 给已有软件加新能力的小程序，比如给 VS Code 装 GitHub Copilot 就是装一个 extension。">extension</span>。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">⌨️</div>
+            <h4 class="pattern-title">Command Line</h4>
+            <p class="pattern-desc">代表：claude-code / Codex CLI / Gemini CLI / aider。把 AI 装进终端。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🖥️</div>
+            <h4 class="pattern-title">Local Apps</h4>
+            <p class="pattern-desc">代表：Dyad / bolt.diy / CCHub。桌面应用，本地跑、本地存。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">📱</div>
+            <h4 class="pattern-title">Mobile Apps</h4>
+            <p class="pattern-desc">代表：VibeCode（iOS/Android）。少数派——手机上一句话出 App。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">📋</div>
+            <h4 class="pattern-title">Task Management</h4>
+            <p class="pattern-desc">代表：vibe-kanban / CCPM / Archon。多 <span class="term" data-definition="Agent（智能体）= 能自己规划、调用工具、循环执行直到完成目标的 AI。比如 claude-code 就是一个 coding agent。">agent</span> 协同的指挥台。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">决策树：从想法到选型</h2>
+        <p>面对一墙工具，按下面三个问题走一遍，至少能砍掉 80%。点击 "Next Step" 跟着决策流走。</p>
+
+        <div class="flow-animation" id="flow-m1-decision-tree" data-steps='[
+          {"highlight":"flow-actor-m1-1","label":"出发：你脑子里有一个想法（landing page / 工具 / 重构 / 周末小项目）"},
+          {"highlight":"flow-actor-m1-1","label":"决策点 1：要不要看见代码？不要 → 走浏览器派","packet":true,"from":"actor-m1-1","to":"actor-m1-2"},
+          {"highlight":"flow-actor-m1-2","label":"浏览器派：5 分钟出 demo，部署链接直接发给同事"},
+          {"highlight":"flow-actor-m1-1","label":"决策点 2：要本地控制 + 长期维护？是 → 走 IDE 派","packet":true,"from":"actor-m1-1","to":"actor-m1-3"},
+          {"highlight":"flow-actor-m1-3","label":"IDE 派：AI 副驾，你看每一行 diff，AGENTS.md 沉淀上下文"},
+          {"highlight":"flow-actor-m1-1","label":"决策点 3：长任务 + 多文件 + 自动化？是 → 走 CLI 派","packet":true,"from":"actor-m1-1","to":"actor-m1-4"},
+          {"highlight":"flow-actor-m1-4","label":"CLI 派：终端里一行命令跑批量；prompt → 执行 → 验证 → 提交"},
+          {"highlight":"flow-actor-m1-1","label":"决策点 4：多 agent 协同？是 → 加任务编排","packet":true,"from":"actor-m1-1","to":"actor-m1-5"},
+          {"highlight":"flow-actor-m1-5","label":"编排：vibe-kanban / CCPM / Archon 当指挥，多 agent 并行不打架"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-m1-1">
+              <div class="flow-actor-icon">💡</div>
+              <span>想法</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-m1-2">
+              <div class="flow-actor-icon">🌐</div>
+              <span>浏览器派</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-m1-3">
+              <div class="flow-actor-icon">💻</div>
+              <span>IDE 派</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-m1-4">
+              <div class="flow-actor-icon">⌨️</div>
+              <span>CLI 派</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-m1-5">
+              <div class="flow-actor-icon">🎼</div>
+              <span>任务编排</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet-m1"></div>
+
+          <div class="flow-step-label" id="flow-label-m1">点 "Next Step" 开始走决策树</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">Next Step</button>
+            <button class="btn flow-reset-btn">Restart</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">解读 awesome-vibe-coding 仓库结构</h2>
+        <p>这个 README 是一个标准的 <span class="term" data-definition="Awesome list 是 GitHub 上的一种约定：精选某个领域的资源做成清单，按主题分类。awesome-vibe-coding 是 vibe coding 工具领域最知名的清单。">awesome list</span>。下面这段描述就是它的"自我介绍"——读懂它就读懂了它的取舍。</p>
+
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">README 原文</span>
+            <pre><code><span class="code-line"><span class="code-comment"># awesome-vibe-coding</span></span>
+<span class="code-line"></span>
+<span class="code-line">A curated list of vibe coding</span>
+<span class="code-line">references, collaborating with</span>
+<span class="code-line">AI to write code.</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment">## Browser-based Tools</span></span>
+<span class="code-line"><span class="code-comment">## IDEs and Code Editors</span></span>
+<span class="code-line"><span class="code-comment">## Command Line Tools</span></span>
+<span class="code-line"><span class="code-comment">## Task Management for AI</span></span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>"awesome-vibe-coding"</strong> ——这是 GitHub 风格的清单标题。</p>
+              <p class="tl"><strong>"curated list"</strong> ——人工筛过的，不是搜索结果。</p>
+              <p class="tl"><strong>"collaborating with AI to write code"</strong> ——核心定义：和 AI 一起写代码，不是让 AI 替你写。</p>
+              <p class="tl"><strong>分类用使用形态而非品牌</strong>——浏览器/IDE/CLI/编排——这是一份"形态地图"，不是品牌排行榜。</p>
+              <p class="tl">所以 Cursor 排在 IDE 类下，claude-code 排在 CLI 类下，不存在"哪个第一"。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">小测验：你会选哪个？</h2>
+        <p>下面是真实的工程场景。试着用刚才的决策树推一遍。</p>
+
+        <div class="quiz-container" id="quiz-m1">
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">场景 1</span>
+              <p>同事 30 分钟后开会要看 demo，你需要做一个 landing page 演示新功能概念。</p>
+            </div>
+            <div class="quiz-question-block"
+                 data-correct="m1-q1-b"
+                 data-explanation-right="对——这种 demo 优先级是&lsquo;速度 × 可分享 link&rsquo;，浏览器派 Lovable / Bolt.new 是为这一刻而生的。Cursor / claude-code 适合长期代码，但 30 分钟出可演示 URL 不是它们的强项。"
+                 data-explanation-wrong="再想想——这是临时 demo，30 分钟内要给人看到。Cursor / claude-code 让你看见每一行代码，但你需要本地搭起 dev server、写路由、配部署……时间不够。">
+              <h3 class="quiz-question">最合适的工具是？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="m1-q1-a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>A. Cursor + Next.js 模板</span>
+                </button>
+                <button class="quiz-option" data-value="m1-q1-b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>B. Lovable 或 Bolt.new（浏览器派一句话）</span>
+                </button>
+                <button class="quiz-option" data-value="m1-q1-c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>C. claude-code 在终端里写</span>
+                </button>
+                <button class="quiz-option" data-value="m1-q1-d" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>D. vim + 手写</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+          </div>
+
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">场景 2</span>
+              <p>你接手了一个 10 万行的 Java 老项目，要做大规模重构。</p>
+            </div>
+            <div class="quiz-question-block"
+                 data-correct="m1-q2-b"
+                 data-explanation-right="对——大仓 + 多文件 + 长任务正是 CLI 派的强项。claude-code / Codex CLI 能一口气读全仓上下文，按 TODO 列表批量执行。浏览器派根本读不进 10 万行私有代码。"
+                 data-explanation-wrong="再想想——浏览器派擅长&lsquo;从零生成&rsquo;，对&lsquo;读懂十万行老代码再改&rsquo;无能为力。这种活属于 CLI 派，配合 IDE 派看每一步 diff。">
+              <h3 class="quiz-question">最合适的工具组合是？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="m1-q2-a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>A. Lovable 重写一遍</span>
+                </button>
+                <button class="quiz-option" data-value="m1-q2-b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>B. CLI 派（claude-code）+ IDE 派（Cursor）看 diff</span>
+                </button>
+                <button class="quiz-option" data-value="m1-q2-c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>C. v0 by Vercel</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m1')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m1')">再试一次</button>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Key Insight：少而精，不是多而杂</strong>
+            <p>工具不是越多越好。挑 1 个浏览器派 + 1 个 IDE 派 + 1 个 CLI 派——三件套就能覆盖 90% 真实场景。多了反而切换成本压垮你。</p>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🗺️</div>
+          <div class="callout-content">
+            <strong class="callout-title">接下来</strong>
+            <p>模块 2-4 分别精读 浏览器 / IDE / CLI 三大主线（覆盖 80% 真实选择）。模块 5 拼上"工具的工具"——任务编排 + 文档标准。</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-2" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">浏览器派 · 自动售货机</h1>
+      <p class="module-subtitle">投币（写 prompt）出货（生成应用）——零安装，但你不能拆零件改。</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">浏览器派的本质：零摩擦换控制力</h2>
+        <p>所有<span class="term" data-definition="浏览器派 = 整个开发流程发生在浏览器网页上的工具——不需要本地装 IDE、装 Node、配部署。打开网页就开始写。">浏览器派</span>工具都遵守同一条公式：<strong>一个输入框 + 一句话 → 完整可部署的产品</strong>。</p>
+        <p>它们隐藏了一切——前端框架、数据库、托管服务、域名、HTTPS。代价是：你看不见也改不了底层。这就像自动售货机：投币立刻出货，但你别想拆开它换齿轮。</p>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🎯</div>
+          <div class="callout-content">
+            <strong class="callout-title">谁应该选浏览器派</strong>
+            <p>独立创业者验证想法、产品经理画原型、设计师做交互 demo、营销做 landing page。共同点是：<em>速度比控制力重要</em>。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Top 4 详解</h2>
+        <p>21 款浏览器派里，这 4 款覆盖了 80% 的真实选择。读完这一屏你就有方向了。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">⚡</div>
+            <h4 class="pattern-title">Bolt.new</h4>
+            <p class="pattern-desc"><strong>StackBlitz 出品</strong>。"Prompt, run, edit, and deploy full-stack web and mobile apps." 浏览器内运行 Node 容器，前后端一站式。</p>
+            <p class="pattern-desc"><em>强项：</em>真前后端 <span class="term" data-definition="全栈（Full-stack）= 前端（用户看到的页面）+ 后端（服务器逻辑、数据库）一整套都包。一个全栈开发者可以独立做完一个完整的应用。">全栈</span> · <em>弱项：</em>免费额度紧 · <em>典型用户：</em>独立开发者验证全栈想法</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">💜</div>
+            <h4 class="pattern-title">Lovable 🔥</h4>
+            <p class="pattern-desc">"Idea to app in seconds. Lovable is your superhuman full stack engineer." 自我定位是<strong>超人级全栈工程师</strong>，UI 出色、英文社区最热。</p>
+            <p class="pattern-desc"><em>强项：</em>UI 设计感强 · <em>弱项：</em>免费额度有限 · <em>典型用户：</em>设计敏感的产品经理 / 副业 SaaS</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">▲</div>
+            <h4 class="pattern-title">v0 by Vercel</h4>
+            <p class="pattern-desc">"Vibe coding platform for building production apps and agents with Next.js." Next.js 原生 + <span class="term" data-definition="Vercel 是 Next.js 的母公司、最流行的前端部署平台。一键 git push 就上线，自动 HTTPS、自动 CDN。">Vercel</span> 部署一条龙。</p>
+            <p class="pattern-desc"><em>强项：</em>Next.js 生态最佳 · <em>弱项：</em>非 Next.js 项目用不上 · <em>典型用户：</em>Next.js 老用户</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">🟠</div>
+            <h4 class="pattern-title">Replit</h4>
+            <p class="pattern-desc">老牌在线 IDE 转身做 vibe coding 平台。Agent 模式强，多语言 / 多框架兼容性最好。</p>
+            <p class="pattern-desc"><em>强项：</em>支持几乎任何技术栈 · <em>弱项：</em>UI 比 Lovable 朴素 · <em>典型用户：</em>编程教学 / 学生 / 多语言项目</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">类别全景：剩余 17 个工具的扫描</h2>
+        <p>不需要逐一深入——一句话定位即可。某天你刷到了，知道它属于哪一档就行。</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🎨</div>
+            <div><strong>Capacity / Trickle / Tempo / Creatr</strong><p>Lovable 的同类竞品，UI 各有侧重。挑一个用熟即可。</p></div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">📱</div>
+            <div><strong>Rork</strong><p>专做 React Native 移动端 vibe coding。</p></div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🔥</div>
+            <div><strong>Firebase Studio</strong><p>Google 出品。深度集成 Firebase 数据库 + 认证。</p></div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">🦸</div>
+            <div><strong>HeroUI Chat / Napkins</strong><p>专做组件级生成——给 React 组件，不给整 App。</p></div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-5)">☁️</div>
+            <div><strong>Google AI Studio / Manus / Same.new</strong><p>大厂浏览器 IDE / agent 平台，免费额度大但厂锁强。</p></div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🛠️</div>
+            <div><strong>Anything / Softgen / Lazy AI / HeyBoss / Rocket / Emergent</strong><p>2025 年新势力，定位重叠度高。先观察 6 个月再选不迟。</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">解读一段真实 Lovable prompt</h2>
+        <p>浏览器派的"输入"看起来是一句话，本质上是一份缩微 PRD。下面是一段实战级 prompt，5 段拆给你看。</p>
+
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">Lovable Prompt</span>
+            <pre><code><span class="code-line">Build a personal expense tracker</span>
+<span class="code-line">where I can log daily spending</span>
+<span class="code-line">across categories.</span>
+<span class="code-line"></span>
+<span class="code-line">Use a clean Notion-style UI</span>
+<span class="code-line">with sidebar navigation and</span>
+<span class="code-line">a dashboard showing weekly</span>
+<span class="code-line">spending charts.</span>
+<span class="code-line"></span>
+<span class="code-line">Store data in Supabase with</span>
+<span class="code-line">user authentication via email.</span>
+<span class="code-line"></span>
+<span class="code-line">Only logged-in users can view</span>
+<span class="code-line">their own records.</span>
+<span class="code-line"></span>
+<span class="code-line">Deploy to Vercel with the</span>
+<span class="code-line">default domain.</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">5 段拆解</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>1. 要做什么：</strong>记账工具，按分类记每日支出。<em>这一句决定了功能边界。</em></p>
+              <p class="tl"><strong>2. 长什么样：</strong>Notion 风格、侧边栏、周图表。<em>UI 风格用类比比形容词更精准。</em></p>
+              <p class="tl"><strong>3. 数据存哪：</strong><span class="term" data-definition="Supabase 是开源版 Firebase——一个云数据库 + 用户认证一体化服务。浏览器派工具最常配的后端。">Supabase</span> + 邮箱认证。<em>不写默认是 mock 数据，重启就丢。</em></p>
+              <p class="tl"><strong>4. 谁能用：</strong>登录用户只看自己的。<em>这一句生成行级权限策略，避免数据泄露。</em></p>
+              <p class="tl"><strong>5. 部署到哪：</strong>Vercel 默认域名。<em>不写就停在 staging 链接，给同事看不到。</em></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">📐</div>
+          <div class="callout-content">
+            <strong class="callout-title">5 段公式</strong>
+            <p>要做什么 / 长什么样 / 数据存哪 / 谁能用 / 部署到哪。任何浏览器派 prompt 把这 5 段写齐，第一版基本可用。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">选型矩阵：4 款 Top 怎么排</h2>
+        <p>不同维度上同一款工具表现完全不同。下面这张表你保留下来——下次选型直接对号入座。</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🏆</div>
+            <div><strong>速度优先：Lovable / Bolt.new</strong><p>生成 → 看见结果 30 秒。最快感受到"产品有了"。</p></div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🎨</div>
+            <div><strong>质量优先：v0 + Vercel</strong><p>Next.js 原生，生成的代码可以直接 fork 到 IDE 派继续维护。</p></div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-5)">🎮</div>
+            <div><strong>控制力优先：Replit</strong><p>Agent + 在线 IDE 双模。可以一句话生成，也可以打开终端手改。</p></div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">⚡</div>
+            <div><strong>自动化最高：Bolt.new</strong><p>从 prompt 到 deploy 链接，中间不打断。展示性最强。</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">实战选型测验</h2>
+
+        <div class="quiz-container" id="quiz-m2">
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">场景</span>
+              <p>你想做一个副业小项目——给摄影爱好者用的图片打分工具。预计月活 500，自己一个人维护，<strong>想稳定不想运维</strong>。</p>
+            </div>
+            <div class="quiz-question-block"
+                 data-correct="m2-q1-b"
+                 data-explanation-right="对——月活 500 的小项目，&lsquo;不运维&rsquo;是核心约束。Lovable 默认部署 + Supabase 一条龙搞定数据库和认证，不需要你管服务器、管证书、管备份。Bolt.new 也行，但 Lovable 的 UI 出图更稳。"
+                 data-explanation-wrong="再想想——你的核心约束是&lsquo;不想运维&rsquo;，所以本地跑 + 自己买服务器 + Cursor 写代码这条路违背初衷。Replit 也不错，但 Lovable 在&lsquo;UI 完成度 + 默认部署&rsquo;两点上更省心。">
+              <h3 class="quiz-question">最合适的工具是？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="m2-q1-a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>A. Cursor + 自己买 VPS</span>
+                </button>
+                <button class="quiz-option" data-value="m2-q1-b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>B. Lovable + 默认部署 + Supabase</span>
+                </button>
+                <button class="quiz-option" data-value="m2-q1-c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>C. claude-code 在终端写然后手动部署</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+          </div>
+
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">场景 2</span>
+              <p>你接了一个客户单：<strong>用 Stripe 做订阅 + 自定义域名 + 后续要团队三人接手开发</strong>。</p>
+            </div>
+            <div class="quiz-question-block"
+                 data-correct="m2-q2-c"
+                 data-explanation-right="对——这个单子的关键词是&lsquo;团队三人接手&rsquo;，意味着代码必须可读、可改、可走 PR review。浏览器派适合一个人快速验证，但三人协作要走 IDE 派 + Git。v0 生成的 Next.js 代码可以 fork 到 Cursor 继续，这是&lsquo;原型 → 产品&rsquo;最丝滑的过渡。"
+                 data-explanation-wrong="再想想——客户要&lsquo;团队三人接手&rsquo;。如果停在 Lovable / Bolt.new，三个人就要在同一个浏览器项目里改，没有 Git 分支、没有 PR review。需要的是&lsquo;先用浏览器派出原型，再迁到 IDE 派维护&rsquo;。">
+              <h3 class="quiz-question">最合适的路径是？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="m2-q2-a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>A. 全程 Lovable，三人共享一个项目</span>
+                </button>
+                <button class="quiz-option" data-value="m2-q2-b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>B. 全程 Bolt.new，反正能部署</span>
+                </button>
+                <button class="quiz-option" data-value="m2-q2-c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>C. v0 出原型 → fork 到 Cursor + Git</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m2')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m2')">再试一次</button>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">浏览器派的陷阱：能跑 ≠ 能维护</strong>
+            <p>第一版 demo 跑通的兴奋会让你想直接上线。但产品超过 3 屏 / 功能超过 5 个，就该考虑往 IDE 派迁——不是因为浏览器派不好，而是<strong>没有 Git 分支没有 PR review，三人协作就翻车</strong>。下一模块进 IDE 派。</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-3" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">IDE 派 · 辅助驾驶</h1>
+      <p class="module-subtitle">你坐主驾，AI 帮你看路、提示路线、有时直接接管 5 公里。</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">IDE 派的本质：副驾，而非司机</h2>
+        <p>把 IDE 派想成 L2-L4 辅助驾驶——不同 IDE 对应不同自动级别。<span class="term" data-definition="IDE = Integrated Development Environment 集成开发环境。Cursor / Windsurf / VS Code 都是 IDE，本质是&lsquo;带 AI 的代码编辑器&rsquo;，主驾依然是你。">IDE</span> 派最大的价值不是"AI 写代码"——是<strong>上下文管理</strong>。AGENTS.md / cursorrules / <span class="term" data-definition="MCP = Model Context Protocol（Anthropic 提的开放协议）。让 AI 工具可以通过统一接口接入任何外部数据源，比如直接读你的 Notion、Postgres、Slack。">MCP</span> 让 AI 持续了解你的项目，而不是每次重新解释一遍。</p>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🎯</div>
+          <div class="callout-content">
+            <strong class="callout-title">谁应该选 IDE 派</strong>
+            <p>需要长期维护代码的工程师、3-10 人小团队、追求"能看见每一行 diff 再合"的人。共同点：<em>代码质量比首次速度重要</em>。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Top 5 详解</h2>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">⌘</div>
+            <h4 class="pattern-title"><span class="term" data-definition="Cursor 是基于 VS Code 的 fork，把 AI 深度集成到编辑器里——侧边 Composer 可以多文件改、Tab 自动补全比 Copilot 更激进。2026 年 IDE 派标杆。">Cursor</span> 🔥</h4>
+            <p class="pattern-desc">"AI Code Editor with Cloud Agents, JetBrains integration, and 30+ plugins." 2026 IDE 派标杆。</p>
+            <p class="pattern-desc"><em>强项：</em>Composer 多文件改 + 30+ 插件 · <em>弱项：</em>Pro 订阅 $20/月 · <em>典型用户：</em>独立 + 小团队前端</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🌊</div>
+            <h4 class="pattern-title"><span class="term" data-definition="Windsurf 是 Codeium 出品，2025 年被 Cognition（Devin 母公司）收购。卖点是 Cascade——多步自动编码，可以一次跑十几个步骤。">Windsurf</span></h4>
+            <p class="pattern-desc">"Agentic IDE (acquired by Cognition, makers of Devin) with <span class="term" data-definition="Cascade 是 Windsurf 的多步骤 agent 模式——一句话进去，AI 自己规划 → 改代码 → 运行 → 看错误 → 再改，连续做几轮。">Cascade</span> for multi-step coding."</p>
+            <p class="pattern-desc"><em>强项：</em>Cascade 多步执行 + Tab <span class="term" data-definition="Supercomplete 是比传统 Tab 自动补全更激进的版本——不只补当前行，会预测你接下来要写整个函数 / 整段逻辑，一次给你 30 行建议。">supercomplete</span> · <em>弱项：</em>2025 易主后节奏不稳 · <em>典型用户：</em>追求&ldquo;一句话出整段&rdquo;</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">⚡</div>
+            <h4 class="pattern-title"><span class="term" data-definition="Zed 是 Atom 团队第二代作品，Rust 写的极致性能编辑器。原生 120fps、内置 Agent、自带实时协作。开源。">Zed</span></h4>
+            <p class="pattern-desc">Rust 原生 "Agentic IDE"——120fps 实时协作 + 内置 Agent。</p>
+            <p class="pattern-desc"><em>强项：</em>速度 + 开源 + 协作 · <em>弱项：</em>插件生态远不如 VS Code · <em>典型用户：</em>性能洁癖 / 偏好开源</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🇨🇳</div>
+            <h4 class="pattern-title">Trae</h4>
+            <p class="pattern-desc">字节出品，<strong>免费</strong>。免费 GPT-4o / Claude Sonnet / DeepSeek R1。</p>
+            <p class="pattern-desc"><em>强项：</em>免费用顶级模型 · <em>弱项：</em>新工具，生态薄 · <em>典型用户：</em>预算紧 / 国内用户</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🌀</div>
+            <h4 class="pattern-title"><span class="term" data-definition="Amazon Kiro 是 AWS 的 IDE，主打 Spec-driven development——先写需求规格，AI 按规格改代码。和 AWS 服务深度绑定。">Amazon Kiro</span></h4>
+            <p class="pattern-desc"><span class="term" data-definition="Spec-driven（规格驱动）= 写代码前先把 &lsquo;要做什么、输入什么、输出什么、约束是什么&rsquo; 写成结构化规格文档，AI 按规格执行。比直接 prompt 更可控。">Spec-driven</span> 开发 + AWS 深度集成。</p>
+            <p class="pattern-desc"><em>强项：</em>spec-driven 流程 + AWS 集成 · <em>弱项：</em>厂锁强 · <em>典型用户：</em>AWS 重度用户 / 企业团队</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">5 款 IDE 横向对比</h2>
+        <p>对号入座更省时间。同一个团队不同人选不一样的 IDE 也没事——因为下面要讲的 AGENTS.md 跨 IDE 通用。</p>
+
+        <div class="file-tree">
+          <div class="ft-folder open">
+            <span class="ft-name">Cursor</span>
+            <span class="ft-desc">$20/月 · GPT-4 / Claude / o3 任选 · Composer 强 · 大团队偏好</span>
+          </div>
+          <div class="ft-folder open">
+            <span class="ft-name">Windsurf</span>
+            <span class="ft-desc">$15/月 · Cascade 多步 · supercomplete 激进 · 速度玩家偏好</span>
+          </div>
+          <div class="ft-folder open">
+            <span class="ft-name">Zed</span>
+            <span class="ft-desc">免费基础版 / 付费 AI · 120fps · 开源 + 协作 · Rust 程序员偏好</span>
+          </div>
+          <div class="ft-folder open">
+            <span class="ft-name">Trae</span>
+            <span class="ft-desc">完全免费 · 免费 Claude Sonnet / GPT-4o · 国内 / 预算紧团队</span>
+          </div>
+          <div class="ft-folder open">
+            <span class="ft-name">Kiro</span>
+            <span class="ft-desc">AWS 体系内 · Spec-driven 流程 · 适合企业 / 合规要求高</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">解读 .cursorrules：让 AI 永远记得你的项目</h2>
+        <p>IDE 派最关键的文件不是代码——是<span class="term" data-definition=".cursorrules（或 cursor rules）= Cursor 项目根目录里的一个纯文本文件，AI 每次对话开头自动读它。相当于&lsquo;给 AI 的常驻 system prompt&rsquo;。">.cursorrules</span>。它是放在仓库根目录的纯文本，AI 每次对话开头都会读到。下面是真实片段：</p>
+
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">.cursorrules</span>
+            <pre><code><span class="code-line"><span class="code-comment"># Project Rules for AI</span></span>
+<span class="code-line"></span>
+<span class="code-line">- Use TypeScript strict mode.</span>
+<span class="code-line">- Prefer functional components,</span>
+<span class="code-line">  no class components.</span>
+<span class="code-line">- API calls go through</span>
+<span class="code-line">  src/lib/api/client.ts only.</span>
+<span class="code-line">- Test files live next to code:</span>
+<span class="code-line">  foo.ts and foo.test.ts.</span>
+<span class="code-line">- Never edit /generated/ folder.</span>
+<span class="code-line">- Use pnpm, not npm or yarn.</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>"Project Rules for AI"</strong>——下面这堆是给 AI 看的项目家规。</p>
+              <p class="tl"><strong>TypeScript strict mode + 函数组件</strong>——技术风格，AI 不会再生成你已经禁用的 class 组件。</p>
+              <p class="tl"><strong>"API calls go through src/lib/api/client.ts only"</strong>——架构约束。这一句让 AI 永远不会瞎写一个新的 fetch 出来。</p>
+              <p class="tl"><strong>"Test files live next to code"</strong>——文件组织习惯。AI 生成新文件时会自己放对位置。</p>
+              <p class="tl"><strong>"Never edit /generated/"</strong>——保护机制。某些目录是自动生成的，AI 改了就会被覆盖掉。</p>
+              <p class="tl">这些规则<strong>每一次新对话开头都自动读</strong>——你不需要每次重复"用 TypeScript、用 pnpm、别动那个目录"。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">📦</div>
+          <div class="callout-content">
+            <strong class="callout-title">awesome-cursorrules 仓库</strong>
+            <p>GitHub 上有一个 <code>awesome-cursorrules</code> 仓库，按技术栈（Next.js / FastAPI / Rust / 等等）收集精选 .cursorrules。新项目第一件事就是复制一份过来。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">两家 IDE 的"工作风格"差异</h2>
+        <p>同一个需求："把这个组件改成响应式 + 加暗色模式"。Cursor Composer 和 Windsurf Cascade 给出的指令风格不同——读懂这个差异，你就明白选哪一家。</p>
+
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">Cursor Composer</span>
+            <pre><code><span class="code-line">@components/Card.tsx</span>
+<span class="code-line">@styles/theme.ts</span>
+<span class="code-line"></span>
+<span class="code-line">Make Card responsive:</span>
+<span class="code-line">- single column &lt; 640px</span>
+<span class="code-line">- 2 columns 640-1024px</span>
+<span class="code-line">- 3 columns &gt; 1024px</span>
+<span class="code-line"></span>
+<span class="code-line">Add dark mode using</span>
+<span class="code-line">existing theme tokens.</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译 · Cursor 风格</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>"@" 选文件</strong>——你必须明确告诉 AI 操作哪些文件。</p>
+              <p class="tl"><strong>具体断点：&lt; 640px / 640-1024 / &gt; 1024</strong>——Cursor 喜欢精确数字，AI 严格执行。</p>
+              <p class="tl"><strong>"using existing theme tokens"</strong>——指定要复用，不要造新的颜色变量。</p>
+              <p class="tl"><strong>风格总结：</strong>外科手术——你给精确指令，AI 精准执行。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">Windsurf Cascade</span>
+            <pre><code><span class="code-line">Make the Card component</span>
+<span class="code-line">work great on phone, tablet,</span>
+<span class="code-line">and desktop, and add dark</span>
+<span class="code-line">mode that matches our brand.</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment">// Cascade then:</span></span>
+<span class="code-line"><span class="code-comment">// 1. reads project structure</span></span>
+<span class="code-line"><span class="code-comment">// 2. finds theme tokens</span></span>
+<span class="code-line"><span class="code-comment">// 3. plans 6 file edits</span></span>
+<span class="code-line"><span class="code-comment">// 4. asks for approval</span></span>
+<span class="code-line"><span class="code-comment">// 5. runs tests after</span></span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译 · Windsurf 风格</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>更口语</strong>——"在手机、平板、桌面都好用"，不写具体断点。</p>
+              <p class="tl"><strong>Cascade 自己规划</strong>——AI 先看项目结构、找现有变量、规划改哪几个文件，再问你确认。</p>
+              <p class="tl"><strong>"runs tests after"</strong>——改完自己跑测试，失败再调一次。</p>
+              <p class="tl"><strong>风格总结：</strong>多步代理——你给意图，AI 自己拆任务执行循环。</p>
+            </div>
+          </div>
+        </div>
+
+        <p><strong>怎么选：</strong>外科手术派 → Cursor。多步代理派 → Windsurf。两个都试一周再决定。</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">AGENTS.md：跨 IDE 的通用语言</h2>
+        <p>每家 IDE 有自己的配置文件——Cursor 用 .cursorrules、Windsurf 用 .windsurfrules、Kiro 用自己的 spec……每次换 IDE 都重写一遍？</p>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🌍</div>
+          <div class="callout-content">
+            <strong class="callout-title"><span class="term" data-definition="agents.md（AGENTS.md）= Linux Foundation 维护的开放格式，用一个统一的 markdown 文件描述项目给 AI agent 看。Cursor / Windsurf / Zed / Kiro 等主流 IDE 都读它，跨工具迁移零成本。">AGENTS.md</span> 是 Linux Foundation 维护的开放格式</strong>
+            <p>"A simple, open format for guiding coding agents." 一份 markdown，所有 IDE 都读：Cursor / Windsurf / Zed / Kiro / claude-code 都已支持。这一份文件让你换 IDE 零迁移成本。</p>
+            <p style="margin-top:var(--space-2);font-size:var(--text-sm)">仓库：<code>agents.md</code></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">实战测验</h2>
+
+        <div class="quiz-container" id="quiz-m3">
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">场景</span>
+              <p>团队 5 人，想统一 AI 编辑器但<strong>预算紧</strong>。每人 $20/月 × 5 × 12 = $1200/年承受不起。</p>
+            </div>
+            <div class="quiz-question-block"
+                 data-correct="m3-q1-b"
+                 data-explanation-right="对——预算紧 + 5 人统一两个约束下，Trae 免费用 Claude Sonnet 是最直接的解。但更关键的一步是&lsquo;共享 AGENTS.md&rsquo;——这样将来谁要换 IDE 也不用重新教 AI 项目规则。这个组合让你既省钱又留了升级路径。"
+                 data-explanation-wrong="再想想——预算是硬约束，那 Cursor Pro $20 × 5 是顶不住的。&lsquo;每人选自己的&rsquo;短期省事，但缺了统一上下文，每次 review PR 都看到 AI 风格不同。最优是免费工具 + 共享配置。">
+              <h3 class="quiz-question">最合适的方案是？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="m3-q1-a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>A. 所有人 Cursor Pro，咬牙交</span>
+                </button>
+                <button class="quiz-option" data-value="m3-q1-b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>B. 所有人 Trae 免费 + 共享 AGENTS.md</span>
+                </button>
+                <button class="quiz-option" data-value="m3-q1-c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>C. 每人选自己的工具，自由发挥</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+          </div>
+
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">场景 2</span>
+              <p>你最近频繁切换三个项目（一个 Next.js 老项目、一个 Rust CLI、一个 Python 数据科学）。每次进新项目 AI 都从零猜技术栈。</p>
+            </div>
+            <div class="quiz-question-block"
+                 data-correct="m3-q2-c"
+                 data-explanation-right="对——根因是&lsquo;AI 没有项目上下文&rsquo;。每个项目根目录里放一份 AGENTS.md，把技术栈、风格、约束写清楚。AI 进新项目自动读，不需要你每次重复解释。换 IDE 都能用同一份。"
+                 data-explanation-wrong="再想想——换更贵的模型只让 AI &lsquo;更聪明&rsquo;，但它依然不知道你的项目用 pnpm 还是 npm、用 React Query 还是 SWR。问题在&lsquo;上下文&rsquo;不在&lsquo;模型&rsquo;。">
+              <h3 class="quiz-question">最该做的事是？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="m3-q2-a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>A. 换成 Claude Opus 4 / GPT-5 顶级模型</span>
+                </button>
+                <button class="quiz-option" data-value="m3-q2-b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>B. 每次手打 system prompt 解释项目</span>
+                </button>
+                <button class="quiz-option" data-value="m3-q2-c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>C. 每个项目根目录放一份 AGENTS.md</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m3')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m3')">再试一次</button>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Key Insight：上下文 &gt; 模型</strong>
+            <p>IDE 派最大价值不是"AI 写代码"——是<strong>上下文管理</strong>。AGENTS.md / .cursorrules / MCP 让 AI 持续了解你的项目。一个有上下文的中等模型，远胜一个零上下文的最强模型。</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-4" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">CLI 派 · 手动挡跑车</h1>
+      <p class="module-subtitle">没有 UI 没有按钮，只有命令和上下文——senior 工程师的选择。</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">CLI 派的本质：把 AI 装进终端</h2>
+        <p><span class="term" data-definition="CLI = Command Line Interface 命令行界面。在终端窗口里敲命令交互，不点鼠标不看 UI。&lsquo;CLI 派&rsquo; vibe coding 工具就是把 AI agent 装进终端。">CLI</span> 派把 AI 装进终端：你打开 iTerm，敲 <code>claude</code>，告诉它"重构这个模块"，它读全仓 → 改文件 → 跑测试 → 提交。整个过程没有窗口、没有点击。</p>
+        <p>陡峭曲线换来的是<strong>极致控制力 + 极致速度</strong>。批量任务、夜间自动化、CI/CD 集成——这些场景 IDE 派做不了。</p>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🎯</div>
+          <div class="callout-content">
+            <strong class="callout-title">谁应该选 CLI 派</strong>
+            <p>已经熟悉终端的 senior 工程师、做大规模重构 / 批量迁移的人、把 AI 编排进 CI/CD 的团队。共同点：<em>已经有自己的 prompt → 执行 → 验证 → 提交工作循环</em>。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Top 5 CLI 详解</h2>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🌟</div>
+            <h4 class="pattern-title"><span class="term" data-definition="claude-code 是 Anthropic 官方出的命令行 coding agent。理解整仓代码、跑命令、读文件、改文件、跑测试、commit。是 2025-2026 CLI 派事实标准。">claude-code</span> 🔥</h4>
+            <p class="pattern-desc">"Coding agent that understands your codebase, automates tasks, explains code, and manages Git, all via natural language." Anthropic 官方。</p>
+            <p class="pattern-desc"><em>强项：</em>整仓理解 + 自动 git · <em>弱项：</em>按 <span class="term" data-definition="Token 是 AI 模型按段落切的小块，1 个汉字 ≈ 1.5-2 token，1 个英文单词 ≈ 1.3 token。所有按用量计费的 AI 都按 token 算钱。">token</span> 计费 · <em>典型用户：</em>需要稳定能力的工程师</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🤖</div>
+            <h4 class="pattern-title"><span class="term" data-definition="Codex CLI 是 OpenAI 官方的命令行 agent，2025 年发布。可以本地跑，也可以在 OpenAI Codex Cloud 上跑长任务。配套 IDE 扩展。">Codex CLI</span></h4>
+            <p class="pattern-desc">OpenAI 官方终端 agent。Codex Cloud 长任务 + IDE 扩展双模。</p>
+            <p class="pattern-desc"><em>强项：</em>云端跑长任务 + GPT 模型 · <em>弱项：</em>2025 才发，生态在追赶 · <em>典型用户：</em>OpenAI 体系玩家</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">💎</div>
+            <h4 class="pattern-title"><span class="term" data-definition="Gemini CLI 是 Google 开源的命令行 agent，免费额度极高（60 req/min, 1000/day）。代码完全开源，可以自己改。">Gemini CLI</span></h4>
+            <p class="pattern-desc">"Open-source AI agent from Google. Generous free tier (60 req/min, 1000/day)."</p>
+            <p class="pattern-desc"><em>强项：</em><strong>免费额度极高</strong> + 开源 · <em>弱项：</em>Gemini 模型对中文 / 长上下文略弱 · <em>典型用户：</em>预算 0 / 跑批量自动化</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">📐</div>
+            <h4 class="pattern-title"><span class="term" data-definition="aider 是最早的 CLI vibe coding 工具之一（2023 起），git-first 哲学：每次 AI 改代码自动 commit，方便 review 和回滚。支持 100+ 语言。">aider</span></h4>
+            <p class="pattern-desc">老牌 git-first 多文件协调，100+ 语言。每次改代码自动 commit。</p>
+            <p class="pattern-desc"><em>强项：</em>每步都有 git diff · <em>弱项：</em>UI 朴素、不像 claude-code 自动化 · <em>典型用户：</em>偏好&ldquo;每一步都看见&rdquo;的工程师</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🐙</div>
+            <h4 class="pattern-title">GitHub Copilot CLI</h4>
+            <p class="pattern-desc">2026-02 GA。<span class="term" data-definition="Autopilot（自动驾驶模式）= AI 不再问你确认每一步，自己规划、执行、验证。失败了自己再想办法。CLI 派 Autopilot 通常意味着&lsquo;给个目标，半小时回来看结果&rsquo;。">Autopilot</span> 模式 + 多模型可选。</p>
+            <p class="pattern-desc"><em>强项：</em>GitHub 深度集成（issue / PR） · <em>弱项：</em>需要 Copilot 订阅 · <em>典型用户：</em>GitHub 重度用户</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">17 款 CLI 全景扫描</h2>
+        <p>CLI 派品类爆发——awesome 仓库列了 17 款。先认得名字、知道定位即可。</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🦆</div>
+            <div><strong>goose / OpenHands / Plandex</strong><p>长任务规划派，先列计划再执行。</p></div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🛠️</div>
+            <div><strong>claude-engineer / aichat / gptme</strong><p>早期社区 CLI，轻量但活跃度参差。</p></div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">📡</div>
+            <div><strong><span class="term" data-definition="Warp 是新一代终端模拟器（不是 vibe coding 工具本体），原生集成 AI——你直接在终端输入自然语言，它给 shell 命令。把整个终端体验 AI 化。">Warp</span> / charmbracelet/crush</strong><p>把 AI 内置进终端模拟器本身。</p></div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">🌏</div>
+            <div><strong>qwen-code / kimi-cli / mistral-vibe</strong><p>非 OpenAI/Anthropic 模型出的 CLI。中国 / 法国选项。</p></div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-5)">🧪</div>
+            <div><strong>RA.Aid / MyCoder / OpenCode / langchain-code / Cloudflare/vibesdk</strong><p>实验性 / 框架级 / 边缘选手。生态观察期。</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">三家 CLI 同一需求的不同回应</h2>
+        <p>同一句话："refactor 这个支付模块"——三家 CLI 给的反应完全不一样。读这段对话你会立刻明白选哪一家。</p>
+
+        <div class="chat-window" id="chat-m4-cli-styles">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="actor-you" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">你</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">你</span>
+                <p>refactor src/payment/* —— 拆出独立的 stripe 适配层，要可替换。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="actor-claude" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">CC</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">claude-code</span>
+                <p>先扫一下 src/payment/。我看到 8 个文件、3 处直接调 Stripe SDK、2 处在 React 组件里。我准备：① 抽 PaymentProvider 接口 ② 实现 StripeProvider ③ 把组件改用接口。要看完整 plan 再开干吗？</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="actor-codex" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">CX</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">Codex CLI</span>
+                <p>任务拆 4 步：1) 列 stripe 调用点 2) 设计接口 3) 替换实现 4) 跑测试。我把 1) 推到 Codex Cloud 上跑——大仓 grep 比本地快。10 秒后回结果。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="actor-aider" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">AD</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">aider</span>
+                <p>git status 干净？我先 git checkout -b refactor-payment。然后每改一文件就 commit，方便你 review 和回滚。把要改的文件一个个 /add 进上下文吧。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="actor-you" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">你</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">你</span>
+                <p>开始干吧。Stripe 接口要支持以后接 Adyen 替换。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="5" data-sender="actor-claude" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">CC</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">claude-code</span>
+                <p>已写 src/payment/provider.ts 抽接口，迁移 4 文件，跑了 vitest 全绿。预留 AdyenProvider 占位 + TODO 注释。要 commit 吗？</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="6" data-sender="actor-codex" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">CX</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">Codex CLI</span>
+                <p>步骤 2 完成：接口设计草案放进 codex-task-output。步骤 3 我开了并行子任务——预计 90 秒。你可以先去喝水。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="7" data-sender="actor-aider" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">AD</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">aider</span>
+                <p>commit a1b2c3d: "Extract PaymentProvider interface". 文件 1/4 done. 看一眼 diff 再继续？</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="8" data-sender="actor-you" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">你</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">你</span>
+                <p>三家风格完全不同：claude-code 像副驾、Codex CLI 像后端工头、aider 像 git 老党员。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" style="display:none">
+            <div class="chat-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条</button>
+            <button class="btn chat-all-btn">全部播放</button>
+            <button class="btn chat-reset-btn">重播</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">解读一段 claude-code 终端 session</h2>
+        <p>看 CLI 派"工作循环"长什么样——为什么 AI 改代码前要先读 README。</p>
+
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">Terminal Session</span>
+            <pre><code><span class="code-line"><span class="code-comment">$ claude</span></span>
+<span class="code-line"></span>
+<span class="code-line">&gt; add a /healthz endpoint</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-function">Read</span>(README.md)</span>
+<span class="code-line"><span class="code-function">Read</span>(package.json)</span>
+<span class="code-line"><span class="code-function">Glob</span>(src/routes/*.ts)</span>
+<span class="code-line"></span>
+<span class="code-line">I see this is a Fastify app</span>
+<span class="code-line">with routes in src/routes/.</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-function">Edit</span>(src/routes/health.ts)</span>
+<span class="code-line"><span class="code-function">Bash</span>(pnpm test)</span>
+<span class="code-line">✓ 42 tests passed</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>$ claude</strong>——启动 claude-code，进入交互模式。</p>
+              <p class="tl"><strong>"add a /healthz endpoint"</strong>——你的需求只有一句话。</p>
+              <p class="tl"><strong>Read(README) + Read(package.json) + Glob(src/routes)</strong>——AI 自己决定要读哪些文件。它<em>不假设</em>你用什么框架，先看证据。</p>
+              <p class="tl"><strong>"this is a Fastify app"</strong>——AI 推断出来的，不是你告诉它的。这一步避免了它瞎写一个 Express 风格的代码。</p>
+              <p class="tl"><strong>Edit + Bash(pnpm test)</strong>——改完自己跑测试。失败了它会再调一次。</p>
+              <p class="tl"><strong>核心：</strong>"读 → 推断 → 改 → 验证" 是 CLI 派的 DNA。<em>这就是为什么 AI 改代码前要先读 README——它在建立项目模型。</em></p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Gemini CLI 配置 + 第一次运行</h2>
+        <p>CLI 派的"启动仪式"——拿 Gemini CLI 当例子，因为它免费额度最大、最适合从零开始。</p>
+
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">install + config</span>
+            <pre><code><span class="code-line"><span class="code-comment"># 装</span></span>
+<span class="code-line">npm install -g @google/gemini-cli</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 配置 ~/.gemini/config.yaml</span></span>
+<span class="code-line">api_key: ${GEMINI_API_KEY}</span>
+<span class="code-line">model: gemini-2.0-pro</span>
+<span class="code-line">tools:</span>
+<span class="code-line">  - read_file</span>
+<span class="code-line">  - write_file</span>
+<span class="code-line">  - run_shell</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 第一次跑</span></span>
+<span class="code-line">cd my-project</span>
+<span class="code-line">gemini "explain this repo"</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>npm install -g</strong>——全局装一个命令行工具。-g 让你在任意目录都能敲 <code>gemini</code>。</p>
+              <p class="tl"><strong>config.yaml</strong>——告诉 CLI &lsquo;用哪把 API key、用哪个模型、允许调用哪些工具&rsquo;。</p>
+              <p class="tl"><strong>tools 列表</strong>——给 AI 开权限。read/write 文件 + 跑 shell 命令。<em>这一步本质是&lsquo;沙箱&rsquo;——你决定 AI 能动什么不能动什么。</em></p>
+              <p class="tl"><strong>cd my-project + gemini "..."</strong>——在项目目录里启动。AI 把这个目录当上下文。</p>
+              <p class="tl"><strong>核心仪式：</strong>装 → 配 key → 进项目 → 第一句话。其他 CLI 都是这个套路。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">实战测验</h2>
+
+        <div class="quiz-container" id="quiz-m4">
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">场景</span>
+              <p>你想用 AI 跑批量自动化任务（每晚扫 100 个仓库写测试）。<strong>预算 0</strong>，能开源就开源。</p>
+            </div>
+            <div class="quiz-question-block"
+                 data-correct="m4-q1-b"
+                 data-explanation-right="对——预算 0 + 大量调用两个约束下，Gemini CLI 是唯一靠谱选项：60 req/min、1000/day 免费额度，按你 100 个仓库算下来够用。claude-code 按 token 计费，跑 100 仓单晚就是几十美金。"
+                 data-explanation-wrong="再想想——预算是 0。claude-code 顶配确实强但每次调用都烧 token；OpenHands 不错但默认要接付费 API。Gemini CLI 的免费额度是为这种批量场景而生。">
+              <h3 class="quiz-question">最合适的 CLI 是？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="m4-q1-a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>A. claude-code（最强）</span>
+                </button>
+                <button class="quiz-option" data-value="m4-q1-b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>B. Gemini CLI（免费额度高）</span>
+                </button>
+                <button class="quiz-option" data-value="m4-q1-c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>C. OpenHands + 付费 API</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+          </div>
+
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">场景 2</span>
+              <p>你团队有规矩：<strong>AI 改代码必须每步可 review 可回滚</strong>。任何"AI 改完一大堆然后说&lsquo;搞定了&rsquo;"都不行。</p>
+            </div>
+            <div class="quiz-question-block"
+                 data-correct="m4-q2-c"
+                 data-explanation-right="对——aider 的 git-first 哲学就是为这种规矩设计的：每改一文件自动 commit，每个 commit 一句简短描述，git log 直接当 changelog。任何一步出错 git revert 即可。"
+                 data-explanation-wrong="再想想——claude-code / Codex CLI 默认是&lsquo;一口气改完再 commit&rsquo;，符合 senior 工程师效率优先的偏好，但不适合&lsquo;每步可 review&rsquo;的硬约束。aider 老牌就是吃这个市场。">
+              <h3 class="quiz-question">最合适的 CLI 是？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="m4-q2-a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>A. claude-code，让它最后再 commit</span>
+                </button>
+                <button class="quiz-option" data-value="m4-q2-b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>B. Codex CLI Autopilot 模式</span>
+                </button>
+                <button class="quiz-option" data-value="m4-q2-c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>C. aider（每改一文件自动 commit）</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m4')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m4')">再试一次</button>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Key Insight：CLI 派的核心是工作循环</strong>
+            <p>CLI 派的核心不是"装一个工具"——是建立 <strong>prompt → 执行 → 验证 → 提交</strong> 的工作循环。一旦循环跑顺，你会发现日常 80% 任务都能在终端里 30 分钟内闭环。下一模块讲多个 CLI 同时跑时怎么不打架。</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-5" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">编排与文档标准 · 交响乐团</h1>
+      <p class="module-subtitle">单乐器再好，没有指挥就是噪音——这就是工具的工具。</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">单工具好用，多工具协作炸了</h2>
+        <p>前面四个模块讲了"挑哪辆车"。现实是当你同时开三辆车——比如<span class="term" data-definition="Agent（智能体）= 能自己规划、调用工具、循环执行直到完成目标的 AI 程序。多 agent 并行 = 同时跑几个 AI agent 各做一摊事。">多 agent 并行</span>跑重构、写测试、修文档——它们会改同一个文件、提交冲突 commit、互相推翻彼此的修改。</p>
+        <p>这时候你需要"工具的工具"——<strong>任务编排</strong>当指挥，<strong>文档标准</strong>当乐谱。所有 agent 看同一份谱子，按指挥的拍子来。</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">任务编排 Top 4</h2>
+        <p>同一类工具——把多个 AI agent 组织起来不打架。挑最适合你团队规模的一个。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">📋</div>
+            <h4 class="pattern-title"><span class="term" data-definition="vibe-kanban 是 BloopAI 出品的可视化看板，把多个 AI coding agent 当看板上的卡片来调度——每张卡片一个 agent 跑一个任务，像项目管理软件那样拖拽。支持 10+ 种 coding agent。">vibe-kanban</span> 🔥</h4>
+            <p class="pattern-desc">"A kanban board to manage and orchestrate AI coding agents. Supports 10+ coding agents."</p>
+            <p class="pattern-desc"><em>定位：</em>看板视角的多 agent 调度 · <em>典型用户：</em>5-15 人小团队</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🐙</div>
+            <h4 class="pattern-title"><span class="term" data-definition="CCPM = Claude Code Project Manager。基于 GitHub Issues + Git worktrees 的并行 agent 调度框架——每个 agent 在独立的 worktree 里改代码，互不干扰，最后汇总到主分支。">CCPM</span></h4>
+            <p class="pattern-desc">基于 GitHub Issues + <span class="term" data-definition="Git worktree = 同一个仓库可以同时 checkout 多个分支到不同目录。多个 AI agent 各占一个 worktree 改代码，互不打架。">Git worktrees</span> 并行 agent。</p>
+            <p class="pattern-desc"><em>定位：</em>GitHub-native 的多 agent · <em>典型用户：</em>已经全 GitHub 工作流的团队</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🏛️</div>
+            <h4 class="pattern-title">Archon</h4>
+            <p class="pattern-desc">MCP 知识 + 任务管理后台。把项目知识库当 MCP 服务暴露给所有 agent。</p>
+            <p class="pattern-desc"><em>定位：</em>知识 + 任务双中心 · <em>典型用户：</em>企业 / 知识密集</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">🪃</div>
+            <h4 class="pattern-title">Boomerang Tasks</h4>
+            <p class="pattern-desc">自动拆解大任务为可管理小块——给一个"做用户认证"，它自动拆 12 个子任务。</p>
+            <p class="pattern-desc"><em>定位：</em>任务拆解器 · <em>典型用户：</em>独立 + 不擅拆任务</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">文档标准 6 件套</h2>
+        <p>给 AI 的乐谱。不同标准解决不同问题——但都遵守同一个原则：<em>把项目上下文沉淀成 AI 可读的文件</em>。</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🤖</div>
+            <div><strong><span class="term" data-definition="AGENTS.md 是 Linux Foundation 维护的开放格式，跨 IDE / CLI 通用的 agent 配置文件。Cursor / Windsurf / Zed / Kiro / claude-code 都读它。">AGENTS.md</span></strong><p>跨 IDE 通用 agent 配置。<em>"A simple, open format for guiding coding agents, stewarded by the Linux Foundation."</em></p></div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">📃</div>
+            <div><strong><span class="term" data-definition="llms.txt 是 2024 年由 Jeremy Howard 提出的标准——在网站根目录放一份结构化 markdown，让 LLM 抓取时拿到精炼版。Anthropic / OpenAI / Vercel 文档站都已支持。">llms.txt</span></strong><p>"Standardized markdown file specification for making website documentation LLM-friendly."</p></div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">📚</div>
+            <div><strong><span class="term" data-definition="Context7 是 Upstash 出品的 MCP 服务器——AI 通过它实时查到任何开源库的最新版文档，避免幻觉旧 API。和 cursor / claude-code 通过 MCP 协议接通。">Context7</span></strong><p>"Delivers up-to-date, version-specific documentation directly into LLM prompts. MCP server + CLI."</p></div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">📦</div>
+            <div><strong>awesome-cursorrules</strong><p>精选 .cursorrules 集合。按技术栈现拷一份就行——别从零写。</p></div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-5)">🧠</div>
+            <div><strong>claude-reflect</strong><p>自学习系统——把每次纠错（"这里写错了，应该这样"）自动同步到 CLAUDE.md，AI 越用越懂你的项目。</p></div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🎨</div>
+            <div><strong>getdesign.md 🔥</strong><p>真实 DESIGN.md 案例库——告诉你设计文档应该长什么样。</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">解读一段真实 AGENTS.md</h2>
+        <p>下面这段是一个 Next.js 项目的 AGENTS.md。读懂它你就懂为什么"一份文件让所有 IDE 都明白你的项目"。</p>
+
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">AGENTS.md</span>
+            <pre><code><span class="code-line"><span class="code-comment"># Project: aiflowlearn-web</span></span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment">## Stack</span></span>
+<span class="code-line">- Next.js 14 App Router</span>
+<span class="code-line">- TypeScript strict</span>
+<span class="code-line">- Tailwind CSS</span>
+<span class="code-line">- Prisma + PostgreSQL</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment">## Conventions</span></span>
+<span class="code-line">- API calls: lib/api/client.ts</span>
+<span class="code-line">- i18n: messages/zh.json only</span>
+<span class="code-line">- No /api/ prefix in URLs</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment">## Forbidden</span></span>
+<span class="code-line">- prisma db push (use migrate)</span>
+<span class="code-line">- Editing /generated/</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment">## Test</span></span>
+<span class="code-line">pnpm test</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>"Project: aiflowlearn-web"</strong>——名字 + 一句话定位。AI 进项目第一眼看这个。</p>
+              <p class="tl"><strong>Stack 段</strong>——技术栈清单。AI 不会再瞎写 React Router 风格代码（Next.js 14 用 App Router）。</p>
+              <p class="tl"><strong>Conventions 段</strong>——你的项目家规。"No /api/ prefix" 这一句，让 AI 永远不会再出错。</p>
+              <p class="tl"><strong>Forbidden 段</strong>——硬约束。"prisma db push" 是真实事故级禁令——这种血的教训写进去，AI 就不会再踩坑。</p>
+              <p class="tl"><strong>Test 段</strong>——验证命令。AI 改完代码自己跑 <code>pnpm test</code> 看绿不绿。</p>
+              <p class="tl"><strong>整段 18 行</strong>——Cursor / Windsurf / Zed / claude-code 全部读。换 IDE 零迁移。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">解读一段 llms.txt</h2>
+        <p>llms.txt 解决的是另一个问题：<strong>网站文档怎么给 LLM 读</strong>。HTML 有导航、有侧边栏、有广告，对 AI 是噪音。llms.txt 给一份精炼 markdown 索引——AI 一抓就拿到结构化内容。</p>
+
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">llms.txt</span>
+            <pre><code><span class="code-line"># awesome-vibe-coding</span>
+<span class="code-line"></span>
+<span class="code-line">&gt; Curated list of vibe coding</span>
+<span class="code-line">&gt; tools by category.</span>
+<span class="code-line"></span>
+<span class="code-line">## Categories</span>
+<span class="code-line"></span>
+<span class="code-line">- [Browser tools](#browser):</span>
+<span class="code-line">  Lovable, Bolt.new, v0...</span>
+<span class="code-line">- [IDEs](#ides):</span>
+<span class="code-line">  Cursor, Windsurf, Zed...</span>
+<span class="code-line">- [CLI tools](#cli):</span>
+<span class="code-line">  claude-code, aider...</span>
+<span class="code-line"></span>
+<span class="code-line">## Optional</span>
+<span class="code-line"></span>
+<span class="code-line">- [Full README](/README.md)</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>第一行 # 大标题</strong>——项目名。LLM 抓取时知道这是关于什么的。</p>
+              <p class="tl"><strong>"&gt;" 引言段</strong>——一句话定位。比读完整 README 快 100 倍。</p>
+              <p class="tl"><strong>"## Categories" 章节</strong>——核心内容索引。每条是 <code>[标题](#锚点): 简短列表</code>。</p>
+              <p class="tl"><strong>"## Optional" 章节</strong>——补充信息。LLM 可以选择性跟进——抓完上面的就够回答 80% 问题，需要细节再点 README。</p>
+              <p class="tl"><strong>核心：</strong>llms.txt 是给 AI 的"目录页"——让大模型读了之后<em>不需要再爬整个网站就能直接回答你的项目</em>。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">装备整合矩阵：四种组合</h2>
+        <p>不同流派配不同"工具的工具"。四种组合，对号入座。</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🌐</div>
+            <div>
+              <strong>浏览器派 + Boomerang Tasks</strong>
+              <p>浏览器派一句话生成的产品做大了，需要拆任务。Boomerang 帮你把"加用户系统"拆成 12 个 prompt 喂回工具。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">💻</div>
+            <div>
+              <strong>IDE 派 + AGENTS.md</strong>
+              <p>团队 5 人各用各的 IDE（有人 Cursor、有人 Windsurf、有人 Zed），AGENTS.md 让所有 AI 看同一份家规——零迁移、零冲突。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-5)">⌨️</div>
+            <div>
+              <strong>CLI 派 + Context7</strong>
+              <p>claude-code / Codex CLI 通过 Context7 MCP 实时查最新文档。AI 不再幻觉旧 API——你用最新版的 Next.js 它就给最新版代码。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🏗️</div>
+            <div>
+              <strong>全栈 + claude-reflect</strong>
+              <p>每次你纠正 AI（"这里写错了，应该 X 而不是 Y"），claude-reflect 自动写进 CLAUDE.md。一年后这份文件就是你的项目知识沉淀。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">最后的实战测验</h2>
+
+        <div class="quiz-container" id="quiz-m5">
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">最终场景</span>
+              <p>你是 10 人团队的技术负责人，要落地<strong>多 agent 并行开发</strong>——每个工程师同时跑 3-5 个 agent 干活。当务之急<strong>最先建立的</strong>是？</p>
+            </div>
+            <div class="quiz-question-block"
+                 data-correct="m5-q1-b"
+                 data-explanation-right="对——多 agent 并行的最大风险是&lsquo;各 agent 各自为战&rsquo;。你需要 ① AGENTS.md 让所有 agent 看同一份家规 ② vibe-kanban 当指挥避免改同一文件 ③ Context7 让 agent 拿到最新文档不幻觉。这三件套是最低限度的协调机制——不是 nice-to-have，是 MVP。"
+                 data-explanation-wrong="再想想——买 Cursor Pro 全员只解决&lsquo;每个人单独写代码&rsquo;的体验，多 agent 并行的根因是&lsquo;协调&rsquo;不是&lsquo;能力&rsquo;。&lsquo;每人各自 prompt&rsquo;则等于放弃协调，10 人 × 5 agent = 50 个不同的 prompt 风格，code review 会哭。">
+              <h3 class="quiz-question">最先建立什么？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="m5-q1-a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>A. 全员买 Cursor Pro 顶配模型</span>
+                </button>
+                <button class="quiz-option" data-value="m5-q1-b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>B. AGENTS.md + vibe-kanban + Context7 三件套</span>
+                </button>
+                <button class="quiz-option" data-value="m5-q1-c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>C. 每人各自维护 prompt，自由发挥</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+          </div>
+
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">回顾</span>
+              <p>你已经看了系列三的所有内容。系列一讲方法、系列二讲思维、系列三讲工具——这三者关系是？</p>
+            </div>
+            <div class="quiz-question-block"
+                 data-correct="m5-q2-c"
+                 data-explanation-right="对——工具迭代速度比方法论快得多（去年 Cursor 还没爆，前年 vibe coding 这个词都不存在），但好工具一定服从好方法论。所以系列 2 的内功永远不会过期，系列 3 的工具图谱半年后会换一批，系列 1 的实战起步则适合任何时代——三者构成完整学习路径。"
+                 data-explanation-wrong="再想想——只学方法不会工具是空架子，只学工具不懂方法是被工具牵着走。三者本就是一体的。">
+              <h3 class="quiz-question">三者关系最准确的描述？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="m5-q2-a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>A. 工具最重要，方法论是过时的</span>
+                </button>
+                <button class="quiz-option" data-value="m5-q2-b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>B. 方法论最重要，工具不重要</span>
+                </button>
+                <button class="quiz-option" data-value="m5-q2-c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>C. 工具迭代快但服从方法，方法是内功永不过期</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m5')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m5')">再试一次</button>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">收束 Insight</strong>
+            <p>工具的迭代速度比方法论快——但<strong>好工具一定服从好方法论</strong>。所以系列 2（方法）的内功永远不会过期。这门课会过期，但你借这门课建立起来的"看工具的视角"会陪你走很久。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">课程总结 · 三部曲完结</h2>
+
+        <p>这门课你走完了——从 100+ 款工具的混乱市场里画出了一张可用地图：</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>工具景观全图</strong>
+              <p>7 大类 + 决策树。少而精：1 个浏览器 + 1 个 IDE + 1 个 CLI 覆盖 90% 场景。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>浏览器派</strong>
+              <p>Lovable / Bolt.new / v0 / Replit。零摩擦换控制力——5 分钟出 demo 的最佳选择。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>IDE 派</strong>
+              <p>Cursor / Windsurf / Zed / Trae / Kiro。AI 副驾——价值不在写代码，在上下文管理。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>CLI 派</strong>
+              <p>claude-code / Codex CLI / Gemini CLI / aider。把 AI 装进终端——senior 工程师的工作循环。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>编排与文档标准</strong>
+              <p>vibe-kanban + AGENTS.md + Context7——工具的工具，让多 agent 协作不打架。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🙏</div>
+          <div class="callout-content">
+            <strong class="callout-title">致谢源仓库</strong>
+            <p>这门课基于 <strong>Filipe Calegario</strong> 维护的 awesome list：<a href="https://github.com/filipecalegario/awesome-vibe-coding" target="_blank" rel="noopener">filipecalegario/awesome-vibe-coding</a>。这是 vibe coding 工具领域最权威、更新最勤的清单。本课用中文重组了它的 7 大类工具，并加上了选型决策树和实战场景。</p>
+            <p style="margin-top:var(--space-2)">推荐你 Star 原仓库，关注作者持续更新——工具市场每周都在变。</p>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">🎬</div>
+          <div class="callout-content">
+            <strong class="callout-title">完整三部曲已结束</strong>
+            <p><strong>系列一（实战）</strong>讲怎么从 0 到 1 起步；<strong>系列二（方法）</strong>讲思维模型和长期内功；<strong>系列三（工具）</strong>讲选型和组合。三者各有侧重——方法是内功永不过期，工具半年一换需要持续追，实战是最快的入门路径。</p>
+            <p style="margin-top:var(--space-2)">现在你的下一步：<strong>挑一个浏览器派 + 一个 IDE 派 + 一个 CLI 派</strong>，今晚就装上——不用纠结，不行再换。"少而精"是这门课最重要的一句话。</p>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+  </div>
+</section>
+  </main>
+
+</body>
+</html>

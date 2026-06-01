@@ -1,0 +1,225 @@
+<section class="module" id="module-3" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">从一句话到能跑的原型</h1>
+      <p class="module-subtitle">15 分钟做一个贪吃蛇——这是 vibe coding 的"折纸第一只鸟"。</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">折纸比喻：白纸 → 小鸟</h2>
+        <p>原型就像折纸——一开始是张白纸（空文件夹），按几个折法折几下，立马变成一只能"立"起来的小鸟（能跑的<span class="term" data-definition="MVP 是 Minimum Viable Product 的缩写——最小可用产品。一个砍到极致、只保留核心功能、能跑给人看的版本。">MVP</span>）。</p>
+        <p>贪吃蛇是 Stage 1 教程里最经典的"第一只鸟"——它简单到一屏代码就够，又复杂到包含了"画布、键盘、循环、计分"四件事，是 vibe coding 的最佳成就解锁副本。</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>开 IDE，新建空文件夹 snake/</strong>
+              <p>从干净的空白起步——AI 不会被旧文件干扰。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>把"五段式"需求贴进对话框</strong>
+              <p>画布尺寸、操作方式、计分规则、技术栈、完成判定——一次写清楚。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>等 AI 写代码，秒级生成</strong>
+              <p>它会自动建 index.html，把 HTML+CSS+JS 内嵌进去。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>双击打开，浏览器里玩</strong>
+              <p>没错——你已经在玩自己的第一个游戏了。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>改色、加分数、加最高分</strong>
+              <p>"把蛇换成蓝色 / 加一个最高纪录 localStorage"——继续聊就行。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">幕后追踪：你按下回车后发生了什么</h2>
+        <p>这一屏是 vibe coding 的"地铁线路图"——从你打字到游戏跑起来，6 站全程。点 "下一步" 一站站走。</p>
+
+        <div class="flow-animation" id="flow-m3-prototype" data-steps='[
+          {"highlight":"flow-actor-1","label":"第一步：你在 IDE 里输入需求——画 200x200 的贪吃蛇，方向键控制，吃苹果加 1 分。"},
+          {"highlight":"flow-actor-2","label":"第二步：IDE 把你的中文需求打包成结构化的 prompt。","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-3","label":"第三步：AI 模型读懂意图，开始生成 HTML+CSS+JS 代码。","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-4","label":"第四步：IDE 把 AI 返回的代码写入 index.html 文件。","packet":true,"from":"actor-3","to":"actor-4"},
+          {"highlight":"flow-actor-5","label":"第五步：浏览器加载这个 HTML 文件，渲染画布。","packet":true,"from":"actor-4","to":"actor-5"},
+          {"highlight":"flow-actor-5","label":"第六步：你按方向键——能玩了。这就是从一句话到能跑的全过程。"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon" style="background: var(--color-actor-2)">🗣️</div>
+              <span>你</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon" style="background: var(--color-actor-1)">🛠️</div>
+              <span>AI IDE</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon" style="background: var(--color-actor-3)">🧠</div>
+              <span>AI 模型</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon" style="background: var(--color-actor-4)">📁</div>
+              <span>文件系统</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-5">
+              <div class="flow-actor-icon" style="background: var(--color-actor-5)">🌐</div>
+              <span>浏览器</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+
+          <div class="flow-step-label" id="flow-label">点"下一步"开始追踪</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">prompt 翻译：你只描述了 What，没描述 How</h2>
+        <p>下面这段贪吃蛇 prompt 看着很短，但已经足够。注意——你只说了"画什么、怎么操作、怎么得分"，<em>完全没说</em>"用 canvas 还是 div、定时器多少毫秒、数组怎么存"——那是 AI 该想的事。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">你的中文 PROMPT</span>
+<pre><code>做个 200x200 的贪吃蛇网页，
+方向键控制，
+吃到苹果加 1 分，
+撞墙或撞自己游戏结束。
+HTML+CSS+JS 单文件，
+双击就能玩。</code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PROMPT 各段在干嘛</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>1. 画布尺寸：</strong>200x200——告诉 AI 大小，避免它给你来个全屏。</p>
+              <p class="tl"><strong>2. 操作方式：</strong>方向键——锁定输入设备，不会做出鼠标点击版。</p>
+              <p class="tl"><strong>3. 计分规则：</strong>吃苹果 +1——明确产出，AI 知道要做计分 UI。</p>
+              <p class="tl"><strong>4. 失败条件：</strong>撞墙/撞自己——边界清晰，AI 不会自己加奇怪规则。</p>
+              <p class="tl"><strong>5. 技术约束：</strong>单文件 + 双击运行——这一句帮你避开 80% 装环境的坑。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码翻译：AI 给你写了什么</h2>
+        <p>AI 生成的代码里有这么一段——这是"键盘控制"的核心。看不懂没关系，右边白话能让你知道它在做啥：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">AI 生成的 JS</span>
+<pre><code><span class="code-function">document</span>.<span class="code-function">addEventListener</span>(<span class="code-string">"keydown"</span>, (e) =&gt; {
+  <span class="code-keyword">if</span> (e.<span class="code-property">key</span> === <span class="code-string">"ArrowUp"</span>)    snake.<span class="code-function">setDir</span>(<span class="code-number">0</span>, -<span class="code-number">1</span>);
+  <span class="code-keyword">if</span> (e.<span class="code-property">key</span> === <span class="code-string">"ArrowDown"</span>)  snake.<span class="code-function">setDir</span>(<span class="code-number">0</span>,  <span class="code-number">1</span>);
+  <span class="code-keyword">if</span> (e.<span class="code-property">key</span> === <span class="code-string">"ArrowLeft"</span>)  snake.<span class="code-function">setDir</span>(-<span class="code-number">1</span>, <span class="code-number">0</span>);
+  <span class="code-keyword">if</span> (e.<span class="code-property">key</span> === <span class="code-string">"ArrowRight"</span>) snake.<span class="code-function">setDir</span>( <span class="code-number">1</span>, <span class="code-number">0</span>);
+});</code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">这段代码在说啥</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>第 1 行：</strong>"嘿浏览器，帮我盯着键盘——一旦有人按键，叫我一声。"</p>
+              <p class="tl"><strong>第 2 行：</strong>按了上箭头？——蛇头方向改成"向上一格"。</p>
+              <p class="tl"><strong>第 3 行：</strong>下箭头——"向下一格"。</p>
+              <p class="tl"><strong>第 4-5 行：</strong>左右同理。</p>
+              <p class="tl"><strong>整段意思：</strong>把键盘的物理按键 → 翻译成蛇的运动方向。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">别被甜头冲昏头</strong>
+            <p>贪吃蛇能跑 ≠ 代码能上线——它只是 demo。Stage 2 才教你怎么从 demo 变成"全网用户都能玩"的产品。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">练手三选一：把贪吃蛇换成你自己的产品</h2>
+        <p>掌握了套路，下面这三个想法，你今晚都能跑出 demo——选一个，照"五要素"写 prompt：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">💰</div>
+            <h4 class="pattern-title">记账小程序</h4>
+            <p class="pattern-desc"><strong>五要素：</strong><br>① 单页面记账<br>② 加一笔含金额+备注<br>③ 自动算本月总额<br>④ localStorage 存储<br>⑤ 单 html 双击打开</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🍅</div>
+            <h4 class="pattern-title">番茄钟</h4>
+            <p class="pattern-desc"><strong>五要素：</strong><br>① 25 分钟工作 5 分钟休息<br>② 圆环倒计时 + 听觉提醒<br>③ 一天累计完成几个番茄<br>④ 数据本地存<br>⑤ 单 html 直开</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">📝</div>
+            <h4 class="pattern-title">个人博客首页</h4>
+            <p class="pattern-desc"><strong>五要素：</strong><br>① 首页+文章列表+正文三页<br>② Markdown 写正文<br>③ 暗色/亮色切换<br>④ 文章存 JSON 文件<br>⑤ 静态站、可直接部署</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">小测验：找出 prompt 里的硬伤</h2>
+
+        <div class="quiz-container" id="quiz-m3">
+          <div class="quiz-question-block"
+               data-correct="option-d"
+               data-explanation-right="完全正确——少了'技术栈+完成判定'这两段，AI 可能给你来个 React + 后端数据库的方案，复杂度爆炸。技术约束是新手最容易漏的'防坑句'。"
+               data-explanation-wrong="再看一眼——这段 prompt 缺了关键的'技术栈/完成判定'约束，AI 容易过度发挥。看 D 选项的解释。">
+            <h3 class="quiz-question">你写了如下 prompt，但 AI 给你生成的项目复杂得跑不起来：<br><em>"做一个待办 App，能加任务、能勾掉，要好看一点。"</em><br>哪句话漏了，导致 AI 跑偏？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>A. 没说颜色——AI 不知道用什么色</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>B. 没说作者名字——AI 不知道版权写谁</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>C. 没说"用中文"——AI 默认会写英文</span>
+              </button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>D. 没说"单文件 HTML、双击就能跑"——AI 没有技术栈约束，可能给你做了一套要装环境的复杂工程</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m3')">看看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m3')">再试一次</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

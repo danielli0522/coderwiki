@@ -1,0 +1,202 @@
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">架构选型指南：该不该用 GPT Researcher</h1>
+      <p class="module-subtitle">面向技术决策者的快速参考——问题、理念、对比、边界、成本。</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Problem + Philosophy -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">解决什么问题？核心理念？</h2>
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">核心问题</code>
+            <span class="badge-desc">手动研究耗时数周，LLM 训练数据过时且容易产生幻觉，现有服务信息来源有限导致偏见</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">核心方案</code>
+            <span class="badge-desc">用 AI Agent 自主完成「搜索-爬取-筛选-写作」全流程，聚合 20+ 信息源，生成带引用的研究报告</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">设计哲学</code>
+            <span class="badge-desc">Plan-and-Solve：先规划策略再逐步执行；并行搜索提速；组合模式可扩展</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">本质属性</code>
+            <span class="badge-desc">开源 Python 研究Agent框架，MIT 许可证，单Agent + 多Agent 双模式</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">技术栈</code>
+            <span class="badge-desc">Python 3.11+ / LangChain / LangGraph / asyncio / 多种 LLM（OpenAI、Anthropic 等）</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Comparison -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">与同类方案对比</h2>
+        <div class="callout callout-info">
+          <div class="callout-icon">📊</div>
+          <div class="callout-content">
+            <strong class="callout-title">核心区别</strong>
+            <p>GPT Researcher 是唯一一个专注「自主研究报告生成」的开源框架，同时支持单 Agent 轻量使用和多 Agent 编排。</p>
+          </div>
+        </div>
+        <table style="width:100%; border-collapse:collapse; margin: var(--space-6) 0; font-size: var(--text-sm);">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--color-border);">
+              <th style="text-align:left; padding: var(--space-3); color: var(--color-text-secondary);">维度</th>
+              <th style="text-align:left; padding: var(--space-3); color: var(--color-accent);">GPT Researcher</th>
+              <th style="text-align:left; padding: var(--space-3); color: var(--color-text-secondary);">LangChain Agent</th>
+              <th style="text-align:left; padding: var(--space-3); color: var(--color-text-secondary);">Perplexity API</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid var(--color-border-light);">
+              <td style="padding: var(--space-3); font-weight:600;">定位</td>
+              <td style="padding: var(--space-3);">
+                <ul><li>完整研究报告生成</li><li>端到端自动化</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>通用 Agent 框架</li><li>需要自己编排</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>搜索增强问答</li><li>API 服务</li></ul>
+              </td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--color-border-light);">
+              <td style="padding: var(--space-3); font-weight:600;">开源</td>
+              <td style="padding: var(--space-3);"><ul><li>MIT 许可，完全开源</li></ul></td>
+              <td style="padding: var(--space-3);"><ul><li>MIT 许可，完全开源</li></ul></td>
+              <td style="padding: var(--space-3);"><ul><li>闭源，按量付费 API</li></ul></td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--color-border-light);">
+              <td style="padding: var(--space-3); font-weight:600;">搜索引擎</td>
+              <td style="padding: var(--space-3);"><ul><li>20+ 搜索引擎即插即用</li></ul></td>
+              <td style="padding: var(--space-3);"><ul><li>需自行集成</li></ul></td>
+              <td style="padding: var(--space-3);"><ul><li>自有搜索引擎</li></ul></td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--color-border-light);">
+              <td style="padding: var(--space-3); font-weight:600;">报告质量</td>
+              <td style="padding: var(--space-3);"><ul><li>2000+ 词完整报告</li><li>带引用和来源追踪</li></ul></td>
+              <td style="padding: var(--space-3);"><ul><li>取决于你的 Prompt 设计</li><li>无内置报告模板</li></ul></td>
+              <td style="padding: var(--space-3);"><ul><li>简洁摘要式回答</li><li>带引用链接</li></ul></td>
+            </tr>
+            <tr>
+              <td style="padding: var(--space-3); font-weight:600;">定制性</td>
+              <td style="padding: var(--space-3);"><ul><li>可自定义 Agent 角色、Prompt、搜索引擎</li></ul></td>
+              <td style="padding: var(--space-3);"><ul><li>完全自由，但需要更多开发</li></ul></td>
+              <td style="padding: var(--space-3);"><ul><li>API 参数有限</li></ul></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Screen 3: Suitable vs Not-suitable -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">适合 vs 不适合</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+          <div style="background: var(--color-success-light); border-radius: var(--radius-md); padding: var(--space-6);">
+            <h3 style="color: var(--color-success); font-size: var(--text-lg); margin-bottom: var(--space-4); font-family: var(--font-display);">✅ 适合</h3>
+            <ul style="list-style: none; padding: 0;">
+              <li style="padding: var(--space-2) 0; color: var(--color-text); font-size: var(--text-sm);">需要自动化市场调研的创业团队</li>
+              <li style="padding: var(--space-2) 0; color: var(--color-text); font-size: var(--text-sm);">学术研究中的文献综述辅助</li>
+              <li style="padding: var(--space-2) 0; color: var(--color-text); font-size: var(--text-sm);">竞品分析和行业趋势追踪</li>
+              <li style="padding: var(--space-2) 0; color: var(--color-text); font-size: var(--text-sm);">需要定期生成研究报告的自动化流水线</li>
+              <li style="padding: var(--space-2) 0; color: var(--color-text); font-size: var(--text-sm);">想学习 Agent 架构的 AI 工程师</li>
+              <li style="padding: var(--space-2) 0; color: var(--color-text); font-size: var(--text-sm);">需要自建研究 Agent 而不想从零开始</li>
+            </ul>
+          </div>
+          <div style="background: var(--color-error-light); border-radius: var(--radius-md); padding: var(--space-6);">
+            <h3 style="color: var(--color-error); font-size: var(--text-lg); margin-bottom: var(--space-4); font-family: var(--font-display);">❌ 不适合</h3>
+            <ul style="list-style: none; padding: 0;">
+              <li style="padding: var(--space-2) 0; color: var(--color-text); font-size: var(--text-sm);">需要 100% 事实准确性的法律/医疗报告</li>
+              <li style="padding: var(--space-2) 0; color: var(--color-text); font-size: var(--text-sm);">实时性要求极高的新闻快讯</li>
+              <li style="padding: var(--space-2) 0; color: var(--color-text); font-size: var(--text-sm);">纯中文环境下搜索引擎支持有限</li>
+              <li style="padding: var(--space-2) 0; color: var(--color-text); font-size: var(--text-sm);">不需要报告、只需要简短回答的场景</li>
+              <li style="padding: var(--space-2) 0; color: var(--color-text); font-size: var(--text-sm);">对 LLM 成本极度敏感的应用</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Hard limits from source code -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">源码中的硬限制</h2>
+        <p>以下是直接从源码中提取的关键常量和限制：</p>
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">max_iterations = 3</code>
+            <span class="badge-desc">默认最多搜索 3 轮。可在配置中修改，但更多轮次意味着更高的 LLM API 成本</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">max_subtopics = 5</code>
+            <span class="badge-desc">子主题报告最多 5 个子主题。这是 GPTResearcher.__init__ 中的默认值</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">temperature = 0.15</code>
+            <span class="badge-desc">Agent 选择时的温度参数。低温度确保选择结果稳定可复现</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">20+ 搜索引擎</code>
+            <span class="badge-desc">retrievers/ 目录下有 20+ 搜索适配器，每个都需要对应的 API Key</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">Python 3.11+</code>
+            <span class="badge-desc">最低 Python 版本要求。因为使用了 match-case 语法（3.10+）和类型注解新特性</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">MIT License</code>
+            <span class="badge-desc">开源许可证，可自由商用。但部分搜索引擎 API 可能需要付费</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Costs + Conclusion -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">成本与结论</h2>
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>LLM API 成本</strong>
+              <p>每次研究至少调用 LLM 5-8 次（Agent 选择、子问题生成、每个子问题的搜索、报告生成）。使用 GPT-4o 级别模型，单次研究约 $0.05-0.15。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>搜索引擎 API 成本</strong>
+              <p>Tavily 有免费额度（1000 次/月），Google Custom Search 每天 100 次免费。DuckDuckGo 免费但稳定性较差。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>时间成本</strong>
+              <p>单次完整研究约 30-90 秒，取决于并行搜索数量和网页爬取速度。深度研究模式需要 3-5 分钟。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>自托管 vs 云服务</strong>
+              <p>代码完全开源可自托管。也可用 Docker 一键部署。前端支持轻量 HTML 版本和生产级 Next.js 版本。</p>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-accent">
+          <div class="callout-icon">🎯</div>
+          <div class="callout-content">
+            <strong class="callout-title">一句话结论</strong>
+            <p>GPT Researcher 是目前最成熟的开源研究 Agent 框架。如果你的项目需要「自动搜索+自动写报告」的能力，它是最快上手的选择。但要注意：它的输出质量受 LLM 和搜索引擎双重限制，不适合对事实准确性要求极高的场景。</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

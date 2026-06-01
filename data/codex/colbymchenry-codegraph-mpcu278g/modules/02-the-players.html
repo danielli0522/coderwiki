@@ -1,0 +1,244 @@
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+
+    <div class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">Meet the Players: Who Does What</h1>
+      <p class="module-subtitle">CodeGraph is built from eight specialized components — each with a narrow, clear job</p>
+    </div>
+
+    <!-- Screen 1: Architecture Diagram -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">The Eight Actors (Click Any to Learn More)</h2>
+      <p>Think of CodeGraph as a small, well-organized company. Each department has one job and does it brilliantly. Click any component below to see what it does.</p>
+
+      <div class="arch-diagram animate-in">
+
+        <div class="arch-zone">
+          <div class="arch-zone-label">Entry Points</div>
+          <div style="display: flex; flex-wrap: wrap;">
+            <div class="arch-component" data-desc="The CLI (command-line interface) — the front door. Routes commands like 'init', 'index', 'sync', 'query' to the right internal systems. Entry file: src/bin/codegraph.ts">
+              <span class="arch-icon">⌨️</span>
+              <span>CLI</span>
+            </div>
+            <div class="arch-component" data-desc="The MCP Server — CodeGraph's bridge to AI assistants. Speaks the Model Context Protocol (a standardized language for AI tools), exposing tools like codegraph_explore and codegraph_query. Entry file: src/mcp/index.ts">
+              <span class="arch-icon">🤖</span>
+              <span>MCPServer</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="arch-zone">
+          <div class="arch-zone-label">Orchestration</div>
+          <div style="display: flex; flex-wrap: wrap;">
+            <div class="arch-component" data-desc="The main CodeGraph class — the conductor of the whole orchestra. Coordinates all layers, exposes the public API (init, indexAll, getCallers, buildContext), and manages the project lifecycle. Entry file: src/index.ts">
+              <span class="arch-icon">🎯</span>
+              <span>CodeGraph</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="arch-zone">
+          <div class="arch-zone-label">Core Layers</div>
+          <div style="display: flex; flex-wrap: wrap;">
+            <div class="arch-component" data-desc="The ExtractionOrchestrator — scans your project files, loads tree-sitter grammars for each language, parses files into syntax trees, and extracts nodes (functions, classes) and edges (calls, imports). Entry file: src/extraction/index.ts">
+              <span class="arch-icon">🔬</span>
+              <span>Extractor</span>
+            </div>
+            <div class="arch-component" data-desc="The DatabaseConnection — wraps SQLite. Stores nodes, edges, and files. Manages prepared statements and transactions. Uses either native 'better-sqlite3' (fast) or 'node-sqlite3-wasm' (portable fallback). Entry file: src/db/index.ts">
+              <span class="arch-icon">🗃️</span>
+              <span>Database</span>
+            </div>
+            <div class="arch-component" data-desc="The ReferenceResolver — after extraction, connects the dots. It follows import paths across files, resolves TypeScript path aliases, and uses fuzzy name-matching to link unresolved symbol references to their definitions. Entry file: src/resolution/index.ts">
+              <span class="arch-icon">🧵</span>
+              <span>Resolver</span>
+            </div>
+            <div class="arch-component" data-desc="The GraphTraverser — answers graph questions. Uses breadth-first search to find all callers (who calls this function?) and all callees (what does this function call?). Also calculates impact radius — what breaks if you change something. Entry file: src/graph/traversal.ts">
+              <span class="arch-icon">🕸️</span>
+              <span>GraphTraverser</span>
+            </div>
+            <div class="arch-component" data-desc="The ContextBuilder — the translator for AI. Takes raw graph data and formats it into structured markdown that AI assistants can understand: entry points, call chains, code snippets, and impact analysis. Entry file: src/context/index.ts">
+              <span class="arch-icon">📝</span>
+              <span>ContextBuilder</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="arch-zone">
+          <div class="arch-zone-label">Background Service</div>
+          <div style="display: flex; flex-wrap: wrap;">
+            <div class="arch-component" data-desc="The FileWatcher — monitors your project for changes using native OS APIs (FSEvents on macOS, inotify on Linux, ReadDirectoryChangesW on Windows). Debounces rapid file changes into one re-index pass. Keeps the database fresh automatically. Entry file: src/sync/watcher.ts">
+              <span class="arch-icon">👁️</span>
+              <span>FileWatcher</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="arch-description">Click a component above to see its description</div>
+      </div>
+    </div>
+
+    <!-- Screen 2: Code Translation of the Public API -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">The Public API: What CodeGraph Exposes</h2>
+      <p>The <span class="term" data-definition="A class is a blueprint — it defines properties (data) and methods (functions) for objects of that type. Think of it as a cookie cutter; each 'instance' is a cookie made from that cutter.">CodeGraph class</span> is the only thing you (and AI tools) ever directly touch. Everything else is hidden behind it. Here's what the public surface looks like.</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">src/index.ts (simplified)</span>
+          <span class="code-line"><span class="code-keyword">export class</span> <span class="code-function">CodeGraph</span> {</span>
+          <span class="code-line">  <span class="code-keyword">static async</span> <span class="code-function">init</span>(path: <span class="code-function">string</span>): <span class="code-keyword">Promise</span>&lt;CodeGraph&gt; { ... }</span>
+          <span class="code-line">  <span class="code-keyword">async</span> <span class="code-function">indexAll</span>(): <span class="code-keyword">Promise</span>&lt;IndexResult&gt; { ... }</span>
+          <span class="code-line">  <span class="code-keyword">async</span> <span class="code-function">sync</span>(): <span class="code-keyword">Promise</span>&lt;<span class="code-keyword">void</span>&gt; { ... }</span>
+          <span class="code-line">  <span class="code-keyword">async</span> <span class="code-function">getCallers</span>(name: <span class="code-function">string</span>): <span class="code-keyword">Promise</span>&lt;Node[]&gt; { ... }</span>
+          <span class="code-line">  <span class="code-keyword">async</span> <span class="code-function">getCallees</span>(name: <span class="code-function">string</span>): <span class="code-keyword">Promise</span>&lt;Node[]&gt; { ... }</span>
+          <span class="code-line">  <span class="code-keyword">async</span> <span class="code-function">searchNodes</span>(query: <span class="code-function">string</span>): <span class="code-keyword">Promise</span>&lt;Node[]&gt; { ... }</span>
+          <span class="code-line">  <span class="code-keyword">async</span> <span class="code-function">buildContext</span>(task: <span class="code-function">string</span>): <span class="code-keyword">Promise</span>&lt;Context&gt; { ... }</span>
+          <span class="code-line">}</span>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">Plain English</span>
+          <div class="translation-lines">
+            <div class="tl">The CodeGraph class — this is the only door in</div>
+            <div class="tl">Set up a new CodeGraph for a project folder (class method)</div>
+            <div class="tl">Read and index every file in the project</div>
+            <div class="tl">Update the index after file changes</div>
+            <div class="tl">Find everything that calls a given function</div>
+            <div class="tl">Find everything a given function calls</div>
+            <div class="tl">Full-text search across all symbol names</div>
+            <div class="tl">Build a formatted summary for an AI to read</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-info animate-in">
+        <span class="callout-icon">💡</span>
+        <div class="callout-content">
+          <span class="callout-title">Why a "Facade" Class?</span>
+          <p>Having one class as the only entry point is a classic design pattern called a <strong>Facade</strong>. It keeps the complex internals hidden. You never need to know about ExtractionOrchestrator or GraphTraverser — you just ask CodeGraph and it figures out who to delegate to.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 3: Group Chat Animation -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">A Query Arrives: What Happens Inside</h2>
+      <p>When Claude Code asks "how does authentication work?", here's the internal conversation that happens in milliseconds.</p>
+
+      <div class="chat-window" id="chat-m2">
+        <div class="chat-messages">
+          <div class="chat-message" data-sender="mcp" style="display:none">
+            <div class="chat-avatar" style="background: #D94F30">M</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: #D94F30">MCPServer</span>
+              <p>Claude just sent a query: <strong>"Explain how authentication works."</strong> Who's handling this?</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="cg" style="display:none">
+            <div class="chat-avatar" style="background: #2A7B9B">C</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: #2A7B9B">CodeGraph</span>
+              <p>I'll coordinate. ExtractionOrchestrator — was this project already indexed?</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="ex" style="display:none">
+            <div class="chat-avatar" style="background: #7B6DAA">E</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: #7B6DAA">ExtractionOrchestrator</span>
+              <p>✅ Already done. Parsed 1,234 TypeScript files using tree-sitter. Found 45,678 symbols and 134,567 edges. All stored.</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="db" style="display:none">
+            <div class="chat-avatar" style="background: #D4A843">D</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: #D4A843">DatabaseConnection</span>
+              <p>All safely in SQLite — nodes, edges, file records, and a full-text search index. Ready for queries.</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="gt" style="display:none">
+            <div class="chat-avatar" style="background: #2D8B55">G</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: #2D8B55">GraphTraverser</span>
+              <p>I'll run FTS5 search for "auth" and "login", then BFS-traverse outward to map the full authentication call graph.</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="cg" style="display:none">
+            <div class="chat-avatar" style="background: #2A7B9B">C</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: #2A7B9B">CodeGraph</span>
+              <p>ContextBuilder will format that for Claude. Total tool call count: <strong>3</strong>. FTS5 search, graph traversal, context build.</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="mcp" style="display:none">
+            <div class="chat-avatar" style="background: #D94F30">M</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: #D94F30">MCPServer</span>
+              <p>Response delivered to Claude in under 200ms. ⚡ This is why we exist.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-typing" style="display:none">
+          <div class="chat-avatar" id="chat-m2-typing-avatar" style="background: #2A7B9B">?</div>
+          <div class="chat-bubble chat-typing-dots">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
+        </div>
+
+        <div class="chat-controls">
+          <button class="btn btn-sm chat-next-btn" style="padding: var(--space-2) var(--space-4); background: var(--color-accent); color: white; border: none; border-radius: var(--radius-sm); font-family: var(--font-body); font-size: var(--text-sm); font-weight: 600; cursor: pointer;">Next Message</button>
+          <button class="btn btn-sm chat-all-btn" style="padding: var(--space-2) var(--space-4); background: var(--color-surface); color: var(--color-text-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-family: var(--font-body); font-size: var(--text-sm); cursor: pointer;">Play All</button>
+          <button class="btn btn-sm chat-reset-btn" style="padding: var(--space-2) var(--space-4); background: transparent; color: var(--color-text-muted); border: none; font-family: var(--font-body); font-size: var(--text-sm); cursor: pointer;">Reset</button>
+          <span class="chat-progress">0 / 7 messages</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 4: Drag and Drop Quiz -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">Match the Actor to Its Job</h2>
+      <p>Drag each description to the correct actor. (On mobile: tap and drag.)</p>
+
+      <div class="dnd-container" id="dnd-m2">
+        <div class="dnd-chips">
+          <div class="dnd-chip" draggable="true" data-answer="extractor">Parses files into AST nodes</div>
+          <div class="dnd-chip" draggable="true" data-answer="database">Stores nodes &amp; edges in SQLite</div>
+          <div class="dnd-chip" draggable="true" data-answer="resolver">Resolves import paths across files</div>
+          <div class="dnd-chip" draggable="true" data-answer="traverser">Traverses the call graph via BFS</div>
+          <div class="dnd-chip" draggable="true" data-answer="mcp">Talks to AI assistants via MCP</div>
+        </div>
+
+        <div class="dnd-zones">
+          <div class="dnd-zone" data-correct="extractor">
+            <div class="dnd-zone-label">ExtractionOrchestrator (src/extraction/index.ts)</div>
+            <div class="dnd-zone-target">Drop here</div>
+          </div>
+          <div class="dnd-zone" data-correct="database">
+            <div class="dnd-zone-label">DatabaseConnection (src/db/index.ts)</div>
+            <div class="dnd-zone-target">Drop here</div>
+          </div>
+          <div class="dnd-zone" data-correct="resolver">
+            <div class="dnd-zone-label">ReferenceResolver (src/resolution/index.ts)</div>
+            <div class="dnd-zone-target">Drop here</div>
+          </div>
+          <div class="dnd-zone" data-correct="traverser">
+            <div class="dnd-zone-label">GraphTraverser (src/graph/traversal.ts)</div>
+            <div class="dnd-zone-target">Drop here</div>
+          </div>
+          <div class="dnd-zone" data-correct="mcp">
+            <div class="dnd-zone-label">MCPServer (src/mcp/index.ts)</div>
+            <div class="dnd-zone-target">Drop here</div>
+          </div>
+        </div>
+
+        <div style="margin-top: var(--space-6); display: flex; gap: var(--space-3);">
+          <button class="quiz-check-btn" onclick="checkDnD('dnd-m2')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetDnD('dnd-m2')">Reset</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>

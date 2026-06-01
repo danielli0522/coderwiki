@@ -1,0 +1,161 @@
+<section class="module" id="module-4" style="background: var(--color-bg)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">让原型变成真产品</h1>
+      <p class="module-subtitle">能跑 ≠ 能上线——从家庭作坊到工厂，多了一整套 SOP。</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">家庭作坊 → 工厂：少了什么？</h2>
+        <p>贪吃蛇能在你电脑上跑，但要"全网用户都能用"，缺了一整套配套：数据库（SOP）、部署（质检+物流）、支付（合规）、AI 工作流（生产线）……这就是 Stage 2/3 的内容，也是从原型到产品的真实差距。</p>
+
+        <p>下面这 7 块拼图，每一块都是"工厂"绕不开的工种。一个一个认识就行——你不用今晚学完，但听过一遍后，下次别人提起时你不会再陌生。</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">全栈拼图：7 块工厂零件</h2>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🔄</div>
+            <h4 class="pattern-title">Dify</h4>
+            <p class="pattern-desc"><span class="term" data-definition="Dify 是一个'AI 应用搭建平台'——你拖拽节点就能拼出一条 AI 工作流（比如：拿用户输入 → 调大模型 → 查知识库 → 返回结果），不用手写代码。">Dify</span> 是 AI 工作流工厂——拖拽节点拼一条 AI 流水线，不用写代码。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🗄️</div>
+            <h4 class="pattern-title">Supabase</h4>
+            <p class="pattern-desc"><span class="term" data-definition="Supabase 是一个开源的'后端即服务'平台——开箱即用的数据库、用户登录、文件存储。可以理解成'谷歌网盘+SQL 数据库+登录系统'三合一。">Supabase</span> 是数据库+登录系统二合一——存数据、管用户，五分钟搞定后端。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🌳</div>
+            <h4 class="pattern-title">Git</h4>
+            <p class="pattern-desc"><span class="term" data-definition="Git 是版本管理系统——给你的项目存档每一步改动。出了问题能一键回滚到之前任何版本，团队协作不打架。">Git</span> 是代码的"时光机"——每一版改动都存档，不怕改坏。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🚀</div>
+            <h4 class="pattern-title">Vercel</h4>
+            <p class="pattern-desc"><span class="term" data-definition="Vercel 是一个网站部署平台——你把代码推上去，它自动给你生成一个公网链接，全世界都能访问。免费额度够个人项目长期用。">Vercel</span> 是上线发射器——push 一下，全世界 30 秒后能访问你的站。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">💳</div>
+            <h4 class="pattern-title">Stripe</h4>
+            <p class="pattern-desc"><span class="term" data-definition="Stripe 是一个国际支付服务商——帮你的产品收信用卡、订阅费、跨境支付。开发者圈最常用的支付方案。">Stripe</span> 是收银台——海外信用卡、订阅、退款，半天接完。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🔌</div>
+            <h4 class="pattern-title">MCP</h4>
+            <p class="pattern-desc"><span class="term" data-definition="MCP 是 Model Context Protocol 的缩写——让 AI 模型能调用外部工具（比如读文件、查数据库、发邮件）的标准协议。Anthropic 在 2024 年提出。">MCP</span> 是 AI 的"USB 接口"——让大模型能调你的工具、数据库、API。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">📚</div>
+            <h4 class="pattern-title">RAG</h4>
+            <p class="pattern-desc"><span class="term" data-definition="RAG 是 Retrieval Augmented Generation 的缩写——检索增强生成。先在你的私有资料库里找相关内容，再让大模型基于这些内容回答。让 AI 用'你的知识'说话。">RAG</span> 是"AI 的私域知识库"——把你的文档喂进去，AI 用你的资料回答。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">数据库一瞥：Supabase 建表的 SQL</h2>
+        <p>下面这段是 Supabase 里建一张"用户表"的 <span class="term" data-definition="SQL 是 Structured Query Language 的缩写——结构化查询语言。专门用来跟数据库说话的标准语法：建表、查数据、改数据、删数据。">SQL</span> 语句。看不懂没关系，右边白话告诉你它在干嘛：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">SUPABASE SCHEMA</span>
+<pre><code><span class="code-keyword">create table</span> <span class="code-function">users</span> (
+  <span class="code-property">id</span>         <span class="code-keyword">uuid</span> <span class="code-keyword">primary key</span>,
+  <span class="code-property">email</span>      <span class="code-keyword">text</span> <span class="code-keyword">unique not null</span>,
+  <span class="code-property">created_at</span> <span class="code-keyword">timestamp</span> <span class="code-keyword">default now</span>()
+);</code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">这段 SQL 在说啥</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>第 1 行：</strong>"建一个名叫 users 的表"——就像新建一张 Excel 工作表。</p>
+              <p class="tl"><strong>第 2 行：</strong>表里有一列叫 id，每个用户一个唯一编号。</p>
+              <p class="tl"><strong>第 3 行：</strong>有一列叫 email，每人一个、不能重复、不能空。</p>
+              <p class="tl"><strong>第 4 行：</strong>有一列叫 created_at，自动填进"这个用户什么时候注册的"。</p>
+              <p class="tl"><strong>整段意思：</strong>建一张用户表，每个用户记录"是谁、邮箱什么、什么时候来的"。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">跨平台：从浏览器到手机到桌面</h2>
+        <p>Stage 3 教程把"原型"扩展到三大跨平台分支——你可以选一个最贴近你目标用户的方向：</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-5)">💬</div>
+            <div>
+              <strong><span class="term" data-definition="微信小程序是只在微信里运行的轻量 App——不用下载、扫码即用。是国内做 toC 产品的最低门槛入口。">微信小程序</span></strong>
+              <p>不用下载、扫码即用、覆盖 14 亿微信用户——做国内 toC 产品的首选。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">📱</div>
+            <div>
+              <strong>Android · iOS（React Native）</strong>
+              <p>一套 JavaScript 代码，同时编译出安卓和苹果的原生 App——上架两个商店。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🖥️</div>
+            <div>
+              <strong><span class="term" data-definition="Electron 是用网页技术做桌面 App 的框架——VS Code、Discord、Slack 都是它做的。你写一遍前端，能在 Mac/Windows/Linux 都跑。">Electron</span> 桌面端</strong>
+              <p>把网页打包成 Mac/Windows 桌面 App——VS Code、Discord 都是这么来的。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">小测验：朋友想用你的 demo</h2>
+
+        <div class="quiz-container" id="quiz-m4">
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="对——部署到 Vercel 拿到一个公网链接，朋友点链接就能用；数据存 Supabase，他自己也能加任务还能保存。这才是'真产品'的最小形态。"
+               data-explanation-wrong="再想想——发 zip 让朋友本地跑，他还得装 Node、跑命令；截图根本不能用；让他来你电脑就更不现实。把它部署到公网才是答案。">
+            <h3 class="quiz-question">你今晚做了一个待办 demo，朋友想用——下一步最合理是？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>A. 部署到 Vercel（拿到公网链接），用 Supabase 存任务，发链接给他</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>B. 把整个项目打成 zip 发他，让他自己本地跑</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>C. 截几张图发给他看一下就行</span>
+              </button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>D. 让他来你电脑前用</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m4')">看看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m4')">再试一次</button>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">不必现在懂 MCP</strong>
+            <p>MCP / RAG / Stripe 都是 Stage 3 才需要碰的。你今天听过一次，下次别人提起时就不会陌生——这就是这模块的目标。</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

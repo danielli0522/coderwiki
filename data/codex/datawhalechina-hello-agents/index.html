@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hello Agents · 智能体入门地图</title>
+
+  <!-- Google Fonts: Bricolage Grotesque · DM Sans · JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <!--
+    CUSTOMIZE PER COURSE — change only the three accent variables below.
+    Options:
+      vermillion  #D94F30 / #C4432A / #FDEEE9 / #E8836C  (default)
+      coral       #E06B56 / #C85A47 / #FDECEA / #E89585
+      teal        #2A7B9B / #1F6280 / #E4F2F7 / #5A9DB8
+      amber       #D4A843 / #BF9530 / #FDF5E0 / #E0C070
+      forest      #2D8B55 / #226B41 / #E8F5EE / #5AAD7A
+  -->
+  <style>
+    :root {
+      --color-accent:       #2D8B55;
+      --color-accent-hover: #226B41;
+      --color-accent-light: #E8F5EE;
+      --color-accent-muted: #5AAD7A;
+      --toc-width: 260px;
+    }
+
+    /* ── TOC Sidebar ── */
+    .toc-sidebar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: var(--toc-width);
+      height: 100vh;
+      background: var(--color-surface);
+      border-left: 1px solid var(--color-border);
+      z-index: 1000;
+      transform: translateX(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: -4px 0 20px rgba(0,0,0,0.05);
+    }
+    .toc-sidebar.open {
+      transform: translateX(0);
+    }
+
+    .toc-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--color-border-light);
+      flex-shrink: 0;
+    }
+    .toc-header-title {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--color-text);
+    }
+    .toc-close {
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      padding: 4px;
+      line-height: 1;
+      border-radius: 6px;
+      transition: color 0.15s, background 0.15s;
+    }
+    .toc-close:hover {
+      color: var(--color-text);
+      background: var(--color-bg-warm);
+    }
+
+    .toc-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 0;
+      list-style: none;
+    }
+
+    .toc-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 20px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      border-left: 3px solid transparent;
+      text-decoration: none;
+    }
+    .toc-item:hover {
+      background: var(--color-bg-warm);
+    }
+    .toc-item.active {
+      background: var(--color-accent-light);
+      border-left-color: var(--color-accent);
+    }
+    .toc-item.active .toc-item-title {
+      color: var(--color-accent);
+      font-weight: 600;
+    }
+
+    .toc-item-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+      flex-shrink: 0;
+      background: var(--color-bg-warm);
+      color: var(--color-text-muted);
+      transition: background 0.15s, color 0.15s;
+    }
+    .toc-item.active .toc-item-num {
+      background: var(--color-accent);
+      color: #fff;
+    }
+
+    .toc-item-title {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      line-height: 1.3;
+      transition: color 0.15s;
+    }
+
+    /* Toggle button — inline in nav-dots */
+    .toc-toggle {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-secondary);
+      font-size: 14px;
+      padding: 0;
+      line-height: 1;
+      transition: color 0.15s;
+    }
+    .toc-toggle:hover {
+      color: var(--color-text);
+    }
+
+    /* Overlay for mobile */
+    .toc-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.2);
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .toc-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Adjust main content when sidebar open */
+    body.toc-open main,
+    body.toc-open nav {
+      margin-right: var(--toc-width);
+      transition: margin-right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @media (max-width: 768px) {
+      body.toc-open main,
+      body.toc-open nav {
+        margin-right: 0;
+      }
+      /* Keep nav-bar offset on mobile */
+      .module {
+        padding-top: calc(var(--nav-height) + var(--space-8)) !important;
+      }
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <!-- TOC Overlay (mobile) -->
+  <div class="toc-overlay" id="toc-overlay"></div>
+
+  <!-- TOC Sidebar -->
+  <aside class="toc-sidebar" id="toc-sidebar">
+    <div class="toc-header">
+      <span class="toc-header-title">目录</span>
+      <button class="toc-close" id="toc-close">✕</button>
+    </div>
+    <ul class="toc-list">
+      <li class="toc-item" data-target="module-1"><span class="toc-item-num">01</span><span class="toc-item-title">从第一个 Agent 任务说起</span></li>
+      <li class="toc-item" data-target="module-2"><span class="toc-item-num">02</span><span class="toc-item-title">智能体的核心角色</span></li>
+      <li class="toc-item" data-target="module-3"><span class="toc-item-num">03</span><span class="toc-item-title">消息与工具如何协作</span></li>
+      <li class="toc-item" data-target="module-4"><span class="toc-item-num">04</span><span class="toc-item-title">多智能体协作模式</span></li>
+      <li class="toc-item" data-target="module-5"><span class="toc-item-num">05</span><span class="toc-item-title">评测、记忆与安全</span></li>
+      <li class="toc-item" data-target="module-6"><span class="toc-item-num">06</span><span class="toc-item-title">架构选型指南</span></li>
+    </ul>
+  </aside>
+
+  <script>
+    // TOC logic
+    document.addEventListener('DOMContentLoaded', function() {
+      const sidebar = document.getElementById('toc-sidebar');
+      const toggle = document.getElementById('toc-toggle');
+      const close = document.getElementById('toc-close');
+      const overlay = document.getElementById('toc-overlay');
+      const items = document.querySelectorAll('.toc-item');
+      const modules = document.querySelectorAll('.module');
+
+      function openToc() {
+        sidebar.classList.add('open');
+        overlay.classList.add('visible');
+        document.body.classList.add('toc-open');
+      }
+      function closeToc() {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('visible');
+        document.body.classList.remove('toc-open');
+      }
+
+      if (toggle) toggle.addEventListener('click', () => {
+        sidebar.classList.contains('open') ? closeToc() : openToc();
+      });
+      if (close) close.addEventListener('click', closeToc);
+      if (overlay) overlay.addEventListener('click', closeToc);
+
+      items.forEach(item => {
+        item.addEventListener('click', () => {
+          const target = document.getElementById(item.dataset.target);
+          if (target) target.scrollIntoView({ behavior: 'smooth' });
+          if (window.innerWidth <= 768) closeToc();
+        });
+      });
+
+      function updateActiveToc() {
+        let current = 'module-1';
+        modules.forEach(mod => {
+          const rect = mod.getBoundingClientRect();
+          if (rect.top <= window.innerHeight / 3) {
+            current = mod.id;
+          }
+        });
+        items.forEach(item => {
+          item.classList.toggle('active', item.dataset.target === current);
+        });
+      }
+      window.addEventListener('scroll', () => {
+        requestAnimationFrame(updateActiveToc);
+      }, { passive: true });
+      updateActiveToc();
+    });
+  </script>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">Hello Agents · 智能体入门地图</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <!--
+          One <button> per module. Replace MODULE_N_NAME with the actual module title.
+
+          <button class="nav-dot" data-target="module-1" data-tooltip="MODULE_1_NAME" role="tab" aria-label="Module 1: MODULE_1_NAME"></button>
+          <button class="nav-dot" data-target="module-2" data-tooltip="MODULE_2_NAME" role="tab" aria-label="Module 2: MODULE_2_NAME"></button>
+          ...
+        -->
+        <button class="toc-toggle" id="toc-toggle" title="目录">☰</button>
+        <button class="nav-dot" data-target="module-1" data-tooltip="从第一个 Agent 任务说起" role="tab" aria-label="Module 1: 从第一个 Agent 任务说起"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="智能体的核心角色" role="tab" aria-label="Module 2: 智能体的核心角色"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="消息与工具如何协作" role="tab" aria-label="Module 3: 消息与工具如何协作"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="多智能体协作模式" role="tab" aria-label="Module 4: 多智能体协作模式"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="评测、记忆与安全" role="tab" aria-label="Module 5: 评测、记忆与安全"></button>
+        <button class="nav-dot" data-target="module-6" data-tooltip="架构选型指南" role="tab" aria-label="Module 6: 架构选型指南"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh -->
+
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">从第一个 Agent 任务说起</h1>
+      <p class="module-subtitle">你用 AI 写过文案、回答过问题——但当你需要 AI 自己去"查资料再回答"时，它就不行了。这就是 Agent 要解决的问题。</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: What is this project? -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">这个项目在做什么？</h2>
+        <p>想象你问 AI："华为最新手机是什么？它的主要卖点是什么？"</p>
+        <p>普通 AI 只能靠训练数据里已有的知识来猜。但如果它<strong>能自己上网搜索</strong>，拿到最新信息再回答你，那就完全不同了。</p>
+        <p><strong>Hello-Agents</strong> 就是在教你构建这样的系统——一个能<strong>自主思考、调用工具、获取信息、做出决策</strong>的
+          <span class="term" data-definition="Agent（智能体）= 一个能感知环境、自主决策并采取行动的 AI 程序。和普通聊天机器人不同，它能主动使用工具、记忆上下文、多步推理。">智能体</span>。
+        </p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">核心理念：从"使用者"到"构建者"</strong>
+            <p>这个项目的口号是让你从大语言模型的"使用者"蜕变为智能体系统的"构建者"。整本书围绕一个目标：让你亲手用代码搭建出能自主行动的 AI。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: The first agent — ELIZA -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">最早的"智能体"：ELIZA</h2>
+        <p>智能体的历史可以追溯到 1966 年的 <strong>ELIZA</strong>——一个用
+          <span class="term" data-definition="正则表达式（Regex）是一种文本模式匹配工具，就像在文档里用通配符搜索特定格式的文字。">正则表达式</span>
+          模拟心理治疗师的程序。它的核心思路是：匹配用户输入的句式，然后套用模板回复。
+        </p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment"># ELIZA 的规则库：模式 -&gt; 回复模板</span></span>
+<span class="code-line"><span class="code-keyword">rules</span> = {</span>
+<span class="code-line">    <span class="code-string">r'I need (.*)'</span>: [</span>
+<span class="code-line">        <span class="code-string">"Why do you need {0}?"</span>,</span>
+<span class="code-line">        <span class="code-string">"Would it really help you to get {0}?"</span>,</span>
+<span class="code-line">    ],</span>
+<span class="code-line">    <span class="code-string">r'I am (.*)'</span>: [</span>
+<span class="code-line">        <span class="code-string">"Did you come to me because you are {0}?"</span>,</span>
+<span class="code-line">        <span class="code-string">"How long have you been {0}?"</span>,</span>
+<span class="code-line">    ],</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN CHINESE</span>
+            <div class="translation-lines">
+              <p class="tl">定义一个字典（键值对集合），键是正则匹配模式，值是回复模板列表。</p>
+              <p class="tl">当用户说 "I need xxx" 时触发这条规则，{0} 会被替换为 xxx 的内容。</p>
+              <p class="tl">提供多个备选回复，让对话看起来不那么机械。</p>
+              <p class="tl">另一条规则：匹配 "I am xxx"，然后追问关于这个状态的问题。</p>
+              <p class="tl">ELIZA 的关键在于它不做真正的"理解"——只是匹配模式、填模板。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">📖</div>
+          <div class="callout-content">
+            <strong class="callout-title">知识卡片：从规则到智能</strong>
+            <p>ELIZA 用固定的"如果用户说 X，就回 Y"规则。现代 Agent 用
+              <span class="term" data-definition="LLM（大语言模型）是像 GPT、Qwen 这样的大规模 AI 模型，能理解并生成自然语言文本。">LLM</span>
+              来"理解"用户意图，然后自己决定该做什么。从"写死的规则"到"自主推理"，这是 60 年智能体进化最核心的变化。
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: The ReAct loop -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">智能体的心脏：思考-行动循环</h2>
+        <p>Hello-Agents 项目中最核心的模式叫 <strong>ReAct</strong>（Reasoning + Acting）。它让 AI 交替地"思考"和"行动"，像一个人在解题：先想清楚下一步做什么，然后去做，再根据结果继续想。</p>
+
+        <div class="flow-animation animate-in" data-steps='[
+          {"highlight":"flow-actor-1","label":"用户提出问题：华为最新手机是什么？"},
+          {"highlight":"flow-actor-2","label":"Agent 思考(Thought)：我需要搜索最新信息"},
+          {"highlight":"flow-actor-2","label":"Agent 决定行动(Action)：调用搜索工具","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-3","label":"工具返回搜索结果(Observation)"},
+          {"highlight":"flow-actor-2","label":"Agent 思考：信息足够了，可以回答","packet":true,"from":"actor-3","to":"actor-2"},
+          {"highlight":"flow-actor-2","label":"Agent 输出最终答案(Finish)"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">👤</div>
+              <span>用户</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">🤖</div>
+              <span>Agent</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">🔧</div>
+              <span>工具</span>
+            </div>
+          </div>
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击"Next Step"查看 ReAct 循环的每一步</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">Next Step</button>
+            <button class="btn flow-reset-btn">Restart</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+
+        <p>每一步，Agent 都遵循 <strong>Thought → Action → Observation</strong> 三段式循环，直到收集到足够信息输出最终答案。</p>
+      </section>
+
+      <!-- Screen 4: Quiz -->
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="对！ReAct 的核心是 Thought-Action-Observation 循环。Agent 先思考，再行动，再观察结果，然后继续循环直到能给出最终答案。"
+               data-explanation-wrong="想想 ReAct 这个名字——Reasoning + Acting。Agent 需要交替进行思考和行动，而不是一次性给出答案或无脑调用工具。">
+            <h3 class="quiz-question">你正在设计一个 Agent 来帮用户查询天气并推荐景点。它应该怎么工作？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>用户提问 → Agent 直接用训练知识回答，不查实时数据</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>用户提问 → Agent 思考需要查天气 → 调用天气 API → 观察结果 → 推荐景点</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>用户提问 → Agent 同时调用所有可能的工具，最后汇总回答</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">智能体的核心角色</h1>
+      <p class="module-subtitle">一个智能体系统就像一支乐队：有人负责思考，有人负责干活，有人负责记忆。认识这些角色是理解整个代码库的第一步。</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Meet the actors -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码库里的"角色表"</h2>
+        <p>打开 Hello-Agents 的 <code>code/chapter7/</code> 目录，你会看到几个核心文件。每个文件扮演一个角色：</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🧠</div>
+            <div>
+              <strong>my_llm.py — 大脑</strong>
+              <p>封装了
+                <span class="term" data-definition="OpenAI API 是 OpenAI 公司提供的云端接口，开发者通过 HTTP 请求调用 GPT 等模型的能力。市面上大部分 AI 公司都兼容这个接口格式。">OpenAI 兼容接口</span>
+                的调用逻辑，负责把消息发给 LLM、拿回回复
+              </p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🔧</div>
+            <div>
+              <strong>my_calculator_tool.py — 工具</strong>
+              <p>定义了 Agent 可以调用的工具（搜索、计算器等），是 Agent 的"手和脚"</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🤖</div>
+            <div>
+              <strong>my_react_agent.py — 决策者</strong>
+              <p>实现 ReAct 循环：调用 LLM 思考 → 解析出要执行的工具 → 执行工具 → 把结果喂回 LLM → 循环</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">🎯</div>
+            <div>
+              <strong>my_simple_agent.py — 基础版</strong>
+              <p>更简单的 Agent 变体，支持纯对话和可选的工具调用，适合理解基本结构</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: LLM Client deep dive -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">大脑如何工作：LLM 客户端</h2>
+        <p>所有 Agent 的"智能"都来自一个统一的大脑——<code>HelloAgentsLLM</code> 类。它封装了与
+          <span class="term" data-definition="流式响应（Streaming）指服务器边生成边发送内容，就像水龙头流水，而不是等整桶水装满才给你。用户能看到文字一个字一个字出现。">流式响应</span>。
+        </p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">HelloAgentsLLM</span>:</span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(<span class="code-keyword">self</span>, model, apiKey, baseUrl):</span>
+<span class="code-line">        <span class="code-keyword">self</span>.model = model</span>
+<span class="code-line">        <span class="code-keyword">self</span>.client = <span class="code-function">OpenAI</span>(</span>
+<span class="code-line">            api_key=apiKey,</span>
+<span class="code-line">            base_url=baseUrl</span>
+<span class="code-line">        )</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">think</span>(<span class="code-keyword">self</span>, messages):</span>
+<span class="code-line">        response = <span class="code-keyword">self</span>.client.chat.completions.<span class="code-function">create</span>(</span>
+<span class="code-line">            model=<span class="code-keyword">self</span>.model,</span>
+<span class="code-line">            messages=messages,</span>
+<span class="code-line">            stream=<span class="code-keyword">True</span>,</span>
+<span class="code-line">        )</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN CHINESE</span>
+            <div class="translation-lines">
+              <p class="tl">定义一个 LLM 客户端类，管理"用哪个模型"和"怎么连接"。</p>
+              <p class="tl">构造函数接收模型名称、API 密钥和服务地址三个关键参数。</p>
+              <p class="tl">使用 OpenAI 库创建客户端实例——关键是 base_url 可以指向任何兼容服务。</p>
+              <p class="tl">think 方法是核心：把对话历史发给模型，获取回复。</p>
+              <p class="tl">stream=True 开启流式输出，让回复像打字机一样逐字返回。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Group Chat -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">角色之间的对话</h2>
+        <p>当一个用户向 Agent 提问时，各角色之间会发生这样的对话：</p>
+
+        <div class="chat-window" id="chat-module2">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="user" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">👤</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">用户</span>
+                <p>帮我查一下北京今天的天气，然后推荐一个适合的景点</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="agent" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🤖</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Agent</span>
+                <p>收到！让我先思考一下...我需要先查询北京今天的天气数据，然后再根据天气推荐景点。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="agent" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🤖</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Agent</span>
+                <p>我决定调用 get_weather 工具，参数是 city="北京"</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="tool" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">🔧</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">工具</span>
+                <p>北京当前天气：晴，气温 28 摄氏度</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="agent" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🤖</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Agent</span>
+                <p>天气不错！我再去搜索一下适合晴天去的景点...</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="5" data-sender="agent" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🤖</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Agent</span>
+                <p>Finish[北京今天晴天 28 度，推荐去颐和园赏荷花，或去奥林匹克公园骑行！]</p>
+              </div>
+            </div>
+          </div>
+          <div class="chat-typing" id="chat-module2-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module2-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">Next Message</button>
+            <button class="btn chat-all-btn">Play All</button>
+            <button class="btn chat-reset-btn">Replay</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Quiz -->
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="没错！LLM 客户端是所有 Agent 共用的大脑。不同的 Agent（SimpleAgent、ReActAgent）只是不同的"思考策略"，但它们都通过同一个 LLM 客户端来与模型通信。"
+               data-explanation-wrong="仔细看看代码结构——HelloAgentsLLM 是被所有 Agent 共用的。不同的 Agent 类型（Simple、ReAct）代表不同的决策策略，但底层都用同一个 LLM 客户端发请求。">
+            <h3 class="quiz-question">如果你要给系统添加一个新的 Agent 类型（比如一个专门做翻译的 Agent），你需要重写 LLM 客户端吗？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>需要，每个 Agent 都要有自己独立的 LLM 客户端</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>需要，因为不同 Agent 可能用不同的 API 格式</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>不需要，所有 Agent 共用同一个 HelloAgentsLLM 客户端</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">消息与工具如何协作</h1>
+      <p class="module-subtitle">Agent 不只是调用 LLM 那么简单——它要解析 LLM 的输出、识别工具调用请求、执行工具、再把结果喂回去。这是一条精密的数据流水线。</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Prompt Template -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">给 AI 的"工作手册"：Prompt 模板</h2>
+        <p>Agent 不会"天生"知道怎么调用工具。我们通过一个精心设计的
+          <span class="term" data-definition="Prompt 模板是一段预写好的指令文本，包含占位符（如 {question}），运行时会被替换为实际内容。就像一份填空表格。">Prompt 模板</span>
+          来告诉 LLM："你有哪些工具可用，以及该怎么调用它们。"
+        </p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line">REACT_PROMPT_TEMPLATE = <span class="code-string">"""</span></span>
+<span class="code-line"><span class="code-string">你是一个有能力调用外部工具的智能助手。</span></span>
+<span class="code-line"><span class="code-string">可用工具如下：</span></span>
+<span class="code-line"><span class="code-string">{tools}</span></span>
+<span class="code-line"><span class="code-string"></span></span>
+<span class="code-line"><span class="code-string">请严格按照以下格式进行回应：</span></span>
+<span class="code-line"><span class="code-string">Thought: 你的思考过程</span></span>
+<span class="code-line"><span class="code-string">Action: tool_name[tool_input]</span></span>
+<span class="code-line"><span class="code-string">  或 Finish[最终答案]</span></span>
+<span class="code-line"><span class="code-string">"""</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN CHINESE</span>
+            <div class="translation-lines">
+              <p class="tl">这是一段多行字符串，作为发给 LLM 的系统指令。</p>
+              <p class="tl">先告诉 LLM 它的角色定位：一个能调用外部工具的助手。</p>
+              <p class="tl">{tools} 是占位符，运行时会被替换为实际可用的工具描述。</p>
+              <p class="tl">核心规则：要求 LLM 严格遵循 Thought/Action 的输出格式。</p>
+              <p class="tl">Action 有两种形式：调用工具 或 直接输出最终答案（Finish）。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Prompt 工程 = 写合同</strong>
+            <p>这个模板本质上是一份"合同"——你和 LLM 约定好了它的输出格式。只要它遵守格式，你的代码就能解析出"它想做什么"。如果格式乱了，整个系统就崩了。这就是为什么模板里的措辞要非常精确。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Parsing the output -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">解析 AI 的"意图"</h2>
+        <p>LLM 返回一段文本，代码需要从中提取出"思考了什么"和"要做什么"。这靠的是
+          <span class="term" data-definition="正则匹配（Regex Matching）就是在一堆文字里按照特定模式搜索。比如搜索 'Thought: 后面跟着任意文字'。">正则表达式</span>。
+        </p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">_parse_output</span>(<span class="code-keyword">self</span>, text: <span class="code-keyword">str</span>):</span>
+<span class="code-line">    thought_match = re.<span class="code-function">search</span>(</span>
+<span class="code-line">        <span class="code-string">r"Thought:\s*(.*?)(?=\nAction:|$)"</span>,</span>
+<span class="code-line">        text, re.DOTALL)</span>
+<span class="code-line">    action_match = re.<span class="code-function">search</span>(</span>
+<span class="code-line">        <span class="code-string">r"Action:\s*(.*?)$"</span>,</span>
+<span class="code-line">        text, re.DOTALL)</span>
+<span class="code-line">    <span class="code-keyword">return</span> thought, action</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN CHINESE</span>
+            <div class="translation-lines">
+              <p class="tl">接收 LLM 输出的完整文本，开始解析。</p>
+              <p class="tl">用正则找 "Thought:" 后面的内容，一直匹配到 "Action:" 或文本末尾。</p>
+              <p class="tl">re.DOTALL 让点号也能匹配换行符——因为思考内容可能跨行。</p>
+              <p class="tl">同样用正则找 "Action:" 后面的内容到文本末尾。</p>
+              <p class="tl">返回提取到的 thought（思考内容）和 action（行动指令）。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Tool execution flow -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">工具注册与执行</h2>
+        <p>在 Agent 运行之前，你需要先"注册"可用的工具。就像给新员工配工位上的工具箱——他不认识的工具就不能用。</p>
+
+        <div class="step-cards animate-in">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>定义工具函数</strong>
+              <p>写一个普通的 Python 函数，比如 <code>search(query)</code>，接收参数、返回结果</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>注册到 ToolExecutor</strong>
+              <p>调用 <code>registerTool("Search", description, search)</code>，给它起个名字和描述</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Agent 自动发现</strong>
+              <p>Prompt 模板里的 {tools} 会被替换为所有已注册工具的描述，LLM 就知道有什么可用</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>按名字调用</strong>
+              <p>LLM 输出 <code>Action: Search[华为最新手机]</code>，代码用名字查到对应函数并执行</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">📖</div>
+          <div class="callout-content">
+            <strong class="callout-title">工具调用格式的演变</strong>
+            <p>第 4 章用 <code>tool_name[input]</code> 这种自定义格式。第 7 章进化到 <code>[TOOL_CALL:name:params]</code> 标签。再到后来用 OpenAI 原生的
+              <span class="term" data-definition="Function Calling 是 OpenAI 提供的一种机制，LLM 可以结构化地输出"我想调用哪个函数、传什么参数"，而不是让开发者去解析文本。">Function Calling</span>。
+              越来越标准，越来越不容易出错。
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Quiz -->
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="对！Prompt 模板是 Agent 和 LLM 之间的协议。它告诉 LLM 有哪些工具、该怎么格式化输出。如果 LLM 不遵守格式，_parse_output 就无法正确解析 Action。"
+               data-explanation-wrong="仔细看代码——Prompt 模板包含了工具描述和输出格式要求，它是让 LLM 知道怎么调用工具的关键。没有它，LLM 只会输出普通对话文本，不会产生 Thought/Action 结构。">
+            <h3 class="quiz-question">如果 LLM 没有按照 "Thought: ... Action: ..." 格式输出，Agent 会发生什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>没关系，Agent 会自动理解 LLM 的意思</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>解析失败，_parse_output 返回 None，Agent 无法继续执行</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Agent 会忽略格式问题，直接把 LLM 输出当作最终答案</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">多智能体协作模式</h1>
+      <p class="module-subtitle">一个人做不了所有事。当任务变复杂，你需要多个 Agent 分工合作——就像公司里有不同部门各司其职。</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Three classic paradigms -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">三种经典的"思考方式"</h2>
+        <p>Hello-Agents 教你实现三种智能体范式，每种解决不同类型的问题：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-accent-light); color: var(--color-accent)">🔄</div>
+            <h4 class="pattern-title">ReAct</h4>
+            <p class="pattern-desc">边想边做。每一步都先思考再行动，观察结果后继续。像侦探破案：发现线索 → 顺着线索查 → 发现新线索 → 继续追查。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light); color: var(--color-info)">📋</div>
+            <h4 class="pattern-title">Plan-and-Solve</h4>
+            <p class="pattern-desc">先做计划再执行。把大任务拆成小步骤，然后逐步完成。像旅行攻略：先列清单（订票→找房→打包），再逐项执行。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: #EDE9FE; color: #7B6DAA">🪞</div>
+            <h4 class="pattern-title">Reflection</h4>
+            <p class="pattern-desc">做完之后自我检查。生成一个答案，然后让 AI 审视自己的答案，找出问题并改进。像学生写完作文后自己检查一遍。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: ReAct code walkthrough -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">ReAct 循环的核心代码</h2>
+        <p>ReAct Agent 的核心是一个 <code>while</code> 循环——每一步都把 Prompt 发给 LLM，解析输出，执行工具，把观察结果追加到历史里，再循环。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">run</span>(<span class="code-keyword">self</span>, question: <span class="code-keyword">str</span>):</span>
+<span class="code-line">    current_step = <span class="code-number">0</span></span>
+<span class="code-line">    <span class="code-keyword">while</span> current_step &lt; <span class="code-keyword">self</span>.max_steps:</span>
+<span class="code-line">        prompt = TEMPLATE.<span class="code-function">format</span>(</span>
+<span class="code-line">            tools=tools_desc,</span>
+<span class="code-line">            question=question,</span>
+<span class="code-line">            history=history_str)</span>
+<span class="code-line">        response = llm.<span class="code-function">think</span>(messages)</span>
+<span class="code-line">        thought, action = <span class="code-function">_parse</span>(response)</span>
+<span class="code-line">        <span class="code-keyword">if</span> action.<span class="code-function">startswith</span>(<span class="code-string">"Finish"</span>):</span>
+<span class="code-line">            <span class="code-keyword">return</span> final_answer</span>
+<span class="code-line">        observation = tool_func(tool_input)</span>
+<span class="code-line">        history.<span class="code-function">append</span>(f<span class="code-string">"Observation: {observation}"</span>)</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN CHINESE</span>
+            <div class="translation-lines">
+              <p class="tl">Agent 的运行方法，接收用户的问题作为输入。</p>
+              <p class="tl">用一个计数器跟踪当前执行到第几步，防止无限循环。</p>
+              <p class="tl">把工具描述、问题、历史拼装成完整的 Prompt 发给 LLM。</p>
+              <p class="tl">从 LLM 的回复中解析出 thought 和 action 两个字段。</p>
+              <p class="tl">如果 LLM 觉得信息够了（action 以 Finish 开头），直接返回最终答案。</p>
+              <p class="tl">否则执行工具，把观察结果追加到对话历史中，下一轮继续。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Multi-agent architectures -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">当多个 Agent 组成团队</h2>
+        <p>Hello-Agents 的后半部分展示了真实的
+          <span class="term" data-definition="多智能体系统（Multi-Agent System）是由多个 Agent 协作完成任务的系统。每个 Agent 有自己的角色和职责，通过通信协议协调工作。">多智能体系统</span>：
+          旅行助手里有"搜索 Agent"和"规划 Agent"；赛博小镇里有多个"居民 Agent"互相社交。
+        </p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: #FDF5E0; color: #D4A843">🗺️</div>
+            <h4 class="pattern-title">智能旅行助手（Ch.13）</h4>
+            <p class="pattern-desc">用 MCP 协议连接地图服务、景点搜索等多个工具，Agent 自动规划旅行路线。后端 Python + 前端 Vue。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: #E8F5EE; color: #2D8B55">🏘️</div>
+            <h4 class="pattern-title">赛博小镇（Ch.15）</h4>
+            <p class="pattern-desc">多个 AI 角色住在同一个虚拟小镇里，各自有记忆系统、关系网络，能自主移动和对话。后端 Python + 前端 Godot 游戏引擎。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-accent-light); color: var(--color-accent)">🔬</div>
+            <h4 class="pattern-title">深度研究 Agent（Ch.14）</h4>
+            <p class="pattern-desc">自动化的研究助手：搜索论文、总结内容、生成报告。展示了 Planner → Searcher → Reporter 的流水线分工。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Quiz -->
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="正确！ReAct 用 while 循环不断"思考→行动→观察"，Plan-and-Solve 先做计划再逐步执行，Reflection 生成答案后自我审查。三者解决的是不同类型的问题。"
+               data-explanation-wrong="三种范式的区别在于"思考方式"不同：ReAct 是边想边做（循环），Plan-and-Solve 是先想后做（计划→执行），Reflection 是做完再想（自我审查）。">
+            <h3 class="quiz-question">你要做一个"自动写代码并调试"的 Agent。哪种范式最合适？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>ReAct + Reflection 结合：先用 ReAct 循环写代码和测试，再用 Reflection 审查结果</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>只用 Plan-and-Solve：先列出所有代码文件，然后逐个生成</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>只用 Reflection：生成一次代码，然后让 AI 自己找出所有 bug</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">评测、记忆与安全</h1>
+      <p class="module-subtitle">让 Agent "能做事"只是第一步。真正的挑战是：怎么确保它做得好？怎么让它记住过去的经验？怎么防止它被恶意利用？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Memory systems -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">给 Agent 装上"记忆"</h2>
+        <p>没有记忆的 Agent 就像金鱼——每次对话都从零开始。Hello-Agents 第 8 章深入讲解了
+          <span class="term" data-definition="记忆系统（Memory System）是 Agent 保存和检索过去信息的能力。分为短期记忆（本次对话上下文）和长期记忆（跨会话的知识积累）。">记忆系统</span>：
+        </p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light); color: var(--color-info)">📝</div>
+            <h4 class="pattern-title">短期记忆</h4>
+            <p class="pattern-desc">就是当前对话的上下文历史。每次调用 LLM 都带上之前的消息列表。用 <code>self._history</code> 存储在代码里。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: #EDE9FE; color: #7B6DAA">🗄️</div>
+            <h4 class="pattern-title">长期记忆</h4>
+            <p class="pattern-desc">跨对话的知识持久化。用 <code>MemoryTool</code> 把重要信息存储到数据库，下次对话时可以检索。赛博小镇里的 NPC 就靠这个记住"昨天和张三聊了什么"。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: #E8F5EE; color: #2D8B55">🔍</div>
+            <h4 class="pattern-title">RAG 检索</h4>
+            <p class="pattern-desc"><span class="term" data-definition="RAG（检索增强生成）= 先从知识库搜索相关内容，再把搜索结果作为上下文喂给 LLM。像开卷考试——先翻书找到相关段落，再回答问题。">RAG</span> 让 Agent 能从海量文档中精准找到需要的信息，而不是把所有内容都塞进上下文。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Evaluation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">怎么知道 Agent 做得好不好？</h2>
+        <p>第 12 章讲了一个关键问题：
+          <span class="term" data-definition="智能体评估（Agent Evaluation）是用标准化的测试集和指标来衡量 Agent 性能的过程。就像学生考试一样，有固定的题目和评分标准。">智能体评估</span>。
+          项目引入了 BFCL 和 GAIA 两个评估基准。
+        </p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment"># BFCL 评估：测试 function calling 能力</span></span>
+<span class="code-line"><span class="code-keyword">from</span> bfcl <span class="code-keyword">import</span> evaluate_agent</span>
+<span class="code-line"></span>
+<span class="code-line">result = <span class="code-function">evaluate_agent</span>(</span>
+<span class="code-line">    agent=my_agent,</span>
+<span class="code-line">    test_cases=[</span>
+<span class="code-line">        {<span class="code-string">"input"</span>: <span class="code-string">"北京的天气"</span>,</span>
+<span class="code-line">         <span class="code-string">"expected_tool"</span>: <span class="code-string">"get_weather"</span>,</span>
+<span class="code-line">         <span class="code-string">"expected_args"</span>: {<span class="code-string">"city"</span>: <span class="code-string">"北京"</span>}},</span>
+<span class="code-line">    ]</span>
+<span class="code-line">)</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN CHINESE</span>
+            <div class="translation-lines">
+              <p class="tl">BFCL 专门测试 Agent 的 function calling 能力——它是否选对了工具。</p>
+              <p class="tl">每个测试用例定义了输入、期望调用的工具名和期望的参数。</p>
+              <p class="tl">评估器会对比 Agent 实际调用的工具和期望工具是否一致。</p>
+              <p class="tl">参数也要匹配——Agent 不能调对工具但传错参数。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">常见陷阱：只测正确率</strong>
+            <p>很多人只看"Agent 回答对了几个问题"。但真正重要的是：<strong>它在什么情况下会出错？</strong> 是工具选择错了？参数传错了？还是根本没意识到需要用工具？分类统计错误类型，才能有针对性地改进。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Context Engineering -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">上下文工程：喂什么给 AI 很关键</h2>
+        <p>第 9 章提出了一个重要概念：<strong>上下文工程</strong>——精心设计每次发给 LLM 的信息，让它能做出最好的决策。</p>
+
+        <div class="step-cards animate-in">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>选什么信息放进 Prompt</strong>
+              <p>不是所有历史消息都有用。要选择最相关的事实、最近的对话、最适合的工具描述</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>控制信息的顺序和格式</strong>
+              <p>把重要信息放在 Prompt 开头或结尾（LLM 对这些位置更敏感），用清晰的分隔符区分不同部分</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>管理 Token 预算</strong>
+              <p>LLM 有
+                <span class="term" data-definition="Token 是 LLM 处理文字的最小单位。一个中文字大约是 1-2 个 token。每次调用有最大 token 上限（如 8K、128K），超过就要截断。">Token</span>
+                上限。上下文越长，成本越高，延迟越大。要像理财一样管理你的 token 预算
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Quiz -->
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-module5">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="对！RAG 的核心是"先检索再生成"——从知识库搜索相关内容，把搜索结果作为上下文喂给 LLM，然后让 LLM 基于这些真实数据回答。这比让 LLM 凭记忆回答准确得多。"
+               data-explanation-wrong="回忆一下 RAG 的含义：Retrieval-Augmented Generation（检索增强生成）。它的核心是先用搜索引擎找到相关文档，再把文档内容提供给 LLM 作为参考资料。">
+            <h3 class="quiz-question">你的 Agent 需要回答关于公司内部文档的问题。哪种方法最靠谱？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>把所有文档都放进系统 Prompt，让 LLM 每次都读全部内容</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>用 Function Calling 让 LLM 自己决定什么时候查文档</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>用 RAG：先把文档向量化存储，每次根据问题检索最相关的片段，再喂给 LLM</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+
+<section class="module" id="module-6" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">06</span>
+      <h1 class="module-title">架构选型指南</h1>
+      <p class="module-subtitle">你是技术负责人，需要决定是否采用 Hello-Agents 的方案来构建智能体。这里给你一份决策参考。</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Problem + Philosophy -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">它解决什么问题？核心哲学是什么？</h2>
+        <p>Hello-Agents 面向的是<strong>从零构建 AI Native Agent</strong> 这个需求——不是用 Dify/Coze 拖拽搭建流程式 Agent，而是用代码亲手实现能自主推理和行动的 AI。</p>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">问题定位</code>
+            <span class="badge-desc">系统性、重实践的智能体构建教程极度匮乏，新手不知从何入手</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">核心哲学</code>
+            <span class="badge-desc">AI Native Agent（非流程驱动）+ 从代码层面理解原理 + 亲手构建而非调 API</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">教学路线</code>
+            <span class="badge-desc">16 章从 ELIZA 到赛博小镇，基础理论 → 经典范式 → 框架实战 → 综合项目</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">代码量</code>
+            <span class="badge-desc">覆盖 Python + Vue + Godot 三种技术栈，含 15+ 章配套完整可运行代码</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Comparison with alternatives -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">与替代方案的对比</h2>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">📊</div>
+          <div class="callout-content">
+            <p>一句话区分：Hello-Agents 教你<strong>用代码从零构建</strong>智能体；Dify/Coze 让你<strong>用拖拽配置</strong>智能体；LangChain 提供<strong>现成的框架库</strong>。</p>
+          </div>
+        </div>
+
+        <table style="width:100%; border-collapse:collapse; margin: var(--space-6) 0; font-size: var(--text-sm); box-shadow: var(--shadow-sm); border-radius: var(--radius-md); overflow: hidden;">
+          <thead>
+            <tr style="background: var(--color-bg-warm)">
+              <th style="padding: var(--space-3) var(--space-4); text-align:left; font-family: var(--font-mono); font-size: var(--text-xs); text-transform:uppercase; letter-spacing:0.05em; color: var(--color-text-muted);">维度</th>
+              <th style="padding: var(--space-3) var(--space-4); text-align:left; font-family: var(--font-mono); font-size: var(--text-xs); text-transform:uppercase; letter-spacing:0.05em; color: var(--color-text-muted);">Hello-Agents</th>
+              <th style="padding: var(--space-3) var(--space-4); text-align:left; font-family: var(--font-mono); font-size: var(--text-xs); text-transform:uppercase; letter-spacing:0.05em; color: var(--color-text-muted);">LangChain/LangGraph</th>
+              <th style="padding: var(--space-3) var(--space-4); text-align:left; font-family: var(--font-mono); font-size: var(--text-xs); text-transform:uppercase; letter-spacing:0.05em; color: var(--color-text-muted);">Dify/Coze/n8n</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid var(--color-border-light)">
+              <td style="padding: var(--space-3) var(--space-4); font-weight:600;">学习方式</td>
+              <td style="padding: var(--space-3) var(--space-4);">
+                <ul style="margin:0;padding-left:var(--space-4)"><li>逐章动手写代码</li><li>从原理到实现全链路</li></ul>
+              </td>
+              <td style="padding: var(--space-3) var(--space-4);">
+                <ul style="margin:0;padding-left:var(--space-4)"><li>读文档 + 看示例</li><li>理解抽象层设计</li></ul>
+              </td>
+              <td style="padding: var(--space-3) var(--space-4);">
+                <ul style="margin:0;padding-left:var(--space-4)"><li>拖拽式可视化配置</li><li>无需写代码</li></ul>
+              </td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--color-border-light); background: var(--color-surface)">
+              <td style="padding: var(--space-3) var(--space-4); font-weight:600;">控制粒度</td>
+              <td style="padding: var(--space-3) var(--space-4);">
+                <ul style="margin:0;padding-left:var(--space-4)"><li>完全自定义</li><li>可修改每行代码</li></ul>
+              </td>
+              <td style="padding: var(--space-3) var(--space-4);">
+                <ul style="margin:0;padding-left:var(--space-4)"><li>框架约束内自定义</li><li>扩展点有限</li></ul>
+              </td>
+              <td style="padding: var(--space-3) var(--space-4);">
+                <ul style="margin:0;padding-left:var(--space-4)"><li>平台能力范围内</li><li>受限于节点类型</li></ul>
+              </td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--color-border-light)">
+              <td style="padding: var(--space-3) var(--space-4); font-weight:600;">上手难度</td>
+              <td style="padding: var(--space-3) var(--space-4);">
+                <ul style="margin:0;padding-left:var(--space-4)"><li>中等，需要 Python 基础</li><li>有保姆级教程</li></ul>
+              </td>
+              <td style="padding: var(--space-3) var(--space-4);">
+                <ul style="margin:0;padding-left:var(--space-4)"><li>较高，需理解框架概念</li><li>文档丰富但分散</li></ul>
+              </td>
+              <td style="padding: var(--space-3) var(--space-4);">
+                <ul style="margin:0;padding-left:var(--space-4)"><li>低，适合非技术人员</li><li>快速出原型</li></ul>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: var(--space-3) var(--space-4); font-weight:600;">生产就绪</td>
+              <td style="padding: var(--space-3) var(--space-4);">
+                <ul style="margin:0;padding-left:var(--space-4)"><li>教学代码，需改造</li><li>适合学习和原型</li></ul>
+              </td>
+              <td style="padding: var(--space-3) var(--space-4);">
+                <ul style="margin:0;padding-left:var(--space-4)"><li>有生产部署案例</li><li>社区生态成熟</li></ul>
+              </td>
+              <td style="padding: var(--space-3) var(--space-4);">
+                <ul style="margin:0;padding-left:var(--space-4)"><li>平台托管运维</li><li>受限于平台稳定性</li></ul>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Screen 3: Suitable vs Not-suitable -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">适合 vs 不适合的场景</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); margin: var(--space-6) 0;">
+          <div style="background: var(--color-success-light); border-radius: var(--radius-md); padding: var(--space-6); border: 1px solid var(--color-success);">
+            <h4 style="color: var(--color-success); margin-bottom: var(--space-4); font-family: var(--font-display);">✅ 适合</h4>
+            <ul style="padding-left: var(--space-5); color: var(--color-text-secondary); line-height: 1.8;">
+              <li>想从零理解 Agent 原理的学习者</li>
+              <li>需要高度定制化的 Agent 场景</li>
+              <li>有 Python 基础的技术人员</li>
+              <li>研究性项目或学术实验</li>
+              <li>想成为 AI 工程师的转型者</li>
+            </ul>
+          </div>
+          <div style="background: var(--color-error-light); border-radius: var(--radius-md); padding: var(--space-6); border: 1px solid var(--color-error);">
+            <h4 style="color: var(--color-error); margin-bottom: var(--space-4); font-family: var(--font-display);">❌ 不适合</h4>
+            <ul style="padding-left: var(--space-5); color: var(--color-text-secondary); line-height: 1.8;">
+              <li>没有任何编程基础的人</li>
+              <li>需要 5 分钟快速搭建 Agent 的场景</li>
+              <li>企业级高可用生产环境（直接用框架）</li>
+              <li>只想要流程编排（用 Dify/Coze 更好）</li>
+              <li>需要大规模并发处理</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Hard limits from source code -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">从源码中提取的硬限制</h2>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">max_steps = 5</code>
+            <span class="badge-desc">ReAct Agent 默认最大循环步数。防止无限循环，但复杂任务可能不够用（可在初始化时修改）</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">max_tool_iterations = 3</code>
+            <span class="badge-desc">SimpleAgent 的工具调用最大轮次。每次调用 LLM → 检查工具调用 → 执行 → 喂回结果，最多 3 轮</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">temperature = 0</code>
+            <span class="badge-desc">默认温度为 0（最确定性的输出）。Agent 需要可预测的行为，不适合高创造性场景</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">TOOL_CALL 正则</code>
+            <span class="badge-desc">工具调用解析依赖正则匹配，格式不严格就会解析失败。这是纯文本解析方案的固有局限</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Costs + Conclusion -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">成本与结论</h2>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>学习成本</strong>
+              <p>约 40-60 小时通读全部 16 章 + 完成代码实践。需要 Python 基础</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>API 成本</strong>
+              <p>实际运行代码需要 LLM API 费用。按 OpenAI 定价，一次完整 ReAct 循环约消耗 1000-3000 tokens</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>时间成本</strong>
+              <p>从零到能构建自己的 Agent 框架，认真学完整教程约需 2-3 周</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">🎯</div>
+          <div class="callout-content">
+            <strong class="callout-title">最终判定</strong>
+            <p>Hello-Agents 是目前中文社区最全面的 AI Native Agent 教程。它不适合直接上生产，但如果你想<strong>真正理解 Agent 的内部工作机制</strong>，或者想<strong>亲手构建一个自己的框架</strong>，它是最系统的起点。MIT 协议开源，完全免费。</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+  </main>
+
+</body>
+</html>

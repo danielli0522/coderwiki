@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MiroFish：用鱼群智慧预测一切</title>
+
+  <!-- Google Fonts: Bricolage Grotesque · DM Sans · JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <!--
+    Warm accent: coral — inspired by fish scales at sunset
+  -->
+  <style>
+    :root {
+      --color-accent:       #E06B56;
+      --color-accent-hover: #C85A47;
+      --color-accent-light: #FDECEA;
+      --color-accent-muted: #E89585;
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">MiroFish：用鱼群智慧预测一切</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <button class="nav-dot" data-target="module-1" data-tooltip="鱼群中的每条鱼" role="tab" aria-label="Module 1: 鱼群中的每条鱼"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="知识图谱：鱼群的水域" role="tab" aria-label="Module 2: 知识图谱"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="数字沙盘推演" role="tab" aria-label="Module 3: 数字沙盘推演"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="上帝视角的报告" role="tab" aria-label="Module 4: 上帝视角的报告"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="从种子到预测" role="tab" aria-label="Module 5: 从种子到预测"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh -->
+<!-- ═══════════════════════════════════════════════════════════════
+     Module 01 — 鱼群中的每条鱼：多智能体如何模拟真实人群
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">鱼群中的每条鱼</h1>
+      <p class="module-subtitle">千千万万个独立人格的智能体，如何涌现出群体的智慧与疯狂</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Hook — 从鱼群说起 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">想象你站在海边，看到一群鱼</h2>
+        <p>没有一条鱼在指挥，但整群鱼却像有灵魂一样——突然转向、同步闪避、集体加速。这就是<span class="term" data-definition="群体智能（Swarm Intelligence）是指大量简单个体通过局部互动，涌现出超越任何单个个体的集体智慧。鱼群、蚁群、鸟群都是自然界的群体智能。">群体智能</span>。</p>
+        <p>MiroFish 就是这样一个引擎：它创造成千上万个拥有独立人格、记忆和行为的<span class="term" data-definition="智能体（Agent）是一个能感知环境、自主决策并采取行动的程序。你可以把它想象成一个虚拟人物，有自己的性格、记忆和目标。">智能体</span>（Agent），让它们在数字世界中自由互动——然后观察群体行为如何涌现。</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">&#x1F4A1;</div>
+          <div class="callout-content">
+            <strong class="callout-title">核心理念</strong>
+            <p>预测未来不需要一个全知全能的预言家。只要模拟足够多个真实的人，观察他们如何互动，群体涌现的结果就是最可信的未来预测。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Agent Profile — 角色卡片 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">每条鱼都有名字和性格</h2>
+        <p>在 MiroFish 中，每个 Agent 都不是一个随机数，而是一个有血有肉的虚拟人物。系统使用 <span class="term" data-definition="大语言模型（LLM）是像 ChatGPT、Qwen 这样的人工智能，通过阅读海量文本学会了理解和生成人类语言。">大语言模型</span> 从种子材料中提取人物信息，生成详细的<span class="term" data-definition="人设（Persona）是一个虚拟角色的完整描述，包括性格、背景、语言风格、立场态度等。它决定了这个角色在模拟中会如何思考和行动。">人设</span>。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">&#x1F393;</div>
+            <h4 class="pattern-title">学生</h4>
+            <p class="pattern-desc">活跃度 0.8，晚间高峰活跃，发帖频率高，影响力低。愤怒时可能成为舆论引爆点。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">&#x1F3E2;</div>
+            <h4 class="pattern-title">大学官方</h4>
+            <p class="pattern-desc">活跃度 0.2，仅工作时间，响应慢（60-240分钟），但影响力极高（3.0）。发言风格严谨保守。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">&#x1F4F0;</div>
+            <h4 class="pattern-title">媒体机构</h4>
+            <p class="pattern-desc">全天候活跃，快速响应事件（5-30分钟），影响力高（2.5）。内容以报道和评论为主。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">&#x1F468;&#x200D;&#x2695;</div>
+            <h4 class="pattern-title">教授/专家</h4>
+            <p class="pattern-desc">活跃度中等，影响力 2.0。通常保持中立，但一旦发声就会被大量引用。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Code Translation — Profile 数据结构 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码翻译：一条鱼的身份证</h2>
+        <p>以下是 MiroFish 中 Agent 人设数据的结构，每条"鱼"都有这样的完整档案：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">Python 代码</span>
+            <pre><code><span class="code-line"><span class="code-keyword">@dataclass</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">OasisAgentProfile</span>:</span>
+<span class="code-line">    user_id: <span class="code-function">int</span></span>
+<span class="code-line">    user_name: <span class="code-function">str</span></span>
+<span class="code-line">    name: <span class="code-function">str</span></span>
+<span class="code-line">    bio: <span class="code-function">str</span></span>
+<span class="code-line">    persona: <span class="code-function">str</span></span>
+<span class="code-line">    mbti: <span class="code-function">str</span> = <span class="code-string">None</span></span>
+<span class="code-line">    profession: <span class="code-function">str</span> = <span class="code-string">None</span></span>
+<span class="code-line">    interested_topics: List[<span class="code-function">str</span>] = []</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">通俗解释</span>
+            <div class="translation-lines">
+              <p class="tl">定义一个"虚拟人物档案"的数据结构</p>
+              <p class="tl">每个角色有一个唯一的数字编号</p>
+              <p class="tl">在模拟世界中的用户名（自动生成）</p>
+              <p class="tl">角色的真实姓名</p>
+              <p class="tl">一段简短的自我介绍</p>
+              <p class="tl">长达 2000 字的详细人设，包含性格、背景、立场</p>
+              <p class="tl">MBTI 人格类型（如 INTJ、ENFP），决定思维方式</p>
+              <p class="tl">职业，影响发言风格和活跃时段</p>
+              <p class="tl">感兴趣的话题列表，决定会关注哪些事件</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#x1F30A;</div>
+          <div class="callout-content">
+            <strong class="callout-title">为什么需要 2000 字的人设？</strong>
+            <p>简短的"他是一个学生"远远不够。LLM 需要知道：这个学生是大几的？什么专业？经历过什么？对哪些话题敏感？只有这样，模拟中的每个决策才真实可信。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Group Chat Animation — Agents 对话 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">鱼群的对话：当事件发生时</h2>
+        <p>当一个新闻事件在模拟世界中爆发，不同角色的 Agent 会如何反应？点击下方按钮，观看一场模拟对话：</p>
+
+        <div class="chat-window" id="chat-module1">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="student" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">学</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">大三学生 · ENFP</span>
+                <p>天哪！刚看到那个新闻，这也太过分了吧？学校怎么可以这样！我一定要发帖曝光！</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="media" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">媒</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">某新闻媒体</span>
+                <p>注意到大量网友讨论此事，正在核实相关情况，稍后将发布详细报道。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="professor" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">教</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">教授 · INTJ</span>
+                <p>建议大家理性看待，等待更多事实披露。目前信息不足，过早下结论对所有人都不公平。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="university" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">校</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">大学官方</span>
+                <p>学校已关注到相关讨论，高度重视，已成立专项工作组调查核实，后续将及时通报。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="alumni" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">校</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">校友 · ISTJ</span>
+                <p>作为毕业生很痛心。母校应该拿出诚意，而不是等舆论发酵了才出来回应。希望这次能真正解决问题。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-module1-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module1-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条消息</button>
+            <button class="btn chat-all-btn">播放全部</button>
+            <button class="btn chat-reset-btn">重新播放</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+
+        <p>注意每个角色的反应速度和风格都不同——这正是人设数据的功劳。学生立即愤怒，媒体快速跟进，教授理性呼吁，学校慢慢回应，校友带着情感反思。</p>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">测验：你理解鱼群了吗？</h2>
+
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！群体智能的核心就是：没有中央指挥者，群体行为从个体互动中自然涌现。这正是 MiroFish 的设计哲学。"
+               data-explanation-wrong="再想想——蚁群中没有任何一只蚂蚁在指挥全局。群体的智慧来自个体的简单互动，这正是群体智能的本质。">
+            <h3 class="quiz-question">如果要模拟一场大学舆情事件，以下哪种做法最接近 MiroFish 的思路？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>让一个超级 AI 从头到尾编写一个"完美"的故事脚本</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>创建大量有独立人格的虚拟角色，让它们自由互动，观察涌现</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>用统计学模型预测舆论的走向概率分布</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="没错！2000 字的人设包含了性格、背景、记忆、立场等全方位信息，这样 LLM 在模拟中才能做出真实、一致的决策。简短的标签无法做到这一点。"
+               data-explanation-wrong="考虑一下——如果人设只有几个标签（如"学生、男、愤怒"），AI 在模拟中就缺少做出真实决策所需的上下文。详细人设正是让模拟可信的关键。">
+            <h3 class="quiz-question">为什么 MiroFish 的 Agent 人设需要长达 2000 字的描述，而不是简单的几个标签？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为代码写错了，本意是想用短标签</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>为了让用户觉得系统很高级</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为 AI 需要丰富的上下文才能做出真实、一致的决策</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     Module 02 — 知识图谱：鱼群游弋的水域
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">知识图谱：鱼群游弋的水域</h1>
+      <p class="module-subtitle">从新闻稿到关系网络——MiroFish 如何理解现实世界的复杂关联</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Metaphor -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">种子材料就像一滴水</h2>
+        <p>你给 MiroFish 一篇新闻报道、一份分析报告，甚至一部小说——它需要从这些<span class="term" data-definition="种子材料（Seed Material）是你提供给 MiroFish 的原始信息，比如新闻文本、分析报告、小说片段等。系统从这些材料中提取人物、关系和事件。">种子材料</span>中提取出所有重要的人物、机构、事件，以及它们之间的关系。</p>
+        <p>这就像往平静的池塘里滴入一滴墨水——MiroFish 需要理解这滴墨水的每一个分子，才能在后续模拟中让整池水真实地波动。</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>本体生成（Ontology）</strong>
+              <p>LLM 分析文本，定义"有哪些类型的角色和关系"——比如学生、教授、大学、媒体，以及它们之间可能存在的"就读于""隶属于""报道"等关系</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>图谱构建（Graph Building）</strong>
+              <p>将文本分块后发送给 <span class="term" data-definition="Zep 是一个知识图谱云服务，能从文本中自动提取实体（人物/机构）和关系，构建可查询的知识图谱。">Zep</span>，让它从文本中提取出具体的实体节点和关系边</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>人设生成（Profile）</strong>
+              <p>对图谱中每个实体，用 LLM 生成详细人设，并从 Zep 检索更多上下文信息来丰富人设</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Architecture Diagram -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">系统架构：三大核心组件</h2>
+        <p>点击下方组件，了解它们各自的职责：</p>
+
+        <div class="arch-diagram">
+          <div class="arch-zone">
+            <h4 class="arch-zone-label">文本分析层</h4>
+            <div class="arch-component" data-desc="使用 LLM 分析文本内容，定义实体类型（如 Student、MediaOutlet）和关系类型（如 WORKS_FOR、REPORTS_ON）。必须正好 10 种实体类型，其中 Person 和 Organization 是兜底类型。">
+              <div class="arch-icon">&#x1F4CB;</div>
+              <span>本体生成器</span>
+            </div>
+            <div class="arch-component" data-desc="使用 LLM 为每个实体生成详细人设（2000 字），区分个人实体（如学生）和群体实体（如大学），支持并行生成以加速处理。">
+              <div class="arch-icon">&#x1F9D1;</div>
+              <span>人设生成器</span>
+            </div>
+          </div>
+          <div class="arch-zone">
+            <h4 class="arch-zone-label">知识图谱层</h4>
+            <div class="arch-component" data-desc="调用 Zep API 创建图谱、设置本体、分批添加文本数据、等待处理完成，最终获取完整的节点和边数据。整个流程在后台线程中异步执行。">
+              <div class="arch-icon">&#x1F5FA;</div>
+              <span>图谱构建器</span>
+            </div>
+          </div>
+          <div class="arch-zone">
+            <h4 class="arch-zone-label">外部服务</h4>
+            <div class="arch-component" data-desc="Zep Cloud 知识图谱服务，负责从文本中自动提取实体和关系，并支持语义搜索、混合检索等功能。是 MiroFish 的核心记忆引擎。">
+              <div class="arch-icon">&#x2601;</div>
+              <span>Zep Cloud</span>
+            </div>
+            <div class="arch-component" data-desc="大语言模型（如阿里 Qwen），用于分析文本、生成本体、创建人设、以及后续的报告生成。是 MiroFish 的"大脑"。">
+              <div class="arch-icon">&#x1F9E0;</div>
+              <span>LLM</span>
+            </div>
+          </div>
+          <div class="arch-description" id="arch-desc">点击任意组件，了解它的职责</div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Code Translation — Ontology -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码翻译：本体是如何定义的</h2>
+        <p>MiroFish 让 LLM 分析文本后生成的<span class="term" data-definition="本体（Ontology）在知识图谱中定义了"世界中有哪些类型的角色"以及"它们之间可能存在哪些关系"。就像给一部电影定义角色类型和关系类型。">本体</span>包含实体类型和关系类型：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">Python 代码</span>
+            <pre><code><span class="code-line">ontology = {</span>
+<span class="code-line">  <span class="code-string">"entity_types"</span>: [</span>
+<span class="code-line">    {<span class="code-string">"name"</span>: <span class="code-string">"Student"</span>,</span>
+<span class="code-line">     <span class="code-string">"description"</span>: <span class="code-string">"在校学生"</span>,</span>
+<span class="code-line">     <span class="code-string">"attributes"</span>: [{<span class="code-string">"name"</span>: <span class="code-string">"full_name"</span>}]},</span>
+<span class="code-line">    {<span class="code-string">"name"</span>: <span class="code-string">"Person"</span>},  <span class="code-comment"># 兜底</span></span>
+<span class="code-line">    {<span class="code-string">"name"</span>: <span class="code-string">"Organization"</span>}  <span class="code-comment"># 兜底</span></span>
+<span class="code-line">  ],</span>
+<span class="code-line">  <span class="code-string">"edge_types"</span>: [</span>
+<span class="code-line">    {<span class="code-string">"name"</span>: <span class="code-string">"STUDIES_AT"</span>,</span>
+<span class="code-line">     <span class="code-string">"source_targets"</span>: [</span>
+<span class="code-line">       {<span class="code-string">"source"</span>: <span class="code-string">"Student"</span>,</span>
+<span class="code-line">        <span class="code-string">"target"</span>: <span class="code-string">"University"</span>}]}</span>
+<span class="code-line">  ]</span>
+<span class="code-line">}</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">通俗解释</span>
+            <div class="translation-lines">
+              <p class="tl">定义"世界中有哪些类型的角色和关系"</p>
+              <p class="tl">实体类型列表——这个世界中有哪几种角色</p>
+              <p class="tl">学生类型，有一个属性用来存全名</p>
+              <p class="tl">描述"在校学生"这个角色是什么</p>
+              <p class="tl">角色的属性，比如名字</p>
+              <p class="tl">兜底类型：任何不属于特定类型的个人</p>
+              <p class="tl">兜底类型：任何不属于特定类型的组织</p>
+              <p class="tl">关系类型列表——角色之间可以有什么联系</p>
+              <p class="tl">定义"学生就读于大学"这种关系</p>
+              <p class="tl">关系的方向：学生 → 大学</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Message Flow — Graph Building Pipeline -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">数据流：从文本到图谱</h2>
+        <p>点击"下一步"观看一篇新闻稿是如何变成知识图谱的：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"用户上传种子材料（新闻稿、分析报告等）"},
+          {"highlight":"flow-actor-1","label":"本体生成器调用 LLM，分析文本定义实体和关系类型","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-2","label":"LLM 返回本体定义（10 种实体 + 6-10 种关系）","packet":true,"from":"actor-2","to":"actor-1"},
+          {"highlight":"flow-actor-1","label":"图谱构建器将文本分块，分批发送给 Zep","packet":true,"from":"actor-1","to":"actor-3"},
+          {"highlight":"flow-actor-3","label":"Zep 从每个文本块中提取实体节点和关系边"},
+          {"highlight":"flow-actor-3","label":"Zep 返回完整的知识图谱数据","packet":true,"from":"actor-3","to":"actor-4"},
+          {"highlight":"flow-actor-4","label":"人设生成器为每个实体节点生成详细人设（LLM + Zep 检索）","packet":true,"from":"actor-4","to":"actor-2"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">M</div>
+              <span>MiroFish 核心</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">L</div>
+              <span>LLM 大脑</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">Z</div>
+              <span>Zep 图谱</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">P</div>
+              <span>人设工厂</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+
+          <div class="flow-step-label" id="flow-label">点击"下一步"开始</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">测验：你理解知识图谱了吗？</h2>
+
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！Person 和 Organization 是兜底类型——当文本中出现的人物或机构不属于任何具体类型时，就会被归入这两个类型。这确保所有实体都能被捕获。"
+               data-explanation-wrong="想一想——如果文本中出现了一个'路人甲'或'小商店'，它们不属于 Student 或 University 等具体类型。兜底类型就是为这种情况准备的。">
+            <h3 class="quiz-question">MiroFish 的本体定义中，为什么必须有 Person 和 Organization 这两个"兜底类型"？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为 Zep API 要求必须有这两个类型才能创建图谱</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>为了确保文本中所有人物和机构都能被分类，即使不属于任何具体类型</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为 LLM 只能识别这两种类型</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="没错！实体类型名必须用 PascalCase（每个单词首字母大写），关系类型名必须用 UPPER_SNAKE_CASE（全大写加下划线），这是 Zep API 的强制要求。代码中有专门的转换函数来确保格式正确。"
+               data-explanation-wrong="仔细看看代码——ontology_generator.py 中有 _to_pascal_case 函数，专门处理名称格式。Zep API 对命名格式有严格要求。">
+            <h3 class="quiz-question">在 MiroFish 的本体定义中，实体类型的命名格式有什么要求？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>实体类型用 PascalCase（如 MediaOutlet），关系类型用 UPPER_SNAKE_CASE（如 WORKS_FOR）</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>所有名称都用小写加下划线（如 media_outlet）</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>可以随意命名，系统会自动适配</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     Module 03 — 数字沙盘推演：OASIS 模拟引擎
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">数字沙盘推演</h1>
+      <p class="module-subtitle">OASIS 模拟引擎如何让成百上千个 Agent 在 Twitter 和 Reddit 上同时"活"起来</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Metaphor -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">想象一个平行宇宙的微博和 Reddit</h2>
+        <p>MiroFish 的模拟引擎叫 <span class="term" data-definition="OASIS（Open Agent Social Interaction Simulations）是一个开源的社会模拟框架，由 CAMEL-AI 团队开发。它模拟社交媒体平台上的用户互动行为。">OASIS</span>——它创建了两个平行运行的社交媒体平台：一个类似微博/Twitter，一个类似 Reddit。</p>
+        <p>每个 Agent 都在这两个平台上拥有账号，按照自己的人设发帖、评论、点赞、转发。没有人在幕后操控它们的每一步行动——它们的行为完全由自己的性格和 LLM 的推理决定。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">&#x1F426;</div>
+            <h4 class="pattern-title">Twitter 平台</h4>
+            <p class="pattern-desc">短文本、快节奏、病毒式传播。Agent 可以发帖、转发、点赞、关注。信息像鱼群一样快速扩散。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">&#x1F4CC;</div>
+            <h4 class="pattern-title">Reddit 平台</h4>
+            <p class="pattern-desc">长文本、深度讨论、社区投票。Agent 可以发帖、评论、投票。更适合表达复杂观点和立场。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Simulation Config — Agent Activity -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">每条鱼的作息表：模拟配置</h2>
+        <p>MiroFish 使用 LLM 为每个 Agent 智能生成活动配置，包括活跃时段、发言频率、响应速度、情感倾向和影响力权重：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">Python 代码</span>
+            <pre><code><span class="code-line"><span class="code-keyword">@dataclass</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">AgentActivityConfig</span>:</span>
+<span class="code-line">    activity_level: <span class="code-function">float</span> = <span class="code-number">0.5</span></span>
+<span class="code-line">    posts_per_hour: <span class="code-function">float</span> = <span class="code-number">1.0</span></span>
+<span class="code-line">    active_hours: List[<span class="code-function">int</span>] = []</span>
+<span class="code-line">    response_delay_min: <span class="code-function">int</span> = <span class="code-number">5</span></span>
+<span class="code-line">    sentiment_bias: <span class="code-function">float</span> = <span class="code-number">0.0</span></span>
+<span class="code-line">    stance: <span class="code-function">str</span> = <span class="code-string">"neutral"</span></span>
+<span class="code-line">    influence_weight: <span class="code-function">float</span> = <span class="code-number">1.0</span></span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">通俗解释</span>
+            <div class="translation-lines">
+              <p class="tl">定义每个 Agent 的活动参数配置</p>
+              <p class="tl">整体活跃度（0.0-1.0），0.2=官方/0.8=学生</p>
+              <p class="tl">每小时预期发帖数，学生可能 0.6，官方仅 0.1</p>
+              <p class="tl">活跃的时段（24小时制），如学生=[18-23]</p>
+              <p class="tl">对热点事件的最小响应延迟（分钟）</p>
+              <p class="tl">情感倾向（-1.0 负面 到 +1.0 正面）</p>
+              <p class="tl">立场：supportive/opposing/neutral/observer</p>
+              <p class="tl">影响力权重——决定发言被看到的概率</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Time Config — Chinese habits -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">模拟中国人的一天</h2>
+        <p>模拟时间按照中国人的真实作息来推进。以下是系统默认的时间段配置——注意晚间 19-22 点的活跃度是凌晨的 30 倍：</p>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">0-5 点</code>
+            <span class="badge-desc">深夜时段 — 活跃度 0.05（几乎没人发帖，模拟中 95% 的 Agent 在睡觉）</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">6-8 点</code>
+            <span class="badge-desc">早间时段 — 活跃度 0.4（开始刷手机，但还没有太多互动）</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">9-18 点</code>
+            <span class="badge-desc">工作时段 — 活跃度 0.7（媒体和官方活跃，学生上课间隙偷看）</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">19-22 点</code>
+            <span class="badge-desc">晚间高峰 — 活跃度 1.5（所有人都在线，舆论的核爆时刻！）</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">23 点</code>
+            <span class="badge-desc">深夜下降 — 活跃度 0.5（夜猫子还在，但大部队已退场）</span>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">&#x26A0;</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键设计</strong>
+            <p>这些时段不是硬编码的——LLM 会根据事件性质调整。比如突发热点可能导致凌晨仍有大量讨论（off_peak_hours 缩短），而学生群体的晚间高峰可能延后到 21-23 点。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Group Chat — Simulation Running -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">模拟运行时的真实消息流</h2>
+        <p>当模拟开始后，系统通过监控线程实时读取每个 Agent 的动作日志（actions.jsonl），记录发帖、评论、点赞等行为：</p>
+
+        <div class="chat-window" id="chat-module3">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="runner" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">调</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">模拟调度器</span>
+                <p>第 12 轮模拟开始（模拟时间：晚上 20:00）——高峰时段，激活 18 个 Agent</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="agent5" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">学</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Agent #5 · 大三学生</span>
+                <p>[CREATE_POST] 发表微博："看到学校回应了，但完全是官话套话，根本没有实质内容！大家怎么看？"</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="agent12" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">校</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">Agent #12 · 校友</span>
+                <p>[LIKE_POST] 点赞了 Agent #5 的帖子 · [COMMENT] "作为毕业生，我同意。这种回应只会让事情更糟。"</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="agent3" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">媒</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">Agent #3 · 某媒体</span>
+                <p>[CREATE_POST] 发表新闻报道："事件持续发酵，学生情绪激动，校方回应引争议。截至发稿，微博话题阅读量已破千万。"</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="runner2" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">监</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">监控线程</span>
+                <p>第 12 轮结束 — Twitter: 47 个动作，Reddit: 23 个动作。话题热度指数上升 340%。图谱记忆已同步更新。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-module3-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module3-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条消息</button>
+            <button class="btn chat-all-btn">播放全部</button>
+            <button class="btn chat-reset-btn">重新播放</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Drag and Drop -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">拖拽匹配：Agent 配置连连看</h2>
+        <p>将左侧的 Agent 类型拖到右侧对应的最佳活动配置上：</p>
+
+        <div class="dnd-container" id="dnd-module3">
+          <div class="dnd-chips">
+            <div class="dnd-chip" draggable="true" data-answer="official">大学官方</div>
+            <div class="dnd-chip" draggable="true" data-answer="media">媒体机构</div>
+            <div class="dnd-chip" draggable="true" data-answer="student">大学生</div>
+            <div class="dnd-chip" draggable="true" data-answer="expert">教授/专家</div>
+          </div>
+          <div class="dnd-zones">
+            <div class="dnd-zone" data-correct="student">
+              <p class="dnd-zone-label">活跃度 0.8 · 晚间 18-23 点 · 响应 1-15 分钟 · 影响力 0.8</p>
+              <div class="dnd-zone-target">拖到这里</div>
+            </div>
+            <div class="dnd-zone" data-correct="official">
+              <p class="dnd-zone-label">活跃度 0.2 · 工作时间 9-17 点 · 响应 60-240 分钟 · 影响力 3.0</p>
+              <div class="dnd-zone-target">拖到这里</div>
+            </div>
+            <div class="dnd-zone" data-correct="media">
+              <p class="dnd-zone-label">活跃度 0.5 · 全天 7-23 点 · 响应 5-30 分钟 · 影响力 2.5</p>
+              <div class="dnd-zone-target">拖到这里</div>
+            </div>
+            <div class="dnd-zone" data-correct="expert">
+              <p class="dnd-zone-label">活跃度 0.4 · 白天+晚间 8-21 点 · 响应 15-90 分钟 · 影响力 2.0</p>
+              <div class="dnd-zone-target">拖到这里</div>
+            </div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkDnD('dnd-module3')">检查匹配</button>
+          <button class="quiz-reset-btn" onclick="resetDnD('dnd-module3')">重置</button>
+        </div>
+      </section>
+
+      <!-- Screen 6: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">测验：你理解模拟引擎了吗？</h2>
+
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="完全正确！MiroFish 支持双平台并行模拟，Agent 同时在类 Twitter 和类 Reddit 两个平台上活动。这能捕获不同平台上的舆论传播特征——Twitter 适合快速传播，Reddit 适合深度讨论。"
+               data-explanation-wrong="MiroFish 的独特之处在于——它同时运行两个平台！Twitter 模拟快速传播，Reddit 模拟深度讨论。双平台并行让预测更全面。">
+            <h3 class="quiz-question">MiroFish 的模拟是在几个平台上同时进行的？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>只有一个平台（微博）</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>三个平台（微博 + 微信 + 抖音）</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>两个平台（类 Twitter + 类 Reddit），双平台并行</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！晚间高峰的活跃度是 1.5，而凌晨低谷只有 0.05——相差 30 倍！这个巨大的差异模拟了真实中国人"白天上班上学，晚上刷手机"的作息规律。"
+               data-explanation-wrong="回顾一下时间配置：晚间 19-22 点的活跃度系数是 1.5，而凌晨 0-5 点只有 0.05。1.5 / 0.05 = 30 倍的差距！">
+            <h3 class="quiz-question">在默认的时间配置中，晚间高峰（19-22 点）的活跃度是凌晨低谷（0-5 点）的多少倍？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>约 5 倍</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>约 30 倍</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>约 100 倍</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     Module 04 — 上帝视角的报告：ReportAgent
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">上帝视角的报告</h1>
+      <p class="module-subtitle">ReportAgent 如何像一位全知记者，检索模拟世界的每个角落</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Metaphor -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">想象一位拥有读心术的记者</h2>
+        <p>模拟结束后，MiroFish 需要把成千上万个 Agent 的互动整理成一份人类可读的预测报告。这不是简单的摘要——ReportAgent 需要"潜入"模拟世界，像一位拥有<span class="term" data-definition="上帝视角（God Mode）意味着你能看到模拟世界中每一个 Agent 的想法、行动和互动，而不是只能看到公开的帖子。">上帝视角</span>的记者，检索每一条线索。</p>
+        <p>它使用 <span class="term" data-definition="ReACT 模式是 Reason（推理）+ Act（行动）的循环：先思考需要什么信息，然后调用工具获取，再分析结果，直到信息足够后输出最终答案。这是 AI 的"边查边写"模式。">ReACT</span>（推理+行动）模式工作——每个章节都经过多轮思考、检索、再思考的过程。</p>
+
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <p>规划大纲</p>
+          </div>
+          <div class="flow-arrow">&#x2192;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <p>逐章生成</p>
+          </div>
+          <div class="flow-arrow">&#x2192;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <p>组装报告</p>
+          </div>
+          <div class="flow-arrow">&#x2192;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">4</div>
+            <p>交互对话</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Tools — ReportAgent's toolkit -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">记者的四件法宝</h2>
+        <p>ReportAgent 有四个强大的<span class="term" data-definition="工具（Tool）是 AI 可以调用的外部函数。比如搜索知识图谱、采访 Agent 等。AI 通过工具获取自己不知道的信息。">检索工具</span>，每个章节至少调用 3-5 次：</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">&#x1F50D;</div>
+            <div>
+              <strong>深度洞察（InsightForge）</strong>
+              <p>自动将问题分解为多个子问题，从多个维度检索图谱，整合语义搜索、实体分析、关系链追踪的结果。最强大的工具。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">&#x1F30A;</div>
+            <div>
+              <strong>广角全景（PanoramaSearch）</strong>
+              <p>获取模拟的完整全貌——区分当前有效事实和已过期的历史事实，帮你看清舆论是如何演变的。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">&#x26A1;</div>
+            <div>
+              <strong>快速检索（QuickSearch）</strong>
+              <p>轻量级快速查询，适合验证某个具体事实。比如"确认一下校方什么时候发的声明"。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">&#x1F4AC;</div>
+            <div>
+              <strong>深度采访（InterviewAgents）</strong>
+              <p>调用 OASIS 的真实采访 API，对正在运行的模拟 Agent 进行双平台采访。获取各角色的第一人称观点。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Code Translation — ReACT loop -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码翻译：ReACT 循环的精髓</h2>
+        <p>ReportAgent 生成每个章节时的核心逻辑——不断"思考-行动-观察"循环：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">Python 代码</span>
+            <pre><code><span class="code-line"><span class="code-keyword">for</span> iteration <span class="code-keyword">in</span> <span class="code-function">range</span>(max_iterations):</span>
+<span class="code-line">    response = llm.chat(messages)</span>
+<span class="code-line">    tool_calls = parse_tool_calls(response)</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">if</span> <span class="code-string">"Final Answer:"</span> <span class="code-keyword">in</span> response:</span>
+<span class="code-line">        <span class="code-keyword">return</span> extract_final_answer(response)</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">if</span> tool_calls:</span>
+<span class="code-line">        result = execute_tool(tool_calls[<span class="code-number">0</span>])</span>
+<span class="code-line">        messages.append(observation)</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">通俗解释</span>
+            <div class="translation-lines">
+              <p class="tl">最多循环 5 轮（每章最多调 5 次工具）</p>
+              <p class="tl">把之前所有的对话发给 LLM，让它思考</p>
+              <p class="tl">检查 LLM 的回复里有没有工具调用</p>
+              <p class="tl">如果 LLM 说"我写好了"——提取最终答案</p>
+              <p class="tl">返回章节内容，ReACT 循环结束</p>
+              <p class="tl">如果 LLM 想调工具——执行第一个工具</p>
+              <p class="tl">拿到工具结果，追加到对话历史</p>
+              <p class="tl">下一轮循环，LLM 看到工具结果后继续思考</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">&#x1F4A1;</div>
+          <div class="callout-content">
+            <strong class="callout-title">为什么必须至少调 3 次工具？</strong>
+            <p>ReportAgent 有一条硬规则：每个章节至少调用 3 次检索工具，否则拒绝输出。如果 LLM 想偷懒直接写答案，系统会强制它先去检索数据。这确保报告的每一句话都有模拟数据支撑，而不是 AI 编造的。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Group Chat — ReACT in Action -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">旁观 ReACT：记者的工作现场</h2>
+        <p>以下是 ReportAgent 撰写"舆论传播分析"章节时的真实工作过程——点击观看：</p>
+
+        <div class="chat-window" id="chat-module4">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="agent" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">R</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">ReportAgent 思考</span>
+                <p>我需要了解事件的传播路径。先调用 InsightForge 深度分析"信息是如何从源头扩散到全网的"。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="tool" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">T</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">InsightForge 结果</span>
+                <p>自动分解为 5 个子问题，检索到 47 条事实、12 个关键实体。微博首发占 68% 声量，抖音视觉冲击放大了情绪传播...</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="agent" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">R</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">ReportAgent 思考</span>
+                <p>有传播数据了。现在我想采访几个学生 Agent，了解他们的真实心理。调用 InterviewAgents。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="tool" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">T</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">Interview 结果</span>
+                <p>采访了 3 个学生 Agent。Twitter 回答："看到第一反应是愤怒，觉得学校不把我们当人看"；Reddit："我发了长文分析，希望大家理性..."</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="agent" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">R</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">ReportAgent 输出</span>
+                <p>Final Answer: 微博作为舆情的"第一现场"，贡献了 68% 的首发声量。正如 Agent #5 所说："看到第一反应是愤怒..." [输出完整章节内容]</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-module4-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module4-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条消息</button>
+            <button class="btn chat-all-btn">播放全部</button>
+            <button class="btn chat-reset-btn">重新播放</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">测验：你理解报告生成了吗？</h2>
+
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！ReACT 的核心就是"先思考需要什么信息，再调用工具获取，分析结果后决定是继续检索还是输出答案"——这就是 Reason + Act 的循环。"
+               data-explanation-wrong="ReACT 是 Reason（推理）+ Act（行动）的缩写。它不是一个简单的问答，而是 AI 先思考、再行动（调工具）、再思考的循环过程。">
+            <h3 class="quiz-question">ReACT 模式的核心工作方式是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>LLM 一次性生成完整报告，不需要任何外部数据</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>LLM 先思考需要什么信息，调用工具检索，分析结果后决定继续还是输出</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>用户逐步指导 LLM 写什么内容</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="没错！ReportAgent 强制每个章节至少调用 3 次工具（最多 5 次），并且建议混合使用不同工具。如果 LLM 试图偷懒直接写答案，系统会拒绝并要求它先去检索。"
+               data-explanation-wrong="想想为什么需要强制最低次数——因为 LLM 可能会'偷懒'，用自己已有的知识编造内容而不是检索模拟数据。强制 3 次确保内容来自真实模拟。">
+            <h3 class="quiz-question">为什么 ReportAgent 强制每个章节至少调用 3 次检索工具？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为 3 次是 LLM 能处理的最多工具调用次数</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为 Zep API 要求每次查询必须调用 3 次</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>为了防止 LLM 用自己的知识编造内容，确保报告基于真实模拟数据</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     Module 05 — 从种子到预测：完整工作流
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">从种子到预测</h1>
+      <p class="module-subtitle">把所有拼图拼在一起——MiroFish 的完整工作流和你能用它做什么</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Full Pipeline -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">五大步骤，从新闻到未来</h2>
+        <p>MiroFish 的完整工作流分为五个阶段，每个阶段都由不同的服务组件负责：</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>图谱构建</strong>
+              <p>上传种子材料（新闻/报告/小说）&#x2192; 本体生成器定义实体和关系类型 &#x2192; 图谱构建器调用 Zep 提取节点和边 &#x2192; 人设生成器为每个实体创建详细人设</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>环境搭建</strong>
+              <p>配置生成器用 LLM 智能设置模拟参数 &#x2192; 时间配置（按中国人作息）&#x2192; Agent 活动配置 &#x2192; 初始事件（第一枪由谁打响）&#x2192; 平台配置</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>开始模拟</strong>
+              <p>OASIS 引擎在 Twitter + Reddit 双平台并行 &#x2192; Agent 按人设自主互动 &#x2192; 监控线程实时记录动作 &#x2192; 可选：将活动动态更新到 Zep 图谱</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>报告生成</strong>
+              <p>ReportAgent 用 ReACT 模式撰写预测报告 &#x2192; 先规划大纲（2-5 章）&#x2192; 逐章多轮检索+生成 &#x2192; 分章节实时保存 &#x2192; 组装完整报告</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>深度互动</strong>
+              <p>用户可以与模拟世界中的任意 Agent 对话（Interview）&#x2192; 也可以与 ReportAgent 对话，追问细节 &#x2192; 从上帝视角探索预测的未来</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: File Tree -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码仓库地图</h2>
+        <p>MiroFish 采用前后端分离架构，核心逻辑在后端 Python 服务中：</p>
+
+        <div class="file-tree">
+          <div class="ft-folder open">
+            <span class="ft-name">backend/app/</span>
+            <span class="ft-desc">Python 后端核心</span>
+            <div class="ft-children">
+              <div class="ft-folder">
+                <span class="ft-name">services/</span>
+                <span class="ft-desc">业务逻辑层——每个文件对应一个核心能力</span>
+                <div class="ft-children">
+                  <div class="ft-file">
+                    <span class="ft-name">ontology_generator.py</span>
+                    <span class="ft-desc">LLM 分析文本，生成实体和关系类型定义</span>
+                  </div>
+                  <div class="ft-file">
+                    <span class="ft-name">graph_builder.py</span>
+                    <span class="ft-desc">调用 Zep API 构建知识图谱（异步+进度跟踪）</span>
+                  </div>
+                  <div class="ft-file">
+                    <span class="ft-name">oasis_profile_generator.py</span>
+                    <span class="ft-desc">LLM + Zep 检索，为实体生成详细人设（支持并行）</span>
+                  </div>
+                  <div class="ft-file">
+                    <span class="ft-name">simulation_config_generator.py</span>
+                    <span class="ft-desc">LLM 智能生成模拟参数（时间/事件/Agent/平台）</span>
+                  </div>
+                  <div class="ft-file">
+                    <span class="ft-name">simulation_runner.py</span>
+                    <span class="ft-desc">启动/监控/停止模拟进程，实时解析动作日志</span>
+                  </div>
+                  <div class="ft-file">
+                    <span class="ft-name">report_agent.py</span>
+                    <span class="ft-desc">ReACT 模式的报告生成器，四大检索工具</span>
+                  </div>
+                </div>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">api/</span>
+                <span class="ft-desc">Flask API 路由，连接前端和后端服务</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">models/</span>
+                <span class="ft-desc">数据模型和任务管理</span>
+              </div>
+            </div>
+          </div>
+          <div class="ft-folder">
+            <span class="ft-name">frontend/</span>
+            <span class="ft-desc">Vue.js 前端，可视化操作界面</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Data Flow Animation — Full Pipeline -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">数据流全景：种子的旅程</h2>
+        <p>点击"下一步"，跟踪一条新闻从上传到变成预测报告的完整路径：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"用户上传种子材料 + 描述预测需求"},
+          {"highlight":"flow-actor-2","label":"本体生成器分析文本，定义实体和关系类型","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-3","label":"图谱构建器调用 Zep，从文本中提取节点和边","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-4","label":"人设工厂为每个实体生成 2000 字详细人设","packet":true,"from":"actor-3","to":"actor-4"},
+          {"highlight":"flow-actor-5","label":"OASIS 引擎启动双平台模拟，Agent 自由互动","packet":true,"from":"actor-4","to":"actor-5"},
+          {"highlight":"flow-actor-5","label":"模拟过程中，Agent 的动作被实时记录到日志文件"},
+          {"highlight":"flow-actor-6","label":"ReportAgent 用 ReACT 模式检索图谱 + 采访 Agent，生成预测报告","packet":true,"from":"actor-5","to":"actor-6"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">&#x1F4C4;</div>
+              <span>种子材料</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">&#x1F4CB;</div>
+              <span>本体</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">&#x1F5FA;</div>
+              <span>知识图谱</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">&#x1F9D1;</div>
+              <span>人设</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-5">
+              <div class="flow-actor-icon">&#x1F3AE;</div>
+              <span>OASIS</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-6">
+              <div class="flow-actor-icon">&#x1F4DD;</div>
+              <span>预测报告</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+
+          <div class="flow-step-label" id="flow-label">点击"下一步"开始旅程</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Use Cases -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">不只是预测——鱼群引擎的应用场景</h2>
+        <p>MiroFish 的群体智能引擎可以预测万物。以下是已经实现的案例：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">&#x1F4F0;</div>
+            <h4 class="pattern-title">舆情推演</h4>
+            <p class="pattern-desc">武汉大学的舆情事件——上传舆情报告，模拟学生、校方、媒体、校友各方的反应，预测舆论走向。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">&#x1F4DA;</div>
+            <h4 class="pattern-title">小说结局预测</h4>
+            <p class="pattern-desc">《红楼梦》失传结局——上传前 80 回，让角色们在模拟世界中继续生活，预测最可能的结局走向。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">&#x1F4B0;</div>
+            <h4 class="pattern-title">金融预测</h4>
+            <p class="pattern-desc">上传金融信号和政策草案，模拟投资者、机构、监管者的行为，预测市场可能的反应。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">&#x1F3AD;</div>
+            <h4 class="pattern-title">政策模拟</h4>
+            <p class="pattern-desc">上传政策草案，模拟不同群体（企业、民众、媒体）对新政策的反应，预判社会影响。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Final Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">最终测验：你理解 MiroFish 了吗？</h2>
+
+        <div class="quiz-container" id="quiz-module5">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="完全正确！工作流是：图谱构建（提取实体和关系）&#x2192; 环境搭建（生成模拟配置和人设）&#x2192; 开始模拟（双平台运行）&#x2192; 报告生成（ReACT 多轮检索）&#x2192; 深度互动（采访 Agent）。每一步都依赖前一步的输出。"
+               data-explanation-wrong="MiroFish 的工作流有严格的顺序依赖：必须先建图谱才能生成人设，必须有人设才能开始模拟，必须先模拟才能生成报告。">
+            <h3 class="quiz-question">以下哪个顺序正确描述了 MiroFish 的工作流？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>模拟 &#x2192; 报告 &#x2192; 图谱 &#x2192; 人设</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>图谱 &#x2192; 人设 &#x2192; 模拟 &#x2192; 报告 &#x2192; 互动</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>报告 &#x2192; 模拟 &#x2192; 图谱 &#x2192; 互动 &#x2192; 人设</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！MiroFish 的底层引擎 OASIS 是开源的（由 CAMEL-AI 团队开发），整个项目采用 AGPL-3.0 开源协议，代码托管在 GitHub 上。你可以自由使用和修改。"
+               data-explanation-wrong="MiroFish 是完全开源的！代码在 GitHub 上（666ghj/MiroFish），采用 AGPL-3.0 协议。底层模拟引擎 OASIS 也由 CAMEL-AI 团队开源。">
+            <h3 class="quiz-question">MiroFish 项目是开源的还是商业闭源的？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>完全闭源的商业产品</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>核心引擎闭源，只有前端开源</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>完全开源（AGPL-3.0），底层引擎 OASIS 也开源</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="没错！MiroFish 的核心理念是：与其让一个超级 AI 预测未来，不如创建足够多个"虚拟人"让他们在数字世界中自由互动——群体涌现的结果就是最可信的预测。这正如鱼群不需要指挥者就能展现群体智慧。"
+               data-explanation-wrong="回到课程的第一个比喻——鱼群。MiroFish 的名字来自鱼的群体行为。它的核心思想是：大量简单个体的互动可以涌现出复杂的群体智慧，这比任何一个单独的 AI 都更能预测未来。">
+            <h3 class="quiz-question">MiroFish 的名字中的"Fish"暗示了什么核心理念？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>群体智能——大量简单个体的互动涌现出超越个体的集体智慧</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>鱼的记忆只有 7 秒——暗示模拟应该是快速和短暂的</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>项目创始人的星座是双鱼座</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">重试</button>
+        </div>
+      </section>
+
+      <!-- Screen 6: Closing -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">课程结束</h2>
+        <p>恭喜你完成了 MiroFish 交互式课程！现在你已经理解了：</p>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">多智能体</code>
+            <span class="badge-desc">每个 Agent 都有独立人格、记忆和行为，群体的互动涌现出预测</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">知识图谱</code>
+            <span class="badge-desc">从种子材料中提取实体和关系，构建数字世界的"水域地图"</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">OASIS 模拟</code>
+            <span class="badge-desc">双平台并行，按真实作息推进时间，Agent 自主演化社会行为</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">ReportAgent</code>
+            <span class="badge-desc">ReACT 模式的"全知记者"，四大检索工具确保报告基于真实数据</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">完整工作流</code>
+            <span class="badge-desc">从种子到预测的五步流程，每步环环相扣</span>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#x1F41F;</div>
+          <div class="callout-content">
+            <strong class="callout-title">继续探索</strong>
+            <p>MiroFish 在 GitHub 上开源：github.com/666ghj/MiroFish。你可以克隆代码、上传自己的种子材料，让鱼群预测你关心的未来。</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+  </main>
+
+</body>
+</html>

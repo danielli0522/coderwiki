@@ -1,0 +1,185 @@
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">风险控制与回测</h1>
+      <p class="module-subtitle">如何确保 AI 交易系统不会在现实中亏钱——风险管理、回测框架和系统扩展</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">风险管理器的三层防线</h2>
+        <p>Risk Manager Agent 不是简单的「仓位不能超过 X」。它建立了三层风险防线，保护整个投资组合：</p>
+
+        <div class="arch-diagram">
+          <div class="arch-zone">
+            <h4 class="arch-zone-label">第一层：个股风险</h4>
+            <div class="arch-component" data-desc="计算每只股票的波动率（30日/60日/90日）。波动率越高，允许的最大仓位越小。高波动股票（如 TSLA）可能只允许 5% 仓位，低波动股票（如 JNJ）可以允许 15%。" onclick="showArchDesc(this)">
+              <div class="arch-icon">📉</div>
+              <span>波动率限制</span>
+            </div>
+            <div class="arch-component" data-desc="计算每只股票的最大回撤（从最高价到最低价的跌幅）。如果最大回撤超过 25%，会对该股票设置额外的仓位折扣。" onclick="showArchDesc(this)">
+              <div class="arch-icon">⬇️</div>
+              <span>最大回撤</span>
+            </div>
+          </div>
+          <div class="arch-zone">
+            <h4 class="arch-zone-label">第二层：组合风险</h4>
+            <div class="arch-component" data-desc="计算所有持仓之间的相关系数矩阵。如果 AAPL 和 MSFT 的相关性是 0.8，说明它们经常同涨同跌——不能同时重仓两只高相关性的股票。" onclick="showArchDesc(this)">
+              <div class="arch-icon">🔗</div>
+              <span>相关性分析</span>
+            </div>
+            <div class="arch-component" data-desc="整个投资组合的总风险敞口不能超过设定阈值。即使每只股票都没超限，如果总风险太高，Risk Manager 会要求缩小整体仓位。" onclick="showArchDesc(this)">
+              <div class="arch-icon">🛡️</div>
+              <span>总敞口上限</span>
+            </div>
+          </div>
+          <div class="arch-zone">
+            <h4 class="arch-zone-label">第三层：极端情况</h4>
+            <div class="arch-component" data-desc="模拟最坏情况下（如 2008 金融危机）投资组合可能的最大损失。如果 VaR 超过 30%，会触发强制减仓。" onclick="showArchDesc(this)">
+              <div class="arch-icon">💥</div>
+              <span>VaR 压力测试</span>
+            </div>
+          </div>
+          <div class="arch-description" id="arch-desc">点击任意组件了解详情</div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">回测：用历史数据验证策略</h2>
+        <p>在用真金白银之前，你需要验证 AI 对冲基金的决策是否真的有效。这就是<span class="term" data-definition="回测（Backtesting）：用历史市场数据来模拟交易策略的表现。如果你的策略在过去 5 年的数据上都能盈利，那么它在未来盈利的概率更高。">回测</span>的作用：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment"># 回测主循环（简化版）</span></span>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">backtest</span>(strategy, start, end):</span>
+<span class="code-line">    portfolio = {<span class="code-string">"cash"</span>: <span class="code-number">100000</span>}</span>
+<span class="code-line">    <span class="code-keyword">for</span> date <span class="code-keyword">in</span> <span class="code-function">date_range</span>(start, end):</span>
+<span class="code-line">        signals = strategy.<span class="code-function">run</span>(date)</span>
+<span class="code-line">        decisions = portfolio_mgr.<span class="code-function">decide</span>(</span>
+<span class="code-line">            signals, portfolio</span>
+<span class="code-line">        )</span>
+<span class="code-line">        <span class="code-function">execute_trades</span>(decisions)</span>
+<span class="code-line">        <span class="code-function">update_portfolio</span>(portfolio)</span>
+<span class="code-line">    <span class="code-keyword">return</span> <span class="code-function">calculate_metrics</span>(portfolio)</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">回测函数：用历史数据模拟交易</p>
+              <p class="tl">初始资金 $100,000，持仓为空</p>
+              <p class="tl">遍历历史中的每一个交易日</p>
+              <p class="tl">用策略分析当天的市场数据，产生信号</p>
+              <p class="tl">Portfolio Manager 综合信号做出交易决策</p>
+              <p class="tl">模拟执行交易（假设按收盘价成交）</p>
+              <p class="tl">更新投资组合的市场价值</p>
+              <p class="tl">计算收益、最大回撤、夏普比率等指标</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">📊</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键回测指标</strong>
+            <p><strong>年化收益率</strong>：一年的平均收益率，越高越好。<strong>最大回撤</strong>：从最高点到最低点的最大跌幅，越小越好。<strong>夏普比率</strong>：每承担一单位风险能获得多少收益，通常 >1 算不错，>2 算优秀。<strong>胜率</strong>：盈利交易占总交易的百分比。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">系统扩展：如何添加新的 Agent</h2>
+        <p>ai-hedge-fund 的架构让扩展变得简单。假设你想添加一个「宏观经济分析师」Agent，关注利率、通胀和 GDP 增长：</p>
+
+        <div class="step-cards animate-in">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>创建 Agent 文件</strong>
+              <p>在 src/agents/ 下创建 macro_agent.py，定义分析逻辑和输出格式。输入是宏观数据，输出是 bullish/bearish/neutral 信号。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>编写 System Prompt</strong>
+              <p>在 src/prompts/ 下创建 macro_prompt.py，定义宏观分析师的投资框架——关注美联储利率、CPI、失业率等。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>注册到工作流</strong>
+              <p>在 create_workflow 函数里添加新节点，把它接入并行分析层。Portfolio Manager 会自动读取它的信号。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">扩展的黄金法则</strong>
+            <p>新增 Agent 必须遵守「输入-输出契约」：从 AgentState 读取数据，写入标准格式的信号（ticker、signal、confidence、reasoning）。只要遵守这个契约，任何新 Agent 都能无缝接入系统——这就是共享状态架构的威力。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">综合测验</h2>
+        <div class="quiz-container" id="quiz-ahf-4">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！相关性分析是第二层防线。如果 AAPL 和 MSFT 高度相关，同时重仓等于把赌注压在同一个方向上。Risk Manager 会根据相关性系数调整仓位上限。"
+               data-explanation-wrong="再想想——两支股票同时涨跌的问题属于「组合风险」层面，不是单个股票的风险。Risk Manager 的哪一层专门处理多个持仓之间的关系？">
+            <h3 class="quiz-question">你的投资组合持有 AAPL $50,000。现在你想买入 MSFT $80,000。Risk Manager 可能会怎么做？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>直接批准，因为两只股票是不同的公司</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>计算 AAPL 和 MSFT 的相关性，因为相关性高（0.8），限制 MSFT 的仓位</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>拒绝交易，因为投资组合已经满了</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！回测时数据是已知的，AI 可以「看到未来」——比如在分析 2024-03-15 的数据时，它可能无意中使用了 2024-03-16 的信息。解决方法是用「滚动窗口」确保只用当时可用的数据。"
+               data-explanation-wrong="再想想——回测用的是历史数据，AI 在分析时会不会无意中获取了未来信息？这叫「前瞻偏差」（Look-ahead Bias），是回测最常见的陷阱。">
+            <h3 class="quiz-question">回测中最大的陷阱是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>计算速度太慢，回测需要很长时间</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>历史数据不够多，无法得出结论</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>AI 可能使用了「未来信息」做出决策，导致回测结果过于乐观</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-ahf-4')">提交答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-ahf-4')">再试一次</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

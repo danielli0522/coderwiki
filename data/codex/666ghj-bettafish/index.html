@@ -1,0 +1,1983 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>微舆 BettaFish：用 AI 打破信息茧房</title>
+
+  <!-- Google Fonts: Bricolage Grotesque · DM Sans · JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <!--
+    Warm amber accent for BettaFish — matches the "breaking out of filter bubbles" energy.
+  -->
+  <style>
+    :root {
+      --color-accent:       #D4A843;
+      --color-accent-hover: #BF9530;
+      --color-accent-light: #FDF5E0;
+      --color-accent-muted: #E0C070;
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">微舆 BettaFish：用 AI 打破信息茧房</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <button class="nav-dot" data-target="module-1" data-tooltip="什么是信息茧房" role="tab" aria-label="Module 1: 什么是信息茧房"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="五大引擎各司其职" role="tab" aria-label="Module 2: 五大引擎各司其职"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="论坛协作机制" role="tab" aria-label="Module 3: 论坛协作机制"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="从数据到报告" role="tab" aria-label="Module 4: 从数据到报告"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="动手扩展你的微舆" role="tab" aria-label="Module 5: 动手扩展你的微舆"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh -->
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 1: 什么是信息茧房 — 为什么 BettaFish 诞生
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">什么是信息茧房</h1>
+      <p class="module-subtitle">为什么我们越来越难看到"不同的声音"？BettaFish 又是如何用多智能体协作来打破这面墙的。</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Hook — the cocoon metaphor -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">你被困在"茧房"里了吗？</h2>
+        <p>想象一下：你每天打开手机，看到的新闻、视频、朋友圈，都是算法精心挑选的——它觉得你喜欢科技，就只推科技；你觉得某个观点对，就只推同类的声音。久而久之，你的世界变成了一间只播放一个频道的房间。</p>
+        <p>这不是假设，这就是 <span class="term" data-definition="信息茧房（Information Cocoon）：一种现象——个性化推荐算法持续向你推送你已经认同的内容，让你接触不到不同观点，就像蚕吐丝把自己包裹起来一样。">信息茧房</span>。而你并不孤单——全球数亿互联网用户都面临同样的困境。</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">&#x1F4A1;</div>
+          <div class="callout-content">
+            <strong class="callout-title">核心理念</strong>
+            <p>BettaFish 的名字来自"斗鱼"（Betta Fish）——一种体型很小但非常好斗、漂亮的鱼。它象征着"小而强大，不畏挑战"。微舆的目标，就是帮你看清信息的全貌，不被单一声音操控。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Why traditional tools fail -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">传统分析工具为什么不够？</h2>
+        <p>市面上的舆情工具大多是"数据看板"——给你一堆图表和数字。但你真正需要的是：<strong>洞察</strong>和<strong>决策依据</strong>。BettaFish 的思路完全不同——你只需要像聊天一样提出问题，它就会自动分析国内外 30+ 主流社媒与数百万条评论。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#x1F4CA;</div>
+            <h4 class="pattern-title">传统看板</h4>
+            <p class="pattern-desc">你去看数据、做筛选、画图表——但看到的只是表面数字，难以发现深层趋势和跨平台对比。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">&#x1F916;</div>
+            <h4 class="pattern-title">单一 AI 分析</h4>
+            <p class="pattern-desc">一个模型从单一角度分析——它有自己的"偏见"和盲区，和被茧房困住的人类一样。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#x1F41F;</div>
+            <h4 class="pattern-title">BettaFish 多智能体</h4>
+            <p class="pattern-desc">多个专业 Agent 各自从不同角度分析，再通过"论坛辩论"碰撞出更高质量的集体智能。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Six advantages -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">BettaFish 的六大优势</h2>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>AI 驱动的全域监控</strong>
+              <p>爬虫集群 7x24 小时不间断作业，覆盖微博、小红书、抖音、快手等 10+ 国内外社媒，下钻至海量用户评论</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>超越 LLM 的复合分析引擎</strong>
+              <p>5 类专业 Agent + 微调模型 + 统计模型，多模型协同保证深度与多维度</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>强大的 <span class="term" data-definition="多模态（Multimodal）：指 AI 系统能同时理解和处理多种类型的数据——文字、图片、视频、音频等，就像人类能同时看、听、读一样。">多模态</span> 能力</strong>
+              <p>深度解析短视频内容，精准提取天气、股票等结构化信息卡片</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>Agent "论坛"协作机制</strong>
+              <p>不同 Agent 有独特工具集与思维模式，通过辩论碰撞出集体智能</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>公私域数据无缝融合</strong>
+              <p>同时分析公开舆情和企业内部业务数据库，打通数据壁垒</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <strong>轻量化与高扩展性</strong>
+              <p>纯 Python 模块化设计，一键部署，开发者可轻松集成自定义模型与业务逻辑</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Architecture overview diagram -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">整体架构一瞥</h2>
+        <p>BettaFish 由六大模块组成，每个模块都是一个独立运行的"角色"。点击下方组件，了解它们各自的职责。</p>
+
+        <div class="arch-diagram">
+          <div class="arch-zone">
+            <h4 class="arch-zone-label">数据采集层</h4>
+            <div class="arch-component" data-desc="MindSpider（心智蜘蛛）：7x24 不间断的 AI 爬虫集群。它负责从微博、小红书、抖音、快手等 30+ 平台抓取内容和评论，存入本地舆情数据库。它还有话题提取和关键词管理能力。">
+              <div class="arch-icon">&#x1F577;&#xFE0F;</div>
+              <span>MindSpider</span>
+            </div>
+          </div>
+          <div class="arch-zone">
+            <h4 class="arch-zone-label">分析引擎层（三个 Agent 并行）</h4>
+            <div class="arch-component" data-desc="Insight Agent（洞察者）：深入私有舆情数据库挖掘。它使用微调的情感分析模型（BERT/GPT-2/Qwen）和聚类采样来分析历史数据模式，找出大众评论中的情绪倾向和热点话题。">
+              <div class="arch-icon">&#x1F50D;</div>
+              <span>Insight Agent</span>
+            </div>
+            <div class="arch-component" data-desc="Media Agent（多媒体分析师）：擅长多模态内容分析。它能深度理解抖音、快手等短视频内容，还能提取搜索引擎中的天气、股票等结构化卡片信息，让你全面掌握舆情动态。">
+              <div class="arch-icon">&#x1F3AC;</div>
+              <span>Media Agent</span>
+            </div>
+            <div class="arch-component" data-desc="Query Agent（搜索专家）：负责精准的国内外网页搜索。它使用 Tavily 搜索工具集，能进行深度新闻搜索、24小时快讯、历史日期搜索等多种精准信息检索。">
+              <div class="arch-icon">&#x1F310;</div>
+              <span>Query Agent</span>
+            </div>
+          </div>
+          <div class="arch-zone">
+            <h4 class="arch-zone-label">协作与输出层</h4>
+            <div class="arch-component" data-desc="ForumEngine（论坛引擎）：这是 BettaFish 最独特的设计。它监控三个 Agent 的分析日志，收集发言，然后用一个独立的 LLM（论坛主持人）来引导讨论、纠正错误、整合观点，催生集体智能。">
+              <div class="arch-icon">&#x1F3DB;&#xFE0F;</div>
+              <span>ForumEngine</span>
+            </div>
+            <div class="arch-component" data-desc="Report Agent（报告生成器）：收集所有分析结果和论坛讨论内容，通过"模板选择→布局设计→篇幅规划→章节生成→IR装订→HTML渲染"多步流程，生成精美的交互式研究报告。">
+              <div class="arch-icon">&#x1F4C4;</div>
+              <span>Report Agent</span>
+            </div>
+          </div>
+          <div class="arch-description">点击任意组件，了解它的职责</div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Code translation — the entry point -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">一切从一个问题开始</h2>
+        <p>用户只需在 Web 界面输入一个分析需求（比如"武汉大学的舆情分析"），Flask 主应用就会启动整个流水线。下面是主应用接收请求的关键代码：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># app.py — Flask 主应用入口</span></span>
+<span class="code-line"><span class="code-keyword">from</span> ForumEngine <span class="code-keyword">import</span> start_forum_monitoring</span>
+<span class="code-line"><span class="code-keyword">from</span> QueryEngine.agent <span class="code-keyword">import</span> DeepSearchAgent</span>
+<span class="code-line"><span class="code-keyword">from</span> InsightEngine.agent <span class="code-keyword">import</span> DeepSearchAgent</span>
+<span class="code-line"><span class="code-keyword">from</span> MediaEngine.agent <span class="code-keyword">import</span> DeepSearchAgent</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-function">@app.route</span>(<span class="code-string">'/analyze'</span>, methods=[<span class="code-string">'POST'</span>])</span>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">analyze</span>():</span>
+<span class="code-line">    query = request.json[<span class="code-string">'query'</span>]</span>
+<span class="code-line">    <span class="code-comment"># 启动论坛监控</span></span>
+<span class="code-line">    start_forum_monitoring()</span>
+<span class="code-line">    <span class="code-comment"># 三个 Agent 并行启动</span></span>
+<span class="code-line">    <span class="code-function">run_agents_parallel</span>(query)</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">引入论坛引擎（让 Agent 们能"讨论"）</p>
+              <p class="tl">引入三个分析 Agent（各有专长）</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">注册一个 HTTP 接口，接收用户问题</p>
+              <p class="tl">拿到用户的分析需求</p>
+              <p class="tl">先启动论坛监控——它会实时监听 Agent 们的发言</p>
+              <p class="tl">然后三个 Agent 同时开始工作，各干各的</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#x1F4A1;</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键设计</strong>
+            <p>三个 Agent 是<strong>并行</strong>启动的，而不是串行。这意味着它们同时开始搜索和分析，大大加快了整体速度。而 ForumEngine 在后台持续监听它们的进展。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 6: Complete analysis flow -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">一次完整分析的流程</h2>
+        <p>当用户提出问题后，系统经历以下几个阶段。注意步骤 5 是一个<strong>多轮循环</strong>——Agent 们不是一次就完成，而是在论坛中反复深入。</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"用户提出分析需求，比如：武汉大学的舆情分析"},
+          {"highlight":"flow-actor-2","label":"三个 Agent 并行启动：Insight、Media、Query 各自开始初步搜索","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-3","label":"各 Agent 根据初步结果制定分块研究策略"},
+          {"highlight":"flow-actor-4","label":"ForumEngine 收集 Agent 发言，主持人引导深入讨论","packet":true,"from":"actor-3","to":"actor-4"},
+          {"highlight":"flow-actor-2","label":"Agent 们根据论坛引导调整方向，进行更深度的搜索（多轮循环）"},
+          {"highlight":"flow-actor-5","label":"Report Agent 收集所有结果，生成精美的交互式报告","packet":true,"from":"actor-4","to":"actor-5"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">&#x1F464;</div>
+              <span>用户</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">&#x1F916;</div>
+              <span>三个 Agent</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">&#x1F4CB;</div>
+              <span>策略决策</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">&#x1F3DB;&#xFE0F;</div>
+              <span>ForumEngine</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-5">
+              <div class="flow-actor-icon">&#x1F4C4;</div>
+              <span>Report Agent</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label">点击"下一步"开始体验完整分析流程</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 7: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验你的理解</h2>
+
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="没错。并行启动意味着三个 Agent 同时工作，大大缩短了整体分析时间，而不是排队等候。"
+               data-explanation-wrong="想想 BettaFish 是如何处理三个 Agent 的——它们是排队还是同时出发？">
+            <h3 class="quiz-question">当用户提出一个分析需求后，Insight Agent、Media Agent、Query Agent 是按什么顺序启动的？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>先启动 Insight Agent，等它完成后再启动下一个</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>由 ForumEngine 依次调度，一次只运行一个</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>三个 Agent 同时并行启动，各干各的</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="准确！ForumEngine 的核心职责就是监控三个 Agent 的日志，收集发言，并让主持人引导讨论——而不是自己分析数据。"
+               data-explanation-wrong="ForumEngine 自己并不搜索或分析数据。想想它的名字——论坛引擎——它在做什么？">
+            <h3 class="quiz-question">ForumEngine 的核心职责是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>自己搜索和分析舆情数据</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>监控 Agent 发言，用主持人引导讨论、整合观点</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>生成最终的 HTML 报告</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="完全正确！信息茧房就是你只能看到自己已经认同的观点，不同声音被算法过滤掉了。BettaFish 正是为了帮人们看到全貌而诞生的。"
+               data-explanation-wrong="回到本模块开头——信息茧房和数据的哪个特性有关？是数量、隐私，还是你能看到的观点多样性？">
+            <h3 class="quiz-question">如果让你向一个非技术朋友解释"信息茧房"，你会怎么说？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>算法只给你看你已经认同的内容，让你看不到不同的观点</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>你的个人信息被互联网公司收集和泄露</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>网络上虚假信息太多，无法分辨真假</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">重新作答</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 2: 五大引擎各司其职 — 深入每个 Agent 的内部
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">五大引擎各司其职</h1>
+      <p class="module-subtitle">深入理解 MindSpider、Insight Agent、Media Agent、Query Agent 和 Report Agent 各自的工具集与内部工作方式。</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: MindSpider — the data collector -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">MindSpider：不知疲倦的数据采集蜘蛛</h2>
+        <p>就像蜘蛛结网一样，MindSpider 在互联网上织起一张覆盖 30+ 社媒的采集网。它有两个核心模块：</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-accent-light)">&#x1F4F0;</div>
+            <div>
+              <strong>BroadTopicExtraction（广域话题提取）</strong>
+              <p>每天自动抓取热点新闻，用 <span class="term" data-definition="LLM（大语言模型）：像 GPT、Qwen 这样的人工智能模型，能理解和生成人类语言。在这里它用来从新闻中自动提取关键词。">LLM</span> 提取关键词，存入数据库</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-info-light)">&#x1F50D;</div>
+            <div>
+              <strong>DeepSentimentCrawling（深度舆情爬取）</strong>
+              <p>根据关键词下钻到各平台抓取帖子和评论，支持微博、小红书、抖音、快手、B站等七大平台</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># MindSpider/main.py — 爬虫主程序入口</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">MindSpider</span>:</span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self):</span>
+<span class="code-line">        self.broad_topic_path = (</span>
+<span class="code-line">            self.project_root / <span class="code-string">"BroadTopicExtraction"</span>)</span>
+<span class="code-line">        self.deep_sentiment_path = (</span>
+<span class="code-line">            self.project_root / <span class="code-string">"DeepSentimentCrawling"</span>)</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">MindSpider 主类——整个爬虫系统的总指挥</p>
+              <p class="tl">初始化时设置两个子模块的路径</p>
+              <p class="tl">广域话题提取模块——负责"今天有什么热点"</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">深度舆情爬取模块——负责"挖掘大众评论"</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Insight Agent — the database miner -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Insight Agent：私有数据库的深度矿工</h2>
+        <p>Insight Agent 的专长是在本地舆情数据库中挖掘金矿。它拥有 5 种专用查询工具，还有一个秘密武器——<strong>情感分析模型</strong>。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#x1F525;</div>
+            <h4 class="pattern-title">search_hot_content</h4>
+            <p class="pattern-desc">查找指定时间范围内综合热度最高的内容——综合点赞、评论、分享、观看的加权评分</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">&#x1F30D;</div>
+            <h4 class="pattern-title">search_topic_globally</h4>
+            <p class="pattern-desc">在整个数据库中全局搜索与特定话题相关的所有内容和评论</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: #EDE8F5">&#x1F4C5;</div>
+            <h4 class="pattern-title">search_topic_by_date</h4>
+            <p class="pattern-desc">在指定历史日期范围内搜索与话题相关的内容</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#x1F4AC;</div>
+            <h4 class="pattern-title">get_comments_for_topic</h4>
+            <p class="pattern-desc">专门提取公众对某一话题的评论数据——这就是"听到最真实声音"的关键</p>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># InsightEngine/tools/search.py</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">MediaCrawlerDB</span>:</span>
+<span class="code-line">    <span class="code-comment"># 权重定义</span></span>
+<span class="code-line">    W_LIKE    = <span class="code-number">1.0</span></span>
+<span class="code-line">    W_COMMENT = <span class="code-number">5.0</span></span>
+<span class="code-line">    W_SHARE   = <span class="code-number">10.0</span>  <span class="code-comment"># 高价值互动</span></span>
+<span class="code-line">    W_VIEW    = <span class="code-number">0.1</span></span>
+<span class="code-line">    W_DANMAKU = <span class="code-number">0.5</span></span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">本地舆情数据库查询工具集</p>
+              <p class="tl">热度计算的权重配置——不同互动价值不同</p>
+              <p class="tl">点赞权重 1.0——基础的互动指标</p>
+              <p class="tl">评论权重 5.0——评论代表更深度的参与</p>
+              <p class="tl">分享/转发权重 10.0——传播力最强，价值最高</p>
+              <p class="tl">观看权重 0.1——看的人多但价值较低</p>
+              <p class="tl">弹幕权重 0.5——中等互动深度</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">&#x1F9E0;</div>
+          <div class="callout-content">
+            <strong class="callout-title">情感分析武器库</strong>
+            <p>Insight Agent 集成了多种情感分析模型：BERT 中文微调、GPT-2 LoRA 微调、小参数 Qwen3 微调、多语言情感分析，甚至还有传统的 <span class="term" data-definition="SVM（支持向量机）：一种经典的机器学习算法，通过找到最优分界线来分类数据——比如把评论分为"正面"和"负面"。">SVM</span> 机器学习方法。不同模型各有优势，系统可以根据场景灵活选择。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Media Agent — multimodal analyst -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Media Agent：看图看视频的分析师</h2>
+        <p>Media Agent 是整个系统里"眼睛"最好的成员。它使用博查多模态搜索引擎，能理解图片和视频内容。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># MediaEngine/agent.py</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">DeepSearchAgent</span>:</span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, config=<span class="code-keyword">None</span>):</span>
+<span class="code-line">        self.llm_client = self._initialize_llm()</span>
+<span class="code-line">        self.search_agency = (</span>
+<span class="code-line">            BochaMultimodalSearch(</span>
+<span class="code-line">                api_key=self.config.BOCHA_API_KEY))</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">Media Agent 的主类</p>
+              <p class="tl">初始化时准备两样东西</p>
+              <p class="tl">1. LLM 客户端——用来理解和分析内容</p>
+              <p class="tl">2. 多模态搜索引擎——能搜图片和视频</p>
+              <p class="tl">使用博查搜索 API 作为多模态搜索工具</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Query Agent — precision search -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Query Agent：精准信息搜索专家</h2>
+        <p>Query Agent 使用 <span class="term" data-definition="Tavily：一个专为 AI Agent 设计的搜索 API，能返回结构化的搜索结果，包括新闻发布日期、相关性评分等，比传统搜索更适合 AI 分析使用。">Tavily</span> 搜索工具集，专门负责精准的国内外新闻搜索。它有 6 种搜索模式：</p>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">basic_search_news</code>
+            <span class="badge-desc">标准通用新闻搜索——快速获取概况</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">deep_search_news</code>
+            <span class="badge-desc">最全面的深度分析——适合重要话题</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">search_news_last_24_hours</code>
+            <span class="badge-desc">24 小时最新动态——时效性最强</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">search_news_last_week</code>
+            <span class="badge-desc">过去一周主要报道——看趋势</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">search_images_for_news</code>
+            <span class="badge-desc">搜索新闻相关图片——视觉维度</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">search_news_by_date</code>
+            <span class="badge-desc">指定历史日期范围搜索——回溯事件</span>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># QueryEngine/agent.py</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">DeepSearchAgent</span>:</span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, config=<span class="code-keyword">None</span>):</span>
+<span class="code-line">        self.llm_client = self._initialize_llm()</span>
+<span class="code-line">        self.search_agency = TavilyNewsAgency(</span>
+<span class="code-line">            api_key=self.config.TAVILY_API_KEY)</span>
+<span class="code-line">        <span class="code-comment"># 初始化搜索、反思、总结等节点</span></span>
+<span class="code-line">        self._initialize_nodes()</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">Query Agent 主类——和 Media Agent 结构类似</p>
+              <p class="tl">初始化 LLM 客户端</p>
+              <p class="tl">但搜索工具不同——用 Tavily 新闻搜索</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">然后初始化内部的处理节点管线</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Report Agent — the publisher -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Report Agent：把分析变成精美报告</h2>
+        <p>Report Agent 是整个系统的最后一棒。它把三个 Agent 的分析结果和论坛讨论内容，变成一份精美的交互式 HTML 报告。这个过程有六个步骤：</p>
+
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <p>模板选择</p>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <p>布局设计</p>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <p>篇幅规划</p>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">4</div>
+            <p>章节生成</p>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">5</div>
+            <p>IR 装订</p>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">6</div>
+            <p>HTML 渲染</p>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#x1F4D6;</div>
+          <div class="callout-content">
+            <strong class="callout-title">什么是 IR？</strong>
+            <p><span class="term" data-definition="IR（中间表示，Intermediate Representation）：一种数据格式，介于原始分析和最终报告之间。就像建筑图纸——先把设计意图画成标准化的图纸（IR），再由施工队（渲染器）按图纸盖房子（HTML 报告）。">IR</span> 是 Report Agent 的独创设计。它不直接生成 HTML，而是先生成一个标准化的 JSON 结构（IR），再由渲染器翻译成 HTML。这样做的好处是：同一份 IR 可以渲染成不同格式——HTML 网页、PDF 文档、Markdown 文本。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 6: Drag-and-drop matching -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">把引擎和它的专长匹配起来</h2>
+        <p>把左侧的 Agent 名称拖到右侧对应的描述上：</p>
+
+        <div class="dnd-container" id="dnd-module2">
+          <div class="dnd-chips">
+            <div class="dnd-chip" draggable="true" data-answer="insight">Insight Agent</div>
+            <div class="dnd-chip" draggable="true" data-answer="media">Media Agent</div>
+            <div class="dnd-chip" draggable="true" data-answer="query">Query Agent</div>
+            <div class="dnd-chip" draggable="true" data-answer="mindspider">MindSpider</div>
+            <div class="dnd-chip" draggable="true" data-answer="report">Report Agent</div>
+          </div>
+          <div class="dnd-zones">
+            <div class="dnd-zone" data-correct="mindspider">
+              <p class="dnd-zone-label">7x24 爬虫集群，覆盖 30+ 社媒平台</p>
+              <div class="dnd-zone-target">拖到这里</div>
+            </div>
+            <div class="dnd-zone" data-correct="insight">
+              <p class="dnd-zone-label">私有数据库挖掘 + 情感分析模型</p>
+              <div class="dnd-zone-target">拖到这里</div>
+            </div>
+            <div class="dnd-zone" data-correct="media">
+              <p class="dnd-zone-label">多模态搜索——能理解图片和短视频</p>
+              <div class="dnd-zone-target">拖到这里</div>
+            </div>
+            <div class="dnd-zone" data-correct="query">
+              <p class="dnd-zone-label">Tavily 新闻搜索——6 种精准搜索模式</p>
+              <div class="dnd-zone-target">拖到这里</div>
+            </div>
+            <div class="dnd-zone" data-correct="report">
+              <p class="dnd-zone-label">IR 中间表示 → HTML/PDF/Markdown 渲染</p>
+              <div class="dnd-zone-target">拖到这里</div>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="checkDnD('dnd-module2')">检查匹配</button>
+          <button class="btn" onclick="resetDnD('dnd-module2')">重新匹配</button>
+        </div>
+      </section>
+
+      <!-- Screen 7: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验你的理解</h2>
+
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！Insight Agent 使用本地数据库（MediaCrawlerDB）+ 情感分析模型 + 聚类采样来挖掘数据，而不是在线搜索。"
+               data-explanation-wrong="仔细看看 Insight Agent 的工具集——它的数据来源是什么？是在线搜索引擎还是本地数据库？">
+            <h3 class="quiz-question">如果要分析的是企业内部数据库中的客户反馈，哪个 Agent 最适合？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Query Agent——因为它擅长精准搜索</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Insight Agent——因为它专攻私有数据库挖掘</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Media Agent——因为它能处理多模态内容</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！热度 = 点赞 x 1 + 评论 x 5 + 分享 x 10 + 观看 x 0.1。分享/转发的传播力最强，所以权重最高。"
+               data-explanation-wrong="回忆一下 Insight Agent 的热度计算权重——哪种互动的权重是 10.0？">
+            <h3 class="quiz-question">在 Insight Agent 的热度计算中，哪种互动的权重最高？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>点赞——因为参与人数最多</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>评论——因为它代表更深度的参与</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>分享/转发——因为传播力最强</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="完全正确！IR 是中间表示——先把内容变成标准化的 JSON，再由渲染器翻译成不同格式。这就像有了蓝图，可以盖不同风格的房子。"
+               data-explanation-wrong="想想 Report Agent 为什么要引入 IR 这一层——是为了生成更多格式，还是为了速度？">
+            <h3 class="quiz-question">Report Agent 为什么要用 IR 中间表示，而不是直接生成 HTML？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为直接生成 HTML 速度太慢</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>同一份 IR 可以渲染成 HTML、PDF、Markdown 等多种格式</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为 LLM 不擅长直接写 HTML</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重新作答</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 3: 论坛协作机制 — Agent 们如何"讨论"出更好的答案
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">论坛协作机制</h1>
+      <p class="module-subtitle">BettaFish 最独特的设计：三个 Agent 不只是各自分析，而是通过"论坛"进行多轮辩论、纠正和融合，催生集体智能。</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Why collaboration matters -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">为什么单个 Agent 不够？</h2>
+        <p>想象你是一个公司老板，要做一个重大决策。你会只问一个部门的意见吗？当然不会——你会召集市场部（看外部趋势）、客服部（听用户声音）、财务部（看数据）。让不同视角碰撞，才能做出更好的决策。</p>
+        <p>BettaFish 的"论坛"就是这个道理。三个 Agent 各有专长，但单独看都有盲区。通过论坛讨论，它们互相补充、互相纠错，最终产出远超任何一个 Agent 独自能做到的分析质量。</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">&#x1F4A1;</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键洞察</strong>
+            <p>在 AI 系统中，<span class="term" data-definition="多智能体系统（Multi-Agent System）：多个 AI Agent 协同工作的架构。每个 Agent 有自己的专长和工具，通过协作解决单个 Agent 无法处理的复杂任务。就像一个团队，每个人都有自己的角色。">多智能体协作</span> 的核心优势不只是"干得更快"，而是"想得更全面"。通过引入不同视角和辩论机制，可以有效减少单一模型的偏见和盲区。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: ForumEngine internals — how it monitors -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">ForumEngine 如何监听 Agent 发言？</h2>
+        <p>ForumEngine 的核心是一个 <span class="term" data-definition="LogMonitor（日志监控器）：一个后台线程，持续监视三个日志文件（insight.log、media.log、query.log）的变化，从中提取 Agent 的"发言"内容，写入论坛日志。就像会议室里的书记员，记录每个人的发言。">LogMonitor</span>。它监控三个日志文件，一旦发现 Agent 产出了有价值的分析内容，就把它记录到论坛日志（forum.log）中。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># ForumEngine/monitor.py</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">LogMonitor</span>:</span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, log_dir=<span class="code-string">"logs"</span>):</span>
+<span class="code-line">        self.monitored_logs = {</span>
+<span class="code-line">            <span class="code-string">'insight'</span>: self.log_dir / <span class="code-string">'insight.log'</span>,</span>
+<span class="code-line">            <span class="code-string">'media'</span>:   self.log_dir / <span class="code-string">'media.log'</span>,</span>
+<span class="code-line">            <span class="code-string">'query'</span>:   self.log_dir / <span class="code-string">'query.log'</span></span>
+<span class="code-line">        }</span>
+<span class="code-line">        self.agent_speeches_buffer = []</span>
+<span class="code-line">        self.host_speech_threshold = <span class="code-number">5</span></span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">日志监控器——论坛引擎的核心组件</p>
+              <p class="tl">监控三个日志文件——每个 Agent 一个</p>
+              <p class="tl">Insight Agent 的日志</p>
+              <p class="tl">Media Agent 的日志</p>
+              <p class="tl">Query Agent 的日志</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">Agent 发言缓冲区——收集发言</p>
+              <p class="tl">每收集 5 条发言，触发一次主持人发言</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Forum Host — the moderator -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">论坛主持人：智能的讨论引导者</h2>
+        <p>每收集 5 条 Agent 发言，ForumEngine 就会触发一个独立的 LLM（论坛主持人）来生成引导性发言。主持人不是简单地总结，而是<strong>梳理事件、整合观点、纠正错误、引导方向</strong>。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># ForumEngine/llm_host.py</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">ForumHost</span>:</span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">generate_host_speech</span>(self, forum_logs):</span>
+<span class="code-line">        parsed = self._parse_forum_logs(forum_logs)</span>
+<span class="code-line">        system_prompt = self._build_system_prompt()</span>
+<span class="code-line">        user_prompt = self._build_user_prompt(parsed)</span>
+<span class="code-line">        response = self._call_qwen_api(</span>
+<span class="code-line">            system_prompt, user_prompt)</span>
+<span class="code-line">        <span class="code-keyword">return</span> response[<span class="code-string">"content"</span>]</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">论坛主持人类——用一个独立 LLM 来引导讨论</p>
+              <p class="tl">生成主持人发言的流程：</p>
+              <p class="tl">1. 解析论坛日志，提取 Agent 发言</p>
+              <p class="tl">2. 构建系统提示——定义主持人角色</p>
+              <p class="tl">3. 构建用户提示——附上最近的发言内容</p>
+              <p class="tl">4. 调用 LLM API 生成发言</p>
+              <p class="tl">5. 返回主持人的发言内容</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">&#x26A0;&#xFE0F;</div>
+          <div class="callout-content">
+            <strong class="callout-title">防止"回音室"效应</strong>
+            <p>注意：主持人使用的是<strong>独立的 LLM</strong>（可配置为不同于分析 Agent 的模型），这确保了它的视角不会和分析 Agent 完全一致——这是 BettaFish 避免集体偏见的关键设计。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Group Chat Animation — the forum in action -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">论坛讨论实况模拟</h2>
+        <p>点击"下一条消息"，体验一次真实的论坛讨论流程。注意观察：每个 Agent 从不同角度分析同一个话题，主持人如何整合和引导。</p>
+
+        <div class="chat-window" id="chat-module3">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="query" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">Q</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">Query Agent</span>
+                <p>我刚搜索了过去 24 小时关于"武汉大学"的新闻，发现 3 条热点：1) 校庆活动引发关注；2) 某论文争议在学术圈扩散；3) 招生政策调整被媒体解读。其中第 2 条热度上升最快。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="insight" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">I</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Insight Agent</span>
+                <p>我从数据库中检索到关于该论文的 2,847 条评论。情感分析显示：62% 为中性、23% 为负面、15% 为正面。负面评论集中在"学术诚信"话题，其中 40% 来自教育从业者账号。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="media" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">M</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">Media Agent</span>
+                <p>我在抖音和 B 站上找到了 15 个相关视频，总播放量 320 万。视频评论的情绪比文字评论更激烈——负面比例达 35%。值得注意的是，一条教授回应视频获得了最高的正面互动。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="query" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">Q</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">Query Agent</span>
+                <p>补充搜索发现，该论文争议最早由一个学术自媒体在知乎发起，12 小时后被微博大 V 转发开始扩散。目前尚未被主流官媒报道。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="insight" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">I</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Insight Agent</span>
+                <p>聚类分析显示评论者主要分为三类：学术圈人士（关注规范）、在校生（关注学校声誉）、普通网民（跟风讨论）。建议后续重点分析学术圈的观点分布。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="5" data-sender="host" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">H</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">主持人</span>
+                <p>综合各方信息：事件目前处于"自媒体扩散→主流媒体关注前"阶段。三个关键发现：1) 负面情绪集中在学术圈，尚未大规模外溢；2) 视频平台的情绪比文字平台更极端；3) 教授回应视频是正面转折点。建议 Query Agent 追踪官媒动态，Media Agent 关注短视频传播路径变化。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module3-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条消息</button>
+            <button class="btn chat-all-btn">播放全部</button>
+            <button class="btn chat-reset-btn">重新播放</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: How Agents read forum — the forum_reader tool -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Agent 们如何"听到"论坛讨论？</h2>
+        <p>论坛不是单向的——Agent 们也有一个工具叫 <code>forum_reader</code>，可以读取主持人的引导发言和其他 Agent 的分析，然后据此调整自己的研究方向。这就是"交流融合"。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># InsightEngine/nodes/summary_node.py</span></span>
+<span class="code-line"><span class="code-keyword">from</span> utils.forum_reader <span class="code-keyword">import</span> (</span>
+<span class="code-line">    get_latest_host_speech,</span>
+<span class="code-line">    format_host_speech_for_prompt</span>
+<span class="code-line">)</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 在总结节点中读取主持人发言</span></span>
+<span class="code-line">host_speech = get_latest_host_speech()</span>
+<span class="code-line"><span class="code-keyword">if</span> host_speech:</span>
+<span class="code-line">    guidance = format_host_speech_for_prompt(</span>
+<span class="code-line">        host_speech)</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">导入论坛读取工具</p>
+              <p class="tl">get_latest_host_speech：获取主持人最新发言</p>
+              <p class="tl">format_host_speech_for_prompt：格式化为提示词</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">在生成总结前，先读取主持人说了什么</p>
+              <p class="tl">如果有主持人引导</p>
+              <p class="tl">把主持人的引导格式化为提示词的一部分</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 6: Message flow animation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">论坛消息流——数据如何流转</h2>
+        <p>点击"下一步"，观察一条消息从 Agent 到论坛再到其他 Agent 的完整流转路径：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"Agent 生成分析结果，写入自己的日志文件"},
+          {"highlight":"flow-actor-2","label":"LogMonitor 检测到日志变化，提取有价值的发言","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-2","label":"发言被写入 forum.log，添加 Agent 标签"},
+          {"highlight":"flow-actor-3","label":"缓冲区积累 5 条发言，触发主持人 LLM","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-3","label":"主持人分析发言，生成引导内容写入 forum.log"},
+          {"highlight":"flow-actor-1","label":"其他 Agent 通过 forum_reader 读取主持人引导，调整研究方向","packet":true,"from":"actor-3","to":"actor-1"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">&#x1F916;</div>
+              <span>Agent</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">&#x1F4DD;</div>
+              <span>LogMonitor</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">&#x1F3DB;&#xFE0F;</div>
+              <span>主持人</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label">点击"下一步"开始追踪消息流</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 7: Spot the bug challenge -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">找找这段代码的 Bug</h2>
+        <p>下面是 ForumEngine 的日志监控代码，其中有一个微妙的 Bug。点击你认为有问题的那一行：</p>
+
+        <div class="bug-challenge">
+          <h3>ForumEngine 日志处理中的 Bug</h3>
+          <div class="bug-code">
+            <div class="bug-line" data-line="1" onclick="checkBugLine(this, false)">
+              <span class="line-num">1</span>
+              <code><span class="code-keyword">def</span> <span class="code-function">_trigger_host_speech</span>(self):</code>
+            </div>
+            <div class="bug-line" data-line="2" onclick="checkBugLine(this, false)">
+              <span class="line-num">2</span>
+              <code>    recent_speeches = self.agent_speeches_buffer[:<span class="code-number">5</span>]</code>
+            </div>
+            <div class="bug-line" data-line="3" onclick="checkBugLine(this, true)" data-explanation="找到了！这里只取了前 5 条发言，但如果缓冲区超过 5 条（比如 10 条），后面的发言永远不会被处理。而且清空操作 self.agent_speeches_buffer = self.agent_speeches_buffer[5:] 是在生成发言之后执行的，如果在生成过程中有新发言加入，它们可能被意外丢弃。">
+              <span class="line-num">3</span>
+              <code>    <span class="code-keyword">if</span> len(recent_speeches) &lt; <span class="code-number">5</span>: <span class="code-keyword">return</span></code>
+            </div>
+            <div class="bug-line" data-line="4" onclick="checkBugLine(this, false)">
+              <span class="line-num">4</span>
+              <code>    host_speech = generate_host_speech(recent_speeches)</code>
+            </div>
+            <div class="bug-line" data-line="5" onclick="checkBugLine(this, false)">
+              <span class="line-num">5</span>
+              <code>    self.agent_speeches_buffer = self.agent_speeches_buffer[<span class="code-number">5</span>:]</code>
+            </div>
+          </div>
+          <div class="bug-feedback"></div>
+        </div>
+      </section>
+
+      <!-- Screen 8: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验你的理解</h2>
+
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！ForumEngine 使用独立的 LLM 作为主持人，确保它的视角不会和分析 Agent 完全一致，这是避免集体偏见的关键设计。"
+               data-explanation-wrong="主持人的独特之处在于它的"独立性"——它使用什么模型？它和分析 Agent 是同一个吗？">
+            <h3 class="quiz-question">ForumEngine 的主持人（ForumHost）使用什么来生成引导发言？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>复用分析 Agent 的同一个 LLM，节省 API 调用</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>一个独立的 LLM（可配置不同模型），保证视角多样性</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>不使用 LLM，用固定规则来引导讨论</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！forum_reader 工具让 Agent 可以读取主持人的引导发言，然后据此调整自己的研究方向——这就是"交流融合"环节。"
+               data-explanation-wrong="Agent 们不是只看自己的分析结果。它们有一个专门的工具来获取论坛信息——叫什么？">
+            <h3 class="quiz-question">Agent 们如何"听到"论坛中主持人的引导？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>主持人直接调用 Agent 的 API 推送引导内容</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Agent 们共享同一个内存空间，自动获取最新发言</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Agent 使用 forum_reader 工具主动读取论坛日志</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！每积累 5 条 Agent 发言就触发一次主持人发言。这个频率既保证了讨论的连贯性，又不会因为太频繁而影响分析效率。"
+               data-explanation-wrong="回顾 LogMonitor 的初始化代码——有一个叫 host_speech_threshold 的变量，它的值是多少？">
+            <h3 class="quiz-question">论坛主持人每隔多少条 Agent 发言触发一次？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>每 3 条发言触发一次</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>每 5 条发言触发一次</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>每 10 条发言触发一次</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重新作答</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 4: 从数据到报告 — 追踪一条分析的全生命周期
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">从数据到报告</h1>
+      <p class="module-subtitle">追踪一条用户提问从输入到最终 HTML 报告生成的完整旅程，深入理解 Agent 内部节点如何协同工作。</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Each Agent's internal pipeline -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Agent 内部的"节点流水线"</h2>
+        <p>三个分析 Agent（Insight、Media、Query）虽然工具集不同，但共享同一套内部处理架构——一套由"节点"组成的流水线。就像工厂的流水线一样，原材料（搜索结果）经过多个工位（节点）加工，最终变成成品（分析报告）。</p>
+
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <p>首次搜索</p>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <p>首次总结</p>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <p>反思搜索</p>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">4</div>
+            <p>反思总结</p>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">5</div>
+            <p>格式化输出</p>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># 三个 Agent 共享的节点初始化模式</span></span>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">_initialize_nodes</span>(self):</span>
+<span class="code-line">    self.first_search_node = FirstSearchNode(</span>
+<span class="code-line">        self.llm_client)</span>
+<span class="code-line">    self.reflection_node = ReflectionNode(</span>
+<span class="code-line">        self.llm_client)</span>
+<span class="code-line">    self.first_summary_node = FirstSummaryNode(</span>
+<span class="code-line">        self.llm_client)</span>
+<span class="code-line">    self.reflection_summary_node = (</span>
+<span class="code-line">        ReflectionSummaryNode(self.llm_client))</span>
+<span class="code-line">    self.report_formatting_node = (</span>
+<span class="code-line">        ReportFormattingNode(self.llm_client))</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">三个 Agent 都用这个方法初始化处理管线</p>
+              <p class="tl">节点 1：首次搜索——用工具集搜索相关信息</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">节点 2：反思——基于初步结果，思考还需要搜什么</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">节点 3：首次总结——把搜索结果总结成段落</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">节点 4：反思总结——结合论坛讨论，更新总结</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">节点 5：格式化——输出最终 Markdown 报告</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: The "reflection" pattern -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">"反思"机制：让 Agent 越来越聪明</h2>
+        <p>BettaFish 的 Agent 不是搜索一次就完事。它们遵循一个<strong>"搜索→总结→反思→再搜索→再总结"</strong>的循环模式。就像写论文一样——初稿之后要反复修改、补充资料、完善论点。</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">&#x1F4A1;</div>
+          <div class="callout-content">
+            <strong class="callout-title">反思模式</strong>
+            <p>Agent 的反思节点会审视之前的搜索结果，判断是否还有需要补充的信息。如果发现不足，它会生成新的搜索策略，进行下一轮搜索。这个过程可以重复多轮（由 <code>max_reflections</code> 参数控制），确保分析足够深入。</p>
+          </div>
+        </div>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">max_reflections = 2</code>
+            <span class="badge-desc">Query Agent 最多反思 2 轮——平衡深度与速度</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">max_search_results = 15</code>
+            <span class="badge-desc">每次搜索最多返回 15 条结果</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">max_content_length = 8000</code>
+            <span class="badge-desc">每条结果最大内容长度 8000 字符</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Summary Node — where forum interaction happens -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">总结节点：Agent 与论坛的交汇点</h2>
+        <p>总结节点（SummaryNode）是 Agent 内部与论坛系统的接口。在生成总结之前，它会先读取主持人的最新引导发言，把引导内容融入自己的分析中。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># InsightEngine/nodes/summary_node.py</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">FirstSummaryNode</span>(StateMutationNode):</span>
+<span class="code-line">    <span class="code-string">"""根据搜索结果生成段落首次总结"""</span></span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, llm_client):</span>
+<span class="code-line">        <span class="code-keyword">super</span>().__init__(llm_client,</span>
+<span class="code-line">            <span class="code-string">"FirstSummaryNode"</span>)</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">validate_input</span>(self, input_data):</span>
+<span class="code-line">        <span class="code-string">"""验证输入数据"""</span></span>
+<span class="code-line">        <span class="code-keyword">if</span> isinstance(input_data, str):</span>
+<span class="code-line">            data = json.loads(input_data)</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">首次总结节点——流水线的第 2 站</p>
+              <p class="tl">负责把搜索结果总结成分析段落</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">继承 StateMutationNode（能修改 Agent 状态）</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">验证输入——把 JSON 字符串解析为对象</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Report Agent's multi-stage pipeline -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Report Agent 的六步生成流程</h2>
+        <p>Report Agent 有自己独特的六步流程。它不是简单地"拼接文本"，而是一个精心设计的多阶段生成管线：</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>TemplateSelectionNode — 模板选择</strong>
+              <p>从模板库中收集候选模板，让 LLM 根据分析主题选择最合适的报告模板（如"企业品牌声誉分析报告"）</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>DocumentLayoutNode — 文档布局</strong>
+              <p>设计报告的标题、目录、主题风格——就像装修房子前先画设计图</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>WordBudgetNode — 篇幅规划</strong>
+              <p>根据模板和内容量，为每个章节分配字数预算，确保报告结构均衡</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>ChapterGenerationNode — 章节生成</strong>
+              <p>逐章节生成 JSON 格式的内容，经过校验后存入章节存储</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>Stitcher — IR 装订</strong>
+              <p>把所有章节 JSON 装订成一份完整的 <span class="term" data-definition="Document IR（文档中间表示）：一份标准化的 JSON 数据结构，包含报告的所有内容和元数据。它是渲染前的"蓝图"，可以被不同的渲染器翻译成 HTML、PDF 或 Markdown。">Document IR</span></p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <strong>HTMLRenderer — HTML 渲染</strong>
+              <p>把 Document IR 渲染成精美的交互式 HTML 报告，包含图表、动画等丰富的可视化元素</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: IR schema and validator -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">IR 中间表示——报告的"蓝图"</h2>
+        <p>Report Agent 的独创设计是 IR（Intermediate Representation）中间表示。它定义了一套标准的 JSON Schema，所有章节内容都遵循这个格式，然后由装订器（Stitcher）组合成完整文档。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># ReportEngine/core/stitcher.py</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">DocumentComposer</span>:</span>
+<span class="code-line">    <span class="code-string">"""Document IR 装订器"""</span></span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">compose</span>(self, chapters, meta):</span>
+<span class="code-line">        doc_ir = {</span>
+<span class="code-line">            <span class="code-string">"meta"</span>: meta,</span>
+<span class="code-line">            <span class="code-string">"chapters"</span>: chapters,</span>
+<span class="code-line">            <span class="code-string">"anchors"</span>: self._build_anchors(),</span>
+<span class="code-line">            <span class="code-string">"toc"</span>: self._build_toc(chapters)</span>
+<span class="code-line">        }</span>
+<span class="code-line">        <span class="code-keyword">return</span> doc_ir</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">文档装订器——把章节组合成完整文档</p>
+              <p class="tl">装订方法：把各部分组装成 IR</p>
+              <p class="tl">meta：报告元数据（标题、日期、主题等）</p>
+              <p class="tl">chapters：所有章节内容</p>
+              <p class="tl">anchors：锚点链接（用于目录跳转）</p>
+              <p class="tl">toc：自动生成的目录结构</p>
+              <p class="tl">返回完整的 IR 文档蓝图</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#x1F527;</div>
+          <div class="callout-content">
+            <strong class="callout-title">IR 的校验机制</strong>
+            <p>每个章节在生成后都会经过 <span class="term" data-definition="IRValidator：一个 JSON 结构校验器，检查每个章节是否符合预定义的 Schema（数据格式规范）。就像质检员检查产品是否符合标准。">IRValidator</span> 的校验，确保 JSON 结构符合规范。如果校验失败，会触发重试——保证最终输出的质量。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 6: File count baseline — knowing when to start -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">怎么知道三个 Agent 都分析完了？</h2>
+        <p>Report Agent 需要等三个 Agent 全部完成后才能开始。它使用 <span class="term" data-definition="FileCountBaseline（文件数量基准管理器）：一个工具，在任务启动时记录三个引擎目录中的文件数量，后续轮询时检查是否有新文件生成，以此判断 Agent 是否已完成工作。">FileCountBaseline</span> 来判断输入是否准备完毕。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># ReportEngine/agent.py</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">FileCountBaseline</span>:</span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">initialize_baseline</span>(</span>
+<span class="code-line">            self, directories) -> Dict[str, int]:</span>
+<span class="code-line">        <span class="code-keyword">for</span> name, path <span class="code-keyword">in</span> directories.items():</span>
+<span class="code-line">            md_files = [f <span class="code-keyword">for</span> f <span class="code-keyword">in</span> Path(path)</span>
+<span class="code-line">                .glob(<span class="code-string">"*.md"</span>)]</span>
+<span class="code-line">            self.baseline_data[name] = len(</span>
+<span class="code-line">                md_files)</span>
+<span class="code-line">        self._save_baseline()</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">文件数量基准管理器</p>
+              <p class="tl">初始化基准：记录当前文件数量</p>
+              <p class="tl">遍历三个引擎的输出目录</p>
+              <p class="tl">统计每个目录中的 Markdown 文件</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">记录当前数量作为基准</p>
+              <p class="tl">保存基准数据到磁盘</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 7: The Flask SSE interface -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">实时进度推送——SSE 流式传输</h2>
+        <p>Report Agent 使用 <span class="term" data-definition="SSE（Server-Sent Events）：一种让服务器主动向浏览器推送消息的技术。和 WebSocket 不同，SSE 是单向的（服务器→浏览器），但实现更简单，非常适合"进度更新"这种场景。">SSE</span>（Server-Sent Events）来实时推送报告生成进度，让用户在浏览器中看到报告逐步生成的过程。</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-accent-light)">&#x1F310;</div>
+            <div>
+              <strong>Flask + SSE 入口</strong>
+              <p>Report Agent 的 flask_interface.py 管理任务排队和流式事件分发</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-info-light)">&#x1F4E1;</div>
+            <div>
+              <strong>实时事件推送</strong>
+              <p>每个阶段完成时推送事件：模板已选→布局完成→章节生成中→渲染完成</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: #EDE8F5">&#x1F4BE;</div>
+            <div>
+              <strong>多格式输出</strong>
+              <p>HTML 交互式报告 + PDF 导出（WeasyPrint）+ Markdown 纯文本</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 8: Full data flow animation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">端到端数据流追踪</h2>
+        <p>点击"下一步"，追踪一条用户提问从输入到最终报告的完整数据流：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"用户输入：分析武汉大学舆情"},
+          {"highlight":"flow-actor-2","label":"MindSpider 数据库中已有的历史数据被 Insight Agent 读取","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-3","label":"Query Agent 通过 Tavily 搜索国内外新闻","packet":true,"from":"actor-1","to":"actor-3"},
+          {"highlight":"flow-actor-4","label":"Media Agent 通过博查搜索多模态内容","packet":true,"from":"actor-1","to":"actor-4"},
+          {"highlight":"flow-actor-5","label":"三个 Agent 各自生成 Markdown 分析报告"},
+          {"highlight":"flow-actor-6","label":"ForumEngine 收集发言，主持人引导讨论","packet":true,"from":"actor-5","to":"actor-6"},
+          {"highlight":"flow-actor-5","label":"Agent 根据论坛引导进行反思和补充搜索"},
+          {"highlight":"flow-actor-7","label":"Report Agent 读取三份报告 + 论坛日志，生成 IR","packet":true,"from":"actor-6","to":"actor-7"},
+          {"highlight":"flow-actor-8","label":"渲染器将 IR 翻译成精美的 HTML 报告呈现给用户","packet":true,"from":"actor-7","to":"actor-8"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">&#x1F464;</div>
+              <span>用户</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">&#x1F4CA;</div>
+              <span>Insight</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">&#x1F310;</div>
+              <span>Query</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">&#x1F3AC;</div>
+              <span>Media</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-5">
+              <div class="flow-actor-icon">&#x1F916;</div>
+              <span>Agent 输出</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-6">
+              <div class="flow-actor-icon">&#x1F3DB;&#xFE0F;</div>
+              <span>论坛</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-7">
+              <div class="flow-actor-icon">&#x1F4DD;</div>
+              <span>Report</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-8">
+              <div class="flow-actor-icon">&#x1F4C4;</div>
+              <span>HTML</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label">点击"下一步"追踪完整数据流</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 9: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验你的理解</h2>
+
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！Agent 遵循"搜索→总结→反思→再搜索→再总结"的循环模式，由 max_reflections 参数控制反思轮次。"
+               data-explanation-wrong="Agent 不会只搜索一次就结束。回想一下"反思"机制是如何工作的。">
+            <h3 class="quiz-question">Agent 内部的"反思"机制是如何工作的？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>搜索一次就输出最终结果，不做迭代</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>搜索→总结→反思不足→再搜索→再总结，可多轮循环</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>只在论坛讨论中做反思，Agent 内部不做迭代</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="正确！FileCountBaseline 会记录三个引擎目录中的 Markdown 文件数量作为基准，后续通过轮询检查是否有新文件生成来判断完成状态。"
+               data-explanation-wrong="Report Agent 是怎么知道三个 Agent 都分析完了的？它使用了什么机制来检测？">
+            <h3 class="quiz-question">Report Agent 如何判断三个分析 Agent 都已完成工作？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>通过 FileCountBaseline 监控输出目录中新增的 Markdown 文件数量</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>通过 ForumEngine 的日志来判断所有讨论已结束</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>三个 Agent 完成后会主动调用 Report Agent 的 API 通知</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="没错！IR 装订器（Stitcher）把各章节 JSON 组合成完整的 Document IR，包含 meta、chapters、anchors 和 toc。然后渲染器才能把 IR 翻译成最终格式。"
+               data-explanation-wrong="IR 不是直接生成的 HTML。想想 Stitcher（装订器）的职责——它在章节生成和最终渲染之间扮演什么角色？">
+            <h3 class="quiz-question">Report Agent 的 IR 中间表示包含哪些核心部分？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>只有章节内容和图片</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>HTML 模板和 CSS 样式表</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>meta 元数据 + chapters 章节 + anchors 锚点 + toc 目录</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重新作答</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 5: 动手扩展你的微舆 — 从学习到实践
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">动手扩展你的微舆</h1>
+      <p class="module-subtitle">理解了架构之后，来看看如何把 BettaFish 改造成你自己的分析引擎——接入不同的 LLM、添加自定义工具、甚至变成金融分析系统。</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Modular design philosophy -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">模块化设计：像搭积木一样扩展</h2>
+        <p>BettaFish 的代码结构遵循一个清晰的模块化原则：每个引擎都是独立的 Python 包，有自己的 Agent、LLM 客户端、节点、工具集、状态管理和提示词。你可以替换任何一个模块，而不影响其他部分。</p>
+
+        <div class="file-tree">
+          <div class="ft-folder open">
+            <span class="ft-name">BettaFish/</span>
+            <span class="ft-desc">项目根目录</span>
+            <div class="ft-children">
+              <div class="ft-folder">
+                <span class="ft-name">QueryEngine/</span>
+                <span class="ft-desc">新闻搜索 Agent — 可替换搜索工具</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">MediaEngine/</span>
+                <span class="ft-desc">多模态 Agent — 可替换搜索 API</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">InsightEngine/</span>
+                <span class="ft-desc">数据库 Agent — 可接入不同数据库</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">ReportEngine/</span>
+                <span class="ft-desc">报告生成 Agent — 可自定义模板</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">ForumEngine/</span>
+                <span class="ft-desc">论坛协作 — 可调整主持人模型</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">MindSpider/</span>
+                <span class="ft-desc">爬虫系统 — 可添加新平台</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Swap the LLM -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">一键切换 LLM 模型</h2>
+        <p>所有 LLM 调用都遵循 <span class="term" data-definition="OpenAI API 格式：一种通用的 AI 模型调用标准。只要 API 兼容这个格式（有 chat.completions.create 方法），就可以无缝切换不同供应商的模型——GPT、Qwen、DeepSeek 等。">OpenAI API 格式</span>，你只需在 .env 文件中修改三个参数就能切换模型。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># .env — 切换 LLM 只需改三个参数</span></span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># Insight Agent 的 LLM</span></span>
+<span class="code-line">INSIGHT_ENGINE_API_KEY=sk-xxx</span>
+<span class="code-line">INSIGHT_ENGINE_BASE_URL=https://api.openai.com/v1</span>
+<span class="code-line">INSIGHT_ENGINE_MODEL_NAME=gpt-4o-mini</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 换成 DeepSeek？只改这三行：</span></span>
+<span class="code-line"><span class="code-comment"># INSIGHT_ENGINE_API_KEY=sk-deepseek</span></span>
+<span class="code-line"><span class="code-comment"># INSIGHT_ENGINE_BASE_URL=https://api.deepseek.com</span></span>
+<span class="code-line"><span class="code-comment"># INSIGHT_ENGINE_MODEL_NAME=deepseek-chat</span></span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">环境变量配置文件——不用改代码就能换模型</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">API 密钥——你的账户凭证</p>
+              <p class="tl">API 地址——模型服务的入口</p>
+              <p class="tl">模型名称——你想用哪个模型</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">想换模型？注释掉旧的，取消注释新的就行</p>
+              <p class="tl">三个 Agent 可以用不同的模型</p>
+              <p class="tl">每个 Agent 独立配置，互不影响</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Add custom tools -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">给 Agent 添加自定义工具</h2>
+        <p>每个 Agent 的工具集都是可扩展的。比如，你可以给 Insight Agent 添加一个"企业内部数据库查询工具"，让它不只分析公开舆情，还能分析你公司的业务数据。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># InsightEngine/tools/custom_db_tool.py</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">CustomBusinessDBTool</span>:</span>
+<span class="code-line">    <span class="code-string">"""自定义业务数据库查询工具"""</span></span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self):</span>
+<span class="code-line">        self.connection_config = {</span>
+<span class="code-line">            <span class="code-string">'host'</span>: config.BUSINESS_DB_HOST,</span>
+<span class="code-line">            <span class="code-string">'port'</span>: config.BUSINESS_DB_PORT,</span>
+<span class="code-line">            <span class="code-string">'user'</span>: config.BUSINESS_DB_USER,</span>
+<span class="code-line">        }</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">search_business_data</span>(</span>
+<span class="code-line">            self, query: str, table: str):</span>
+<span class="code-line">        <span class="code-string">"""查询业务数据"""</span></span>
+<span class="code-line">        <span class="code-comment"># 实现你的业务逻辑</span></span>
+<span class="code-line">        <span class="code-keyword">pass</span></span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">自定义工具文件——你的业务数据接口</p>
+              <p class="tl">类名可以自由命名</p>
+              <p class="tl">描述这个工具的用途</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">初始化数据库连接配置</p>
+              <p class="tl">从全局配置读取连接参数</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">定义查询方法——Agent 会调用这个方法</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">在这里写你的查询逻辑</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">&#x1F680;</div>
+          <div class="callout-content">
+            <strong class="callout-title">不止于舆情</strong>
+            <p>README 中提到：你只需简单修改 Agent 工具集的 API 参数和 prompt，就可以把它变成一个金融领域的市场分析系统。这就是模块化设计的威力——同一套架构，不同的工具和提示词，就能适应不同的领域。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Custom report templates -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">自定义报告模板</h2>
+        <p>Report Agent 的模板是 Markdown 文件，放在 <code>ReportEngine/report_template/</code> 目录下。你可以创建自己的模板，Agent 会自动选择最合适的。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#x1F4C4;</div>
+            <h4 class="pattern-title">企业品牌声誉分析报告</h4>
+            <p class="pattern-desc">内置模板，包含品牌认知度、美誉度、危机事件等维度</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">&#x1F4B0;</div>
+            <h4 class="pattern-title">金融市场分析报告（你可以创建）</h4>
+            <p class="pattern-desc">只需创建一个 Markdown 模板，包含市场概览、趋势分析、风险评估等章节</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: #E8F5EE">&#x1F3AD;</div>
+            <h4 class="pattern-title">竞品监测报告（你可以创建）</h4>
+            <p class="pattern-desc">追踪竞争对手的动态、用户反馈和市场反应</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Sentiment model selection -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">选择你的情感分析模型</h2>
+        <p>BettaFish 集成了多种情感分析方法，从传统机器学习到大模型微调，你可以根据场景选择：</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-accent-light)">&#x1F9E0;</div>
+            <div>
+              <strong>BERT 中文 LoRA 微调</strong>
+              <p>经典 NLP 模型，适合中文微博评论的情感分析</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-info-light)">&#x1F422;</div>
+            <div>
+              <strong>GPT-2 LoRA 微调</strong>
+              <p>生成式模型微调，能捕获更细腻的情感变化</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: #EDE8F5">&#x1F30D;</div>
+            <div>
+              <strong>多语言情感分析</strong>
+              <p>支持 22 种语言——分析英文、日文评论也不在话下</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: #E8F5EE">&#x26A1;</div>
+            <div>
+              <strong>小参数 Qwen3 微调</strong>
+              <p>轻量高效，适合资源有限的环境</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># 情感分析配置示例</span></span>
+<span class="code-line">SENTIMENT_CONFIG = {</span>
+<span class="code-line">    <span class="code-string">'model_type'</span>: <span class="code-string">'multilingual'</span>,</span>
+<span class="code-line">    <span class="code-string">'confidence_threshold'</span>: <span class="code-number">0.8</span>,</span>
+<span class="code-line">    <span class="code-string">'batch_size'</span>: <span class="code-number">32</span>,</span>
+<span class="code-line">    <span class="code-string">'max_sequence_length'</span>: <span class="code-number">512</span>,</span>
+<span class="code-line">}</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">情感分析器的配置参数</p>
+              <p class="tl">模型类型：multilingual（多语言）——还可选 bert、qwen 等</p>
+              <p class="tl">置信度阈值 0.8——低于 80% 确信的结果会被标记</p>
+              <p class="tl">批处理大小 32——一次分析 32 条评论</p>
+              <p class="tl">最大序列长度 512——每条评论最多 512 个字符</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 6: Architecture recap with layer toggle -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">三层架构总览</h2>
+        <p>BettaFish 的架构可以看作三个层次。切换下面的标签，逐层了解：</p>
+
+        <div class="layer-demo">
+          <div class="layer-tabs">
+            <button class="layer-tab active" onclick="showLayer('layer-data', this)">数据层</button>
+            <button class="layer-tab" onclick="showLayer('layer-analysis', this)">分析层</button>
+            <button class="layer-tab" onclick="showLayer('layer-output', this)">输出层</button>
+          </div>
+          <div class="layer-viewport">
+            <div class="layer" id="layer-data" style="display:block">
+              <div style="padding: var(--space-6); background: var(--color-surface); border-radius: var(--radius-md);">
+                <div class="icon-rows">
+                  <div class="icon-row">
+                    <div class="icon-circle" style="background: var(--color-accent-light)">&#x1F577;&#xFE0F;</div>
+                    <div>
+                      <strong>MindSpider 爬虫集群</strong>
+                      <p>30+ 社媒平台的持续数据采集，存入 PostgreSQL 数据库</p>
+                    </div>
+                  </div>
+                  <div class="icon-row">
+                    <div class="icon-circle" style="background: var(--color-info-light)">&#x1F4BE;</div>
+                    <div>
+                      <strong>PostgreSQL / MySQL</strong>
+                      <p>存储所有抓取的帖子、评论、互动数据，供 Insight Agent 查询</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="layer" id="layer-analysis" style="display:none">
+              <div style="padding: var(--space-6); background: var(--color-surface); border-radius: var(--radius-md);">
+                <div class="icon-rows">
+                  <div class="icon-row">
+                    <div class="icon-circle" style="background: var(--color-actor-1)">&#x1F4CA;</div>
+                    <div>
+                      <strong>Insight + Media + Query（并行）</strong>
+                      <p>三个 Agent 同时工作，各自用专属工具集搜索和分析</p>
+                    </div>
+                  </div>
+                  <div class="icon-row">
+                    <div class="icon-circle" style="background: var(--color-actor-4)">&#x1F3DB;&#xFE0F;</div>
+                    <div>
+                      <strong>ForumEngine（后台）</strong>
+                      <p>监控发言、主持人引导、多轮辩论——催生集体智能</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="layer" id="layer-output" style="display:none">
+              <div style="padding: var(--space-6); background: var(--color-surface); border-radius: var(--radius-md);">
+                <div class="icon-rows">
+                  <div class="icon-row">
+                    <div class="icon-circle" style="background: #EDE8F5">&#x1F4DD;</div>
+                    <div>
+                      <strong>Report Agent（六步流程）</strong>
+                      <p>模板选择→布局→篇幅→章节→IR装订→HTML渲染</p>
+                    </div>
+                  </div>
+                  <div class="icon-row">
+                    <div class="icon-circle" style="background: #E8F5EE">&#x1F4C4;</div>
+                    <div>
+                      <strong>多格式输出</strong>
+                      <p>交互式 HTML + PDF 导出 + Markdown 纯文本——一份 IR，三种呈现</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="layer-description">数据层：所有原始数据的采集和存储</p>
+        </div>
+      </section>
+
+      <!-- Screen 7: Design philosophy recap -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">BettaFish 的设计哲学</h2>
+        <p>通过前四个模块的学习，我们可以总结出 BettaFish 背后的设计哲学——这些原则不仅适用于舆情分析，也适用于任何多智能体系统：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#x1F504;</div>
+            <h4 class="pattern-title">并行 + 反思</h4>
+            <p class="pattern-desc">Agent 并行启动保证速度，内部反思机制保证深度——速度和质量兼得</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">&#x1F5E3;&#xFE0F;</div>
+            <h4 class="pattern-title">辩论优于独白</h4>
+            <p class="pattern-desc">多个 Agent 通过论坛辩论产生的集体智能，远超任何单一模型的输出</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: #EDE8F5">&#x1F6E0;&#xFE0F;</div>
+            <h4 class="pattern-title">工具即身份</h4>
+            <p class="pattern-desc">每个 Agent 的"性格"由其工具集决定——换工具就换了视角</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#x1F4D0;</div>
+            <h4 class="pattern-title">IR 解耦</h4>
+            <p class="pattern-desc">中间表示（IR）把内容生成和格式渲染解耦——一份内容，多种输出</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 8: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">最终测验</h2>
+
+        <div class="quiz-container" id="quiz-module5">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！只需修改 .env 文件中的 API_KEY、BASE_URL、MODEL_NAME 三个参数，就能切换到任何兼容 OpenAI 格式的 LLM。不用改一行代码。"
+               data-explanation-wrong="切换 LLM 不需要改代码。想想 BettaFish 是如何配置模型的——是在代码里硬编码，还是通过配置文件？">
+            <h3 class="quiz-question">如果你想把 BettaFish 的 LLM 从 GPT-4o 切换到 DeepSeek，需要修改什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>需要修改每个 Agent 的源代码中的 API 调用</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>只需修改 .env 文件中的 API_KEY、BASE_URL、MODEL_NAME</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>需要重新训练所有情感分析模型</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="正确！Insight Agent 专攻本地数据库查询，只需要为它写一个新的工具类（CustomBusinessDBTool），就能接入你的业务数据库。"
+               data-explanation-wrong="回想模块 2 的内容——哪个 Agent 是专门做数据库查询的？它的工具集是怎么设计的？">
+            <h3 class="quiz-question">如果你想分析企业内部数据库中的客户反馈数据，应该修改哪个 Agent？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Insight Agent——为它添加自定义数据库查询工具</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Query Agent——修改它的 Tavily 搜索参数</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Report Agent——修改报告模板即可</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="完全正确！BettaFish 的模块化设计让你只需替换工具集的 API 参数和 prompt，就能把它变成任何领域的分析系统——金融、医疗、教育，都可以。"
+               data-explanation-wrong="BettaFish 不仅仅是一个舆情工具。它的架构有什么特性让它可以适应不同领域？">
+            <h3 class="quiz-question">BettaFish "始于舆情，而不止于舆情"的关键是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>它使用了最先进的 LLM 模型</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>它能同时搜索国内外新闻</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>模块化设计让工具集和提示词可以替换，适应任何领域</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">重新作答</button>
+        </div>
+      </section>
+
+      <!-- Screen 9: What's next -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">接下来做什么？</h2>
+        <p>恭喜你完成了 BettaFish 的全部课程！现在你已经理解了一个 41K Star 的多智能体系统是如何设计和实现的。以下是你的下一步选择：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#x1F4BB;</div>
+            <h4 class="pattern-title">阅读源码</h4>
+            <p class="pattern-desc">克隆仓库，从 app.py 入口开始追踪一次完整运行。现在你能看懂每一行代码的用意了。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">&#x1F6E0;&#xFE0F;</div>
+            <h4 class="pattern-title">动手改造</h4>
+            <p class="pattern-desc">试试把 Query Agent 的搜索工具换成另一个 API，或者给 Insight Agent 添加一个自定义查询工具。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#x1F31F;</div>
+            <h4 class="pattern-title">探索 MiroFish</h4>
+            <p class="pattern-desc">BettaFish 团队还发布了 MiroFish——一个"群体智能预测引擎"。从分析到预测，数据分析的完整闭环。</p>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#x1F4DA;</div>
+          <div class="callout-content">
+            <strong class="callout-title">推荐学习路径</strong>
+            <p>如果你刚开始学习 Agent 系统，作者推荐从 <strong>Deep Search Agent Demo</strong> 开始——一个极简的单 Agent 搜索系统。理解了单 Agent 的搜索-反思模式后，再来看 BettaFish 的多 Agent 协作，会事半功倍。</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+  </main>
+
+</body>
+</html>

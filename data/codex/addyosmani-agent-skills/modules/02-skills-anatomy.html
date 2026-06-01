@@ -1,0 +1,363 @@
+<!-- MODULE 2: 认识 21 个技能 -->
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+
+    <!-- ── HEADER ────────────────────────────────────────────── -->
+    <div class="module-header">
+      <span class="module-number">02</span>
+      <h1 class="module-title animate-in">认识 21 个技能</h1>
+      <p class="module-subtitle animate-in">每个技能都是一份操作手册，教你和 AI 怎么一步步把代码写好</p>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         SCREEN 1: 每个技能都是一份操作手册
+         ══════════════════════════════════════════════════════════ -->
+    <div class="screen">
+      <h2 class="screen-heading animate-in">每个技能都是一份操作手册</h2>
+
+      <p class="animate-in">
+        想象你在做一道菜。食谱不会只写"把鸡煮熟"——它会告诉你需要什么食材、每一步怎么做、哪些地方容易出错、怎么判断做好了没。
+      </p>
+
+      <p class="animate-in">
+        Agent Skills 里的每个技能就是这样一个"食谱卡片"。它不只是一句口号，而是一份完整的
+        <span class="term" data-definition="Spec（规格说明）就是一份详细的需求文档，描述你要做什么、怎么做、以及边界在哪里。">spec</span>，包含了目标、步骤、规则和边界。
+      </p>
+
+      <p class="animate-in">
+        下面是一个真实的技能模板，来自 spec-driven-development（规格驱动开发）这个技能。左边是技能文件里写的格式，右边是每一条的意思：
+      </p>
+
+      <!-- Code ↔ English Translation Block -->
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">SKILL SPEC</span>
+          <code class="code-line"><span class="code-keyword">## Objective</span></code>
+          <code class="code-line">[What we are building and why.]</code>
+          <code class="code-line">[User stories or acceptance criteria.]</code>
+          <code class="code-line">&nbsp;</code>
+          <code class="code-line"><span class="code-keyword">## Commands</span></code>
+          <code class="code-line">[Build, test, lint, dev]</code>
+          <code class="code-line">&nbsp;</code>
+          <code class="code-line"><span class="code-keyword">## Project Structure</span></code>
+          <code class="code-line">[Directory layout with descriptions]</code>
+          <code class="code-line">&nbsp;</code>
+          <code class="code-line"><span class="code-keyword">## Code Style</span></code>
+          <code class="code-line">[Example snippet + key conventions]</code>
+          <code class="code-line">&nbsp;</code>
+          <code class="code-line"><span class="code-keyword">## Testing Strategy</span></code>
+          <code class="code-line">[Framework, test locations,]</code>
+          <code class="code-line">[coverage requirements]</code>
+          <code class="code-line">&nbsp;</code>
+          <code class="code-line"><span class="code-keyword">## Boundaries</span></code>
+          <code class="code-line"><span class="code-string">- Always: [...]</span></code>
+          <code class="code-line"><span class="code-string">- Ask first: [...]</span></code>
+          <code class="code-line"><span class="code-string">- Never: [...]</span></code>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <div class="tl"><strong>目标：</strong>我们在做什么，为什么做。用户的期望是什么。</div>
+            <div class="tl"><strong>命令：</strong>构建、测试、检查、运行——完整的命令列表。</div>
+            <div class="tl"><strong>项目结构：</strong>每个文件夹里放什么，为什么这样组织。</div>
+            <div class="tl"><strong>代码风格：</strong>代码应该长什么样，有哪些规则要遵守。</div>
+            <div class="tl"><strong>测试策略：</strong>怎么验证代码是对的，测什么、不测什么。</div>
+            <div class="tl"><strong>边界：</strong>必须做的 / 要先问的 / 绝对不做的。</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent animate-in">
+        <span class="callout-icon">&#128161;</span>
+        <div class="callout-content">
+          <span class="callout-title">关键洞察</span>
+          <p>当你用 <span class="term" data-definition="PRD（Product Requirements Document，产品需求文档）是描述产品功能、用户故事和技术要求的文档。">PRD</span> 写清楚"要做什么"，AI 就有了明确的导航地图。没有地图，AI 只能瞎猜。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         SCREEN 2: 六个阶段及其技能
+         ══════════════════════════════════════════════════════════ -->
+    <div class="screen">
+      <h2 class="screen-heading animate-in">六个阶段，21 个技能各就各位</h2>
+
+      <p class="animate-in">
+        这 21 个技能不是随便堆在一起的。它们按照软件开发的六个阶段排列，就像流水线一样，每个阶段有自己的职责。
+      </p>
+
+      <!-- Phase 1: DEFINE -->
+      <div class="pattern-cards animate-in stagger-children" style="margin-bottom: var(--space-8);">
+        <div class="pattern-card" style="border-top-color: var(--color-actor-1);">
+          <div class="pattern-icon" style="background: var(--color-actor-1); color: white; border-radius: var(--radius-sm);">&#127919;</div>
+          <div class="pattern-title" style="color: var(--color-actor-1);">Phase 1: DEFINE 定义</div>
+          <p class="pattern-desc">想清楚要做什么，把模糊的想法变成清晰的方案。</p>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-icon" style="background: var(--color-accent-light); color: var(--color-actor-1);">&#128161;</div>
+          <div class="pattern-title">idea-refine</div>
+          <p class="pattern-desc">把模糊想法变成清晰提案</p>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-icon" style="background: var(--color-accent-light); color: var(--color-actor-1);">&#128196;</div>
+          <div class="pattern-title">spec-driven-development</div>
+          <p class="pattern-desc">写 PRD 再动手</p>
+        </div>
+      </div>
+
+      <!-- Phase 2: PLAN -->
+      <div class="pattern-cards animate-in stagger-children" style="margin-bottom: var(--space-8);">
+        <div class="pattern-card" style="border-top-color: var(--color-actor-2);">
+          <div class="pattern-icon" style="background: var(--color-actor-2); color: white; border-radius: var(--radius-sm);">&#128203;</div>
+          <div class="pattern-title" style="color: var(--color-actor-2);">Phase 2: PLAN 规划</div>
+          <p class="pattern-desc">把大目标拆成小任务，排好优先级。</p>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-icon" style="background: var(--color-info-light); color: var(--color-actor-2);">&#128203;</div>
+          <div class="pattern-title">planning-and-task-breakdown</div>
+          <p class="pattern-desc">把需求拆成小任务</p>
+        </div>
+      </div>
+
+      <!-- Phase 3: BUILD -->
+      <div class="pattern-cards animate-in stagger-children" style="margin-bottom: var(--space-8);">
+        <div class="pattern-card" style="border-top-color: var(--color-actor-3);">
+          <div class="pattern-icon" style="background: var(--color-actor-3); color: white; border-radius: var(--radius-sm);">&#128296;</div>
+          <div class="pattern-title" style="color: var(--color-actor-3);">Phase 3: BUILD 构建</div>
+          <p class="pattern-desc">动手写代码，一小步一小步来。</p>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-icon" style="background: #F0ECF8; color: var(--color-actor-3);">&#128640;</div>
+          <div class="pattern-title">incremental-implementation</div>
+          <p class="pattern-desc">一小步一小步写代码</p>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-icon" style="background: #F0ECF8; color: var(--color-actor-3);">&#129504;</div>
+          <div class="pattern-title">context-engineering</div>
+          <p class="pattern-desc">给 AI 正确的信息</p>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-icon" style="background: #F0ECF8; color: var(--color-actor-3);">&#9989;</div>
+          <div class="pattern-title">test-driven-development</div>
+          <p class="pattern-desc">先写测试再写代码</p>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-icon" style="background: #F0ECF8; color: var(--color-actor-3);">&#128214;</div>
+          <div class="pattern-title">source-driven-development</div>
+          <p class="pattern-desc">查官方文档，不瞎猜</p>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-icon" style="background: #F0ECF8; color: var(--color-actor-3);">&#128269;</div>
+          <div class="pattern-title">doubt-driven-development</div>
+          <p class="pattern-desc">用新视角质疑每个决定</p>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-icon" style="background: #F0ECF8; color: var(--color-actor-3);">&#127912;</div>
+          <div class="pattern-title">frontend-ui-engineering</div>
+          <p class="pattern-desc">界面设计和组件</p>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-icon" style="background: #F0ECF8; color: var(--color-actor-3);">&#128268;</div>
+          <div class="pattern-title">api-and-interface-design</div>
+          <p class="pattern-desc">接口设计</p>
+        </div>
+      </div>
+
+      <!-- Phase 4: VERIFY -->
+      <div class="pattern-cards animate-in stagger-children" style="margin-bottom: var(--space-8);">
+        <div class="pattern-card" style="border-top-color: var(--color-actor-4);">
+          <div class="pattern-icon" style="background: var(--color-actor-4); color: white; border-radius: var(--radius-sm);">&#128270;</div>
+          <div class="pattern-title" style="color: var(--color-actor-4);">Phase 4: VERIFY 验证</div>
+          <p class="pattern-desc">测试代码是不是真的能正常工作。</p>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-icon" style="background: var(--color-accent-light); color: var(--color-actor-4);">&#127760;</div>
+          <div class="pattern-title">browser-testing-with-devtools</div>
+          <p class="pattern-desc">用浏览器工具测</p>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-icon" style="background: var(--color-accent-light); color: var(--color-actor-4);">&#128300;</div>
+          <div class="pattern-title">debugging-and-error-recovery</div>
+          <p class="pattern-desc">系统化找 bug</p>
+        </div>
+      </div>
+
+      <!-- Phase 5: REVIEW -->
+      <div class="pattern-cards animate-in stagger-children" style="margin-bottom: var(--space-8);">
+        <div class="pattern-card" style="border-top-color: var(--color-actor-5);">
+          <div class="pattern-icon" style="background: var(--color-actor-5); color: white; border-radius: var(--radius-sm);">&#128737;</div>
+          <div class="pattern-title" style="color: var(--color-actor-5);">Phase 5: REVIEW 审查</div>
+          <p class="pattern-desc">从质量、安全、性能等维度全面检查代码。</p>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-icon" style="background: var(--color-success-light); color: var(--color-actor-5);">&#128269;</div>
+          <div class="pattern-title">code-review-and-quality</div>
+          <p class="pattern-desc">五维度代码审查</p>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-icon" style="background: var(--color-success-light); color: var(--color-actor-5);">&#9986;</div>
+          <div class="pattern-title">code-simplification</div>
+          <p class="pattern-desc">简化代码</p>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-icon" style="background: var(--color-success-light); color: var(--color-actor-5);">&#128274;</div>
+          <div class="pattern-title">security-and-hardening</div>
+          <p class="pattern-desc">安全检查</p>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-icon" style="background: var(--color-success-light); color: var(--color-actor-5);">&#9889;</div>
+          <div class="pattern-title">performance-optimization</div>
+          <p class="pattern-desc">性能优化</p>
+        </div>
+      </div>
+
+      <!-- Phase 6: SHIP -->
+      <div class="pattern-cards animate-in stagger-children" style="margin-bottom: var(--space-8);">
+        <div class="pattern-card" style="border-top-color: var(--color-accent);">
+          <div class="pattern-icon" style="background: var(--color-accent); color: white; border-radius: var(--radius-sm);">&#128640;</div>
+          <div class="pattern-title" style="color: var(--color-accent);">Phase 6: SHIP 发布</div>
+          <p class="pattern-desc">安全上线，确保版本可控、流程自动化。</p>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-icon" style="background: var(--color-accent-light); color: var(--color-accent);">&#128193;</div>
+          <div class="pattern-title">git-workflow-and-versioning</div>
+          <p class="pattern-desc">代码版本管理</p>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-icon" style="background: var(--color-accent-light); color: var(--color-accent);">&#9881;</div>
+          <div class="pattern-title">ci-cd-and-automation</div>
+          <p class="pattern-desc">自动化流程</p>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-icon" style="background: var(--color-accent-light); color: var(--color-accent);">&#128465;</div>
+          <div class="pattern-title">deprecation-and-migration</div>
+          <p class="pattern-desc">代码退役和迁移</p>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-icon" style="background: var(--color-accent-light); color: var(--color-accent);">&#128221;</div>
+          <div class="pattern-title">documentation-and-adrs</div>
+          <p class="pattern-desc">写文档</p>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-icon" style="background: var(--color-accent-light); color: var(--color-accent);">&#128640;</div>
+          <div class="pattern-title">shipping-and-launch</div>
+          <p class="pattern-desc">上线检查清单</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         SCREEN 3: 反借口对照表
+         ══════════════════════════════════════════════════════════ -->
+    <div class="screen">
+      <h2 class="screen-heading animate-in">反借口对照表</h2>
+
+      <div class="callout callout-warning animate-in">
+        <span class="callout-icon">&#9888;&#65039;</span>
+        <div class="callout-content">
+          <span class="callout-title">AI 最爱找借口跳过质量关卡</span>
+          <p>当你让 AI 帮你写代码，它可能会说"先这样吧""后面再优化"。这些都是绕过质量检查的借口。下面是常见的借口和正确的应对方式：</p>
+        </div>
+      </div>
+
+      <div class="badge-list animate-in">
+        <div class="badge-item">
+          <span style="font-size: 1.25rem; flex-shrink: 0;">&#128172;</span>
+          <div>
+            <div style="font-weight: 600; margin-bottom: 4px;">"先这样吧，后面再测"</div>
+            <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">AI 想跳过测试直接交付</div>
+          </div>
+          <span style="margin-left: auto; flex-shrink: 0; font-size: 1.25rem;">&#128680;</span>
+          <div style="flex-shrink: 0; text-align: right; min-width: 180px;">
+            <div style="color: var(--color-error); font-weight: 700;">&#128683; 红灯</div>
+            <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">没有测试的代码就是没验货的商品</div>
+          </div>
+        </div>
+
+        <div class="badge-item">
+          <span style="font-size: 1.25rem; flex-shrink: 0;">&#128172;</span>
+          <div>
+            <div style="font-weight: 600; margin-bottom: 4px;">"这只是个小改动"</div>
+            <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">AI 觉得小改动不需要认真检查</div>
+          </div>
+          <span style="margin-left: auto; flex-shrink: 0; font-size: 1.25rem;">&#128680;</span>
+          <div style="flex-shrink: 0; text-align: right; min-width: 180px;">
+            <div style="color: var(--color-error); font-weight: 700;">&#128683; 红灯</div>
+            <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">小改动也能引入大 bug</div>
+          </div>
+        </div>
+
+        <div class="badge-item">
+          <span style="font-size: 1.25rem; flex-shrink: 0;">&#128172;</span>
+          <div>
+            <div style="font-weight: 600; margin-bottom: 4px;">"安全以后再说"</div>
+            <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">AI 建议安全检查推迟到后面</div>
+          </div>
+          <span style="margin-left: auto; flex-shrink: 0; font-size: 1.25rem;">&#128680;</span>
+          <div style="flex-shrink: 0; text-align: right; min-width: 180px;">
+            <div style="color: var(--color-error); font-weight: 700;">&#128683; 红灯</div>
+            <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">安全不是阶段，是每行代码的约束</div>
+          </div>
+        </div>
+
+        <div class="badge-item" style="border-color: #E5C100;">
+          <span style="font-size: 1.25rem; flex-shrink: 0;">&#128172;</span>
+          <div>
+            <div style="font-weight: 600; margin-bottom: 4px;">"先让它跑起来"</div>
+            <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">AI 想跳过规范先写原型</div>
+          </div>
+          <span style="margin-left: auto; flex-shrink: 0; font-size: 1.25rem;">&#9888;&#65039;</span>
+          <div style="flex-shrink: 0; text-align: right; min-width: 180px;">
+            <div style="color: #B8860B; font-weight: 700;">&#9888;&#65039; 黄灯</div>
+            <div style="font-size: var(--text-sm); color: var(--color-text-secondary);">原型可以快，但必须有验证计划</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent animate-in">
+        <span class="callout-icon">&#127891;</span>
+        <div class="callout-content">
+          <span class="callout-title">你的新习惯</span>
+          <p>听到 AI 说"先这样吧"的时候，立刻打开反借口对照表。红灯意味着必须停下来纠正，黄灯意味着可以继续但要有计划。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         SCREEN 4: QUIZ
+         ══════════════════════════════════════════════════════════ -->
+    <div class="screen">
+      <h2 class="screen-heading animate-in">测一测</h2>
+
+      <div class="quiz-container animate-in" id="quiz-module2">
+
+        <div class="quiz-question-block" data-correct="option-b"
+             data-explanation-right="这就是 TDD（测试驱动开发）的红-绿-重构循环！先写一个会失败的测试（红灯），然后写最少的代码让测试通过（绿灯），最后重构优化。"
+             data-explanation-wrong="这违反了'先写测试再写代码'（TDD）原则。先写测试能帮你看清到底要做什么。">
+          <div class="quiz-question">你的 AI 助手说"这个功能很简单，我直接写完再测试"。根据 Agent Skills 的理念，你应该？</div>
+
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>让它直接写，反正写完可以再测</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>要求它先写一个失败的测试，然后写代码让测试通过</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>不需要测试，手动检查一下就行</span>
+            </button>
+          </div>
+
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重新作答</button>
+      </div>
+    </div>
+
+  </div>
+</section>

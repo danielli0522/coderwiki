@@ -1,0 +1,313 @@
+
+<!-- ═══════════════════════════════════════════════════════════════
+     Module 05 — 从种子到预测：完整工作流
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">从种子到预测</h1>
+      <p class="module-subtitle">把所有拼图拼在一起——MiroFish 的完整工作流和你能用它做什么</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Full Pipeline -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">五大步骤，从新闻到未来</h2>
+        <p>MiroFish 的完整工作流分为五个阶段，每个阶段都由不同的服务组件负责：</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>图谱构建</strong>
+              <p>上传种子材料（新闻/报告/小说）&#x2192; 本体生成器定义实体和关系类型 &#x2192; 图谱构建器调用 Zep 提取节点和边 &#x2192; 人设生成器为每个实体创建详细人设</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>环境搭建</strong>
+              <p>配置生成器用 LLM 智能设置模拟参数 &#x2192; 时间配置（按中国人作息）&#x2192; Agent 活动配置 &#x2192; 初始事件（第一枪由谁打响）&#x2192; 平台配置</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>开始模拟</strong>
+              <p>OASIS 引擎在 Twitter + Reddit 双平台并行 &#x2192; Agent 按人设自主互动 &#x2192; 监控线程实时记录动作 &#x2192; 可选：将活动动态更新到 Zep 图谱</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>报告生成</strong>
+              <p>ReportAgent 用 ReACT 模式撰写预测报告 &#x2192; 先规划大纲（2-5 章）&#x2192; 逐章多轮检索+生成 &#x2192; 分章节实时保存 &#x2192; 组装完整报告</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>深度互动</strong>
+              <p>用户可以与模拟世界中的任意 Agent 对话（Interview）&#x2192; 也可以与 ReportAgent 对话，追问细节 &#x2192; 从上帝视角探索预测的未来</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: File Tree -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码仓库地图</h2>
+        <p>MiroFish 采用前后端分离架构，核心逻辑在后端 Python 服务中：</p>
+
+        <div class="file-tree">
+          <div class="ft-folder open">
+            <span class="ft-name">backend/app/</span>
+            <span class="ft-desc">Python 后端核心</span>
+            <div class="ft-children">
+              <div class="ft-folder">
+                <span class="ft-name">services/</span>
+                <span class="ft-desc">业务逻辑层——每个文件对应一个核心能力</span>
+                <div class="ft-children">
+                  <div class="ft-file">
+                    <span class="ft-name">ontology_generator.py</span>
+                    <span class="ft-desc">LLM 分析文本，生成实体和关系类型定义</span>
+                  </div>
+                  <div class="ft-file">
+                    <span class="ft-name">graph_builder.py</span>
+                    <span class="ft-desc">调用 Zep API 构建知识图谱（异步+进度跟踪）</span>
+                  </div>
+                  <div class="ft-file">
+                    <span class="ft-name">oasis_profile_generator.py</span>
+                    <span class="ft-desc">LLM + Zep 检索，为实体生成详细人设（支持并行）</span>
+                  </div>
+                  <div class="ft-file">
+                    <span class="ft-name">simulation_config_generator.py</span>
+                    <span class="ft-desc">LLM 智能生成模拟参数（时间/事件/Agent/平台）</span>
+                  </div>
+                  <div class="ft-file">
+                    <span class="ft-name">simulation_runner.py</span>
+                    <span class="ft-desc">启动/监控/停止模拟进程，实时解析动作日志</span>
+                  </div>
+                  <div class="ft-file">
+                    <span class="ft-name">report_agent.py</span>
+                    <span class="ft-desc">ReACT 模式的报告生成器，四大检索工具</span>
+                  </div>
+                </div>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">api/</span>
+                <span class="ft-desc">Flask API 路由，连接前端和后端服务</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">models/</span>
+                <span class="ft-desc">数据模型和任务管理</span>
+              </div>
+            </div>
+          </div>
+          <div class="ft-folder">
+            <span class="ft-name">frontend/</span>
+            <span class="ft-desc">Vue.js 前端，可视化操作界面</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Data Flow Animation — Full Pipeline -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">数据流全景：种子的旅程</h2>
+        <p>点击"下一步"，跟踪一条新闻从上传到变成预测报告的完整路径：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"用户上传种子材料 + 描述预测需求"},
+          {"highlight":"flow-actor-2","label":"本体生成器分析文本，定义实体和关系类型","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-3","label":"图谱构建器调用 Zep，从文本中提取节点和边","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-4","label":"人设工厂为每个实体生成 2000 字详细人设","packet":true,"from":"actor-3","to":"actor-4"},
+          {"highlight":"flow-actor-5","label":"OASIS 引擎启动双平台模拟，Agent 自由互动","packet":true,"from":"actor-4","to":"actor-5"},
+          {"highlight":"flow-actor-5","label":"模拟过程中，Agent 的动作被实时记录到日志文件"},
+          {"highlight":"flow-actor-6","label":"ReportAgent 用 ReACT 模式检索图谱 + 采访 Agent，生成预测报告","packet":true,"from":"actor-5","to":"actor-6"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">&#x1F4C4;</div>
+              <span>种子材料</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">&#x1F4CB;</div>
+              <span>本体</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">&#x1F5FA;</div>
+              <span>知识图谱</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">&#x1F9D1;</div>
+              <span>人设</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-5">
+              <div class="flow-actor-icon">&#x1F3AE;</div>
+              <span>OASIS</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-6">
+              <div class="flow-actor-icon">&#x1F4DD;</div>
+              <span>预测报告</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+
+          <div class="flow-step-label" id="flow-label">点击"下一步"开始旅程</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Use Cases -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">不只是预测——鱼群引擎的应用场景</h2>
+        <p>MiroFish 的群体智能引擎可以预测万物。以下是已经实现的案例：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">&#x1F4F0;</div>
+            <h4 class="pattern-title">舆情推演</h4>
+            <p class="pattern-desc">武汉大学的舆情事件——上传舆情报告，模拟学生、校方、媒体、校友各方的反应，预测舆论走向。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">&#x1F4DA;</div>
+            <h4 class="pattern-title">小说结局预测</h4>
+            <p class="pattern-desc">《红楼梦》失传结局——上传前 80 回，让角色们在模拟世界中继续生活，预测最可能的结局走向。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">&#x1F4B0;</div>
+            <h4 class="pattern-title">金融预测</h4>
+            <p class="pattern-desc">上传金融信号和政策草案，模拟投资者、机构、监管者的行为，预测市场可能的反应。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">&#x1F3AD;</div>
+            <h4 class="pattern-title">政策模拟</h4>
+            <p class="pattern-desc">上传政策草案，模拟不同群体（企业、民众、媒体）对新政策的反应，预判社会影响。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Final Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">最终测验：你理解 MiroFish 了吗？</h2>
+
+        <div class="quiz-container" id="quiz-module5">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="完全正确！工作流是：图谱构建（提取实体和关系）&#x2192; 环境搭建（生成模拟配置和人设）&#x2192; 开始模拟（双平台运行）&#x2192; 报告生成（ReACT 多轮检索）&#x2192; 深度互动（采访 Agent）。每一步都依赖前一步的输出。"
+               data-explanation-wrong="MiroFish 的工作流有严格的顺序依赖：必须先建图谱才能生成人设，必须有人设才能开始模拟，必须先模拟才能生成报告。">
+            <h3 class="quiz-question">以下哪个顺序正确描述了 MiroFish 的工作流？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>模拟 &#x2192; 报告 &#x2192; 图谱 &#x2192; 人设</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>图谱 &#x2192; 人设 &#x2192; 模拟 &#x2192; 报告 &#x2192; 互动</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>报告 &#x2192; 模拟 &#x2192; 图谱 &#x2192; 互动 &#x2192; 人设</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！MiroFish 的底层引擎 OASIS 是开源的（由 CAMEL-AI 团队开发），整个项目采用 AGPL-3.0 开源协议，代码托管在 GitHub 上。你可以自由使用和修改。"
+               data-explanation-wrong="MiroFish 是完全开源的！代码在 GitHub 上（666ghj/MiroFish），采用 AGPL-3.0 协议。底层模拟引擎 OASIS 也由 CAMEL-AI 团队开源。">
+            <h3 class="quiz-question">MiroFish 项目是开源的还是商业闭源的？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>完全闭源的商业产品</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>核心引擎闭源，只有前端开源</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>完全开源（AGPL-3.0），底层引擎 OASIS 也开源</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="没错！MiroFish 的核心理念是：与其让一个超级 AI 预测未来，不如创建足够多个"虚拟人"让他们在数字世界中自由互动——群体涌现的结果就是最可信的预测。这正如鱼群不需要指挥者就能展现群体智慧。"
+               data-explanation-wrong="回到课程的第一个比喻——鱼群。MiroFish 的名字来自鱼的群体行为。它的核心思想是：大量简单个体的互动可以涌现出复杂的群体智慧，这比任何一个单独的 AI 都更能预测未来。">
+            <h3 class="quiz-question">MiroFish 的名字中的"Fish"暗示了什么核心理念？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>群体智能——大量简单个体的互动涌现出超越个体的集体智慧</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>鱼的记忆只有 7 秒——暗示模拟应该是快速和短暂的</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>项目创始人的星座是双鱼座</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">重试</button>
+        </div>
+      </section>
+
+      <!-- Screen 6: Closing -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">课程结束</h2>
+        <p>恭喜你完成了 MiroFish 交互式课程！现在你已经理解了：</p>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">多智能体</code>
+            <span class="badge-desc">每个 Agent 都有独立人格、记忆和行为，群体的互动涌现出预测</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">知识图谱</code>
+            <span class="badge-desc">从种子材料中提取实体和关系，构建数字世界的"水域地图"</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">OASIS 模拟</code>
+            <span class="badge-desc">双平台并行，按真实作息推进时间，Agent 自主演化社会行为</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">ReportAgent</code>
+            <span class="badge-desc">ReACT 模式的"全知记者"，四大检索工具确保报告基于真实数据</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">完整工作流</code>
+            <span class="badge-desc">从种子到预测的五步流程，每步环环相扣</span>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#x1F41F;</div>
+          <div class="callout-content">
+            <strong class="callout-title">继续探索</strong>
+            <p>MiroFish 在 GitHub 上开源：github.com/666ghj/MiroFish。你可以克隆代码、上传自己的种子材料，让鱼群预测你关心的未来。</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

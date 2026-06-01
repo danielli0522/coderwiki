@@ -1,0 +1,246 @@
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">安装、配置与驾驭 claude-mem</h1>
+      <p class="module-subtitle">从零到第一条记忆被注入，只需要一行命令。但要真正用好它，你还需要知道这几件事。</p>
+    </header>
+
+    <!-- Screen 1: Installation -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">安装：30 秒上手</h2>
+      <p>claude-mem 用 <span class="term" data-definition="npx 是 Node.js 自带的工具，让你可以直接运行一个 npm 包里的命令，不需要先全局安装。就像直接拨通一个号码，不需要先把号码存到手机联系人里。">npx</span> 一键安装，自动完成所有配置。</p>
+
+      <div class="step-cards animate-in">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>运行安装命令</strong>
+            <p><code style="font-family:var(--font-mono); background:var(--color-bg-code); color:#A6E3A1; padding:2px 6px; border-radius:4px;">npx claude-mem install</code> — 自动下载、安装依赖、注册 Hooks</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>重启 Claude Code</strong>
+            <p>重启后 Setup 钩子触发，检查 Bun/Python/Chroma 等依赖是否就绪</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>正常使用 Claude Code</strong>
+            <p>无需任何额外操作。claude-mem 在后台静默运行，你只需要看到成果</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>（可选）打开 Web 监控界面</strong>
+            <p>在浏览器访问 <code style="font-family:var(--font-mono); background:var(--color-bg-code); color:#89B4FA; padding:2px 6px; border-radius:4px;">http://localhost:37777</code> 实时查看记忆流</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">ℹ️</div>
+        <div class="callout-content">
+          <strong class="callout-title">系统要求</strong>
+          <p>Node.js 18+，Claude Code 最新版，macOS/Linux/Windows（WSL）。Bun 和 uv 会自动安装——你不需要手动处理。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 2: Configuration -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">配置文件：调整 claude-mem 行为</h2>
+      <p>所有设置都在 <code style="font-family:var(--font-mono); font-size:0.85em; background: var(--color-bg-code); color:#CBA6F7; padding:2px 6px; border-radius:4px;">~/.claude-mem/settings.json</code>，自动生成，可直接编辑。</p>
+
+      <div class="badge-list animate-in">
+        <div class="badge-item">
+          <code class="badge-code">CLAUDE_MEM_MODE</code>
+          <span class="badge-desc">工作模式：<strong>code</strong>（英文）/ <strong>code--zh</strong>（中文观察）/ <strong>code--ja</strong>（日文）</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">CLAUDE_MEM_PROVIDER</code>
+          <span class="badge-desc">AI 提供商：默认用 Claude SDK，也可以切换 Gemini 或 OpenRouter</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">WORKER_PORT</code>
+          <span class="badge-desc">Worker Service 端口，默认 37777。如果被占用可以改这里</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">CLAUDE_MEM_CHROMA_ENABLED</code>
+          <span class="badge-desc">是否启用向量搜索。设为 false 可以用纯 SQLite 模式，省资源</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">CLAUDE_MEM_MAX_OBSERVATIONS</code>
+          <span class="badge-desc">每次注入的最大观察数量。越多越全，但 token 消耗越大</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 3: Using mem-search -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">主动搜索：mem-search 技能</h2>
+      <p>自动注入是被动记忆，<span class="term" data-definition="mem-search 是 claude-mem 提供的 MCP 工具，让 Claude 可以主动搜索历史记忆。就像你可以主动问同事'上次那个 bug 是怎么解决的'，而不是等他主动告诉你。">mem-search</span> 让 Claude 可以主动检索任何历史记忆。</p>
+
+      <div class="chat-window" id="chat-memsearch">
+        <div class="chat-messages">
+          <div class="chat-message" data-sender="user" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-3)">你</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-3)">你</span>
+              <p>帮我回忆一下我们之前是怎么处理大文件上传超时问题的</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="claude" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-2)">C</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-2)">Claude</span>
+              <p>让我搜一下历史记忆……</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="memsearch" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-accent)">M</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-accent)">mem-search</span>
+              <p>搜索"文件上传超时"，找到 3 条相关记忆：#47 (2025-04-15)、#63 (2025-04-28)、#71 (2025-05-01)</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="claude" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-2)">C</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-2)">Claude</span>
+              <p>根据记忆 #63，你当时用了 S3 分片上传（multipart upload）方案，把大文件切成 5MB 的块分别上传，彻底避免了超时问题。代码在 src/upload/chunked-uploader.ts。</p>
+            </div>
+          </div>
+        </div>
+        <div class="chat-typing" style="display:none">
+          <div class="chat-avatar" id="chat-memsearch-typing-avatar" style="background: var(--color-actor-2)">C</div>
+          <div class="chat-typing-dots">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+          </div>
+        </div>
+        <div class="chat-controls">
+          <button class="btn chat-next-btn">下一条消息</button>
+          <button class="btn chat-all-btn">全部展开</button>
+          <button class="btn chat-reset-btn">重播</button>
+          <span class="chat-progress"></span>
+        </div>
+      </div>
+
+      <p>mem-search 实现了 3 层工作流：先用 <code style="font-family:var(--font-mono); font-size:0.85em; background:var(--color-bg-code); color:#CBA6F7; padding:2px 6px; border-radius:4px;">search</code> 获取 ID 索引，再用 <code style="font-family:var(--font-mono); font-size:0.85em; background:var(--color-bg-code); color:#CBA6F7; padding:2px 6px; border-radius:4px;">timeline</code> 看时间上下文，最后用 <code style="font-family:var(--font-mono); font-size:0.85em; background:var(--color-bg-code); color:#CBA6F7; padding:2px 6px; border-radius:4px;">get_observations</code> 按需获取完整内容。比一次性获取全部节省 10 倍 token。</p>
+    </section>
+
+    <!-- Screen 4: Privacy control -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">隐私控制：不想被记录的内容怎么办</h2>
+      <p>有时候你在对话里输入了 <span class="term" data-definition="敏感信息（Sensitive Data）包括密码、API 密钥、个人身份信息（PII）等不应该被存储或分享的数据。">敏感信息</span>——比如临时 API key 或者内部凭证。</p>
+      <p>claude-mem 支持用 <code style="font-family:var(--font-mono); font-size:0.85em; background:var(--color-bg-code); color:#CBA6F7; padding:2px 6px; border-radius:4px;">&lt;private&gt;...&lt;/private&gt;</code> 标签包裹不想被记录的内容：</p>
+
+      <div style="background: var(--color-bg-code); border-radius: var(--radius-md); padding: var(--space-6); margin: var(--space-6) 0;">
+        <pre style="color: #CDD6F4; font-family: var(--font-mono); font-size: var(--text-sm); white-space: pre-wrap;"><span style="color: #CBA6F7;">你：</span> <span style="color: #A6E3A1;">帮我测试一下这个 API：</span>
+<span style="color: #CBA6F7;">&lt;private&gt;</span>
+<span style="color: #F38BA8;">API_KEY=sk-prod-3x7mN2kL9pQ...</span>
+<span style="color: #CBA6F7;">&lt;/private&gt;</span>
+<span style="color: #A6E3A1;">用上面的 key 调用用户 API</span>
+
+<span style="color: #6C7086;">→ &lt;private&gt; 标签内的内容不会被 claude-mem 记录</span></pre>
+      </div>
+
+      <div class="callout callout-warning">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-content">
+          <strong class="callout-title">记忆存储在本机</strong>
+          <p>所有记忆存储在你本地的 SQLite 文件里（~/.claude-mem/data/），不会上传到任何服务器。但仍然建议用 &lt;private&gt; 标签保护真正敏感的内容。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 5: Final quiz -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">最终综合检验</h2>
+      <div class="quiz-container" id="quiz-m5">
+        <div class="quiz-question-block"
+             data-correct="b"
+             data-explanation-right="对！整个记忆管道：PostToolUse 捕获 → SDK Agent 压缩 → SQLite 存储 → 下次 SessionStart 时 Context Generator 注入。这是四个组件的协作。"
+             data-explanation-wrong="这个流程涉及多个组件协作——思考一下捕获、压缩、存储、注入分别是哪个组件负责的。">
+          <h3 class="quiz-question">你今天用 Claude 实现了一个功能，明天想让新会话知道这个功能已经完成了。哪个说法描述了这个信息是怎么从今天流向明天的？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Claude 自动把今天的工作写入了 CLAUDE.md 文件</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>PostToolUse 钩子捕获工具输出 → SDK Agent 压缩为观察 → 存入 SQLite → 明天 SessionStart 时注入</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Worker Service 直接把整个对话历史保存到磁盘</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="c"
+             data-explanation-right="正确！通过设置 CLAUDE_MEM_CHROMA_ENABLED=false，可以禁用 Chroma 向量搜索，切换到只用 SQLite 的轻量模式，适合资源有限的环境。"
+             data-explanation-wrong="Chroma 是向量搜索组件，可以独立关闭。SQLite 和 Worker Service 是核心组件，关闭会导致整个记忆系统失效。">
+          <h3 class="quiz-question">你在一台配置较低的开发机上运行 claude-mem，发现 Chroma 向量数据库消耗了太多内存。你应该怎么处理？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>卸载 claude-mem，因为它太重了</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>删除 SQLite 数据库文件释放磁盘空间</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>在 settings.json 设置 CLAUDE_MEM_CHROMA_ENABLED=false，降级到纯 SQLite 模式</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="a"
+             data-explanation-right="mem-search 的 3 层工作流正是为此设计的：search 获取 ID 索引（低 token 消耗），get_observations 按 ID 获取完整内容（只拉相关的）。这比一次性获取全部节省约 10 倍 token。"
+             data-explanation-wrong="mem-search 的设计哲学正是避免这种情况。思考一下它的 3 层工作流（search → timeline → get_observations）是如何解决这个问题的。">
+          <h3 class="quiz-question">你问 Claude 关于 6 个月前某个 bug 修复的详细信息，这条记忆的原始内容很长。mem-search 怎么在不消耗大量 token 的情况下找到它？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>先用 search 获取 ID 索引（低消耗），确认相关 ID 后再用 get_observations 只拉那条完整记录</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>一次性加载所有 6 个月的记忆到上下文</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>mem-search 只能搜索最近 30 天的记忆</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-m5')">检验答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m5')">重新作答</button>
+      </div>
+
+      <div class="callout callout-accent" style="margin-top: var(--space-12)">
+        <div class="callout-icon">🎉</div>
+        <div class="callout-content">
+          <strong class="callout-title">你已经理解了 claude-mem 的完整架构</strong>
+          <p>从 AI 失忆的根本原因，到 Hook 拦截机制，到 AI 压缩流水线，到记忆注入——你现在掌握了足够的知识来有效驾驭这个工具，并在它出问题时知道从哪里入手排查。</p>
+        </div>
+      </div>
+    </section>
+  </div>
+</section>

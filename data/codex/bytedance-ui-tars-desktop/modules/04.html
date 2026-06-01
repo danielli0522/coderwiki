@@ -1,0 +1,168 @@
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">MCP Agent：工具调用引擎</h1>
+      <p class="module-subtitle">MCP 是 AI 世界的"万能插座"——任何工具只要插上，AI 就能用。搜索引擎、文件操作、代码执行，统统变成 AI 的手和脚。</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">什么是 MCP？</h2>
+        <p><span class="term" data-definition="MCP（Model Context Protocol）是 Anthropic 提出的开放协议，定义了 AI 模型如何与外部工具通信的标准。就像 USB-C 统一了手机充电线——MCP 统一了 AI 调用工具的方式。">MCP</span> 让 AI 智能体能调用外部工具——搜索引擎、网页爬虫、文件操作等。Tarko 框架的 MCPAgent 专门处理这些工具调用。</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"1. 用户提问：搜索最新的 AI Agent 论文"},
+          {"highlight":"flow-actor-1","label":"2. Agent 分析：需要调用搜索工具","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-2","label":"3. MCPAgent 连接 MCP Server，发现可用工具"},
+          {"highlight":"flow-actor-2","label":"4. 通过 MCP 协议调用 search 工具","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-3","label":"5. 外部服务（如 Tavily）返回搜索结果","packet":true,"from":"actor-3","to":"actor-2"},
+          {"highlight":"flow-actor-2","label":"6. MCPAgent 把工具返回值交给 LLM 处理","packet":true,"from":"actor-2","to":"actor-1"},
+          {"highlight":"flow-actor-1","label":"7. LLM 基于搜索结果生成最终回答给用户"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">LLM</div>
+              <span>大语言模型<br/>推理决策</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">MCP</div>
+              <span>MCPAgent<br/>工具调度</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">EXT</div>
+              <span>外部服务<br/>搜索/爬虫</span>
+            </div>
+          </div>
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">Click "Next Step" to begin</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">Next Step</button>
+            <button class="btn flow-reset-btn">Restart</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">MCPAgent 的代码实现</h2>
+        <p>MCPAgent 继承自 Tarko 的基础 Agent 类，在初始化时连接所有 <span class="term" data-definition="MCP Server 是提供工具能力的服务进程。就像自动售货机——你投入请求（硬币），它吐出结果（饮料）。每个 MCP Server 提供一类工具能力。">MCP Server</span>，把它们的工具注册到自己身上。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-comment">// multimodal/tarko/mcp-agent/src/mcp-agent.ts</span>
+<span class="code-line"><span class="code-keyword">export class</span> <span class="code-function">MCPAgent</span>&lt;T&gt;</span>
+<span class="code-line">  <span class="code-keyword">extends</span> Agent&lt;T&gt; {</span>
+<span class="code-line">  <span class="code-keyword">private</span> mcpClients:</span>
+<span class="code-line">    Map&lt;<span class="code-keyword">string</span>, IMCPClient&gt;;</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">async</span> <span class="code-function">initialize</span>() {</span>
+<span class="code-line">    <span class="code-keyword">for</span> (<span class="code-keyword">const</span> [name, config]</span>
+<span class="code-line">      <span class="code-keyword">of</span> Object.entries(mcpConfig)) {</span>
+<span class="code-line">      <span class="code-keyword">const</span> client =</span>
+<span class="code-line">        <span class="code-keyword">new</span> <span class="code-function">MCPClientV2</span>(name, config);</span>
+<span class="code-line">      <span class="code-keyword">await</span> client.<span class="code-function">initialize</span>();</span>
+<span class="code-line"></span>
+<span class="code-line">      <span class="code-keyword">const</span> tools = client.<span class="code-function">getTools</span>();</span>
+<span class="code-line">      <span class="code-keyword">for</span> (<span class="code-keyword">const</span> tool <span class="code-keyword">of</span> tools) {</span>
+<span class="code-line">        <span class="code-keyword">this</span>.<span class="code-function">registerTool</span>(</span>
+<span class="code-line">          <span class="code-keyword">new</span> <span class="code-function">Tool</span>({ id: tool.name,</span>
+<span class="code-line">            function: (args) =&gt;</span>
+<span class="code-line">              client.<span class="code-function">callTool</span>(tool.name, args)</span>
+<span class="code-line">          })</span>
+<span class="code-line">        );</span>
+<span class="code-line">      }</span>
+<span class="code-line">    }</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">MCPAgent 继承自基础 Agent 类，专门处理 MCP 工具调用...</p>
+              <p class="tl">用一个 Map 管理所有 MCP 客户端连接...</p>
+              <p class="tl">初始化时遍历配置中的所有 MCP Server...</p>
+              <p class="tl">取出每个 Server 的名称和连接配置...</p>
+              <p class="tl">创建 MCP 客户端并建立连接...</p>
+              <p class="tl">获取这个 Server 提供的所有工具...</p>
+              <p class="tl">逐个注册为 Agent 可用的工具...</p>
+              <p class="tl">工具的执行函数就是调用 MCP 客户端的 callTool 方法...</p>
+              <p class="tl">传入工具名和参数，等待结果返回。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🔑</div>
+          <div class="callout-content">
+            <strong class="callout-title">设计模式：依赖注入</strong>
+            <p>MCPAgent 不知道也不关心它调用的工具是怎么实现的。它只通过 MCP 协议和工具通信。你可以换掉底层的搜索引擎、换掉爬虫实现——Agent 的代码一行都不用改。这就是 <span class="term" data-definition="依赖注入（Dependency Injection）是一种设计模式——不自己创建依赖，而是从外部接收。就像你不自己发电，而是插上插座用电网的电。">依赖注入</span> 的威力。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Agent TARS：MCP + GUI 的融合</h2>
+        <p>AgentTARS 是 MCP 能力的集大成者——它继承自 MCPAgent，同时集成了浏览器控制、文件系统操作和搜索能力。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-comment">// multimodal/agent-tars/core/src/agent-tars.ts</span>
+<span class="code-line"><span class="code-keyword">export class</span> <span class="code-function">AgentTARS</span>&lt;T&gt;</span>
+<span class="code-line">  <span class="code-keyword">extends</span> MCPAgent&lt;T&gt; {</span>
+<span class="code-line">  <span class="code-keyword">private readonly</span> environment;</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-function">constructor</span>(options: T) {</span>
+<span class="code-line">    <span class="code-keyword">const</span> env = options.aioSandbox</span>
+<span class="code-line">      ? <span class="code-keyword">new</span> <span class="code-function">AIOEnvironment</span>(options)</span>
+<span class="code-line">      : <span class="code-keyword">new</span> <span class="code-function">LocalEnvironment</span>(options);</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">super</span>({</span>
+<span class="code-line">      ...processedOptions,</span>
+<span class="code-line">      mcpServers:</span>
+<span class="code-line">        env.<span class="code-function">getMCPServerRegistry</span>(),</span>
+<span class="code-line">    });</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">AgentTARS 继承自 MCPAgent——它天生就有工具调用能力...</p>
+              <p class="tl">environment 负责管理运行环境（本地或沙箱）...</p>
+              <p class="tl">构造函数根据配置选择环境...</p>
+              <p class="tl">如果启用 AIO 沙箱，用隔离的云端环境执行...</p>
+              <p class="tl">否则用本地环境——浏览器、文件系统都在本机...</p>
+              <p class="tl">调用父类 MCPAgent 的构造函数...</p>
+              <p class="tl">关键：从 environment 获取 MCP Server 注册表...</p>
+              <p class="tl">这样 MCPAgent 就能连接所有环境提供的工具了。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block" data-correct="option-b" data-explanation-right="MCPAgent 的设计通过依赖注入实现了松耦合——底层工具可以随意替换（Tavily 换成 Google），Agent 的核心逻辑不需要任何修改。" data-explanation-wrong="MCP 是一个工具调用协议，不是 GUI 操作协议。GUI 操作由 Operator 层负责。">
+            <h3 class="quiz-question">你的 Agent TARS 使用 Tavily 搜索引擎，现在想换成 Google Search。你需要做什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>修改 MCPAgent 的核心代码，把 Tavily 调用替换成 Google 调用</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>只需在配置里换一个 MCP Server（从 Tavily 换成 Google Search MCP），Agent 代码不用改</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>需要重新训练模型才能识别新的搜索结果格式</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">Try Again</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>

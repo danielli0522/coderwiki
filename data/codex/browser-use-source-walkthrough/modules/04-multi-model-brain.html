@@ -1,0 +1,205 @@
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="hero-title module-title">多模型大脑</h1>
+      <p class="module-subtitle">browser-use 怎么同时支持 OpenAI、Anthropic、Google、Ollama 等十几种模型？秘密在 BaseChatModel 协议。</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">十一个 Chat 类，一个统一协议</h2>
+        <p>在 <code>__init__.py</code> 的导出列表里，你能看到 browser-use 支持的所有模型：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line">__all__ = [</span>
+<span class="code-line">    <span class="code-string">'Agent'</span>, <span class="code-string">'BrowserSession'</span>, <span class="code-string">'Browser'</span>,</span>
+<span class="code-line">    <span class="code-string">'Controller'</span>, <span class="code-string">'DomService'</span>, <span class="code-string">'SystemPrompt'</span>,</span>
+<span class="code-line">    <span class="code-comment"># Chat models</span></span>
+<span class="code-line">    <span class="code-string">'ChatOpenAI'</span>,</span>
+<span class="code-line">    <span class="code-string">'ChatGoogle'</span>,</span>
+<span class="code-line">    <span class="code-string">'ChatAnthropic'</span>,</span>
+<span class="code-line">    <span class="code-string">'ChatBrowserUse'</span>,</span>
+<span class="code-line">    <span class="code-string">'ChatGroq'</span>,</span>
+<span class="code-line">    <span class="code-string">'ChatLiteLLM'</span>,</span>
+<span class="code-line">    <span class="code-string">'ChatMistral'</span>,</span>
+<span class="code-line">    <span class="code-string">'ChatAzureOpenAI'</span>,</span>
+<span class="code-line">    <span class="code-string">'ChatOCIRaw'</span>,</span>
+<span class="code-line">    <span class="code-string">'ChatOllama'</span>,</span>
+<span class="code-line">    <span class="code-string">'ChatVercel'</span>,</span>
+<span class="code-line">]</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">核心导出就那几个：Agent、Browser、Controller、DomService。</p>
+              <p class="tl">然后是整整 11 个 Chat 类！每个对应一家 AI 模型提供商。</p>
+              <p class="tl">ChatBrowserUse 是官方微调模型，专门为浏览器操控优化。</p>
+              <p class="tl">ChatOllama 支持本地模型——不想把数据发到云端就用它。</p>
+              <p class="tl">ChatLiteLLM 是个万能适配器，能连接 100+ 模型提供商。</p>
+            </div>
+          </div>
+        </div>
+
+        <p>这 11 个类之所以能互换使用，是因为它们都遵循同一个协议：<code>BaseChatModel</code>。</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">BaseChatModel：一份"大脑入职合同"</h2>
+        <p><span class="term" data-definition="Protocol 是 Python 的一个特性，定义一组方法签名。只要一个类实现了这些方法，就算'符合协议'，不需要显式继承。类似于其他语言的 interface。">Protocol</span> 是 Python 的接口机制。BaseChatModel 定义了"作为一个合格的 AI 大脑，你必须会什么"：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">@runtime_checkable</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">BaseChatModel</span>(Protocol):</span>
+<span class="code-line">    model: str</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">@property</span></span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">provider</span>(self) -> str: ...</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">@property</span></span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">name</span>(self) -> str: ...</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">async def</span> <span class="code-function">ainvoke</span>(</span>
+<span class="code-line">        self,</span>
+<span class="code-line">        messages: list[BaseMessage],</span>
+<span class="code-line">        output_format: type[T] | <span class="code-keyword">None</span> = <span class="code-keyword">None</span>,</span>
+<span class="code-line">        **kwargs: Any</span>
+<span class="code-line">    ) -> ChatInvokeCompletion[T] | ChatInvokeCompletion[str]: ...</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">@runtime_checkable 让你能在运行时检查一个对象是否符合协议。</p>
+              <p class="tl">model: str —— 你得告诉别人你是什么模型（比如 "gpt-4o"、"claude-sonnet-4-6"）。</p>
+              <p class="tl">provider 属性 —— 你是哪家的？（"openai"、"anthropic"、"google"...）</p>
+              <p class="tl">name 属性 —— 你的显示名称。</p>
+              <p class="tl">ainvoke 方法 —— 这是核心！接收消息列表，返回 AI 的回复。支持结构化输出（output_format）。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">设计洞察</strong>
+            <p>browser-use 用 <span class="term" data-definition="Protocol 和抽象基类（ABC）的区别在于：Protocol 不需要显式继承，只要你实现了规定的方法就算符合。这叫'结构化子类型'，更灵活。">Protocol 而非抽象基类</span>，意味着你甚至可以传入自己写的类，只要它有 model 属性和 ainvoke 方法，Agent 就能用——零侵入式扩展。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">以 ChatOpenAI 为例：怎么跟具体模型通信</h2>
+        <p>看看 ChatOpenAI 是怎么实现 BaseChatModel 协议的：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">@dataclass</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">ChatOpenAI</span>(BaseChatModel):</span>
+<span class="code-line">    model: ChatModel | str</span>
+<span class="code-line">    temperature: float | <span class="code-keyword">None</span> = <span class="code-keyword">0.2</span></span>
+<span class="code-line">    frequency_penalty: float | <span class="code-keyword">None</span> = <span class="code-keyword">0.3</span></span>
+<span class="code-line">    api_key: str | <span class="code-keyword">None</span> = <span class="code-keyword">None</span></span>
+<span class="code-line">    base_url: str | httpx.URL | <span class="code-keyword">None</span> = <span class="code-keyword">None</span></span>
+<span class="code-line">    max_retries: int = <span class="code-keyword">5</span></span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">@property</span></span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">provider</span>(self) -> str:</span>
+<span class="code-line">        <span class="code-keyword">return</span> <span class="code-string">'openai'</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">用 @dataclass 自动生成 __init__，省去手写样板代码。</p>
+              <p class="tl">model 是必填的——"gpt-4o"、"gpt-4.1-mini" 等等。</p>
+              <p class="tl">temperature 默认 0.2——偏向确定性输出，适合自动化场景。</p>
+              <p class="tl">frequency_penalty 0.3 防止模型无限重复（比如死循环输出制表符）。</p>
+              <p class="tl">max_retries=5：浏览器自动化网络不稳定，多试几次更可靠。</p>
+              <p class="tl">provider 属性返回 "openai"——Agent 用它来判断模型类型，自动调整提示词。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Agent 怎么根据模型自动调参？</h2>
+        <p>Agent 初始化时会检查模型类型，自动调整行为：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment"># set flashmode = True if llm is ChatBrowserUse</span></span>
+<span class="code-line"><span class="code-keyword">if</span> llm.provider == <span class="code-string">'browser-use'</span>:</span>
+<span class="code-line">    flash_mode = <span class="code-keyword">True</span></span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># Auto-configure llm_screenshot_size for Claude Sonnet</span></span>
+<span class="code-line"><span class="code-keyword">if</span> llm_screenshot_size <span class="code-keyword">is None</span>:</span>
+<span class="code-line">    model_name = getattr(llm, <span class="code-string">'model'</span>, <span class="code-string">''</span>)</span>
+<span class="code-line">    <span class="code-keyword">if</span> isinstance(model_name, str) <span class="code-keyword">and</span> model_name.startswith(<span class="code-string">'claude-sonnet'</span>):</span>
+<span class="code-line">        llm_screenshot_size = (<span class="code-keyword">1400</span>, <span class="code-keyword">850</span>)</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># DeepSeek models do not support vision</span></span>
+<span class="code-line"><span class="code-keyword">if</span> <span class="code-string">'deepseek'</span> <span class="code-keyword">in</span> self.llm.model.lower():</span>
+<span class="code-line">    self.settings.use_vision = <span class="code-keyword">False</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">如果用的是 browser-use 官方微调模型，自动开启 flash_mode（精简提示词，更快）。</p>
+              <p class="tl">如果是 Claude Sonnet，自动把截图缩放到 1400x850——这个模型对图片大小有偏好。</p>
+              <p class="tl">如果是 DeepSeek 模型，关闭视觉功能——它还不支持图片理解。</p>
+              <p class="tl">这就是 provider 属性的价值：Agent 能根据模型自动做适配。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">踩坑提醒</strong>
+            <p>如果你用了 DeepSeek 或 Grok-3 模型但忘了关闭 use_vision，Agent 会自动帮你关并打印警告。但最好一开始就设置好，避免浪费 API 调用。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">测测你理解了多少</h2>
+
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block" data-correct="option-c" data-explanation-right="没错！BaseChatModel 是 Protocol，只要你的类实现了 model 属性和 ainvoke 方法，Agent 就能直接用——不需要继承任何基类。" data-explanation-wrong="关键在于 Protocol 的'结构化子类型'特性——它不要求继承，只要求实现规定的方法。">
+            <h3 class="quiz-question">如果你想用自己的 AI 模型接入 browser-use，需要怎么做？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div><span>必须继承 BaseChatModel 基类并重写所有方法</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div><span>需要修改 browser-use 源码，在 __init__.py 注册新模型</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div><span>只要实现 model 属性和 ainvoke 方法就行，不用继承</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

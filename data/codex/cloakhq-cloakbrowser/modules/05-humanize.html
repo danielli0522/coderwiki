@@ -1,0 +1,192 @@
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">模拟人类行为</h1>
+      <p class="module-subtitle">光有假指纹还不够——你还得"演"得像一个真人</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Why Behavior Matters -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">指纹只是第一关</h2>
+        <p>想象你伪造了一张完美的身份证，通过了门口的安检。但进去之后，你的行为暴露了你——你走路太快、从不眨眼、每次都走完全相同的路线。</p>
+        <p>高级 Bot 检测不仅检查"你是谁"（指纹），还检查"你怎么动"（行为）。CloakBrowser 的 <span class="term" data-definition="Humanize 是 CloakBrowser 的行为模拟功能。开启后，鼠标移动、点击、键盘输入等操作都会带上人类的随机性和不精确性——比如鼠标不会走直线，打字不会匀速。">humanize</span> 模式就是专门应对这类检测的。</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Aha! 行为指纹</strong>
+            <p>你的鼠标轨迹本身就是一种指纹。Bot 的鼠标走直线、瞬间到达、完美居中——真人的鼠标走曲线、有时会偏移、偶尔还会停顿。这种"行为指纹"比浏览器指纹更难伪造，因为它需要理解人类的物理运动规律。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Three Pillars of Humanization -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">三大行为模拟引擎</h2>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🖱️</div>
+            <h4 class="pattern-title">鼠标：贝塞尔曲线</h4>
+            <p class="pattern-desc">真人的鼠标不会走直线——它走的是弯弯曲曲的<span class="term" data-definition="贝塞尔曲线是一种用控制点定义的平滑曲线。在 CloakBrowser 中，鼠标从 A 点移动到 B 点不是走直线，而是沿一条由随机控制点定义的弧线——就像真人的手移动鼠标时的自然弧度。">贝塞尔曲线</span>。每次移动的路径都不一样，还有随机的中途停顿和微小的抖动。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">⌨️</div>
+            <h4 class="pattern-title">键盘：节奏与失误</h4>
+            <p class="pattern-desc">真人打字不是匀速的——有些按键快、有些慢，偶尔还会按错然后删除重打。CloakBrowser 模拟了这种不精确性，包括真实的"打错→退格→重打"流程。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">📜</div>
+            <h4 class="pattern-title">滚动：物理惯性</h4>
+            <p class="pattern-desc">真人的滚动有加速、匀速、减速、回弹——像物理世界中的惯性运动。Bot 的滚动要么不动要么匀速跳转，一眼就能看出来。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Humanize Config -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">怎么开启人类行为模拟</h2>
+        <p>只需要在 launch 时加上一个参数：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line">browser = <span class="code-keyword">await</span> <span class="code-function">launch</span>(</span>
+<span class="code-line">    headless=<span class="code-keyword">True</span>,</span>
+<span class="code-line">    humanize=<span class="code-keyword">True</span>,</span>
+<span class="code-line">    human_preset=<span class="code-string">"default"</span>,</span>
+<span class="code-line">)</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">启动一个隐身浏览器</p>
+              <p class="tl">在后台运行，不显示窗口</p>
+              <p class="tl">开启人类行为模拟！</p>
+              <p class="tl">使用默认的"人类特征"预设（有多个预设可选）</p>
+              <p class="tl">结束配置</p>
+            </div>
+          </div>
+        </div>
+
+        <p>CloakBrowser 内部会对 Playwright 的鼠标和键盘方法做<span class="term" data-definition="猴子补丁（Monkey Patch）是一种在运行时替换或修改已有函数的技术。就像给一只猴子换了顶帽子——函数的名字没变，但它的行为变了。">猴子补丁（Monkey Patch）</span>，把原本"机器人式"的操作替换成"人类式"的操作：</p>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">page.click()</code>
+            <span class="badge-desc">不再是瞬间移动+点击，而是：贝塞尔曲线移动 → 微小偏移 → 按下 → 随机延迟 → 释放</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">page.type()</code>
+            <span class="badge-desc">不再是匀速输入，而是：随机间隔（30-170ms）→ 偶尔打错 → 退格 → 重打正确的字符</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">page.mouse.move()</code>
+            <span class="badge-desc">不再是直线移动，而是：生成随机控制点 → 绘制贝塞尔曲线 → 沿曲线移动，带微小抖动</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Bezier Curve Explanation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">贝塞尔曲线：鼠标的"人类弧度"</h2>
+        <p>Bot 的鼠标从 A 点到 B 点走直线（下左）。真人的鼠标走曲线，路径带有自然的弧度和微偏（下右）：</p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin: var(--space-6) 0;">
+          <div style="background: var(--color-surface); border-radius: var(--radius-md); padding: var(--space-5); text-align: center; box-shadow: var(--shadow-sm);">
+            <div style="font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-error); margin-bottom: var(--space-2);">BOT 方式</div>
+            <svg width="200" height="100" viewBox="0 0 200 100">
+              <line x1="20" y1="80" x2="180" y2="20" stroke="var(--color-error)" stroke-width="2" stroke-dasharray="5,5"/>
+              <circle cx="20" cy="80" r="6" fill="var(--color-error)"/>
+              <circle cx="180" cy="20" r="6" fill="var(--color-error)"/>
+              <text x="10" y="95" font-size="10" fill="var(--color-text-muted)">A</text>
+              <text x="175" y="15" font-size="10" fill="var(--color-text-muted)">B</text>
+            </svg>
+            <p style="font-size: var(--text-sm); color: var(--color-text-secondary); margin-top: var(--space-2);">直线，瞬间到达</p>
+          </div>
+          <div style="background: var(--color-surface); border-radius: var(--radius-md); padding: var(--space-5); text-align: center; box-shadow: var(--shadow-sm);">
+            <div style="font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-success); margin-bottom: var(--space-2);">真人方式</div>
+            <svg width="200" height="100" viewBox="0 0 200 100">
+              <path d="M 20 80 C 60 30, 140 90, 180 20" stroke="var(--color-success)" stroke-width="2" fill="none"/>
+              <circle cx="20" cy="80" r="6" fill="var(--color-success)"/>
+              <circle cx="180" cy="20" r="6" fill="var(--color-success)"/>
+              <circle cx="60" cy="30" r="3" fill="var(--color-success)" opacity="0.3"/>
+              <circle cx="140" cy="90" r="3" fill="var(--color-success)" opacity="0.3"/>
+              <text x="10" y="95" font-size="10" fill="var(--color-text-muted)">A</text>
+              <text x="175" y="15" font-size="10" fill="var(--color-text-muted)">B</text>
+            </svg>
+            <p style="font-size: var(--text-sm); color: var(--color-text-secondary); margin-top: var(--space-2);">贝塞尔曲线，自然弧度</p>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">ℹ️</div>
+          <div class="callout-content">
+            <strong class="callout-title">为什么贝塞尔曲线？</strong>
+            <p>真人的手臂是通过关节运动的——肩膀、手肘、手腕。这种关节运动自然产生的轨迹就是贝塞尔曲线。CloakBrowser 用随机控制点模拟不同人的手臂长度、运动习惯，每次轨迹都不一样。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+
+        <div class="quiz-container" id="quiz-module5">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！指纹伪装解决"你是谁"的问题，行为模拟解决"你怎么动"的问题。两者缺一不可——完美的指纹+机器人的行为，还是会被高级检测发现。"
+               data-explanation-wrong="指纹和行为是两个不同的检测维度。一个检查你的"身份"，另一个检查你的"动作"。高级 Bot 检测会同时看两者。">
+            <h3 class="quiz-question">为什么光有指纹伪装还不够，还需要行为模拟？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>指纹伪装只能骗过 Canvas 检测，其他检测需要行为模拟</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>行为模拟是为了让页面加载更快</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>指纹是静态伪装（"你是谁"），行为是动态伪装（"你怎么动"）——高级检测会同时检查两者</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="没错！猴子补丁是在运行时替换函数——page.click() 的名字不变，但它的内部实现被替换成了"人类式点击"。你的代码不需要做任何修改。"
+               data-explanation-wrong="猴子补丁不需要你修改任何代码。它的原理是拦截底层的函数调用，自动添加人类行为。">
+            <h3 class="quiz-question">CloakBrowser 怎么让你的代码自动获得"人类行为"——而不需要你重写任何操作代码？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>用猴子补丁在运行时替换 Playwright 的鼠标/键盘方法</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>提供了一个全新的 API，需要把所有操作改为 humanized.click() 等方法</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>通过浏览器插件注入 JavaScript 来拦截鼠标事件</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

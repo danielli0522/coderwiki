@@ -1,0 +1,184 @@
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">信号聚合</h1>
+      <p class="module-subtitle">19 个分析师意见不一，Portfolio Manager 如何做出最终决定</p>
+    </header>
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">投票还是加权平均？</h2>
+        <p>想象一场投资委员会会议：Buffett 说买，Burry 说卖，Cathie Wood 说强买，基本面分析说中性……Portfolio Manager 的任务是综合这 19 个声音，做出一个决定。</p>
+        <p>ai-hedge-fund 的做法是把所有信号打包交给 <span class="term" data-definition="LLM（大语言模型）是 GPT、Claude、DeepSeek 这类 AI 的正式名称。它通过分析大量文本训练出来，能理解和生成人类语言，也能处理结构化推理任务。">LLM</span> 做最终综合——Portfolio Manager 本身也是一个 AI Agent！</p>
+
+        <div class="chat-window" id="chat-ahf-signals">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="buffett" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">WB</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Warren Buffett Agent</span>
+                <p>AAPL：强烈看多。品牌护城河深厚，iPhone 生态锁定效应极强，ROE 持续超过 100%，适合长期持有。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="burry" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">MB</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">Michael Burry Agent</span>
+                <p>AAPL：轻度看空。市盈率 30x 已过高，增长放缓迹象明显，大型科技股历史上在利率上升期间表现不佳。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="sentiment" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">ST</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">Sentiment Agent</span>
+                <p>AAPL：中性偏正面。最近新闻情绪分数 0.65（满分 1.0），Vision Pro 发布引发一定关注，但没有特别强烈的催化剂。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="risk" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">RM</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">Risk Manager</span>
+                <p>风险限制：AAPL 最大仓位 $50,000（因为与 MSFT 相关性 0.8，不能双向重仓科技股）。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="pm" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">PM</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">Portfolio Manager</span>
+                <p>综合判断：看多信号 11 / 中性 5 / 看空 3，多数派看多，风险可控。决策：BUY AAPL，数量 80 股（在 $50k 上限内）。</p>
+              </div>
+            </div>
+          </div>
+          <div class="chat-typing" id="chat-ahf-signals-typing" style="display:none">
+            <div class="chat-avatar" id="chat-ahf-signals-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>
+            </div>
+          </div>
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条</button>
+            <button class="btn chat-all-btn">全部播放</button>
+            <button class="btn chat-reset-btn">重播</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">AgentState：Agent 之间的公告板</h2>
+        <p>所有 Agent 通过 <span class="term" data-definition="AgentState 是 LangGraph 中存储所有 Agent 共享数据的对象，就像一块公告板。每个 Agent 读取它需要的输入，写入自己的输出。这种模式叫做共享状态模式。">AgentState</span> 传递信息。这个状态对象的结构展示了系统的数据模型：</p>
+        <div class="file-tree animate-in">
+          <div class="ft-folder open">
+            <span class="ft-name">AgentState</span>
+            <span class="ft-desc">所有 Agent 共享的状态对象</span>
+            <div class="ft-children">
+              <div class="ft-file"><span class="ft-name">messages[]</span><span class="ft-desc">LangChain 消息历史，让 LLM 知道对话上下文</span></div>
+              <div class="ft-file"><span class="ft-name">data.tickers[]</span><span class="ft-desc">要分析的股票代码列表</span></div>
+              <div class="ft-file"><span class="ft-name">data.portfolio</span><span class="ft-desc">当前持仓：{AAPL: 100股, cash: $50000}</span></div>
+              <div class="ft-file"><span class="ft-name">data.analyst_signals</span><span class="ft-desc">所有分析师的信号：{buffett: {AAPL: bullish, confidence: 0.9}}</span></div>
+              <div class="ft-file"><span class="ft-name">data.risk_analysis</span><span class="ft-desc">风险管理器的输出：{AAPL: {max_position: 50000, volatility: 0.18}}</span></div>
+              <div class="ft-file"><span class="ft-name">metadata.show_reasoning</span><span class="ft-desc">是否打印每个 Agent 的推理过程（调试用）</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">信号冲突：当分析师们意见完全相反</h2>
+        <p>真实的投资决策中，信号冲突是常态而非例外。当 Buffett 说强买、Burry 说强卖时，Portfolio Manager 不是简单地「投票计数」，而是进行加权推理：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment"># Portfolio Manager 的决策逻辑（简化版）</span></span>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">portfolio_decision</span>(signals, risk_analysis):</span>
+<span class="code-line">    bull_count = <span class="code-function">sum</span>(</span>
+<span class="code-line">        s.signal == <span class="code-string">"bullish"</span></span>
+<span class="code-line">        <span class="code-keyword">for</span> s <span class="code-keyword">in</span> signals</span>
+<span class="code-line">    )</span>
+<span class="code-line">    avg_confidence = <span class="code-function">mean</span>(</span>
+<span class="code-line">        s.confidence <span class="code-keyword">for</span> s <span class="code-keyword">in</span> signals</span>
+<span class="code-line">        <span class="code-keyword">if</span> s.signal == <span class="code-string">"bullish"</span></span>
+<span class="code-line">    )</span>
+<span class="code-line">    max_pos = risk_analysis.max_position</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">if</span> bull_count >= <span class="code-number">0.6</span> * <span class="code-function">len</span>(signals):</span>
+<span class="code-line">        qty = <span class="code-function">calc_quantity</span>(</span>
+<span class="code-line">            max_pos, avg_confidence</span>
+<span class="code-line">        )</span>
+<span class="code-line">        <span class="code-keyword">return</span> <span class="code-string">"BUY"</span>, qty</span>
+<span class="code-line">    <span class="code-keyword">elif</span> bull_count <= <span class="code-number">0.3</span> * <span class="code-function">len</span>(signals):</span>
+<span class="code-line">        <span class="code-keyword">return</span> <span class="code-string">"SELL"</span>, <span class="code-number">0</span></span>
+<span class="code-line">    <span class="code-keyword">else</span>:</span>
+<span class="code-line">        <span class="code-keyword">return</span> <span class="code-string">"HOLD"</span>, <span class="code-number">0</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">统计看多信号的数量</p>
+              <p class="tl"></p>
+              <p class="tl">计算看多信号的平均置信度</p>
+              <p class="tl">（置信度越高，信号越可靠）</p>
+              <p class="tl">从风险管理器获取最大仓位限制</p>
+              <p class="tl"></p>
+              <p class="tl">如果超过 60% 的分析师看多</p>
+              <p class="tl">根据置信度和仓位上限计算买入数量</p>
+              <p class="tl">决策：买入</p>
+              <p class="tl">如果不到 30% 看多</p>
+              <p class="tl">决策：卖出</p>
+              <p class="tl">介于 30%-60% 之间</p>
+              <p class="tl">决策：持有（观望）</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">风险管理是硬约束，不是建议</strong>
+            <p>注意代码里的 max_pos 变量——即使所有 19 个分析师都强烈看多，Portfolio Manager 也不能超过 Risk Manager 设定的仓位上限。这是系统的安全阀：理性分析很重要，但风险控制是不可逾越的红线。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">你是 Portfolio Manager</h2>
+        <div class="quiz-container" id="quiz-ahf-3">
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">场景</span>
+              <p>分析完 TSLA 后，信号如下：Cathie Wood Agent: 强烈看多、Fundamentals Agent: 看空（亏损）、Risk Manager: 最大仓位 $20,000（因高波动率）、Sentiment Agent: 看多（马斯克发推）。你有 $100,000 可用资金。</p>
+            </div>
+          </div>
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！信号有冲突时，风险管理器的仓位上限是硬约束，不能超过。在上限内买入少量表达信号，同时保留大量现金应对风险，是合理的决策。"
+               data-explanation-wrong="再想想——风险管理器设置的是硬上限。即使你很看好，也不能超过 $20,000。">
+            <h3 class="quiz-question">基于上述信号，最合理的操作是？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Cathie Wood 是增长投资大师，全仓买入 TSLA $100,000</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>在 $20,000 上限内买入少量 TSLA，保留大部分现金</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>基本面看空，不买</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-ahf-3')">提交答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-ahf-3')">再试一次</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

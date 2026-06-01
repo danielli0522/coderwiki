@@ -1,0 +1,244 @@
+<section class="module" id="module-5">
+  <div class="module-inner">
+    <h2>总结与练习</h2>
+    <p>恭喜你完成了 Codebuff 课程！让我们回顾一下所学内容，并通过实践练习巩固知识。</p>
+
+    <h3>关键要点</h3>
+    <div class="pattern-cards">
+      <div class="pattern-card">
+        <h4>多代理协作</h4>
+        <p>Codebuff 使用文件选择、规划、编辑、审查四个代理分工协作，每个代理专注单一职责，确保修改的准确性和安全性。</p>
+      </div>
+      <div class="pattern-card">
+        <h4>自然语言驱动</h4>
+        <p>通过自然语言描述需求，Codebuff 自动理解意图并转化为代码修改。从简单的单文件修改到复杂的跨文件重构都能处理。</p>
+      </div>
+      <div class="pattern-card">
+        <h4>可扩展架构</h4>
+        <p>通过自定义代理和 SDK，Codebuff 可以适应各种开发场景，从个人项目到企业级 CI/CD 集成。</p>
+      </div>
+      <div class="pattern-card">
+        <h4>开源生态</h4>
+        <p>Freebuff 免费版降低了使用门槛，SDK 为高级用户提供了完整的编程接口。</p>
+      </div>
+    </div>
+
+    <h3>知识图谱</h3>
+    <div class="arch-diagram">
+      <h4>Codebuff 核心知识体系</h4>
+      <div class="diagram-flow">
+        <div class="diagram-node">
+          <strong>基础层</strong><br>
+          <small>安装配置<br>基本指令<br>项目初始化</small>
+        </div>
+        <div class="diagram-arrow">→</div>
+        <div class="diagram-node highlight">
+          <strong>核心层</strong><br>
+          <small>四代理架构<br>自然语言处理<br>文件选择策略</small>
+        </div>
+        <div class="diagram-arrow">→</div>
+        <div class="diagram-node highlight">
+          <strong>应用层</strong><br>
+          <small>安全修复<br>代码重构<br>测试生成</small>
+        </div>
+        <div class="diagram-arrow">→</div>
+        <div class="diagram-node">
+          <strong>进阶层</strong><br>
+          <small>自定义代理<br>SDK 集成<br>CI/CD 集成</small>
+        </div>
+      </div>
+    </div>
+
+    <h3>练习项目</h3>
+    <p>尝试以下任务来巩固你的知识：</p>
+
+    <div class="callout callout-accent">
+      <p><strong>练习 1：入门级 — 漏洞修复</strong></p>
+    </div>
+    <ol>
+      <li>创建一个简单的 Express.js 项目</li>
+      <li>故意引入一个 XSS 漏洞</li>
+      <li>使用 Codebuff 修复这个漏洞</li>
+      <li>验证修复是否完整</li>
+    </ol>
+
+    <div class="code-translation">
+      <div class="code">
+        <pre><code># 练习 1 的操作步骤
+mkdir my-test-project && cd my-test-project
+npm init -y
+npm install express
+
+# 创建带有 XSS 漏洞的代码
+cat > app.js << 'EOF'
+app.get('/search', (req, res) => {
+  const results = searchDB(req.query.q);
+  res.send(`
+    <h1>Search Results</h1>
+    <p>You searched: ${req.query.q}</p>
+  `);
+});
+EOF
+
+# 使用 Codebuff 修复
+codebuff "Fix XSS vulnerability in search,
+  sanitize user input before rendering"</code></pre>
+      </div>
+      <div class="translation">
+        <p>这个练习帮助你理解 Codebuff 如何处理安全漏洞。先引入一个典型问题，然后用 Codebuff 修复，对比修复前后的代码。</p>
+      </div>
+    </div>
+
+    <div class="callout callout-accent">
+      <p><strong>练习 2：中级 — 功能开发</strong></p>
+    </div>
+    <ol>
+      <li>创建一个待办事项 API</li>
+      <li>使用 Codebuff 添加用户认证功能</li>
+      <li>使用 Codebuff 添加速率限制</li>
+      <li>使用 Codebuff 为所有功能编写测试</li>
+    </ol>
+
+    <div class="callout callout-accent">
+      <p><strong>练习 3：高级 — 自定义代理</strong></p>
+    </div>
+    <ol>
+      <li>创建一个自定义代码审查代理</li>
+      <li>定义审查规则和输出格式</li>
+      <li>在真实项目中测试自定义代理</li>
+      <li>使用 SDK 将 Codebuff 集成到你的工具链</li>
+    </ol>
+
+    <div class="code-translation">
+      <div class="code">
+        <pre><code># 练习 3：自定义审查代理
+# .agents/code-reviewer.md
+---
+name: Code Reviewer
+description: Reviews code for best practices
+triggers:
+  - "review code"
+  - "check code quality"
+---
+
+## Review Checklist
+1. Error handling completeness
+2. Input validation coverage
+3. Performance considerations
+4. Security best practices
+5. Code style consistency
+6. Test coverage assessment
+
+## Output Format
+Return a structured review with:
+- Critical issues (must fix)
+- Warnings (should fix)
+- Suggestions (nice to have)
+- Overall quality score (1-10)</code></pre>
+      </div>
+      <div class="translation">
+        <p>这个练习让你创建一个实用的代码审查代理。通过 Markdown 定义审查规则，Codebuff 会在触发时自动执行审查并返回结构化的结果。</p>
+      </div>
+    </div>
+
+    <h3>常见问题解答</h3>
+    <div class="callout">
+      <p><strong>Q: Codebuff 会修改 Git 未追踪的文件吗？</strong><br>A: 默认不会。Codebuff 尊重 .gitignore 规则，只修改已追踪的文件。你可以通过配置覆盖这个行为。</p>
+    </div>
+    <div class="callout">
+      <p><strong>Q: 如何撤销 Codebuff 的修改？</strong><br>A: Codebuff 的每次修改都可以通过 <code>git checkout .</code> 或 <code>git stash</code> 撤销。建议在使用前确保工作目录干净。</p>
+    </div>
+    <div class="callout">
+      <p><strong>Q: Codebuff 支持哪些编程语言？</strong><br>A: Codebuff 支持所有主流编程语言，包括 JavaScript/TypeScript、Python、Java、Go、Rust、C++ 等。</p>
+    </div>
+
+    <h3>延伸学习资源</h3>
+    <ul>
+      <li><strong>Codebuff 官方文档</strong>：https://docs.codebuff.com</li>
+      <li><strong>GitHub 仓库</strong>：https://github.com/codebuff/codebuff</li>
+      <li><strong>社区 Discord</strong>：加入 Codebuff 社区获取帮助</li>
+      <li><strong>示例项目</strong>：官方提供的多个示例项目展示各种用法</li>
+    </ul>
+
+    <div class="callout">
+      <p>不要害怕尝试！Codebuff 是开源的，你可以随时查看源代码来了解其工作原理。</p>
+    </div>
+
+    <section class="screen animate-in">
+      <h3>进阶练习：构建自定义代理生态系统</h3>
+      <p>掌握了 Codebuff 的基础和进阶功能后，你可以构建一套完整的自定义代理生态系统，覆盖项目开发的各个方面。</p>
+
+      <div class="code-translation">
+        <div class="code">
+          <pre><code># 完整的自定义代理生态系统
+.agents/
+├── code-reviewer.md       # 代码审查代理
+├── quality-guard.md       # 质量守护代理
+├── api-docs-generator.md  # API 文档生成
+├── db-migration-helper.md # 数据库迁移助手
+├── test-generator.md      # 测试生成代理
+└── tools/
+    ├── database-query.md  # 数据库查询工具
+    ├── http-client.md     # HTTP 请求工具
+    └── schema-validator.md # Schema 验证工具
+
+# 代理之间的协作关系
+code-reviewer → quality-guard → test-generator
+api-docs-generator ← db-migration-helper
+test-generator → quality-guard</code></pre>
+        </div>
+        <div class="translation">
+          <p>一个完整的代理生态系统包含多个专用代理和共享工具。代理之间通过 chain 配置形成工作流，工具则提供可复用的能力扩展。这种设计让每个代理保持单一职责，同时通过组合实现复杂功能。</p>
+        </div>
+      </div>
+
+      <div class="callout callout-accent">
+        <p><strong>练习 4：专家级 — 构建完整的代理生态</strong>：在一个真实项目中创建上述所有代理，配置代理间的链式调用，编写统一的工具定义，并用 SDK 创建一个管理面板来触发和监控代理执行。</p>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>Codebuff 未来发展与社区贡献</h3>
+      <p>Codebuff 作为一个活跃的开源项目，正在快速发展。了解其路线图和贡献方式，有助于你更好地规划使用策略。</p>
+
+      <div class="pattern-cards">
+        <div class="pattern-card">
+          <h4>多模型支持增强</h4>
+          <p>未来版本将支持更多 LLM 提供商，包括本地模型（Ollama）、开源模型（Llama 3）和国内模型（通义千问、GLM）。你可以为不同的代理选择最适合的模型。</p>
+        </div>
+        <div class="pattern-card">
+          <h4>IDE 深度集成</h4>
+          <p>除了 VS Code 扩展，未来将支持 JetBrains 全家桶、Neovim 和 Emacs。Codebuff 的修改将实时反映在编辑器中，支持 inline diff 和交互式确认。</p>
+        </div>
+        <div class="pattern-card">
+          <h4>团队协作功能</h4>
+          <p>计划中的团队功能包括：共享代理市场、统一配置管理、使用统计和成本分析、权限控制和审计日志。</p>
+        </div>
+      </div>
+
+      <div class="callout">
+        <p><strong>如何参与贡献</strong>：Codebuff 欢迎社区贡献。你可以通过提交自定义代理模板、改进文档、报告 Bug 或贡献代码来参与。GitHub 仓库有详细的贡献指南和 Good First Issue 标签。</p>
+      </div>
+    </section>
+
+    <div class="quiz">
+      <p><strong>最终测验：</strong>以下哪项是 Codebuff 的核心优势？</p>
+      <ul>
+        <li><button>A. 仅支持一种模型</button></li>
+        <li><button>B. 多代理协作</button></li>
+        <li><button>C. 需要手动编写代码</button></li>
+        <li><button>D. 仅支持 Python 项目</button></li>
+      </ul>
+    </div>
+
+    <div class="quiz">
+      <p><strong>综合测验：</strong>在使用 Codebuff SDK 时，如何安全地预览修改而不实际改变文件？</p>
+      <ul>
+        <li><button>A. 使用 dryRun: true 选项</button></li>
+        <li><button>B. 使用 readOnly 模式</button></li>
+        <li><button>C. SDK 不支持预览功能</button></li>
+        <li><button>D. 先备份整个项目再执行</button></li>
+      </ul>
+    </div>
+  </div>
+</section>

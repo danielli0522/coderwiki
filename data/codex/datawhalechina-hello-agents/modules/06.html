@@ -1,0 +1,200 @@
+
+<section class="module" id="module-6" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">06</span>
+      <h1 class="module-title">架构选型指南</h1>
+      <p class="module-subtitle">你是技术负责人，需要决定是否采用 Hello-Agents 的方案来构建智能体。这里给你一份决策参考。</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Problem + Philosophy -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">它解决什么问题？核心哲学是什么？</h2>
+        <p>Hello-Agents 面向的是<strong>从零构建 AI Native Agent</strong> 这个需求——不是用 Dify/Coze 拖拽搭建流程式 Agent，而是用代码亲手实现能自主推理和行动的 AI。</p>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">问题定位</code>
+            <span class="badge-desc">系统性、重实践的智能体构建教程极度匮乏，新手不知从何入手</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">核心哲学</code>
+            <span class="badge-desc">AI Native Agent（非流程驱动）+ 从代码层面理解原理 + 亲手构建而非调 API</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">教学路线</code>
+            <span class="badge-desc">16 章从 ELIZA 到赛博小镇，基础理论 → 经典范式 → 框架实战 → 综合项目</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">代码量</code>
+            <span class="badge-desc">覆盖 Python + Vue + Godot 三种技术栈，含 15+ 章配套完整可运行代码</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Comparison with alternatives -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">与替代方案的对比</h2>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">📊</div>
+          <div class="callout-content">
+            <p>一句话区分：Hello-Agents 教你<strong>用代码从零构建</strong>智能体；Dify/Coze 让你<strong>用拖拽配置</strong>智能体；LangChain 提供<strong>现成的框架库</strong>。</p>
+          </div>
+        </div>
+
+        <table style="width:100%; border-collapse:collapse; margin: var(--space-6) 0; font-size: var(--text-sm); box-shadow: var(--shadow-sm); border-radius: var(--radius-md); overflow: hidden;">
+          <thead>
+            <tr style="background: var(--color-bg-warm)">
+              <th style="padding: var(--space-3) var(--space-4); text-align:left; font-family: var(--font-mono); font-size: var(--text-xs); text-transform:uppercase; letter-spacing:0.05em; color: var(--color-text-muted);">维度</th>
+              <th style="padding: var(--space-3) var(--space-4); text-align:left; font-family: var(--font-mono); font-size: var(--text-xs); text-transform:uppercase; letter-spacing:0.05em; color: var(--color-text-muted);">Hello-Agents</th>
+              <th style="padding: var(--space-3) var(--space-4); text-align:left; font-family: var(--font-mono); font-size: var(--text-xs); text-transform:uppercase; letter-spacing:0.05em; color: var(--color-text-muted);">LangChain/LangGraph</th>
+              <th style="padding: var(--space-3) var(--space-4); text-align:left; font-family: var(--font-mono); font-size: var(--text-xs); text-transform:uppercase; letter-spacing:0.05em; color: var(--color-text-muted);">Dify/Coze/n8n</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid var(--color-border-light)">
+              <td style="padding: var(--space-3) var(--space-4); font-weight:600;">学习方式</td>
+              <td style="padding: var(--space-3) var(--space-4);">
+                <ul style="margin:0;padding-left:var(--space-4)"><li>逐章动手写代码</li><li>从原理到实现全链路</li></ul>
+              </td>
+              <td style="padding: var(--space-3) var(--space-4);">
+                <ul style="margin:0;padding-left:var(--space-4)"><li>读文档 + 看示例</li><li>理解抽象层设计</li></ul>
+              </td>
+              <td style="padding: var(--space-3) var(--space-4);">
+                <ul style="margin:0;padding-left:var(--space-4)"><li>拖拽式可视化配置</li><li>无需写代码</li></ul>
+              </td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--color-border-light); background: var(--color-surface)">
+              <td style="padding: var(--space-3) var(--space-4); font-weight:600;">控制粒度</td>
+              <td style="padding: var(--space-3) var(--space-4);">
+                <ul style="margin:0;padding-left:var(--space-4)"><li>完全自定义</li><li>可修改每行代码</li></ul>
+              </td>
+              <td style="padding: var(--space-3) var(--space-4);">
+                <ul style="margin:0;padding-left:var(--space-4)"><li>框架约束内自定义</li><li>扩展点有限</li></ul>
+              </td>
+              <td style="padding: var(--space-3) var(--space-4);">
+                <ul style="margin:0;padding-left:var(--space-4)"><li>平台能力范围内</li><li>受限于节点类型</li></ul>
+              </td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--color-border-light)">
+              <td style="padding: var(--space-3) var(--space-4); font-weight:600;">上手难度</td>
+              <td style="padding: var(--space-3) var(--space-4);">
+                <ul style="margin:0;padding-left:var(--space-4)"><li>中等，需要 Python 基础</li><li>有保姆级教程</li></ul>
+              </td>
+              <td style="padding: var(--space-3) var(--space-4);">
+                <ul style="margin:0;padding-left:var(--space-4)"><li>较高，需理解框架概念</li><li>文档丰富但分散</li></ul>
+              </td>
+              <td style="padding: var(--space-3) var(--space-4);">
+                <ul style="margin:0;padding-left:var(--space-4)"><li>低，适合非技术人员</li><li>快速出原型</li></ul>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: var(--space-3) var(--space-4); font-weight:600;">生产就绪</td>
+              <td style="padding: var(--space-3) var(--space-4);">
+                <ul style="margin:0;padding-left:var(--space-4)"><li>教学代码，需改造</li><li>适合学习和原型</li></ul>
+              </td>
+              <td style="padding: var(--space-3) var(--space-4);">
+                <ul style="margin:0;padding-left:var(--space-4)"><li>有生产部署案例</li><li>社区生态成熟</li></ul>
+              </td>
+              <td style="padding: var(--space-3) var(--space-4);">
+                <ul style="margin:0;padding-left:var(--space-4)"><li>平台托管运维</li><li>受限于平台稳定性</li></ul>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Screen 3: Suitable vs Not-suitable -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">适合 vs 不适合的场景</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); margin: var(--space-6) 0;">
+          <div style="background: var(--color-success-light); border-radius: var(--radius-md); padding: var(--space-6); border: 1px solid var(--color-success);">
+            <h4 style="color: var(--color-success); margin-bottom: var(--space-4); font-family: var(--font-display);">✅ 适合</h4>
+            <ul style="padding-left: var(--space-5); color: var(--color-text-secondary); line-height: 1.8;">
+              <li>想从零理解 Agent 原理的学习者</li>
+              <li>需要高度定制化的 Agent 场景</li>
+              <li>有 Python 基础的技术人员</li>
+              <li>研究性项目或学术实验</li>
+              <li>想成为 AI 工程师的转型者</li>
+            </ul>
+          </div>
+          <div style="background: var(--color-error-light); border-radius: var(--radius-md); padding: var(--space-6); border: 1px solid var(--color-error);">
+            <h4 style="color: var(--color-error); margin-bottom: var(--space-4); font-family: var(--font-display);">❌ 不适合</h4>
+            <ul style="padding-left: var(--space-5); color: var(--color-text-secondary); line-height: 1.8;">
+              <li>没有任何编程基础的人</li>
+              <li>需要 5 分钟快速搭建 Agent 的场景</li>
+              <li>企业级高可用生产环境（直接用框架）</li>
+              <li>只想要流程编排（用 Dify/Coze 更好）</li>
+              <li>需要大规模并发处理</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Hard limits from source code -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">从源码中提取的硬限制</h2>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">max_steps = 5</code>
+            <span class="badge-desc">ReAct Agent 默认最大循环步数。防止无限循环，但复杂任务可能不够用（可在初始化时修改）</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">max_tool_iterations = 3</code>
+            <span class="badge-desc">SimpleAgent 的工具调用最大轮次。每次调用 LLM → 检查工具调用 → 执行 → 喂回结果，最多 3 轮</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">temperature = 0</code>
+            <span class="badge-desc">默认温度为 0（最确定性的输出）。Agent 需要可预测的行为，不适合高创造性场景</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">TOOL_CALL 正则</code>
+            <span class="badge-desc">工具调用解析依赖正则匹配，格式不严格就会解析失败。这是纯文本解析方案的固有局限</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Costs + Conclusion -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">成本与结论</h2>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>学习成本</strong>
+              <p>约 40-60 小时通读全部 16 章 + 完成代码实践。需要 Python 基础</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>API 成本</strong>
+              <p>实际运行代码需要 LLM API 费用。按 OpenAI 定价，一次完整 ReAct 循环约消耗 1000-3000 tokens</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>时间成本</strong>
+              <p>从零到能构建自己的 Agent 框架，认真学完整教程约需 2-3 周</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">🎯</div>
+          <div class="callout-content">
+            <strong class="callout-title">最终判定</strong>
+            <p>Hello-Agents 是目前中文社区最全面的 AI Native Agent 教程。它不适合直接上生产，但如果你想<strong>真正理解 Agent 的内部工作机制</strong>，或者想<strong>亲手构建一个自己的框架</strong>，它是最系统的起点。MIT 协议开源，完全免费。</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

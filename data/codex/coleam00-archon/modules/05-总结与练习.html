@@ -1,0 +1,220 @@
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">精妙的设计模式与故障排查</h1>
+      <p class="module-subtitle">Archon 中值得学习的设计技巧，以及当 Agent 出错时如何排查</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Design patterns intro -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Archon 中的巧妙设计</h2>
+        <p>好的软件就像精心设计的机器——每个零件都有它的道理。Archon 中有几个特别巧妙的设计模式值得学习。理解这些模式不仅能帮你更好地使用 Archon，还能让你在指挥 AI 写代码时提出更专业的需求。</p>
+      </section>
+
+      <!-- Screen 2: Iterative refinement -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">模式一：迭代优化循环</h2>
+        <p>Archon 不满足于一次就写出完美代码。它采用「写代码 → 审查 → 修改 → 再审查」的循环模式，就像写作文时的多轮修改——初稿往往不够好，修改几遍后质量才会上去。</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">should_continue</span>(state):</span>
+<span class="code-line">    <span class="code-keyword">if</span> state[<span class="code-string">"iterations"</span>] >= MAX_ITER:</span>
+<span class="code-line">        <span class="code-keyword">return</span> <span class="code-string">"finish"</span></span>
+<span class="code-line">    <span class="code-keyword">if</span> <span class="code-string">"APPROVED"</span> <span class="code-keyword">in</span> state[<span class="code-string">"review"</span>]:</span>
+<span class="code-line">        <span class="code-keyword">return</span> <span class="code-string">"finish"</span></span>
+<span class="code-line">    <span class="code-keyword">return</span> <span class="code-string">"continue"</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">定义一个函数来决定是否继续优化。</p>
+              <p class="tl">如果迭代次数达到上限...</p>
+              <p class="tl">就结束循环，返回最终结果。</p>
+              <p class="tl">如果审查者认为代码通过了...</p>
+              <p class="tl">也结束循环。</p>
+              <p class="tl">否则，继续返回编码者优化代码。</p>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">通用智慧：迭代优于完美</strong>
+            <p>这个模式在软件工程中极其常见：<span class="term" data-definition="迭代（Iteration）是指重复执行某个过程，每次都在上一次的结果基础上改进。就像雕塑家一点点雕刻——每一刀都让作品更接近完美。">迭代</span>改进比一次做到完美更现实。不管是写代码、写文章还是做设计，「先出初版，再逐步优化」永远是更高效的策略。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Error handling -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">模式二：防御性编程</h2>
+        <p>Archon 的代码中处处体现了「防御性编程」的思想——假设任何可能出错的地方都会出错，提前准备好应对措施。就像一个谨慎的司机，不仅系好安全带，还买了保险、备了备胎。</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">try</span>:</span>
+<span class="code-line">    response = llm.<span class="code-function">invoke</span>(prompt)</span>
+<span class="code-line"><span class="code-keyword">except</span> RateLimitError:</span>
+<span class="code-line">    time.<span class="code-function">sleep</span>(<span class="code-number">60</span>)</span>
+<span class="code-line">    response = llm.<span class="code-function">invoke</span>(prompt)</span>
+<span class="code-line"><span class="code-keyword">except</span> Exception <span class="code-keyword">as</span> e:</span>
+<span class="code-line">    <span class="code-keyword">return</span> {<span class="code-string">"error"</span>: <span class="code-function">str</span>(e)}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">尝试调用 AI 模型。</p>
+              <p class="tl">发送提示词并等待回复。</p>
+              <p class="tl">如果遇到速率限制（调用太频繁）...</p>
+              <p class="tl">等待 60 秒后重试。</p>
+              <p class="tl">如果遇到其他类型的错误...</p>
+              <p class="tl">返回错误信息，而不是让程序崩溃。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Debugging strategies -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">当 Agent 出错了怎么办？</h2>
+        <p>不管代码写得多好，问题总会出现。学会排查问题是使用 AI 工具最重要的能力之一。以下是常见的出错场景和排查方法：</p>
+        <div class="pattern-cards stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-error)">
+            <div class="pattern-icon" style="background: var(--color-error-light)">🔴</div>
+            <h4 class="pattern-title">Agent 无限循环</h4>
+            <p class="pattern-desc"><strong>症状：</strong>Agent 一直在重复同样的操作，不停下来。<strong>排查：</strong>检查 should_continue 函数的退出条件是否正确。可能 MAX_ITER 设得太高，或者审查者永远不会返回 APPROVED。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-info)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">🔵</div>
+            <h4 class="pattern-title">生成代码有语法错误</h4>
+            <p class="pattern-desc"><strong>症状：</strong>生成的代码无法运行。<strong>排查：</strong>检查审查者节点是否正常工作，或者 prompt 是否足够清晰。有时候给 LLM 提供一个代码示例就能大幅提高生成质量。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-success)">
+            <div class="pattern-icon" style="background: var(--color-success-light)">🟢</div>
+            <h4 class="pattern-title">API 调用超时</h4>
+            <p class="pattern-desc"><strong>症状：</strong>Agent 运行到某一步就卡住了。<strong>排查：</strong>查看网络连接和 API 密钥。增加重试逻辑（如上面的代码示例）可以解决大部分问题。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Spot the Bug Challenge -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">找 Bug 挑战</h2>
+        <p>下面这段代码有一个常见的 Bug，看看你能不能找到它！点击你认为有问题的行。</p>
+        <div class="bug-challenge">
+          <div class="bug-code">
+            <div class="bug-line" data-line="1" onclick="checkBugLine(this, false)">
+              <span class="line-num">1</span>
+              <code><span class="code-keyword">def</span> <span class="code-function">should_continue</span>(state):</code>
+            </div>
+            <div class="bug-line" data-line="2" onclick="checkBugLine(this, false)">
+              <span class="line-num">2</span>
+              <code>    <span class="code-keyword">if</span> state[<span class="code-string">"iterations"</span>] >= <span class="code-number">10</span>:</code>
+            </div>
+            <div class="bug-line bug-target" data-line="3" onclick="checkBugLine(this, true)">
+              <span class="line-num">3</span>
+              <code>        <span class="code-keyword">return</span> <span class="code-string">"continue"</span></code>
+            </div>
+            <div class="bug-line" data-line="4" onclick="checkBugLine(this, false)">
+              <span class="line-num">4</span>
+              <code>    <span class="code-keyword">if</span> <span class="code-string">"APPROVED"</span> <span class="code-keyword">in</span> state[<span class="code-string">"review"</span>]:</code>
+            </div>
+            <div class="bug-line" data-line="5" onclick="checkBugLine(this, false)">
+              <span class="line-num">5</span>
+              <code>        <span class="code-keyword">return</span> <span class="code-string">"finish"</span></code>
+            </div>
+            <div class="bug-line" data-line="6" onclick="checkBugLine(this, false)">
+              <span class="line-num">6</span>
+              <code>    <span class="code-keyword">return</span> <span class="code-string">"continue"</span></code>
+            </div>
+          </div>
+          <div class="bug-feedback" id="bug-feedback"></div>
+        </div>
+      </section>
+
+      <!-- Screen 6: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">设计模式测验</h2>
+        <div class="quiz-container" id="quiz-module5">
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="正确！迭代优化循环的核心思想是「先出初版，逐步改进」。这比期望一次就做到完美更现实、更高效。"
+               data-explanation-wrong="再想一想。Archon 的迭代优化模式体现了一个什么哲学？不是速度、不是成本，而是对质量的态度。">
+            <h3 class="quiz-question">Archon 的迭代优化模式体现了什么核心思想？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>先出初版，逐步改进</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>一次做到完美再交付</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>尽量减少迭代次数以节省成本</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！首先检查 should_continue 函数的退出条件——这决定了循环是否会终止。如果退出条件有 Bug，Agent 就会无限循环。"
+               data-explanation-wrong="排查问题时，应该从控制循环的函数开始。这个函数决定了 Agent 什么时候停下来——如果它有问题，整个流程都会出错。">
+            <h3 class="quiz-question">当 Agent 出现无限循环问题时，你首先应该检查什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>网络连接是否正常</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>should_continue 函数的退出条件</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>API 密钥是否正确</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="完全正确！防御性编程的核心就是「假设一切可能出错的地方都会出错」，提前准备好应对措施。这不是悲观，而是负责。"
+               data-explanation-wrong="防御性编程的本质是什么？不是写更多代码、不是处理更多数据，而是一种思维态度——对错误的预见和准备。">
+            <h3 class="quiz-question">「防御性编程」的核心思想是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>写更多的代码来覆盖所有场景</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>让程序运行得更快</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>假设任何可能出错的地方都会出错，提前准备</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

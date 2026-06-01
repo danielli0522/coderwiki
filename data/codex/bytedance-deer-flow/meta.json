@@ -1,0 +1,13 @@
+{
+  "title": "DeerFlow 2.0 源码解读：从用户输入到 Agent 执行的全链路",
+  "moduleCount": 5,
+  "repoUrl": "https://github.com/bytedance/deer-flow",
+  "repoName": "bytedance/deer-flow",
+  "modules": [
+    "DeerFlow 是什么",
+    "认识核心角色",
+    "消息在系统中如何流动",
+    "智能扩展机制",
+    "架构选型总览"
+  ]
+}

@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browser-Use 源码解析：AI 如何操控浏览器</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    :root {
+      --color-accent:       #E06B56;
+      --color-accent-hover: #C85A47;
+      --color-accent-light: #FDECEA;
+      --color-accent-muted: #E89585;
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">Browser-Use 源码解析</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <button class="nav-dot" data-target="module-1" data-tooltip="AI 怎么操控浏览器？" role="tab" aria-label="模块 1：AI 怎么操控浏览器？"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="认识核心角色" role="tab" aria-label="模块 2：认识核心角色"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="AI 的眼睛和手" role="tab" aria-label="模块 3：AI 的眼睛和手"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="多模型大脑" role="tab" aria-label="模块 4：多模型大脑"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="从看懂到会改" role="tab" aria-label="模块 5：从看懂到会改"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh -->
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="hero-title module-title">AI 怎么操控浏览器？</h1>
+      <p class="module-subtitle">从一个最简示例出发，看懂 browser-use 如何让 AI 像人一样"看见"网页、"点击"按钮。</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">5 行代码，AI 就能帮你上网干活</h2>
+        <p>想象一下：你跟 AI 说"去 GitHub 查一下 browser-use 这个仓库有多少星"，AI 就真的打开浏览器、搜索、找到结果、告诉你答案。这就是 <span class="term" data-definition="browser-use 是一个开源 Python 库，让大语言模型能够像真人一样操控浏览器——点击、输入、滚动、截图，全自动。">browser-use</span> 做的事情。</p>
+        <p>最简的用法只需要这几行：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">from</span> browser_use <span class="code-keyword">import</span> Agent, ChatBrowserUse</span>
+<span class="code-line"></span>
+<span class="code-line">agent = Agent(</span>
+<span class="code-line">    task=<span class="code-string">'Find the number of stars of the following repos: browser-use, playwright, stagehand, react, nextjs'</span>,</span>
+<span class="code-line">    llm=ChatBrowserUse(model=<span class="code-string">'bu-2-0'</span>),</span>
+<span class="code-line">)</span>
+<span class="code-line">agent.run_sync()</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">引入两个主角：Agent 是"干活的机器人"，ChatBrowserUse 是它的大脑（AI 模型）。</p>
+              <p class="tl">创建一个 Agent，告诉它任务是什么——这里是要查 5 个 GitHub 仓库的星数。</p>
+              <p class="tl">给它装上 browser-use 官方微调过的模型，专门擅长操控浏览器。</p>
+              <p class="tl">一行启动！run_sync() 会阻塞运行直到任务完成。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键认知</strong>
+            <p>browser-use 的设计哲学是"一行代码开跑"。你不需要手动管理浏览器进程、写 DOM 选择器、处理弹窗——Agent 把这些全部包了。你的工作就是：定义任务 + 选模型。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">完整一点的写法：手动配浏览器</h2>
+        <p>上面的例子用了"默认一切"的写法。如果你想要更多控制——比如用自己的模型、指定浏览器配置——可以这样做：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">from</span> browser_use <span class="code-keyword">import</span> Agent, Browser, ChatBrowserUse</span>
+<span class="code-line"><span class="code-keyword">import</span> asyncio</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-keyword">async def</span> <span class="code-function">main</span>():</span>
+<span class="code-line">    browser = Browser()</span>
+<span class="code-line"></span>
+<span class="code-line">    agent = Agent(</span>
+<span class="code-line">        task=<span class="code-string">"Find the number of stars of the browser-use repo"</span>,</span>
+<span class="code-line">        llm=ChatBrowserUse(),</span>
+<span class="code-line">        browser=browser,</span>
+<span class="code-line">    )</span>
+<span class="code-line">    <span class="code-keyword">await</span> agent.run()</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-keyword">if</span> __name__ == <span class="code-string">"__main__"</span>:</span>
+<span class="code-line">    asyncio.run(main())</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">引入 Agent（机器人）、Browser（浏览器实例）、ChatBrowserUse（AI 大脑）。</p>
+              <p class="tl">browser-use 是异步架构，所以主函数要用 async def。</p>
+              <p class="tl">Browser() 创建一个浏览器实例，可以传各种配置参数。</p>
+              <p class="tl">创建 Agent，把任务、大脑、浏览器三者绑定在一起。</p>
+              <p class="tl">agent.run() 启动异步循环，Agent 开始一步步执行任务。</p>
+              <p class="tl">asyncio.run() 是 Python 标准的"启动异步程序"写法。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">它到底在做什么？一眼看懂循环</h2>
+        <p>Agent.run() 启动后，内部是一个"观察→思考→行动"的循环，每一步都是：</p>
+
+        <div class="flow-animation" data-steps='[{"highlight":"flow-actor-1","label":"1. Agent 截取当前网页截图 + 解析 DOM 树，获得浏览器状态快照"},{"highlight":"flow-actor-1","label":"2. 把截图和 DOM 信息打包成提示词，发给 LLM（AI 大脑）","packet":true,"from":"actor-1","to":"actor-2"},{"highlight":"flow-actor-2","label":"3. LLM 返回结构化 JSON：思考 + 下一步动作（点击/输入/滚动...）","packet":true,"from":"actor-2","to":"actor-1"},{"highlight":"flow-actor-1","label":"4. Agent 把 LLM 的动作翻译成真实浏览器操作，执行"},{"highlight":"flow-actor-3","label":"5. 判断任务是否完成，没完成就回到第 1 步继续","packet":true,"from":"actor-1","to":"actor-3"}]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">🤖</div>
+              <span>Agent</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">🧠</div>
+              <span>LLM</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">🔄</div>
+              <span>循环判断</span>
+            </div>
+          </div>
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击"下一步"开始演示</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+
+        <p>这个循环在源码中就是 <span class="term" data-definition="run() 方法是 Agent 的主循环，它不断调用 step() 方法直到任务完成或达到最大步数。">Agent.run()</span> 里的 <code>while self.state.n_steps &lt;= max_steps</code> 循环，每次循环调用一次 <code>step()</code>。</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">测测你理解了多少</h2>
+
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block" data-correct="option-b" data-explanation-right="完全正确！Agent 内部是 截图+DOM → 发给LLM → LLM返回动作 → 执行 → 判断是否完成 的循环。" data-explanation-wrong="想想 Agent.run() 里面那个 while 循环每次都在做什么——它不是一次性生成所有动作，而是每一步都重新观察再决策。">
+            <h3 class="quiz-question">browser-use 的 Agent 执行任务时，内部是什么模式？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div><span>一次性生成所有步骤的代码，然后批量执行</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div><span>观察→思考→行动的循环，每一步重新感知和决策</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div><span>先把整个网页 HTML 下载下来，离线分析后执行</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="hero-title module-title">认识核心角色</h1>
+      <p class="module-subtitle">Agent、Browser、DOM Service、Tools 四大角色各司其职——搞清谁干什么，源码就通了。</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">四个角色，一张图看明白</h2>
+        <p>browser-use 的架构像一家小公司：老板下达任务，四个人各干各的活。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🤖</div>
+            <h4 class="pattern-title">Agent</h4>
+            <p class="pattern-desc">总指挥。接收用户任务，循环"观察→思考→行动"，协调其他三个角色完成目标。源码在 <code>agent/service.py</code>。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🌐</div>
+            <h4 class="pattern-title">Browser / BrowserSession</h4>
+            <p class="pattern-desc">浏览器管家。通过 <span class="term" data-definition="CDP 全称 Chrome DevTools Protocol，是 Chrome/Chromium 浏览器的调试协议。browser-use 通过它远程控制浏览器——打开页面、点击元素、输入文字。">CDP 协议</span> 控制真实的 Chromium 浏览器：开页面、截图、管理 Tab。源码在 <code>browser/session.py</code>。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">👁️</div>
+            <h4 class="pattern-title">DomService</h4>
+            <p class="pattern-desc">AI 的眼睛。把网页 DOM 树解析成 LLM 能理解的文本格式——哪些元素可以点击、输入框在哪、按钮叫什么。源码在 <code>dom/service.py</code>。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🔧</div>
+            <h4 class="pattern-title">Tools</h4>
+            <p class="pattern-desc">AI 的手。把 LLM 输出的"动作意图"翻译成真实浏览器操作——点击、输入、滚动、导航。源码在 <code>tools/service.py</code>。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">角色对话：一次完整执行长什么样？</h2>
+        <p>下面模拟一次"查 GitHub 星数"任务中四个角色之间的对话，帮你感受数据在它们之间怎么流动的：</p>
+
+        <div class="chat-window" id="chat-module2">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="agent" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🤖</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Agent</span>
+                <p>用户让我查 browser-use 仓库的星数。我先看看当前浏览器状态。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="browser" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">🌐</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">BrowserSession</span>
+                <p>好的，我截了个图，当前是新标签页。页面 URL 是 about:blank。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="dom" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">👁️</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">DomService</span>
+                <p>DOM 解析完毕。当前页面是空白页，没有任何可交互元素。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="agent" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🤖</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Agent</span>
+                <p>好的，我把截图和 DOM 信息打包发给 LLM，让它决定下一步干什么。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="llm" style="display:none">
+              <div class="chat-avatar" style="background: #7C3AED">🧠</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: #7C3AED">LLM</span>
+                <p>当前是空白页，需要先导航到 GitHub 搜索页。我决定执行 navigate 动作，URL 设为 github.com/browser-use/browser-use。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="5" data-sender="tools" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">🔧</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">Tools</span>
+                <p>收到 navigate 动作！我用 CDP 协议让浏览器打开这个 URL。页面加载中...</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="6" data-sender="agent" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🤖</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Agent</span>
+                <p>导航完成，进入下一轮循环——重新截图、解析 DOM、发给 LLM，直到找到星数为止。</p>
+              </div>
+            </div>
+          </div>
+          <div class="chat-typing" id="chat-module2-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module2-typing-avatar">?</div>
+            <div class="chat-typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>
+          </div>
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条</button>
+            <button class="btn chat-all-btn">播放全部</button>
+            <button class="btn chat-reset-btn">重放</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Agent 的 __init__：像搭积木一样组装</h2>
+        <p>Agent 的构造函数接收大量参数，但核心就是"把四个角色绑在一起"。看看源码中最关键的几行：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">Agent</span>(Generic[Context, AgentStructuredOutput]):</span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(</span>
+<span class="code-line">        self,</span>
+<span class="code-line">        task: str,</span>
+<span class="code-line">        llm: BaseChatModel | <span class="code-keyword">None</span> = <span class="code-keyword">None</span>,</span>
+<span class="code-line">        browser_session: BrowserSession | <span class="code-keyword">None</span> = <span class="code-keyword">None</span>,</span>
+<span class="code-line">        browser: Browser | <span class="code-keyword">None</span> = <span class="code-keyword">None</span>,</span>
+<span class="code-line">        tools: Tools[Context] | <span class="code-keyword">None</span> = <span class="code-keyword">None</span>,</span>
+<span class="code-line">        controller: Tools[Context] | <span class="code-keyword">None</span> = <span class="code-keyword">None</span>,</span>
+<span class="code-line">        ...</span>
+<span class="code-line">    ):</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">Agent 是一个泛型类，支持自定义上下文和结构化输出类型。</p>
+              <p class="tl">task 是必填参数——你要 AI 干什么。</p>
+              <p class="tl">llm 是 AI 大脑，不传就用默认的 ChatBrowserUse。</p>
+              <p class="tl">browser_session 和 browser 是同一个东西（别名），传一个就行。</p>
+              <p class="tl">tools 和 controller 也是别名——是"手"，不传就用默认的 Tools()。</p>
+              <p class="tl">省略号代表还有几十个可选参数，比如超时、截图、敏感数据等。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">📌</div>
+          <div class="callout-content">
+            <strong class="callout-title">设计模式</strong>
+            <p>browser-use 大量使用"别名参数"模式：<code>browser</code> 和 <code>browser_session</code> 是同一个东西，<code>tools</code> 和 <code>controller</code> 也是。这让 API 对新手更友好——不管你叫哪个名字都能用。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">测测你理解了多少</h2>
+
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block" data-correct="option-c" data-explanation-right="没错！DomService 负责解析网页结构并生成 LLM 可读的文本描述——这就是 AI 能'看见'网页的关键。" data-explanation-wrong="想一想：LLM 是怎么知道页面上有哪些按钮、输入框的？是有人帮它把 HTML 翻译成了它能理解的文本格式。">
+            <h3 class="quiz-question">browser-use 中，哪个角色负责把网页 HTML 翻译成 LLM 能理解的文本？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div><span>Agent —— 它是总指挥，什么都管</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div><span>BrowserSession —— 它直接跟浏览器通信</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div><span>DomService —— 专门解析 DOM 树并生成文本描述</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="hero-title module-title">AI 的眼睛和手</h1>
+      <p class="module-subtitle">DomService 怎么把网页变成 AI 能读的文本？Tools 怎么把 AI 的想法变成真实操作？</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">DomService：给 AI 一双"读网页"的眼睛</h2>
+        <p>LLM 不能直接看 HTML——它需要一段结构化的文本描述，告诉它"页面上有什么、在哪里、能干什么"。DomService 就是干这个的：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">DomService</span>:</span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(</span>
+<span class="code-line">        self,</span>
+<span class="code-line">        browser_session: <span class="code-string">'BrowserSession'</span>,</span>
+<span class="code-line">        cross_origin_iframes: bool = <span class="code-keyword">False</span>,</span>
+<span class="code-line">        paint_order_filtering: bool = <span class="code-keyword">True</span>,</span>
+<span class="code-line">        max_iframes: int = <span class="code-keyword">100</span>,</span>
+<span class="code-line">        max_iframe_depth: int = <span class="code-keyword">5</span>,</span>
+<span class="code-line">        viewport_threshold: int | <span class="code-keyword">None</span> = <span class="code-keyword">1000</span>,</span>
+<span class="code-line">    ):</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">DomService 绑定一个浏览器会话——它要解析哪个页面的 DOM，就看这个会话。</p>
+              <p class="tl">cross_origin_iframes：要不要解析跨域的 iframe（嵌套网页）。默认不解析，安全。</p>
+              <p class="tl">paint_order_filtering：按绘制顺序过滤元素——被遮挡的元素不传给 AI，减少噪音。</p>
+              <p class="tl">max_iframes / max_iframe_depth：防止嵌套太多 iframe 导致性能爆炸。</p>
+              <p class="tl">viewport_threshold：视口阈值——超出视口太远的元素会被标记为"不可见"。</p>
+            </div>
+          </div>
+        </div>
+
+        <p>DomService 最终调用 <code>DOMTreeSerializer</code> 把 DOM 树变成一段文本。这段文本长这样：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line">&lt;<span class="code-keyword">page_stats</span>&gt;</span>
+<span class="code-line">12 links, 5 interactive, 1 iframes, 48 total elements</span>
+<span class="code-line">&lt;/<span class="code-keyword">page_stats</span>&gt;</span>
+<span class="code-line"></span>
+<span class="code-line">[Start of page]</span>
+<span class="code-line">&lt;<span class="code-keyword">nav</span>&gt;</span>
+<span class="code-line">  [&lt;<span class="code-keyword">a</span> href=<span class="code-string">"/"</span>&gt;] Home</span>
+<span class="code-line">  [&lt;<span class="code-keyword">input</span> type=<span class="code-string">"search"</span> placeholder=<span class="code-string">"Search..."*</span>&gt;]</span>
+<span class="code-line">&lt;/<span class="code-keyword">nav</span>&gt;</span>
+<span class="code-line">[End of page]</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">先是页面统计：有多少链接、多少可交互元素、多少 iframe——给 AI 一个全局概览。</p>
+              <p class="tl">然后是页面的结构化表示，用类似 HTML 的格式，但只保留 AI 需要关心的元素。</p>
+              <p class="tl">方括号标记可交互元素（链接、输入框、按钮），AI 看到这些就知道"这里可以点击/输入"。</p>
+              <p class="tl">[Start/End of page] 告诉 AI 当前视口是否覆盖了整个页面——没覆盖就要滚动。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Tools：把 AI 的想法变成真实操作</h2>
+        <p>LLM 返回的不是 Python 代码，而是结构化的 JSON，像这样：<code>{"click": {"index": 5}}</code>。Tools 类负责把这个 JSON 翻译成真实的浏览器操作。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">ClickElementAction</span>(BaseModel):</span>
+<span class="code-line">    index: int | <span class="code-keyword">None</span> = Field(</span>
+<span class="code-line">        default=<span class="code-keyword">None</span>, ge=<span class="code-keyword">1</span>,</span>
+<span class="code-line">        description=<span class="code-string">'Element index from browser_state'</span></span>
+<span class="code-line">    )</span>
+<span class="code-line">    coordinate_x: int | <span class="code-keyword">None</span> = Field(</span>
+<span class="code-line">        default=<span class="code-keyword">None</span>,</span>
+<span class="code-line">        description=<span class="code-string">'Horizontal coordinate relative to viewport left edge'</span></span>
+<span class="code-line">    )</span>
+<span class="code-line">    coordinate_y: int | <span class="code-keyword">None</span> = Field(</span>
+<span class="code-line">        default=<span class="code-keyword">None</span>,</span>
+<span class="code-line">        description=<span class="code-string">'Vertical coordinate relative to viewport top edge'</span></span>
+<span class="code-line">    )</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">ClickElementAction 是一个 Pydantic 模型——定义了"点击"动作的参数格式。</p>
+              <p class="tl">index：通过元素编号点击。DomService 给每个可交互元素编了号，AI 引用编号就行。</p>
+              <p class="tl">coordinate_x / y：通过坐标点击。有些模型（如 Claude Sonnet 4）支持坐标点击，更精准。</p>
+              <p class="tl">两种方式二选一——有 index 用 index，没有就用坐标。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">数据流动：从网页到 AI 再到手</h2>
+        <p>一次完整的"点击"操作，数据经历了这些环节：</p>
+
+        <div class="flow-animation" data-steps='[{"highlight":"flow-actor-1","label":"1. BrowserSession 通过 CDP 获取页面 DOM 和截图"},{"highlight":"flow-actor-2","label":"2. DomService 解析 DOM 树，生成带编号的元素列表文本","packet":true,"from":"actor-1","to":"actor-2"},{"highlight":"flow-actor-3","label":"3. Agent 把元素列表 + 截图 + 任务历史打包发给 LLM","packet":true,"from":"actor-2","to":"actor-3"},{"highlight":"flow-actor-3","label":"4. LLM 返回 JSON 动作：{click: {index: 5}}"},{"highlight":"flow-actor-4","label":"5. Tools 解析 JSON，找到编号 5 的元素坐标，通过 CDP 执行点击","packet":true,"from":"actor-3","to":"actor-4"},{"highlight":"flow-actor-1","label":"6. BrowserSession 执行完毕，返回 ActionResult（成功/失败）","packet":true,"from":"actor-4","to":"actor-1"}]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">🌐</div>
+              <span>Browser</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">👁️</div>
+              <span>DomService</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">🧠</div>
+              <span>LLM</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">🔧</div>
+              <span>Tools</span>
+            </div>
+          </div>
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击"下一步"开始演示</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">不只是点击：Tools 支持的所有动作</h2>
+        <p>browser-use 内置了大量动作类型，每种都对应一个 Pydantic 模型：</p>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">NavigateAction</code>
+            <span class="badge-desc">打开一个 URL——就像你在地址栏输入网址按回车</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">ClickElementAction</code>
+            <span class="badge-desc">点击元素——通过编号或坐标，就像鼠标左键单击</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">InputTextAction</code>
+            <span class="badge-desc">在输入框里打字——先点击，再输入文字</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">ScrollAction</code>
+            <span class="badge-desc">滚动页面——上下滚、滚到指定元素位置</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">SearchAction</code>
+            <span class="badge-desc">用搜索引擎搜索——默认用 DuckDuckGo（验证码少）</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">ExtractAction</code>
+            <span class="badge-desc">从当前页面提取信息——用 LLM 从页面内容中抽取结构化数据</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">SendKeysAction</code>
+            <span class="badge-desc">发送键盘按键——回车、Tab、Escape 等特殊键</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">DoneAction</code>
+            <span class="badge-desc">任务完成！告诉 Agent "我搞定了"，并附上最终答案</span>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键设计</strong>
+            <p>所有动作都用 Pydantic 模型定义——这意味着 LLM 的输出会被自动校验。如果 AI 说了"点击编号 -1 的元素"，Pydantic 会拒绝（因为 ge=1 限制最小值为 1）。这种"在数据层面保证安全"的思路很值得学习。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">测测你理解了多少</h2>
+
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block" data-correct="option-b" data-explanation-right="正确！DomService 把 DOM 树序列化为带编号的文本格式，每个可交互元素都有唯一编号，LLM 输出 click:{index:5} 就是点击编号 5 的元素。" data-explanation-wrong="关键在于：LLM 并不知道网页的 CSS 选择器或 XPath。它只能看到 DomService 生成的带编号元素列表，然后用编号来指定要操作的元素。">
+            <h3 class="quiz-question">LLM 怎么知道要点击哪个元素？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div><span>LLM 自己分析 CSS 选择器来定位元素</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div><span>DomService 给每个可交互元素编号，LLM 通过编号引用</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div><span>LLM 直接使用 XPath 来定位页面元素</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="hero-title module-title">多模型大脑</h1>
+      <p class="module-subtitle">browser-use 怎么同时支持 OpenAI、Anthropic、Google、Ollama 等十几种模型？秘密在 BaseChatModel 协议。</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">十一个 Chat 类，一个统一协议</h2>
+        <p>在 <code>__init__.py</code> 的导出列表里，你能看到 browser-use 支持的所有模型：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line">__all__ = [</span>
+<span class="code-line">    <span class="code-string">'Agent'</span>, <span class="code-string">'BrowserSession'</span>, <span class="code-string">'Browser'</span>,</span>
+<span class="code-line">    <span class="code-string">'Controller'</span>, <span class="code-string">'DomService'</span>, <span class="code-string">'SystemPrompt'</span>,</span>
+<span class="code-line">    <span class="code-comment"># Chat models</span></span>
+<span class="code-line">    <span class="code-string">'ChatOpenAI'</span>,</span>
+<span class="code-line">    <span class="code-string">'ChatGoogle'</span>,</span>
+<span class="code-line">    <span class="code-string">'ChatAnthropic'</span>,</span>
+<span class="code-line">    <span class="code-string">'ChatBrowserUse'</span>,</span>
+<span class="code-line">    <span class="code-string">'ChatGroq'</span>,</span>
+<span class="code-line">    <span class="code-string">'ChatLiteLLM'</span>,</span>
+<span class="code-line">    <span class="code-string">'ChatMistral'</span>,</span>
+<span class="code-line">    <span class="code-string">'ChatAzureOpenAI'</span>,</span>
+<span class="code-line">    <span class="code-string">'ChatOCIRaw'</span>,</span>
+<span class="code-line">    <span class="code-string">'ChatOllama'</span>,</span>
+<span class="code-line">    <span class="code-string">'ChatVercel'</span>,</span>
+<span class="code-line">]</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">核心导出就那几个：Agent、Browser、Controller、DomService。</p>
+              <p class="tl">然后是整整 11 个 Chat 类！每个对应一家 AI 模型提供商。</p>
+              <p class="tl">ChatBrowserUse 是官方微调模型，专门为浏览器操控优化。</p>
+              <p class="tl">ChatOllama 支持本地模型——不想把数据发到云端就用它。</p>
+              <p class="tl">ChatLiteLLM 是个万能适配器，能连接 100+ 模型提供商。</p>
+            </div>
+          </div>
+        </div>
+
+        <p>这 11 个类之所以能互换使用，是因为它们都遵循同一个协议：<code>BaseChatModel</code>。</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">BaseChatModel：一份"大脑入职合同"</h2>
+        <p><span class="term" data-definition="Protocol 是 Python 的一个特性，定义一组方法签名。只要一个类实现了这些方法，就算'符合协议'，不需要显式继承。类似于其他语言的 interface。">Protocol</span> 是 Python 的接口机制。BaseChatModel 定义了"作为一个合格的 AI 大脑，你必须会什么"：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">@runtime_checkable</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">BaseChatModel</span>(Protocol):</span>
+<span class="code-line">    model: str</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">@property</span></span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">provider</span>(self) -> str: ...</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">@property</span></span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">name</span>(self) -> str: ...</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">async def</span> <span class="code-function">ainvoke</span>(</span>
+<span class="code-line">        self,</span>
+<span class="code-line">        messages: list[BaseMessage],</span>
+<span class="code-line">        output_format: type[T] | <span class="code-keyword">None</span> = <span class="code-keyword">None</span>,</span>
+<span class="code-line">        **kwargs: Any</span>
+<span class="code-line">    ) -> ChatInvokeCompletion[T] | ChatInvokeCompletion[str]: ...</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">@runtime_checkable 让你能在运行时检查一个对象是否符合协议。</p>
+              <p class="tl">model: str —— 你得告诉别人你是什么模型（比如 "gpt-4o"、"claude-sonnet-4-6"）。</p>
+              <p class="tl">provider 属性 —— 你是哪家的？（"openai"、"anthropic"、"google"...）</p>
+              <p class="tl">name 属性 —— 你的显示名称。</p>
+              <p class="tl">ainvoke 方法 —— 这是核心！接收消息列表，返回 AI 的回复。支持结构化输出（output_format）。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">设计洞察</strong>
+            <p>browser-use 用 <span class="term" data-definition="Protocol 和抽象基类（ABC）的区别在于：Protocol 不需要显式继承，只要你实现了规定的方法就算符合。这叫'结构化子类型'，更灵活。">Protocol 而非抽象基类</span>，意味着你甚至可以传入自己写的类，只要它有 model 属性和 ainvoke 方法，Agent 就能用——零侵入式扩展。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">以 ChatOpenAI 为例：怎么跟具体模型通信</h2>
+        <p>看看 ChatOpenAI 是怎么实现 BaseChatModel 协议的：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">@dataclass</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">ChatOpenAI</span>(BaseChatModel):</span>
+<span class="code-line">    model: ChatModel | str</span>
+<span class="code-line">    temperature: float | <span class="code-keyword">None</span> = <span class="code-keyword">0.2</span></span>
+<span class="code-line">    frequency_penalty: float | <span class="code-keyword">None</span> = <span class="code-keyword">0.3</span></span>
+<span class="code-line">    api_key: str | <span class="code-keyword">None</span> = <span class="code-keyword">None</span></span>
+<span class="code-line">    base_url: str | httpx.URL | <span class="code-keyword">None</span> = <span class="code-keyword">None</span></span>
+<span class="code-line">    max_retries: int = <span class="code-keyword">5</span></span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">@property</span></span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">provider</span>(self) -> str:</span>
+<span class="code-line">        <span class="code-keyword">return</span> <span class="code-string">'openai'</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">用 @dataclass 自动生成 __init__，省去手写样板代码。</p>
+              <p class="tl">model 是必填的——"gpt-4o"、"gpt-4.1-mini" 等等。</p>
+              <p class="tl">temperature 默认 0.2——偏向确定性输出，适合自动化场景。</p>
+              <p class="tl">frequency_penalty 0.3 防止模型无限重复（比如死循环输出制表符）。</p>
+              <p class="tl">max_retries=5：浏览器自动化网络不稳定，多试几次更可靠。</p>
+              <p class="tl">provider 属性返回 "openai"——Agent 用它来判断模型类型，自动调整提示词。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Agent 怎么根据模型自动调参？</h2>
+        <p>Agent 初始化时会检查模型类型，自动调整行为：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment"># set flashmode = True if llm is ChatBrowserUse</span></span>
+<span class="code-line"><span class="code-keyword">if</span> llm.provider == <span class="code-string">'browser-use'</span>:</span>
+<span class="code-line">    flash_mode = <span class="code-keyword">True</span></span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># Auto-configure llm_screenshot_size for Claude Sonnet</span></span>
+<span class="code-line"><span class="code-keyword">if</span> llm_screenshot_size <span class="code-keyword">is None</span>:</span>
+<span class="code-line">    model_name = getattr(llm, <span class="code-string">'model'</span>, <span class="code-string">''</span>)</span>
+<span class="code-line">    <span class="code-keyword">if</span> isinstance(model_name, str) <span class="code-keyword">and</span> model_name.startswith(<span class="code-string">'claude-sonnet'</span>):</span>
+<span class="code-line">        llm_screenshot_size = (<span class="code-keyword">1400</span>, <span class="code-keyword">850</span>)</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># DeepSeek models do not support vision</span></span>
+<span class="code-line"><span class="code-keyword">if</span> <span class="code-string">'deepseek'</span> <span class="code-keyword">in</span> self.llm.model.lower():</span>
+<span class="code-line">    self.settings.use_vision = <span class="code-keyword">False</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">如果用的是 browser-use 官方微调模型，自动开启 flash_mode（精简提示词，更快）。</p>
+              <p class="tl">如果是 Claude Sonnet，自动把截图缩放到 1400x850——这个模型对图片大小有偏好。</p>
+              <p class="tl">如果是 DeepSeek 模型，关闭视觉功能——它还不支持图片理解。</p>
+              <p class="tl">这就是 provider 属性的价值：Agent 能根据模型自动做适配。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">踩坑提醒</strong>
+            <p>如果你用了 DeepSeek 或 Grok-3 模型但忘了关闭 use_vision，Agent 会自动帮你关并打印警告。但最好一开始就设置好，避免浪费 API 调用。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">测测你理解了多少</h2>
+
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block" data-correct="option-c" data-explanation-right="没错！BaseChatModel 是 Protocol，只要你的类实现了 model 属性和 ainvoke 方法，Agent 就能直接用——不需要继承任何基类。" data-explanation-wrong="关键在于 Protocol 的'结构化子类型'特性——它不要求继承，只要求实现规定的方法。">
+            <h3 class="quiz-question">如果你想用自己的 AI 模型接入 browser-use，需要怎么做？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div><span>必须继承 BaseChatModel 基类并重写所有方法</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div><span>需要修改 browser-use 源码，在 __init__.py 注册新模型</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div><span>只要实现 model 属性和 ainvoke 方法就行，不用继承</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="hero-title module-title">从看懂到会改</h1>
+      <p class="module-subtitle">自定义 Action、System Prompt，以及实际调试技巧——学完这章你就能魔改 browser-use 了。</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">SystemPrompt：AI 的"工作手册"</h2>
+        <p>Agent 给 LLM 的系统提示词不只是一段文字，而是一套精心设计的"工作手册"。看看它怎么加载的：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">SystemPrompt</span>:</span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(</span>
+<span class="code-line">        self,</span>
+<span class="code-line">        max_actions_per_step: int = <span class="code-keyword">3</span>,</span>
+<span class="code-line">        override_system_message: str | <span class="code-keyword">None</span> = <span class="code-keyword">None</span>,</span>
+<span class="code-line">        extend_system_message: str | <span class="code-keyword">None</span> = <span class="code-keyword">None</span>,</span>
+<span class="code-line">        use_thinking: bool = <span class="code-keyword">True</span>,</span>
+<span class="code-line">        flash_mode: bool = <span class="code-keyword">False</span>,</span>
+<span class="code-line">        is_anthropic: bool = <span class="code-keyword">False</span>,</span>
+<span class="code-line">        is_browser_use_model: bool = <span class="code-keyword">False</span>,</span>
+<span class="code-line">        model_name: str | <span class="code-keyword">None</span> = <span class="code-keyword">None</span>,</span>
+<span class="code-line">    ):</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">max_actions_per_step：每步最多执行几个动作（默认 3）。限制数量让 AI 更谨慎。</p>
+              <p class="tl">override_system_message：完全替换系统提示词——你说了算。</p>
+              <p class="tl">extend_system_message：在默认提示词后面追加内容——更安全的方式。</p>
+              <p class="tl">use_thinking：让 AI 在行动前先"想一下"，输出思考过程。</p>
+              <p class="tl">flash_mode：精简模式——去掉思考和评估，追求速度。</p>
+              <p class="tl">is_anthropic / is_browser_use_model：根据模型类型选择不同的提示词模板。</p>
+            </div>
+          </div>
+        </div>
+
+        <p>它内部会根据模型类型选择不同的提示词模板文件：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">if</span> self.is_browser_use_model:</span>
+<span class="code-line">    <span class="code-keyword">if</span> self.flash_mode:</span>
+<span class="code-line">        template_filename = <span class="code-string">'system_prompt_browser_use_flash.md'</span></span>
+<span class="code-line">    <span class="code-keyword">elif</span> self.use_thinking:</span>
+<span class="code-line">        template_filename = <span class="code-string">'system_prompt_browser_use.md'</span></span>
+<span class="code-line"><span class="code-keyword">elif</span> self.flash_mode <span class="code-keyword">and</span> self.is_anthropic:</span>
+<span class="code-line">    template_filename = <span class="code-string">'system_prompt_flash_anthropic.md'</span></span>
+<span class="code-line"><span class="code-keyword">elif</span> self.flash_mode:</span>
+<span class="code-line">    template_filename = <span class="code-string">'system_prompt_flash.md'</span></span>
+<span class="code-line"><span class="code-keyword">elif</span> self.use_thinking:</span>
+<span class="code-line">    template_filename = <span class="code-string">'system_prompt.md'</span></span>
+<span class="code-line"><span class="code-keyword">else</span>:</span>
+<span class="code-line">    template_filename = <span class="code-string">'system_prompt_no_thinking.md'</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">官方微调模型用专属模板（browser_use 后缀），更精简高效。</p>
+              <p class="tl">每种组合（flash/thinking/anthropic）都有对应的 .md 模板文件。</p>
+              <p class="tl">这意味着你可以在不改源码的情况下，替换这些 .md 文件来定制 AI 行为。</p>
+              <p class="tl">最终，模板里的 {max_actions} 占位符会被替换成实际数字。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">自定义 System Prompt：让 AI 更懂你的场景</h2>
+        <p>browser-use 提供两种方式定制系统提示词。最常用的是 <code>extend_system_message</code>——在默认提示词后面加内容：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line">agent = Agent(</span>
+<span class="code-line">    task=<span class="code-string">'Search for AI news and summarize'</span>,</span>
+<span class="code-line">    llm=ChatOpenAI(model=<span class="code-string">'gpt-4o'</span>),</span>
+<span class="code-line">    extend_system_message=<span class="code-string">"""</span></span>
+<span class="code-line"><span class="code-string">Additional rules:</span></span>
+<span class="code-line"><span class="code-string">1. Always click "Accept cookies" if a cookie banner appears</span></span>
+<span class="code-line"><span class="code-string">2. Never sign up or log in to any website</span></span>
+<span class="code-line"><span class="code-string">3. If a CAPTCHA appears, skip that site and move on</span></span>
+<span class="code-line"><span class="code-string">"""</span>,</span>
+<span class="code-line">)</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">extend_system_message 是追加的——默认提示词还在，你只是在后面加了规则。</p>
+              <p class="tl">规则 1：遇到 Cookie 弹窗自动点"接受"——省得 AI 卡在这里。</p>
+              <p class="tl">规则 2：永远不要注册或登录——防止 AI 乱填表单。</p>
+              <p class="tl">规则 3：遇到验证码就跳过——不浪费时间。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">📌</div>
+          <div class="callout-content">
+            <strong class="callout-title">实用技巧</strong>
+            <p><code>override_system_message</code> 是完全替换，适合深度定制。但新手建议用 <code>extend_system_message</code>，因为默认提示词经过大量测试调优，里面有处理各种边界情况的指令。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">AgentMessagePrompt：每次发给 LLM 的完整上下文</h2>
+        <p>每一步，Agent 都会构造一个超长的"用户消息"发给 LLM。这个消息包含了 AI 做决策需要的所有信息：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line">state_description = (</span>
+<span class="code-line">    <span class="code-string">'&lt;agent_history&gt;\n'</span></span>
+<span class="code-line">    + (self.agent_history_description.strip(<span class="code-string">'\n'</span>)</span>
+<span class="code-line">       <span class="code-keyword">if</span> self.agent_history_description <span class="code-keyword">else</span> <span class="code-string">''</span>)</span>
+<span class="code-line">    + <span class="code-string">'\n&lt;/agent_history&gt;\n\n'</span></span>
+<span class="code-line">)</span>
+<span class="code-line">state_description += <span class="code-string">'&lt;agent_state&gt;\n'</span></span>
+<span class="code-line">    + self._get_agent_state_description().strip(<span class="code-string">'\n'</span>)</span>
+<span class="code-line">    + <span class="code-string">'\n&lt;/agent_state&gt;\n'</span></span>
+<span class="code-line">state_description += <span class="code-string">'&lt;browser_state&gt;\n'</span></span>
+<span class="code-line">    + self._get_browser_state_description().strip(<span class="code-string">'\n'</span>)</span>
+<span class="code-line">    + <span class="code-string">'\n&lt;/browser_state&gt;\n'</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">agent_history：之前做了什么——AI 需要知道历史才能避免重复。</p>
+              <p class="tl">agent_state：当前任务描述、文件系统状态、todo 列表、敏感数据等。</p>
+              <p class="tl">browser_state：当前页面的 DOM 元素列表、截图、Tab 信息、滚动位置。</p>
+              <p class="tl">三个 XML 标签把不同类型的信息分块，方便 LLM 区分理解。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">循环检测：防止 AI 在原地打转</h2>
+        <p>AI 有时会陷入死循环——反复点击同一个按钮，或者在两个页面之间来回跳。browser-use 内置了 <span class="term" data-definition="ActionLoopDetector 是一个循环检测器，跟踪最近 N 步的动作哈希值。如果同一个动作重复太多次，就给 LLM 发一条'提醒'，建议它换个策略。">ActionLoopDetector</span> 来应对：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">get_nudge_message</span>(self) -> str | <span class="code-keyword">None</span>:</span>
+<span class="code-line">    <span class="code-keyword">if</span> self.max_repetition_count >= <span class="code-keyword">12</span>:</span>
+<span class="code-line">        messages.append(</span>
+<span class="code-line">            f<span class="code-string">'Heads up: you have repeated a similar action'</span></span>
+<span class="code-line">            f<span class="code-string">' {self.max_repetition_count} times in the last'</span></span>
+<span class="code-line">            f<span class="code-string">' {len(self.recent_action_hashes)} actions.'</span></span>
+<span class="code-line">        )</span>
+<span class="code-line">    <span class="code-keyword">elif</span> self.max_repetition_count >= <span class="code-keyword">5</span>:</span>
+<span class="code-line">        messages.append(</span>
+<span class="code-line">            f<span class="code-string">'Heads up: you have repeated a similar action'</span></span>
+<span class="code-line">            f<span class="code-string">' {self.max_repetition_count} times.'</span></span>
+<span class="code-line">        )</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">循环检测器持续统计最近 20 步中每个动作的哈希值出现次数。</p>
+              <p class="tl">重复 5 次：温和提醒"你重复了，还在进步吗？"</p>
+              <p class="tl">重复 12 次：严肃警告"你可能卡住了，换个方法吧。"</p>
+              <p class="tl">注意：这只是"提醒"，不是"禁止"。AI 可以忽略提醒继续执行——毕竟有时候重复是合理的（比如翻页）。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">工程哲学</strong>
+            <p>browser-use 的循环检测是"软约束"而非"硬约束"——它只给 LLM 提示，不强制阻止动作。这种设计尊重了 AI 的判断力：有时候重复是有意的（比如逐页翻页），硬阻断反而会打断正确行为。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">step() 方法：一次完整执行的四阶段</h2>
+        <p>Agent 的核心方法是 <code>step()</code>，每一步都严格按照四个阶段执行：</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Phase 0: 等待 CAPTCHA（可选）</strong>
+              <p>如果之前在解验证码，先等它解完再继续。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Phase 1: 准备上下文（_prepare_context）</strong>
+              <p>截图 + 获取浏览器状态 + 解析 DOM + 更新动作模型。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Phase 2: 获取 AI 决策并执行（_get_next_action + _execute_actions）</strong>
+              <p>把上下文发给 LLM，拿到 JSON 动作，Tools 翻译成浏览器操作并执行。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>Phase 3: 后处理（_post_process）</strong>
+              <p>更新历史、检查下载、判断是否完成、记录遥测数据。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">调试技巧：看日志、存对话、设超时</h2>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">📝</div>
+            <div>
+              <strong>save_conversation_path</strong>
+              <p>设置这个参数，Agent 会把每一步发给 LLM 的完整对话保存到文件——调试时的第一选择。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">⏱️</div>
+            <div>
+              <strong>llm_timeout / step_timeout</strong>
+              <p>llm_timeout 控制 LLM 调用的超时（默认 60s），step_timeout 控制整步超时（默认 180s）。网络慢时可以调大。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🪞</div>
+            <div>
+              <strong>max_failures</strong>
+              <p>连续失败多少步后停止（默认 5）。调试时建议设成 2，快速发现问题。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line">agent = Agent(</span>
+<span class="code-line">    task=<span class="code-string">'Debug example task'</span>,</span>
+<span class="code-line">    llm=ChatOpenAI(model=<span class="code-string">'gpt-4o'</span>),</span>
+<span class="code-line">    save_conversation_path=<span class="code-string">'./debug_conversation'</span>,</span>
+<span class="code-line">    max_failures=<span class="code-keyword">2</span>,</span>
+<span class="code-line">    llm_timeout=<span class="code-keyword">90</span>,</span>
+<span class="code-line">    step_timeout=<span class="code-keyword">120</span>,</span>
+<span class="code-line">    max_actions_per_step=<span class="code-keyword">1</span>,</span>
+<span class="code-line">)</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">save_conversation_path：把每步对话存到 ./debug_conversation 目录。</p>
+              <p class="tl">max_failures=2：连续失败 2 次就停——快速暴露问题。</p>
+              <p class="tl">llm_timeout=90：给 LLM 90 秒响应时间（默认 60 可能不够）。</p>
+              <p class="tl">step_timeout=120：每步最多执行 120 秒。</p>
+              <p class="tl">max_actions_per_step=1：每步只做一个动作——方便逐步调试。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">测测你理解了多少</h2>
+
+        <div class="quiz-container" id="quiz-module5">
+          <div class="quiz-question-block" data-correct="option-a" data-explanation-right="没错！extend_system_message 是追加模式，默认提示词保留，你的规则加在后面。这是最安全的定制方式。" data-explanation-wrong="extend_system_message 不是替换，而是追加。默认提示词经过大量测试调优，里面有很多处理边界情况的指令，不建议完全丢弃。">
+            <h3 class="quiz-question">想在默认提示词基础上加一条规则"遇到 Cookie 弹窗自动点接受"，该用哪个参数？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div><span>extend_system_message —— 追加规则，保留默认提示词</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div><span>override_system_message —— 完全替换默认提示词</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div><span>直接修改源码中的 system_prompt.md 模板文件</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+  </main>
+
+</body>
+</html>

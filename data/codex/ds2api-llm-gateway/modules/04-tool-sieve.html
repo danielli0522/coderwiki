@@ -1,0 +1,320 @@
+    <section class="module" id="module-4">
+      <div class="module-inner">
+
+        <header class="module-header">
+          <span class="module-number">04</span>
+          <h1 class="module-title">工具调用防泄漏：直播延迟器的设计</h1>
+          <p class="module-tagline">SSE 是直播，模型可能突然吐出工具调用标记。来不及切的话，"幕后台词"会直接喷给客户端 —— Tool Sieve 就是那 5 秒延迟。</p>
+        </header>
+
+        <section class="screen">
+          <h2>问题：模型嘴比手快</h2>
+          <p>客户端用 OpenAI/Claude/Gemini 协议发来一个带工具的请求。DeepSeek 网页不懂结构化工具调用，所以模型会按 ds2api 在 system prompt 里教的格式，<strong>直接在文本流里吐</strong>类似这样的标记：</p>
+
+          <div class="translation-block animate-in">
+            <div class="translation-code">
+              <span class="translation-label">模型直接吐出来的原文（流式）</span>
+              <pre><code><span class="code-line">好的，我先查一下天气。</span>
+<span class="code-line"></span>
+<span class="code-line">&lt;|DSML|tool_calls&gt;</span>
+<span class="code-line">  &lt;|DSML|invoke name="get_weather"&gt;</span>
+<span class="code-line">    &lt;|DSML|parameter name="city"&gt;Beijing&lt;/parameter&gt;</span>
+<span class="code-line">  &lt;/invoke&gt;</span>
+<span class="code-line">&lt;/tool_calls&gt;</span></code></pre>
+            </div>
+            <div class="translation-english">
+              <span class="translation-label">客户端期待看到的（OpenAI 格式）</span>
+              <div class="translation-lines">
+                <p class="tl">"好的，我先查一下天气。"  ← 普通文本，正常输出</p>
+                <p class="tl">然后是结构化的 <code>delta.tool_calls</code> JSON 字段，里面有 function name 和 arguments。</p>
+                <p class="tl">原始的 <code>&lt;|DSML|tool_calls&gt;...&lt;/tool_calls&gt;</code> 标记<strong>绝不能让客户端看到</strong> —— 那是内部协议，客户端的 SDK 不认识、用户更不认识。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout callout-accent">
+            <div class="callout-icon">📺</div>
+            <div class="callout-content">
+              <strong class="callout-title">直播延迟器比喻</strong>
+              <p>电视直播都有 5 秒缓冲：嘉宾突然说脏话，导播按一下钮把那段切掉。<strong>Tool Sieve 就是那个缓冲 + 切换：流来一段就缓存一段，识别到工具调用前缀就"延迟发布"，等收完整段后切成结构化字段输出。</strong></p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>三种状态：流过、捕获、整段切换</h2>
+          <div class="step-cards">
+            <div class="step-card">
+              <div class="step-num">1</div>
+              <div class="step-body">
+                <strong>流过模式 (passthrough)</strong>
+                <p>不像工具调用前缀的字符直接发给客户端。注意"前缀"两字 —— 哪怕只看到 <code>&lt;|D</code>，也得先停下来等等看完整。</p>
+              </div>
+            </div>
+            <div class="step-card">
+              <div class="step-num">2</div>
+              <div class="step-body">
+                <strong>捕获模式 (capturing)</strong>
+                <p>认出可疑前缀后切到捕获模式，把后续 chunk 都先吃进 capture 缓冲，不发出去。直到看到结束标签 <code>&lt;/tool_calls&gt;</code>，才整段解析。</p>
+              </div>
+            </div>
+            <div class="step-card">
+              <div class="step-num">3</div>
+              <div class="step-body">
+                <strong>整段切换</strong>
+                <p>解析成功 → 当成结构化 <code>tool_calls</code> 事件吐出去；解析失败（其实是误识别） → 把缓冲的原文当普通文本补发，恢复流过模式。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>核心循环：ProcessChunk</h2>
+
+          <div class="translation-block animate-in">
+            <div class="translation-code">
+              <span class="translation-label">CODE · internal/toolstream/tool_sieve_core.go</span>
+              <pre><code><span class="code-line"><span class="code-keyword">func</span> <span class="code-function">ProcessChunk</span>(state *State, chunk string,</span>
+<span class="code-line">    toolNames []string) []Event {</span>
+<span class="code-line">  <span class="code-keyword">if</span> chunk != <span class="code-string">""</span> { state.pending.<span class="code-function">WriteString</span>(chunk) }</span>
+<span class="code-line">  events := <span class="code-function">make</span>([]Event, 0, 2)</span>
+<span class="code-line">  <span class="code-keyword">for</span> {</span>
+<span class="code-line">    <span class="code-keyword">if</span> state.capturing {</span>
+<span class="code-line">      state.capture.<span class="code-function">WriteString</span>(state.pending.<span class="code-function">String</span>())</span>
+<span class="code-line">      state.pending.<span class="code-function">Reset</span>()</span>
+<span class="code-line">      prefix, calls, suffix, ready := <span class="code-function">consumeToolCapture</span>(state, toolNames)</span>
+<span class="code-line">      <span class="code-keyword">if</span> !ready { <span class="code-keyword">break</span> }  <span class="code-comment">// 还没收完整，挂着等下一 chunk</span></span>
+<span class="code-line">      state.capturing = <span class="code-keyword">false</span></span>
+<span class="code-line">      <span class="code-keyword">if</span> <span class="code-function">len</span>(calls) > 0 {</span>
+<span class="code-line">        <span class="code-keyword">if</span> prefix != <span class="code-string">""</span> { events = <span class="code-function">append</span>(events, Event{Content: prefix}) }</span>
+<span class="code-line">        state.pendingToolCalls = calls</span>
+<span class="code-line">      }</span>
+<span class="code-line">      <span class="code-keyword">continue</span></span>
+<span class="code-line">    }</span>
+<span class="code-line">    pending := state.pending.<span class="code-function">String</span>()</span>
+<span class="code-line">    start := <span class="code-function">findToolSegmentStart</span>(state, pending)</span>
+<span class="code-line">    <span class="code-keyword">if</span> start &gt;= 0 {</span>
+<span class="code-line">      <span class="code-comment">// 切捕获，前缀文本先吐出</span></span>
+<span class="code-line">      state.capturing = <span class="code-keyword">true</span></span>
+<span class="code-line">    } <span class="code-keyword">else</span> {</span>
+<span class="code-line">      <span class="code-comment">// 安全字符：直接吐到客户端</span></span>
+<span class="code-line">      events = <span class="code-function">append</span>(events, Event{Content: pending})</span>
+<span class="code-line">    }</span>
+<span class="code-line">  }</span>
+<span class="code-line">  <span class="code-keyword">return</span> events</span>
+<span class="code-line">}</span></code></pre>
+            </div>
+            <div class="translation-english">
+              <span class="translation-label">中文翻译</span>
+              <div class="translation-lines">
+                <p class="tl">每次上游来一段新文本（chunk），先扔进 pending 这个临时缓冲。</p>
+                <p class="tl">events 是这一轮要吐给客户端的事件列表，可能是文本、可能是工具调用、可能两者都没有（还在攒）。</p>
+                <p class="tl">无限循环：根据当前是不是"捕获模式"分两条路。</p>
+                <p class="tl">捕获模式下：把 pending 全倒进 capture 缓冲，调 consumeToolCapture 看能不能解出完整工具调用。</p>
+                <p class="tl">如果 ready=false 说明还没收齐 —— 比如 <code>&lt;invoke&gt;</code> 还没看到结束标签，先 break 等下一 chunk。</p>
+                <p class="tl">如果解析出有效 calls，就退出捕获，把工具调用前面的普通文本（prefix）先发出去。</p>
+                <p class="tl">流过模式下：扫 pending 看有没有可疑工具前缀。</p>
+                <p class="tl">有就切捕获模式，下一轮循环再处理。</p>
+                <p class="tl">没有就把 pending 当普通文本一次性吐给客户端。</p>
+                <p class="tl">这种"边收边判，可疑就缓冲，安全就放行"的状态机模式，就是流式协议解析的标准骨架。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>三个角色的内心对话</h2>
+
+          <div class="chat-window" id="chat-toolsieve">
+            <div class="chat-messages">
+              <div class="chat-message" data-msg="0" data-sender="upstream" style="display:none">
+                <div class="chat-avatar" style="background: var(--color-actor-1)">DS</div>
+                <div class="chat-bubble">
+                  <span class="chat-sender" style="color: var(--color-actor-1)">DeepSeek 上游</span>
+                  <p>来一块 chunk："好的，我先查一下天气。"</p>
+                </div>
+              </div>
+              <div class="chat-message" data-msg="1" data-sender="sieve" style="display:none">
+                <div class="chat-avatar" style="background: var(--color-accent)">TS</div>
+                <div class="chat-bubble">
+                  <span class="chat-sender" style="color: var(--color-accent)">Tool Sieve</span>
+                  <p>扫一遍 → 没看到工具前缀 → 流过。直接转给客户端。</p>
+                </div>
+              </div>
+              <div class="chat-message" data-msg="2" data-sender="upstream" style="display:none">
+                <div class="chat-avatar" style="background: var(--color-actor-1)">DS</div>
+                <div class="chat-bubble">
+                  <span class="chat-sender" style="color: var(--color-actor-1)">DeepSeek 上游</span>
+                  <p>下一块："&lt;|D" —— 只是一个不完整的开头。</p>
+                </div>
+              </div>
+              <div class="chat-message" data-msg="3" data-sender="sieve" style="display:none">
+                <div class="chat-avatar" style="background: var(--color-accent)">TS</div>
+                <div class="chat-bubble">
+                  <span class="chat-sender" style="color: var(--color-accent)">Tool Sieve</span>
+                  <p>这看起来像 DSML 工具前缀的开头！我不放出去，先压在 pending 里等更多字符。</p>
+                </div>
+              </div>
+              <div class="chat-message" data-msg="4" data-sender="upstream" style="display:none">
+                <div class="chat-avatar" style="background: var(--color-actor-1)">DS</div>
+                <div class="chat-bubble">
+                  <span class="chat-sender" style="color: var(--color-actor-1)">DeepSeek 上游</span>
+                  <p>下一块："SML|tool_calls&gt;&lt;|DSML|invoke name=\"get_weather\"&gt;..."</p>
+                </div>
+              </div>
+              <div class="chat-message" data-msg="5" data-sender="sieve" style="display:none">
+                <div class="chat-avatar" style="background: var(--color-accent)">TS</div>
+                <div class="chat-bubble">
+                  <span class="chat-sender" style="color: var(--color-accent)">Tool Sieve</span>
+                  <p>确认是工具调用！进入 capturing 模式，全部吃进 capture 缓冲，不向客户端漏一个字。</p>
+                </div>
+              </div>
+              <div class="chat-message" data-msg="6" data-sender="upstream" style="display:none">
+                <div class="chat-avatar" style="background: var(--color-actor-1)">DS</div>
+                <div class="chat-bubble">
+                  <span class="chat-sender" style="color: var(--color-actor-1)">DeepSeek 上游</span>
+                  <p>"...&lt;/invoke&gt;&lt;/tool_calls&gt;" —— 收尾标签来了。</p>
+                </div>
+              </div>
+              <div class="chat-message" data-msg="7" data-sender="sieve" style="display:none">
+                <div class="chat-avatar" style="background: var(--color-accent)">TS</div>
+                <div class="chat-bubble">
+                  <span class="chat-sender" style="color: var(--color-accent)">Tool Sieve</span>
+                  <p>整段收齐！解析成 <code>{name: "get_weather", arguments: {city: "Beijing"}}</code>，包成 OpenAI 的 delta.tool_calls JSON 吐给客户端。</p>
+                </div>
+              </div>
+              <div class="chat-message" data-msg="8" data-sender="client" style="display:none">
+                <div class="chat-avatar" style="background: var(--color-actor-3)">CL</div>
+                <div class="chat-bubble">
+                  <span class="chat-sender" style="color: var(--color-actor-3)">客户端 SDK</span>
+                  <p>看到了 tool_calls 字段，直接走标准流程：执行工具 → 把结果发回去。完全没察觉中间是 DSML 标记。</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="chat-typing" id="chat-toolsieve-typing" style="display:none">
+              <div class="chat-avatar" id="chat-toolsieve-typing-avatar">?</div>
+              <div class="chat-typing-dots">
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+              </div>
+            </div>
+
+            <div class="chat-controls">
+              <button class="btn chat-next-btn">下一条</button>
+              <button class="btn chat-all-btn">一次播完</button>
+              <button class="btn chat-reset-btn">重播</button>
+              <span class="chat-progress"></span>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>误识别怎么办</h2>
+          <p>模型有时会在解释代码时，正经地写出 <code>&lt;tool_calls&gt;</code> 这种字符串作为示例。Tool Sieve 怎么避免把它当真？</p>
+
+          <div class="pattern-cards">
+            <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+              <div class="pattern-icon" style="background: var(--color-actor-1)">📦</div>
+              <h4 class="pattern-title">代码块跳过</h4>
+              <p class="pattern-desc">先识别 ``` 代码块边界，里面的所有标记都不当工具调用，直接当文本流过。</p>
+            </div>
+            <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+              <div class="pattern-icon" style="background: var(--color-actor-2)">✅</div>
+              <h4 class="pattern-title">白名单校验</h4>
+              <p class="pattern-desc">解析出工具名后必须在 toolNames 清单里 —— 这一单请求允许的工具。不在就当文本放出去。</p>
+            </div>
+            <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+              <div class="pattern-icon" style="background: var(--color-actor-3)">🔁</div>
+              <h4 class="pattern-title">解析失败回放</h4>
+              <p class="pattern-desc">捕获完了但 JSON 不合法，或工具名不认 —— 把整段 capture 当普通文本补发，<strong>客户端看到的就是模型本来想写的字</strong>，不会丢字。</p>
+            </div>
+          </div>
+
+          <div class="callout callout-warning">
+            <div class="callout-icon">⚠️</div>
+            <div class="callout-content">
+              <strong class="callout-title">泄漏 = 灾难</strong>
+              <p>如果让 <code>&lt;|DSML|tool_calls&gt;</code> 漏到客户端，客户端 SDK 解析失败 → 用户看到一段奇怪的 XML/标签。这种 bug 在生产里会立刻被截图发到 issue 区。<strong>"宁可慢半拍，绝不漏一字"</strong> 是流式协议的铁律。</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>检查理解</h2>
+          <div class="quiz-container" id="quiz-module4">
+
+            <div class="quiz-question-block"
+                 data-correct="b"
+                 data-explanation-right="对。看到不完整前缀就要停下来等 —— 直接放出去就漏了；万一后面跟的是工具调用，客户端会看到一半 XML。所以 Tool Sieve 必须缓冲。"
+                 data-explanation-wrong="再想想：客户端不能容忍 DSML 标记的任何片段泄漏，哪怕只有 &lt;|D 三个字符。">
+              <h3 class="quiz-question">上游一个 chunk 只有 <code>&lt;|D</code> 三个字符，Tool Sieve 应该怎么做？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>直接当文本放给客户端，等下一 chunk 再说。</span>
+                </button>
+                <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>压在 pending 里不发，等更多字符到达再判断是不是工具前缀。</span>
+                </button>
+                <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>立刻报错说"协议不完整"。</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <div class="quiz-question-block"
+                 data-correct="c"
+                 data-explanation-right="对。捕获到的整段会作为普通文本补发给客户端。这样既不会丢字，又保证客户端看到的是模型原本想写的内容（比如教程里在解释 tool_calls 这个标签）。"
+                 data-explanation-wrong="再想想：丢字会让用户看到内容缺一截，比泄漏标记还糟糕。">
+              <h3 class="quiz-question">Tool Sieve 切到捕获模式，但最后发现是模型在解释代码，里面的 <code>&lt;tool_calls&gt;</code> 不在白名单里。怎么办？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>丢弃捕获缓冲，恢复流过模式。</span>
+                </button>
+                <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>报错，让客户端重发。</span>
+                </button>
+                <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>把整段 capture 当普通文本补发给客户端，恢复流过模式。</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <div class="quiz-question-block"
+                 data-correct="b"
+                 data-explanation-right="对。延迟来自缓冲：识别到可疑前缀后必须先攒齐再判断。这是流式 + 防泄漏的固有取舍 —— 想要绝对安全，就要付几毫秒延迟。"
+                 data-explanation-wrong="再想想：流式吐字本身没延迟，是 Tool Sieve 在前缀可疑时主动缓冲造成的。">
+              <h3 class="quiz-question">用户反馈"工具调用前的最后几个字总是隔一拍才出来"，原因是？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>网络太慢。</span>
+                </button>
+                <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>Tool Sieve 看到可疑前缀就缓冲等更多字符，确认不是工具调用才一并放出，所以会有几毫秒延迟。</span>
+                </button>
+                <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>DeepSeek 模型本身就这样。</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">检查答案</button>
+            <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重做</button>
+          </div>
+        </section>
+
+      </div>
+    </section>

@@ -1,0 +1,247 @@
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">数据在节点间流淌：执行引擎揭秘</h1>
+      <p class="module-subtitle">从验证到执行，一条 prompt 走过的完整旅途</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: The Problem -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">为什么需要执行引擎？</h2>
+        <p>你画的节点图可能有几十个节点，连成复杂的网络。但计算机不能'同时'执行所有节点——就像地铁线路图上，列车必须按顺序从起点开到终点。</p>
+
+        <p>执行引擎的核心工作就是：<strong>确定顺序，按序执行，传递数据</strong>。</p>
+
+        <p>把执行引擎想象成一个<strong>快递分拣中心</strong>。每个包裹（数据）都有明确的目的地（下游节点），分拣员（引擎）要确保：</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>验证</strong>
+              <p>包裹上的地址格式对不对？收件人存在吗？（类型检查、循环依赖检测）</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>排序</strong>
+              <p>哪些包裹要先送？不能让收件人等不到上游的包裹。（<span class="term" data-definition="拓扑排序是一种算法，能把有依赖关系的任务排成一个线性顺序。就像穿衣服——你得先穿袜子再穿鞋，拓扑排序就是在算这种先后关系。">拓扑排序</span>）</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>执行</strong>
+              <p>按排好的顺序逐个节点执行，把输出传给下游节点，直到所有输出节点完成</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>缓存</strong>
+              <p>上次已经算过的结果如果输入没变，直接复用，不用重新算（智能缓存）</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Validation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">第一步：验证 Prompt</h2>
+        <p><code>validate_prompt</code> 函数是第一道关卡。它做什么？</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">async def</span> <span class="code-function">validate_prompt</span>(prompt_id, prompt, partial_execution_list):</span>
+<span class="code-line">    outputs = <span class="code-function">set</span>()</span>
+<span class="code-line">    <span class="code-keyword">for</span> x <span class="code-keyword">in</span> prompt:</span>
+<span class="code-line">        class_type = prompt[x][<span class="code-string">"class_type"</span>]</span>
+<span class="code-line">        class_ = nodes.NODE_CLASS_MAPPINGS.<span class="code-function">get</span>(class_type)</span>
+<span class="code-line">        <span class="code-keyword">if</span> class_ <span class="code-keyword">is None</span>:</span>
+<span class="code-line">            <span class="code-keyword">return</span> (<span class="code-keyword">False</span>, error, [], {})</span>
+<span class="code-line">        <span class="code-keyword">if</span> hasattr(class_, <span class="code-string">"OUTPUT_NODE"</span>):</span>
+<span class="code-line">            outputs.<span class="code-function">add</span>(x)</span>
+<span class="code-line">    <span class="code-keyword">if</span> <span class="code-function">len</span>(outputs) == <span class="code-number">0</span>:</span>
+<span class="code-line">        <span class="code-keyword">return</span> (<span class="code-keyword">False</span>, error, [], {})</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">定义异步验证函数，接收 prompt ID 和节点字典...</p>
+              <p class="tl">准备一个集合来记录哪些节点是'输出节点'...</p>
+              <p class="tl">遍历 prompt 里的每一个节点...</p>
+              <p class="tl">取出这个节点的类型名称...</p>
+              <p class="tl">在全局注册表里查找这个类型——如果找不到...</p>
+              <p class="tl">说明自定义节点没安装，直接返回错误...</p>
+              <p class="tl">如果这个节点标记了 OUTPUT_NODE = True...</p>
+              <p class="tl">就把它记到输出集合里（SaveImage 就是输出节点）...</p>
+              <p class="tl">如果整个图连一个输出节点都没有...</p>
+              <p class="tl">返回错误：这个图没有终点，执行了也没意义。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">&#9888;</div>
+          <div class="callout-content">
+            <strong class="callout-title">常见报错</strong>
+            <p>如果你看到 "Node 'XXX' not found. The custom node may not be installed"——这就是 <code>validate_prompt</code> 发现一个节点的 class_type 在 NODE_CLASS_MAPPINGS 里找不到。解决方案：安装对应的自定义节点。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Execution Flow -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">执行引擎的完整数据流</h2>
+        <p>验证通过后，真正的执行开始了。数据像水流一样从上游节点流向下游：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"用户点击 Queue Prompt，前端发送 JSON prompt"},
+          {"highlight":"flow-actor-2","label":"validate_prompt 检查所有节点的类型和连线是否合法"},
+          {"highlight":"flow-actor-2","label":"验证通过！prompt 进入 PromptQueue 排队","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-3","label":"prompt_worker 线程从队列取出任务"},
+          {"highlight":"flow-actor-3","label":"PromptExecutor 按 ExecutionList 顺序执行节点"},
+          {"highlight":"flow-actor-3","label":"每个节点的输出缓存起来，传给下游节点","packet":true,"from":"actor-3","to":"actor-4"},
+          {"highlight":"flow-actor-4","label":"最终结果通过 WebSocket 推送回前端显示","packet":true,"from":"actor-4","to":"actor-1"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">FE</div>
+              <span>前端</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">VAL</div>
+              <span>验证器</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">EXE</div>
+              <span>执行器</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">WS</div>
+              <span>WebSocket</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击 "Next Step" 追踪数据从点击到出图的完整旅程</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">Next Step</button>
+            <button class="btn flow-reset-btn">Restart</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Caching Strategies -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">智能缓存：不重复造轮子</h2>
+        <p>如果一张图你生成两次，但只改了最后的 SaveImage 参数，前面的模型加载、文本编码都不需要重新算。ComfyUI 提供了多种缓存策略：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">&#128260;</div>
+            <h4 class="pattern-title">Classic 缓存</h4>
+            <p class="pattern-desc">用完即丢——最保守的策略，每次执行都重新计算。适合调试场景。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">&#128230;</div>
+            <h4 class="pattern-title">LRU 缓存</h4>
+            <p class="pattern-desc">最近用过的留着，很久没用的丢掉。通过 <code>--cache-lru N</code> 设置大小。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">&#128184;</div>
+            <h4 class="pattern-title">RAM Pressure 缓存</h4>
+            <p class="pattern-desc">默认策略。根据可用内存动态决定保留多少缓存，内存紧张时自动清理。</p>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">CacheType</span>(Enum):</span>
+<span class="code-line">    CLASSIC = <span class="code-number">0</span></span>
+<span class="code-line">    LRU = <span class="code-number">1</span></span>
+<span class="code-line">    NONE = <span class="code-number">2</span></span>
+<span class="code-line">    RAM_PRESSURE = <span class="code-number">3</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">用枚举定义四种缓存策略...</p>
+              <p class="tl">Classic：经典模式，用完就清...</p>
+              <p class="tl">LRU：保留最近使用的，丢弃最久没用的...</p>
+              <p class="tl">NONE：完全不缓存，每次都从头算...</p>
+              <p class="tl">RAM_PRESSURE：根据内存压力动态调整，默认选择。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">理解执行引擎</h2>
+
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！如果没有输出节点（如 SaveImage），整个图没有终点，执行引擎不知道该算到什么时候停。即使中间节点都定义好了，也必须至少有一个 OUTPUT_NODE = True 的节点。"
+               data-explanation-wrong="想象一下：如果一张节点图没有任何终点（输出节点），执行引擎会怎么判断？它需要知道'算到哪个节点算完'。">
+            <h3 class="quiz-question">如果一个 ComfyUI 工作流里没有任何 SaveImage 或 PreviewImage 等输出节点，会发生什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>正常执行，只是不会保存图片</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>验证阶段直接报错：Prompt has no outputs</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>执行会陷入死循环，一直算下去</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="对！RAM Pressure 缓存会监控可用内存，当内存紧张时自动清理旧的缓存条目，在性能和内存使用之间取得平衡。"
+               data-explanation-wrong="想想 ComfyUI 默认的缓存策略是怎么工作的——它需要同时考虑速度和内存。">
+            <h3 class="quiz-question">RAM Pressure 缓存策略的核心思想是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>把所有缓存都存到硬盘上，不占内存</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>固定保留最近 N 个节点的结果</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>根据可用内存动态调整缓存大小，内存紧张时自动释放</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

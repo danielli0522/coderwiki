@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Awesome Claude Design 完全指南</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    :root {
+      --color-accent:       #7B6DAA;
+      --color-accent-hover: #645A91;
+      --color-accent-light: #F0EDF7;
+      --color-accent-muted: #9B8FC4;
+    }
+  </style>
+  <script src="main.js" defer></script>
+</head>
+<body>
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">Awesome Claude Design</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <button class="nav-dot" data-target="module-1" data-tooltip="什么是 DESIGN.md" role="tab" aria-label="模块 1"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="68 套设计灵感" role="tab" aria-label="模块 2"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="9 大结构" role="tab" aria-label="模块 3"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="使用流程" role="tab" aria-label="模块 4"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="实战技巧" role="tab" aria-label="模块 5"></button>
+      </div>
+    </div>
+  </nav>
+  <main id="main">
+<!-- 模块 1: 什么是 DESIGN.md -->
+<section class="module" id="module-1">
+  <div class="module-content">
+    <div class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">一个文件，一套设计系统</h1>
+      <p class="module-subtitle">Awesome Claude Design 如何用一个 Markdown 文件生成完整的 UI 体系</p>
+    </div>
+
+    <div class="screen">
+      <div class="callout callout-accent animate-in">
+        <div class="callout-icon">🎨</div>
+        <div class="callout-content">
+          <strong class="callout-title">核心理念</strong>
+          <p><span class="term" data-definition="DESIGN.md 是一个纯文本 Markdown 文件，用 AI 能理解的格式描述一个品牌的视觉语言——颜色、字体、组件样式、布局规则等。">DESIGN.md</span> 是一个纯文本 Markdown 文件，描述品牌的视觉语言。把它交给 <span class="term" data-definition="Claude Design 是 Anthropic 推出的设计工作区，能根据 DESIGN.md 自动生成完整的设计系统：颜色、字体、组件、预览页面。">Claude Design</span>，几分钟就能生成完整的设计系统：CSS 变量、字体方案、组件库、预览页面——全部搞定。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">它解决什么问题？</h2>
+      <div class="icon-rows animate-in stagger-children">
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-actor-1)">📄</div>
+          <div>
+            <strong>Figma 导出只告诉你"用什么"</strong>
+            <p>但不告诉你"为什么"。缺少设计决策的上下文。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-actor-2)">📋</div>
+          <div>
+            <strong>品牌指南 PDF 对人说"高端大气"</strong>
+            <p>但太模糊了，AI Agent 不知道该用什么具体颜色和间距。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-actor-3)">🎯</div>
+          <div>
+            <strong>DESIGN.md 坐在中间</strong>
+            <p>足够具体让 AI 做出下一个决策，同时保留了"为什么"的上下文——遇到文件没覆盖的情况也能保持风格统一。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">DESIGN.md 的影响力</h2>
+      <div class="badge-list animate-in stagger-children">
+        <div class="badge-item animate-in">
+          <code class="badge-code">GitHub Stars</code>
+          <span class="badge-desc">awesome-claude-design 仓库迅速获得大量关注，成为 AI 设计领域的标杆项目</span>
+        </div>
+        <div class="badge-item animate-in">
+          <code class="badge-code">68 套模板</code>
+          <span class="badge-desc">覆盖从 AI 平台到汽车工业的 10 个行业，每种风格都经过精心编写</span>
+        </div>
+        <div class="badge-item animate-in">
+          <code class="badge-code">9 章标准</code>
+          <span class="badge-desc">统一的 9 章结构确保所有 DESIGN.md 都能被 Claude 正确解析和生成</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">和 AGENTS.md 的关系</h2>
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">对比</span>
+          <pre><code><span class="code-line"><span class="code-comment">| 文件        | 谁读它      | 定义什么           |</span></span>
+<span class="code-line"><span class="code-comment">|------------|------------|-------------------|</span></span>
+<span class="code-line">AGENTS.md    编码 Agent    <span class="code-string">如何构建项目</span></span>
+<span class="code-line">DESIGN.md    设计 Agent    <span class="code-string">项目应该长什么样</span></span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">大白话翻译</span>
+          <div class="translation-lines">
+            <p class="tl">两个文件各管各的...</p>
+            <p class="tl">AGENTS.md 告诉编码 AI 怎么写代码...</p>
+            <p class="tl">DESIGN.md 告诉设计 AI 怎么做界面...</p>
+            <p class="tl">一个管功能，一个管颜值，互不干扰。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">DESIGN.md 的典型结构预览</h2>
+      <p>一个完整的 DESIGN.md 文件通常包含这些章节，每个章节都有明确的格式和内容要求：</p>
+
+      <div class="badge-list animate-in stagger-children">
+        <div class="badge-item animate-in">
+          <code class="badge-code">视觉主题</code>
+          <span class="badge-desc">用 2-3 个形容词描述整体感觉：如「精密、暗色、优雅」</span>
+        </div>
+        <div class="badge-item animate-in">
+          <code class="badge-code">配色方案</code>
+          <span class="badge-desc">每个颜色的用途 + Hex 值 + 适用的状态场景</span>
+        </div>
+        <div class="badge-item animate-in">
+          <code class="badge-code">排版系统</code>
+          <span class="badge-desc">字体家族 + 字号阶梯（xs/sm/base/lg/xl/2xl）+ 行高和字重</span>
+        </div>
+        <div class="badge-item animate-in">
+          <code class="badge-code">组件样式</code>
+          <span class="badge-desc">按钮/输入框/卡片等组件的视觉规范和状态变化</span>
+        </div>
+        <div class="badge-item animate-in">
+          <code class="badge-code">布局规则</code>
+          <span class="badge-desc">间距阶梯、网格系统、响应式断点</span>
+        </div>
+        <div class="badge-item animate-in">
+          <code class="badge-code">Do/Don't</code>
+          <span class="badge-desc">明确的设计护栏——告诉 AI 什么是风格内的，什么不是</span>
+        </div>
+      </div>
+
+      <div class="callout callout-accent animate-in">
+        <div class="callout-icon">📝</div>
+        <div class="callout-content">
+          <strong class="callout-title">为什么用 Markdown 而不是 JSON/YAML？</strong>
+          <p>因为 Claude（和大多数 LLM）对 Markdown 的理解最自然。Markdown 既有结构（标题、列表、表格），又允许自然语言描述（设计理由、使用场景）。JSON/YAML 适合机器解析，但丢失了「为什么这样设计」的上下文。DESIGN.md 选择 Markdown 是为了最大化 AI 的理解深度，而非数据可解析性。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <div class="quiz-container animate-in" id="quiz-module1">
+        <div class="quiz-question-block"
+             data-correct="option-b"
+             data-explanation-right="DESIGN.md 的核心理念是把 token（具体值）、rule（规则）和 rationale（为什么）放在同一个文件里，让 AI 既有具体指令又有决策上下文。"
+             data-explanation-wrong="想想 DESIGN.md 和 Figma 导出或品牌 PDF 的关键区别是什么。它独特地保留了什么信息？">
+          <h3 class="quiz-question">DESIGN.md 相比 Figma 导出或品牌 PDF，最核心的区别是？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>文件格式更新，支持更多颜色</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>把具体值、规则和"为什么"放在同一个文件里</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>只包含颜色色值，不包含组件样式</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">重试</button>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- 模块 2: 68 套设计灵感 -->
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <div class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">68 套设计灵感</h1>
+      <p class="module-subtitle">覆盖 10 个行业，从 AI 到汽车，应有尽有</p>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">10 大类别一览</h2>
+      <div class="pattern-cards animate-in stagger-children">
+        <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">🤖</div>
+          <h4 class="pattern-title">AI & LLM 平台</h4>
+          <p class="pattern-desc">12 套。Claude、Cohere、ElevenLabs、Mistral、Ollama、Replicate 等。从暖色调到终端风格全覆盖。</p>
+        </div>
+        <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">🛠️</div>
+          <h4 class="pattern-title">开发者工具 & IDE</h4>
+          <p class="pattern-desc">7 套。Cursor、Vercel、Warp、Raycast 等。深色主题、渐变点缀、代码优先美学。</p>
+        </div>
+        <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">⬡</div>
+          <h4 class="pattern-title">后端 & 数据库</h4>
+          <p class="pattern-desc">8 套。Supabase、MongoDB、Sentry、ClickHouse 等。技术文档风、深色仪表盘。</p>
+        </div>
+        <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+          <div class="pattern-icon" style="background: var(--color-actor-4)">📊</div>
+          <h4 class="pattern-title">生产力 & SaaS</h4>
+          <p class="pattern-desc">7 套。Linear、Notion、Intercom、Resend 等。极简主义、紫色点缀、开发者友好。</p>
+        </div>
+        <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-5)">
+          <div class="pattern-icon" style="background: var(--color-actor-5)">🎨</div>
+          <h4 class="pattern-title">设计 & 创意工具</h4>
+          <p class="pattern-desc">6 套。Figma、Framer、Miro、Webflow 等。多彩、大胆、动效优先。</p>
+        </div>
+        <div class="pattern-card animate-in" style="border-top: 3px solid #D4A843">
+          <div class="pattern-icon" style="background: #D4A843">💰</div>
+          <h4 class="pattern-title">金融 & 加密</h4>
+          <p class="pattern-desc">7 套。Stripe、Coinbase、Binance、Revolut 等。深色精密、渐变卡片、信任感。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">还有更多</h2>
+      <div class="badge-list animate-in stagger-children">
+        <div class="badge-item animate-in">
+          <code class="badge-code">电商 & 零售</code>
+          <span class="badge-desc">4 套：Airbnb、Nike、Shopify、Meta Store</span>
+        </div>
+        <div class="badge-item animate-in">
+          <code class="badge-code">媒体 & 消费科技</code>
+          <span class="badge-desc">11 套：Apple、Spotify、SpaceX、Uber、PlayStation 等</span>
+        </div>
+        <div class="badge-item animate-in">
+          <code class="badge-code">汽车</code>
+          <span class="badge-desc">6 套：Tesla、BMW、Ferrari、Lamborghini、Bugatti、Renault</span>
+        </div>
+      </div>
+
+      <div class="callout callout-accent animate-in">
+        <div class="callout-icon">💡</div>
+        <div class="callout-content">
+          <strong class="callout-title">不是 1:1 克隆</strong>
+          <p>这些 DESIGN.md 文件是受公开设计模式启发的<strong>起点</strong>，不是官方设计系统。它们给 AI 足够的上下文来生成风格一致的 UI，但你自己的项目应该用它作为灵感来创造原创设计。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <div class="callout callout-info animate-in">
+        <div class="callout-icon">🔮</div>
+        <div class="callout-content">
+          <strong class="callout-title">如何选择适合你项目的设计灵感？</strong>
+          <p>不要只看品牌名气——关键是匹配你项目的<strong>调性</strong>。问自己三个问题：(1) 你的用户是开发者还是普通消费者？(2) 你的产品强调功能还是体验？(3) 你的品牌性格是严肃还是活泼？开发者工具选 Linear/Cursor 风格，消费产品选 Spotify/Apple 风格，金融产品选 Stripe/Coinbase 风格。</p>
+        </div>
+      </div>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">设计风格速配表</span>
+          <pre><code><span class="code-line"><span class="code-comment">项目类型          推荐风格             关键词</span></span>
+<span class="code-line">开发者工具        Cursor, Raycast       深色、代码风</span>
+<span class="code-line">B2B SaaS         Linear, Vercel        极简、紫色点缀</span>
+<span class="code-line">AI 平台           Claude, Mistral       暖色、亲和力</span>
+<span class="code-line">金融科技          Stripe, Coinbase      精密、信任感</span>
+<span class="code-line">电商零售          Nike, Airbnb          大胆、视觉冲击</span>
+<span class="code-line">媒体娱乐          Spotify, Apple        深底+亮色、活力</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">选择策略</span>
+          <div class="translation-lines">
+            <p class="tl">开发者工具：深色主题 + 等宽字体 + 功能优先</p>
+            <p class="tl">B2B SaaS：极简主义 + 精确间距 + 专业感</p>
+            <p class="tl">AI 平台：暖色调 + 圆角 + 友好的交互</p>
+            <p class="tl">金融科技：深色精密 + 渐变卡片 + 信任感</p>
+            <p class="tl">电商零售：全屏图片 + 大字体 + 视觉冲击</p>
+            <p class="tl">媒体娱乐：深底亮色 + 动态排版 + 沉浸感</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="quiz-container animate-in" id="quiz-module2">
+        <div class="quiz-question-block"
+             data-correct="option-c"
+             data-explanation-right="68 套 DESIGN.md 覆盖了 AI 平台、开发工具、后端、SaaS、设计工具、金融、电商、媒体、汽车等 10 个行业类别。"
+             data-explanation-wrong="再想想——这个仓库远不止 AI 相关的设计系统。">
+          <h3 class="quiz-question">Awesome Claude Design 收录了多少套 DESIGN.md？覆盖了哪些领域？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>12 套，只覆盖 AI 平台</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>30 套，覆盖科技和设计两个领域</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>68 套，覆盖 AI、开发、金融、电商、媒体、汽车等 10 个行业</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重试</button>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- 模块 3: DESIGN.md 的 9 大结构 -->
+<section class="module" id="module-3">
+  <div class="module-content">
+    <div class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">DESIGN.md 的 9 大结构</h1>
+      <p class="module-subtitle">每个 DESIGN.md 都遵循这 9 个标准章节</p>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">从氛围到 Agent 提示词</h2>
+      <div class="step-cards animate-in stagger-children">
+        <div class="step-card animate-in">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>视觉主题与氛围</strong>
+            <p>定调：密集还是疏朗、深沉还是明亮、冷色还是暖色。这是整个系统的情绪基调。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>配色方案与角色</strong>
+            <p>定义每个颜色的用途——主色、背景、强调、成功/错误/警告。Claude 据此生成 <span class="term" data-definition="CSS 变量（Custom Properties）是样式表中的占位符，如 --color-accent: #7B6DAA，可以在整个项目中复用，改一处全局生效。">CSS 变量</span>。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>排版规则</strong>
+            <p>字体选择、字号阶梯、行高。Claude 会自动找 Google Fonts 替代方案（如果品牌字体是专有的）。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>组件样式</strong>
+            <p>按钮、输入框、卡片、导航——包含各种状态（默认、悬浮、激活、禁用）。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <strong>布局原则</strong>
+            <p>间距阶梯、网格系统、留白节奏。决定了页面呼吸感。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">还有 4 个关键章节</h2>
+      <div class="icon-rows animate-in stagger-children">
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-actor-1)">6</div>
+          <div>
+            <strong>深度与层次</strong>
+            <p>阴影 token 和表面层级。哪些元素浮在前面，哪些沉在后面。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-actor-2)">7</div>
+          <div>
+            <strong>应该做和不应该做</strong>
+            <p>Claude 生成新页面时的护栏——"按钮不用渐变"、"标题不超过两行"之类的硬规则。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-actor-3)">8</div>
+          <div>
+            <strong>响应式行为</strong>
+            <p>断点、触摸目标、折叠行为。确保在手机上也好用。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-actor-4)">9</div>
+          <div>
+            <strong>Agent 提示词指南</strong>
+            <p>可复用的提示词模板，Claude 会嵌入到生成的 <span class="term" data-definition="SKILL.md 是 Claude Code 的技能文件，定义了可复用的 AI 行为模式。保存后，你在任何 Claude 项目中都能召唤相同的设计风格。">SKILL.md</span> 中，方便未来项目复用。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <div class="chat-window animate-in" id="chat-module3">
+        <div class="chat-messages">
+          <div class="chat-message" data-sender="designer" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-1)">你</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-1)">你</span>
+              <p>我想给项目加个 Stripe 风格的设计系统，怎么做？</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="acd" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-2)">A</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-2)">Awesome Claude Design</span>
+              <p>去 getdesign.md/stripe/design-md 下载 Stripe 的 DESIGN.md，里面有 9 个章节的完整描述。</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="claude" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-3)">C</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-3)">Claude Design</span>
+              <p>收到 DESIGN.md！我读到了紫色渐变、weight-300 优雅字体、精确间距...正在生成完整设计系统。</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="claude" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-3)">C</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-3)">Claude Design</span>
+              <p>搞定！生成了 CSS 变量、Google Fonts 替代、组件库、预览页面和 SKILL.md。全部在你的设计系统审查标签里。</p>
+            </div>
+          </div>
+        </div>
+        <div class="chat-typing" style="display:none">
+          <div class="chat-avatar" id="chat-module3-typing-avatar">?</div>
+          <div class="chat-typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>
+        </div>
+        <div class="chat-controls">
+          <button class="btn chat-next-btn">下一条</button>
+          <button class="btn chat-all-btn">播放全部</button>
+          <button class="btn chat-reset-btn">重播</button>
+          <span class="chat-progress"></span>
+        </div>
+      </div>
+
+      <div class="callout callout-info animate-in">
+        <div class="callout-icon">📐</div>
+        <div class="callout-content">
+          <strong class="callout-title">DESIGN.md 的「三层信息密度」设计</strong>
+          <p>每个章节都包含三个层次的信息：<strong>Token（具体值）</strong>如 <code>--color-accent: #7B6DAA</code>、<strong>Rule（规则）</strong>如「主按钮使用品牌色填充」、<strong>Rationale（原因）</strong>如「紫色传达创意与专业并重的品牌印象」。这种三层结构让 AI 既有精确指令（用哪个颜色），又有决策框架（什么时候用），还有上下文（为什么）——遇到 DESIGN.md 没覆盖的边缘情况，AI 也能根据 rationale 做出一致的选择。</p>
+        </div>
+      </div>
+
+      <div class="pattern-cards animate-in stagger-children">
+        <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">Token</div>
+          <h4 class="pattern-title">具体值层</h4>
+          <p class="pattern-desc">精确的 CSS 变量、字号像素值、间距 token。AI 不需要猜测，直接使用。<code>--spacing-sm: 8px</code>、<code>--font-heading: Bricolage Grotesque</code>。</p>
+        </div>
+        <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">Rule</div>
+          <h4 class="pattern-title">规则层</h4>
+          <p class="pattern-desc">使用规则和约束条件。「标题只用 weight-700」「按钮圆角统一 8px」「卡片阴影不超过 2 层」。这些规则确保一致性。</p>
+        </div>
+        <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">Rationale</div>
+          <h4 class="pattern-title">原因层</h4>
+          <p class="pattern-desc">设计决策背后的思考。「紫色因为传达创意+专业」「大留白因为产品强调阅读体验」。这是 AI 能泛化的关键。</p>
+        </div>
+      </div>
+
+      <div class="quiz-container animate-in" id="quiz-module3">
+        <div class="quiz-question-block"
+             data-correct="option-a"
+             data-explanation-right="第 9 章「Agent 提示词指南」包含可复用的提示词模板，Claude 会将其嵌入生成的 SKILL.md，让你在未来的项目中无需重新上传 DESIGN.md 就能召唤相同风格。"
+             data-explanation-wrong="仔细看看第 9 章是干什么的。它的重点是「未来复用」。">
+          <h3 class="quiz-question">如果你想在未来项目中不用重新上传 DESIGN.md 就能复用相同的设计风格，应该依赖 DESIGN.md 的哪个章节？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>第 9 章：Agent 提示词指南（生成 SKILL.md）</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>第 2 章：配色方案与角色（生成 CSS 变量）</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>第 7 章：应该做和不应该做（护栏规则）</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重试</button>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- 模块 4: 使用流程 -->
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <div class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">怎么用它？</h1>
+      <p class="module-subtitle">从选灵感到生成设计系统的完整流程</p>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">三步搞定</h2>
+      <div class="step-cards animate-in stagger-children">
+        <div class="step-card animate-in">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>选择设计灵感</strong>
+            <p>从 68 套 DESIGN.md 中选一个你喜欢的风格，点进去预览，下载文件。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>上传到 Claude Design</strong>
+            <p>在 <span class="term" data-definition="claude.ai/design 是 Anthropic 的设计工作区网页版，可以上传 DESIGN.md 并自动生成完整设计系统。">claude.ai/design</span> 创建新设计系统或新原型，上传 DESIGN.md。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Claude 自动生成一切</strong>
+            <p>几分钟内输出：品牌文档、CSS 变量、字体方案、组件库、预览页面、SKILL.md。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">两种使用方式</h2>
+      <div class="flow-animation animate-in" data-steps='[
+        {"highlight":"flow-actor-1","label":"你选择一套 DESIGN.md 并下载"},
+        {"highlight":"flow-actor-1","label":"方式 A：在设计系统中上传","packet":true,"from":"actor-1","to":"actor-2"},
+        {"highlight":"flow-actor-2","label":"Claude Design 解析 9 个章节"},
+        {"highlight":"flow-actor-2","label":"生成完整设计系统包","packet":true,"from":"actor-2","to":"actor-3"},
+        {"highlight":"flow-actor-3","label":"输出：CSS + 字体 + 组件 + 预览 + SKILL.md"}
+      ]'>
+        <div class="flow-actors">
+          <div class="flow-actor" id="flow-actor-1">
+            <div class="flow-actor-icon">📥</div>
+            <span>上传</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-2">
+            <div class="flow-actor-icon">🧠</div>
+            <span>Claude</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-3">
+            <div class="flow-actor-icon">📦</div>
+            <span>输出</span>
+          </div>
+        </div>
+        <div class="flow-packet" id="flow-packet"></div>
+        <div class="flow-step-label" id="flow-label">点击「下一步」开始</div>
+        <div class="flow-controls">
+          <button class="btn flow-next-btn">下一步</button>
+          <button class="btn flow-reset-btn">重新开始</button>
+          <span class="flow-progress"></span>
+        </div>
+      </div>
+
+      <div class="pattern-cards animate-in">
+        <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">A</div>
+          <h4 class="pattern-title">从设计系统开始</h4>
+          <p class="pattern-desc">去 claude.ai/design/#org → 创建新设计系统 → 在"添加资源"上传 DESIGN.md。适合需要完整系统骨架的项目。</p>
+        </div>
+        <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">B</div>
+          <h4 class="pattern-title">从原型开始</h4>
+          <p class="pattern-desc">在仪表盘创建新原型 → 在聊天中附加 DESIGN.md → 输入"从这个 DESIGN.md 创建设计系统"。适合想快速出页面。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">Claude 生成什么？</h2>
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">输出清单</span>
+          <pre><code><span class="code-line"><span class="code-comment"># Claude Design 自动生成：</span></span>
+<span class="code-line"></span>
+<span class="code-line">README.md          <span class="code-comment"># 品牌上下文、语调、视觉基础</span></span>
+<span class="code-line">colors_and_type.css <span class="code-comment"># CSS 变量、字号阶梯、工具类</span></span>
+<span class="code-line">preview/            <span class="code-comment"># 颜色/字体/间距/组件预览卡片</span></span>
+<span class="code-line">index.html          <span class="code-comment"># 完整 UI Kit（营销页面）</span></span>
+<span class="code-line">SKILL.md            <span class="code-comment"># 可复用的技能文件</span></span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">大白话翻译</span>
+          <div class="translation-lines">
+            <p class="tl">品牌说明文档——了解这个设计的性格...</p>
+            <p class="tl">所有颜色和字体的 CSS 变量——直接用...</p>
+            <p class="tl">可视化的预览卡片——一眼看到效果...</p>
+            <p class="tl">一个真实营销页面——不是空壳...</p>
+            <p class="tl">技能文件——下次不用重新上传。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-info animate-in">
+        <div class="callout-icon">🔬</div>
+        <div class="callout-content">
+          <strong class="callout-title">输出文件详解：每个文件的作用</strong>
+          <p><strong>README.md</strong> 包含品牌上下文和语调指南，是整个系统的「为什么」文档。<strong>colors_and_type.css</strong> 包含所有 CSS 变量定义，可以直接在你的项目中 import 使用。<strong>preview/</strong> 目录包含可视化的预览卡片，帮你快速确认颜色、字体、间距是否正确。<strong>index.html</strong> 是一个完整的营销页面 demo，展示了所有组件在真实布局中的效果。<strong>SKILL.md</strong> 是核心复用文件——包含精简的提示词模板，让未来项目一键召唤相同风格。</p>
+        </div>
+      </div>
+
+      <div class="callout callout-accent animate-in">
+        <div class="callout-icon">⚙️</div>
+        <div class="callout-content">
+          <strong class="callout-title">DESIGN.md 的常见定制场景</strong>
+          <p>下载的 DESIGN.md 不是最终版——你应该根据项目需求定制它。最常见的三种定制：(1) <strong>替换品牌色</strong>——把 Stripe 的紫色换成你品牌的颜色，Claude 会自动推导出完整的色阶（浅色、深色、悬浮态等）；(2) <strong>调整间距节奏</strong>——如果你的内容密度更高，把 spacing-base 从 16px 调到 12px，整个间距阶梯会重新计算；(3) <strong>修改字体搭配</strong>——如果品牌字体不在 Google Fonts 上，Claude 会自动找最接近的替代方案。</p>
+        </div>
+      </div>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">定制示例：从 Stripe 到你的品牌</span>
+          <pre><code><span class="code-line"><span class="code-comment"># 原始（Stripe 风格）</span></span>
+<span class="code-line">Primary:   #635BFF  <span class="code-comment">→ 改为你的品牌色</span></span>
+<span class="code-line">Heading:   Bricolage Grotesque  <span class="code-comment">→ 改为你的字体</span></span>
+<span class="code-line">Spacing:   16px base  <span class="code-comment">→ 改为你的节奏</span></span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># Claude 自动推导的变化</span></span>
+<span class="code-line">--color-primary-hover   <span class="code-comment">→ 自动调深 10%</span></span>
+<span class="code-line">--color-primary-light   <span class="code-comment">→ 自动加白 90%</span></span>
+<span class="code-line">--spacing-sm/lg/xl      <span class="code-comment">→ 按 base 重新计算</span></span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">定制要点</span>
+          <div class="translation-lines">
+            <p class="tl">只需改 3 个核心值，Claude 推导整个系统</p>
+            <p class="tl">品牌色是影响最大的单一改动</p>
+            <p class="tl">字体替换会自动匹配 Google Fonts</p>
+            <p class="tl">间距改变会影响所有组件的节奏感</p>
+            <p class="tl">定制的 DESIGN.md 保存后可以反复复用</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="icon-rows animate-in stagger-children">
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-actor-1)">🎯</div>
+          <div>
+            <strong>定制时的常见错误</strong>
+            <p>不要只改颜色不改间距——颜色和间距是一体的。暗色主题通常需要更大的间距来保持呼吸感，而亮色主题可以更紧凑。如果你从 Stripe（亮色）切换到深夜模式，记得同步增大 spacing-base。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-actor-2)">💡</div>
+          <div>
+            <strong>验证定制效果的最佳方法</strong>
+            <p>生成后不要只看 index.html demo——重点检查 preview/ 目录里的颜色卡片和组件卡片。这些独立的预览卡片能帮你快速发现配色不协调、间距不一致等问题，比看完整页面更容易定位问题。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="quiz-container animate-in" id="quiz-module4">
+        <div class="quiz-question-block"
+             data-correct="option-b"
+             data-explanation-right="方式 B 更适合想快速出页面的人——在聊天中附加 DESIGN.md 并让它创建设计系统，然后直接开始请求具体页面。"
+             data-explanation-wrong="想想两种方式的区别：一个从系统骨架出发，一个从具体页面出发。哪个更快看到结果？">
+          <h3 class="quiz-question">你想快速做一个定价页面，哪种方式更适合？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>方式 A：从设计系统开始，一步步构建</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>方式 B：从原型开始，直接让 Claude 出页面</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重试</button>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- 模块 5: 实战技巧 -->
+<section class="module" id="module-5">
+  <div class="module-content">
+    <div class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">实战技巧</h1>
+      <p class="module-subtitle">让你的 DESIGN.md 发挥最大价值</p>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">四个黄金法则</h2>
+      <div class="pattern-cards animate-in stagger-children">
+        <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">🆕</div>
+          <h4 class="pattern-title">用新项目开始</h4>
+          <p class="pattern-desc">Claude Design 会把设计系统锚定到项目上。在旧项目里混品牌会弄乱 token。新项目 = 干净起点。</p>
+        </div>
+        <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">📱</div>
+          <h4 class="pattern-title">持续要页面</h4>
+          <p class="pattern-desc">系统搭好后，直接说"做个定价页"或"加个空状态"——Claude 会自动保持品牌一致，因为你已经有系统了。</p>
+        </div>
+        <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">🔀</div>
+          <h4 class="pattern-title">要求变体</h4>
+          <p class="pattern-desc">亮色/暗色、紧凑/舒适、营销风/应用风——Claude 能基于基础 token 干净地派生出变体。</p>
+        </div>
+        <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+          <div class="pattern-icon" style="background: var(--color-actor-4)">💾</div>
+          <h4 class="pattern-title">导出 SKILL.md</h4>
+          <p class="pattern-desc">保存到你的 skills 文件夹，未来任何 Claude 项目都能召唤相同美学，不用重新上传 DESIGN.md。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">推荐搭配</h2>
+      <div class="icon-rows animate-in stagger-children">
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-actor-1)">🏎️</div>
+          <div>
+            <strong>需要速度感？→ Tesla</strong>
+            <p>极致减法设计、全视口摄影、Universal Sans 字体。适合产品展示、科技感项目。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-actor-2)">💎</div>
+          <div>
+            <strong>需要高级感？→ Bugatti</strong>
+            <p>影院级纯黑、单色极简、纪念碑式大字体。适合奢侈品、高端 SaaS。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-actor-3)">🎵</div>
+          <div>
+            <strong>需要活力感？→ Spotify</strong>
+            <p>深色底+亮绿强调、大胆排版、专辑封面风格。适合媒体、娱乐、内容平台。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-actor-4)">🏢</div>
+          <div>
+            <strong>需要专业感？→ Linear</strong>
+            <p>超极简、精确、紫色点缀。适合 B2B SaaS、开发者工具、效率应用。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <div class="callout callout-accent animate-in">
+        <div class="callout-icon">🚀</div>
+        <div class="callout-content">
+          <strong class="callout-title">你准备好了！</strong>
+          <p>现在你已经理解了 DESIGN.md 的理念、68 套灵感的分类、9 大结构章节、使用流程和实战技巧。去 <a href="https://github.com/VoltAgent/awesome-claude-design" style="color: var(--color-accent)">GitHub 仓库</a> 选一套你喜欢的风格，开始你的下一个项目吧。</p>
+        </div>
+      </div>
+
+      <div class="callout callout-info animate-in">
+        <div class="callout-icon">🎯</div>
+        <div class="callout-content">
+          <strong class="callout-title">进阶技巧：混合多种风格</strong>
+          <p>你不是只能选一套 DESIGN.md——高级用法是把两三套风格的元素混合起来。例如：用 Linear 的间距和布局系统 + Spotify 的配色活力 + Stripe 的组件精致度。方法是在 DESIGN.md 的每个章节中选择性引用不同风格的规则。Claude 会自动处理冲突（当两个风格矛盾时，优先使用第一个引用的规则）。</p>
+        </div>
+      </div>
+
+      <div class="icon-rows animate-in stagger-children">
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-actor-1)">🔧</div>
+          <div>
+            <strong>调试不一致的输出</strong>
+            <p>如果 Claude 生成的页面风格不一致，检查你的 DESIGN.md 是否有矛盾的规则。常见问题：第 2 章说「圆角 8px」但第 4 章说「按钮 sharp edges」——Claude 会随机选一个。解决方法：在「应该做/不应该做」章节中明确优先级。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-actor-2)">📱</div>
+          <div>
+            <strong>响应式断点的注意事项</strong>
+            <p>DESIGN.md 第 8 章定义了响应式行为，但 Claude 生成移动端布局时可能过度简化。建议在 prompt 中明确说「保持桌面端的间距节奏，不要在移动端突然改变品牌感」。这样可以避免移动端看起来像另一个产品。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-actor-3)">🔄</div>
+          <div>
+            <strong>版本迭代策略</strong>
+            <p>把 DESIGN.md 当代码管理——每次品牌升级都更新版本号，用 git 追踪变化。当你的设计语言进化时，只需要更新 DESIGN.md 然后让 Claude 重新生成，所有页面自动保持一致。这比手动改 50 个页面的 CSS 效率高几个数量级。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">快速启动命令</span>
+          <pre><code><span class="code-line"><span class="code-comment"># 1. 克隆仓库</span></span>
+<span class="code-line">git clone https://github.com/VoltAgent/awesome-claude-design</span>
+<span class="code-line"><span class="code-comment"># 2. 浏览目录，选择你喜欢的风格</span></span>
+<span class="code-line">ls designs/</span>
+<span class="code-line"><span class="code-comment"># 3. 打开 claude.ai/design</span></span>
+<span class="code-line"><span class="code-comment"># 4. 创建新设计系统 → 上传 DESIGN.md</span></span>
+<span class="code-line"><span class="code-comment"># 5. 等待生成 → 下载 → 开始构建</span></span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">启动步骤</span>
+          <div class="translation-lines">
+            <p class="tl">克隆仓库到本地，浏览所有设计风格</p>
+            <p class="tl">每个设计都有独立的文件夹和 DESIGN.md</p>
+            <p class="tl">打开 Claude Design 工作区</p>
+            <p class="tl">上传你选好的 DESIGN.md 文件</p>
+            <p class="tl">几分钟内获得完整设计系统</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="quiz-container animate-in" id="quiz-module5">
+        <div class="quiz-question-block"
+             data-correct="option-c"
+             data-explanation-right="保存 SKILL.md 到你的 skills 文件夹。这是 4 个黄金法则之一——未来任何 Claude 项目都能直接召唤相同美学风格。"
+             data-explanation-wrong="想想怎么让设计风格在不同项目间复用。哪个文件是为此设计的？">
+          <h3 class="quiz-question">你在项目 A 中用 Stripe 的 DESIGN.md 生成了完美的设计系统。如何在项目 B 中复用相同风格？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>重新下载 DESIGN.md 再上传一遍</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>复制项目 A 的 CSS 文件到项目 B</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>导出 SKILL.md 到 skills 文件夹，在项目 B 中直接召唤</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">重试</button>
+      </div>
+    </div>
+  </div>
+  <div class="callout callout-accent">
+    <strong>微调扩展标记——进阶练习</strong>：本课程持续更新中。掌握基础概念后，建议结合实际项目反复练习，将知识内化为直觉。关注项目 GitHub 获取最新版本和社区讨论。每一条设计建议都来自真实项目经验，反复实践才能形成肌肉记忆。建议从一个小项目开始，逐步应用课程中的设计原则，在实践中体会"好的设计"与"够用的设计"之间的平衡。
+  </div>
+</section>
+  </main>
+
+</body>
+</html>

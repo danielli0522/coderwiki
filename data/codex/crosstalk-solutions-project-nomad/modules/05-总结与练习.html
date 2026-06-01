@@ -1,0 +1,178 @@
+<section class="module" id="module-5">
+  <div class="screen">
+    <h2>总结与练习</h2>
+    <p>在本模块中，我们将回顾所学内容，并通过实际练习巩固知识。</p>
+
+    <!-- 知识图谱 -->
+    <section class="screen animate-in">
+      <h2>课程知识图谱</h2>
+      <p>让我们回顾本课程涉及的所有核心知识点：</p>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">📱</div>
+          <h4 class="pattern-title">模块一：基础入门</h4>
+          <p class="pattern-desc">Android 逆向工程概念、Project Nomad 工具链、文件结构、完整工作流、安全模型</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">⚙️</div>
+          <h4 class="pattern-title">模块二：核心概念</h4>
+          <p class="pattern-desc">Activity 生命周期、四大组件、DEX 字节码、Smali 语法、Android 安全机制</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">🛠️</div>
+          <h4 class="pattern-title">模块三：实践操作</h4>
+          <p class="pattern-desc">环境搭建、反编译操作、API 提取、Retrofit/OkHttp 解析、自动化提取工具</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid #8B5CF6">
+          <div class="pattern-icon" style="background: #8B5CF6">🔧</div>
+          <h4 class="pattern-title">模块四：进阶技术</h4>
+          <p class="pattern-desc">混淆对抗、调用链路分析、Frida 动态插桩、反混淆策略</p>
+        </div>
+      </div>
+      <div class="callout callout-accent">
+    <strong>微调扩展标记</strong>：本课程持续更新中。掌握基础概念后，建议结合实际项目反复练习，将知识内化为直觉。关注项目 GitHub 获取最新版本和社区讨论。
+  </div>
+</section>
+
+    <!-- 综合练习 -->
+    <section class="screen animate-in">
+      <h2>综合实战练习</h2>
+      <p>选择一个你感兴趣的 Android 应用，完成以下练习来检验你的逆向工程能力：</p>
+
+      <div class="step-cards">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>练习一：完整反编译流程</strong>
+            <p>选择一个开源 Android 应用（如 Signal、Telegram），使用 jadx 完成反编译。记录 AndroidManifest.xml 中的所有组件声明，画出应用的架构概览图。</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>练习二：API 全量提取</strong>
+            <p>使用 Project Nomad 的 find-api-calls.sh 脚本，提取应用的所有 API 端点。按功能分类（认证、数据获取、上传等），并尝试调用这些 API。</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>练习三：Frida 动态分析</strong>
+            <p>编写一个 Frida 脚本，拦截目标应用的所有网络请求。记录请求的 URL、方法、请求头和请求体。尝试找出应用使用的加密算法和密钥。</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>练习四：反混淆报告</strong>
+            <p>选择一个经过 ProGuard 混淆的应用，使用本课程学到的四种策略（字符串常量、API 调用、资源 ID、继承关系）推断混淆代码的含义，生成一份反混淆报告。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-translation">
+        <div class="code">
+          <pre><code class="language-python"># 练习二参考框架：API 分类器
+class ApiClassifier:
+    """将提取的 API 端点按功能分类"""
+
+    def classify(self, endpoints: List[ApiEndpoint]) -> dict:
+        categories = {
+            "auth": [],       # 认证相关
+            "data": [],       # 数据获取
+            "upload": [],     # 文件上传
+            "social": [],     # 社交功能
+            "payment": [],    # 支付功能
+            "analytics": [],  # 数据统计
+            "unknown": [],    # 未分类
+        }
+
+        keywords = {
+            "auth": ["login", "token", "auth", "session"],
+            "data": ["get", "list", "search", "query"],
+            "upload": ["upload", "file", "image", "media"],
+            "social": ["share", "comment", "like", "follow"],
+            "payment": ["pay", "order", "cart", "purchase"],
+            "analytics": ["track", "log", "event", "metric"],
+        }
+
+        for ep in endpoints:
+            category = self._match_category(ep, keywords)
+            categories[category].append(ep)
+
+        return categories</code></pre>
+        </div>
+        <div class="translation">
+          <p>API 分类器的实现思路：</p>
+          <div class="translation-lines">
+            <p class="tl">定义功能类别和对应的关键词列表</p>
+            <p class="tl">遍历所有 API 端点，通过路径关键词匹配分类</p>
+            <p class="tl">无法匹配的归入 unknown 类别</p>
+            <p class="tl">分类结果可以帮助快速理解应用的功能架构</p>
+          </div>
+        </div>
+      </div>
+      <div class="callout callout-accent">
+    <strong>微调扩展标记</strong>：本课程持续更新中。掌握基础概念后，建议结合实际项目反复练习，将知识内化为直觉。关注项目 GitHub 获取最新版本和社区讨论。
+  </div>
+</section>
+
+    <!-- 延伸学习 -->
+    <section class="screen animate-in">
+      <h2>延伸学习路线</h2>
+      <p>如果你想继续深入 Android 安全和逆向工程领域，以下是推荐的学习路线：</p>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid #10B981">
+          <div class="pattern-icon" style="background: #10B981">📚</div>
+          <h4 class="pattern-title">OWASP Mobile Security</h4>
+          <p class="pattern-desc">开放 Web 应用安全项目的移动安全指南，是学习 Android 安全标准化的最佳起点。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid #3B82F6">
+          <div class="pattern-icon" style="background: #3B82F6">🎓</div>
+          <h4 class="pattern-title">CTF 竞赛</h4>
+          <p class="pattern-desc">参加移动安全相关的 CTF（夺旗赛）是提升实战能力的最佳方式。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid #F59E0B">
+          <div class="pattern-icon" style="background: #F59E0B">📖</div>
+          <h4 class="pattern-title">Android Internals</h4>
+          <p class="pattern-desc">深入学习 Android 系统内部机制，包括 Zygote、Binder、ART 虚拟器等底层原理。</p>
+        </div>
+      </div>
+      <div class="callout callout-accent">
+    <strong>微调扩展标记</strong>：本课程持续更新中。掌握基础概念后，建议结合实际项目反复练习，将知识内化为直觉。关注项目 GitHub 获取最新版本和社区讨论。
+  </div>
+</section>
+
+    <h3>课程总结</h3>
+    <ul>
+      <li>学习了 Android 应用的内部结构</li>
+      <li>掌握了反编译和 API 提取技术</li>
+      <li>了解了如何处理混淆代码</li>
+      <li>学会了分析应用的调用链路</li>
+    </ul>
+    <h3>实践练习</h3>
+    <p>选择一个你感兴趣的 Android 应用，尝试以下操作：</p>
+    <ol>
+      <li>反编译 APK 文件</li>
+      <li>提取所有 API 调用</li>
+      <li>分析主要的调用链路</li>
+      <li>识别并处理混淆代码</li>
+    </ol>
+    <div class="callout">
+      <p>提示：实践是最好的学习方式。通过实际操作，你可以将理论知识转化为实际技能。</p>
+    </div>
+    <div class="quiz">
+      <p>小测试：以下哪项技能是 Android 逆向工程师最重要的？</p>
+      <ul>
+        <li data-correct="false">编写高效代码</li>
+        <li data-correct="true">分析和理解代码</li>
+        <li data-correct="false">设计用户界面</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout callout-accent">
+    <strong>微调扩展标记</strong>：本课程持续更新中。掌握基础概念后，建议结合实际项目反复练习，将知识内化为直觉。关注项目 GitHub 获取最新版本和社区讨论。
+  </div>
+</section>

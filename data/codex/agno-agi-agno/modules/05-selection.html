@@ -1,0 +1,22 @@
+<section class="module" id="module-5" style="background: var(--color-bg)"><div class="module-content"><header class="module-header animate-in"><span class="module-number">05</span><h1 class="module-title">架构选型：什么时候该选 agno</h1><p class="module-subtitle">用技术负责人视角判断适用边界、替代方案和成本。</p></header><div class="module-body">
+    <section class="screen animate-in"><h2 class="screen-heading">问题与哲学</h2><div class="badge-list"><div class="badge-item"><code>Problem</code><span>Framework to build, run, and manage agent platforms and multi-agent applications.</span></div><div class="badge-item"><code>Stars</code><span>约 40,413 stars，说明它处在高关注、高反馈密度的开源区间。</span></div><div class="badge-item"><code>Language</code><span>Python 是主要实现语言，决定二次开发和部署团队要求。</span></div><div class="badge-item"><code>Use when</code><span>你需要把 AI 能力工程化，而不是只做一次 prompt demo。</span></div></div></section>
+    <section class="screen animate-in"><h2 class="screen-heading">与替代方案对比</h2><table><thead><tr><th>方案</th><th>适合场景</th><th>主要代价</th></tr></thead><tbody><tr><td>agno</td><td><ul><li>需要开源可控</li><li>需要理解并改造内部链路</li></ul></td><td><ul><li>要自己承担部署和升级</li><li>需要读懂配置与边界</li></ul></td></tr><tr><td>云厂商托管能力</td><td><ul><li>快速上线</li><li>团队不想维护底层</li></ul></td><td><ul><li>可控性弱</li><li>成本和锁定风险更高</li></ul></td></tr><tr><td>从零自研</td><td><ul><li>强定制</li><li>业务差异极大</li></ul></td><td><ul><li>周期长</li><li>容易重复造轮子</li></ul></td></tr></tbody></table></section>
+    <section class="screen animate-in"><h2 class="screen-heading">代码翻译：选型要落到接口</h2><div class="translation-block animate-in"><div class="translation-code"><span class="translation-label">CODE</span><pre><code>interface AdoptionDecision {
+  repo: "agno-agi/agno";
+  fit: "adopt" | "pilot" | "avoid";
+  risks: string[];
+  verification: string[];
+}</code></pre></div><div class="translation-english"><span class="translation-label">中文解释</span><div class="translation-lines"><p class="tl">repo 记录本次评估的开源项目，避免口头判断丢失上下文。</p><p class="tl">fit 不是简单喜欢或不喜欢，而是采用、试点、暂缓三种决策。</p><p class="tl">risks 写明部署、成本、协议、性能和维护风险。</p><p class="tl">verification 写出真正要跑的验证命令和验收页面。</p></div></div></div></section>
+    <section class="screen animate-in"><h2 class="screen-heading">适合 / 不适合</h2><div class="two-column"><div class="callout callout-success"><div class="callout-content"><strong class="callout-title">适合</strong><ul><li>团队愿意阅读源码并做小步集成。</li><li>需要掌控模型、工具、数据或运行环境。</li><li>希望把 AI 能力变成可复用基础设施。</li></ul></div></div><div class="callout callout-error"><div class="callout-content"><strong class="callout-title">不适合</strong><ul><li>只想要一次性演示，不准备维护。</li><li>没有日志、权限、密钥和成本治理意识。</li><li>业务需求和项目定位完全不匹配。</li></ul></div></div></div><div class="quiz-container" id="quiz-agno-agi-agno-5">
+    <div class="quiz-question-block" data-correct="option-b" data-explanation-right="答对了。要看它是否匹配你的输入、运行边界、团队能力和长期维护成本。" data-explanation-wrong="再想想：这个项目的核心价值通常藏在输入、编排、模型调用、状态保存这几层之间。">
+      <h3 class="quiz-question">选择 agno 的核心判断不是“它火不火”，而是什么？</h3>
+      <div class="quiz-options">
+        <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>它是否今天排在榜单第一</span></button>
+        <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>它是否匹配业务边界、团队能力和维护成本</span></button>
+        <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>它的 logo 是否好看</span></button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+    <button class="quiz-check-btn" onclick="checkQuiz('quiz-agno-agi-agno-5')">检查答案</button>
+    <button class="quiz-reset-btn" onclick="resetQuiz('quiz-agno-agi-agno-5')">再试一次</button>
+  </div></section></div></div></section>

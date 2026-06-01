@@ -1,0 +1,167 @@
+<!-- Module 4: 核心工具：输入、导航、调试 -->
+<section class="module" id="module-4">
+  <div class="module-content">
+
+    <div class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">核心工具：输入、导航、调试</h1>
+      <p class="module-subtitle">深入理解最常用的三类工具，从源码层面掌握它们的工作原理。</p>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">输入工具：从 uid 到真实点击</h2>
+      <p>输入工具的核心流程：<code>uid</code>（文本快照中的元素标识符） &rarr; <code>getElementByUid</code>（查找 DOM 元素） &rarr; <code>waitForEventsAfterAction</code>（执行操作并等待稳定）。</p>
+
+      <div class="translation-block">
+        <div class="translation-code">
+          <span class="translation-label">input.ts — click 工具</span>
+          <span class="code-line">handler: <span class="code-keyword">async</span> (request, response) =&gt; {</span>
+          <span class="code-line">  <span class="code-keyword">const</span> uid = request.params.uid;</span>
+          <span class="code-line">  <span class="code-comment">// 1. 通过 uid 获取真实 DOM 元素</span></span>
+          <span class="code-line">  <span class="code-keyword">const</span> handle = <span class="code-keyword">await</span> request.page.<span class="code-function">getElementByUid</span>(uid);</span>
+          <span class="code-line">  <span class="code-keyword">const</span> aXNode = request.page.<span class="code-function">getAXNodeByUid</span>(uid);</span>
+          <span class="code-line">  <span class="code-comment">// 2. 特殊处理：原生 select 的 option</span></span>
+          <span class="code-line">  <span class="code-keyword">const</span> shouldSelectNativeOption =</span>
+          <span class="code-line">    !request.params.dblClick &amp;&amp; aXNode?.role === <span class="code-string">'option'</span>;</span>
+          <span class="code-line">  <span class="code-keyword">try</span> {</span>
+          <span class="code-line">    <span class="code-comment">// 3. 包装在 waitForEventsAfterAction 中</span></span>
+          <span class="code-line">    <span class="code-keyword">const</span> result = <span class="code-keyword">await</span> page.<span class="code-function">waitForEventsAfterAction</span>(<span class="code-keyword">async</span> () =&gt; {</span>
+          <span class="code-line">      <span class="code-keyword">if</span> (shouldSelectNativeOption) {</span>
+          <span class="code-line">        <span class="code-keyword">await</span> <span class="code-function">selectNativeSelectOption</span>(handle);</span>
+          <span class="code-line">        <span class="code-keyword">return</span>;</span>
+          <span class="code-line">      }</span>
+          <span class="code-line">      <span class="code-keyword">await</span> handle.<span class="code-function">asLocator</span>().<span class="code-function">click</span>({</span>
+          <span class="code-line">        count: request.params.dblClick ? <span class="code-number">2</span> : <span class="code-number">1</span>,</span>
+          <span class="code-line">      });</span>
+          <span class="code-line">    });</span>
+          <span class="code-line">    response.<span class="code-function">appendResponseLine</span>(<span class="code-string">'Successfully clicked'</span>);</span>
+          <span class="code-line">    response.<span class="code-function">attachWaitForResult</span>(result);</span>
+          <span class="code-line">  } <span class="code-keyword">finally</span> { <span class="code-keyword">void</span> handle.<span class="code-function">dispose</span>(); }</span>
+          <span class="code-line">},</span>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文解读</span>
+          <div class="translation-lines">
+            <div class="tl">第 1 步：从快照中查找 uid 对应的无障碍树节点，再获取真实 DOM 元素句柄。</div>
+            <div class="tl">第 2 步：如果目标是原生 select 的 option，走特殊的 fill 路径而非 click。</div>
+            <div class="tl">第 3 步：所有操作都包装在 waitForEventsAfterAction 中，确保操作后 DOM 稳定。</div>
+            <div class="tl">最后：无论成功或失败都要 dispose ElementHandle，防止内存泄漏。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">导航工具：页面管理</h2>
+      <p>导航工具管理浏览器的标签页生命周期。核心是 <code>navigate_page</code>，它支持四种导航模式：</p>
+
+      <div class="icon-rows stagger-children">
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-accent-light); color: var(--color-accent);">url</div>
+          <div>
+            <strong>url 模式</strong>
+            <p>导航到指定 URL。自动等待 load 事件，支持超时配置。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-info-light); color: var(--color-info);">back</div>
+          <div>
+            <strong>back / forward 模式</strong>
+            <p>浏览器历史前进/后退。适合 LLM 在多步骤调试中回退。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-success-light); color: var(--color-success);">reload</div>
+          <div>
+            <strong>reload 模式</strong>
+            <p>重新加载页面。支持 ignoreCache 参数强制刷新。可注入 initScript 在页面加载前执行脚本。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-info animate-in">
+        <span class="callout-icon">&#x2139;</span>
+        <div class="callout-content">
+          <span class="callout-title">URL 拦截</span>
+          <p>navigate_page 支持 <code>allowList</code> 参数，使用 URLPattern API 拦截非白名单的导航请求。这在自动化测试中非常有用，可以阻止第三方追踪脚本。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">调试工具：快照与截图</h2>
+      <p><code>take_snapshot</code> 是最常用的调试工具，它基于 <span class="term" data-definition="Accessibility Tree —— 浏览器将 DOM 转换为语义化的树结构，用于辅助功能和自动化测试。">无障碍树</span> 生成页面元素的文本表示，每个元素附带一个 <code>uid</code> 用于后续操作。</p>
+
+      <div class="translation-block">
+        <div class="translation-code">
+          <span class="translation-label">TextSnapshot.ts — 快照核心</span>
+          <span class="code-line"><span class="code-keyword">static async</span> <span class="code-function">create</span>(page: McpPage, options): Promise&lt;TextSnapshot&gt; {</span>
+          <span class="code-line">  <span class="code-comment">// 1. 获取 a11y 树快照</span></span>
+          <span class="code-line">  <span class="code-keyword">const</span> rootNode = <span class="code-keyword">await</span> page.pptrPage.accessibility</span>
+          <span class="code-line">    .<span class="code-function">snapshot</span>({includeIframes: <span class="code-keyword">true</span>});</span>
+          <span class="code-line"></span>
+          <span class="code-line">  <span class="code-comment">// 2. 为每个节点分配稳定 uid</span></span>
+          <span class="code-line">  <span class="code-keyword">const</span> assignIds = (node: SerializedAXNode): TextSnapshotNode =&gt; {</span>
+          <span class="code-line">    <span class="code-keyword">const</span> backendNodeId = node.backendNodeId;</span>
+          <span class="code-line">    <span class="code-keyword">const</span> uniqueId = <span class="code-string">`${node.loaderId}_${backendNodeId}`</span>;</span>
+          <span class="code-line">    <span class="code-comment">// 复用已有 uid（跨导航保持稳定）</span></span>
+          <span class="code-line">    <span class="code-keyword">const</span> existingId = uniqueBackendNodeIdToMcpId</span>
+          <span class="code-line">      .<span class="code-function">get</span>(uniqueId);</span>
+          <span class="code-line">    <span class="code-keyword">if</span> (existingId) <span class="code-keyword">return</span> existingId;</span>
+          <span class="code-line">    <span class="code-comment">// 分配新 uid（如 "E12"）</span></span>
+          <span class="code-line">    <span class="code-keyword">const</span> id = <span class="code-string">`E${idCounter++}`</span>;</span>
+          <span class="code-line">    uniqueBackendNodeIdToMcpId.<span class="code-function">set</span>(uniqueId, id);</span>
+          <span class="code-line">    <span class="code-keyword">return</span> id;</span>
+          <span class="code-line">  };</span>
+          <span class="code-line">}</span>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文解读</span>
+          <div class="translation-lines">
+            <div class="tl">第 1 步：调用 Puppeteer 的 accessibility.snapshot() 获取整棵无障碍树。</div>
+            <div class="tl">第 2 步：递归遍历每个节点，为它分配一个 uid。</div>
+            <div class="tl">关键优化：基于 loaderId + backendNodeId 组合键，跨快照复用 uid。同一元素在多次快照中保持相同 uid。</div>
+            <div class="tl">uid 格式为 "E1", "E2" 等，简洁且有序。LLM 通过这个 uid 来引用页面元素。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">Bug 挑战：找出代码中的问题</h2>
+      <p>下面是一段模拟的工具处理器代码，其中有一行有 bug。试着找出来：</p>
+
+      <div class="bug-challenge">
+        <h3>点击下面你认为有 bug 的行</h3>
+        <div class="bug-code">
+          <div class="bug-line" onclick="checkBugLine(this, false)"><span class="line-num">1</span><code>async function handleClick(uid, page) {</code></div>
+          <div class="bug-line" onclick="checkBugLine(this, false)" data-hint="这行是正确的，Puppeteer 需要 await。"><span class="line-num">2</span><code>  const handle = await page.getElementByUid(uid);</code></div>
+          <div class="bug-line" onclick="checkBugLine(this, true)" data-explanation="正确！操作完成后没有 dispose ElementHandle，会导致 Puppeteer 的 DOM 引用泄漏。源码中每个工具的 finally 块都有 void handle.dispose()。" data-hint="仔细看看 ElementHandle 的生命周期管理。"><span class="line-num">3</span><code>  await handle.asLocator().click();</code></div>
+          <div class="bug-line" onclick="checkBugLine(this, false)"><span class="line-num">4</span><code>  return 'Successfully clicked';</code></div>
+          <div class="bug-line" onclick="checkBugLine(this, false)"><span class="line-num">5</span><code>}</code></div>
+        </div>
+        <div class="bug-feedback"></div>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">知识检测</h2>
+      <div class="quiz-container" id="quiz-4">
+        <div class="quiz-question-block" data-correct="a" data-explanation-right="TextSnapshot 基于 loaderId + backendNodeId 组合键来复用 uid，确保同一 DOM 元素在多次快照中保持相同的 uid。" data-explanationwrong="重新看看 TextSnapshot.create 中 uid 分配的逻辑。">
+          <p class="quiz-question">TextSnapshot 如何保证同一元素在多次快照中 uid 不变？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)"><span class="quiz-option-radio"></span>使用 loaderId + backendNodeId 组合键复用 uid</button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)"><span class="quiz-option-radio"></span>基于元素的 CSS 选择器生成固定 uid</button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)"><span class="quiz-option-radio"></span>每次快照都重新分配 uid</button>
+            <button class="quiz-option" data-value="d" onclick="selectOption(this)"><span class="quiz-option-radio"></span>使用 XPath 作为 uid</button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-4')">Check Answers</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-4')">Reset</button>
+      </div>
+    </div>
+
+  </div>
+</section>

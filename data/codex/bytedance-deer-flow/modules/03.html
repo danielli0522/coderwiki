@@ -1,0 +1,208 @@
+
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">消息在系统中如何流动</h1>
+      <p class="module-subtitle">从你按下发送到收到回答，一条消息经历了网关鉴权、中间件加工、Agent 推理、工具调用、结果汇总的完整旅程</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: 完整请求流程 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">一条请求的完整旅程</h2>
+        <p>把数据流想象成一条快递路线。你的消息是包裹，每经过一个站点都会被加工、检查、转发。</p>
+
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <p>前端发送<br/>HTTP POST</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <p>Auth 中间件<br/>验证身份</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <p>CSRF 中间件<br/>防伪造检查</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">4</div>
+            <p>Thread Router<br/>找到会话</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">5</div>
+            <p>LangGraph<br/>启动 Agent</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Gateway 代码解读 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Gateway：安检门 + 调度中心</h2>
+        <p>Gateway 的 <code>lifespan</code> 函数是整个后端启动的核心——它初始化了 LangGraph 运行时、启动 IM 渠道服务、处理管理员账号迁移：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">async def</span> <span class="code-function">lifespan</span>(app: FastAPI):</span>
+<span class="code-line">    startup_config = get_app_config()</span>
+<span class="code-line">    apply_logging_level(</span>
+<span class="code-line">        startup_config.log_level)</span>
+<span class="code-line">    <span class="code-keyword">async with</span> langgraph_runtime(</span>
+<span class="code-line">        app, startup_config):</span>
+<span class="code-line">        <span class="code-keyword">await</span> _ensure_admin_user(app)</span>
+<span class="code-line">        channel_service = \</span>
+<span class="code-line">            <span class="code-keyword">await</span> start_channel_service()</span>
+<span class="code-line">        <span class="code-keyword">yield</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">应用启动时的生命周期函数——在第一个请求到来之前执行。</p>
+              <p class="tl">加载全局配置（模型、端口、日志级别等）。</p>
+              <p class="tl">根据配置设置日志详细程度。</p>
+              <p class="tl">初始化 LangGraph 运行时——这是 Agent 执行引擎的核心，包括检查点存储、运行管理器。</p>
+              <p class="tl">确保管理员账号存在，首次启动会提示你访问 /setup 创建。</p>
+              <p class="tl">启动 IM 渠道服务（飞书、钉钉等），这样你就能通过这些渠道和 Agent 对话。</p>
+              <p class="tl">yield 表示"应用准备好了，可以接收请求"。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: 中间件管道的数据变化 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">中间件管道：消息的加工流水线</h2>
+        <p>你的消息到达 Agent 之前，会经过一系列中间件的加工。想象一条汽车流水线——每经过一个工位，车身就被装上新的零件：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"用户消息到达：包含原始文本和上传文件"},
+          {"highlight":"flow-actor-2","label":"DynamicContextMiddleware 注入当前日期和记忆上下文","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-3","label":"SummarizationMiddleware 检查对话长度，过长则自动摘要","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-4","label":"TitleMiddleware 给对话生成一个简洁标题","packet":true,"from":"actor-3","to":"actor-4"},
+          {"highlight":"flow-actor-5","label":"MemoryMiddleware 把当前对话加入长期记忆队列","packet":true,"from":"actor-4","to":"actor-5"},
+          {"highlight":"flow-actor-6","label":"ClarificationMiddleware 判断是否需要向用户提问澄清","packet":true,"from":"actor-5","to":"actor-6"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">📨</div>
+              <span>原始消息</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">📅</div>
+              <span>上下文</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">📝</div>
+              <span>摘要</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">🏷️</div>
+              <span>标题</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-5">
+              <div class="flow-actor-icon">🧠</div>
+              <span>记忆</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-6">
+              <div class="flow-actor-icon">❓</div>
+              <span>澄清</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击 "Next Step" 查看中间件加工过程</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">Next Step</button>
+            <button class="btn flow-reset-btn">Restart</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">设计精妙之处</strong>
+            <p>系统提示词（System Prompt）是静态的，而日期和记忆通过 DynamicContextMiddleware 作为 <code>&lt;system-reminder&gt;</code> 注入到第一条 HumanMessage 中。这样做的目的是最大化前缀缓存（prefix caching）的命中率——所有用户共享同一段系统提示词，只有动态部分不同。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: 子 Agent 的调度 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">子 Agent 调度：并行执行的秘密</h2>
+        <p>当 Lead Agent 决定拆分任务时，它通过 <code>task</code> 工具调用 <code>SubagentExecutor</code>。这段代码展示了子 Agent 如何被创建和执行：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line">MAX_CONCURRENT_SUBAGENTS = <span class="code-number">3</span></span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">SubagentExecutor</span>:</span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">execute_async</span>(self, task):</span>
+<span class="code-line">        task_id = uuid.uuid4()[:<span class="code-number">8</span>]</span>
+<span class="code-line">        result = SubagentResult(</span>
+<span class="code-line">            task_id=task_id,</span>
+<span class="code-line">            status=SubagentStatus.PENDING)</span>
+<span class="code-line">        _scheduler_pool.submit(</span>
+<span class="code-line">            run_task)</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">硬性并发上限：最多 3 个子 Agent 同时运行。超出部分会被静默丢弃！</p>
+              <p class="tl">子 Agent 执行器——每个子任务创建一个独立的执行实例。</p>
+              <p class="tl">异步执行入口：不阻塞主 Agent，在后台线程池中运行。</p>
+              <p class="tl">为每个子任务生成唯一 ID，用于追踪状态。</p>
+              <p class="tl">创建结果容器——记录任务状态、开始/结束时间、token 消耗。</p>
+              <p class="tl">提交到线程池（最多 3 个调度线程），开始后台执行。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Glossary terms inline + Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验你的理解</h2>
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！DynamicContextMiddleware 把当前日期和记忆注入到消息中，而系统提示词本身是静态的。这种设计让所有用户共享同一段缓存，大幅降低 LLM 调用成本。"
+               data-explanation-wrong="考虑一下：系统提示词中有用户特定的信息（如记忆）吗？如果有，每次都需要重新发送整个提示词。但如果只有一小部分不同，能否只让不同的部分动态注入？">
+            <h3 class="quiz-question">为什么 DeerFlow 要把日期和记忆放在 DynamicContextMiddleware 里动态注入，而不是直接写在系统提示词（System Prompt）里？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为系统提示词有长度限制，放不下那么多内容</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>为了让所有用户共享静态系统提示词，最大化 LLM 前缀缓存命中率</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为日期每秒都在变化，无法预写进提示词</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

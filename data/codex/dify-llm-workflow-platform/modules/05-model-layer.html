@@ -1,0 +1,199 @@
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">模型层：厂商无关的统一接口</h1>
+      <p class="module-subtitle">为什么换一个 AI 模型只需要点几下，不需要改代码？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: The USB standard metaphor -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">模型层 = USB 标准接口</h2>
+        <p>USB 发明之前，每个设备都有自己的接口——打印机插头、键盘插头、鼠标插头各不相同，换设备就要换接口。USB 统一了标准，任何设备插进去都能用。</p>
+        <p>Dify 的模型层做的是完全一样的事：不管是 OpenAI、Anthropic、百度千帆还是本地 Ollama，Dify 的工作流代码都用<strong>同一套接口</strong>调用——底层细节被屏蔽掉了。</p>
+
+        <div class="pattern-cards animate-in stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🌐</div>
+            <h4 class="pattern-title">OpenAI / Azure</h4>
+            <p class="pattern-desc">GPT-4o, GPT-4, o1，最广泛使用的商业模型</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🤖</div>
+            <h4 class="pattern-title">Anthropic</h4>
+            <p class="pattern-desc">Claude 3.5 Sonnet，长上下文、代码和分析能力强</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🇨🇳</div>
+            <h4 class="pattern-title">国产模型</h4>
+            <p class="pattern-desc">通义千问、GLM、文心一言——数据合规、国内延迟低</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">🏠</div>
+            <h4 class="pattern-title">本地部署</h4>
+            <p class="pattern-desc">Ollama / LM Studio——数据不出内网，适合高合规要求</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: ModelInstance code -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码翻译：ModelInstance 统一模型实例</h2>
+        <p><code>api/core/model_manager.py</code> 里的 <code>ModelInstance</code> 就是那个"USB 接口"——工作流调用它，不需要知道底层是什么模型：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-keyword">class</span> <span class="code-function">ModelInstance</span>:</span>
+<span class="code-line">  <span class="code-keyword">def</span> <span class="code-function">__init__</span>(</span>
+<span class="code-line">    <span class="code-keyword">self</span>,</span>
+<span class="code-line">    provider_model_bundle,</span>
+<span class="code-line">    model: str,</span>
+<span class="code-line">    credentials: dict | <span class="code-keyword">None</span> = <span class="code-keyword">None</span></span>
+<span class="code-line">  ) -> <span class="code-keyword">None</span>:</span>
+<span class="code-line">    <span class="code-keyword">self</span>.provider = </span>
+<span class="code-line">      provider_model_bundle</span>
+<span class="code-line">        .configuration.provider.provider</span>
+<span class="code-line">    <span class="code-keyword">if</span> credentials <span class="code-keyword">is None</span>:</span>
+<span class="code-line">      credentials = </span>
+<span class="code-line">        <span class="code-keyword">self</span>._fetch_credentials_from_bundle(</span>
+<span class="code-line">          provider_model_bundle, model</span>
+<span class="code-line">        )</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">定义"模型实例"类——代表一个准备好被调用的 AI 模型</p>
+              <p class="tl">构造方法：创建实例时调用</p>
+              <p class="tl">（self 是实例自身）</p>
+              <p class="tl">模型的"套餐"——包含厂商配置、认证信息、负载均衡设置</p>
+              <p class="tl">具体的模型名称，比如 "gpt-4o" 或 "claude-3-5-sonnet"</p>
+              <p class="tl">API 密钥，如果不传就自动从数据库读取</p>
+              <p class="tl">记录这个实例用的是哪家厂商（openai / anthropic / xxx）</p>
+              <p class="tl">如果没有传入密钥</p>
+              <p class="tl">就从数据库（provider_model_bundle）里取出</p>
+              <p class="tl">该厂商为该模型配置的 API 密钥</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Load balancing -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">生产级特性：负载均衡 &amp; 限流保护</h2>
+        <p>只配一个 API Key 在生产中会很快触发 <span class="term" data-definition="限流（Rate Limiting）：API 提供商限制你每分钟/每天能发多少请求。超过就会返回 429 错误——就像高速公路收费站每小时只能放行多少辆车。">限流</span>。Dify 内置了两个生产级保护机制：</p>
+
+        <div class="icon-rows animate-in">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">⚖️</div>
+            <div>
+              <strong>多 Key 负载均衡</strong>
+              <p>配置多个 API Key，Dify 自动在它们之间轮转请求——把总配额叠加起来</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">🔄</div>
+            <div>
+              <strong>自动重试 &amp; Fallback</strong>
+              <p>遇到 <span class="term" data-definition="429 错误：Too Many Requests——你超出了 API 的请求限制。服务器说：稍等一下，别太猛了。">429</span>/<span class="term" data-definition="503 错误：Service Unavailable——服务器暂时不可用，可能是维护或过载。通常过一会儿重试就好了。">503</span> 等错误，自动等待后重试；如果主模型持续失败，切换到备用模型</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning animate-in">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">常见踩坑：只配一个 API Key</strong>
+            <p>Demo 阶段一个 Key 够用。但产品上线后如果有 100 个并发用户，单个 OpenAI Key 的每分钟限额（TPM）会瞬间打满。在 Dify 里提前配置多 Key 负载均衡，避免上线即崩。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Model types -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">不止 LLM：Dify 管理的 5 种模型</h2>
+        <p>很多人以为 Dify 只管理聊天模型，其实它统一管理了 5 种不同用途的模型——每种对应不同的业务场景：</p>
+
+        <div class="badge-list animate-in">
+          <div class="badge-item">
+            <code class="badge-code">LLM</code>
+            <span class="badge-desc">大语言模型——对话、生成、推理（GPT-4o 等）</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">Embedding</code>
+            <span class="badge-desc">文本向量化——用于 RAG 知识库的索引和检索（text-embedding-3 等）</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">Reranker</code>
+            <span class="badge-desc">重排序模型——对检索结果二次打分，提升 RAG 精准度</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">TTS / ASR</code>
+            <span class="badge-desc">语音合成 / 语音识别——文字转语音、语音转文字</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">Moderation</code>
+            <span class="badge-desc">内容审核——过滤有害内容，保护产品安全</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">理解检验</h2>
+
+        <div class="quiz-container" id="quiz-module5">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="对！Dify 的模型抽象层让你无需修改任何工作流代码就能切换模型。这是设计上的关键决策——把模型选择从业务逻辑中解耦出来。"
+               data-explanation-wrong="想想 Dify 设计模型层的目的——它是要让切换模型变得很容易，还是很难？只需要改一个地方就够了。">
+            <h3 class="quiz-question">你用 GPT-4o 搭建了一套工作流，现在想切换到 Claude 3.5 试试效果。需要改多少代码？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>需要重写工作流的所有 LLM 调用代码</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>需要修改几个 API 调用的参数格式</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>在 Dify 界面里的模型配置里切换即可，无需改代码</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！Embedding 模型负责把文本转成向量——这是 RAG 知识库能"理解"文档语义的核心。LLM 是聊天用的，Reranker 是优化检索结果排序用的。"
+               data-explanation-wrong="想想 RAG 的管道：文档被切块后，需要被转成数字向量才能做语义检索——这个"翻译"工作由哪种模型完成？">
+            <h3 class="quiz-question">你在 Dify 里建了一个知识库，上传了 100 份文档。文档内容被转成向量存储时，用的是哪种模型？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>LLM（大语言模型）</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Embedding 模型（文本向量化）</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Reranker 模型（重排序）</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">提交答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">重新作答</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

@@ -1,0 +1,176 @@
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">Agent 组合模式</h1>
+      <p class="module-subtitle">技能、工作区和自动化——如何把 Agent 组合成更强大的系统</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Skills metaphor -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">技能包：给 Agent 的"操作手册"</h2>
+        <p>想象你雇了一个新员工，第一天上班。你不会让他什么都靠猜——你会给他一本操作手册，写着"接到客户投诉时，先查订单状态，再用这个模板回复"。Craft Agents 的<strong>技能（Skills）</strong>就是这个操作手册。</p>
+
+        <div class="step-cards stagger-children">
+          <div class="step-card animate-in">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>技能 = 一段系统提示词（System Prompt）</strong>
+              <p>技能本质上是存储在工作区里的特殊指令，告诉 Agent 在特定场景下如何行动、使用什么语气、遵循哪些规则。</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>用 @ 符号即时调用</strong>
+              <p>对话中输入 @销售分析技能，这个技能的所有指令就立刻生效——就算是进行中的对话也能切换，不需要重开会话。</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>技能可以携带工具</strong>
+              <p>每个技能可以绑定特定的 MCP 工具集。激活"数据分析技能"，自动附带数据库查询工具和可视化工具。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Code translation - messaging gateway router -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码翻译：MessagingGateway 如何路由指令</h2>
+        <p>整个 Craft Agents 的核心是 MessagingGateway。它采用了一种叫 <span class="term" data-definition="Command Pattern（命令模式）是一种软件设计模式：把每个操作封装成一个独立的命令对象，这样你可以把命令存储、排队、撤销——就像把口头指令写成便条纸，随时可以传递和执行。">命令模式（Command Pattern）</span> 的架构：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">export class</span> <span class="code-function">Router</span> {</span>
+<span class="code-line">  <span class="code-keyword">private</span> handlers = <span class="code-keyword">new</span> <span class="code-function">Map</span>&lt;</span>
+<span class="code-line">    <span class="code-keyword">string</span>,</span>
+<span class="code-line">    <span class="code-function">CommandHandler</span></span>
+<span class="code-line">  &gt;();</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-function">register</span>(type: <span class="code-keyword">string</span>, handler: <span class="code-function">CommandHandler</span>) {</span>
+<span class="code-line">    <span class="code-keyword">this</span>.handlers.<span class="code-function">set</span>(type, handler);</span>
+<span class="code-line">  }</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">async</span> <span class="code-function">dispatch</span>(cmd: <span class="code-function">Command</span>) {</span>
+<span class="code-line">    <span class="code-keyword">const</span> handler = <span class="code-keyword">this</span>.handlers.<span class="code-function">get</span>(cmd.type);</span>
+<span class="code-line">    <span class="code-keyword">return</span> handler?.<span class="code-function">execute</span>(cmd);</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">定义一个"路由器"类，类似快递公司的分拣系统</p>
+              <p class="tl">内部维护一张"处理器清单"——命令类型 → 谁来处理它</p>
+              <p class="tl"></p>
+              <p class="tl"></p>
+              <p class="tl">清单是个 Map：key=命令名称，value=处理这种命令的函数</p>
+              <p class="tl"></p>
+              <p class="tl">register 方法：向清单里新增一种命令的处理器</p>
+              <p class="tl">就像在快递分拣台登记："北京的件，交给张三处理"</p>
+              <p class="tl"></p>
+              <p class="tl">dispatch 方法：收到一个命令，查清单，找到对应处理器</p>
+              <p class="tl">从清单里取出这个命令类型的处理器</p>
+              <p class="tl">调用处理器的 execute 方法；如果没找到处理器，什么都不做（?. 是安全调用）</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">为什么用命令模式？</strong>
+            <p>这让系统极度可扩展——要加新功能，只需要 register 一个新的处理器，不需要修改 Router 本身。这是软件工程里的"开闭原则"：对扩展开放，对修改关闭。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Automations -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">自动化：让 Agent 在后台自主运行</h2>
+        <p>Craft Agents 最强大的功能之一是<strong>自动化（Automations）</strong>——基于事件触发的 Agent 任务，不需要你手动开启。这就像给 Agent 设置了一套巡逻规则：</p>
+
+        <div class="badge-list stagger-children">
+          <div class="badge-item animate-in">
+            <code class="badge-code">on:label_change</code>
+            <span class="badge-desc">当工作项标签从"待处理"变为"进行中"时，自动创建 Agent 会话，开始执行相关任务</span>
+          </div>
+          <div class="badge-item animate-in">
+            <code class="badge-code">on:schedule</code>
+            <span class="badge-desc">按时间表触发——比如每周一早上 9 点，自动拉取上周数据并生成周报草稿</span>
+          </div>
+          <div class="badge-item animate-in">
+            <code class="badge-code">on:tool_use</code>
+            <span class="badge-desc">当某个工具被使用时触发——比如每次查询数据库后，自动记录到审计日志</span>
+          </div>
+          <div class="badge-item animate-in">
+            <code class="badge-code">on:session_complete</code>
+            <span class="badge-desc">会话完成时触发——把结果自动同步到 Craft 文档或 Notion 页面</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">应用思考</h2>
+
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="对！这正是技能系统的设计目的——把特定场景的规则封装成技能，按需激活，而不是每次都在对话里重新解释背景。"
+               data-explanation-wrong="思路不太对。每次重新解释浪费 token 也费时间；最正确的做法是把这些规则打包成技能。">
+            <h3 class="quiz-question">你的团队用 Craft Agents 处理客户支持。每次对话开始，Claude 都需要了解：公司的退款政策、常见问题库、回复语气要求。你最应该怎么做？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>每次新会话开始时，手动复制粘贴这些背景信息</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>创建一个"客户支持技能"，把这些规则写进去，所有支持对话都激活它</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>让 Claude 自己从历史对话里学习这些规则</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="完全正确！自动化的 on:schedule 触发器就是为这种定期任务设计的。不需要每周手动启动 Agent——设置好后，它自动跑。"
+               data-explanation-wrong="再想想——你描述的是一个定时重复任务，Craft Agents 的自动化系统完全可以处理这种场景。">
+            <h3 class="quiz-question">你想每周五下午自动生成一份"本周 AI 工具使用报告"发给管理层。在 Craft Agents 架构里，最合适的实现方式是？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>创建一个 on:schedule 自动化，绑定"周报生成"技能，设置为每周五 17:00 触发</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>在手机上设置一个提醒，每周五手动打开 Craft Agents 发请求</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>写一个 cron 脚本调用 Craft Agents 的内部 API</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">提交答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">再试一次</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

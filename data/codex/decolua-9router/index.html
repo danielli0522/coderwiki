@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>9Router 交互式课程 — AI 路由器是怎么工作的</title>
+
+  <!-- Google Fonts: Bricolage Grotesque · DM Sans · JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    :root {
+      --color-accent:       #2A7B9B;
+      --color-accent-hover: #1F6280;
+      --color-accent-light: #E4F2F7;
+      --color-accent-muted: #5A9DB8;
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">9Router 交互式课程</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <button class="nav-dot" data-target="module-1" data-tooltip="一个请求的旅程" role="tab" aria-label="Module 1: 一个请求的旅程"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="核心角色大盘点" role="tab" aria-label="Module 2: 核心角色大盘点"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="三层智能降级" role="tab" aria-label="Module 3: 三层智能降级"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="省 token 的魔法" role="tab" aria-label="Module 4: 省 token 的魔法"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="格式翻译官" role="tab" aria-label="Module 5: 格式翻译官"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh -->
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">一个请求的旅程</h1>
+      <p class="module-subtitle">当你用 Claude Code 写代码时，你的请求经历了怎样的冒险？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Hook — what does 9Router do? -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">想象你在写代码，AI 突然断了</h2>
+        <p>你正用 <span class="term" data-definition="Claude Code 是 Anthropic 出品的一个命令行 AI 编程工具，可以在终端里用自然语言让 AI 帮你写代码。">Claude Code</span> 专心写代码，突然弹出"配额用尽"。你的 $20/月 <span class="term" data-definition="订阅制指的是按月付费使用某个 AI 服务，比如 Claude Pro 每月 20 美元，有使用配额限制。">订阅</span> 额度花完了，代码写了一半，怎么办？</p>
+        <p><strong>9Router 就是你的"智能总机"</strong>——当你的主力 <span class="term" data-definition="AI 提供商是提供 AI 大模型服务的公司，比如 Anthropic（Claude）、OpenAI（GPT）、Google（Gemini）等。">AI 提供商</span> 挂了，它自动帮你切换到备用线路，让你的代码永不停歇。</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">核心洞察</strong>
+            <p>9Router 的本质是一个"本地 <span class="term" data-definition="代理服务器是一台中间服务器，客户端不直接访问目标服务器，而是通过代理转发请求。就像打电话时通过总机转接。">代理服务器</span>"——所有 AI 请求先到它这里，它再帮你转发到合适的 AI 服务商。你只需要改一个地址，就能接入 40+ 家 AI 服务商、100+ 个模型。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: The big picture flow -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">一个请求的完整旅程</h2>
+        <p>你在 Claude Code 里输入"帮我写个排序算法"，然后发生了什么？点"下一步"来看：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"你在 Claude Code 里输入提示词，请求发往 localhost:20128"},
+          {"highlight":"flow-actor-2","label":"9Router 收到请求，识别出你要用 claude-opus-4-7 模型"},
+          {"highlight":"flow-actor-2","label":"检查你的 Claude 订阅额度... 发现用完了！","packet":true,"from":"actor-2","to":"actor-2"},
+          {"highlight":"flow-actor-2","label":"自动切换到备用方案：GLM-5.1（便宜，$0.6/百万token）","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-3","label":"GLM 服务商处理请求，返回排序算法代码"},
+          {"highlight":"flow-actor-2","label":"9Router 把结果转回 Claude Code 格式，流式推送到你的终端","packet":true,"from":"actor-3","to":"actor-2"},
+          {"highlight":"flow-actor-1","label":"你在终端里看到代码流式出现，全程无感切换！","packet":true,"from":"actor-2","to":"actor-1"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">⌨️</div>
+              <span>Claude Code</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">🔀</div>
+              <span>9Router</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">🤖</div>
+              <span>AI 提供商</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击"下一步"开始旅程</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Code translation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">入口代码长什么样</h2>
+        <p>所有 AI 请求都从 <code>handleChat</code> 这个函数开始。它就像是 9Router 的前台接待员：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">export async function</span> <span class="code-function">handleChat</span>(request) {</span>
+<span class="code-line">  <span class="code-keyword">const</span> body = <span class="code-keyword">await</span> request.<span class="code-function">json</span>();</span>
+<span class="code-line">  <span class="code-keyword">const</span> modelStr = body.model;</span>
+<span class="code-line">  <span class="code-keyword">const</span> settings = <span class="code-keyword">await</span> <span class="code-function">getSettings</span>();</span>
+<span class="code-line">  <span class="code-keyword">const</span> modelInfo = <span class="code-function">getModelInfo</span>(modelStr);</span>
+<span class="code-line">  <span class="code-keyword">return</span> <span class="code-function">handleSingleModelChat</span>(body, modelInfo);</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">定义一个"处理聊天"的函数，接收来自客户端的请求</p>
+              <p class="tl">把请求体解析成 JS 对象，拿到用户想用的模型名</p>
+              <p class="tl">提取出模型名称字符串，比如 "cc/claude-opus-4-7"</p>
+              <p class="tl">读取全局设置（是否需要 API Key、使用什么策略等）</p>
+              <p class="tl">解析模型名，得到"提供商 + 模型"的组合信息</p>
+              <p class="tl">把请求交给专门处理单个模型的函数去执行</p>
+              <p class="tl">函数结束，返回响应给客户端</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Three-tier architecture -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">三层架构一览</h2>
+        <p>9Router 由三层组成，各司其职：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🚪</div>
+            <h4 class="pattern-title">API 接口层</h4>
+            <p class="pattern-desc">Next.js <span class="term" data-definition="路由是指 URL 路径到处理函数的映射。比如 /v1/chat/completions 这个路径会触发一个处理聊天请求的函数。">路由</span>——接收请求、验证身份、解析模型名。就像大厦的入口大堂。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🧠</div>
+            <h4 class="pattern-title">SSE 核心</h4>
+            <p class="pattern-desc">翻译格式、选择执行器、管理 <span class="term" data-definition="流式传输是指数据不是一次性全部返回，而是像流水一样一点一点推送过来。SSE（Server-Sent Events）是浏览器原生支持的一种流式传输技术。">流式传输</span>。是整个系统的大脑。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">💾</div>
+            <h4 class="pattern-title">持久化层</h4>
+            <p class="pattern-desc">用 JSON 文件存储配置、<span class="term" data-definition="凭据是指用来证明身份的密钥或令牌，比如 API Key、OAuth Token 等，相当于你访问服务的通行证。">凭据</span>和使用记录。轻量级，无需数据库。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">测验：你理解了请求旅程吗？</h2>
+
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！9Router 就是一个本地代理，所有请求先经过它，它负责转发和降级。这就像你打电话先经过总机，总机帮你转接。"
+               data-explanation-wrong="想一想 9Router 在整个流程中的位置——它站在你的工具和 AI 服务商之间。">
+            <h3 class="quiz-question">9Router 在整个 AI 编程流程中扮演什么角色？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>一个 AI 模型，负责生成代码</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>一个中间代理，帮你路由请求到不同 AI 提供商</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>一个代码编辑器，用来写代码</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="对！9Router 的所有配置都存在 JSON 文件里（db.json），不需要安装 MySQL 或 PostgreSQL 这样的重量级数据库。"
+               data-explanation-wrong="9Router 的持久化方案非常轻量。想想什么数据库技术最简单——甚至不需要额外安装？">
+            <h3 class="quiz-question">9Router 用什么来存储提供商配置和使用数据？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>MySQL 数据库</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Redis 缓存</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>JSON 文件</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">核心角色大盘点</h1>
+      <p class="module-subtitle">认识 9Router 里的五个关键"演员"，看看它们怎么分工合作</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Actors overview -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">一出好戏，五个主角</h2>
+        <p>想象一个机场。旅客要飞往不同目的地，但不可能自己开飞机。9Router 就像一个智能机场调度系统，每个模块都有明确的职责：</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🚪</div>
+            <div>
+              <strong>API 路由层 <code>src/app/api/</code></strong>
+              <p>前台接待——检查你的"登机牌"（<span class="term" data-definition="API Key 是一串字符，用来证明你有权访问某个服务。就像会员卡的卡号。">API Key</span>），识别你要去哪里（模型名），然后把请求交给调度中心</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🧠</div>
+            <div>
+              <strong>Chat 处理器 <code>chat.js / chatCore.js</code></strong>
+              <p>调度中心——决定用哪家航空公司（提供商），安排"翻译官"转换格式，协调整个飞行过程</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🔀</div>
+            <div>
+              <strong>翻译器 <code>translator/</code></strong>
+              <p>翻译官——不同 AI 服务商说不同的"语言"（OpenAI 格式、Claude 格式、Gemini 格式），翻译官帮你互相转换</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">🛫</div>
+            <div>
+              <strong>执行器 <code>executors/</code></strong>
+              <p>飞行员——真正飞向目标 AI 服务商的人。不同航司有不同飞行方式（OAuth 认证、API Key 认证...）</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-5)">💾</div>
+            <div>
+              <strong>持久化层 <code>localDb.js / usageDb.js</code></strong>
+              <p>档案室——记住所有配置（你的 API Key、套餐设置），以及每次飞行的记录（用了多少 <span class="term" data-definition="Token 是 AI 模型处理文字的基本单位。大约 1 个中文字 = 1-2 个 token。模型按 token 数量计费。">token</span>、花了多少钱）</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Group Chat -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">看它们互相对话</h2>
+        <p>当你发送一个聊天请求时，五个角色会像微信群聊一样互相配合：</p>
+
+        <div class="chat-window" id="chat-module2">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="api-route" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🚪</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">API 路由</span>
+                <p>收到请求！模型是 cc/claude-opus-4-7，API Key 验证通过。交给调度中心处理。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="chat-handler" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">🧠</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">Chat 处理器</span>
+                <p>OK，目标提供商是 Claude，需要从 OpenAI 格式翻译成 Claude 格式。翻译官，你来！</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="translator" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">🔀</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">翻译器</span>
+                <p>翻译完成！messages[] 已转成 Claude 的 system + messages 格式。执行器，可以起飞了。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="executor" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">🛫</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">执行器</span>
+                <p>Claude 返回了结果！流式数据正在推送中... 用了 2,340 tokens。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="storage" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">💾</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">持久化层</span>
+                <p>已记录：Claude opus-4-7，输入 1,200 + 输出 1,140 = 2,340 tokens，预估成本 $0.035。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-module2-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module2-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条消息</button>
+            <button class="btn chat-all-btn">播放全部</button>
+            <button class="btn chat-reset-btn">重播</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Executor code -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">执行器：每个提供商一个</h2>
+        <p>不同的 AI 服务商需要不同的"飞行方式"。9Router 给每个服务商写了一个专门的执行器：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">import</span> { BaseExecutor } <span class="code-keyword">from</span> <span class="code-string">"./base.js"</span>;</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-keyword">export class</span> <span class="code-function">KiroExecutor</span> <span class="code-keyword">extends</span> BaseExecutor {</span>
+<span class="code-line">  <span class="code-function">constructor</span>() {</span>
+<span class="code-line">    <span class="code-keyword">super</span>();</span>
+<span class="code-line">    <span class="code-keyword">this</span>.providerId = <span class="code-string">"kiro"</span>;</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">导入"基础飞行员"类，它已经实现了通用的飞行逻辑</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">Kiro 执行器继承基础类，就像"川航飞行员"继承了通用的飞行技能</p>
+              <p class="tl">构造函数初始化时...</p>
+              <p class="tl">调用父类的基础设置</p>
+              <p class="tl">标记自己是"kiro"（Kiro AI 服务商）的专属执行器</p>
+              <p class="tl">类定义结束</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">ℹ️</div>
+          <div class="callout-content">
+            <strong class="callout-title">扩展新提供商很简单</strong>
+            <p>如果要加一个新的 AI 服务商，只需要创建一个继承 <code>BaseExecutor</code> 的新类，实现该服务商特有的认证和 <span class="term" data-definition="HTTP 请求头是附在每次网络请求里的元数据，比如 Content-Type 表示数据格式，Authorization 表示身份验证信息。">请求头</span>逻辑就行。当前有 15+ 个专用执行器。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: File tree -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码目录结构</h2>
+        <p>9Router 的代码组织就像一个井井有条的办公室：</p>
+
+        <div class="file-tree animate-in">
+          <div class="ft-folder open">
+            <span class="ft-name">src/</span>
+            <span class="ft-desc">主应用代码</span>
+            <div class="ft-children">
+              <div class="ft-folder">
+                <span class="ft-name">app/api/</span>
+                <span class="ft-desc">所有 API 接口路由</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">sse/</span>
+                <span class="ft-desc">SSE 流式处理核心（调度中心）</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">lib/</span>
+                <span class="ft-desc">本地数据库（JSON 文件读写）</span>
+              </div>
+            </div>
+          </div>
+          <div class="ft-folder open">
+            <span class="ft-name">open-sse/</span>
+            <span class="ft-desc">核心引擎（跨环境共享）</span>
+            <div class="ft-children">
+              <div class="ft-folder">
+                <span class="ft-name">executors/</span>
+                <span class="ft-desc">每个 AI 服务商的专属执行器</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">translator/</span>
+                <span class="ft-desc">格式翻译器（OpenAI ↔ Claude ↔ Gemini...）</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">rtk/</span>
+                <span class="ft-desc">Token 省钱引擎（RTK 压缩 + Caveman 模式）</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">测验：角色认知</h2>
+
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！执行器（executors/）是真正与 AI 服务商通信的模块。每个执行器知道怎么跟特定的服务商对话——用什么 URL、什么请求头、什么认证方式。"
+               data-explanation-wrong="想想哪个角色是真正"飞向" AI 服务商的？它需要知道每家服务商的特殊规则。">
+            <h3 class="quiz-question">如果你要新增一个 AI 服务商的支持，应该修改哪个模块？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>API 路由层（src/app/api/）</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>执行器（open-sse/executors/）</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>持久化层（src/lib/）</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="对！翻译器就像同声传译——不同 AI 服务商用不同的数据格式"说话"，翻译器负责实时转换，让任何客户端都能跟任何服务商对话。"
+               data-explanation-wrong="提示：当你的工具说 OpenAI 格式，但目标服务商只接受 Claude 格式时，谁来做这个转换？">
+            <h3 class="quiz-question">翻译器（translator/）最像现实世界中的什么角色？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>同声传译——让说不同语言的人能互相沟通</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>保安——检查每个进来的人有没有权限</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>会计——记录每笔花销</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">三层智能降级</h1>
+      <p class="module-subtitle">当一个 AI 服务挂了，9Router 怎么无缝切换到备用方案？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Fallback concept -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">像发电厂的备用发电机</h2>
+        <p>想象一栋大楼。主电源（订阅）停电了，自动切换到 <span class="term" data-definition="柴油发电机作为备用电源，主电停电时自动启动。类比 9Router 的降级策略：主力 AI 不可用时自动切换到备选方案。">备用发电机</span>（便宜方案）。发电机也烧完了？太阳能（免费方案）继续供电。</p>
+        <p>9Router 就是这样工作的——<strong>三层降级，永不停机</strong>：</p>
+
+        <div class="step-cards animate-in">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Tier 1：订阅服务（主力）</strong>
+              <p>Claude Code Pro $20/月、Codex Plus 等——你已经在付钱了，优先用完它</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Tier 2：便宜方案（备用）</strong>
+              <p>GLM-5.1（$0.6/百万 token）、MiniMax（$0.2/百万 token）——极低成本</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Tier 3：免费方案（兜底）</strong>
+              <p>Kiro AI（免费无限 Claude 4.5）、OpenCode Free——$0，永远不会断</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Combo system -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Combo：你的"套餐组合"</h2>
+        <p>你可以在 9Router 仪表盘里创建"Combo"——给多个模型排个优先级，就像给手机设置"WiFi 优先 → 4G 备用 → 3G 兜底"：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"请求到达，使用 combo: my-coding-stack"},
+          {"highlight":"flow-actor-1","label":"第一个模型: cc/claude-opus-4-7（订阅）","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-2","label":"Claude 返回 429（配额用完）——触发降级！"},
+          {"highlight":"flow-actor-3","label":"第二个模型: glm/glm-5.1（便宜备用，$0.6/1M）","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-3","label":"GLM 返回 429（也限流了）——继续降级！"},
+          {"highlight":"flow-actor-4","label":"第三个模型: kr/claude-sonnet-4.5（免费兜底）","packet":true,"from":"actor-3","to":"actor-4"},
+          {"highlight":"flow-actor-4","label":"Kiro 免费服务成功返回结果！全程自动，用户无感知"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">📋</div>
+              <span>Combo 选择器</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">💳</div>
+              <span>Tier 1 订阅</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">💰</div>
+              <span>Tier 2 便宜</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">🆓</div>
+              <span>Tier 3 免费</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击"下一步"观看降级过程</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Error detection code -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">怎么判断"该降级了"？</h2>
+        <p>9Router 用一套"错误规则"来判断什么时候该切换到下一个方案：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">export function</span> <span class="code-function">checkFallbackError</span>(status, errorText) {</span>
+<span class="code-line">  <span class="code-keyword">for</span> (<span class="code-keyword">const</span> rule <span class="code-keyword">of</span> ERROR_RULES) {</span>
+<span class="code-line">    <span class="code-keyword">if</span> (rule.text && lowerError.includes(rule.text)) {</span>
+<span class="code-line">      <span class="code-keyword">return</span> { shouldFallback: <span class="code-keyword">true</span> };</span>
+<span class="code-line">    }</span>
+<span class="code-line">    <span class="code-keyword">if</span> (rule.status && rule.status === status) {</span>
+<span class="code-line">      <span class="code-keyword">return</span> { shouldFallback: <span class="code-keyword">true</span> };</span>
+<span class="code-line">    }</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">定义一个"检查是否该降级"的函数，输入是状态码和错误信息</p>
+              <p class="tl">遍历所有预设的错误规则（从最具体的到最一般的）</p>
+              <p class="tl">如果是文字匹配规则，看错误信息里有没有包含关键字（比如"rate limit"）</p>
+              <p class="tl">匹配到了！返回"该降级了"</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">如果是状态码规则，看 HTTP 状态码是否匹配（比如 429 = 限流）</p>
+              <p class="tl">匹配到了！返回"该降级了"</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">所有规则都没匹配——默认也降级（宁可多试一个，不要直接失败）</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Exponential backoff -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">指数退避：越失败越慢</h2>
+        <p>当一个账户被限流时，9Router 不会疯狂重试。它用一个聪明的策略——<span class="term" data-definition="指数退避是一种错误重试策略：第一次等 1 秒，第二次等 2 秒，第三次等 4 秒... 每次翻倍。这样不会给服务器造成更大压力。">指数退避</span>：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">⏱️</div>
+            <h4 class="pattern-title">冷却时间翻倍</h4>
+            <p class="pattern-desc">第一次失败：等 1 秒。第二次：2 秒。第三次：4 秒。最多等 4 分钟。给服务器喘息的时间。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🔄</div>
+            <h4 class="pattern-title">多账户轮换</h4>
+            <p class="pattern-desc">同一个提供商可以有多个账户。账户 A 限流了？试账户 B。都限流了？才降级到下一个模型。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🔒</div>
+            <h4 class="pattern-title">模型级锁定</h4>
+            <p class="pattern-desc">不是整个提供商都挂了才切换——是具体的模型。比如 Claude Opus 限流了，但 Claude Sonnet 可能还能用。</p>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Aha！</strong>
+            <p>指数退避是分布式系统的黄金法则。Google、Amazon 的服务都在用。下次你告诉 AI "加重试逻辑"时，加上"用指数退避"——这是区分小白和专家的关键词。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">测验：降级策略</h2>
+
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！三层分别是：订阅服务（主力）→ 便宜方案（备用）→ 免费方案（兜底）。这确保了无论发生什么，你总能继续编码。"
+               data-explanation-wrong="回忆一下发电厂的比喻：主电源 → 备用发电机 → 太阳能。对应 9Router 的哪三个层级？">
+            <h3 class="quiz-question">9Router 的三层降级顺序是？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>免费 → 便宜 → 订阅</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>便宜 → 订阅 → 免费</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>订阅 → 便宜 → 免费</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="对！429 是 HTTP 标准状态码，表示"Too Many Requests"（请求太多，请稍后再试）。这是触发降级最常见的信号。"
+               data-explanation-wrong="想想 API 限流时，服务商会返回什么 HTTP 状态码？提示：4xx 系列表示客户端错误，其中有一个专门表示'请求太频繁'。">
+            <h3 class="quiz-question">当 AI 服务商限流时，通常返回什么 HTTP 状态码？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>429（请求过多）</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>200（成功）</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>404（未找到）</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">省 Token 的魔法</h1>
+      <p class="module-subtitle">RTK 和 Caveman——两个让每次请求省 20-65% token 的黑科技</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Token cost problem -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Token 就是钱</h2>
+        <p>每次跟 AI 对话，你发送的每一个字都会被计算成 <span class="term" data-definition="Token 是 AI 模型处理文字的最小单位。大约 1 个中文字 = 1-2 个 token，1 个英文单词 ≈ 1 个 token。AI 按处理了多少 token 来计费。">token</span>。一个典型的编程会话，tool 的输出（git diff、grep 结果、文件列表...）经常占掉 30-50% 的 token 预算。</p>
+        <p><strong>9Router 内置了两个"省钱引擎"：</strong></p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent)">🗜️</div>
+            <h4 class="pattern-title">RTK Token Saver</h4>
+            <p class="pattern-desc">智能压缩工具输出——省 <strong>20-40% 输入 token</strong>。自动识别 git diff、grep、find 等输出格式，应用专门的压缩策略。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🦣</div>
+            <h4 class="pattern-title">Caveman Mode</h4>
+            <p class="pattern-desc">在 <span class="term" data-definition="System prompt 是你发给 AI 的隐藏指令，AI 每次回复都会遵循。比如"用简短专业的方式回答"就是一个 system prompt。">system prompt</span> 里注入"原始人指令"——让 AI 用更简短的方式回复。省 <strong>最高 65% 输出 token</strong>。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: RTK autodetect -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">RTK 怎么自动识别内容类型？</h2>
+        <p>RTK 不需要你配置——它会"偷看"每段 tool 输出的前 1KB，自动判断内容类型：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">export function</span> <span class="code-function">autoDetectFilter</span>(text) {</span>
+<span class="code-line">  <span class="code-keyword">const</span> head = text.<span class="code-function">slice</span>(<span class="code-number">0</span>, DETECT_WINDOW);</span>
+<span class="code-line">  <span class="code-keyword">if</span> (RE_GIT_DIFF.<span class="code-function">test</span>(head)) <span class="code-keyword">return</span> gitDiff;</span>
+<span class="code-line">  <span class="code-keyword">if</span> (RE_GIT_STATUS.<span class="code-function">test</span>(head)) <span class="code-keyword">return</span> gitStatus;</span>
+<span class="code-line">  <span class="code-keyword">if</span> (first5.<span class="code-function">some</span>(isGrepLine)) <span class="code-keyword">return</span> grep;</span>
+<span class="code-line">  <span class="code-keyword">if</span> (RE_TREE_GLYPH.<span class="code-function">test</span>(head)) <span class="code-keyword">return</span> tree;</span>
+<span class="code-line">  <span class="code-keyword">if</span> (text.<span class="code-function">split</span>(<span class="code-string">"\n"</span>).length >= MIN_LINES)</span>
+<span class="code-line">    <span class="code-keyword">return</span> smartTruncate;</span>
+<span class="code-line">  <span class="code-keyword">return null</span>;</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">定义"自动检测过滤器"函数，输入是 tool 输出的文本</p>
+              <p class="tl">只看文本的开头部分（就像你瞟一眼文件就知道它是什么类型）</p>
+              <p class="tl">看到"diff --git"？这是 git diff 输出 → 用 gitDiff 压缩器</p>
+              <p class="tl">看到"On branch"？这是 git status 输出 → 用 gitStatus 压缩器</p>
+              <p class="tl">前 5 行里有"文件名:行号:内容"格式？这是 grep 结果</p>
+              <p class="tl">看到树形结构字符（├── └──）？这是 tree 命令输出</p>
+              <p class="tl">行数太多？用智能截断，保留关键部分</p>
+              <p class="tl">都不匹配？返回 null（不压缩，保持原样）</p>
+              <p class="tl">函数结束</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Safe compression -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">安全网：压缩失败也不怕</h2>
+        <p>RTK 有一个关键设计哲学：<strong>永远不要因为压缩而破坏请求</strong>。看看它的安全机制：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">export function</span> <span class="code-function">safeApply</span>(fn, text) {</span>
+<span class="code-line">  <span class="code-keyword">try</span> {</span>
+<span class="code-line">    <span class="code-keyword">const</span> out = <span class="code-function">fn</span>(text);</span>
+<span class="code-line">    <span class="code-keyword">if</span> (<span class="code-keyword">typeof</span> out !== <span class="code-string">"string"</span>) <span class="code-keyword">return</span> text;</span>
+<span class="code-line">    <span class="code-keyword">return</span> out;</span>
+<span class="code-line">  } <span class="code-keyword">catch</span> (err) {</span>
+<span class="code-line">    console.<span class="code-function">warn</span>(<span class="code-string">"filter panicked"</span>);</span>
+<span class="code-line">    <span class="code-keyword">return</span> text;</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">定义一个"安全执行"函数，包裹任何压缩操作</p>
+              <p class="tl">尝试执行压缩...</p>
+              <p class="tl">调用压缩函数，得到结果</p>
+              <p class="tl">如果结果不是字符串（压缩器出错了）？返回原始文本</p>
+              <p class="tl">压缩成功，返回压缩后的文本</p>
+              <p class="tl">如果压缩过程中抛了异常...</p>
+              <p class="tl">打印一条警告日志（但不崩溃！）</p>
+              <p class="tl">返回原始文本（完全没有损失）</p>
+              <p class="tl">无论发生什么，用户都不会看到错误</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">设计原则</strong>
+            <p>"优化类"代码最重要的是：失败时回退到原始行为。这叫<span class="term" data-definition="优雅降级是指当某个高级功能不可用时，系统能自动回退到基本功能，而不是直接崩溃。就像手机没有 5G 信号时自动切换到 4G。">优雅降级</span>。你在指导 AI 做优化时，一定要说"失败时保持原样"。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Caveman -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Caveman：让 AI 说"短话"</h2>
+        <p>Caveman 的灵感来自一个爆款项目——"为什么要用很多词，明明几个字就能说清楚"。它在发送请求前，偷偷注入一段"原始人指令"：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">export function</span> <span class="code-function">injectCaveman</span>(body, format, level) {</span>
+<span class="code-line">  <span class="code-keyword">const</span> prompt = CAVEMAN_PROMPTS[level];</span>
+<span class="code-line">  <span class="code-keyword">switch</span> (format) {</span>
+<span class="code-line">    <span class="code-keyword">case</span> FORMATS.CLAUDE:</span>
+<span class="code-line">      <span class="code-function">injectClaudeSystem</span>(body, prompt);</span>
+<span class="code-line">      <span class="code-keyword">return</span>;</span>
+<span class="code-line">    <span class="code-keyword">default</span>:</span>
+<span class="code-line">      <span class="code-function">injectMessagesSystem</span>(body, prompt);</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">定义"注入原始人指令"的函数，输入是请求体、格式和压缩等级</p>
+              <p class="tl">根据等级选择对应的原始人提示词（"少说话，多干活"）</p>
+              <p class="tl">根据目标 AI 的格式来决定怎么注入...</p>
+              <p class="tl">如果是 Claude 格式...</p>
+              <p class="tl">把原始人指令插入到 Claude 的 system 字段里</p>
+              <p class="tl">返回</p>
+              <p class="tl">其他格式（OpenAI、Gemini 等）...</p>
+              <p class="tl">把指令插入到 messages 数组的 system 消息里</p>
+              <p class="tl">函数结束。AI 回复时就会用更简短的方式回答了</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">测验：Token 省钱术</h2>
+
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="对！RTK 会偷看每段 tool 输出的前 1KB，用正则匹配来判断内容类型（git diff、grep、find 等），然后自动选择合适的压缩策略。"
+               data-explanation-wrong="RTK 是怎么知道一段文本是 git diff 还是 grep 结果的？它需要先识别内容类型，再选择压缩方式。">
+            <h3 class="quiz-question">RTK 怎么知道该用哪种压缩策略？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>用户在设置里手动配置每种工具的压缩方式</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>自动分析文本内容的格式特征来判断</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>所有内容统一用同一种压缩算法</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="没错！safeApply 函数用 try-catch 包裹所有压缩操作，如果压缩失败或抛异常，就返回原始文本。这确保了压缩永远不会导致请求失败。"
+               data-explanation-wrong="如果一个压缩器崩溃了，9Router 会怎么处理？想想"安全第一"的设计哲学——绝不会让你的请求因此而失败。">
+            <h3 class="quiz-question">如果 RTK 的压缩器执行时崩溃了，会发生什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>整个请求失败，返回错误给用户</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>跳过压缩，但打印大量错误日志</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>静默回退到原始文本，请求正常执行</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">格式翻译官</h1>
+      <p class="module-subtitle">OpenAI、Claude、Gemini 说的"语言"都不同——9Router 怎么让它们互相听懂？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Format problem -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">AI 服务商的"方言"问题</h2>
+        <p>想象你在国际会议上发言。你说中文，但听众里有说英文的、法文的、日文的。你需要一个同声传译。</p>
+        <p>AI 世界也一样——<span class="term" data-definition="OpenAI 格式是目前最广泛使用的 AI API 数据格式，几乎所有 AI 工具都支持。它用 JSON 表示聊天消息，messages 数组里每条消息有 role 和 content。">OpenAI 格式</span>、<span class="term" data-definition="Claude 格式是 Anthropic 公司的 AI API 数据格式，和 OpenAI 格式略有不同，比如 system 消息是单独的字段而不是 messages 数组的一部分。">Claude 格式</span>、<span class="term" data-definition="Gemini 格式是 Google 的 AI API 数据格式，使用 contents 数组和 parts 结构来表示消息。">Gemini 格式</span> 各不相同：</p>
+
+        <div class="badge-list animate-in">
+          <div class="badge-item">
+            <code class="badge-code">messages[]</code>
+            <span class="badge-desc">OpenAI 用这个字段存聊天历史</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">system + messages</code>
+            <span class="badge-desc">Claude 把系统指令单独放，聊天记录放 messages</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">contents + parts</code>
+            <span class="badge-desc">Gemini 用完全不同的结构组织消息</span>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">ℹ️</div>
+          <div class="callout-content">
+            <strong class="callout-title">为什么这很重要？</strong>
+            <p>你的工具（Claude Code）说一种"方言"，但你想用的 AI 服务商（Gemini）说另一种。没有翻译，它们根本无法沟通。9Router 的翻译器就是让任意工具和任意服务商都能对话的关键。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Two-phase translation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">巧妙的"两阶段翻译"</h2>
+        <p>9Router 用了一个聪明的策略来减少翻译器的数量。它不需要为每对格式都写一个翻译器——而是用 OpenAI 格式作为"<span class="term" data-definition="中间格式是一种通用标准，所有格式先转换成它，再从它转换成目标格式。就像英语是国际会议的中间语言——中文→英语→法语，比直接中文→法语更容易。">中间格式</span>"：</p>
+
+        <div class="flow-steps animate-in">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <p><strong>来源格式</strong><br/>（Claude/Gemini/Kiro...）</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <p><strong>OpenAI 中间格式</strong><br/>（通用标准）</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <p><strong>目标格式</strong><br/>（Claude/Gemini/Kiro...）</p>
+          </div>
+        </div>
+
+        <p>这意味着：支持 N 种格式，只需要写 2N 个翻译器（而不是 N×N 个）。从 5 种格式 25 个翻译器 → 10 个翻译器。</p>
+      </section>
+
+      <!-- Screen 3: Translator registry code -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">翻译器注册表</h2>
+        <p>看看 9Router 是怎么注册和管理翻译器的：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">const</span> requestRegistry = <span class="code-keyword">new</span> <span class="code-function">Map</span>();</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-keyword">export function</span> <span class="code-function">register</span>(from, to, requestFn) {</span>
+<span class="code-line">  <span class="code-keyword">const</span> key = <span class="code-string">`${from}:${to}`</span>;</span>
+<span class="code-line">  requestRegistry.<span class="code-function">set</span>(key, requestFn);</span>
+<span class="code-line">}</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment">// 懒加载——用到时才加载翻译器</span></span>
+<span class="code-line"><span class="code-function">require</span>(<span class="code-string">"./request/claude-to-openai.js"</span>);</span>
+<span class="code-line"><span class="code-function">require</span>(<span class="code-string">"./request/openai-to-claude.js"</span>);</span>
+<span class="code-line"><span class="code-function">require</span>(<span class="code-string">"./request/gemini-to-openai.js"</span>);</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">用一个 Map（字典）来存储所有注册的请求翻译器</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">定义注册函数：记录"从 A 格式翻译到 B 格式"用哪个翻译函数</p>
+              <p class="tl">把来源和目标拼成一个唯一键，比如"claude:openai"</p>
+              <p class="tl">把这个键和对应的翻译函数存进字典</p>
+              <p class="tl">注册完成</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">用懒加载：只有第一次需要翻译时才加载这些文件（提高启动速度）</p>
+              <p class="tl">加载 Claude → OpenAI 翻译器</p>
+              <p class="tl">加载 OpenAI → Claude 翻译器</p>
+              <p class="tl">加载 Gemini → OpenAI 翻译器</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Native passthrough -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">捷径：原生直通模式</h2>
+        <p>有时候根本不需要翻译！当你的工具和 AI 服务商说同一种"方言"时，9Router 会跳过所有翻译步骤，直接转发：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">const</span> passthrough = <span class="code-function">isNativePassthrough</span>(</span>
+<span class="code-line">  clientTool, provider</span>
+<span class="code-line">);</span>
+<span class="code-line"><span class="code-keyword">if</span> (passthrough) {</span>
+<span class="code-line">  translatedBody = { ...body, model };</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">检查客户端工具和目标服务商是否同一个"生态系统"</p>
+              <p class="tl">（比如 Cursor 客户端 → Cursor 服务商）</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">如果是同生态——不需要翻译！</p>
+              <p class="tl">只需要换掉模型名，其他原样转发。省时省力。</p>
+              <p class="tl">跳过了翻译步骤，直接发过去</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">性能优化思维</strong>
+            <p>好的优化不是"让每件事做得更快"，而是"跳过不需要做的事"。下次你让 AI 优化代码时，先问：有没有什么操作是根本不需要执行的？这种"短路思维"是最有效的优化。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">测验：翻译系统</h2>
+
+        <div class="quiz-container" id="quiz-module5">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="对！OpenAI 格式被用作中间格式（Hub），所有其他格式先转成 OpenAI 格式，再从 OpenAI 格式转成目标格式。这样 N 种格式只需要 2N 个翻译器。"
+               data-explanation-wrong="想一想：如果 9Router 用一种格式作为"中间语言"（就像国际会议用英语），所有翻译都经过它，会减少多少翻译器？">
+            <h3 class="quiz-question">9Router 用什么格式作为翻译的中间格式？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Claude 格式</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>OpenAI 格式</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Gemini 格式</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="没错！如果客户端和目标服务商是同一个生态系统（比如 Cursor→Cursor），9Router 会跳过所有翻译，只替换模型名。这是最高效的优化——不做不需要做的事。"
+               data-explanation-wrong="想想什么情况下根本不需要翻译——当发送方和接收方说同一种'语言'时？">
+            <h3 class="quiz-question">什么情况下 9Router 会完全跳过格式翻译？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>客户端工具和目标服务商属于同一生态系统</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>请求的 token 数量很少时</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>用户在设置里关闭了翻译功能</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+  </main>
+
+</body>
+</html>

@@ -1,0 +1,146 @@
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="hero-title module-title">AI 怎么操控浏览器？</h1>
+      <p class="module-subtitle">从一个最简示例出发，看懂 browser-use 如何让 AI 像人一样"看见"网页、"点击"按钮。</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">5 行代码，AI 就能帮你上网干活</h2>
+        <p>想象一下：你跟 AI 说"去 GitHub 查一下 browser-use 这个仓库有多少星"，AI 就真的打开浏览器、搜索、找到结果、告诉你答案。这就是 <span class="term" data-definition="browser-use 是一个开源 Python 库，让大语言模型能够像真人一样操控浏览器——点击、输入、滚动、截图，全自动。">browser-use</span> 做的事情。</p>
+        <p>最简的用法只需要这几行：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">from</span> browser_use <span class="code-keyword">import</span> Agent, ChatBrowserUse</span>
+<span class="code-line"></span>
+<span class="code-line">agent = Agent(</span>
+<span class="code-line">    task=<span class="code-string">'Find the number of stars of the following repos: browser-use, playwright, stagehand, react, nextjs'</span>,</span>
+<span class="code-line">    llm=ChatBrowserUse(model=<span class="code-string">'bu-2-0'</span>),</span>
+<span class="code-line">)</span>
+<span class="code-line">agent.run_sync()</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">引入两个主角：Agent 是"干活的机器人"，ChatBrowserUse 是它的大脑（AI 模型）。</p>
+              <p class="tl">创建一个 Agent，告诉它任务是什么——这里是要查 5 个 GitHub 仓库的星数。</p>
+              <p class="tl">给它装上 browser-use 官方微调过的模型，专门擅长操控浏览器。</p>
+              <p class="tl">一行启动！run_sync() 会阻塞运行直到任务完成。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键认知</strong>
+            <p>browser-use 的设计哲学是"一行代码开跑"。你不需要手动管理浏览器进程、写 DOM 选择器、处理弹窗——Agent 把这些全部包了。你的工作就是：定义任务 + 选模型。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">完整一点的写法：手动配浏览器</h2>
+        <p>上面的例子用了"默认一切"的写法。如果你想要更多控制——比如用自己的模型、指定浏览器配置——可以这样做：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">from</span> browser_use <span class="code-keyword">import</span> Agent, Browser, ChatBrowserUse</span>
+<span class="code-line"><span class="code-keyword">import</span> asyncio</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-keyword">async def</span> <span class="code-function">main</span>():</span>
+<span class="code-line">    browser = Browser()</span>
+<span class="code-line"></span>
+<span class="code-line">    agent = Agent(</span>
+<span class="code-line">        task=<span class="code-string">"Find the number of stars of the browser-use repo"</span>,</span>
+<span class="code-line">        llm=ChatBrowserUse(),</span>
+<span class="code-line">        browser=browser,</span>
+<span class="code-line">    )</span>
+<span class="code-line">    <span class="code-keyword">await</span> agent.run()</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-keyword">if</span> __name__ == <span class="code-string">"__main__"</span>:</span>
+<span class="code-line">    asyncio.run(main())</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">引入 Agent（机器人）、Browser（浏览器实例）、ChatBrowserUse（AI 大脑）。</p>
+              <p class="tl">browser-use 是异步架构，所以主函数要用 async def。</p>
+              <p class="tl">Browser() 创建一个浏览器实例，可以传各种配置参数。</p>
+              <p class="tl">创建 Agent，把任务、大脑、浏览器三者绑定在一起。</p>
+              <p class="tl">agent.run() 启动异步循环，Agent 开始一步步执行任务。</p>
+              <p class="tl">asyncio.run() 是 Python 标准的"启动异步程序"写法。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">它到底在做什么？一眼看懂循环</h2>
+        <p>Agent.run() 启动后，内部是一个"观察→思考→行动"的循环，每一步都是：</p>
+
+        <div class="flow-animation" data-steps='[{"highlight":"flow-actor-1","label":"1. Agent 截取当前网页截图 + 解析 DOM 树，获得浏览器状态快照"},{"highlight":"flow-actor-1","label":"2. 把截图和 DOM 信息打包成提示词，发给 LLM（AI 大脑）","packet":true,"from":"actor-1","to":"actor-2"},{"highlight":"flow-actor-2","label":"3. LLM 返回结构化 JSON：思考 + 下一步动作（点击/输入/滚动...）","packet":true,"from":"actor-2","to":"actor-1"},{"highlight":"flow-actor-1","label":"4. Agent 把 LLM 的动作翻译成真实浏览器操作，执行"},{"highlight":"flow-actor-3","label":"5. 判断任务是否完成，没完成就回到第 1 步继续","packet":true,"from":"actor-1","to":"actor-3"}]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">🤖</div>
+              <span>Agent</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">🧠</div>
+              <span>LLM</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">🔄</div>
+              <span>循环判断</span>
+            </div>
+          </div>
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击"下一步"开始演示</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+
+        <p>这个循环在源码中就是 <span class="term" data-definition="run() 方法是 Agent 的主循环，它不断调用 step() 方法直到任务完成或达到最大步数。">Agent.run()</span> 里的 <code>while self.state.n_steps &lt;= max_steps</code> 循环，每次循环调用一次 <code>step()</code>。</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">测测你理解了多少</h2>
+
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block" data-correct="option-b" data-explanation-right="完全正确！Agent 内部是 截图+DOM → 发给LLM → LLM返回动作 → 执行 → 判断是否完成 的循环。" data-explanation-wrong="想想 Agent.run() 里面那个 while 循环每次都在做什么——它不是一次性生成所有动作，而是每一步都重新观察再决策。">
+            <h3 class="quiz-question">browser-use 的 Agent 执行任务时，内部是什么模式？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div><span>一次性生成所有步骤的代码，然后批量执行</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div><span>观察→思考→行动的循环，每一步重新感知和决策</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div><span>先把整个网页 HTML 下载下来，离线分析后执行</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

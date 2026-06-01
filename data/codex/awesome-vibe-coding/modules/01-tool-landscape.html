@@ -1,0 +1,275 @@
+<section class="module" id="module-1" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="hero-title module-title">工具景观全图</h1>
+      <p class="module-subtitle">30 款"一句话生成 App" + 50 款 IDE/CLI——先看地图再选车。</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">为什么需要一张工具地图</h2>
+        <p>过去两年，<span class="term" data-definition="Vibe coding 是 Andrej Karpathy 2025 年提出的说法：用自然语言对话生成代码，几乎不手写。它是一种节奏，不是某个工具。">vibe coding</span> 工具从 5 款爆炸到 100+ 款。每一款都说自己最快、最强、最 AI-native。</p>
+        <p>但你只有一双手、一个项目。问题从来不是"哪个最强"，而是"<strong>这一刻、这件事，哪个最合适</strong>"。</p>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">📜</div>
+          <div class="callout-content">
+            <strong class="callout-title">Karpathy 引言</strong>
+            <p>"There&apos;s a new kind of coding I call vibe coding, where you fully give in to the vibes, embrace exponentials, and forget that the code even exists."</p>
+          </div>
+        </div>
+
+        <p>这门课的目标：用一个下午，让你看清这片混乱的工具市场，然后挑出属于你的"少而精"组合。</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">交通工具光谱：同一个目的地，不同开法</h2>
+        <p>把 vibe coding 工具想成交通工具——每一档都对应一种"控制力 × 上手难度"的组合。</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🚲</div>
+            <div>
+              <strong>共享单车 · 浏览器派</strong>
+              <p>打开网页一句话出 demo。零安装、零配置。换来的是控制力——你不能拆开零件改。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🚗</div>
+            <div>
+              <strong>汽车 · IDE 派</strong>
+              <p>AI 副驾。你坐主驾、AI 提示路线、有时直接接管 5 公里。半人工，权衡最佳。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-5)">🏎️</div>
+            <div>
+              <strong>越野车 · CLI 派</strong>
+              <p>手动挡跑车。没有 UI 没有按钮，只有命令和上下文。陡峭曲线 + 极致控制。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🎼</div>
+            <div>
+              <strong>交响乐团 · 编排 + 文档标准</strong>
+              <p>当你同时开三辆车（多 agent 并行），你需要指挥——任务编排 + AGENTS.md 这类工具的工具。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">7 大类全景</h2>
+        <p>awesome-vibe-coding 仓库把所有工具分成 7 大类。先记代表选手，细节后面四个模块详讲。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🌐</div>
+            <h4 class="pattern-title">Browser-based</h4>
+            <p class="pattern-desc">代表：Lovable / Bolt.new / v0 / Replit。一句话 → 部署链接，零安装。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">💻</div>
+            <h4 class="pattern-title">IDEs &amp; Editors</h4>
+            <p class="pattern-desc">代表：Cursor / Windsurf / Zed / Trae。把 AI 装进 <span class="term" data-definition="IDE = Integrated Development Environment，集成开发环境。VS Code、Cursor、Windsurf 都是 IDE，是带 AI 的代码编辑器。">IDE</span>，主驾还是你。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🧩</div>
+            <h4 class="pattern-title">Plugins &amp; Extensions</h4>
+            <p class="pattern-desc">代表：GitHub Copilot / Cline / continue。给已有编辑器插一个 <span class="term" data-definition="Extension（插件 / 扩展）= 给已有软件加新能力的小程序，比如给 VS Code 装 GitHub Copilot 就是装一个 extension。">extension</span>。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">⌨️</div>
+            <h4 class="pattern-title">Command Line</h4>
+            <p class="pattern-desc">代表：claude-code / Codex CLI / Gemini CLI / aider。把 AI 装进终端。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🖥️</div>
+            <h4 class="pattern-title">Local Apps</h4>
+            <p class="pattern-desc">代表：Dyad / bolt.diy / CCHub。桌面应用，本地跑、本地存。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">📱</div>
+            <h4 class="pattern-title">Mobile Apps</h4>
+            <p class="pattern-desc">代表：VibeCode（iOS/Android）。少数派——手机上一句话出 App。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">📋</div>
+            <h4 class="pattern-title">Task Management</h4>
+            <p class="pattern-desc">代表：vibe-kanban / CCPM / Archon。多 <span class="term" data-definition="Agent（智能体）= 能自己规划、调用工具、循环执行直到完成目标的 AI。比如 claude-code 就是一个 coding agent。">agent</span> 协同的指挥台。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">决策树：从想法到选型</h2>
+        <p>面对一墙工具，按下面三个问题走一遍，至少能砍掉 80%。点击 "Next Step" 跟着决策流走。</p>
+
+        <div class="flow-animation" id="flow-m1-decision-tree" data-steps='[
+          {"highlight":"flow-actor-m1-1","label":"出发：你脑子里有一个想法（landing page / 工具 / 重构 / 周末小项目）"},
+          {"highlight":"flow-actor-m1-1","label":"决策点 1：要不要看见代码？不要 → 走浏览器派","packet":true,"from":"actor-m1-1","to":"actor-m1-2"},
+          {"highlight":"flow-actor-m1-2","label":"浏览器派：5 分钟出 demo，部署链接直接发给同事"},
+          {"highlight":"flow-actor-m1-1","label":"决策点 2：要本地控制 + 长期维护？是 → 走 IDE 派","packet":true,"from":"actor-m1-1","to":"actor-m1-3"},
+          {"highlight":"flow-actor-m1-3","label":"IDE 派：AI 副驾，你看每一行 diff，AGENTS.md 沉淀上下文"},
+          {"highlight":"flow-actor-m1-1","label":"决策点 3：长任务 + 多文件 + 自动化？是 → 走 CLI 派","packet":true,"from":"actor-m1-1","to":"actor-m1-4"},
+          {"highlight":"flow-actor-m1-4","label":"CLI 派：终端里一行命令跑批量；prompt → 执行 → 验证 → 提交"},
+          {"highlight":"flow-actor-m1-1","label":"决策点 4：多 agent 协同？是 → 加任务编排","packet":true,"from":"actor-m1-1","to":"actor-m1-5"},
+          {"highlight":"flow-actor-m1-5","label":"编排：vibe-kanban / CCPM / Archon 当指挥，多 agent 并行不打架"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-m1-1">
+              <div class="flow-actor-icon">💡</div>
+              <span>想法</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-m1-2">
+              <div class="flow-actor-icon">🌐</div>
+              <span>浏览器派</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-m1-3">
+              <div class="flow-actor-icon">💻</div>
+              <span>IDE 派</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-m1-4">
+              <div class="flow-actor-icon">⌨️</div>
+              <span>CLI 派</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-m1-5">
+              <div class="flow-actor-icon">🎼</div>
+              <span>任务编排</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet-m1"></div>
+
+          <div class="flow-step-label" id="flow-label-m1">点 "Next Step" 开始走决策树</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">Next Step</button>
+            <button class="btn flow-reset-btn">Restart</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">解读 awesome-vibe-coding 仓库结构</h2>
+        <p>这个 README 是一个标准的 <span class="term" data-definition="Awesome list 是 GitHub 上的一种约定：精选某个领域的资源做成清单，按主题分类。awesome-vibe-coding 是 vibe coding 工具领域最知名的清单。">awesome list</span>。下面这段描述就是它的"自我介绍"——读懂它就读懂了它的取舍。</p>
+
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">README 原文</span>
+            <pre><code><span class="code-line"><span class="code-comment"># awesome-vibe-coding</span></span>
+<span class="code-line"></span>
+<span class="code-line">A curated list of vibe coding</span>
+<span class="code-line">references, collaborating with</span>
+<span class="code-line">AI to write code.</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment">## Browser-based Tools</span></span>
+<span class="code-line"><span class="code-comment">## IDEs and Code Editors</span></span>
+<span class="code-line"><span class="code-comment">## Command Line Tools</span></span>
+<span class="code-line"><span class="code-comment">## Task Management for AI</span></span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>"awesome-vibe-coding"</strong> ——这是 GitHub 风格的清单标题。</p>
+              <p class="tl"><strong>"curated list"</strong> ——人工筛过的，不是搜索结果。</p>
+              <p class="tl"><strong>"collaborating with AI to write code"</strong> ——核心定义：和 AI 一起写代码，不是让 AI 替你写。</p>
+              <p class="tl"><strong>分类用使用形态而非品牌</strong>——浏览器/IDE/CLI/编排——这是一份"形态地图"，不是品牌排行榜。</p>
+              <p class="tl">所以 Cursor 排在 IDE 类下，claude-code 排在 CLI 类下，不存在"哪个第一"。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">小测验：你会选哪个？</h2>
+        <p>下面是真实的工程场景。试着用刚才的决策树推一遍。</p>
+
+        <div class="quiz-container" id="quiz-m1">
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">场景 1</span>
+              <p>同事 30 分钟后开会要看 demo，你需要做一个 landing page 演示新功能概念。</p>
+            </div>
+            <div class="quiz-question-block"
+                 data-correct="m1-q1-b"
+                 data-explanation-right="对——这种 demo 优先级是&lsquo;速度 × 可分享 link&rsquo;，浏览器派 Lovable / Bolt.new 是为这一刻而生的。Cursor / claude-code 适合长期代码，但 30 分钟出可演示 URL 不是它们的强项。"
+                 data-explanation-wrong="再想想——这是临时 demo，30 分钟内要给人看到。Cursor / claude-code 让你看见每一行代码，但你需要本地搭起 dev server、写路由、配部署……时间不够。">
+              <h3 class="quiz-question">最合适的工具是？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="m1-q1-a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>A. Cursor + Next.js 模板</span>
+                </button>
+                <button class="quiz-option" data-value="m1-q1-b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>B. Lovable 或 Bolt.new（浏览器派一句话）</span>
+                </button>
+                <button class="quiz-option" data-value="m1-q1-c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>C. claude-code 在终端里写</span>
+                </button>
+                <button class="quiz-option" data-value="m1-q1-d" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>D. vim + 手写</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+          </div>
+
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">场景 2</span>
+              <p>你接手了一个 10 万行的 Java 老项目，要做大规模重构。</p>
+            </div>
+            <div class="quiz-question-block"
+                 data-correct="m1-q2-b"
+                 data-explanation-right="对——大仓 + 多文件 + 长任务正是 CLI 派的强项。claude-code / Codex CLI 能一口气读全仓上下文，按 TODO 列表批量执行。浏览器派根本读不进 10 万行私有代码。"
+                 data-explanation-wrong="再想想——浏览器派擅长&lsquo;从零生成&rsquo;，对&lsquo;读懂十万行老代码再改&rsquo;无能为力。这种活属于 CLI 派，配合 IDE 派看每一步 diff。">
+              <h3 class="quiz-question">最合适的工具组合是？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="m1-q2-a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>A. Lovable 重写一遍</span>
+                </button>
+                <button class="quiz-option" data-value="m1-q2-b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>B. CLI 派（claude-code）+ IDE 派（Cursor）看 diff</span>
+                </button>
+                <button class="quiz-option" data-value="m1-q2-c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>C. v0 by Vercel</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m1')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m1')">再试一次</button>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Key Insight：少而精，不是多而杂</strong>
+            <p>工具不是越多越好。挑 1 个浏览器派 + 1 个 IDE 派 + 1 个 CLI 派——三件套就能覆盖 90% 真实场景。多了反而切换成本压垮你。</p>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🗺️</div>
+          <div class="callout-content">
+            <strong class="callout-title">接下来</strong>
+            <p>模块 2-4 分别精读 浏览器 / IDE / CLI 三大主线（覆盖 80% 真实选择）。模块 5 拼上"工具的工具"——任务编排 + 文档标准。</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

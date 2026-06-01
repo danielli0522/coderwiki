@@ -1,0 +1,194 @@
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">反检测攻防战</h1>
+      <p class="module-subtitle">网站怎么发现你是 Bot？CloakBrowser 又怎么让 Bot 变成"隐形人"？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: The Arms Race -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">一场永不停歇的军备竞赛</h2>
+        <p>想象你在玩捉迷藏。藏的人（Bot）每次被发现，都会想出新的藏法；找的人（网站）每次被蒙混过关，都会升级搜索策略。这就是 Bot 检测和反检测之间的军备竞赛。</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">核心洞察</strong>
+            <p>大多数反检测工具（比如 <span class="term" data-definition="Puppeteer Extra 是 Puppeteer 的增强版，可以通过插件扩展功能。stealth 插件是最常用的，它通过注入 JavaScript 来隐藏自动化痕迹。">Puppeteer Stealth</span>）是用 <span class="term" data-definition="JavaScript 是运行在浏览器中的编程语言。JS 注入就是在网页加载时，偷偷插入额外的 JS 代码来修改浏览器的行为——就像在剧本里临时加了一段台词。">JS 注入</span>来伪装的。但网站也能用 JS 来检测你的伪装——这就变成了"用 JS 骗 JS"的猫鼠游戏。CloakBrowser 的策略完全不同：它直接修改浏览器的 C++ 源代码。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Detection Methods -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">网站的"安检清单"</h2>
+        <p>网站通过以下方式检测你是不是 Bot。每一项都像一个"检查站"：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-error)">
+            <div class="pattern-icon" style="background: var(--color-error)">🔍</div>
+            <h4 class="pattern-title"><span class="term" data-definition="Canvas 指纹是网站通过让浏览器画一段隐藏图形，然后读取像素数据来识别浏览器。不同设备的显卡渲染结果略有差异，这个差异就成了指纹。">Canvas 指纹</span></h4>
+            <p class="pattern-desc">让浏览器画一张隐藏的图片，检查每个像素的颜色——不同电脑画出来会有细微差异，以此识别你</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-error)">
+            <div class="pattern-icon" style="background: var(--color-error)">🔊</div>
+            <h4 class="pattern-title"><span class="term" data-definition="AudioContext 指纹是网站通过让浏览器处理一段音频信号，然后检查输出结果来识别浏览器。不同设备的音频处理单元会产生微小的差异。">Audio 指纹</span></h4>
+            <p class="pattern-desc">让浏览器处理一段声音信号，检查输出波形的微小差异——每台电脑的声卡处理结果都不一样</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-error)">
+            <div class="pattern-icon" style="background: var(--color-error)">🖥️</div>
+            <h4 class="pattern-title"><span class="term" data-definition="WebGL 指纹通过检查浏览器的 3D 图形渲染能力来识别设备。网站会读取你的显卡型号、渲染器信息等来创建指纹。">WebGL 指纹</span></h4>
+            <p class="pattern-desc">检查你的显卡型号、3D 渲染能力——每张显卡的渲染结果都略有不同</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-error)">
+            <div class="pattern-icon" style="background: var(--color-error)">🌐</div>
+            <h4 class="pattern-title"><span class="term" data-definition="WebRTC 是浏览器内置的实时通信功能，可以让浏览器直接进行视频通话和文件传输。但它也可能泄露你的真实 IP 地址，即使你使用了代理。">WebRTC</span> 泄露</h4>
+            <p class="pattern-desc">即使你用了代理，WebRTC 可能直接暴露你的真实 IP 地址——这是许多反检测工具忽略的漏洞</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-error)">
+            <div class="pattern-icon" style="background: var(--color-error)">🤖</div>
+            <h4 class="pattern-title">自动化信号</h4>
+            <p class="pattern-desc"><code>navigator.webdriver</code>、<code>window.chrome</code> 缺失、<span class="term" data-definition="CDP 是 Chrome DevTools Protocol 的缩写，是 Chrome 浏览器提供的调试接口。自动化工具通过 CDP 来控制浏览器，但网站也能检测到 CDP 的连接痕迹。">CDP</span> 痕迹——这些"我是机器人"的标签需要全部抹掉</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-error)">
+            <div class="pattern-icon" style="background: var(--color-error)">🧬</div>
+            <h4 class="pattern-title">硬件特征</h4>
+            <p class="pattern-desc">CPU 核心数、内存大小、屏幕分辨率、触摸能力——这些硬件参数组合起来也是指纹</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: C++ vs JS Patches -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">C++ 补丁 vs JS 注入</h2>
+        <p>CloakBrowser 的核心创新在于它的修补方式。其他工具在网页层面做伪装，CloakBrowser 在浏览器引擎层面做修改：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">JS 注入（其他工具）</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment">// 在网页里插入一段 JS 来骗检测</span></span>
+<span class="code-line"><span class="code-function">Object</span>.<span class="code-function">defineProperty</span>(navigator, <span class="code-string">'webdriver'</span>, {</span>
+<span class="code-line">  <span class="code-function">get</span>: () => <span class="code-keyword">undefined</span></span>
+<span class="code-line">});</span>
+            </code></pre>
+          </div>
+          <div class="translation-code">
+            <span class="translation-label">C++ 补丁（CloakBrowser）</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment">// 直接在 Chromium 源码里改</span></span>
+<span class="code-line"><span class="code-comment">// third_party/blink/renderer/...</span></span>
+<span class="code-line"><span class="code-keyword">if</span> (IsAutomationEnabled()) {</span>
+<span class="code-line">  <span class="code-keyword">return</span> <span class="code-keyword">false</span>;  <span class="code-comment">// 永远返回"不是机器人"</span></span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">为什么 JS 注入靠不住？</strong>
+            <p>JS 注入就像是给间谍穿了一件外套——外套外面看着像普通人，但一做"X光检查"（检测注入痕迹），就会暴露。网站可以通过检查 <code>Object.getOwnPropertyDescriptor</code> 来发现属性被篡改过。而 C++ 补丁是直接修改了"骨骼"——从里到外都是伪装后的身份。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Data Flow Animation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">当网站尝试检测时</h2>
+        <p>网站执行一段 JavaScript 来检查你的浏览器。看看 CloakBrowser 是怎么拦截这个检查的：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"网站 JS 执行：navigator.webdriver"},
+          {"highlight":"flow-actor-2","label":"请求到达 Chromium 引擎"},
+          {"highlight":"flow-actor-2","label":"C++ 层拦截：检测到自动化标志查询","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-3","label":"返回伪装后的结果：undefined（不是机器人）","packet":true,"from":"actor-3","to":"actor-1"},
+          {"highlight":"flow-actor-1","label":"网站收到"正常"结果，放行！"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">🌐</div>
+              <span>网站 JS</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">⚙️</div>
+              <span>Chromium C++</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">🎭</div>
+              <span>指纹补丁</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击"下一步"开始</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！JS 注入在网页层面做修改，可以被检测到；C++ 补丁直接在浏览器引擎层面修改，对网页完全透明，几乎不可能被检测到。"
+               data-explanation-wrong="想想两种方法在哪个层面做修改。一种是在网页可以看到的层面，一种是在网页根本接触不到的层面。">
+            <h3 class="quiz-question">为什么 CloakBrowser 的 C++ 补丁比 JS 注入更可靠？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>C++ 运行速度更快，所以不容易被检测到</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>C++ 补丁在网页接触不到的引擎层面修改，网页无法检测到篡改痕迹</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>C++ 补丁可以修改更多的指纹，JS 注入只能改少数几个</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正是如此！CloakBrowser 覆盖了 Canvas、WebGL、Audio、WebRTC、自动化信号、硬件特征等全方位的检测手段。"
+               data-explanation-wrong="CloakBrowser 的核心是全面覆盖——不只是改一两个指纹，而是系统性地伪装了浏览器的方方面面。">
+            <h3 class="quiz-question">如果网站同时使用 Canvas 指纹、WebGL 指纹和自动化信号检测，CloakBrowser 能应对吗？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>只能应对其中一种，需要额外工具配合</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>能应对两种，第三种需要手动配置</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>全部都能应对——57 处补丁覆盖了所有常见检测手段</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

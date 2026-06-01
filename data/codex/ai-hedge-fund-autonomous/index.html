@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 对冲基金：自主 Agent 驱动的交易系统</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <!-- EMERALD GREEN/FINANCE accent -->
+  <style>
+    :root {
+      --color-accent:       #1A7A4A;
+      --color-accent-hover: #135C38;
+      --color-accent-light: #E8F5EE;
+      --color-accent-muted: #4DAA78;
+    }
+  </style>
+  <script src="main.js" defer></script>
+</head>
+<body>
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">AI 对冲基金：自主 Agent 驱动的交易系统</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <button class="nav-dot" data-target="module-1" data-tooltip="自主交易愿景" role="tab" aria-label="Module 1"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="Agent 团队架构" role="tab" aria-label="Module 2"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="信号聚合" role="tab" aria-label="Module 3"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="风险控制与回测" role="tab" aria-label="Module 4"></button>
+      </div>
+      </div>
+    </div>
+  </nav>
+  <main id="main">
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">自主交易的愿景</h1>
+      <p class="module-subtitle">当 AI 接管华尔街的分析工作——这个项目究竟在做什么</p>
+    </header>
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">想象一个 AI 投资团队</h2>
+        <p>想象你雇了 19 位顶级投资分析师——沃伦·巴菲特、查理·芒格、迈克尔·伯里、凯西·伍德……每人有自己的投资哲学，分析同一支股票，然后一位投资组合经理综合所有意见做出最终交易决策。</p>
+        <p>ai-hedge-fund 就是这样的系统——但每个"分析师"都是一个 <span class="term" data-definition="AI Agent（AI 智能体）是一个能自主感知环境、做决策并执行动作的 AI 系统。与普通 AI 聊天不同，Agent 有明确的目标，能一步步地计划和执行复杂任务。">AI Agent</span>，用代码模拟了传奇投资者的分析风格。</p>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">重要免责声明</strong>
+            <p>这个项目是教育和研究用途——不做真实交易，不是投资建议。它演示的是 AI Agent 协作的架构模式，不是炒股指南。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">19 位 AI 分析师——每人一种哲学</h2>
+        <p>系统里有 13 位模拟著名投资者的 Agent，加上 6 个专业分析 Agent：</p>
+
+        <div class="pattern-cards stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">📊</div>
+            <h4 class="pattern-title">Warren Buffett Agent</h4>
+            <p class="pattern-desc">寻找"美好企业以合理价格"——品牌护城河、稳定现金流、长期持有。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">📉</div>
+            <h4 class="pattern-title">Michael Burry Agent</h4>
+            <p class="pattern-desc">反向投资者，专找被市场低估的深度价值股，有"大空头"精神。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">🚀</div>
+            <h4 class="pattern-title">Cathie Wood Agent</h4>
+            <p class="pattern-desc">科技颠覆性增长投资——ARK Innovation 风格，押注 5-10 年后的未来。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">⚡</div>
+            <h4 class="pattern-title">Risk Manager Agent</h4>
+            <p class="pattern-desc">不分析个股——专门计算波动率、最大回撤、相关性，控制整体风险敞口。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码翻译：系统的主入口</h2>
+        <p>整个对冲基金系统的启动代码（来自 <code>src/main.py</code>）展示了它如何组装所有 Agent：</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">run_hedge_fund</span>(</span>
+<span class="code-line">    tickers: <span class="code-function">list</span>[<span class="code-keyword">str</span>],</span>
+<span class="code-line">    portfolio: <span class="code-keyword">dict</span>,</span>
+<span class="code-line">    selected_analysts: <span class="code-function">list</span>[<span class="code-keyword">str</span>] = [],</span>
+<span class="code-line">    model_name: <span class="code-keyword">str</span> = <span class="code-string">"gpt-4.1"</span>,</span>
+<span class="code-line">):</span>
+<span class="code-line">    workflow = <span class="code-function">create_workflow</span>(selected_analysts)</span>
+<span class="code-line">    agent = workflow.<span class="code-function">compile</span>()</span>
+<span class="code-line">    final_state = agent.<span class="code-function">invoke</span>({</span>
+<span class="code-line">        <span class="code-string">"messages"</span>: [<span class="code-function">HumanMessage</span>(</span>
+<span class="code-line">            <span class="code-string">"Make trading decisions."</span></span>
+<span class="code-line">        )]</span>
+<span class="code-line">    })</span>
+<span class="code-line">    <span class="code-keyword">return</span> final_state</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">run_hedge_fund：启动整个 AI 对冲基金分析流程</p>
+              <p class="tl">tickers：要分析的股票代码列表，比如 ["AAPL", "TSLA"]</p>
+              <p class="tl">portfolio：当前持仓情况——持有什么、多少股、多少现金</p>
+              <p class="tl">selected_analysts：选哪些 AI 分析师参与（可以只用部分）</p>
+              <p class="tl">model_name：用哪个大语言模型（GPT/Claude/DeepSeek 都可以）</p>
+              <p class="tl"></p>
+              <p class="tl">创建 LangGraph 工作流——把所有选中的 Agent 串成有向图</p>
+              <p class="tl">编译工作流，生成可执行的 Agent 系统</p>
+              <p class="tl">发起运行：给整个系统一个"做交易决策"的指令</p>
+              <p class="tl"></p>
+              <p class="tl"></p>
+              <p class="tl">等所有 Agent 跑完，返回最终状态（包含每个分析师的信号和最终决策）</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">从人类交易员到 AI 交易员</h2>
+        <p>传统的量化交易系统用数学公式和统计模型做决策。AI 对冲基金则走了另一条路——让 AI 模拟人类分析师的思维过程。这两种方式有什么本质区别？</p>
+
+        <div class="pattern-cards stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">📊</div>
+            <h4 class="pattern-title">传统量化交易</h4>
+            <p class="pattern-desc">规则明确：如果 RSI < 30 且成交量 > 均值 2 倍，则买入。每条规则由人编写，模型只是执行器。优点是可解释，缺点是灵活性差——遇到新情况需要手动添加规则。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">🤖</div>
+            <h4 class="pattern-title">AI Agent 交易</h4>
+            <p class="pattern-desc">意图驱动：「像巴菲特那样分析这只股票」。AI 理解投资哲学，综合财报、新闻、技术指标，输出有理由的判断。不写规则，而是给 AI 角色「人格」。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">🔀</div>
+            <h4 class="pattern-title">混合模式（本项目）</h4>
+            <p class="pattern-desc">Agent 框架编排 + LLM 推理 + 结构化数据。技术指标用代码计算（精确），投资决策用 LLM 综合（灵活），风控用硬规则（安全）。</p>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">为什么用 LangGraph 而不直接调 LLM？</strong>
+            <p>如果你只是让一个 AI 分析股票，直接调 GPT-4 就行了。但当你需要 19 个 AI 同时工作、互相协作、按特定顺序执行、共享数据——就需要一个工作流引擎。LangGraph 就是这个引擎，它管理的是「谁来做什么、什么时候做、怎么传数据」。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">初步理解检验</h2>
+        <div class="quiz-container" id="quiz-ahf-1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！LangGraph 工作流决定了哪些 Agent 参与分析，以及它们之间如何传递信息。增减 Agent 就是修改工作流的节点配置。"
+               data-explanation-wrong="再想想系统架构——每个 Agent 是独立的分析模块，工作流控制它们的协作方式。">
+            <h3 class="quiz-question">你想给 ai-hedge-fund 添加一个新的"ESG 投资分析师"Agent（只投资环保公司）。你需要修改什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>修改 Warren Buffett Agent 的代码，加入 ESG 逻辑</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>创建新的 esg_analyst_agent 函数，并在 create_workflow 里注册它</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>修改 portfolio_manager_agent，让它自动识别 ESG 股票</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-ahf-1')">提交答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-ahf-1')">再试一次</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">Agent 团队架构</h1>
+      <p class="module-subtitle">基本面 / 技术面 / 情绪 / 风险——四类分析师如何分工协作</p>
+    </header>
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">LangGraph：Agent 的交通调度员</h2>
+        <p>19 个 AI Agent 需要协作——谁先跑，谁后跑，数据怎么传？ai-hedge-fund 用 <span class="term" data-definition="LangGraph 是 LangChain 团队开发的框架，用有向图（节点+边）来描述 AI Agent 的执行流程。每个节点是一个 Agent 或函数，边定义了执行顺序和条件。">LangGraph</span> 来管理这个协作——就像交通调度员，让每辆车（Agent）在正确的时间经过正确的路口。</p>
+
+        <div class="arch-diagram">
+          <div class="arch-zone">
+            <h4 class="arch-zone-label">第一层：独立分析师（并行执行）</h4>
+            <div class="arch-component" data-desc="Fundamentals Agent：分析财务指标——ROE、净利润率、运营利润率、市盈率、资产负债表健康状况。产出：bullish/bearish/neutral 信号。" onclick="showArchDesc(this)">
+              <div class="arch-icon">📋</div>
+              <span>Fundamentals</span>
+            </div>
+            <div class="arch-component" data-desc="Technicals Agent：分析价格走势——均线、RSI、MACD、布林带、成交量。专注于图表形态和动量信号。" onclick="showArchDesc(this)">
+              <div class="arch-icon">📈</div>
+              <span>Technicals</span>
+            </div>
+            <div class="arch-component" data-desc="Sentiment Agent：分析新闻情绪——用 NLP 处理最新新闻，判断市场对该股票的整体情绪是正面还是负面。" onclick="showArchDesc(this)">
+              <div class="arch-icon">📰</div>
+              <span>Sentiment</span>
+            </div>
+            <div class="arch-component" data-desc="Valuation Agent：用 DCF（贴现现金流）和相对估值方法计算内在价值，判断股票是否被高估或低估。" onclick="showArchDesc(this)">
+              <div class="arch-icon">💰</div>
+              <span>Valuation</span>
+            </div>
+            <div class="arch-component" data-desc="各位著名投资者 Agent（Buffett、Munger、Burry 等）：用其标志性投资哲学分析股票，产出有理由的投资建议。" onclick="showArchDesc(this)">
+              <div class="arch-icon">🧠</div>
+              <span>投资者 Agents</span>
+            </div>
+          </div>
+          <div class="arch-zone">
+            <h4 class="arch-zone-label">第二层：风险控制</h4>
+            <div class="arch-component" data-desc="Risk Manager：不做选股，专门计算风险指标——波动率、最大回撤、与其他持仓的相关性。为每只股票设置最大仓位限制。" onclick="showArchDesc(this)">
+              <div class="arch-icon">🛡️</div>
+              <span>Risk Manager</span>
+            </div>
+          </div>
+          <div class="arch-zone">
+            <h4 class="arch-zone-label">第三层：最终决策</h4>
+            <div class="arch-component" data-desc="Portfolio Manager：综合所有分析师的信号和风险限制，做出最终的买入/卖出/持有决策，并确定具体交易数量。" onclick="showArchDesc(this)">
+              <div class="arch-icon">👔</div>
+              <span>Portfolio Manager</span>
+            </div>
+          </div>
+          <div class="arch-description" id="arch-desc">点击任意 Agent 了解它的职责</div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码翻译：Fundamentals Agent 的分析逻辑</h2>
+        <p>以基本面分析师为例，看看一个分析 Agent 如何工作（来自 <code>src/agents/fundamentals.py</code>）：</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">fundamentals_analyst_agent</span>(state, agent_id):</span>
+<span class="code-line">    financial_metrics = <span class="code-function">get_financial_metrics</span>(</span>
+<span class="code-line">        ticker=ticker, end_date=end_date</span>
+<span class="code-line">    )</span>
+<span class="code-line">    return_on_equity = metrics.return_on_equity</span>
+<span class="code-line">    thresholds = [</span>
+<span class="code-line">        (return_on_equity, <span class="code-number">0.15</span>),</span>
+<span class="code-line">        (net_margin, <span class="code-number">0.20</span>),</span>
+<span class="code-line">    ]</span>
+<span class="code-line">    score = <span class="code-function">sum</span>(m > t <span class="code-keyword">for</span> m, t <span class="code-keyword">in</span> thresholds)</span>
+<span class="code-line">    signal = <span class="code-string">"bullish"</span> <span class="code-keyword">if</span> score >= <span class="code-number">2</span> <span class="code-keyword">else</span> <span class="code-string">"bearish"</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">基本面分析师函数：分析股票的财务健康状况</p>
+              <p class="tl">调用金融数据 API，获取该股票的财务指标</p>
+              <p class="tl">（股票代码和截止日期）</p>
+              <p class="tl"></p>
+              <p class="tl">提取净资产收益率（ROE）——衡量公司用股东钱赚钱的效率</p>
+              <p class="tl">设置评分标准：</p>
+              <p class="tl">ROE 超过 15% 得 1 分（说明资金使用效率高）</p>
+              <p class="tl">净利润率超过 20% 得 1 分（说明赚钱能力强）</p>
+              <p class="tl">统计总分</p>
+              <p class="tl">得分 2 以上：看多（bullish）；否则：看空（bearish）</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">并行执行的力量</h2>
+        <p>19 个分析师 Agent 分析同一支股票——如果串行执行，一个接一个，可能需要几分钟。ai-hedge-fund 利用 LangGraph 的并行执行特性，让多个 Agent 同时分析：</p>
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"你输入 tickers=[\"AAPL\", \"TSLA\"]，系统开始运行"},
+          {"highlight":"flow-actor-2","label":"LangGraph 把分析任务分发给所有 Agent：Fundamentals、Technicals、Sentiment、Valuation 同时开始工作","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-2","label":"各投资者 Agent（Buffett、Burry、Cathie Wood）也在并行分析"},
+          {"highlight":"flow-actor-3","label":"每个 Agent 完成后，把信号写入共享的 AgentState：{ticker: AAPL, signal: bullish, confidence: 0.8}","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-3","label":"Risk Manager 汇总所有信号，计算风险指标，设置仓位上限"},
+          {"highlight":"flow-actor-1","label":"Portfolio Manager 读取所有信号和风险限制，做出最终交易决策：BUY AAPL 100 shares","packet":true,"from":"actor-3","to":"actor-1"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1"><div class="flow-actor-icon">👔</div><span>Portfolio Mgr</span></div>
+            <div class="flow-actor" id="flow-actor-2"><div class="flow-actor-icon">🔀</div><span>LangGraph</span></div>
+            <div class="flow-actor" id="flow-actor-3"><div class="flow-actor-icon">📊</div><span>AgentState</span></div>
+          </div>
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击"下一步"看协作流程</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重置</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">投资者 Agent 的人格设计</h2>
+        <p>每位传奇投资者 Agent 都有精心设计的<span class="term" data-definition="System Prompt（系统提示词）：发送给 AI 的隐藏指令，定义 AI 的角色、行为规则和输出格式。对投资者 Agent 来说，它定义了这个 Agent 的投资哲学和分析框架。">System Prompt</span>——不是简单的「你是巴菲特」，而是完整的投资方法论：</p>
+
+        <div class="chat-window" id="chat-persona">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="system" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">WB</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Warren Buffett System Prompt（节选）</span>
+                <p>你是沃伦·巴菲特的投资分析师。你的分析框架：<br>
+                1. 寻找拥有持久竞争优势（护城河）的企业<br>
+                2. 关注 ROE、自由现金流、利润率<br>
+                3. 管理层是否诚实、能干<br>
+                4. 价格是否合理（安全边际）<br>
+                5. 你偏好长期持有，忽视短期波动</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="system" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">MB</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">Michael Burry System Prompt（节选）</span>
+                <p>你是迈克尔·伯里的投资分析师。你的分析框架：<br>
+                1. 寻找被严重低估的资产<br>
+                2. 关注资产负债表、账面价值<br>
+                3. 寻找市场定价错误的异常情况<br>
+                4. 你愿意承受孤独——即使全世界都反对你<br>
+                5. 你特别关注资产负债率异常的公司</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="system" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">PM</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">关键差异</span>
+                <p>两个 Agent 看同一家公司，巴菲特可能说「品牌护城河极强，长期持有」，伯里可能说「市盈率太高，被高估了」。这不是 Bug——这是故意设计的「多视角对抗」，帮助 Portfolio Manager 看到完整画面。</p>
+              </div>
+            </div>
+          </div>
+          <div class="chat-typing" id="chat-persona-typing" style="display:none">
+            <div class="chat-avatar" id="chat-persona-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>
+            </div>
+          </div>
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条</button>
+            <button class="btn chat-all-btn">播放全部</button>
+            <button class="btn chat-reset-btn">重播</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">数据源：Agent 们从哪里获取信息？</h2>
+        <p>每个分析师 Agent 需要真实的市场数据。ai-hedge-fund 通过多个外部 API 获取数据：</p>
+
+        <div class="arch-diagram">
+          <div class="arch-zone">
+            <h4 class="arch-zone-label">数据源层</h4>
+            <div class="arch-component" data-desc="Financial Datasets API：提供股票的历史价格、财务报表（资产负债表、利润表、现金流量表）、关键指标（ROE、PE、EPS 等）。" onclick="showArchDesc(this)">
+              <div class="arch-icon">💹</div>
+              <span>Financial Datasets</span>
+            </div>
+            <div class="arch-component" data-desc="News API：提供最新的财经新闻、公司公告、分析师评级。Sentiment Agent 用它来判断市场情绪。" onclick="showArchDesc(this)">
+              <div class="arch-icon">📰</div>
+              <span>News API</span>
+            </div>
+            <div class="arch-component" data-desc="Yahoo Finance（备选）：当主 API 不可用时，通过 yfinance 库获取实时行情和历史数据。" onclick="showArchDesc(this)">
+              <div class="arch-icon">📈</div>
+              <span>Yahoo Finance</span>
+            </div>
+          </div>
+          <div class="arch-zone">
+            <h4 class="arch-zone-label">数据使用方式</h4>
+            <div class="arch-component" data-desc="Fundamentals Agent 读取资产负债表和利润表，计算 ROE、净利润率、运营利润率等指标。" onclick="showArchDesc(this)">
+              <div class="arch-icon">📋</div>
+              <span>财务数据 → 基本面分析</span>
+            </div>
+            <div class="arch-component" data-desc="Technicals Agent 读取历史价格和成交量，计算均线、RSI、MACD 等技术指标。" onclick="showArchDesc(this)">
+              <div class="arch-icon">📊</div>
+              <span>价格数据 → 技术分析</span>
+            </div>
+            <div class="arch-component" data-desc="Sentiment Agent 用 NLP 处理新闻标题和内容，计算情绪分数（0-1 之间）。" onclick="showArchDesc(this)">
+              <div class="arch-icon">🧠</div>
+              <span>新闻数据 → 情绪分析</span>
+            </div>
+          </div>
+          <div class="arch-description" id="arch-desc">点击任意组件了解详情</div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">架构理解测验</h2>
+        <div class="quiz-container" id="quiz-ahf-2">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！AgentState 是所有 Agent 共享的状态对象，就像一块公告板。每个 Agent 完成分析后把信号写到这里，Portfolio Manager 最后来读取所有信号。"
+               data-explanation-wrong="再想想 Agent 之间如何传递信息——它们不直接对话，而是通过共享状态来协作。">
+            <h3 class="quiz-question">Fundamentals Agent 分析完 AAPL 得出 bullish 信号。它如何把这个结论传给 Portfolio Manager？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Fundamentals Agent 直接调用 Portfolio Manager 的函数</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>通过 HTTP API 发消息给 Portfolio Manager</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>把 {AAPL: bullish} 写入共享的 AgentState，Portfolio Manager 从 State 里读取</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-ahf-2')">提交答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-ahf-2')">再试一次</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">信号聚合</h1>
+      <p class="module-subtitle">19 个分析师意见不一，Portfolio Manager 如何做出最终决定</p>
+    </header>
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">投票还是加权平均？</h2>
+        <p>想象一场投资委员会会议：Buffett 说买，Burry 说卖，Cathie Wood 说强买，基本面分析说中性……Portfolio Manager 的任务是综合这 19 个声音，做出一个决定。</p>
+        <p>ai-hedge-fund 的做法是把所有信号打包交给 <span class="term" data-definition="LLM（大语言模型）是 GPT、Claude、DeepSeek 这类 AI 的正式名称。它通过分析大量文本训练出来，能理解和生成人类语言，也能处理结构化推理任务。">LLM</span> 做最终综合——Portfolio Manager 本身也是一个 AI Agent！</p>
+
+        <div class="chat-window" id="chat-ahf-signals">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="buffett" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">WB</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Warren Buffett Agent</span>
+                <p>AAPL：强烈看多。品牌护城河深厚，iPhone 生态锁定效应极强，ROE 持续超过 100%，适合长期持有。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="burry" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">MB</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">Michael Burry Agent</span>
+                <p>AAPL：轻度看空。市盈率 30x 已过高，增长放缓迹象明显，大型科技股历史上在利率上升期间表现不佳。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="sentiment" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">ST</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">Sentiment Agent</span>
+                <p>AAPL：中性偏正面。最近新闻情绪分数 0.65（满分 1.0），Vision Pro 发布引发一定关注，但没有特别强烈的催化剂。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="risk" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">RM</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">Risk Manager</span>
+                <p>风险限制：AAPL 最大仓位 $50,000（因为与 MSFT 相关性 0.8，不能双向重仓科技股）。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="pm" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">PM</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">Portfolio Manager</span>
+                <p>综合判断：看多信号 11 / 中性 5 / 看空 3，多数派看多，风险可控。决策：BUY AAPL，数量 80 股（在 $50k 上限内）。</p>
+              </div>
+            </div>
+          </div>
+          <div class="chat-typing" id="chat-ahf-signals-typing" style="display:none">
+            <div class="chat-avatar" id="chat-ahf-signals-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>
+            </div>
+          </div>
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条</button>
+            <button class="btn chat-all-btn">全部播放</button>
+            <button class="btn chat-reset-btn">重播</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">AgentState：Agent 之间的公告板</h2>
+        <p>所有 Agent 通过 <span class="term" data-definition="AgentState 是 LangGraph 中存储所有 Agent 共享数据的对象，就像一块公告板。每个 Agent 读取它需要的输入，写入自己的输出。这种模式叫做共享状态模式。">AgentState</span> 传递信息。这个状态对象的结构展示了系统的数据模型：</p>
+        <div class="file-tree animate-in">
+          <div class="ft-folder open">
+            <span class="ft-name">AgentState</span>
+            <span class="ft-desc">所有 Agent 共享的状态对象</span>
+            <div class="ft-children">
+              <div class="ft-file"><span class="ft-name">messages[]</span><span class="ft-desc">LangChain 消息历史，让 LLM 知道对话上下文</span></div>
+              <div class="ft-file"><span class="ft-name">data.tickers[]</span><span class="ft-desc">要分析的股票代码列表</span></div>
+              <div class="ft-file"><span class="ft-name">data.portfolio</span><span class="ft-desc">当前持仓：{AAPL: 100股, cash: $50000}</span></div>
+              <div class="ft-file"><span class="ft-name">data.analyst_signals</span><span class="ft-desc">所有分析师的信号：{buffett: {AAPL: bullish, confidence: 0.9}}</span></div>
+              <div class="ft-file"><span class="ft-name">data.risk_analysis</span><span class="ft-desc">风险管理器的输出：{AAPL: {max_position: 50000, volatility: 0.18}}</span></div>
+              <div class="ft-file"><span class="ft-name">metadata.show_reasoning</span><span class="ft-desc">是否打印每个 Agent 的推理过程（调试用）</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">信号冲突：当分析师们意见完全相反</h2>
+        <p>真实的投资决策中，信号冲突是常态而非例外。当 Buffett 说强买、Burry 说强卖时，Portfolio Manager 不是简单地「投票计数」，而是进行加权推理：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment"># Portfolio Manager 的决策逻辑（简化版）</span></span>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">portfolio_decision</span>(signals, risk_analysis):</span>
+<span class="code-line">    bull_count = <span class="code-function">sum</span>(</span>
+<span class="code-line">        s.signal == <span class="code-string">"bullish"</span></span>
+<span class="code-line">        <span class="code-keyword">for</span> s <span class="code-keyword">in</span> signals</span>
+<span class="code-line">    )</span>
+<span class="code-line">    avg_confidence = <span class="code-function">mean</span>(</span>
+<span class="code-line">        s.confidence <span class="code-keyword">for</span> s <span class="code-keyword">in</span> signals</span>
+<span class="code-line">        <span class="code-keyword">if</span> s.signal == <span class="code-string">"bullish"</span></span>
+<span class="code-line">    )</span>
+<span class="code-line">    max_pos = risk_analysis.max_position</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">if</span> bull_count >= <span class="code-number">0.6</span> * <span class="code-function">len</span>(signals):</span>
+<span class="code-line">        qty = <span class="code-function">calc_quantity</span>(</span>
+<span class="code-line">            max_pos, avg_confidence</span>
+<span class="code-line">        )</span>
+<span class="code-line">        <span class="code-keyword">return</span> <span class="code-string">"BUY"</span>, qty</span>
+<span class="code-line">    <span class="code-keyword">elif</span> bull_count <= <span class="code-number">0.3</span> * <span class="code-function">len</span>(signals):</span>
+<span class="code-line">        <span class="code-keyword">return</span> <span class="code-string">"SELL"</span>, <span class="code-number">0</span></span>
+<span class="code-line">    <span class="code-keyword">else</span>:</span>
+<span class="code-line">        <span class="code-keyword">return</span> <span class="code-string">"HOLD"</span>, <span class="code-number">0</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">统计看多信号的数量</p>
+              <p class="tl"></p>
+              <p class="tl">计算看多信号的平均置信度</p>
+              <p class="tl">（置信度越高，信号越可靠）</p>
+              <p class="tl">从风险管理器获取最大仓位限制</p>
+              <p class="tl"></p>
+              <p class="tl">如果超过 60% 的分析师看多</p>
+              <p class="tl">根据置信度和仓位上限计算买入数量</p>
+              <p class="tl">决策：买入</p>
+              <p class="tl">如果不到 30% 看多</p>
+              <p class="tl">决策：卖出</p>
+              <p class="tl">介于 30%-60% 之间</p>
+              <p class="tl">决策：持有（观望）</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">风险管理是硬约束，不是建议</strong>
+            <p>注意代码里的 max_pos 变量——即使所有 19 个分析师都强烈看多，Portfolio Manager 也不能超过 Risk Manager 设定的仓位上限。这是系统的安全阀：理性分析很重要，但风险控制是不可逾越的红线。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">你是 Portfolio Manager</h2>
+        <div class="quiz-container" id="quiz-ahf-3">
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">场景</span>
+              <p>分析完 TSLA 后，信号如下：Cathie Wood Agent: 强烈看多、Fundamentals Agent: 看空（亏损）、Risk Manager: 最大仓位 $20,000（因高波动率）、Sentiment Agent: 看多（马斯克发推）。你有 $100,000 可用资金。</p>
+            </div>
+          </div>
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！信号有冲突时，风险管理器的仓位上限是硬约束，不能超过。在上限内买入少量表达信号，同时保留大量现金应对风险，是合理的决策。"
+               data-explanation-wrong="再想想——风险管理器设置的是硬上限。即使你很看好，也不能超过 $20,000。">
+            <h3 class="quiz-question">基于上述信号，最合理的操作是？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Cathie Wood 是增长投资大师，全仓买入 TSLA $100,000</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>在 $20,000 上限内买入少量 TSLA，保留大部分现金</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>基本面看空，不买</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-ahf-3')">提交答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-ahf-3')">再试一次</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">风险控制与回测</h1>
+      <p class="module-subtitle">如何确保 AI 交易系统不会在现实中亏钱——风险管理、回测框架和系统扩展</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">风险管理器的三层防线</h2>
+        <p>Risk Manager Agent 不是简单的「仓位不能超过 X」。它建立了三层风险防线，保护整个投资组合：</p>
+
+        <div class="arch-diagram">
+          <div class="arch-zone">
+            <h4 class="arch-zone-label">第一层：个股风险</h4>
+            <div class="arch-component" data-desc="计算每只股票的波动率（30日/60日/90日）。波动率越高，允许的最大仓位越小。高波动股票（如 TSLA）可能只允许 5% 仓位，低波动股票（如 JNJ）可以允许 15%。" onclick="showArchDesc(this)">
+              <div class="arch-icon">📉</div>
+              <span>波动率限制</span>
+            </div>
+            <div class="arch-component" data-desc="计算每只股票的最大回撤（从最高价到最低价的跌幅）。如果最大回撤超过 25%，会对该股票设置额外的仓位折扣。" onclick="showArchDesc(this)">
+              <div class="arch-icon">⬇️</div>
+              <span>最大回撤</span>
+            </div>
+          </div>
+          <div class="arch-zone">
+            <h4 class="arch-zone-label">第二层：组合风险</h4>
+            <div class="arch-component" data-desc="计算所有持仓之间的相关系数矩阵。如果 AAPL 和 MSFT 的相关性是 0.8，说明它们经常同涨同跌——不能同时重仓两只高相关性的股票。" onclick="showArchDesc(this)">
+              <div class="arch-icon">🔗</div>
+              <span>相关性分析</span>
+            </div>
+            <div class="arch-component" data-desc="整个投资组合的总风险敞口不能超过设定阈值。即使每只股票都没超限，如果总风险太高，Risk Manager 会要求缩小整体仓位。" onclick="showArchDesc(this)">
+              <div class="arch-icon">🛡️</div>
+              <span>总敞口上限</span>
+            </div>
+          </div>
+          <div class="arch-zone">
+            <h4 class="arch-zone-label">第三层：极端情况</h4>
+            <div class="arch-component" data-desc="模拟最坏情况下（如 2008 金融危机）投资组合可能的最大损失。如果 VaR 超过 30%，会触发强制减仓。" onclick="showArchDesc(this)">
+              <div class="arch-icon">💥</div>
+              <span>VaR 压力测试</span>
+            </div>
+          </div>
+          <div class="arch-description" id="arch-desc">点击任意组件了解详情</div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">回测：用历史数据验证策略</h2>
+        <p>在用真金白银之前，你需要验证 AI 对冲基金的决策是否真的有效。这就是<span class="term" data-definition="回测（Backtesting）：用历史市场数据来模拟交易策略的表现。如果你的策略在过去 5 年的数据上都能盈利，那么它在未来盈利的概率更高。">回测</span>的作用：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment"># 回测主循环（简化版）</span></span>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">backtest</span>(strategy, start, end):</span>
+<span class="code-line">    portfolio = {<span class="code-string">"cash"</span>: <span class="code-number">100000</span>}</span>
+<span class="code-line">    <span class="code-keyword">for</span> date <span class="code-keyword">in</span> <span class="code-function">date_range</span>(start, end):</span>
+<span class="code-line">        signals = strategy.<span class="code-function">run</span>(date)</span>
+<span class="code-line">        decisions = portfolio_mgr.<span class="code-function">decide</span>(</span>
+<span class="code-line">            signals, portfolio</span>
+<span class="code-line">        )</span>
+<span class="code-line">        <span class="code-function">execute_trades</span>(decisions)</span>
+<span class="code-line">        <span class="code-function">update_portfolio</span>(portfolio)</span>
+<span class="code-line">    <span class="code-keyword">return</span> <span class="code-function">calculate_metrics</span>(portfolio)</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">回测函数：用历史数据模拟交易</p>
+              <p class="tl">初始资金 $100,000，持仓为空</p>
+              <p class="tl">遍历历史中的每一个交易日</p>
+              <p class="tl">用策略分析当天的市场数据，产生信号</p>
+              <p class="tl">Portfolio Manager 综合信号做出交易决策</p>
+              <p class="tl">模拟执行交易（假设按收盘价成交）</p>
+              <p class="tl">更新投资组合的市场价值</p>
+              <p class="tl">计算收益、最大回撤、夏普比率等指标</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">📊</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键回测指标</strong>
+            <p><strong>年化收益率</strong>：一年的平均收益率，越高越好。<strong>最大回撤</strong>：从最高点到最低点的最大跌幅，越小越好。<strong>夏普比率</strong>：每承担一单位风险能获得多少收益，通常 >1 算不错，>2 算优秀。<strong>胜率</strong>：盈利交易占总交易的百分比。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">系统扩展：如何添加新的 Agent</h2>
+        <p>ai-hedge-fund 的架构让扩展变得简单。假设你想添加一个「宏观经济分析师」Agent，关注利率、通胀和 GDP 增长：</p>
+
+        <div class="step-cards animate-in">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>创建 Agent 文件</strong>
+              <p>在 src/agents/ 下创建 macro_agent.py，定义分析逻辑和输出格式。输入是宏观数据，输出是 bullish/bearish/neutral 信号。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>编写 System Prompt</strong>
+              <p>在 src/prompts/ 下创建 macro_prompt.py，定义宏观分析师的投资框架——关注美联储利率、CPI、失业率等。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>注册到工作流</strong>
+              <p>在 create_workflow 函数里添加新节点，把它接入并行分析层。Portfolio Manager 会自动读取它的信号。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">扩展的黄金法则</strong>
+            <p>新增 Agent 必须遵守「输入-输出契约」：从 AgentState 读取数据，写入标准格式的信号（ticker、signal、confidence、reasoning）。只要遵守这个契约，任何新 Agent 都能无缝接入系统——这就是共享状态架构的威力。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">综合测验</h2>
+        <div class="quiz-container" id="quiz-ahf-4">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！相关性分析是第二层防线。如果 AAPL 和 MSFT 高度相关，同时重仓等于把赌注压在同一个方向上。Risk Manager 会根据相关性系数调整仓位上限。"
+               data-explanation-wrong="再想想——两支股票同时涨跌的问题属于「组合风险」层面，不是单个股票的风险。Risk Manager 的哪一层专门处理多个持仓之间的关系？">
+            <h3 class="quiz-question">你的投资组合持有 AAPL $50,000。现在你想买入 MSFT $80,000。Risk Manager 可能会怎么做？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>直接批准，因为两只股票是不同的公司</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>计算 AAPL 和 MSFT 的相关性，因为相关性高（0.8），限制 MSFT 的仓位</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>拒绝交易，因为投资组合已经满了</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！回测时数据是已知的，AI 可以「看到未来」——比如在分析 2024-03-15 的数据时，它可能无意中使用了 2024-03-16 的信息。解决方法是用「滚动窗口」确保只用当时可用的数据。"
+               data-explanation-wrong="再想想——回测用的是历史数据，AI 在分析时会不会无意中获取了未来信息？这叫「前瞻偏差」（Look-ahead Bias），是回测最常见的陷阱。">
+            <h3 class="quiz-question">回测中最大的陷阱是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>计算速度太慢，回测需要很长时间</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>历史数据不够多，无法得出结论</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>AI 可能使用了「未来信息」做出决策，导致回测结果过于乐观</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-ahf-4')">提交答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-ahf-4')">再试一次</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+  </main>
+</body>
+</html>

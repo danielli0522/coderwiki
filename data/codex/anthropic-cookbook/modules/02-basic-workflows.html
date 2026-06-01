@@ -1,0 +1,343 @@
+    <section class="module" id="module-2" style="background: var(--color-bg)">
+      <div class="module-content">
+        <header class="module-header animate-in">
+          <span class="module-number">02</span>
+          <h1 class="module-title">三种最基础的工序：链式 · 路由 · 并行</h1>
+          <p class="module-subtitle">当一个 LLM 一次答不完，你怎么把多个调用编排起来——agentic 架构的第一道分水岭</p>
+        </header>
+
+        <div class="module-body">
+
+          <!-- Screen 1: Hook + bar metaphor -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">把多个 LLM 编排起来——形状决定工序</h2>
+            <p>上一模块我们看到 Augmented LLM 是基础单元。但一个单元能干的事有限。现在的问题是：<strong>当任务复杂到一个 LLM 一次答不完，你怎么把多个调用编排起来？</strong></p>
+            <p>Anthropic 工程师在论文里给出了三种最基础的编排方式——本课用一家"现代化奶茶吧台"作贯穿隐喻：</p>
+
+            <div class="callout callout-accent">
+              <div class="callout-icon">🧋</div>
+              <div class="callout-content">
+                <strong class="callout-title">本课的隐喻：奶茶吧台的三种工序</strong>
+                <p><strong>链式 = 流水线</strong>：5 个工位前后接力，前一步的产物喂给下一步。<br>
+                <strong>路由 = 分流员</strong>：店员看你点什么，把订单送到对应的专业工位。<br>
+                <strong>并行 = 多窗口同时出杯</strong>：4 个工位同时开工，最后一起打包。</p>
+              </div>
+            </div>
+
+            <div class="pattern-cards stagger-children">
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+                <div class="pattern-icon" style="background: var(--color-actor-1)">⛓️</div>
+                <h4 class="pattern-title">链式 Chain</h4>
+                <p class="pattern-desc"><strong>何时用</strong>：任务能拆成"先 A 再 B 再 C" 的固定步骤。<br><strong>例子</strong>：抽数据 → 转格式 → 排序 → 渲染表格。<br><strong>不要用</strong>：任务步骤会随输入变化。</p>
+              </div>
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+                <div class="pattern-icon" style="background: var(--color-actor-3)">🚦</div>
+                <h4 class="pattern-title">路由 Route</h4>
+                <p class="pattern-desc"><strong>何时用</strong>：输入分多种类型，每种要不同的专门处理。<br><strong>例子</strong>：客服工单分到账单 / 技术 / 安全三个专员。<br><strong>不要用</strong>：所有输入处理逻辑都一样。</p>
+              </div>
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+                <div class="pattern-icon" style="background: var(--color-actor-4)">⚡</div>
+                <h4 class="pattern-title">并行 Parallel</h4>
+                <p class="pattern-desc"><strong>何时用</strong>：多个独立子任务可以同时进行。<br><strong>例子</strong>：对 100 条评论同时打分；对一篇文章同时做"摘要 / 翻译 / 关键词"。<br><strong>不要用</strong>：后一步依赖前一步结果。</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 2: Chain — code translation + flow animation -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">工序一：链式 Chain——前一步的输出喂给下一步</h2>
+            <p>来自 <code>patterns/agents/basic_workflows.ipynb</code>——整个 chain 函数 5 行有效代码：</p>
+
+            <div class="translation-block animate-in">
+              <div class="translation-code">
+                <span class="translation-label">CODE · Python</span>
+<pre><code><span class="code-line"><span class="code-keyword">def</span> <span class="code-function">chain</span>(input: str, prompts: list[str]) -&gt; str:</span>
+<span class="code-line">    <span class="code-string">"""Chain multiple LLM calls sequentially, passing results between steps."""</span></span>
+<span class="code-line">    result = input</span>
+<span class="code-line">    <span class="code-keyword">for</span> i, prompt <span class="code-keyword">in</span> <span class="code-function">enumerate</span>(prompts, 1):</span>
+<span class="code-line">        <span class="code-function">print</span>(<span class="code-string">f"\nStep {i}:"</span>)</span>
+<span class="code-line">        result = <span class="code-function">llm_call</span>(<span class="code-string">f"{prompt}\nInput: {result}"</span>)</span>
+<span class="code-line">        <span class="code-function">print</span>(result)</span>
+<span class="code-line">    <span class="code-keyword">return</span> result</span></code></pre>
+              </div>
+              <div class="translation-english">
+                <span class="translation-label">中文逐行翻译</span>
+                <div class="translation-lines">
+                  <p class="tl"><strong>第 1 行：</strong>定义一个叫 chain 的"组装机"——吃进一段输入和一串 <span class="term" data-definition="给 LLM 的指令文本，告诉它要做什么、怎么做。一个 prompt 可以是一句话也可以是几千字。">prompt</span> 清单。</p>
+                  <p class="tl"><strong>第 3 行：</strong>把"当前结果"初始化为最初的用户输入。</p>
+                  <p class="tl"><strong>第 4 行：</strong>按顺序拿每一个 prompt——步骤 1、步骤 2、步骤 3……</p>
+                  <p class="tl"><strong>第 6 行（关键）：</strong>把"当前结果"塞给下一个 prompt 当输入，再调 LLM。<strong>前一步的输出 = 后一步的输入</strong>——这就是链式的全部魔法。</p>
+                  <p class="tl"><strong>第 8 行：</strong>所有步骤跑完，把最终产物返回。</p>
+                  <p class="tl"><strong>整个 chain 函数 5 行有效代码——这就是链式工作流的全部。</strong></p>
+                </div>
+              </div>
+            </div>
+
+            <h3 style="margin-top: var(--space-12); font-family: var(--font-display); font-size: var(--text-xl);">看一遍真实的链式跑一份业绩报告</h3>
+            <p>cookbook 里给的实际例子：把一段杂乱业绩报告加工成 Markdown 表格，4 步流水线。点"下一步"逐步看：</p>
+
+            <div class="flow-animation" data-steps='[
+              {"highlight":"flow-actor-1","label":"用户提交一段含数字的业绩报告"},
+              {"highlight":"flow-actor-2","label":"步骤 1：抽出所有「数值 + 指标」对","packet":true,"from":"actor-1","to":"actor-2"},
+              {"highlight":"flow-actor-3","label":"步骤 2：把所有数值统一成百分比","packet":true,"from":"actor-2","to":"actor-3"},
+              {"highlight":"flow-actor-4","label":"步骤 3：按数值降序排","packet":true,"from":"actor-3","to":"actor-4"},
+              {"highlight":"flow-actor-5","label":"步骤 4：渲染成 Markdown 表","packet":true,"from":"actor-4","to":"actor-5"},
+              {"highlight":"flow-actor-5","label":"完成！返回最终表格给用户"}
+            ]'>
+              <div class="flow-actors">
+                <div class="flow-actor" id="flow-actor-1">
+                  <div class="flow-actor-icon">📥</div>
+                  <span>用户输入</span>
+                </div>
+                <div class="flow-actor" id="flow-actor-2">
+                  <div class="flow-actor-icon">1</div>
+                  <span>抽数字</span>
+                </div>
+                <div class="flow-actor" id="flow-actor-3">
+                  <div class="flow-actor-icon">2</div>
+                  <span>转百分比</span>
+                </div>
+                <div class="flow-actor" id="flow-actor-4">
+                  <div class="flow-actor-icon">3</div>
+                  <span>排序</span>
+                </div>
+                <div class="flow-actor" id="flow-actor-5">
+                  <div class="flow-actor-icon">4</div>
+                  <span>渲染表格</span>
+                </div>
+              </div>
+
+              <div class="flow-packet" id="flow-packet"></div>
+              <div class="flow-step-label" id="flow-label">点"下一步"开始</div>
+
+              <div class="flow-controls">
+                <button class="btn flow-next-btn">下一步</button>
+                <button class="btn flow-reset-btn">重新开始</button>
+                <span class="flow-progress"></span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 3: Parallel — code translation -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">工序二：并行 Parallel——同一份指令，N 份输入同时跑</h2>
+
+            <div class="translation-block animate-in">
+              <div class="translation-code">
+                <span class="translation-label">CODE · Python</span>
+<pre><code><span class="code-line"><span class="code-keyword">def</span> <span class="code-function">parallel</span>(prompt: str, inputs: list[str], n_workers: int = 3) -&gt; list[str]:</span>
+<span class="code-line">    <span class="code-string">"""Process multiple inputs concurrently with the same prompt."""</span></span>
+<span class="code-line">    <span class="code-keyword">with</span> <span class="code-function">ThreadPoolExecutor</span>(max_workers=n_workers) <span class="code-keyword">as</span> executor:</span>
+<span class="code-line">        futures = [executor.<span class="code-function">submit</span>(llm_call, <span class="code-string">f"{prompt}\nInput: {x}"</span>) <span class="code-keyword">for</span> x <span class="code-keyword">in</span> inputs]</span>
+<span class="code-line">        <span class="code-keyword">return</span> [f.<span class="code-function">result</span>() <span class="code-keyword">for</span> f <span class="code-keyword">in</span> futures]</span></code></pre>
+              </div>
+              <div class="translation-english">
+                <span class="translation-label">中文逐行翻译</span>
+                <div class="translation-lines">
+                  <p class="tl"><strong>第 1 行：</strong>定义"并发分工机"——吃进 1 个共用 prompt 和 N 个待处理输入。</p>
+                  <p class="tl"><strong>第 3 行：</strong>开 3 个并发工位（<span class="term" data-definition="一组可以同时干活的工人。Python 里用线程池能让 N 个网络请求同时进行，而不是排队一个接一个。等待 LLM 回复时尤其有用。">线程池</span>）。</p>
+                  <p class="tl"><strong>第 4 行（关键）：</strong>把 N 个任务一次性丢给工位——每位工人都拿到<strong>同一份 prompt</strong>但处理<strong>不同的输入</strong>。这是并行模式的核心约束。</p>
+                  <p class="tl"><strong>第 5 行：</strong>等所有工位完工，结果按顺序收齐返回。</p>
+                  <p class="tl"><strong>关键洞察</strong>：prompt 不变，input 变。适合"同样的指令处理一堆不同对象"——比如对 100 条评论同时打分、给一篇文章同时生成摘要 / 翻译 / 关键词三种产物。</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="callout callout-info">
+              <div class="callout-icon">⚡</div>
+              <div class="callout-content">
+                <strong class="callout-title">为什么"并行"快</strong>
+                <p>顺序调 100 次 LLM，每次 2 秒 → 200 秒。开 10 个并发工位 → 约 20 秒。<strong>等待 LLM 回复的时间是浪费的</strong>，并行就是把这些等待时间叠在一起。账单不变，但用户感觉快了 10 倍。</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 4: Routing — group chat -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">工序三：路由 Route——分诊台 + 专科医生</h2>
+            <p>路由的核心是<strong>两次 LLM 调用</strong>：第一次 LLM 当"分诊台"判断输入类型，第二次用对应的"专科 prompt"处理实际工作。</p>
+
+            <div class="translation-block animate-in">
+              <div class="translation-code">
+                <span class="translation-label">CODE · Python</span>
+<pre><code><span class="code-line"><span class="code-keyword">def</span> <span class="code-function">route</span>(input: str, routes: dict[str, str]) -&gt; str:</span>
+<span class="code-line">    selector_prompt = <span class="code-string">f"""</span></span>
+<span class="code-line"><span class="code-string">    Analyze the input and select the most appropriate support team</span></span>
+<span class="code-line"><span class="code-string">    from these options: {list(routes.keys())}</span></span>
+<span class="code-line"><span class="code-string">    First explain your reasoning, then provide your selection in this XML format:</span></span>
+<span class="code-line"><span class="code-string">    &lt;reasoning&gt;...&lt;/reasoning&gt;</span></span>
+<span class="code-line"><span class="code-string">    &lt;selection&gt;The chosen team name&lt;/selection&gt;</span></span>
+<span class="code-line"><span class="code-string">    Input: {input}"""</span>.<span class="code-function">strip</span>()</span>
+<span class="code-line"></span>
+<span class="code-line">    route_response = <span class="code-function">llm_call</span>(selector_prompt)</span>
+<span class="code-line">    route_key = <span class="code-function">extract_xml</span>(route_response, <span class="code-string">"selection"</span>).<span class="code-function">strip</span>().<span class="code-function">lower</span>()</span>
+<span class="code-line"></span>
+<span class="code-line">    selected_prompt = routes[route_key]</span>
+<span class="code-line">    <span class="code-keyword">return</span> <span class="code-function">llm_call</span>(<span class="code-string">f"{selected_prompt}\nInput: {input}"</span>)</span></code></pre>
+              </div>
+              <div class="translation-english">
+                <span class="translation-label">中文逐行翻译</span>
+                <div class="translation-lines">
+                  <p class="tl"><strong>第 2-8 行：</strong>构造"分诊 prompt"——告诉 LLM 有哪些可选窗口、要先讲推理、再用 <span class="term" data-definition="可扩展标记语言。在这里只是用 &lt;tag&gt;...&lt;/tag&gt; 这种成对的标签把模型输出的不同部分分开，方便程序解析。Anthropic 工程师推荐用 XML 标签而不是 JSON，因为模型对它格式服从度更高。">XML 标签</span> 给出最终选择。</p>
+                  <p class="tl"><strong>第 10 行：</strong>第一次 LLM 调用——分诊台开工。</p>
+                  <p class="tl"><strong>第 11 行：</strong>用 extract_xml 把 &lt;selection&gt;标签里的内容拎出来，作为路由 key。</p>
+                  <p class="tl"><strong>第 13-14 行：</strong>用 key 取出对应的"专科 prompt"，第二次 LLM 调用——专员处理。</p>
+                  <p class="tl"><strong>核心：两次 LLM 调用，第一次决定"去哪"，第二次干活。</strong></p>
+                </div>
+              </div>
+            </div>
+
+            <h3 style="margin-top: var(--space-12); font-family: var(--font-display); font-size: var(--text-xl);">看一场真实的路由：客户报修工单</h3>
+
+            <div class="chat-window" id="chat-module2">
+              <div class="chat-messages">
+                <div class="chat-message" data-msg="0" data-sender="user" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-2)">客</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-2)">客户</span>
+                    <p>你们的卡上周自动续费了两次，请帮我退一次。</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="1" data-sender="router" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-1)">分</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-1)">分诊员（Claude）</span>
+                    <p>分析中……关键词「自动续费 / 退款 / 卡」→ 这是账单类问题。路由到「账单专员」。</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="2" data-sender="billing" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-3)">账</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-3)">账单专员</span>
+                    <p>Billing Support Response: 已查到您 5 月 1 日的重复扣款记录（订单 #A2418）。3 个工作日内退至原卡。如需加速，可拨打热线 400-XXXX。</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="3" data-sender="user" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-2)">客</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-2)">客户（新会话）</span>
+                    <p>我登录不上了，提示密码错误，但我密码没改过。</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="4" data-sender="router" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-1)">分</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-1)">分诊员（Claude）</span>
+                    <p>关键词「登录不上 / 密码错误」+ 涉及账户安全 → 路由到「账户安全专员」。</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="5" data-sender="security" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-4)">安</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-4)">账户安全专员</span>
+                    <p>Account Support Response: 为保账户安全，请先验证身份。① 我们已发送验证码到您注册邮箱；② 暂时关闭可疑设备登录；③ 收到验证码后通过密码重置流程。预计 5 分钟内完成。</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="chat-typing" id="chat-module2-typing" style="display:none">
+                <div class="chat-avatar" id="chat-module2-typing-avatar">?</div>
+                <div class="chat-typing-dots">
+                  <span class="typing-dot"></span>
+                  <span class="typing-dot"></span>
+                  <span class="typing-dot"></span>
+                </div>
+              </div>
+
+              <div class="chat-controls">
+                <button class="btn chat-next-btn">下一句</button>
+                <button class="btn chat-all-btn">自动播放</button>
+                <button class="btn chat-reset-btn">重播</button>
+                <span class="chat-progress"></span>
+              </div>
+            </div>
+
+            <div class="callout callout-accent">
+              <div class="callout-icon">💡</div>
+              <div class="callout-content">
+                <strong class="callout-title">关键洞察：三种工序可以嵌套</strong>
+                <p>真实生产系统经常是 <strong>route → chain → parallel</strong> 的嵌套——先按工单类型路由，进了"账单专员"窗口后再走 "查订单 → 算金额 → 出退款单" 的链式，每个客户的退款邮件还可以并行批量发。<strong>先按形状判断，再按需要叠在一起。</strong></p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 5: Quiz -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">小测：判断任务的形状</h2>
+
+            <div class="quiz-container" id="quiz-module2">
+
+              <div class="quiz-question-block"
+                   data-correct="option-a"
+                   data-explanation-right="对！这三步存在严格顺序依赖——必须先有摘要才能抽关键词、必须先有原文（或摘要）才能翻译。每一步的输入是上一步的输出。这就是 chain 的标准形状。"
+                   data-explanation-wrong="再分析一下：'摘要 → 关键词 → 翻译' 这三步的顺序能换吗？后一步要不要等前一步的结果？">
+                <h3 class="quiz-question">Q1. 你要做一个程序：客户上传 PDF 后自动生成"摘要 → 关键词 → 翻译成英文"。最适合的工序？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Chain（链式）——三步前后依赖</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Route（路由）——三种 PDF 类型分流</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Parallel（并行）——三件事同时干</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block"
+                   data-correct="option-c"
+                   data-explanation-right="对。5 个标签维度彼此独立——情绪不依赖话题、风险不依赖国家——5 件事可以同时跑。Parallel 把延迟从 5×T 压到 1×T。"
+                   data-explanation-wrong="再想：5 个标签彼此独立，A 标签的判断不依赖 B 标签的结果。如果你串成 chain，会浪费时间——它们其实可以同时进行。">
+                <h3 class="quiz-question">Q2. 你要给一条推文同时打 5 个独立维度的标签：情绪 / 话题 / 国家 / 是否广告 / 风险等级。最佳模式？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Chain——5 步顺序</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Route——按推文类型分流</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Parallel——5 个标签维度同时跑</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block"
+                   data-correct="option-b"
+                   data-explanation-right="对。先要分类（这是发票还是身份证还是收据？），再用对应专门 prompt 处理。这就是路由的标准形状——分诊台 + 专员。"
+                   data-explanation-wrong="再想：用户上传一张图，处理逻辑取决于'这张图属于哪一类'。这是 chain（顺序）、parallel（并发）还是 route（按类型分流）？">
+                <h3 class="quiz-question">Q3. 用户上传一张图，可能是发票、可能是身份证、可能是收据——你要先判断类型，再用对应模板提取信息。最佳模式？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Chain——固定 3 步流水线</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Route——分类后分流到专门 prompt</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Parallel——三种模板并发跑，看哪个置信度高</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">查看答案</button>
+              <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">再做一次</button>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </section>

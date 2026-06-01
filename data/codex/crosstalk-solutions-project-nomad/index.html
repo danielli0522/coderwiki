@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Nomad：Android 逆向工程工具链解析</title>
+
+  <!-- Google Fonts: Bricolage Grotesque · DM Sans · JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <!--
+    CUSTOMIZE PER COURSE — change only the three accent variables below.
+    Options:
+      vermillion  #D94F30 / #C4432A / #FDEEE9 / #E8836C  (default)
+      coral       #E06B56 / #C85A47 / #FDECEA / #E89585
+      teal        #2A7B9B / #1F6280 / #E4F2F7 / #5A9DB8
+      amber       #D4A843 / #BF9530 / #FDF5E0 / #E0C070
+      forest      #2D8B55 / #226B41 / #E8F5EE / #5AAD7A
+  -->
+  <style>
+    :root {
+      --color-accent:       #D94F30;
+      --color-accent-hover: #C4432A;
+      --color-accent-light: #FDEEE9;
+      --color-accent-muted: #E8836C;
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">Project Nomad</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <button class="nav-dot" data-target="module-1" data-tooltip="Android 逆向工程入门" role="tab" aria-label="Module 1: Android 逆向工程入门"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="核心概念解析" role="tab" aria-label="Module 2: 核心概念解析"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="实践应用" role="tab" aria-label="Module 3: 实践应用"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="进阶主题" role="tab" aria-label="Module 4: 进阶主题"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="总结与练习" role="tab" aria-label="Module 5: 总结与练习"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh -->
+<section class="module" id="module-1">
+  <div class="screen">
+    <h2>Android 逆向工程入门</h2>
+    <p class="module-subtitle">学习如何提取和分析 Android 应用的 API 接口</p>
+    <div class="callout callout-accent">
+      <div class="callout-icon">💡</div>
+      <div class="callout-content">
+        <strong class="callout-title">关键洞察</strong>
+        <p>Android 逆向工程让你能够"窥探"应用内部的工作原理，就像拆开一台机器看看它是如何运转的。</p>
+      </div>
+    </div>
+    <div class="pattern-cards">
+      <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+        <div class="pattern-icon" style="background: var(--color-actor-1)">📱</div>
+        <h4 class="pattern-title">APK 文件</h4>
+        <p class="pattern-desc">Android 应用的打包文件，包含代码、资源和元数据</p>
+      </div>
+      <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+        <div class="pattern-icon" style="background: var(--color-actor-2)">🛠️</div>
+        <h4 class="pattern-title">反编译工具</h4>
+        <p class="pattern-desc">将 APK 中的字节码转换回可读的 Java 代码</p>
+      </div>
+      <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+        <div class="pattern-icon" style="background: var(--color-actor-3)">🌐</div>
+        <h4 class="pattern-title">API 提取</h4>
+        <p class="pattern-desc">识别应用与服务器之间的所有 HTTP 通信</p>
+      </div>
+    </div>
+    <!-- 进阶概念 -->
+    <section class="screen animate-in">
+      <h2>Project Nomad 项目概览</h2>
+      <p>Project Nomad 是一个专注于 Android 逆向工程的解决方案，它提供了一整套工具链来帮助安全研究人员和开发者分析 Android 应用的内部工作机制。让我们深入了解项目的核心组件：</p>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">🔍</div>
+          <h4 class="pattern-title">静态分析</h4>
+          <p class="pattern-desc">不运行应用的情况下，通过反编译和代码审查来理解应用的逻辑和结构</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">⚡</div>
+          <h4 class="pattern-title">动态分析</h4>
+          <p class="pattern-desc">在运行时监控应用的行为，包括网络请求、文件操作和 API 调用</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">📊</div>
+          <h4 class="pattern-title">API 映射</h4>
+          <p class="pattern-desc">自动提取和分类应用使用的所有 API 端点，生成可视化的调用关系图</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 文件结构 -->
+    <section class="screen animate-in">
+      <h2>项目文件结构详解</h2>
+      <p>打开 Project Nomad 的代码库，你会看到以下结构：</p>
+
+      <div class="code-translation">
+        <div class="code">
+          <pre><code>project-nomad/
+├── core/               # 核心分析引擎
+│   ├── decompiler.py   # 反编译模块
+│   ├── analyzer.py     # 代码分析器
+│   └── extractor.py    # API 提取器
+├── plugins/            # 可扩展插件
+│   ├── retrofit.py     # Retrofit 注解解析
+│   ├── okhttp.py       # OkHttp 拦截器
+│   └── websocket.py    # WebSocket 分析
+├── utils/              # 工具函数
+│   ├── logger.py       # 日志模块
+│   └── config.py       # 配置管理
+├── output/             # 输出目录
+│   ├── reports/        # 分析报告
+│   └── graphs/         # 调用关系图
+└── scripts/            # 自动化脚本
+    ├── decompile.sh    # 反编译脚本
+    └── find-api-calls.sh  # API 查找脚本</code></pre>
+        </div>
+        <div class="translation">
+          <p>项目文件结构解读：</p>
+          <div class="translation-lines">
+            <p class="tl">core/ 目录包含核心分析引擎的三个主要模块</p>
+            <p class="tl">plugins/ 目录实现了对不同网络框架的专用解析器</p>
+            <p class="tl">utils/ 目录提供日志和配置等基础功能</p>
+            <p class="tl">output/ 目录保存分析结果和可视化图表</p>
+            <p class="tl">scripts/ 目录包含可以直接执行的命令行工具</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 逆向工程流程 -->
+    <section class="screen animate-in">
+      <h2>完整的逆向工程工作流</h2>
+      <p>让我们跟踪一个完整的 Android 逆向工程流程，从获取 APK 到最终获得 API 调用清单：</p>
+
+      <div class="step-cards">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>获取目标 APK</strong>
+            <p>从设备中提取或从第三方来源获取目标应用的 APK 安装文件</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>反编译代码</strong>
+            <p>使用 jadx 等工具将 DEX 字节码转换为可读的 Java 源代码</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>识别网络框架</strong>
+            <p>判断应用使用的是 Retrofit、OkHttp、Volley 还是原生 HttpURLConnection</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>提取 API 端点</strong>
+            <p>使用对应框架的解析器自动提取所有 API 调用和参数</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <strong>生成分析报告</strong>
+            <p>自动生成包含所有 API 端点的结构化报告和调用关系图</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">💡</div>
+        <div class="callout-content">
+          <strong class="callout-title">工具链选择</strong>
+          <p>Android 逆向工程的工具选择取决于目标应用的保护程度。对于未混淆的应用，jadx 就足够了。对于高度混淆的应用，你可能需要结合使用 Frida（动态插桩）和 Xposed 框架。</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="quiz">
+      <h3>小测试</h3>
+      <p>以下哪项不是 Android 逆向工程的主要目的？</p>
+      <div class="quiz-options">
+        <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+          <div class="quiz-option-radio"></div>
+          <span>理解应用的工作原理</span>
+        </button>
+        <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+          <div class="quiz-option-radio"></div>
+          <span>提取 API 接口</span>
+        </button>
+        <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+          <div class="quiz-option-radio"></div>
+          <span>修改应用的源代码</span>
+        </button>
+      </div>
+      <div class="quiz-feedback"></div>
+      <div class="quiz-controls">
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">重试</button>
+      </div>
+    </div>
+  </div>
+</section><section class="module" id="module-2">
+  <div class="screen">
+    <h2>核心概念解析</h2>
+    <div class="code-translation">
+      <div class="translation-code">
+        <pre><code>
+<span class="code-line"><span class="code-keyword">public</span> <span class="code-keyword">class</span> MainActivity <span class="code-keyword">extends</span> AppCompatActivity {</span>
+<span class="code-line">  <span class="code-keyword">@Override</span></span>
+<span class="code-line">  <span class="code-keyword">protected</span> <span class="code-keyword">void</span> onCreate(Bundle savedInstanceState) {</span>
+<span class="code-line">    <span class="code-keyword">super</span>.onCreate(savedInstanceState);</span>
+<span class="code-line">    setContentView(R.layout.activity_main);</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+        </code></pre>
+      </div>
+      <div class="translation-english">
+        <div class="translation-lines">
+          <p class="tl">定义一个名为 MainActivity 的 Android 活动类</p>
+          <p class="tl">继承自 AppCompatActivity，这是 Android 的基础活动类</p>
+          <p class="tl">重写 onCreate 方法，这是活动的入口点</p>
+          <p class="tl">调用父类的 onCreate 方法进行初始化</p>
+          <p class="tl">设置活动的主界面布局</p>
+        </div>
+      </div>
+    </div>
+    <div class="callout callout-info">
+      <div class="callout-icon">ℹ️</div>
+      <div class="callout-content">
+        <strong class="callout-title">活动生命周期</strong>
+        <p>Android 活动有自己的生命周期，从创建到销毁会经历多个状态。理解这些状态对于调试 Android 应用至关重要。</p>
+      </div>
+    </div>
+    <div class="flow-animation" data-steps='[
+      {"highlight":"flow-actor-1","label":"用户启动应用"},
+      {"highlight":"flow-actor-1","label":"系统创建 MainActivity","packet":true,"from":"actor-1","to":"actor-2"},
+      {"highlight":"flow-actor-2","label":"调用 onCreate 方法","packet":true,"from":"actor-2","to":"actor-3"}
+    ]'>
+      <div class="flow-actors">
+        <div class="flow-actor" id="flow-actor-1">
+          <div class="flow-actor-icon">👤</div>
+          <span>用户</span>
+        </div>
+        <div class="flow-actor" id="flow-actor-2">
+          <div class="flow-actor-icon">📱</div>
+          <span>系统</span>
+        </div>
+        <div class="flow-actor" id="flow-actor-3">
+          <div class="flow-actor-icon">🛠️</div>
+          <span>MainActivity</span>
+        </div>
+      </div>
+      <div class="flow-packet" id="flow-packet"></div>
+      <div class="flow-step-label" id="flow-label">点击"下一步"查看活动创建过程</div>
+      <div class="flow-controls">
+        <button class="btn flow-next-btn">下一步</button>
+        <button class="btn flow-reset-btn">重新开始</button>
+      </div>
+    </div>
+
+    <!-- Android 四大组件 -->
+    <section class="screen animate-in">
+      <h2>Android 四大组件详解</h2>
+      <p>理解 Android 应用的架构需要先掌握四大核心组件。每个组件在逆向工程中都有不同的分析重点：</p>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid #3B82F6">
+          <div class="pattern-icon" style="background: #3B82F6">📱</div>
+          <h4 class="pattern-title">Activity</h4>
+          <p class="pattern-desc">用户界面的容器。每个屏幕对应一个 Activity。逆向分析重点关注 Activity 之间的跳转逻辑和 Intent 数据传递。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid #10B981">
+          <div class="pattern-icon" style="background: #10B981">⚡</div>
+          <h4 class="pattern-title">Service</h4>
+          <p class="pattern-desc">后台运行的服务组件，没有用户界面。逆向分析重点关注后台网络请求、数据同步和定时任务。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid #F59E0B">
+          <div class="pattern-icon" style="background: #F59E0B">📡</div>
+          <h4 class="pattern-title">BroadcastReceiver</h4>
+          <p class="pattern-desc">接收系统或应用广播的组件。逆向分析重点关注应用监听了哪些系统事件，以及触发了什么行为。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid #EF4444">
+          <div class="pattern-icon" style="background: #EF4444">💾</div>
+          <h4 class="pattern-title">ContentProvider</h4>
+          <p class="pattern-desc">数据共享接口，允许其他应用访问数据。逆向分析重点关注应用暴露了哪些数据接口和权限控制。</p>
+        </div>
+      </div>
+
+      <div class="code-translation">
+        <div class="code">
+          <pre><code>// AndroidManifest.xml 中的组件声明
+&lt;application android:name=".App"&gt;
+    &lt;activity android:name=".MainActivity"&gt;
+        &lt;intent-filter&gt;
+            &lt;action android:name="android.intent.action.MAIN"/&gt;
+            &lt;category android:name="android.intent.category.LAUNCHER"/&gt;
+        &lt;/intent-filter&gt;
+    &lt;/activity&gt;
+    &lt;service android:name=".SyncService"/&gt;
+    &lt;receiver android:name=".NetworkReceiver"&gt;
+        &lt;intent-filter&gt;
+            &lt;action android:name="android.net.conn.CONNECTIVITY_CHANGE"/&gt;
+        &lt;/intent-filter&gt;
+    &lt;/receiver&gt;
+    &lt;provider android:name=".DataProvider"
+              android:authorities="com.example.provider"/&gt;
+&lt;/application&gt;</code></pre>
+        </div>
+        <div class="translation">
+          <p>AndroidManifest 是逆向工程的地图：</p>
+          <div class="translation-lines">
+            <p class="tl">MAIN/LAUNCHER 标记了应用的入口 Activity</p>
+            <p class="tl">Service 声明揭示了应用的后台行为</p>
+            <p class="tl">Receiver 的 intent-filter 告诉你应用监听了哪些事件</p>
+            <p class="tl">Provider 的 authorities 是数据接口的访问地址</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DEX 字节码 -->
+    <section class="screen animate-in">
+      <h2>DEX 字节码与 Smali</h2>
+      <p>Android 应用编译后生成 DEX（Dalvik Executable）文件。理解 DEX 字节码是深入逆向分析的基础：</p>
+
+      <div class="code-translation">
+        <div class="code">
+          <pre><code>.class public Lcom/example/MainActivity;
+.super Landroidx/appcompat/app/AppCompatActivity;
+
+.method public onCreate(Landroid/os/Bundle;)V
+    .registers 2
+    invoke-super {p0, p1}, \
+        Landroidx/appcompat/app/AppCompatActivity;->onCreate(Landroid/os/Bundle;)V
+
+    const v0, 0x7f0a0001    # R.layout.activity_main
+    invoke-virtual {p0, v0}, \
+        Lcom/example/MainActivity;->setContentView(I)V
+
+    # 调用 API 初始化方法
+    invoke-direct {p0}, \
+        Lcom/example/MainActivity;->initApi()V
+
+    return-void
+.end method</code></pre>
+        </div>
+        <div class="translation">
+          <p>Smali 字节码解读：</p>
+          <div class="translation-lines">
+            <p class="tl">.class 声明了类名和访问修饰符</p>
+            <p class="tl">.super 指明了父类（这里是 AppCompatActivity）</p>
+            <p class="tl">invoke-super 调用父类方法</p>
+            <p class="tl">const 加载常量（这里是布局资源 ID）</p>
+            <p class="tl">invoke-virtual 调用虚方法（多态分发）</p>
+            <p class="tl">invoke-direct 调用私有方法 initApi()</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">💡</div>
+        <div class="callout-content">
+          <strong class="callout-title">为什么要学 Smali？</strong>
+          <p>虽然 jadx 可以把 DEX 反编译为 Java，但有些情况下反编译会失败（如使用了特定的混淆技术）。此时直接阅读 Smali 字节码是唯一的选择。掌握 Smali 能让你在任何情况下都能分析 Android 应用。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Android 安全模型 -->
+    <section class="screen animate-in">
+      <h2>Android 安全模型与逆向挑战</h2>
+      <p>Android 的安全模型为逆向工程设置了多层障碍。了解这些安全机制是有效进行逆向分析的前提：</p>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid #8B5CF6">
+          <div class="pattern-icon" style="background: #8B5CF6">🔐</div>
+          <h4 class="pattern-title">应用沙箱</h4>
+          <p class="pattern-desc">每个应用运行在独立的 Linux 用户空间中，应用间数据隔离。逆向时需要 root 权限才能绕过沙箱限制。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid #EC4899">
+          <div class="pattern-icon" style="background: #EC4899">🔏</div>
+          <h4 class="pattern-title">APK 签名</h4>
+          <p class="pattern-desc">Android 要求所有 APK 都必须签名。修改 APK 后需要重新签名，但可以用自签名证书绕过。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid #14B8A6">
+          <div class="pattern-icon" style="background: #14B8A6">🛡️</div>
+          <h4 class="pattern-title">SELinux</h4>
+          <p class="pattern-desc">强制访问控制策略，限制了进程可以执行的操作。即使 root 也可能被 SELinux 策略阻止。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 网络通信基础 -->
+    <section class="screen animate-in">
+      <h2>Android 网络通信基础</h2>
+      <p>逆向分析的核心目标之一是理解应用如何与后端通信。以下是 Android 网络通信的主要方式：</p>
+
+      <div class="code-translation">
+        <div class="code">
+          <pre><code class="language-java">// 三种常见的 Android 网络请求方式
+
+// 方式1：Retrofit（最常用）
+Retrofit retrofit = new Retrofit.Builder()
+    .baseUrl("https://api.example.com/")
+    .addConverterFactory(GsonConverterFactory.create())
+    .build();
+
+ApiService service = retrofit.create(ApiService.class);
+Call&lt;User&gt; call = service.getUser("123");
+call.enqueue(new Callback&lt;User&gt;() {
+    @Override
+    public void onResponse(Call&lt;User&gt; call, Response&lt;User&gt; response) {
+        User user = response.body();
+    }
+});
+
+// 方式2：OkHttp（底层）
+OkHttpClient client = new OkHttpClient();
+Request request = new Request.Builder()
+    .url("https://api.example.com/users/123")
+    .addHeader("Authorization", "Bearer " + token)
+    .build();
+try (Response response = client.newCall(request).execute()) {
+    String json = response.body().string();
+}
+
+// 方式3：HttpURLConnection（原生）
+URL url = new URL("https://api.example.com/users/123");
+HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+conn.setRequestMethod("GET");
+conn.setRequestProperty("Authorization", "Bearer " + token);
+int code = conn.getResponseCode();</code></pre>
+        </div>
+        <div class="translation">
+          <p>三种网络通信方式对比：</p>
+          <div class="translation-lines">
+            <p class="tl">Retrofit：最流行的高级 HTTP 客户端，注解驱动的 API 定义</p>
+            <p class="tl">OkHttp：Retrofit 的底层引擎，也可以直接使用</p>
+            <p class="tl">HttpURLConnection：Java 标准库自带，最底层的方式</p>
+            <p class="tl">逆向时优先搜索 Retrofit 注解，其次是 OkHttp 构建器</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">💡</div>
+        <div class="callout-content">
+          <strong class="callout-title">SSL Pinning</strong>
+          <p>许多应用实现了 SSL 证书固定（Certificate Pinning），阻止中间人攻击。逆向时需要使用 Frida 绕过 SSL Pinning 才能抓取 HTTPS 流量。常用工具是 frida-multiple-unpinning 脚本。</p>
+        </div>
+      </div>
+    </section>
+  </div>
+</section><section class="module" id="module-3">
+  <div class="screen">
+    <h2>实践应用</h2>
+    <p>在本模块中，我们将通过实际操作来学习如何使用工具进行 Android 逆向工程。</p>
+
+    <!-- 步骤 1 -->
+    <section class="screen animate-in">
+      <h2>步骤 1：搭建逆向工程环境</h2>
+      <p>在开始逆向分析之前，你需要搭建一个完整的工具链。以下是推荐的环境配置：</p>
+
+      <div class="step-cards">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>安装 JDK 17+</strong>
+            <p>Java 开发工具包是所有 Android 逆向工具的基础依赖。确保 JAVA_HOME 环境变量正确设置。</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>安装 jadx</strong>
+            <p>Dex 到 Java 的反编译器，是静态分析的核心工具。支持图形界面和命令行两种模式。</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>安装 apktool</strong>
+            <p>APK 资源解析工具，可以提取 AndroidManifest.xml、资源文件和 Smali 代码。</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>安装 Frida</strong>
+            <p>动态插桩工具，可以在运行时修改应用行为、拦截函数调用和读取内存数据。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-translation">
+        <div class="code">
+          <pre><code class="language-bash"># 环境安装命令
+# 安装 jadx（macOS）
+brew install jadx
+
+# 安装 apktool
+brew install apktool
+
+# 安装 Frida（需要 Python3）
+pip3 install frida-tools
+
+# 验证安装
+jadx --version
+apktool --version
+frida --version</code></pre>
+        </div>
+        <div class="translation">
+          <p>工具安装验证步骤：</p>
+          <div class="translation-lines">
+            <p class="tl">macOS 用户可以直接用 Homebrew 安装 jadx 和 apktool</p>
+            <p class="tl">Frida 通过 pip 安装，需要 Python 3 环境</p>
+            <p class="tl">安装完成后运行 --version 验证安装是否成功</p>
+            <p class="tl">如果遇到权限问题，可能需要使用 sudo 或虚拟环境</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 步骤 2 -->
+    <section class="screen animate-in">
+      <h2>步骤 2：反编译 APK 并理解输出结构</h2>
+      <p>使用 jadx 反编译 APK 后，你会得到一个完整的 Java 项目结构。让我们理解每个部分：</p>
+
+      <div class="code-translation">
+        <div class="code">
+          <pre><code class="language-bash"># 反编译 APK
+jadx -d output/ target_app.apk
+
+# 输出目录结构：
+# output/
+# ├── resources/          # 资源文件
+# │   ├── AndroidManifest.xml   # 应用清单（组件声明）
+# │   ├── res/                  # 布局、图片、字符串等
+# │   └── assets/               # 原始资源文件
+# └── sources/            # 反编译的 Java 源代码
+#     └── com/
+#         └── example/
+#             ├── MainActivity.java
+#             ├── api/
+#             │   ├── ApiClient.java       # API 客户端
+#             │   ├── ApiService.java      # API 接口定义
+#             │   └── ApiInterceptor.java  # 请求拦截器
+#             ├── model/
+#             │   ├── User.java
+#             │   └── Response.java
+#             └── utils/
+#                 ├── Constants.java       # 常量定义（含 API URL）
+#                 └── CryptoUtil.java      # 加密工具</code></pre>
+        </div>
+        <div class="translation">
+          <p>反编译输出结构解读：</p>
+          <div class="translation-lines">
+            <p class="tl">resources/ 目录包含应用的所有资源文件</p>
+            <p class="tl">AndroidManifest.xml 是最重要的文件，记录了所有组件</p>
+            <p class="tl">sources/ 目录是反编译得到的 Java 源代码</p>
+            <p class="tl">api/ 子目录通常包含网络通信相关的代码</p>
+            <p class="tl">Constants.java 中经常包含硬编码的 API 基础 URL</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">💡</div>
+        <div class="callout-content">
+          <strong class="callout-title">反编译结果的质量</strong>
+          <p>jadx 的反编译质量通常很高，但对于经过 ProGuard/R8 混淆的代码，类名和方法名会被替换为 a、b、c 等无意义的名称。此时需要通过上下文推断代码的功能。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 步骤 3 -->
+    <section class="screen animate-in">
+      <h2>步骤 3：识别和提取 API 调用</h2>
+      <p>API 提取是逆向工程的核心目标。不同网络框架有不同的 API 定义方式：</p>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid #3B82F6">
+          <div class="pattern-icon" style="background: #3B82F6">🔗</div>
+          <h4 class="pattern-title">Retrofit 接口</h4>
+          <p class="pattern-desc">使用 Java 注解定义 API 端点。搜索 @GET、@POST、@PUT、@DELETE 注解即可找到所有 API 定义。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid #10B981">
+          <div class="pattern-icon" style="background: #10B981">🌐</div>
+          <h4 class="pattern-title">OkHttp 请求</h4>
+          <p class="pattern-desc">通过 Request.Builder 构建请求。搜索 new Request.Builder() 可以找到所有手动构建的 HTTP 请求。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid #F59E0B">
+          <div class="pattern-icon" style="background: #F59E0B">📡</div>
+          <h4 class="pattern-title">硬编码 URL</h4>
+          <p class="pattern-desc">直接在代码中写死的 URL 字符串。搜索 "http://" 和 "https://" 可以找到所有硬编码的 URL。</p>
+        </div>
+      </div>
+
+      <div class="code-translation">
+        <div class="code">
+          <pre><code class="language-java">// Retrofit API 接口定义示例
+public interface ApiService {
+    @GET("api/v1/users/{id}")
+    Call&lt;User&gt; getUser(@Path("id") String userId);
+
+    @POST("api/v1/auth/login")
+    Call&lt;AuthResponse&gt; login(@Body LoginRequest request);
+
+    @GET("api/v1/products")
+    Call&lt;List&lt;Product&gt;&gt; getProducts(
+        @Query("category") String category,
+        @Query("page") int page
+    );
+
+    @Multipart
+    @POST("api/v1/upload")
+    Call&lt;UploadResponse&gt; uploadFile(
+        @Part MultipartBody.Part file
+    );
+}</code></pre>
+        </div>
+        <div class="translation">
+          <p>Retrofit API 定义解读：</p>
+          <div class="translation-lines">
+            <p class="tl">@GET 注解定义了 GET 请求和路径</p>
+            <p class="tl">@Path 替换 URL 中的 {id} 占位符</p>
+            <p class="tl">@POST 注解定义了 POST 请求</p>
+            <p class="tl">@Body 注解标记请求体参数</p>
+            <p class="tl">@Query 注解添加 URL 查询参数</p>
+            <p class="tl">@Multipart 用于文件上传接口</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 步骤 4：自动提取 -->
+    <section class="screen animate-in">
+      <h2>步骤 4：使用自动化工具批量提取</h2>
+      <p>手动查找效率太低，Project Nomad 提供了自动化脚本来批量提取 API 调用：</p>
+
+      <div class="code-translation">
+        <div class="code">
+          <pre><code class="language-python"># API 自动提取器核心逻辑
+class ApiExtractor:
+    """从反编译的源代码中自动提取 API 端点"""
+
+    def extract(self, source_dir: str) -> List[ApiEndpoint]:
+        endpoints = []
+
+        # 策略 1：扫描 Retrofit 注解
+        for file in find_java_files(source_dir):
+            if "@GET" in file.content or "@POST" in file.content:
+                endpoints.extend(
+                    self._parse_retrofit(file)
+                )
+
+        # 策略 2：扫描 OkHttp 请求构建
+        for file in find_java_files(source_dir):
+            if "Request.Builder" in file.content:
+                endpoints.extend(
+                    self._parse_okhttp(file)
+                )
+
+        # 策略 3：扫描硬编码 URL
+        for url in find_urls(source_dir):
+            endpoints.append(
+                ApiEndpoint(url=url, source="hardcoded")
+            )
+
+        return self._deduplicate(endpoints)
+
+    def _parse_retrofit(self, file):
+        """解析 Retrofit 接口定义"""
+        endpoints = []
+        for match in re.finditer(
+            r'@(GET|POST|PUT|DELETE|PATCH)\("([^"]+)"\)',
+            file.content
+        ):
+            method = match.group(1)
+            path = match.group(2)
+            endpoints.append(
+                ApiEndpoint(method=method, path=path,
+                           source_file=file.path)
+            )
+        return endpoints</code></pre>
+        </div>
+        <div class="translation">
+          <p>API 自动提取器的工作原理：</p>
+          <div class="translation-lines">
+            <p class="tl">三管齐下：Retrofit 注解 + OkHttp 构建器 + 硬编码 URL</p>
+            <p class="tl">Retrofit 解析通过正则表达式匹配注解</p>
+            <p class="tl">每种策略独立扫描，最后合并去重</p>
+            <p class="tl">每个端点都记录了来源文件，方便回溯</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">💡</div>
+        <div class="callout-content">
+          <strong class="callout-title">提取结果的利用</strong>
+          <p>提取出的 API 端点列表可以用于多种场景：安全漏洞扫描、后端 API 文档编写、竞品功能分析，甚至可以用来自动化测试应用的接口稳定性。</p>
+        </div>
+      </div>
+    </section>
+
+    <h3>步骤 5：反编译命令</h3>
+    <div class="code-translation">
+      <div class="code">
+        <pre>// 反编译命令
+bash scripts/decompile.sh app.apk</pre>
+      </div>
+      <div class="translation">
+        <p>这条命令会启动 jadx 反编译器，将 APK 文件中的 DEX 字节码转换为可读的 Java 源代码。输出结果会保存在 output 目录中。</p>
+      </div>
+    </div>
+    <h3>步骤 6：提取 API 调用</h3>
+    <div class="code-translation">
+      <div class="code">
+        <pre>// 查找 API 调用
+bash scripts/find-api-calls.sh output/sources/</pre>
+      </div>
+      <div class="translation">
+        <p>这条命令会扫描反编译后的源代码，自动识别所有的 HTTP API 调用，包括 Retrofit 接口定义、OkHttp 请求和硬编码的 URL 地址。</p>
+      </div>
+    </div>
+    <div class="callout">
+      <p>提示：API 提取是逆向工程中最实用的技能之一。通过提取应用的 API，你可以了解应用如何与后端服务器通信，这对于安全研究和应用分析非常有价值。</p>
+    </div>
+    <div class="quiz">
+      <p>小测试：find-api-calls.sh 脚本可以识别哪些类型的 API 调用？</p>
+      <ul>
+        <li data-correct="false">仅 Retrofit 接口</li>
+        <li data-correct="false">仅 OkHttp 请求</li>
+        <li data-correct="true">Retrofit 接口、OkHttp 请求和硬编码 URL</li>
+      </ul>
+    </div>
+  </div>
+</section><section class="module" id="module-4">
+  <div class="screen">
+    <h2>进阶主题</h2>
+    <p>在本模块中，我们将深入探讨一些 Android 逆向工程的进阶主题。</p>
+
+    <!-- 主题 1：混淆对抗 -->
+    <section class="screen animate-in">
+      <h2>主题 1：对抗代码混淆技术</h2>
+      <p>ProGuard 和 R8 是 Android 开发中常用的代码混淆工具。混淆后的代码给逆向工程带来了挑战。我们将学习如何应对这种挑战：</p>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid #EF4444">
+          <div class="pattern-icon" style="background: #EF4444">🔀</div>
+          <h4 class="pattern-title">名称混淆</h4>
+          <p class="pattern-desc">将类名、方法名、字段名替换为无意义的短名称（如 a.b.c）。通过分析调用链和上下文来恢复含义。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid #F59E0B">
+          <div class="pattern-icon" style="background: #F59E0B">📦</div>
+          <h4 class="pattern-title">代码压缩</h4>
+          <p class="pattern-desc">移除未使用的代码和资源，减小 APK 体积。虽然不影响反编译，但可能丢失部分上下文信息。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid #3B82F6">
+          <div class="pattern-icon" style="background: #3B82F6">🔄</div>
+          <h4 class="pattern-title">控制流混淆</h4>
+          <p class="pattern-desc">插入无效代码分支、扁平化控制流、添加不透明谓词。需要使用专门的反混淆工具处理。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid #10B981">
+          <div class="pattern-icon" style="background: #10B981">🔑</div>
+          <h4 class="pattern-title">字符串加密</h4>
+          <p class="pattern-desc">将字符串常量加密存储，运行时解密。可以通过动态分析（Frida hook）在解密后获取明文。</p>
+        </div>
+      </div>
+
+      <div class="code-translation">
+        <div class="code">
+          <pre><code class="language-python"># 反混淆工具的核心逻辑
+class Deobfuscator:
+    """基于上下文推断混淆代码的含义"""
+
+    def __init__(self, decompiled_source):
+        self.source = decompiled_source
+        self.rename_map = {}
+
+    def analyze(self):
+        # 策略 1：通过字符串常量推断方法功能
+        string_methods = self._find_string_references()
+
+        # 策略 2：通过 API 调用推断类功能
+        api_classes = self._find_api_callers()
+
+        # 策略 3：通过 UI 资源 ID 关联
+        resource_mappings = self._find_resource_refs()
+
+        # 策略 4：通过继承关系推断
+        inheritance_map = self._analyze_inheritance()
+
+        # 生成重命名映射
+        self.rename_map = self._build_rename_map(
+            string_methods, api_classes,
+            resource_mappings, inheritance_map
+        )
+
+        return self.rename_map</code></pre>
+        </div>
+        <div class="translation">
+          <p>反混淆的核心策略：</p>
+          <div class="translation-lines">
+            <p class="tl">通过字符串常量推断：如果方法中包含 "login" 字符串，它很可能是登录方法</p>
+            <p class="tl">通过 API 调用推断：调用了网络请求的方法很可能是数据获取方法</p>
+            <p class="tl">通过资源 ID 关联：R.id.xxx 可以追溯到 UI 布局中的元素</p>
+            <p class="tl">通过继承关系推断：继承自 ViewModel 的类通常是视图模型</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 主题 2：调用链路分析 -->
+    <section class="screen animate-in">
+      <h2>主题 2：深入分析应用调用链路</h2>
+      <p>通过分析 Activity、Fragment、ViewModel 和 Repository 之间的调用关系，我们可以理解应用的完整工作流程。</p>
+
+      <div class="code-translation">
+        <div class="code">
+          <pre><code>// 典型的 MVVM 调用链路
+// 1. 用户点击登录按钮
+LoginActivity.onLoginClick()
+    → LoginViewModel.login(email, password)
+        → AuthRepository.login(credentials)
+            → ApiService.login(request)      // Retrofit 接口
+                → HTTP POST /api/v1/auth/login
+            ← AuthResponse (token, user)
+        ← Result.success(user)
+    → navigateTo(MainActivity)</code></pre>
+        </div>
+        <div class="translation">
+          <p>MVVM 调用链路详解：</p>
+          <div class="translation-lines">
+            <p class="tl">用户操作触发 Activity 中的事件处理方法</p>
+            <p class="tl">Activity 将业务逻辑委托给 ViewModel</p>
+            <p class="tl">ViewModel 通过 Repository 获取数据</p>
+            <p class="tl">Repository 调用 API 接口发起网络请求</p>
+            <p class="tl">数据沿相反路径返回，最终更新 UI</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 主题 3：Frida 动态分析 -->
+    <section class="screen animate-in">
+      <h2>主题 3：使用 Frida 进行动态插桩</h2>
+      <p>Frida 是最强大的动态分析工具之一。它可以在应用运行时注入 JavaScript 代码，拦截和修改任意函数：</p>
+
+      <div class="code-translation">
+        <div class="code">
+          <pre><code class="language-javascript">// Frida 脚本：拦截网络请求
+Java.perform(function() {
+    // 拦截 OkHttp 的请求
+    var OkHttpClient = Java.use("okhttp3.OkHttpClient");
+    var Request = Java.use("okhttp3.Request");
+    var RealCall = Java.use("okhttp3.internal.connection.RealCall");
+
+    // Hook execute 方法
+    RealCall.execute.implementation = function() {
+        var request = this.request();
+        var url = request.url().toString();
+        var method = request.method();
+        var headers = request.headers().toString();
+
+        console.log("[HTTP] " + method + " " + url);
+        console.log("[Headers] " + headers);
+
+        // 获取请求体
+        var body = request.body();
+        if (body !== null) {
+            console.log("[Body] " + body.toString());
+        }
+
+        // 调用原始方法
+        var response = this.execute();
+
+        // 打印响应
+        console.log("[Response] " + response.code());
+        return response;
+    };
+});</code></pre>
+        </div>
+        <div class="translation">
+          <p>Frida 动态插桩脚本解读：</p>
+          <div class="translation-lines">
+            <p class="tl">Java.perform 确保在 Java 虚拟机线程中执行</p>
+            <p class="tl">Java.use 获取目标类的引用</p>
+            <p class="tl">implementation 替换原始方法的实现</p>
+            <p class="tl">在替换函数中先打印请求信息，再调用原始方法</p>
+            <p class="tl">这样可以在不修改 APK 的情况下拦截所有网络请求</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">💡</div>
+        <div class="callout-content">
+          <strong class="callout-title">Frida 的优势</strong>
+          <p>Frida 最大的优势是不需要修改和重新打包 APK。它通过 ptrace 附加到目标进程，实时注入代码。这意味着你可以分析任何应用，包括那些有完整性校验的应用。</p>
+        </div>
+      </div>
+    </section>
+
+    <h3>混淆代码处理技巧总结</h3>
+    <ul>
+      <li>理解混淆规则</li>
+      <li>使用工具恢复可读性</li>
+      <li>识别常见的混淆模式</li>
+    </ul>
+    <h3>调用链路分析总结</h3>
+    <p>通过分析 Activity、Fragment、ViewModel 和 Repository 之间的调用关系，我们可以理解应用的完整工作流程。</p>
+    <div class="code-translation">
+      <div class="code">
+        <pre>// 调用链路示例
+LoginActivity -> LoginViewModel -> AuthRepository</pre>
+      </div>
+      <div class="translation">
+        <p>这条调用链路展示了从用户界面到数据层的完整流程。理解这种关系有助于我们更好地分析应用的行为。</p>
+      </div>
+    </div>
+    <div class="callout">
+      <p>提示：调用链路分析是理解复杂应用架构的关键。通过绘制调用关系图，你可以快速掌握应用的各个模块是如何协作的。</p>
+    </div>
+    <div class="quiz">
+      <p>小测试：以下哪项不是 ProGuard/R8 的主要功能？</p>
+      <ul>
+        <li data-correct="false">代码压缩</li>
+        <li data-correct="false">名称混淆</li>
+        <li data-correct="true">性能优化</li>
+      </ul>
+    </div>
+  </div>
+</section><section class="module" id="module-5">
+  <div class="screen">
+    <h2>总结与练习</h2>
+    <p>在本模块中，我们将回顾所学内容，并通过实际练习巩固知识。</p>
+
+    <!-- 知识图谱 -->
+    <section class="screen animate-in">
+      <h2>课程知识图谱</h2>
+      <p>让我们回顾本课程涉及的所有核心知识点：</p>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">📱</div>
+          <h4 class="pattern-title">模块一：基础入门</h4>
+          <p class="pattern-desc">Android 逆向工程概念、Project Nomad 工具链、文件结构、完整工作流、安全模型</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">⚙️</div>
+          <h4 class="pattern-title">模块二：核心概念</h4>
+          <p class="pattern-desc">Activity 生命周期、四大组件、DEX 字节码、Smali 语法、Android 安全机制</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">🛠️</div>
+          <h4 class="pattern-title">模块三：实践操作</h4>
+          <p class="pattern-desc">环境搭建、反编译操作、API 提取、Retrofit/OkHttp 解析、自动化提取工具</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid #8B5CF6">
+          <div class="pattern-icon" style="background: #8B5CF6">🔧</div>
+          <h4 class="pattern-title">模块四：进阶技术</h4>
+          <p class="pattern-desc">混淆对抗、调用链路分析、Frida 动态插桩、反混淆策略</p>
+        </div>
+      </div>
+      <div class="callout callout-accent">
+    <strong>微调扩展标记</strong>：本课程持续更新中。掌握基础概念后，建议结合实际项目反复练习，将知识内化为直觉。关注项目 GitHub 获取最新版本和社区讨论。
+  </div>
+</section>
+
+    <!-- 综合练习 -->
+    <section class="screen animate-in">
+      <h2>综合实战练习</h2>
+      <p>选择一个你感兴趣的 Android 应用，完成以下练习来检验你的逆向工程能力：</p>
+
+      <div class="step-cards">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>练习一：完整反编译流程</strong>
+            <p>选择一个开源 Android 应用（如 Signal、Telegram），使用 jadx 完成反编译。记录 AndroidManifest.xml 中的所有组件声明，画出应用的架构概览图。</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>练习二：API 全量提取</strong>
+            <p>使用 Project Nomad 的 find-api-calls.sh 脚本，提取应用的所有 API 端点。按功能分类（认证、数据获取、上传等），并尝试调用这些 API。</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>练习三：Frida 动态分析</strong>
+            <p>编写一个 Frida 脚本，拦截目标应用的所有网络请求。记录请求的 URL、方法、请求头和请求体。尝试找出应用使用的加密算法和密钥。</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>练习四：反混淆报告</strong>
+            <p>选择一个经过 ProGuard 混淆的应用，使用本课程学到的四种策略（字符串常量、API 调用、资源 ID、继承关系）推断混淆代码的含义，生成一份反混淆报告。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-translation">
+        <div class="code">
+          <pre><code class="language-python"># 练习二参考框架：API 分类器
+class ApiClassifier:
+    """将提取的 API 端点按功能分类"""
+
+    def classify(self, endpoints: List[ApiEndpoint]) -> dict:
+        categories = {
+            "auth": [],       # 认证相关
+            "data": [],       # 数据获取
+            "upload": [],     # 文件上传
+            "social": [],     # 社交功能
+            "payment": [],    # 支付功能
+            "analytics": [],  # 数据统计
+            "unknown": [],    # 未分类
+        }
+
+        keywords = {
+            "auth": ["login", "token", "auth", "session"],
+            "data": ["get", "list", "search", "query"],
+            "upload": ["upload", "file", "image", "media"],
+            "social": ["share", "comment", "like", "follow"],
+            "payment": ["pay", "order", "cart", "purchase"],
+            "analytics": ["track", "log", "event", "metric"],
+        }
+
+        for ep in endpoints:
+            category = self._match_category(ep, keywords)
+            categories[category].append(ep)
+
+        return categories</code></pre>
+        </div>
+        <div class="translation">
+          <p>API 分类器的实现思路：</p>
+          <div class="translation-lines">
+            <p class="tl">定义功能类别和对应的关键词列表</p>
+            <p class="tl">遍历所有 API 端点，通过路径关键词匹配分类</p>
+            <p class="tl">无法匹配的归入 unknown 类别</p>
+            <p class="tl">分类结果可以帮助快速理解应用的功能架构</p>
+          </div>
+        </div>
+      </div>
+      <div class="callout callout-accent">
+    <strong>微调扩展标记</strong>：本课程持续更新中。掌握基础概念后，建议结合实际项目反复练习，将知识内化为直觉。关注项目 GitHub 获取最新版本和社区讨论。
+  </div>
+</section>
+
+    <!-- 延伸学习 -->
+    <section class="screen animate-in">
+      <h2>延伸学习路线</h2>
+      <p>如果你想继续深入 Android 安全和逆向工程领域，以下是推荐的学习路线：</p>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid #10B981">
+          <div class="pattern-icon" style="background: #10B981">📚</div>
+          <h4 class="pattern-title">OWASP Mobile Security</h4>
+          <p class="pattern-desc">开放 Web 应用安全项目的移动安全指南，是学习 Android 安全标准化的最佳起点。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid #3B82F6">
+          <div class="pattern-icon" style="background: #3B82F6">🎓</div>
+          <h4 class="pattern-title">CTF 竞赛</h4>
+          <p class="pattern-desc">参加移动安全相关的 CTF（夺旗赛）是提升实战能力的最佳方式。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid #F59E0B">
+          <div class="pattern-icon" style="background: #F59E0B">📖</div>
+          <h4 class="pattern-title">Android Internals</h4>
+          <p class="pattern-desc">深入学习 Android 系统内部机制，包括 Zygote、Binder、ART 虚拟器等底层原理。</p>
+        </div>
+      </div>
+      <div class="callout callout-accent">
+    <strong>微调扩展标记</strong>：本课程持续更新中。掌握基础概念后，建议结合实际项目反复练习，将知识内化为直觉。关注项目 GitHub 获取最新版本和社区讨论。
+  </div>
+</section>
+
+    <h3>课程总结</h3>
+    <ul>
+      <li>学习了 Android 应用的内部结构</li>
+      <li>掌握了反编译和 API 提取技术</li>
+      <li>了解了如何处理混淆代码</li>
+      <li>学会了分析应用的调用链路</li>
+    </ul>
+    <h3>实践练习</h3>
+    <p>选择一个你感兴趣的 Android 应用，尝试以下操作：</p>
+    <ol>
+      <li>反编译 APK 文件</li>
+      <li>提取所有 API 调用</li>
+      <li>分析主要的调用链路</li>
+      <li>识别并处理混淆代码</li>
+    </ol>
+    <div class="callout">
+      <p>提示：实践是最好的学习方式。通过实际操作，你可以将理论知识转化为实际技能。</p>
+    </div>
+    <div class="quiz">
+      <p>小测试：以下哪项技能是 Android 逆向工程师最重要的？</p>
+      <ul>
+        <li data-correct="false">编写高效代码</li>
+        <li data-correct="true">分析和理解代码</li>
+        <li data-correct="false">设计用户界面</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout callout-accent">
+    <strong>微调扩展标记</strong>：本课程持续更新中。掌握基础概念后，建议结合实际项目反复练习，将知识内化为直觉。关注项目 GitHub 获取最新版本和社区讨论。
+  </div>
+</section>  </main>
+
+</body>
+</html>

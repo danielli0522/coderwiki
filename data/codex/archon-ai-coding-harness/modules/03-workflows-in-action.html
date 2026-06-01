@@ -1,0 +1,178 @@
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">Workflows in Action</h1>
+      <p class="module-subtitle">Every YAML node is either deterministic (bash) or intelligent (AI prompt) — know which is which and you'll never be surprised.</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Two kinds of work</h2>
+        <p>Think of a workflow like a factory assembly line. Some stations are robots — they do the same thing every time, perfectly, mechanically. Other stations are skilled craftspeople — they bring judgment and creativity, but their output varies. Archon lets you mix both.</p>
+
+        <div class="pattern-cards animate-in stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🤖</div>
+            <h4 class="pattern-title">Bash Node (Robot)</h4>
+            <p class="pattern-desc">Runs a shell command. Same input, always same output. Use for: running tests, committing code, building the project. No AI involved.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🧠</div>
+            <h4 class="pattern-title">Prompt Node (Craftsperson)</h4>
+            <p class="pattern-desc">Sends a message to an AI model and uses its response. Output varies by model mood. Use for: planning, writing code, reviewing changes.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🔄</div>
+            <h4 class="pattern-title">Loop Node</h4>
+            <p class="pattern-desc">Repeats until a condition is true. Can be AI-driven (loop until ALL_TASKS_COMPLETE) or human-gated (loop until APPROVED). Enables iteration without manual restarts.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Inside the workflow executor</h2>
+        <p>This is from <code>packages/workflows/src/executor.ts</code> — the heart of Archon. It reads the workflow definition and decides what to run:</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">async</span> <span class="code-function">executeNode</span>(node: WorkflowNode, context: RunContext) {</span>
+<span class="code-line">  <span class="code-keyword">if</span> (node.bash) {</span>
+<span class="code-line">    <span class="code-keyword">return</span> <span class="code-keyword">await</span> <span class="code-function">executeBash</span>(node.bash, context);</span>
+<span class="code-line">  }</span>
+<span class="code-line">  <span class="code-keyword">if</span> (node.prompt) {</span>
+<span class="code-line">    <span class="code-keyword">return</span> <span class="code-keyword">await</span> <span class="code-function">executePrompt</span>(node.prompt, context);</span>
+<span class="code-line">  }</span>
+<span class="code-line">  <span class="code-keyword">if</span> (node.loop) {</span>
+<span class="code-line">    <span class="code-keyword">return</span> <span class="code-keyword">await</span> <span class="code-function">executeLoop</span>(node.loop, context);</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">This function handles a single workflow step (node).</p>
+              <p class="tl">If the node has a "bash" field, run a shell command. These are the robots.</p>
+              <p class="tl">Wait for the shell command to finish and return the result.</p>
+              <p class="tl">If the node has a "prompt" field, send a message to an AI. These are the craftspeople.</p>
+              <p class="tl">If the node has a "loop" field, handle the repeat-until-done pattern.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Watch a workflow execute step by step</h2>
+
+        <div class="flow-animation animate-in" data-steps='[
+          {"highlight":"flow-actor-1","label":"You trigger: archon run build-feature"},
+          {"highlight":"flow-actor-2","label":"Workflows package loads the YAML and validates the graph","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-3","label":"Git package creates an isolated worktree for this run","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-2","label":"Node &apos;plan&apos; starts: prompt sent to Claude via Providers"},
+          {"highlight":"flow-actor-4","label":"Claude returns a detailed implementation plan","packet":true,"from":"actor-2","to":"actor-4"},
+          {"highlight":"flow-actor-2","label":"Node &apos;implement&apos; loop starts — AI iterates until done"},
+          {"highlight":"flow-actor-5","label":"Bash node runs tests: bun run validate","packet":true,"from":"actor-2","to":"actor-5"},
+          {"highlight":"flow-actor-2","label":"All nodes complete — Archon opens a pull request"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">👤</div>
+              <span>You</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">⚙️</div>
+              <span>Workflows</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">🗂️</div>
+              <span>Git</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">🧠</div>
+              <span>Claude</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-5">
+              <div class="flow-actor-icon">🔧</div>
+              <span>Tests</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">Click "Next Step" to begin</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">Next Step</button>
+            <button class="btn flow-reset-btn">Restart</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+
+        <div class="callout callout-accent animate-in">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">The DAG pattern</strong>
+            <p>Archon uses a <span class="term" data-definition="A DAG (Directed Acyclic Graph) is a way of organizing tasks with dependencies. Each task points to tasks that depend on it, with no circular loops. Like a family tree — children descend from parents but can&apos;t also be their own grandparent.">DAG</span> to figure out which nodes can run in parallel. If two nodes don&apos;t depend on each other, Archon runs them simultaneously. That&apos;s how it stays fast even in complex workflows.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Quiz: Workflows in practice</h2>
+
+        <div class="quiz-container animate-in" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly — bash nodes are deterministic, so they always produce the same result. They&apos;re perfect for running tests since you want a reliable pass/fail signal."
+               data-explanation-wrong="Not quite. The test runner should be a bash node (deterministic) not a prompt node — you don&apos;t want an AI deciding whether tests pass.">
+            <h3 class="quiz-question">You want to add automated linting to your workflow. Should it be a bash node or a prompt node?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Prompt node — ask the AI to check for linting issues</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Bash node — run the linter command directly</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Loop node — keep asking AI until it finds no issues</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="Yes — &apos;depends_on&apos; creates a dependency edge in the DAG. Archon won&apos;t start a node until all its dependencies have successfully completed."
+               data-explanation-wrong="Not quite. &apos;depends_on&apos; is how you sequence nodes — the implement node waits for the plan node to finish before starting.">
+            <h3 class="quiz-question">Your &apos;implement&apos; node keeps starting before the &apos;plan&apos; node finishes. What&apos;s missing?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Add &apos;depends_on: [plan]&apos; to the implement node</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Add a sleep command between the two nodes</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Move the plan node to be listed last in the YAML</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

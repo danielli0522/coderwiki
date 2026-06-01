@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inside CloakBrowser — 隐身浏览器内部原理</title>
+
+  <!-- Google Fonts: Bricolage Grotesque · DM Sans · JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    :root {
+      --color-accent:       #2A7B9B;
+      --color-accent-hover: #1F6280;
+      --color-accent-light: #E4F2F7;
+      --color-accent-muted: #5A9DB8;
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">Inside CloakBrowser</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <button class="nav-dot" data-target="module-1" data-tooltip="隐身浏览器是什么" role="tab" aria-label="Module 1: 隐身浏览器是什么"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="反检测攻防战" role="tab" aria-label="Module 2: 反检测攻防战"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="启动引擎" role="tab" aria-label="Module 3: 启动引擎"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="指纹系统详解" role="tab" aria-label="Module 4: 指纹系统详解"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="模拟人类行为" role="tab" aria-label="Module 5: 模拟人类行为"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh -->
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">隐身浏览器是什么</h1>
+      <p class="module-subtitle">为什么有的网站能一眼认出你是"机器人"？又如何让它看不见？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: The Problem -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">网站的"火眼金睛"</h2>
+        <p>想象你开着一辆车去商场。商场门口有个保安，他不仅看你的脸，还检查你的车牌号、轮胎花纹、后视镜角度、甚至你握方向盘的姿势。只要任何一项和他数据库里的"可疑清单"匹配，他就拦住你。</p>
+        <p>网站也在做同样的事——它们检查你的浏览器的<span class="term" data-definition="浏览器指纹是网站收集的一系列你的浏览器特征信息，比如屏幕分辨率、字体列表、显卡型号等。这些信息组合在一起就像你的"指纹"一样独一无二，能用来追踪你。">浏览器指纹</span>、<span class="term" data-definition="自动化工具是让浏览器自动执行操作的软件，比如自动点击、自动填表。Selenium 和 Playwright 就是常见的自动化工具。">自动化痕迹</span>、鼠标轨迹，来判断你是一个真人还是一个<span class="term" data-definition="Bot 就是自动程序，也叫机器人。在网页场景中，Bot 会自动访问网站、点击按钮、提交表单，而不是由真人手动操作。">机器人（Bot）</span>。</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Aha! 时刻</strong>
+            <p>这就像"间谍"和"安检"的较量：网站是安检，Bot 检测就是X光机。CloakBrowser 就是一套伪装工具，让你的自动化程序在 X 光机下看起来像个普通旅客。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: What CloakBrowser Does -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">CloakBrowser 是什么</h2>
+        <p><strong>CloakBrowser</strong> 是一个"隐身浏览器"——它基于 Chromium（Chrome 的内核），但对底层代码做了 57 处修改，让自动化程序看起来完全像一个真人在操作浏览器。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🎭</div>
+            <h4 class="pattern-title">指纹伪装</h4>
+            <p class="pattern-desc">修改浏览器的 57 个特征（画布、音频、字体、GPU 等），让每次访问看起来像不同的真实用户</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🖱️</div>
+            <h4 class="pattern-title">行为模拟</h4>
+            <p class="pattern-desc">用贝塞尔曲线模拟人类鼠标移动，用随机延迟模拟打字节奏，连"打错字再改"都模拟了</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🔌</div>
+            <h4 class="pattern-title">即插即用</h4>
+            <p class="pattern-desc">直接替换 Playwright 或 Puppeteer，只需要改一行代码就能使用</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: 3 Lines of Code -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">只需三行代码</h2>
+        <p>如果你已经在用 <span class="term" data-definition="Playwright 是微软开发的浏览器自动化工具。你可以用代码控制浏览器打开网页、点击按钮、填写表单——就像有个机器人在帮你操作浏览器一样。">Playwright</span>，换成 CloakBrowser 只需要改一行导入：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">from</span> cloakbrowser <span class="code-keyword">import</span> launch</span>
+<span class="code-line"></span>
+<span class="code-line">browser = <span class="code-keyword">await</span> <span class="code-function">launch</span>(headless=<span class="code-keyword">True</span>)</span>
+<span class="code-line">page = <span class="code-keyword">await</span> browser.<span class="code-function">new_page</span>()</span>
+<span class="code-line"><span class="code-keyword">await</span> page.<span class="code-function">goto</span>(<span class="code-string">"https://example.com"</span>)</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">从 CloakBrowser 包中导入启动函数</p>
+              <p class="tl"></p>
+              <p class="tl">启动一个"看不见窗口"的隐身浏览器</p>
+              <p class="tl">打开一个新的标签页</p>
+              <p class="tl">让浏览器访问这个网址</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">ℹ️</div>
+          <div class="callout-content">
+            <strong class="callout-title">为什么用 headless=True？</strong>
+            <p><span class="term" data-definition="Headless 模式就是浏览器在没有可视窗口的情况下运行。你看不到浏览器界面，但它确实在后台运行——适合自动化场景，因为不需要显示界面，速度更快。">Headless 模式</span>让浏览器在后台运行，不弹出窗口。这对于自动化任务（比如批量抓取数据）特别有用。但普通的 headless 浏览器会暴露"我不是真人"的信号——CloakBrowser 会在 C++ 层面修复这些信号。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Group Chat - What Happens at Launch -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">启动时发生了什么？</h2>
+        <p>当你写下 <code>launch()</code> 时，背后发生了一场精心编排的"伪装派对"：</p>
+
+        <div class="chat-window" id="chat-module1">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="user" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">你</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">你的代码</span>
+                <p>launch()！我要启动一个隐身浏览器！</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="cloakbrowser" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">CB</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">CloakBrowser</span>
+                <p>收到！先检查一下定制的 Chromium 二进制文件有没有下载好...</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="cloakbrowser" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">CB</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">CloakBrowser</span>
+                <p>下载好了，SHA-256 校验通过。现在生成一个随机指纹种子（seed = 42871），然后组装 57 个隐身参数...</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="chromium" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">Cr</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">定制 Chromium</span>
+                <p>我是经过特殊改造的 Chromium。C++ 层面已经修改了 57 处指纹源代码，任何网站检测到的都是伪装后的"假身份"。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="cloakbrowser" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">CB</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">CloakBrowser</span>
+                <p>浏览器启动完毕！你可以像用普通 Playwright 一样操作它了。网站只会看到一个"普通用户"。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module1-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条消息</button>
+            <button class="btn chat-all-btn">播放全部</button>
+            <button class="btn chat-reset-btn">重播</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="完全正确！CloakBrowser 是 Playwright/Puppeteer 的隐身替代品，底层修改了 Chromium 的 C++ 代码来伪装浏览器指纹。"
+               data-explanation-wrong="想一想 CloakBrowser 的核心价值——它不是 VPN，也不是普通的浏览器。它是在浏览器内核层面做伪装的自动化工具。">
+            <h3 class="quiz-question">CloakBrowser 和普通 Playwright 的关键区别是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>CloakBrowser 使用了不同的网络协议，流量更隐蔽</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>CloakBrowser 在 C++ 层面修改了 Chromium，伪装了 57 个浏览器指纹特征</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>CloakBrowser 是一个 VPN 工具，可以隐藏你的 IP 地址</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="对！这正是 CloakBrowser 的设计目标——最低迁移成本。只需要改 import 语句，其他代码都不用动。"
+               data-explanation-wrong="想想看，CloakBrowser 的核心卖点就是'即插即用'。用户从 Playwright 迁移过来的成本应该有多高？">
+            <h3 class="quiz-question">如果你已经有一个用 Playwright 写的自动化脚本，迁移到 CloakBrowser 需要改多少代码？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>需要重写整个项目</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>需要改大约 50% 的代码</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>只需要改一行 import 语句</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">反检测攻防战</h1>
+      <p class="module-subtitle">网站怎么发现你是 Bot？CloakBrowser 又怎么让 Bot 变成"隐形人"？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: The Arms Race -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">一场永不停歇的军备竞赛</h2>
+        <p>想象你在玩捉迷藏。藏的人（Bot）每次被发现，都会想出新的藏法；找的人（网站）每次被蒙混过关，都会升级搜索策略。这就是 Bot 检测和反检测之间的军备竞赛。</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">核心洞察</strong>
+            <p>大多数反检测工具（比如 <span class="term" data-definition="Puppeteer Extra 是 Puppeteer 的增强版，可以通过插件扩展功能。stealth 插件是最常用的，它通过注入 JavaScript 来隐藏自动化痕迹。">Puppeteer Stealth</span>）是用 <span class="term" data-definition="JavaScript 是运行在浏览器中的编程语言。JS 注入就是在网页加载时，偷偷插入额外的 JS 代码来修改浏览器的行为——就像在剧本里临时加了一段台词。">JS 注入</span>来伪装的。但网站也能用 JS 来检测你的伪装——这就变成了"用 JS 骗 JS"的猫鼠游戏。CloakBrowser 的策略完全不同：它直接修改浏览器的 C++ 源代码。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Detection Methods -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">网站的"安检清单"</h2>
+        <p>网站通过以下方式检测你是不是 Bot。每一项都像一个"检查站"：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-error)">
+            <div class="pattern-icon" style="background: var(--color-error)">🔍</div>
+            <h4 class="pattern-title"><span class="term" data-definition="Canvas 指纹是网站通过让浏览器画一段隐藏图形，然后读取像素数据来识别浏览器。不同设备的显卡渲染结果略有差异，这个差异就成了指纹。">Canvas 指纹</span></h4>
+            <p class="pattern-desc">让浏览器画一张隐藏的图片，检查每个像素的颜色——不同电脑画出来会有细微差异，以此识别你</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-error)">
+            <div class="pattern-icon" style="background: var(--color-error)">🔊</div>
+            <h4 class="pattern-title"><span class="term" data-definition="AudioContext 指纹是网站通过让浏览器处理一段音频信号，然后检查输出结果来识别浏览器。不同设备的音频处理单元会产生微小的差异。">Audio 指纹</span></h4>
+            <p class="pattern-desc">让浏览器处理一段声音信号，检查输出波形的微小差异——每台电脑的声卡处理结果都不一样</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-error)">
+            <div class="pattern-icon" style="background: var(--color-error)">🖥️</div>
+            <h4 class="pattern-title"><span class="term" data-definition="WebGL 指纹通过检查浏览器的 3D 图形渲染能力来识别设备。网站会读取你的显卡型号、渲染器信息等来创建指纹。">WebGL 指纹</span></h4>
+            <p class="pattern-desc">检查你的显卡型号、3D 渲染能力——每张显卡的渲染结果都略有不同</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-error)">
+            <div class="pattern-icon" style="background: var(--color-error)">🌐</div>
+            <h4 class="pattern-title"><span class="term" data-definition="WebRTC 是浏览器内置的实时通信功能，可以让浏览器直接进行视频通话和文件传输。但它也可能泄露你的真实 IP 地址，即使你使用了代理。">WebRTC</span> 泄露</h4>
+            <p class="pattern-desc">即使你用了代理，WebRTC 可能直接暴露你的真实 IP 地址——这是许多反检测工具忽略的漏洞</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-error)">
+            <div class="pattern-icon" style="background: var(--color-error)">🤖</div>
+            <h4 class="pattern-title">自动化信号</h4>
+            <p class="pattern-desc"><code>navigator.webdriver</code>、<code>window.chrome</code> 缺失、<span class="term" data-definition="CDP 是 Chrome DevTools Protocol 的缩写，是 Chrome 浏览器提供的调试接口。自动化工具通过 CDP 来控制浏览器，但网站也能检测到 CDP 的连接痕迹。">CDP</span> 痕迹——这些"我是机器人"的标签需要全部抹掉</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-error)">
+            <div class="pattern-icon" style="background: var(--color-error)">🧬</div>
+            <h4 class="pattern-title">硬件特征</h4>
+            <p class="pattern-desc">CPU 核心数、内存大小、屏幕分辨率、触摸能力——这些硬件参数组合起来也是指纹</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: C++ vs JS Patches -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">C++ 补丁 vs JS 注入</h2>
+        <p>CloakBrowser 的核心创新在于它的修补方式。其他工具在网页层面做伪装，CloakBrowser 在浏览器引擎层面做修改：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">JS 注入（其他工具）</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment">// 在网页里插入一段 JS 来骗检测</span></span>
+<span class="code-line"><span class="code-function">Object</span>.<span class="code-function">defineProperty</span>(navigator, <span class="code-string">'webdriver'</span>, {</span>
+<span class="code-line">  <span class="code-function">get</span>: () => <span class="code-keyword">undefined</span></span>
+<span class="code-line">});</span>
+            </code></pre>
+          </div>
+          <div class="translation-code">
+            <span class="translation-label">C++ 补丁（CloakBrowser）</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment">// 直接在 Chromium 源码里改</span></span>
+<span class="code-line"><span class="code-comment">// third_party/blink/renderer/...</span></span>
+<span class="code-line"><span class="code-keyword">if</span> (IsAutomationEnabled()) {</span>
+<span class="code-line">  <span class="code-keyword">return</span> <span class="code-keyword">false</span>;  <span class="code-comment">// 永远返回"不是机器人"</span></span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">为什么 JS 注入靠不住？</strong>
+            <p>JS 注入就像是给间谍穿了一件外套——外套外面看着像普通人，但一做"X光检查"（检测注入痕迹），就会暴露。网站可以通过检查 <code>Object.getOwnPropertyDescriptor</code> 来发现属性被篡改过。而 C++ 补丁是直接修改了"骨骼"——从里到外都是伪装后的身份。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Data Flow Animation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">当网站尝试检测时</h2>
+        <p>网站执行一段 JavaScript 来检查你的浏览器。看看 CloakBrowser 是怎么拦截这个检查的：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"网站 JS 执行：navigator.webdriver"},
+          {"highlight":"flow-actor-2","label":"请求到达 Chromium 引擎"},
+          {"highlight":"flow-actor-2","label":"C++ 层拦截：检测到自动化标志查询","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-3","label":"返回伪装后的结果：undefined（不是机器人）","packet":true,"from":"actor-3","to":"actor-1"},
+          {"highlight":"flow-actor-1","label":"网站收到"正常"结果，放行！"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">🌐</div>
+              <span>网站 JS</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">⚙️</div>
+              <span>Chromium C++</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">🎭</div>
+              <span>指纹补丁</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击"下一步"开始</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！JS 注入在网页层面做修改，可以被检测到；C++ 补丁直接在浏览器引擎层面修改，对网页完全透明，几乎不可能被检测到。"
+               data-explanation-wrong="想想两种方法在哪个层面做修改。一种是在网页可以看到的层面，一种是在网页根本接触不到的层面。">
+            <h3 class="quiz-question">为什么 CloakBrowser 的 C++ 补丁比 JS 注入更可靠？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>C++ 运行速度更快，所以不容易被检测到</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>C++ 补丁在网页接触不到的引擎层面修改，网页无法检测到篡改痕迹</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>C++ 补丁可以修改更多的指纹，JS 注入只能改少数几个</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正是如此！CloakBrowser 覆盖了 Canvas、WebGL、Audio、WebRTC、自动化信号、硬件特征等全方位的检测手段。"
+               data-explanation-wrong="CloakBrowser 的核心是全面覆盖——不只是改一两个指纹，而是系统性地伪装了浏览器的方方面面。">
+            <h3 class="quiz-question">如果网站同时使用 Canvas 指纹、WebGL 指纹和自动化信号检测，CloakBrowser 能应对吗？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>只能应对其中一种，需要额外工具配合</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>能应对两种，第三种需要手动配置</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>全部都能应对——57 处补丁覆盖了所有常见检测手段</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">启动引擎</h1>
+      <p class="module-subtitle">当你写下 launch()，幕后发生了哪些精密操作？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: The Launch Sequence -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">启动就像发射火箭</h2>
+        <p>发射一枚火箭不是按一个按钮就完事了——需要检查燃料、校准轨道、加载载荷、倒计时。CloakBrowser 的启动过程也一样精密：</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>检查浏览器二进制文件</strong>
+              <p>定制的 Chromium 有没有下载好？校验 SHA-256 确保文件没被篡改</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>解析<span class="term" data-definition="代理是一种网络中间人。你的请求先发给代理服务器，代理再转发给目标网站，这样网站只能看到代理的 IP，看不到你的真实 IP。">代理</span>配置</strong>
+              <p>如果配了代理，解析代理 URL（支持 HTTP 和 SOCKS5），自动检测时区和地理位置</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>生成隐身参数</strong>
+              <p>创建随机种子，生成 57 个隐身参数（指纹、平台、GPU 等）</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>启动定制 Chromium</strong>
+              <p>用 Playwright（或 Patchright）启动浏览器，传入所有隐身参数</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>注入人类行为模拟（可选）</strong>
+              <p>如果开了 humanize 模式，给鼠标和键盘操作加上"人类节奏"</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Binary Download -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">定制浏览器的下载管理</h2>
+        <p>CloakBrowser 不用普通的 Chrome——它用的是经过 57 处 C++ 修改的定制版 Chromium。这个文件大约 200MB，下载和管理工作全靠 <code>download.py</code>：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE · download.py</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">ensure_binary</span>() -> Path:</span>
+<span class="code-line">    <span class="code-keyword">if</span> local := os.environ.<span class="code-function">get</span>(<span class="code-string">"CLOAKBROWSER_BIN"</span>):</span>
+<span class="code-line">        <span class="code-keyword">return</span> <span class="code-function">Path</span>(local)</span>
+<span class="code-line">    cached = _cache_dir() / _binary_name()</span>
+<span class="code-line">    <span class="code-keyword">if</span> cached.<span class="code-function">exists</span>() <span class="code-keyword">and</span> _sha256_ok(cached):</span>
+<span class="code-line">        <span class="code-keyword">return</span> cached</span>
+<span class="code-line">    <span class="code-keyword">return</span> <span class="code-function">_download_binary</span>(cached)</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">定义"确保浏览器可用"的函数</p>
+              <p class="tl">如果用户指定了自定义路径，直接用那个</p>
+              <p class="tl">返回用户指定的路径</p>
+              <p class="tl">计算缓存目录中二进制文件的路径</p>
+              <p class="tl">如果文件存在且 SHA-256 校验通过，直接用缓存</p>
+              <p class="tl">返回缓存的文件路径</p>
+              <p class="tl">否则，从 GitHub Releases 下载新文件</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Aha! SHA-256 校验</strong>
+            <p><span class="term" data-definition="SHA-256 是一种密码哈希算法。它可以为任何文件生成一个唯一的 64 位十六进制"指纹"。如果文件被哪怕改了一个字节，指纹就会完全不同。">SHA-256</span> 就像文件的"防伪标签"——如果有人篡改了这个 200MB 的浏览器文件（比如植入了恶意代码），校验就会失败，CloakBrowser 会拒绝使用它。这保证了你运行的是一个安全的、未被篡改的浏览器。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Stealth Args Generation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">隐身参数是怎么生成的</h2>
+        <p>每次启动时，CloakBrowser 都会生成一套全新的"假身份"。这个身份从哪来？答案是一个随机<span class="term" data-definition="种子（Seed）是随机数生成器的起点。给定同一个种子，就会生成完全相同的随机序列。在 CloakBrowser 中，种子决定了所有指纹参数——同一个种子永远产生同一套指纹。">种子（Seed）</span>：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE · config.py</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">get_default_stealth_args</span>() -> list[str]:</span>
+<span class="code-line">    seed = random.<span class="code-function">randint</span>(<span class="code-number">10000</span>, <span class="code-number">99999</span>)</span>
+<span class="code-line">    args = [</span>
+<span class="code-line">      <span class="code-string">f"--fingerprint-seed=</span>{seed}<span class="code-string">"</span>,</span>
+<span class="code-line">      <span class="code-string">f"--fingerprint-platform=</span>{platform}<span class="code-string">"</span>,</span>
+<span class="code-line">    ]</span>
+<span class="code-line">    <span class="code-keyword">return</span> args</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">定义生成隐身参数的函数</p>
+              <p class="tl">随机生成一个 5 位数的种子（10000 到 99999）</p>
+              <p class="tl">组装启动参数列表</p>
+              <p class="tl">传入种子——它决定了所有指纹细节</p>
+              <p class="tl">传入伪装的平台类型（比如把 Linux 伪装成 Windows）</p>
+              <p class="tl">返回完整的参数列表</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">--fingerprint-seed=42871</code>
+            <span class="badge-desc">种子决定了所有指纹参数：画布噪点、GPU 型号、屏幕分辨率、字体列表...</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">--fingerprint-platform=windows</code>
+            <span class="badge-desc">即使你的服务器是 Linux，网站也会认为你用的是 Windows</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">--disable-features=AutomationControl</code>
+            <span class="badge-desc">关闭 Chrome 的"自动化模式"标志，抹除最明显的 Bot 痕迹</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Full Launch Flow Animation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">完整启动流程</h2>
+        <p>从你写下 <code>launch()</code> 到浏览器窗口打开，中间经历了这些步骤：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"用户调用 launch(headless=True, proxy=...)"},
+          {"highlight":"flow-actor-2","label":"ensure_binary()：检查/下载定制 Chromium (~200MB)","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-2","label":"SHA-256 校验通过，二进制文件就绪"},
+          {"highlight":"flow-actor-3","label":"maybe_resolve_geoip()：通过代理 IP 检测地理位置","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-3","label":"自动设置时区和语言环境（如 Asia/Shanghai）"},
+          {"highlight":"flow-actor-4","label":"build_args()：生成种子 + 57 个隐身参数","packet":true,"from":"actor-3","to":"actor-4"},
+          {"highlight":"flow-actor-4","label":"Playwright 启动定制 Chromium，传入所有参数"},
+          {"highlight":"flow-actor-4","label":"（可选）注入 humanize 猴子补丁，添加人类行为模拟"},
+          {"highlight":"flow-actor-1","label":"返回浏览器实例——一切准备就绪！","packet":true,"from":"actor-4","to":"actor-1"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">👤</div>
+              <span>用户代码</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">📦</div>
+              <span>下载管理</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">🌍</div>
+              <span>GeoIP</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">🚀</div>
+              <span>Playwright</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击"下一步"开始</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="完全正确！SHA-256 校验确保下载的定制 Chromium 没有被篡改，保证运行的是安全的、经过 57 处修改的版本。"
+               data-explanation-wrong="想一想：如果有人在你不知情的情况下替换了这个浏览器文件，会发生什么？CloakBrowser 需要一个机制来确保文件是原版的。">
+            <h3 class="quiz-question">为什么 CloakBrowser 要对下载的 Chromium 做 SHA-256 校验？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>为了加速下载——校验通过就可以跳过解压</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>为了安全——确保文件没被篡改（比如植入恶意代码）</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>为了检查版本号——确保和 Playwright 版本匹配</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="对！种子是整个指纹系统的基石。同一个种子会生成完全一致的指纹——这意味着你可以"重现"同一个身份。"
+               data-explanation-wrong="种子（Seed）是 CloakBrowser 指纹系统的核心。想想看，为什么它叫做"种子"而不是"随机数"？">
+            <h3 class="quiz-question">在 CloakBrowser 的启动流程中，哪个参数决定了所有的指纹细节？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>--fingerprint-seed —— 同一个种子生成完全一致的指纹</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>--fingerprint-platform —— 平台类型决定了一切</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>headless 参数 —— 无头模式决定了指纹的伪装程度</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">指纹系统详解</h1>
+      <p class="module-subtitle">一个随机种子如何编织出完美的假身份？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: The Identity Fabric -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">用种子编织一个"虚拟人"</h2>
+        <p>想象你有一个"角色生成器"——输入一个数字（种子），它就能自动生成一个完整的人物档案：身高、体重、发色、声音特征、行走姿态...所有属性都从这一个数字推导出来，而且同一个数字永远生成同一个角色。</p>
+        <p>CloakBrowser 的种子就是这么工作的。种子 <code>42871</code> 生成的是：</p>
+
+        <div class="arch-diagram">
+          <div class="arch-zone" style="background: var(--color-accent-light); border: 1px solid var(--color-accent-muted); border-radius: var(--radius-lg); padding: var(--space-6);">
+            <h4 class="arch-zone-label" style="color: var(--color-accent)">种子 42871 生成的虚拟身份</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-3);">
+              <div class="arch-component" data-desc="GPU 型号：NVIDIA GeForce RTX 3060——从种子推导出的显卡型号，和平台类型匹配" onclick="showArchDesc(this)" style="background: var(--color-surface); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); cursor: pointer; transition: transform 0.2s;">
+                <div class="arch-icon">🖥️</div>
+                <span style="font-size: var(--text-sm); font-weight: 600;">GPU: RTX 3060</span>
+              </div>
+              <div class="arch-component" data-desc="屏幕分辨率：1920x1080，设备像素比 1.0——标准的 Windows 桌面显示配置" onclick="showArchDesc(this)" style="background: var(--color-surface); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); cursor: pointer; transition: transform 0.2s;">
+                <div class="arch-icon">📐</div>
+                <span style="font-size: var(--text-sm); font-weight: 600;">屏幕: 1920x1080</span>
+              </div>
+              <div class="arch-component" data-desc="Canvas 噪点：每次画图时在像素中添加微小的、基于种子的随机偏移——不同种子产生不同的噪点" onclick="showArchDesc(this)" style="background: var(--color-surface); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); cursor: pointer; transition: transform 0.2s;">
+                <div class="arch-icon">🎨</div>
+                <span style="font-size: var(--text-sm); font-weight: 600;">Canvas 噪点</span>
+              </div>
+              <div class="arch-component" data-desc="Audio 指纹：通过种子控制音频处理结果的微小差异，使每台"虚拟电脑"的声音指纹都不同" onclick="showArchDesc(this)" style="background: var(--color-surface); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); cursor: pointer; transition: transform 0.2s;">
+                <div class="arch-icon">🔊</div>
+                <span style="font-size: var(--text-sm); font-weight: 600;">Audio 指纹</span>
+              </div>
+              <div class="arch-component" data-desc="CPU 核心数：8 核——从种子推导的合理硬件参数，和 GPU/屏幕/内存组合起来像一个真实的系统" onclick="showArchDesc(this)" style="background: var(--color-surface); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); cursor: pointer; transition: transform 0.2s;">
+                <div class="arch-icon">🧠</div>
+                <span style="font-size: var(--text-sm); font-weight: 600;">CPU: 8 核</span>
+              </div>
+              <div class="arch-component" data-desc="字体列表：根据伪装的操作系统返回对应的系统字体——Windows 字体在 Linux 上不可能出现，所以需要精确模拟" onclick="showArchDesc(this)" style="background: var(--color-surface); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); cursor: pointer; transition: transform 0.2s;">
+                <div class="arch-icon">🔤</div>
+                <span style="font-size: var(--text-sm); font-weight: 600;">字体列表</span>
+              </div>
+            </div>
+          </div>
+          <div class="arch-description" id="arch-desc" style="margin-top: var(--space-4); padding: var(--space-4); background: var(--color-surface); border-radius: var(--radius-sm); color: var(--color-text-secondary); text-align: center; min-height: 60px;">点击任意组件，查看它的伪装细节</div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Platform Spoofing -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">平台伪装：Linux 变 Windows</h2>
+        <p>这是指纹系统最巧妙的部分之一。大多数自动化程序运行在 Linux 服务器上，但普通用户很少用 Linux 浏览网页。所以 CloakBrowser 会把 Linux 伪装成 Windows：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE · config.py</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">if</span> sys.platform == <span class="code-string">"darwin"</span>:</span>
+<span class="code-line">    platform = <span class="code-string">"macos"</span></span>
+<span class="code-line"><span class="code-keyword">else</span>:</span>
+<span class="code-line">    platform = <span class="code-string">"windows"</span></span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># macOS 保留真实平台</span></span>
+<span class="code-line"><span class="code-comment"># Linux/Windows 都伪装成 Windows</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">如果系统是 macOS（苹果电脑）...</p>
+              <p class="tl">平台参数设为 "macos"</p>
+              <p class="tl">否则（Linux 或 Windows）...</p>
+              <p class="tl">统一伪装成 "windows"</p>
+              <p class="tl"></p>
+              <p class="tl">macOS 用户很常见，不需要伪装</p>
+              <p class="tl">Linux 太显眼——网站会怀疑为什么一个"普通用户"在用 Linux</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">ℹ️</div>
+          <div class="callout-content">
+            <strong class="callout-title">为什么不是所有平台都伪装？</strong>
+            <p>macOS 用户很常见，伪装反而可能引入不一致。Windows 用户占了绝大部分市场份额（~73%），是最安全的伪装目标。这就是"融入人群"的策略——把自己变成最不起眼的那一个。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Coherent Identity -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">一致性是关键</h2>
+        <p>伪装最怕的不是某个指纹不对，而是指纹之间互相矛盾。想象一个人说他来自海南，但口音像东北的、身份证号是北京的——矛盾太多了。</p>
+        <p>CloakBrowser 的种子系统确保所有指纹参数来自同一个"世界"：</p>
+
+        <div class="chat-window" id="chat-module4">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="seed" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-accent)">种</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-accent)">种子 42871</span>
+                <p>我来生成一个一致的虚拟身份。平台：Windows，GPU：NVIDIA RTX 3060...</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="canvas" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">🎨</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">Canvas 模块</span>
+                <p>收到种子。我会添加基于种子的像素噪点，确保画布指纹和这台"RTX 3060 显卡"的渲染特征一致。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="fonts" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">🔤</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">字体模块</span>
+                <p>平台是 Windows，所以我返回 Windows 系统字体列表。Arial、Calibri、Segoe UI... 这些在 Linux 上是不存在的。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="webgl" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">🖥️</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">WebGL 模块</span>
+                <p>GPU 设为 RTX 3060。我的渲染器报告也要返回 NVIDIA 的 WebGL 扩展列表，和 Canvas 的渲染结果匹配。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="seed" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-accent)">种</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-accent)">种子 42871</span>
+                <p>所有模块的指纹都来自同一个种子，互相印证。网站无论检查哪个维度，看到的都是同一个"Windows + RTX 3060"用户。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module4-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条消息</button>
+            <button class="btn chat-all-btn">播放全部</button>
+            <button class="btn chat-reset-btn">重播</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！种子是一致性的保证。同一个种子生成完全相同的所有指纹参数，所以你可以"重现"同一个身份。"
+               data-explanation-wrong="想一想：如果每次启动都用不同的种子，会发生什么？指纹会每次都变。但如果需要维持登录状态呢？">
+            <h3 class="quiz-question">为什么 CloakBrowser 用种子（而不是完全随机的值）来生成指纹？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>种子可以让指纹更难被检测到</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>种子保证所有指纹参数之间一致，而且可以重现同一个身份</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>种子是为了加速启动过程，避免重复计算</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="没错！如果 GPU 报告是 NVIDIA，但字体列表里有 Linux 专有字体（如 Noto Sans CJK），这种矛盾会立刻暴露伪装。所有指纹必须来自"同一个世界"。"
+               data-explanation-wrong="想象你是一个安检员，你会怎么判断一个人的身份证是假的？你不会只看一个信息——你会看所有信息是否互相矛盾。">
+            <h3 class="quiz-question">如果指纹系统把 GPU 伪装成 NVIDIA RTX 3060，但字体列表包含了 Linux 专有字体，会发生什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>不会有影响，网站通常不会交叉检查指纹</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>字体列表和 GPU 是独立的检测维度，互不影响</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>这会造成指纹矛盾——NVIDIA GPU 的电脑不可能有 Linux 专有字体，会立刻暴露伪装</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">模拟人类行为</h1>
+      <p class="module-subtitle">光有假指纹还不够——你还得"演"得像一个真人</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Why Behavior Matters -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">指纹只是第一关</h2>
+        <p>想象你伪造了一张完美的身份证，通过了门口的安检。但进去之后，你的行为暴露了你——你走路太快、从不眨眼、每次都走完全相同的路线。</p>
+        <p>高级 Bot 检测不仅检查"你是谁"（指纹），还检查"你怎么动"（行为）。CloakBrowser 的 <span class="term" data-definition="Humanize 是 CloakBrowser 的行为模拟功能。开启后，鼠标移动、点击、键盘输入等操作都会带上人类的随机性和不精确性——比如鼠标不会走直线，打字不会匀速。">humanize</span> 模式就是专门应对这类检测的。</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Aha! 行为指纹</strong>
+            <p>你的鼠标轨迹本身就是一种指纹。Bot 的鼠标走直线、瞬间到达、完美居中——真人的鼠标走曲线、有时会偏移、偶尔还会停顿。这种"行为指纹"比浏览器指纹更难伪造，因为它需要理解人类的物理运动规律。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Three Pillars of Humanization -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">三大行为模拟引擎</h2>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🖱️</div>
+            <h4 class="pattern-title">鼠标：贝塞尔曲线</h4>
+            <p class="pattern-desc">真人的鼠标不会走直线——它走的是弯弯曲曲的<span class="term" data-definition="贝塞尔曲线是一种用控制点定义的平滑曲线。在 CloakBrowser 中，鼠标从 A 点移动到 B 点不是走直线，而是沿一条由随机控制点定义的弧线——就像真人的手移动鼠标时的自然弧度。">贝塞尔曲线</span>。每次移动的路径都不一样，还有随机的中途停顿和微小的抖动。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">⌨️</div>
+            <h4 class="pattern-title">键盘：节奏与失误</h4>
+            <p class="pattern-desc">真人打字不是匀速的——有些按键快、有些慢，偶尔还会按错然后删除重打。CloakBrowser 模拟了这种不精确性，包括真实的"打错→退格→重打"流程。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">📜</div>
+            <h4 class="pattern-title">滚动：物理惯性</h4>
+            <p class="pattern-desc">真人的滚动有加速、匀速、减速、回弹——像物理世界中的惯性运动。Bot 的滚动要么不动要么匀速跳转，一眼就能看出来。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Humanize Config -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">怎么开启人类行为模拟</h2>
+        <p>只需要在 launch 时加上一个参数：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line">browser = <span class="code-keyword">await</span> <span class="code-function">launch</span>(</span>
+<span class="code-line">    headless=<span class="code-keyword">True</span>,</span>
+<span class="code-line">    humanize=<span class="code-keyword">True</span>,</span>
+<span class="code-line">    human_preset=<span class="code-string">"default"</span>,</span>
+<span class="code-line">)</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">启动一个隐身浏览器</p>
+              <p class="tl">在后台运行，不显示窗口</p>
+              <p class="tl">开启人类行为模拟！</p>
+              <p class="tl">使用默认的"人类特征"预设（有多个预设可选）</p>
+              <p class="tl">结束配置</p>
+            </div>
+          </div>
+        </div>
+
+        <p>CloakBrowser 内部会对 Playwright 的鼠标和键盘方法做<span class="term" data-definition="猴子补丁（Monkey Patch）是一种在运行时替换或修改已有函数的技术。就像给一只猴子换了顶帽子——函数的名字没变，但它的行为变了。">猴子补丁（Monkey Patch）</span>，把原本"机器人式"的操作替换成"人类式"的操作：</p>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">page.click()</code>
+            <span class="badge-desc">不再是瞬间移动+点击，而是：贝塞尔曲线移动 → 微小偏移 → 按下 → 随机延迟 → 释放</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">page.type()</code>
+            <span class="badge-desc">不再是匀速输入，而是：随机间隔（30-170ms）→ 偶尔打错 → 退格 → 重打正确的字符</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">page.mouse.move()</code>
+            <span class="badge-desc">不再是直线移动，而是：生成随机控制点 → 绘制贝塞尔曲线 → 沿曲线移动，带微小抖动</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Bezier Curve Explanation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">贝塞尔曲线：鼠标的"人类弧度"</h2>
+        <p>Bot 的鼠标从 A 点到 B 点走直线（下左）。真人的鼠标走曲线，路径带有自然的弧度和微偏（下右）：</p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin: var(--space-6) 0;">
+          <div style="background: var(--color-surface); border-radius: var(--radius-md); padding: var(--space-5); text-align: center; box-shadow: var(--shadow-sm);">
+            <div style="font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-error); margin-bottom: var(--space-2);">BOT 方式</div>
+            <svg width="200" height="100" viewBox="0 0 200 100">
+              <line x1="20" y1="80" x2="180" y2="20" stroke="var(--color-error)" stroke-width="2" stroke-dasharray="5,5"/>
+              <circle cx="20" cy="80" r="6" fill="var(--color-error)"/>
+              <circle cx="180" cy="20" r="6" fill="var(--color-error)"/>
+              <text x="10" y="95" font-size="10" fill="var(--color-text-muted)">A</text>
+              <text x="175" y="15" font-size="10" fill="var(--color-text-muted)">B</text>
+            </svg>
+            <p style="font-size: var(--text-sm); color: var(--color-text-secondary); margin-top: var(--space-2);">直线，瞬间到达</p>
+          </div>
+          <div style="background: var(--color-surface); border-radius: var(--radius-md); padding: var(--space-5); text-align: center; box-shadow: var(--shadow-sm);">
+            <div style="font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-success); margin-bottom: var(--space-2);">真人方式</div>
+            <svg width="200" height="100" viewBox="0 0 200 100">
+              <path d="M 20 80 C 60 30, 140 90, 180 20" stroke="var(--color-success)" stroke-width="2" fill="none"/>
+              <circle cx="20" cy="80" r="6" fill="var(--color-success)"/>
+              <circle cx="180" cy="20" r="6" fill="var(--color-success)"/>
+              <circle cx="60" cy="30" r="3" fill="var(--color-success)" opacity="0.3"/>
+              <circle cx="140" cy="90" r="3" fill="var(--color-success)" opacity="0.3"/>
+              <text x="10" y="95" font-size="10" fill="var(--color-text-muted)">A</text>
+              <text x="175" y="15" font-size="10" fill="var(--color-text-muted)">B</text>
+            </svg>
+            <p style="font-size: var(--text-sm); color: var(--color-text-secondary); margin-top: var(--space-2);">贝塞尔曲线，自然弧度</p>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">ℹ️</div>
+          <div class="callout-content">
+            <strong class="callout-title">为什么贝塞尔曲线？</strong>
+            <p>真人的手臂是通过关节运动的——肩膀、手肘、手腕。这种关节运动自然产生的轨迹就是贝塞尔曲线。CloakBrowser 用随机控制点模拟不同人的手臂长度、运动习惯，每次轨迹都不一样。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+
+        <div class="quiz-container" id="quiz-module5">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！指纹伪装解决"你是谁"的问题，行为模拟解决"你怎么动"的问题。两者缺一不可——完美的指纹+机器人的行为，还是会被高级检测发现。"
+               data-explanation-wrong="指纹和行为是两个不同的检测维度。一个检查你的"身份"，另一个检查你的"动作"。高级 Bot 检测会同时看两者。">
+            <h3 class="quiz-question">为什么光有指纹伪装还不够，还需要行为模拟？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>指纹伪装只能骗过 Canvas 检测，其他检测需要行为模拟</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>行为模拟是为了让页面加载更快</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>指纹是静态伪装（"你是谁"），行为是动态伪装（"你怎么动"）——高级检测会同时检查两者</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="没错！猴子补丁是在运行时替换函数——page.click() 的名字不变，但它的内部实现被替换成了"人类式点击"。你的代码不需要做任何修改。"
+               data-explanation-wrong="猴子补丁不需要你修改任何代码。它的原理是拦截底层的函数调用，自动添加人类行为。">
+            <h3 class="quiz-question">CloakBrowser 怎么让你的代码自动获得"人类行为"——而不需要你重写任何操作代码？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>用猴子补丁在运行时替换 Playwright 的鼠标/键盘方法</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>提供了一个全新的 API，需要把所有操作改为 humanized.click() 等方法</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>通过浏览器插件注入 JavaScript 来拦截鼠标事件</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+  </main>
+
+</body>
+</html>

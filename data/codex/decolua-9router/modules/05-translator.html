@@ -1,0 +1,202 @@
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">格式翻译官</h1>
+      <p class="module-subtitle">OpenAI、Claude、Gemini 说的"语言"都不同——9Router 怎么让它们互相听懂？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Format problem -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">AI 服务商的"方言"问题</h2>
+        <p>想象你在国际会议上发言。你说中文，但听众里有说英文的、法文的、日文的。你需要一个同声传译。</p>
+        <p>AI 世界也一样——<span class="term" data-definition="OpenAI 格式是目前最广泛使用的 AI API 数据格式，几乎所有 AI 工具都支持。它用 JSON 表示聊天消息，messages 数组里每条消息有 role 和 content。">OpenAI 格式</span>、<span class="term" data-definition="Claude 格式是 Anthropic 公司的 AI API 数据格式，和 OpenAI 格式略有不同，比如 system 消息是单独的字段而不是 messages 数组的一部分。">Claude 格式</span>、<span class="term" data-definition="Gemini 格式是 Google 的 AI API 数据格式，使用 contents 数组和 parts 结构来表示消息。">Gemini 格式</span> 各不相同：</p>
+
+        <div class="badge-list animate-in">
+          <div class="badge-item">
+            <code class="badge-code">messages[]</code>
+            <span class="badge-desc">OpenAI 用这个字段存聊天历史</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">system + messages</code>
+            <span class="badge-desc">Claude 把系统指令单独放，聊天记录放 messages</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">contents + parts</code>
+            <span class="badge-desc">Gemini 用完全不同的结构组织消息</span>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">ℹ️</div>
+          <div class="callout-content">
+            <strong class="callout-title">为什么这很重要？</strong>
+            <p>你的工具（Claude Code）说一种"方言"，但你想用的 AI 服务商（Gemini）说另一种。没有翻译，它们根本无法沟通。9Router 的翻译器就是让任意工具和任意服务商都能对话的关键。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Two-phase translation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">巧妙的"两阶段翻译"</h2>
+        <p>9Router 用了一个聪明的策略来减少翻译器的数量。它不需要为每对格式都写一个翻译器——而是用 OpenAI 格式作为"<span class="term" data-definition="中间格式是一种通用标准，所有格式先转换成它，再从它转换成目标格式。就像英语是国际会议的中间语言——中文→英语→法语，比直接中文→法语更容易。">中间格式</span>"：</p>
+
+        <div class="flow-steps animate-in">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <p><strong>来源格式</strong><br/>（Claude/Gemini/Kiro...）</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <p><strong>OpenAI 中间格式</strong><br/>（通用标准）</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <p><strong>目标格式</strong><br/>（Claude/Gemini/Kiro...）</p>
+          </div>
+        </div>
+
+        <p>这意味着：支持 N 种格式，只需要写 2N 个翻译器（而不是 N×N 个）。从 5 种格式 25 个翻译器 → 10 个翻译器。</p>
+      </section>
+
+      <!-- Screen 3: Translator registry code -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">翻译器注册表</h2>
+        <p>看看 9Router 是怎么注册和管理翻译器的：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">const</span> requestRegistry = <span class="code-keyword">new</span> <span class="code-function">Map</span>();</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-keyword">export function</span> <span class="code-function">register</span>(from, to, requestFn) {</span>
+<span class="code-line">  <span class="code-keyword">const</span> key = <span class="code-string">`${from}:${to}`</span>;</span>
+<span class="code-line">  requestRegistry.<span class="code-function">set</span>(key, requestFn);</span>
+<span class="code-line">}</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment">// 懒加载——用到时才加载翻译器</span></span>
+<span class="code-line"><span class="code-function">require</span>(<span class="code-string">"./request/claude-to-openai.js"</span>);</span>
+<span class="code-line"><span class="code-function">require</span>(<span class="code-string">"./request/openai-to-claude.js"</span>);</span>
+<span class="code-line"><span class="code-function">require</span>(<span class="code-string">"./request/gemini-to-openai.js"</span>);</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">用一个 Map（字典）来存储所有注册的请求翻译器</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">定义注册函数：记录"从 A 格式翻译到 B 格式"用哪个翻译函数</p>
+              <p class="tl">把来源和目标拼成一个唯一键，比如"claude:openai"</p>
+              <p class="tl">把这个键和对应的翻译函数存进字典</p>
+              <p class="tl">注册完成</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">用懒加载：只有第一次需要翻译时才加载这些文件（提高启动速度）</p>
+              <p class="tl">加载 Claude → OpenAI 翻译器</p>
+              <p class="tl">加载 OpenAI → Claude 翻译器</p>
+              <p class="tl">加载 Gemini → OpenAI 翻译器</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Native passthrough -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">捷径：原生直通模式</h2>
+        <p>有时候根本不需要翻译！当你的工具和 AI 服务商说同一种"方言"时，9Router 会跳过所有翻译步骤，直接转发：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">const</span> passthrough = <span class="code-function">isNativePassthrough</span>(</span>
+<span class="code-line">  clientTool, provider</span>
+<span class="code-line">);</span>
+<span class="code-line"><span class="code-keyword">if</span> (passthrough) {</span>
+<span class="code-line">  translatedBody = { ...body, model };</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">检查客户端工具和目标服务商是否同一个"生态系统"</p>
+              <p class="tl">（比如 Cursor 客户端 → Cursor 服务商）</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">如果是同生态——不需要翻译！</p>
+              <p class="tl">只需要换掉模型名，其他原样转发。省时省力。</p>
+              <p class="tl">跳过了翻译步骤，直接发过去</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">性能优化思维</strong>
+            <p>好的优化不是"让每件事做得更快"，而是"跳过不需要做的事"。下次你让 AI 优化代码时，先问：有没有什么操作是根本不需要执行的？这种"短路思维"是最有效的优化。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">测验：翻译系统</h2>
+
+        <div class="quiz-container" id="quiz-module5">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="对！OpenAI 格式被用作中间格式（Hub），所有其他格式先转成 OpenAI 格式，再从 OpenAI 格式转成目标格式。这样 N 种格式只需要 2N 个翻译器。"
+               data-explanation-wrong="想一想：如果 9Router 用一种格式作为"中间语言"（就像国际会议用英语），所有翻译都经过它，会减少多少翻译器？">
+            <h3 class="quiz-question">9Router 用什么格式作为翻译的中间格式？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Claude 格式</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>OpenAI 格式</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Gemini 格式</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="没错！如果客户端和目标服务商是同一个生态系统（比如 Cursor→Cursor），9Router 会跳过所有翻译，只替换模型名。这是最高效的优化——不做不需要做的事。"
+               data-explanation-wrong="想想什么情况下根本不需要翻译——当发送方和接收方说同一种'语言'时？">
+            <h3 class="quiz-question">什么情况下 9Router 会完全跳过格式翻译？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>客户端工具和目标服务商属于同一生态系统</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>请求的 token 数量很少时</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>用户在设置里关闭了翻译功能</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

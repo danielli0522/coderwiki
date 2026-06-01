@@ -1,0 +1,205 @@
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">隐身浏览器是什么</h1>
+      <p class="module-subtitle">为什么有的网站能一眼认出你是"机器人"？又如何让它看不见？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: The Problem -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">网站的"火眼金睛"</h2>
+        <p>想象你开着一辆车去商场。商场门口有个保安，他不仅看你的脸，还检查你的车牌号、轮胎花纹、后视镜角度、甚至你握方向盘的姿势。只要任何一项和他数据库里的"可疑清单"匹配，他就拦住你。</p>
+        <p>网站也在做同样的事——它们检查你的浏览器的<span class="term" data-definition="浏览器指纹是网站收集的一系列你的浏览器特征信息，比如屏幕分辨率、字体列表、显卡型号等。这些信息组合在一起就像你的"指纹"一样独一无二，能用来追踪你。">浏览器指纹</span>、<span class="term" data-definition="自动化工具是让浏览器自动执行操作的软件，比如自动点击、自动填表。Selenium 和 Playwright 就是常见的自动化工具。">自动化痕迹</span>、鼠标轨迹，来判断你是一个真人还是一个<span class="term" data-definition="Bot 就是自动程序，也叫机器人。在网页场景中，Bot 会自动访问网站、点击按钮、提交表单，而不是由真人手动操作。">机器人（Bot）</span>。</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Aha! 时刻</strong>
+            <p>这就像"间谍"和"安检"的较量：网站是安检，Bot 检测就是X光机。CloakBrowser 就是一套伪装工具，让你的自动化程序在 X 光机下看起来像个普通旅客。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: What CloakBrowser Does -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">CloakBrowser 是什么</h2>
+        <p><strong>CloakBrowser</strong> 是一个"隐身浏览器"——它基于 Chromium（Chrome 的内核），但对底层代码做了 57 处修改，让自动化程序看起来完全像一个真人在操作浏览器。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🎭</div>
+            <h4 class="pattern-title">指纹伪装</h4>
+            <p class="pattern-desc">修改浏览器的 57 个特征（画布、音频、字体、GPU 等），让每次访问看起来像不同的真实用户</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🖱️</div>
+            <h4 class="pattern-title">行为模拟</h4>
+            <p class="pattern-desc">用贝塞尔曲线模拟人类鼠标移动，用随机延迟模拟打字节奏，连"打错字再改"都模拟了</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🔌</div>
+            <h4 class="pattern-title">即插即用</h4>
+            <p class="pattern-desc">直接替换 Playwright 或 Puppeteer，只需要改一行代码就能使用</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: 3 Lines of Code -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">只需三行代码</h2>
+        <p>如果你已经在用 <span class="term" data-definition="Playwright 是微软开发的浏览器自动化工具。你可以用代码控制浏览器打开网页、点击按钮、填写表单——就像有个机器人在帮你操作浏览器一样。">Playwright</span>，换成 CloakBrowser 只需要改一行导入：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">from</span> cloakbrowser <span class="code-keyword">import</span> launch</span>
+<span class="code-line"></span>
+<span class="code-line">browser = <span class="code-keyword">await</span> <span class="code-function">launch</span>(headless=<span class="code-keyword">True</span>)</span>
+<span class="code-line">page = <span class="code-keyword">await</span> browser.<span class="code-function">new_page</span>()</span>
+<span class="code-line"><span class="code-keyword">await</span> page.<span class="code-function">goto</span>(<span class="code-string">"https://example.com"</span>)</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">从 CloakBrowser 包中导入启动函数</p>
+              <p class="tl"></p>
+              <p class="tl">启动一个"看不见窗口"的隐身浏览器</p>
+              <p class="tl">打开一个新的标签页</p>
+              <p class="tl">让浏览器访问这个网址</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">ℹ️</div>
+          <div class="callout-content">
+            <strong class="callout-title">为什么用 headless=True？</strong>
+            <p><span class="term" data-definition="Headless 模式就是浏览器在没有可视窗口的情况下运行。你看不到浏览器界面，但它确实在后台运行——适合自动化场景，因为不需要显示界面，速度更快。">Headless 模式</span>让浏览器在后台运行，不弹出窗口。这对于自动化任务（比如批量抓取数据）特别有用。但普通的 headless 浏览器会暴露"我不是真人"的信号——CloakBrowser 会在 C++ 层面修复这些信号。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Group Chat - What Happens at Launch -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">启动时发生了什么？</h2>
+        <p>当你写下 <code>launch()</code> 时，背后发生了一场精心编排的"伪装派对"：</p>
+
+        <div class="chat-window" id="chat-module1">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="user" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">你</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">你的代码</span>
+                <p>launch()！我要启动一个隐身浏览器！</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="cloakbrowser" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">CB</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">CloakBrowser</span>
+                <p>收到！先检查一下定制的 Chromium 二进制文件有没有下载好...</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="cloakbrowser" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">CB</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">CloakBrowser</span>
+                <p>下载好了，SHA-256 校验通过。现在生成一个随机指纹种子（seed = 42871），然后组装 57 个隐身参数...</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="chromium" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">Cr</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">定制 Chromium</span>
+                <p>我是经过特殊改造的 Chromium。C++ 层面已经修改了 57 处指纹源代码，任何网站检测到的都是伪装后的"假身份"。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="cloakbrowser" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">CB</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">CloakBrowser</span>
+                <p>浏览器启动完毕！你可以像用普通 Playwright 一样操作它了。网站只会看到一个"普通用户"。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module1-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条消息</button>
+            <button class="btn chat-all-btn">播放全部</button>
+            <button class="btn chat-reset-btn">重播</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="完全正确！CloakBrowser 是 Playwright/Puppeteer 的隐身替代品，底层修改了 Chromium 的 C++ 代码来伪装浏览器指纹。"
+               data-explanation-wrong="想一想 CloakBrowser 的核心价值——它不是 VPN，也不是普通的浏览器。它是在浏览器内核层面做伪装的自动化工具。">
+            <h3 class="quiz-question">CloakBrowser 和普通 Playwright 的关键区别是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>CloakBrowser 使用了不同的网络协议，流量更隐蔽</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>CloakBrowser 在 C++ 层面修改了 Chromium，伪装了 57 个浏览器指纹特征</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>CloakBrowser 是一个 VPN 工具，可以隐藏你的 IP 地址</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="对！这正是 CloakBrowser 的设计目标——最低迁移成本。只需要改 import 语句，其他代码都不用动。"
+               data-explanation-wrong="想想看，CloakBrowser 的核心卖点就是'即插即用'。用户从 Playwright 迁移过来的成本应该有多高？">
+            <h3 class="quiz-question">如果你已经有一个用 Playwright 写的自动化脚本，迁移到 CloakBrowser 需要改多少代码？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>需要重写整个项目</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>需要改大约 50% 的代码</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>只需要改一行 import 语句</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

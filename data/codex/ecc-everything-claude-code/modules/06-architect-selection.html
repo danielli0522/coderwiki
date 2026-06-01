@@ -1,0 +1,261 @@
+<section class="module" id="module-6" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">06</span>
+      <h1 class="module-title">架构选型指南</h1>
+      <p class="module-subtitle">给技术负责人的快速决策参考 — ECC 适合你的项目吗？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Problem + Philosophy -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">核心定位</h2>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">Problem</code>
+            <span class="badge-desc">Claude Code 原生缺少团队级工作流、<span class="term" data-definition="安全扫描是指自动检查代码中是否存在已知漏洞或恶意模式的过程，类似于机场的行李安检。">安全扫描</span>、持续学习</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">Philosophy</code>
+            <span class="badge-desc"><span class="term" data-definition="声明式配置是描述你想要什么结果（What），而不是怎么做（How）。比如你说我要一张去北京的机票，而不是一步步告诉系统怎么查航班。">声明式</span> > 命令式 — 用 JSON/YAML 描述意图，不写脚本</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">Essence</code>
+            <span class="badge-desc">插件化的 Claude Code 增强框架，不是独立的 <span class="term" data-definition="AI 工具是指利用人工智能技术帮助人类完成任务的软件，比如 ChatGPT、Claude、Copilot 等。">AI 工具</span></span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">Scale</code>
+            <span class="badge-desc">60 <span class="term" data-definition="Agent（智能体）是能自主做决策、分解任务并委派执行的 AI 程序，就像一个能独立思考的项目经理。">agents</span> · 232 <span class="term" data-definition="Skill（技能）是预定义的标准化操作流程，类似菜谱 — 告诉 AI 按什么步骤完成一类任务。">skills</span> · 75 <span class="term" data-definition="Command（命令）是用户通过输入斜杠（/）触发的快捷指令，比如 /scan、/review。">commands</span> · 7 <span class="term" data-definition="Hook（钩子）是在特定事件发生时自动触发的监听器，比如每次文件保存前自动运行代码检查。">hook</span> types · 6 平台</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">License</code>
+            <span class="badge-desc"><span class="term" data-definition="MIT License 是最宽松的开源许可证之一，允许任何人免费使用、修改和商用，只需保留版权声明。">MIT License</span> — 完全开源，商用免费</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Comparison Table -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">横向对比</h2>
+        <p style="margin-bottom: var(--space-4);">ECC 与主流 AI 编码增强方案的对比：</p>
+
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; font-size: var(--text-sm); background: var(--color-surface); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-md);">
+            <thead>
+              <tr style="background: var(--color-accent); color: white;">
+                <th style="padding: var(--space-3) var(--space-4); text-align: left;">方案</th>
+                <th style="padding: var(--space-3) var(--space-4); text-align: left;">配置方式</th>
+                <th style="padding: var(--space-3) var(--space-4); text-align: left;">学习能力</th>
+                <th style="padding: var(--space-3) var(--space-4); text-align: left;">安全扫描</th>
+                <th style="padding: var(--space-3) var(--space-4); text-align: left;">跨平台</th>
+                <th style="padding: var(--space-3) var(--space-4); text-align: left;">社区规模</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="background: var(--color-accent-light);">
+                <td style="padding: var(--space-3) var(--space-4); font-weight: 700;">ECC</td>
+                <td style="padding: var(--space-3) var(--space-4);">
+                  <ul style="margin:0;padding-left:1em;"><li>JSON/YAML 声明式</li><li>零代码配置</li></ul>
+                </td>
+                <td style="padding: var(--space-3) var(--space-4);">
+                  <ul style="margin:0;padding-left:1em;"><li>Instincts 置信度评分</li><li>跨会话持续学习</li></ul>
+                </td>
+                <td style="padding: var(--space-3) var(--space-4);">
+                  <ul style="margin:0;padding-left:1em;"><li>AgentShield 多层扫描</li><li>PreToolUse 拦截</li></ul>
+                </td>
+                <td style="padding: var(--space-3) var(--space-4);">
+                  <ul style="margin:0;padding-left:1em;"><li>6 平台支持</li><li>CLI + IDE 全覆盖</li></ul>
+                </td>
+                <td style="padding: var(--space-3) var(--space-4);">
+                  <ul style="margin:0;padding-left:1em;"><li>182K+ GitHub stars</li><li>活跃社区</li></ul>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: var(--space-3) var(--space-4); font-weight: 700;">Claude Code 原生</td>
+                <td style="padding: var(--space-3) var(--space-4);">
+                  <ul style="margin:0;padding-left:1em;"><li>CLAUDE.md 文件</li><li>简单指令式</li></ul>
+                </td>
+                <td style="padding: var(--space-3) var(--space-4);">
+                  <ul style="margin:0;padding-left:1em;"><li>无跨会话记忆</li><li>每次从零开始</li></ul>
+                </td>
+                <td style="padding: var(--space-3) var(--space-4);">
+                  <ul style="margin:0;padding-left:1em;"><li>基础权限控制</li><li>无主动扫描</li></ul>
+                </td>
+                <td style="padding: var(--space-3) var(--space-4);">
+                  <ul style="margin:0;padding-left:1em;"><li>仅 Claude Code</li><li>官方 CLI</li></ul>
+                </td>
+                <td style="padding: var(--space-3) var(--space-4);">
+                  <ul style="margin:0;padding-left:1em;"><li>Anthropic 官方</li><li>无社区插件</li></ul>
+                </td>
+              </tr>
+              <tr style="background: var(--color-bg-warm);">
+                <td style="padding: var(--space-3) var(--space-4); font-weight: 700;">Cursor Rules</td>
+                <td style="padding: var(--space-3) var(--space-4);">
+                  <ul style="margin:0;padding-left:1em;"><li>.cursorrules 文件</li><li>Markdown 格式</li></ul>
+                </td>
+                <td style="padding: var(--space-3) var(--space-4);">
+                  <ul style="margin:0;padding-left:1em;"><li>无学习能力</li><li>静态规则</li></ul>
+                </td>
+                <td style="padding: var(--space-3) var(--space-4);">
+                  <ul style="margin:0;padding-left:1em;"><li>无安全扫描</li><li>依赖用户判断</li></ul>
+                </td>
+                <td style="padding: var(--space-3) var(--space-4);">
+                  <ul style="margin:0;padding-left:1em;"><li>仅 Cursor IDE</li><li>单一平台</li></ul>
+                </td>
+                <td style="padding: var(--space-3) var(--space-4);">
+                  <ul style="margin:0;padding-left:1em;"><li>Cursor 官方</li><li>社区模板</li></ul>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: var(--space-3) var(--space-4); font-weight: 700;">Cline</td>
+                <td style="padding: var(--space-3) var(--space-4);">
+                  <ul style="margin:0;padding-left:1em;"><li>VS Code 插件</li><li>图形界面配置</li></ul>
+                </td>
+                <td style="padding: var(--space-3) var(--space-4);">
+                  <ul style="margin:0;padding-left:1em;"><li>无学习能力</li><li>无持久化</li></ul>
+                </td>
+                <td style="padding: var(--space-3) var(--space-4);">
+                  <ul style="margin:0;padding-left:1em;"><li>基础文件权限</li><li>无主动扫描</li></ul>
+                </td>
+                <td style="padding: var(--space-3) var(--space-4);">
+                  <ul style="margin:0;padding-left:1em;"><li>VS Code</li><li>单一 IDE</li></ul>
+                </td>
+                <td style="padding: var(--space-3) var(--space-4);">
+                  <ul style="margin:0;padding-left:1em;"><li>开源项目</li><li>中等活跃度</li></ul>
+                </td>
+              </tr>
+              <tr style="background: var(--color-bg-warm);">
+                <td style="padding: var(--space-3) var(--space-4); font-weight: 700;">Aider</td>
+                <td style="padding: var(--space-3) var(--space-4);">
+                  <ul style="margin:0;padding-left:1em;"><li>命令行参数</li><li>Python 配置文件</li></ul>
+                </td>
+                <td style="padding: var(--space-3) var(--space-4);">
+                  <ul style="margin:0;padding-left:1em;"><li>Git 历史感知</li><li>有限学习</li></ul>
+                </td>
+                <td style="padding: var(--space-3) var(--space-4);">
+                  <ul style="margin:0;padding-left:1em;"><li>无安全扫描</li><li>依赖 Git 保护</li></ul>
+                </td>
+                <td style="padding: var(--space-3) var(--space-4);">
+                  <ul style="margin:0;padding-left:1em;"><li>CLI only</li><li>终端环境</li></ul>
+                </td>
+                <td style="padding: var(--space-3) var(--space-4);">
+                  <ul style="margin:0;padding-left:1em;"><li>开源项目</li><li>高活跃度</li></ul>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Screen 3: Suitable vs Not-suitable -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">适用性评估</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6);">
+
+          <div style="background: var(--color-success-light); border-radius: var(--radius-lg); padding: var(--space-6); border-top: 4px solid var(--color-success);">
+            <h3 style="font-family: var(--font-display); font-size: var(--text-xl); font-weight: 700; color: var(--color-success); margin-bottom: var(--space-4);">&#x2705; 适合</h3>
+            <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: var(--space-3);">
+              <li style="font-size: var(--text-sm); line-height: var(--leading-normal);">&#x2713; 频繁使用 Claude Code 的独立开发者</li>
+              <li style="font-size: var(--text-sm); line-height: var(--leading-normal);">&#x2713; 需要团队级 AI 编码规范的团队</li>
+              <li style="font-size: var(--text-sm); line-height: var(--leading-normal);">&#x2713; 想让 AI 记住项目上下文的长期项目</li>
+              <li style="font-size: var(--text-sm); line-height: var(--leading-normal);">&#x2713; 需要 <span class="term" data-definition="AI 编码安全审计是指自动检查 AI 生成或处理的代码是否存在安全漏洞，防止恶意指令注入。">AI 编码安全审计</span>的项目</li>
+              <li style="font-size: var(--text-sm); line-height: var(--leading-normal);">&#x2713; 多人协作、需要统一 AI 行为规范的团队</li>
+            </ul>
+          </div>
+
+          <div style="background: var(--color-error-light); border-radius: var(--radius-lg); padding: var(--space-6); border-top: 4px solid var(--color-error);">
+            <h3 style="font-family: var(--font-display); font-size: var(--text-xl); font-weight: 700; color: var(--color-error); margin-bottom: var(--space-4);">&#x274C; 不适合</h3>
+            <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: var(--space-3);">
+              <li style="font-size: var(--text-sm); line-height: var(--leading-normal);">&#x2717; 偶尔用 AI 写代码的轻度用户</li>
+              <li style="font-size: var(--text-sm); line-height: var(--leading-normal);">&#x2717; 不使用 Claude Code 的团队</li>
+              <li style="font-size: var(--text-sm); line-height: var(--leading-normal);">&#x2717; 对开源依赖有严格合规要求的企业</li>
+              <li style="font-size: var(--text-sm); line-height: var(--leading-normal);">&#x2717; 只用 IDE 内置 AI 就够了的简单项目</li>
+              <li style="font-size: var(--text-sm); line-height: var(--leading-normal);">&#x2717; 需要离线使用、无法连接外部服务的场景</li>
+            </ul>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Screen 4: Hard Limits from Source Code -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">硬性边界（源码数据）</h2>
+        <p style="margin-bottom: var(--space-4); color: var(--color-text-secondary);">从 ECC 源码中提取的精确常量 — 评估规模和边界时参考：</p>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">60 agents</code>
+            <span class="badge-desc">预定义的智能体数量 — 每个覆盖一个专业领域（规划、审查、调试等）</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">232 skills</code>
+            <span class="badge-desc">可复用的技能模板 — 包含代码生成、重构、测试、文档等</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">75 commands</code>
+            <span class="badge-desc">斜杠命令 — 用户可直接输入 /xxx 触发的快捷操作</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">7 hook types</code>
+            <span class="badge-desc">PreToolUse / PostToolUse / Stop / SessionStart / SessionEnd / PreCompact / PostToolUseFailure</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">6 platforms</code>
+            <span class="badge-desc">Claude Code · Cursor · Codex · OpenCode · Gemini CLI · Zed · GitHub Copilot</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">confidenceThreshold</code>
+            <span class="badge-desc"><span class="term" data-definition="置信度阈值是一个 0-1 之间的数字，决定本能是否足够可靠可以被应用。低于阈值的本能会被忽略。">置信度阈值</span> — 低于此值的本能不会被应用（防止误用低可信度模式）</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Costs + Conclusion -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">成本与风险</h2>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>学习曲线</strong>
+              <p>需要理解 hook / agent / skill 的配置格式和触发机制，初次配置约需 2-4 小时</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>维护成本</strong>
+              <p>ECC 版本更新时需要同步更新自定义配置，社区 <span class="term" data-definition="Breaking change（破坏性变更）是指更新后导致旧配置或代码不再兼容的改动。">breaking change</span> 需关注</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>性能开销</strong>
+              <p>Hook 链在每次工具调用时都会执行，复杂配置可能增加 50-200ms 延迟</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>依赖风险</strong>
+              <p>依赖第三方开源项目（ECC），需关注安全更新和项目可持续性</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent" style="margin-top: var(--space-8);">
+          <div class="callout-icon">&#x1F3AF;</div>
+          <div class="callout-content">
+            <strong class="callout-title">结论</strong>
+            <p>ECC 是目前最全面的 Claude Code 增强方案，适合重度 AI 编码用户。轻量用户建议从几个核心 skill 开始，逐步引入。如果你每天的编码工作离不开 AI，ECC 的投入产出比很高。</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

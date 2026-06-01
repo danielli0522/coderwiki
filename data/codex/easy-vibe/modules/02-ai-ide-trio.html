@@ -1,0 +1,240 @@
+<section class="module" id="module-2" style="background: var(--color-bg)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">AI IDE 三件套——你的新装备库</h1>
+      <p class="module-subtitle">不是 1979 年的 Vim，也不是传统 VS Code——你需要一个"听得懂中文、能改你文件、会跑命令"的编辑器。</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">选车比喻：家用 SUV、跑车、卡车</h2>
+        <p>三款主流的 <span class="term" data-definition="IDE 是 Integrated Development Environment 的缩写——集成开发环境。可以把它理解成程序员的'大型工作台'：写代码、运行、调试、看错误日志都在同一个窗口里。">AI IDE</span>，定位完全不同。挑工具就像挑车——你要看自己跑的是什么路。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🚙</div>
+            <h4 class="pattern-title">Cursor · 家用 SUV</h4>
+            <p class="pattern-desc"><strong>上手难度：</strong>中<br><strong>是否免费：</strong>有免费额度，深度用要订阅<br><strong>适合场景：</strong>窗口里直接写代码、改代码、看预览，全程图形界面。第一次接触 AI IDE 的人最容易找到感觉。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🏎️</div>
+            <h4 class="pattern-title">Claude Code · 跑车</h4>
+            <p class="pattern-desc"><strong>上手难度：</strong>中高<br><strong>是否免费：</strong>需 Claude 订阅<br><strong>适合场景：</strong>在<span class="term" data-definition="终端是命令行窗口——一个只能用键盘打字的黑色窗口。它看着原始，但比图形界面更精准、更快。">终端</span>里跑，能读懂整个项目结构、批量改文件、自己跑命令。专业玩家的"长跑利器"。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🚛</div>
+            <h4 class="pattern-title">Trae · 重型卡车（免费）</h4>
+            <p class="pattern-desc"><strong>上手难度：</strong>低<br><strong>是否免费：</strong>完全免费<br><strong>适合场景：</strong>字节出品，内置 GPT-4o / Claude Sonnet / DeepSeek R1 多模型可选。零门槛、不用付费、想体验 vibe coding 但不想先掏钱的人首选。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">同一句需求，三家工具怎么接</h2>
+        <p>下面这段对话演示：你说"做个待办 App"，三个 IDE 各自的<em>响应风格</em>是什么样的。点 "下一句" 一句句看。</p>
+
+        <div class="chat-window" id="chat-m2-tools">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="user" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">你</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">你</span>
+                <p>帮我做个简单的待办 App，能加任务、能勾掉，本地存就行。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="cursor" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">C</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Cursor</span>
+                <p>收到。我会在编辑器右侧 Composer 面板里直接生成 index.html、style.css、app.js 三个文件，左边窗口你能立刻看到代码，右下角点"运行"就能预览效果。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="claude" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">CC</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">Claude Code</span>
+                <p>好的。我先扫一下当前文件夹结构，确认是空目录后，分三步：(1) 写 index.html (2) 写 app.js 接 localStorage (3) 用 python -m http.server 起一个本地服务给你看效果。每一步会停下来等你确认。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="trae" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">T</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">Trae</span>
+                <p>好嘞！要不要先选个模型？免费的 GPT-4o 写前端比较稳，Claude Sonnet 注释更细。我建议这种小项目用 GPT-4o，三秒后开始生成。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="user" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">你</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">你</span>
+                <p>三家都行，我最看重——不想付钱，今晚就要能玩。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="5" data-sender="trae" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">T</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">Trae</span>
+                <p>那就是我了。完全免费、登录就能用、不用绑卡，5 分钟内出 demo。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="6" data-sender="cursor" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">C</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Cursor</span>
+                <p>我有免费额度，但每月用量上来后会提示你订阅 Pro。短期玩没问题。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="7" data-sender="claude" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">CC</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">Claude Code</span>
+                <p>我需要 Claude 订阅。如果你之后想做更大的项目、批量改文件、自动化跑测试，那时再来找我。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" style="display:none">
+            <div class="chat-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一句</button>
+            <button class="btn chat-all-btn">全部播放</button>
+            <button class="btn chat-reset-btn">重新开始</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">三步上手：从下载到第一个项目</h2>
+        <p>不管选哪一家，路径都是这三步——先装好，再登录，再开第一个文件夹。</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>下载安装包</strong>
+              <p>去对应官网（cursor.com / claude.ai/code / trae.ai），按操作系统下载，双击装好——和装一个普通 App 完全一样。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>登录账号</strong>
+              <p>第一次打开会让你登录。Cursor 用邮箱、Claude Code 用 Anthropic 账号、Trae 用字节抖音/手机号——都是常见登录方式。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>"打开文件夹"开第一个项目</strong>
+              <p>菜单里点 Open Folder，新建一个空文件夹（比如 my-todo），打开它。从此你的 vibe coding 工位就开张了。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">同一需求两种界面：Composer vs 终端</h2>
+        <p>Cursor 的 <span class="term" data-definition="Composer 是 Cursor 内置的 AI 对话面板——你在右侧输入需求，AI 会直接修改你左侧打开的代码文件。属于'图形界面'风格。">Composer</span> 让你用聊天框；Claude Code 让你在终端里说话。下面是同一句需求在两种界面里的样子：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CURSOR · COMPOSER</span>
+<pre><code># 在右侧 Composer 输入框里粘贴：
+新建一个 index.html，
+做个待办 App，
+能加任务、勾掉、删除，
+存在 localStorage 里。
+完成后帮我打开预览。</code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">同一需求 · CLAUDE CODE 终端</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>启动：</strong>在 my-todo/ 文件夹里跑 <code>claude</code>。</p>
+              <p class="tl"><strong>提问：</strong>直接打字"做个待办 App，能加任务、勾掉、删除，存 localStorage"。</p>
+              <p class="tl"><strong>差异：</strong>它会先列出"我准备做这几步，你 OK 吗"，等你回 "go" 才开始动手。</p>
+              <p class="tl"><strong>结果：</strong>同样产出 index.html，但你看到的是终端日志而非可视面板。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">prompt 翻译：一句中文 → AI 听得懂的"做单"</h2>
+        <p>同样的需求，写得越像"工单"，AI 出错越少：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">中文一句话</span>
+<pre><code>给我做个待办 App，
+能加任务能勾掉。</code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">工单式 PROMPT</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>1. 目标：</strong>单文件待办 App。</p>
+              <p class="tl"><strong>2. 文件：</strong>只生成 index.html，CSS/JS 内嵌。</p>
+              <p class="tl"><strong>3. 功能：</strong>输入框加任务 / 复选框勾掉 / 红叉删除。</p>
+              <p class="tl"><strong>4. 存储：</strong>localStorage 持久化，刷新不丢。</p>
+              <p class="tl"><strong>5. 完成判定：</strong>双击 html 在浏览器打开能用。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🔑</div>
+          <div class="callout-content">
+            <strong class="callout-title">小贴士</strong>
+            <p>遇到 <span class="term" data-definition="Agent Mode 是让 AI 自动连续做多步操作的模式：它会自己跑命令、看结果、再决定下一步——而不是只回你一句话。">Agent Mode</span> 选项一定要打开——它代表"AI 自己跑、自己看结果、自己迭代"，这是 vibe coding 真正的爽点。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">小测验：怎么挑工具</h2>
+
+        <div class="quiz-container" id="quiz-m2">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="对——Trae 完全免费，对'晚上摸鱼想试一下不愿付费'的人最友好。Cursor/Claude Code 是性能更强但要钱。"
+               data-explanation-wrong="再想想——题目里关键词是'不想付费'。Cursor 和 Claude Code 长期用都要订阅。Trae 是字节出的免费 AI IDE。">
+            <h3 class="quiz-question">你只想晚上摸鱼做个小工具，绝对不想付费——选哪个？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>A. Cursor（先用免费额度，超了再说）</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>B. Claude Code（功能最强）</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>C. Trae（字节出品，完全免费）</span>
+              </button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>D. 装 Vim 自己写</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m2')">看看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m2')">再试一次</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

@@ -1,0 +1,257 @@
+
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">认识核心角色</h1>
+      <p class="module-subtitle">Gateway、Lead Agent、Sub-Agent、Middleware——每个角色各司其职，像一支配合默契的乐队</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: 角色概览 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">乐队成员名单</h2>
+        <p>把 DeerFlow 想象成一支交响乐队。指挥是 Lead Agent，乐手是子 Agent，乐谱是 Skills，舞台管理员是 Gateway。</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🚪</div>
+            <div>
+              <strong>Gateway（API 网关）</strong>
+              <p>舞台管理员——检查门票（身份验证）、安排座位（路由分发）、维持秩序（
+                <span class="term" data-definition="CSRF——跨站请求伪造防护，一种安全机制，确保请求确实是从你的网站发出的，而不是黑客伪造的">CSRF</span>
+                防护）
+              </p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🦌</div>
+            <div>
+              <strong>Lead Agent（主智能体）</strong>
+              <p>乐队指挥——理解用户意图、决定调用哪些工具、编排子 Agent、汇总最终答案</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">⚡</div>
+            <div>
+              <strong>Sub-Agent（子智能体）</strong>
+              <p>乐手——被指挥派出去完成具体任务（搜索、编码、分析），在独立沙箱中工作</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">🔧</div>
+            <div>
+              <strong>Middleware（中间件链）</strong>
+              <p>音效处理器——在消息到达 Agent 之前和之后做各种加工（摘要、记忆、循环检测等）</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-5)">📦</div>
+            <div>
+              <strong>Sandbox（沙箱）</strong>
+              <p>排练室——子 Agent 在这里安全地执行代码和命令，不会影响外部系统</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Lead Agent 深入 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Lead Agent：乐队指挥</h2>
+        <p>Lead Agent 是整个系统的核心。它在 <code>lead_agent/agent.py</code> 中通过工厂函数创建，按需配置模型、工具和中间件。</p>
+
+        <div class="chat-window" id="chat-module2">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="user" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">👤</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">用户</span>
+                <p>帮我分析一下腾讯股价下跌的原因</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="lead-agent" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🦌</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Lead Agent</span>
+                <p>收到！这个任务需要多方面信息，我把它拆成 3 个子任务并行处理：</p>
+                <p>子 Agent 1：查财报数据</p>
+                <p>子 Agent 2：搜负面新闻</p>
+                <p>子 Agent 3：分析行业趋势</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="sub-agent" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">⚡</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">子 Agent 1</span>
+                <p>财报分析完成：营收增长 8%，但利润率下降 3 个百分点，主要因云业务投入增加...</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="sub-agent" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">⚡</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">子 Agent 2</span>
+                <p>新闻搜索完成：近期监管政策收紧、大股东减持是主要利空因素...</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="lead-agent" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🦌</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Lead Agent</span>
+                <p>三方结果已汇总。综合来看，腾讯股价下跌主要由三个因素驱动...</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module2-typing-avatar">🦌</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">Next Message</button>
+            <button class="btn chat-all-btn">Play All</button>
+            <button class="btn chat-reset-btn">Replay</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: 代码翻译 - Agent 工厂 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Agent 是如何被创建的</h2>
+        <p>每次对话开始时，<code>make_lead_agent()</code> 工厂函数会动态组装一个 Agent——根据配置选择模型、加载工具、串起
+          <span class="term" data-definition="中间件——在请求处理流程中介于框架和业务逻辑之间的处理层，就像流水线上的质检站，每个请求都要经过一系列质检站">中间件</span>链：
+        </p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">_make_lead_agent</span>(config, *, app_config):</span>
+<span class="code-line">    model_name = _resolve_model_name(</span>
+<span class="code-line">        cfg.get(<span class="code-string">"model_name"</span>))</span>
+<span class="code-line">    tools = get_available_tools(</span>
+<span class="code-line">        model_name=model_name)</span>
+<span class="code-line">    <span class="code-keyword">return</span> create_agent(</span>
+<span class="code-line">        model=create_chat_model(name=model_name),</span>
+<span class="code-line">        tools=tools,</span>
+<span class="code-line">        middleware=_build_middlewares(config),</span>
+<span class="code-line">        system_prompt=apply_prompt_template(),</span>
+<span class="code-line">    )</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">工厂函数入口，接收运行时配置和应用配置。</p>
+              <p class="tl">根据用户请求或配置，决定用哪个大模型。</p>
+              <p class="tl">加载所有可用的工具（文件操作、搜索、代码执行等）。</p>
+              <p class="tl">用 LangChain 的 create_agent 创建最终的 Agent 实例。</p>
+              <p class="tl">注入选定的大模型。</p>
+              <p class="tl">注入工具集。</p>
+              <p class="tl">构建并注入中间件链（14 层处理！）。</p>
+              <p class="tl">应用系统提示词模板——告诉 Agent 它是谁、能做什么。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: 中间件链 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">14 层中间件：请求的质检流水线</h2>
+        <p>每个用户消息在被 Lead Agent 处理之前，都要经过一条精心设计的中间件链。每层中间件就像流水线上的一个质检站：</p>
+
+        <div class="visual-file-tree">
+          <div class="file-tree">
+            <div class="ft-folder open">
+              <span class="ft-name">中间件链（按执行顺序）</span>
+              <div class="ft-children">
+                <div class="ft-file">
+                  <span class="ft-name">ThreadDataMiddleware</span>
+                  <span class="ft-desc">绑定当前会话的线程信息</span>
+                </div>
+                <div class="ft-file">
+                  <span class="ft-name">SandboxMiddleware</span>
+                  <span class="ft-desc">初始化沙箱环境</span>
+                </div>
+                <div class="ft-file">
+                  <span class="ft-name">DanglingToolCallMiddleware</span>
+                  <span class="ft-desc">修复缺失的工具调用响应</span>
+                </div>
+                <div class="ft-file">
+                  <span class="ft-name">SummarizationMiddleware</span>
+                  <span class="ft-desc">对话太长时自动摘要压缩</span>
+                </div>
+                <div class="ft-file">
+                  <span class="ft-name">TodoMiddleware</span>
+                  <span class="ft-desc">管理任务清单（规划模式）</span>
+                </div>
+                <div class="ft-file">
+                  <span class="ft-name">TitleMiddleware</span>
+                  <span class="ft-desc">自动给对话生成标题</span>
+                </div>
+                <div class="ft-file">
+                  <span class="ft-name">MemoryMiddleware</span>
+                  <span class="ft-desc">把对话内容存入长期记忆</span>
+                </div>
+                <div class="ft-file">
+                  <span class="ft-name">LoopDetectionMiddleware</span>
+                  <span class="ft-desc">检测 Agent 是否陷入死循环</span>
+                </div>
+                <div class="ft-file">
+                  <span class="ft-name">ClarificationMiddleware</span>
+                  <span class="ft-desc">遇到不明确的请求，主动向用户提问</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">中间件顺序很重要</strong>
+            <p>代码注释里明确写道：ClarificationMiddleware 必须在最后，因为它需要在所有其他中间件处理完之后才能判断是否需要向用户提问。如果你在开发自己的中间件，要注意插入位置。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验你的理解</h2>
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！LoopDetectionMiddleware 专门检测 Agent 是否在反复调用相同的工具却没有进展——这是一种常见的 AI 失败模式，就像一个人反复翻同一页书却找不到答案。"
+               data-explanation-wrong="提示：想想哪种情况是 AI 最常见的失败模式——不是安全问题，不是记忆丢失，而是 AI 卡在某个循环里反复尝试同一件事。">
+            <h3 class="quiz-question">如果 Lead Agent 反复调用同一个工具但每次得到相同的结果，哪个中间件会发现并打断这个循环？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>ClarificationMiddleware——向用户确认该怎么做</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>SummarizationMiddleware——压缩对话历史</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>LoopDetectionMiddleware——检测重复工具调用并打断</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

@@ -1,0 +1,152 @@
+<!-- Module 6: 架构选型与技术决策 -->
+<section class="module" id="module-6">
+  <div class="module-content">
+
+    <div class="module-header animate-in">
+      <span class="module-number">06</span>
+      <h1 class="module-title">架构选型与技术决策</h1>
+      <p class="module-subtitle">为什么选 Puppeteer 而不是 Playwright？为什么用 Zod 做校验？深入理解每个技术选择背后的原因。</p>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">核心技术选型</h2>
+
+      <div class="dnd-container" id="dnd-tech">
+        <p style="margin-bottom: var(--space-4);">将技术选择拖放到对应的理由上：</p>
+        <div class="dnd-chips">
+          <div class="dnd-chip" draggable="true" data-answer="puppeteer">Puppeteer</div>
+          <div class="dnd-chip" draggable="true" data-answer="zod">Zod</div>
+          <div class="dnd-chip" draggable="true" data-answer="devtools-frontend">DevTools Frontend</div>
+          <div class="dnd-chip" draggable="true" data-answer="mutex">Mutex 互斥锁</div>
+        </div>
+        <div class="dnd-zones">
+          <div class="dnd-zone" data-correct="puppeteer">
+            <div class="dnd-zone-label">Google 官方维护，原生支持 Chrome CDP 协议和 pipe 通信</div>
+            <div class="dnd-zone-target">Drop here</div>
+          </div>
+          <div class="dnd-zone" data-correct="zod">
+            <div class="dnd-zone-label">运行时类型校验 + 自动生成 JSON Schema，LLM 友好</div>
+            <div class="dnd-zone-target">Drop here</div>
+          </div>
+          <div class="dnd-zone" data-correct="devtools-frontend">
+            <div class="dnd-zone-label">复用 Chrome DevTools 前端的 Trace 解析和 HeapSnapshot 分析能力</div>
+            <div class="dnd-zone-target">Drop here</div>
+          </div>
+          <div class="dnd-zone" data-correct="mutex">
+            <div class="dnd-zone-label">单浏览器实例多工具调用时的并发安全保障</div>
+            <div class="dnd-zone-target">Drop here</div>
+          </div>
+        </div>
+        <button class="quiz-check-btn" onclick="checkDnD('dnd-tech')">Check</button>
+        <button class="quiz-reset-btn" onclick="resetDnD('dnd-tech')">Reset</button>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">Puppeteer vs Playwright：为什么选 Puppeteer</h2>
+      <p>在浏览器自动化领域，Puppeteer 和 Playwright 是两个主要选择。Chrome DevTools MCP 选择 Puppeteer 的理由：</p>
+
+      <div class="layer-demo">
+        <div class="layer-tabs">
+          <button class="layer-tab active" onclick="showLayer('layer-why', this)">为什么选 Puppeteer</button>
+          <button class="layer-tab" onclick="showLayer('layer-tradeoff', this)">代价与权衡</button>
+        </div>
+        <div class="layer-viewport">
+          <div class="layer" id="layer-why" style="display:block;">
+            <div style="padding: var(--space-4);">
+              <ul style="list-style: none; padding: 0;">
+                <li style="padding: var(--space-2) 0;">&#x2705; <strong>Google 官方维护</strong>：Chrome DevTools 团队自己开发，对 Chrome 的支持最及时</li>
+                <li style="padding: var(--space-2) 0;">&#x2705; <strong>CDP 原生支持</strong>：直接通过 Chrome DevTools Protocol 与浏览器通信，支持 pipe 和 WebSocket</li>
+                <li style="padding: var(--space-2) 0;">&#x2705; <strong>DevTools Frontend 集成</strong>：能直接使用 chrome-devtools-frontend 包的 Trace 解析和 HeapSnapshot 引擎</li>
+                <li style="padding: var(--space-2) 0;">&#x2705; <strong>Extension 支持</strong>：Puppeteer 原生支持 Chrome 扩展的安装、触发和管理</li>
+                <li style="padding: var(--space-2) 0;">&#x2705; <strong>DevTools 页面操作</strong>：handleDevToolsAsPage 选项让 DevTools 窗口也作为可操作页面</li>
+              </ul>
+            </div>
+          </div>
+          <div class="layer" id="layer-tradeoff" style="display:none;">
+            <div style="padding: var(--space-4);">
+              <ul style="list-style: none; padding: 0;">
+                <li style="padding: var(--space-2) 0;">&#x26A0;&#xFE0F; <strong>只支持 Chrome</strong>：不支持 Firefox、Safari 等浏览器（项目定位就是 Chrome 专用）</li>
+                <li style="padding: var(--space-2) 0;">&#x26A0;&#xFE0F; <strong>API 稳定性</strong>：Puppeteer 的某些内部 API（如 _tabId）没有类型保证</li>
+                <li style="padding: var(--space-2) 0;">&#x26A0;&#xFE0F; <strong>DevTools Frontend 耦合</strong>：依赖 chrome-devtools-frontend npm 包的特定版本，升级成本高</li>
+                <li style="padding: var(--space-2) 0;">&#x2705; <strong>合理取舍</strong>：对于"让 AI 操控 Chrome 调试"这个场景，Puppeteer 是最佳选择</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">DevTools Frontend 复用策略</h2>
+      <p>这是一个非常巧妙的架构决策：项目直接引入了 Chrome DevTools 前端的核心引擎来处理复杂的数据分析任务。</p>
+
+      <div class="arch-diagram">
+        <div class="arch-zone">
+          <div class="arch-zone-label">DevTools Frontend 复用的三大引擎</div>
+          <div class="arch-component" data-desc="使用 DevTools 的 Trace 解析引擎处理性能录制数据，提取 Insights（如 LCP 分解、长任务检测、布局偏移分析）">&#x1F4CA; <span>Trace 解析引擎</span></div>
+          <div class="arch-component" data-desc="使用 DevTools 的 HeapSnapshotWorker 解析 V8 堆快照，提供类聚合、保留链分析、节点查询等能力">&#x1F4BE; <span>HeapSnapshot 引擎</span></div>
+          <div class="arch-component" data-desc="使用 DevTools 的 FormatterWorker 格式化 Console 输出和网络请求响应，包括 JSON 格式化、Object 预览等">&#x1F4CB; <span>Formatter 引擎</span></div>
+        </div>
+        <div class="arch-description">点击组件查看详细说明</div>
+      </div>
+
+      <div class="callout callout-info animate-in">
+        <span class="callout-icon">&#x2139;</span>
+        <div class="callout-content">
+          <span class="callout-title">DevtoolsUtils.ts 的 UniverseManager</span>
+          <p>UniverseManager 为每个页面创建独立的 DevTools "Universe"（包含 CDP Session 和 Worker），使多个页面可以并行使用 DevTools 引擎而互不干扰。这是通过 PuppeteerDevToolsConnection 适配器实现的，它将 Puppeteer 的 CDPSession 包装成 DevTools 期望的 CDPConnection 接口。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">Rollup 打包策略</h2>
+      <p>项目使用 Rollup 将所有依赖打包成单文件，这是为了支持 <code>npx chrome-devtools-mcp@latest</code> 的零配置使用方式：</p>
+
+      <div class="step-cards">
+        <div class="step-card animate-in">
+          <span class="step-num">1</span>
+          <div class="step-body">
+            <strong>TypeScript 编译</strong>
+            <p>tsc 编译到 build/src/，保留 ES Module 格式</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <span class="step-num">2</span>
+          <div class="step-body">
+            <strong>Rollup 打包</strong>
+            <p>将所有依赖（Puppeteer、Zod、DevTools Frontend Workers）打包成单文件</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <span class="step-num">3</span>
+          <div class="step-body">
+            <strong>Lighthouse 通知追加</strong>
+            <p>append-lighthouse-notices.ts 在打包后的文件中追加 Lighthouse 许可声明</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">知识检测</h2>
+      <div class="quiz-container" id="quiz-6">
+        <div class="quiz-question-block" data-correct="a" data-explanation-right="PuppeteerDevToolsConnection 将 Puppeteer 的 CDPSession 包装成 DevTools CDPConnection 接口，使得 DevTools Frontend 的引擎可以直接在 Node.js 环境中使用。" data-explanationwrong="回顾 DevtoolsUtils.ts 和 DevToolsConnectionAdapter.ts 的关系。">
+          <p class="quiz-question">项目如何让 DevTools Frontend 的引擎在 MCP Server 中工作？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)"><span class="quiz-option-radio"></span>通过 PuppeteerDevToolsConnection 适配器，将 Puppeteer 的 CDPSession 包装成 DevTools 期望的 CDPConnection 接口</button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)"><span class="quiz-option-radio"></span>直接在浏览器中运行 DevTools Frontend</button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)"><span class="quiz-option-radio"></span>用 Webpack 将 DevTools Frontend 编译为 Node.js 模块</button>
+            <button class="quiz-option" data-value="d" onclick="selectOption(this)"><span class="quiz-option-radio"></span>通过 HTTP API 调用 DevTools Frontend</button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-6')">Check Answers</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-6')">Reset</button>
+      </div>
+    </div>
+
+  </div>
+</section>

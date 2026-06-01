@@ -1,0 +1,340 @@
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 2: 五大角色 — The Movie Crew
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+
+  <div class="module-content">
+
+    <!-- ── HEADER ──────────────────────────────────────────────── -->
+    <div class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h2 class="module-title">五大角色</h2>
+      <p class="module-subtitle">一部电影的幕后，由五种角色共同撑起。Claude Code 也是如此。</p>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         SCREEN 1: Introduction — The Movie Crew
+         ══════════════════════════════════════════════════════════ -->
+    <div class="screen animate-in">
+
+      <h3 class="screen-heading">电影剧组的五种角色</h3>
+
+      <p>
+        ECC 的世界里，有五类「演员」在幕后协作。它们各有分工，共同确保每一次
+        <span class="term" data-definition="Prompt：用户发给 AI 的完整输入文本，包括问题、指令和上下文信息。">prompt</span>
+        都能得到精准响应。
+      </p>
+
+      <div class="icon-rows stagger-children">
+
+        <!-- Agent — Director -->
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-actor-1); color: #fff;">D</div>
+          <div>
+            <strong><span class="term" data-definition="Agent（智能代理）：能自主决策、分解任务并委派给其他 Agent 执行的高级 AI 角色。相当于剧组的导演。">Agent</span> — 导演</strong>
+            <p>做决策、分解任务、<span class="term" data-definition="Delegate：将子任务分配给专门的 Agent 或工具处理，而非亲自完成。">委派</span>给其他角色。它是整个剧组的指挥中心。</p>
+          </div>
+        </div>
+
+        <!-- Skill — Scriptwriter -->
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-actor-2); color: #fff;">S</div>
+          <div>
+            <strong><span class="term" data-definition="Skill（技能）：预编写好的标准化流程，用于处理常见任务模式。相当于编剧写好的剧本。">Skill</span> — 编剧</strong>
+            <p>预写好的「剧本」，让 AI 面对常见场景时不用每次从零开始思考。</p>
+          </div>
+        </div>
+
+        <!-- Command — Prop Master -->
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-actor-3); color: #fff;">C</div>
+          <div>
+            <strong><span class="term" data-definition="Command（命令）：用户可通过斜杠（/）直接调用的操作指令，如 /review、/debug。相当于道具师准备的工具。">Command</span> — 道具师</strong>
+            <p>用户随时可以调用的<span class="term" data-definition="Slash Command：以 / 开头的快捷指令，用户在聊天框输入即可触发对应功能。">斜杠命令</span>，像道具一样即拿即用。</p>
+          </div>
+        </div>
+
+        <!-- Hook — Stage Manager -->
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-actor-4); color: #fff;">H</div>
+          <div>
+            <strong><span class="term" data-definition="Hook（钩子）：在特定事件（如文件保存、工具调用）发生时自动触发的后台处理程序。相当于舞台监督在幕后调度。">Hook</span> — 舞台监督</strong>
+            <p>在幕后默默运行，特定事件发生时自动介入。你不需要手动调用它。</p>
+          </div>
+        </div>
+
+        <!-- Instinct — Actor's Memory -->
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-actor-5); color: #fff;">I</div>
+          <div>
+            <strong><span class="term" data-definition="Instinct（直觉记忆）：AI 从历史会话中学习并保留的行为模式，影响未来的决策偏好。相当于演员的肌肉记忆。">Instinct</span> — 演员记忆</strong>
+            <p>从过往会话中学到的经验教训，帮助 AI 避免重复犯错、越用越聪明。</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Aha! Callout -->
+      <div class="callout callout-accent animate-in">
+        <span class="callout-icon">Aha!</span>
+        <div class="callout-content">
+          <span class="callout-title">为什么是五个而不是三个？</span>
+          <p>很多人以为 AI 只需要「理解 + 回答」。但 ECC 把能力拆成五个角色，就像电影不能只有导演和演员——编剧写剧本、道具师准备工具、舞台监督管流程、演员积累经验。每个角色专注一件事，组合起来才能应对复杂场景。这就是<span class="term" data-definition="Configuration（配置）：通过文件或界面设定的参数，控制 AI 的行为边界和响应模式。">配置</span>即能力的精髓。</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         SCREEN 2: Agent Deep Dive — Code Translation
+         ══════════════════════════════════════════════════════════ -->
+    <div class="screen animate-in">
+
+      <h3 class="screen-heading">深入 Agent：导演的剧本</h3>
+
+      <p>
+        一个 <span class="term" data-definition="Agent（智能代理）：能自主决策、分解任务并委派给其他 Agent 执行的高级 AI 角色。">Agent</span>
+        的<span class="term" data-definition="Configuration（配置）：定义 Agent 身份和行为的元数据文件，通常用 YAML 或 Markdown frontmatter 编写。">配置文件</span>
+        长什么样？下面是一段真实的 <code>agents/planner.md</code> 代码。
+      </p>
+
+      <!-- Code ↔ English Translation Block -->
+      <div class="translation-block animate-in">
+
+        <!-- LEFT: Code side -->
+        <div class="translation-code">
+          <span class="translation-label">markdown</span>
+          <span class="code-line"><span class="code-tag">---</span></span>
+          <span class="code-line"><span class="code-attr">name</span><span class="code-keyword">:</span> <span class="code-string">planner</span></span>
+          <span class="code-line"><span class="code-attr">description</span><span class="code-keyword">:</span> <span class="code-keyword">></span></span>
+          <span class="code-line">  <span class="code-string">Strategic planning agent that breaks down</span></span>
+          <span class="code-line">  <span class="code-string">complex tasks into actionable steps.</span></span>
+          <span class="code-line">  <span class="code-string">Coordinates with other agents and</span></span>
+          <span class="code-line">  <span class="code-string">delegates subtasks.</span></span>
+          <span class="code-line"><span class="code-attr">directives</span><span class="code-keyword">:</span></span>
+          <span class="code-line">  <span class="code-keyword">-</span> <span class="code-string">Always think before acting</span></span>
+          <span class="code-line">  <span class="code-keyword">-</span> <span class="code-string">Break complex problems into steps</span></span>
+          <span class="code-line">  <span class="code-keyword">-</span> <span class="code-string">Delegate to specialized agents</span></span>
+          <span class="code-line"><span class="code-tag">---</span></span>
+        </div>
+
+        <!-- RIGHT: Chinese translation -->
+        <div class="translation-english">
+          <span class="translation-label">中文解读</span>
+          <div class="translation-lines">
+            <div class="tl"><strong>name: planner</strong> — 这个 Agent 叫「规划师」</div>
+            <div class="tl"><strong>description</strong> — 它是战略规划型代理，负责把复杂任务拆解为可执行的步骤，并与其他 Agent 协调</div>
+            <div class="tl"><strong>directives</strong> — 行为准则（导演的执导原则）：</div>
+            <div class="tl">&nbsp;&nbsp;1. 行动前先思考</div>
+            <div class="tl">&nbsp;&nbsp;2. 把复杂问题分解成步骤</div>
+            <div class="tl">&nbsp;&nbsp;3. 把子任务<span class="term" data-definition="Delegate（委派）：将子任务分配给专门的 Agent 或工具处理，而非亲自完成。">委派</span>给专业 Agent</div>
+          </div>
+        </div>
+
+      </div>
+
+      <p>
+        <span class="term" data-definition="Markdown：一种轻量级标记语言，用简单的符号（如 #、-、>）来格式化文本，是 Claude Code 配置文件的通用格式。">Markdown</span>
+        文件开头的 <code>---</code> 区域叫
+        <span class="term" data-definition="Frontmatter（前置元数据）：Markdown 文件顶部用 --- 包裹的 YAML 配置块，用于定义文件级别的元信息。">frontmatter</span>，
+        用
+        <span class="term" data-definition="YAML（YAML Ain't Markup Language）：一种人类可读的数据序列化格式，常用于配置文件。缩进表示层级关系。">YAML</span>
+        语法定义了 Agent 的「身份」和「行为准则」。
+      </p>
+
+      <div class="callout callout-info animate-in">
+        <span class="callout-icon">Aha!</span>
+        <div class="callout-content">
+          <span class="callout-title">directives 就是导演的「执导原则」</span>
+          <p>注意那三条 directives——它们不是代码逻辑，而是用自然语言写的「行为约束」。AI 会把这些原则内化为决策依据。你写什么，它就倾向什么。这就是 <span class="term" data-definition="Directive（指令）：用自然语言编写的行为约束，指导 AI 在特定场景下的决策倾向。">directive</span> 的力量。</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         SCREEN 3: Hooks Deep Dive — Group Chat Animation
+         ══════════════════════════════════════════════════════════ -->
+    <div class="screen animate-in">
+
+      <h3 class="screen-heading">五个角色的群聊</h3>
+
+      <p>
+        想象一下：用户执行了一个操作，五个角色在后台如何协作？点击下面的按钮，看一场实时「群聊」。
+      </p>
+
+      <!-- Group Chat Window -->
+      <div class="chat-window" id="chat-module2">
+
+        <div class="chat-messages">
+
+          <!-- Message 1: Hook -->
+          <div class="chat-message" data-sender="hook" style="display: none;">
+            <div class="chat-avatar" style="background: var(--color-actor-4);">H</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-4);">Hook（舞台监督）</span>
+              <p>用户刚执行了一个<span class="term" data-definition="Tool Call（工具调用）：AI 在执行任务时调用外部工具（如文件读写、命令执行）的操作。">工具调用</span>，我需要检查一下安全性...</p>
+            </div>
+          </div>
+
+          <!-- Message 2: Agent -->
+          <div class="chat-message" data-sender="agent" style="display: none;">
+            <div class="chat-avatar" style="background: var(--color-actor-1);">A</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-1);">Agent（导演）</span>
+              <p>好的，我来分析这个操作的风险等级。根据 <span class="term" data-definition="Confidence Score（置信度分数）：AI 对自己判断的确信程度，0-1 之间，用于决定是否需要人工确认。">confidence score</span>，这属于中等风险。</p>
+            </div>
+          </div>
+
+          <!-- Message 3: Instinct -->
+          <div class="chat-message" data-sender="instinct" style="display: none;">
+            <div class="chat-avatar" style="background: var(--color-actor-5);">I</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-5);">Instinct（演员记忆）</span>
+              <p>根据上次类似操作的经验，这个操作通常是安全的。<span class="term" data-definition="Session（会话）：用户与 AI 之间的一次完整交互周期，从开始对话到结束。">上次会话</span>里我们处理过类似场景。</p>
+            </div>
+          </div>
+
+          <!-- Message 4: Skill -->
+          <div class="chat-message" data-sender="skill" style="display: none;">
+            <div class="chat-avatar" style="background: var(--color-actor-2);">S</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-2);">Skill（编剧）</span>
+              <p>如果需要，我可以启动安全扫描<span class="term" data-definition="Procedure（流程）：Skill 中预定义的一组有序操作步骤，用于标准化处理特定类型的任务。">流程</span>。相关的<span class="term" data-definition="Template（模板）：预定义的文本或代码骨架，可以填入参数快速生成标准化输出。">模板</span>已经准备好了。</p>
+            </div>
+          </div>
+
+          <!-- Message 5: Command -->
+          <div class="chat-message" data-sender="command" style="display: none;">
+            <div class="chat-avatar" style="background: var(--color-actor-3);">C</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-3);">Command（道具师）</span>
+              <p>用户随时可以输入 <code>/scan</code> 来手动触发检查。我就站在旁边，随叫随到。</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Typing indicator -->
+        <div class="chat-typing" style="display: none;">
+          <div class="chat-avatar" id="chat-module2-typing-avatar" style="background: var(--color-actor-4);">H</div>
+          <div class="chat-typing-dots">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
+        </div>
+
+        <!-- Chat Controls -->
+        <div class="chat-controls">
+          <button class="btn btn-primary chat-next-btn">下一条</button>
+          <button class="btn chat-all-btn">全部播放</button>
+          <button class="btn chat-reset-btn">重置</button>
+          <span class="chat-progress">0 / 5 messages</span>
+        </div>
+
+      </div>
+
+      <div class="callout callout-accent animate-in">
+        <span class="callout-icon">Aha!</span>
+        <div class="callout-content">
+          <span class="callout-title">Hook 永远是第一个发言的</span>
+          <p>注意到没有？群聊中 Hook（舞台监督）总是第一个检测到事件并开口说话。这就是 Hook 的本质——它是<span class="term" data-definition="Event-driven（事件驱动）：一种编程模式，代码的执行由特定事件（如用户操作、文件变更）触发，而非按固定顺序运行。">事件驱动</span>的，不需要你手动调用。事件发生，它就行动。</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         SCREEN 4: Quiz
+         ══════════════════════════════════════════════════════════ -->
+    <div class="screen animate-in">
+
+      <h3 class="screen-heading">角色匹配挑战</h3>
+
+      <p>根据场景描述，选择最合适的角色。</p>
+
+      <div class="quiz-container" id="quiz-module2">
+
+        <!-- Question 1 -->
+        <div class="quiz-question-block" data-correct="hook" data-explanation-right="Hook 就是自动触发的舞台监督。你配置好触发条件，它在幕后默默守护。" data-explanation-wrong="想想哪个角色是「自动触发、不需要手动调用」的？答案是 Hook（舞台监督）。">
+          <p class="quiz-question">1. 你想让 AI 自动在每次保存文件前检查代码风格。你应该用哪个角色？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="agent" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>Agent（导演）</span>
+            </button>
+            <button class="quiz-option" data-value="skill" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>Skill（编剧）</span>
+            </button>
+            <button class="quiz-option" data-value="hook" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>Hook（舞台监督）</span>
+            </button>
+            <button class="quiz-option" data-value="instinct" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>Instinct（演员记忆）</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="quiz-question-block" data-correct="agent" data-explanation-right="Agent 是指挥中心，擅长分解复杂任务并委派给专业角色。" data-explanation-wrong="需要「分解和委派」能力的角色是 Agent（导演），它是指挥中心。">
+          <p class="quiz-question">2. 你有一个复杂的多步骤任务，需要分解和委派。你该调用什么？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="command" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>Command（道具师）</span>
+            </button>
+            <button class="quiz-option" data-value="agent" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>Agent（导演）</span>
+            </button>
+            <button class="quiz-option" data-value="skill" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>Skill（编剧）</span>
+            </button>
+            <button class="quiz-option" data-value="hook" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>Hook（舞台监督）</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="quiz-question-block" data-correct="instinct" data-explanation-right="Instinct 正是用来记住过往经验的。它会从错误中学习，避免重复踩坑。" data-explanation-wrong="能「记住教训」的是 Instinct（演员记忆），它从历史会话中积累经验模式。">
+          <p class="quiz-question">3. 你发现 AI 总是犯同一个错误。哪个角色能帮它记住教训？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="hook" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>Hook（舞台监督）</span>
+            </button>
+            <button class="quiz-option" data-value="command" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>Command（道具师）</span>
+            </button>
+            <button class="quiz-option" data-value="instinct" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>Instinct（演员记忆）</span>
+            </button>
+            <button class="quiz-option" data-value="agent" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>Agent（导演）</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重新作答</button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>

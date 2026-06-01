@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dify：生产级 LLM 工作流平台架构全解</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    :root {
+      --color-accent:       #2A7B9B;
+      --color-accent-hover: #1F6280;
+      --color-accent-light: #E4F2F7;
+      --color-accent-muted: #5A9DB8;
+    }
+  </style>
+  <script src="main.js" defer></script>
+</head>
+<body>
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">Dify：生产级 LLM 工作流平台架构全解</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <button class="nav-dot" data-target="module-1" data-tooltip="从一次点击开始" role="tab" aria-label="Module 1: 从一次点击开始"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="架构全景：五大角色" role="tab" aria-label="Module 2: 架构全景：五大角色"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="工作流：可视化流程引擎" role="tab" aria-label="Module 3: 工作流：可视化流程引擎"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="RAG 管道：让 AI 读你的文档" role="tab" aria-label="Module 4: RAG 管道：让 AI 读你的文档"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="模型层：厂商无关的统一接口" role="tab" aria-label="Module 5: 模型层：厂商无关的统一接口"></button>
+        <button class="nav-dot" data-target="module-6" data-tooltip="调试生产：当事情出错时" role="tab" aria-label="Module 6: 调试生产：当事情出错时"></button>
+      </div>
+    </div>
+  </nav>
+  <main id="main">
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">从一次点击开始</h1>
+      <p class="module-subtitle">你在 Dify 里点下"运行"，背后发生了什么？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: What is Dify -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Dify 是什么？用一句话说清楚</h2>
+        <p>想象你是一个厨师，但你不需要从零建造厨房——你只需要说"我要做这道菜"，Dify 会把所有厨具、食材通道、出菜窗口都帮你准备好。</p>
+        <p>Dify 是一个 <span class="term" data-definition="LLM 即大语言模型（Large Language Model），比如 GPT-4、Claude、Llama——能理解和生成人类语言的 AI 大脑。">LLM</span> 应用开发平台：你不用写底层代码，就能把 AI 能力组合成真正能用的产品——聊天机器人、文档问答、自动化工作流。</p>
+
+        <div class="pattern-cards stagger-children animate-in">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🔀</div>
+            <h4 class="pattern-title">工作流编排</h4>
+            <p class="pattern-desc">像拼乐高一样把 AI 步骤串联成流程，无需写代码</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">📚</div>
+            <h4 class="pattern-title">RAG 知识库</h4>
+            <p class="pattern-desc">上传你的文档，AI 就能基于它们回答问题</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🤖</div>
+            <h4 class="pattern-title">Agent 能力</h4>
+            <p class="pattern-desc">AI 能主动调用工具、搜索网络、执行多步骤任务</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🔌</div>
+            <h4 class="pattern-title">模型无关</h4>
+            <p class="pattern-desc">GPT、Claude、Llama、国产模型——随时切换，一行不改</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: The journey of a single request -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">你点下"发送"之后的 7 秒</h2>
+        <p>想象你在 Dify 搭建的客服机器人里发了一条消息："我的订单什么时候到？"</p>
+        <p>这 7 秒里，至少有 <strong>6 个系统</strong>协同工作。让我们逐步追踪这段旅程：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"浏览器里的 Next.js 前端捕获你的输入，发出 HTTP 请求"},
+          {"highlight":"flow-actor-2","label":"Nginx 反向代理接收请求，转发给后端 Flask API","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-3","label":"Flask API 验证身份、检查配额，把任务推入消息队列","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-4","label":"Celery Worker 从队列取出任务，召唤 LLM","packet":true,"from":"actor-3","to":"actor-4"},
+          {"highlight":"flow-actor-5","label":"LLM 厂商返回流式 token，Worker 写入 Redis 并推送 SSE","packet":true,"from":"actor-4","to":"actor-5"},
+          {"highlight":"flow-actor-1","label":"浏览器通过 SSE 实时接收 token，字符一个一个蹦出来","packet":true,"from":"actor-5","to":"actor-1"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">🖥️</div>
+              <span>浏览器</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">⚡</div>
+              <span>Nginx</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">🐍</div>
+              <span>Flask API</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">⚙️</div>
+              <span>Worker</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-5">
+              <div class="flow-actor-icon">🤖</div>
+              <span>LLM</span>
+            </div>
+          </div>
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击"下一步"开始追踪请求</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Why this matters -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">为什么 Dify 要这样设计？</h2>
+        <p>你可能会问：为什么需要这么多层？直接调 OpenAI 的 <span class="term" data-definition="API（应用程序编程接口）是软件之间对话的标准方式——就像插座规格，任何符合规格的插头都能用。">API</span> 不就好了？</p>
+
+        <div class="callout callout-accent animate-in">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键洞察：为什么生产级≠Demo 级</strong>
+            <p>直接调 API 能做出 Demo，但无法处理：并发 1000 个用户、API 限流重试、对话历史存储、多模型切换、用量计费……这就是 Dify 的价值所在。</p>
+          </div>
+        </div>
+
+        <div class="icon-rows animate-in">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🔄</div>
+            <div>
+              <strong>队列 + Worker 解耦</strong>
+              <p>API 收到请求立即返回，Worker 在后台慢慢处理——用户不等待，系统不崩溃</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">📡</div>
+            <div>
+              <strong>SSE 流式响应</strong>
+              <p><span class="term" data-definition="SSE（Server-Sent Events）是服务器向浏览器推送数据的技术——就像广播电台，服务器播，浏览器收，不需要浏览器反复询问。">SSE</span> 让 AI 的回答像打字一样逐字出现，而不是等 30 秒后突然弹出一大段</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🗄️</div>
+            <div>
+              <strong>PostgreSQL 持久化</strong>
+              <p>每一条消息、每一次工作流运行都存档——可回溯、可分析、可审计</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Code translation - app_factory -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码翻译：Flask 应用工厂</h2>
+        <p>Dify 后端的入口文件 <code>api/app_factory.py</code> 里有一段很有代表性的代码，它展示了生产级应用如何处理每一个请求：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-keyword">def</span> <span class="code-function">create_flask_app_with_configs</span>() -> DifyApp:</span>
+<span class="code-line">    dify_app = DifyApp(__name__)</span>
+<span class="code-line">    dify_app.config.from_mapping(</span>
+<span class="code-line">        dify_config.model_dump()</span>
+<span class="code-line">    )</span>
+<span class="code-line">    @dify_app.before_request</span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">before_request</span>():</span>
+<span class="code-line">        init_request_context()</span>
+<span class="code-line">        RecyclableContextVar</span>
+<span class="code-line">            .increment_thread_recycles()</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">定义一个"工厂函数"——它每次被调用都会创建并返回一个全新的 Web 应用实例</p>
+              <p class="tl">造一个新的 Dify 应用对象，__name__ 告诉它自己在哪个文件里</p>
+              <p class="tl">从配置文件加载所有设置——数据库地址、密钥、API 限制等</p>
+              <p class="tl">model_dump() 把 Python 对象转成普通字典，方便 Flask 读取</p>
+              <p class="tl">注册一个"钩子"——每一个请求到达之前，都先执行 before_request 里的代码</p>
+              <p class="tl">初始化这次请求的日志上下文，这样后续所有日志都会带上请求 ID</p>
+              <p class="tl">清理线程变量，防止上一个请求的数据污染这一个请求</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">理解检验</h2>
+
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！Celery Worker 在后台异步处理 LLM 调用，API 层立即返回，这就是为什么用户不会在等待 AI 响应时看到超时错误。"
+               data-explanation-wrong="再想想——Flask API 收到请求后会直接调用 LLM 吗？想想为什么 Dify 要引入消息队列。">
+            <h3 class="quiz-question">你在 Dify 里发了一条消息，等了 15 秒才收到回答。这个 15 秒主要消耗在哪里？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Flask API 处理 HTTP 请求的时间</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Celery Worker 调用 LLM 并等待生成回答的时间</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Nginx 转发请求的时间</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="完全正确！SSE（Server-Sent Events）正是为了解决这个问题——服务器可以把 token 一个一个推给浏览器，用户看到实时打字效果，而不是干等 30 秒。"
+               data-explanation-wrong="WebSocket 也能做到，但 Dify 选择了 SSE——因为 SSE 是单向的（服务器→浏览器），更简单，而且 AI 生成文字这个场景恰好只需要单向推送。">
+            <h3 class="quiz-question">用户为什么能看到 AI 回答"一个字一个字蹦出来"的效果，而不是等待后一次性显示全部内容？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>前端用 JavaScript 动画模拟了打字效果</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>WebSocket 双向连接实时传输</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>SSE 流式传输——服务器生成多少就推多少</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">提交答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">重新作答</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">架构全景：五大角色</h1>
+      <p class="module-subtitle">认识 Dify 的演员阵容——每个服务扮演什么角色</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: The orchestra metaphor -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">一场管弦乐演出</h2>
+        <p>Dify 的架构像一场管弦乐：<strong>指挥（Nginx）</strong>站在最前面分配任务，<strong>不同乐手（各个服务）</strong>各司其职，<strong>乐谱（共享配置）</strong>确保大家演奏同一首曲子。</p>
+        <p>没有人"全部都做"——每个服务只做好自己那一件事。这是软件工程里最重要的原则之一：<span class="term" data-definition="单一职责原则（Single Responsibility Principle）：每个模块只负责一件事，改变一个功能只需要修改对应的模块，不会影响其他部分。">单一职责</span>。</p>
+
+        <div class="icon-rows animate-in stagger-children">
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: #6B6560">🎯</div>
+            <div>
+              <strong>Nginx — 门卫 &amp; 指挥</strong>
+              <p>所有流量入口。把 /console/api 转给 API 服务，把 / 转给 Web 服务</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🐍</div>
+            <div>
+              <strong>API Service — 大脑</strong>
+              <p>Python Flask 应用。处理所有业务逻辑：验证、路由、协调其他服务</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-2)">⚙️</div>
+            <div>
+              <strong>Worker Service — 苦力</strong>
+              <p>Celery <span class="term" data-definition="异步任务（Async Task）：把耗时工作放到后台执行，主程序不等待。就像你把衣服放进洗衣机后就去做其他事，不用站在旁边等。">异步</span>工作进程。专门执行耗时任务：调用 LLM、处理文档、发邮件</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🖥️</div>
+            <div>
+              <strong>Web Service — 脸面</strong>
+              <p>Next.js 前端。用户看到的所有界面——工作流画布、聊天界面、配置面板</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-4)">🗄️</div>
+            <div>
+              <strong>PostgreSQL + Redis — 记忆</strong>
+              <p>PostgreSQL 存持久数据（消息、工作流、用户）；Redis 存临时状态和任务队列</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Group chat between services -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">服务之间怎么"说话"？</h2>
+        <p>当你在 Dify 里创建一个新的聊天应用时，这几个服务是这样沟通的：</p>
+
+        <div class="chat-window" id="chat-module2">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="user" style="display:none">
+              <div class="chat-avatar" style="background: #6B6560">U</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: #6B6560">用户（浏览器）</span>
+                <p>我点了"创建新应用"，选了「聊天助手」模板</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="nginx" style="display:none">
+              <div class="chat-avatar" style="background: #9E9790">N</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: #9E9790">Nginx</span>
+                <p>收到 POST /console/api/apps 请求，转发给 API Service</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="api" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">A</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">API Service</span>
+                <p>验证 JWT Token 通过，检查用户创建权限……开始写数据库</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="db" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">D</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">PostgreSQL</span>
+                <p>INSERT INTO apps 完成。新应用 ID: abc-123，已保存 ✓</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="api" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">A</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">API Service</span>
+                <p>返回 201 Created + 应用详情 JSON 给浏览器</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="5" data-sender="web" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">W</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">Web Service（Next.js）</span>
+                <p>渲染新应用页面，跳转到工作流编辑器。用户现在看到空白画布了！</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-module2-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module2-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条消息</button>
+            <button class="btn chat-all-btn">全部播放</button>
+            <button class="btn chat-reset-btn">重新播放</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Visual file tree -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码住在哪里？</h2>
+        <p>了解文件结构，你就知道该让 AI 把新功能写在哪里：</p>
+
+        <div class="file-tree animate-in">
+          <div class="ft-folder open">
+            <span class="ft-name">api/</span>
+            <span class="ft-desc">后端 Python Flask 应用</span>
+            <div class="ft-children">
+              <div class="ft-folder">
+                <span class="ft-name">controllers/</span>
+                <span class="ft-desc">处理 HTTP 请求的入口函数（路由层）</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">core/</span>
+                <span class="ft-desc">所有核心业务逻辑：工作流、RAG、模型管理</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">models/</span>
+                <span class="ft-desc">数据库表结构定义（每个文件对应几张表）</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">services/</span>
+                <span class="ft-desc">业务服务层（controllers 调用 services，services 调用 core）</span>
+              </div>
+            </div>
+          </div>
+          <div class="ft-folder open">
+            <span class="ft-name">web/</span>
+            <span class="ft-desc">前端 Next.js 应用</span>
+            <div class="ft-children">
+              <div class="ft-folder">
+                <span class="ft-name">app/</span>
+                <span class="ft-desc">页面路由（Next.js 14 App Router 结构）</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">app/components/</span>
+                <span class="ft-desc">可复用 UI 组件：聊天框、节点卡片、工具栏等</span>
+              </div>
+            </div>
+          </div>
+          <div class="ft-folder open">
+            <span class="ft-name">docker/</span>
+            <span class="ft-desc">生产部署配置</span>
+            <div class="ft-children">
+              <div class="ft-file">
+                <span class="ft-name">docker-compose.yaml</span>
+                <span class="ft-desc">一键启动所有服务的配置文件</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info animate-in">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">给 AI 的正确指令</strong>
+            <p>知道文件结构后，你就能说"在 api/controllers/console/app/ 下新增一个处理 XXX 的路由"——而不是模糊地说"加一个 API"。AI 听懂精确指令，代码质量提升 10 倍。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Code translation - docker-compose services -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码翻译：Docker Compose 服务定义</h2>
+        <p>Dify 的 <code>docker/docker-compose.yaml</code> 定义了所有服务。这是 API 服务的配置片段：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-property">x-shared-env</span>: <span class="code-operator">&</span><span class="code-string">shared-api-worker-env</span></span>
+<span class="code-line">  <span class="code-property">CELERY_WORKER_AMOUNT</span>:</span>
+<span class="code-line">    <span class="code-string">${CELERY_WORKER_AMOUNT:-4}</span></span>
+<span class="code-line">  <span class="code-property">APP_MAX_EXECUTION_TIME</span>:</span>
+<span class="code-line">    <span class="code-string">${APP_MAX_EXECUTION_TIME:-1200}</span></span>
+<span class="code-line">  <span class="code-property">DB_HOST</span>:</span>
+<span class="code-line">    <span class="code-string">${DB_HOST:-db_postgres}</span></span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">定义一个"共享配置块"——用 &amp; 标记，API 和 Worker 两个服务都会引用它</p>
+              <p class="tl">后台 Worker 进程数量：从环境变量读取</p>
+              <p class="tl">如果没有设置环境变量，默认启动 4 个 Worker 进程</p>
+              <p class="tl">单个应用最大运行时间（秒）</p>
+              <p class="tl">默认 1200 秒（20 分钟）——防止一个任务跑太久把系统卡死</p>
+              <p class="tl">数据库主机地址：</p>
+              <p class="tl">默认连接名叫 db_postgres 的容器（Docker 内部网络会自动解析这个名字）</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">理解检验</h2>
+
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！Worker Service 专门负责耗时的异步任务。文档处理是典型的后台工作——可能需要几分钟，不适合在 API 请求中同步执行。"
+               data-explanation-wrong="再想想——API Service 负责接收请求和业务逻辑，但处理大文件是很耗时的操作，应该交给专门的后台服务处理。">
+            <h3 class="quiz-question">用户上传了一个 500 页的 PDF 让 Dify 建立知识库。这个处理工作主要由哪个服务执行？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>API Service（Flask 应用直接处理）</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Worker Service（Celery 异步任务处理）</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Web Service（Next.js 前端处理）</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="准确！你想修改工作流画布上某个节点的外观，这是 UI 组件，属于前端 web/app/components/ 目录。"
+               data-explanation-wrong="想想哪个服务负责用户界面。工作流画布是用户直接看到和操作的东西——它住在哪里？">
+            <h3 class="quiz-question">你想让工作流画布上的 LLM 节点显示当前使用的模型名称。你应该让 AI 修改哪里的代码？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>api/controllers/ — 后端控制器</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>api/core/workflow/ — 工作流引擎</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>web/app/components/ — 前端 UI 组件</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">提交答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重新作答</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">工作流：可视化流程引擎</h1>
+      <p class="module-subtitle">那些节点和连线背后，藏着什么样的执行引擎？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Metaphor - sheet music -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">工作流是一张乐谱</h2>
+        <p>你在画布上拖出来的工作流，本质上是一张"乐谱"——它描述了"应该发生什么、以什么顺序、在什么条件下"。但它本身不执行任何事情。</p>
+        <p>真正的演奏者，是 <code>api/core/workflow/</code> 里的执行引擎——它读取乐谱（<span class="term" data-definition="DSL（Domain-Specific Language，领域专用语言）：专门为某个用途设计的语言，比 Python 更简单，只描述这个领域的概念。工作流 DSL 就是描述"节点、连接、条件"的专用语言。">DSL</span>），然后驱动每一个节点按顺序"演奏"。</p>
+
+        <div class="step-cards animate-in stagger-children">
+          <div class="step-card animate-in">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>你在画布上设计</strong>
+              <p>拖入节点（LLM / 代码 / 工具 / 知识库），用箭头连接，设定条件分支</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Dify 序列化成 JSON DSL</strong>
+              <p>保存时，整个画布被转成一个 JSON 对象存进数据库——节点列表 + 边的列表</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>执行引擎读取并运行</strong>
+              <p>每次触发时，引擎从数据库加载 JSON，构建有向图，按 <span class="term" data-definition="拓扑排序（Topological Sort）：对有依赖关系的任务排序——比如"先烧水再泡茶"，不能颠倒顺序。工作流引擎用它决定节点执行顺序。">拓扑顺序</span>逐节点执行</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>结果通过 SSE 实时推送</strong>
+              <p>每个节点完成都触发一个事件，流式推送给前端——你看到节点一个个变绿</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Node types -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">节点类型：工作流的词汇表</h2>
+        <p>工作流里的每种节点类型对应 <code>api/core/workflow/nodes/</code> 下的一个目录。了解它们，你才能知道该组合哪些"词汇"来描述你的业务流程：</p>
+
+        <div class="pattern-cards animate-in stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🤖</div>
+            <h4 class="pattern-title">LLM 节点</h4>
+            <p class="pattern-desc">调用大语言模型生成文本，支持 Prompt 模板和上下文变量注入</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🔍</div>
+            <h4 class="pattern-title">知识检索节点</h4>
+            <p class="pattern-desc">从知识库里搜索相关段落，把结果注入到后续 LLM 节点的上下文</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)"></div>
+            <h4 class="pattern-title">代码节点</h4>
+            <p class="pattern-desc">在沙箱里执行 Python 或 JavaScript 代码——处理数据、格式化输出</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🔀</div>
+            <h4 class="pattern-title">条件分支节点</h4>
+            <p class="pattern-desc">If/Else 逻辑——根据前一步的结果走不同的路径</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">🔧</div>
+            <h4 class="pattern-title">工具节点</h4>
+            <p class="pattern-desc">调用内置或自定义工具：Google Search、DALL-E、HTTP 请求等</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid #9E9790">
+            <div class="pattern-icon" style="background: #9E9790">🔁</div>
+            <h4 class="pattern-title">循环节点</h4>
+            <p class="pattern-desc">对列表中的每个元素重复执行一段子流程（类似 for 循环）</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Code translation - WorkflowAppGenerator -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码翻译：工作流触发入口</h2>
+        <p>当你点击"运行"，请求到达 <code>api/core/app/apps/workflow/app_generator.py</code> 的 <code>WorkflowAppGenerator</code>。这里是真正"发动引擎"的地方：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-keyword">class</span> <span class="code-function">WorkflowAppGenerator</span>(BaseAppGenerator):</span>
+<span class="code-line">  <span class="code-keyword">def</span> <span class="code-function">generate</span>(</span>
+<span class="code-line">    <span class="code-keyword">self</span>,</span>
+<span class="code-line">    app_model: App,</span>
+<span class="code-line">    workflow: Workflow,</span>
+<span class="code-line">    invoke_from: InvokeFrom,</span>
+<span class="code-line">    inputs: <span class="code-function">Mapping</span>[str, <span class="code-keyword">Any</span>],</span>
+<span class="code-line">    stream: bool,</span>
+<span class="code-line">  ) -> <span class="code-string">...</span>:</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">定义一个"工作流应用生成器"类，继承自基础生成器</p>
+              <p class="tl">核心方法：generate，负责触发一次工作流执行</p>
+              <p class="tl">（self 表示这是类的实例方法）</p>
+              <p class="tl">要运行哪个应用（数据库里的 App 记录）</p>
+              <p class="tl">要运行哪个工作流版本（草稿 or 已发布版本）</p>
+              <p class="tl">谁触发的：用户通过界面、API 调用还是自动化触发</p>
+              <p class="tl">用户传入的变量（比如 {article: "我要总结的文章内容"}）</p>
+              <p class="tl">是否流式返回——true 时用 SSE 推送，false 时等全部完成后返回</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: How workflow state flows -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">变量是怎么在节点之间传递的？</h2>
+        <p>工作流最神奇的地方是：前一个节点的输出可以作为后一个节点的输入。Dify 用"变量池"来实现这一点：</p>
+
+        <div class="callout callout-accent animate-in">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">变量池的工作原理</strong>
+            <p>每次工作流运行，Dify 维护一个"共享变量池"。每个节点执行完毕后，把自己的输出写入池子。下一个节点从池子里读取它需要的变量，用 <code>{{节点名.输出字段}}</code> 语法引用。</p>
+          </div>
+        </div>
+
+        <div class="flow-steps animate-in">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <p>用户输入：<code>topic = "AI 发展"</code></p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <p>LLM 节点读取 <code>{{sys.query}}</code>，输出 <code>outline</code></p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <p>第二个 LLM 节点读取 <code>{{llm1.outline}}</code>，生成正文</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">4</div>
+            <p>代码节点格式化 <code>{{llm2.text}}</code> 输出 Markdown</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">理解检验</h2>
+
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！工作流被保存为 JSON DSL 存进数据库。这意味着你可以导出、版本控制、甚至手动编辑工作流配置——就像代码一样。"
+               data-explanation-wrong="不完全对。想想 Dify 怎么做到「保存」工作流的——你画的那些节点和连线最终以什么形式存储在服务器上？">
+            <h3 class="quiz-question">你设计了一个有 8 个节点的复杂工作流并保存了。下次再打开时，Dify 是怎么恢复这个工作流的？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Dify 截图保存了工作流画布的图片</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>从数据库加载 JSON DSL，前端重新渲染成可视化画布</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>浏览器本地缓存了画布状态</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="对！条件分支节点（If/Else）正是为这种情况设计的——根据前一个节点的输出值，决定走哪条路径。这是工作流处理业务逻辑的标准方式。"
+               data-explanation-wrong="再想想——你需要根据情况走不同的路径，工作流里哪种节点专门处理这种分支逻辑？">
+            <h3 class="quiz-question">你想搭一个工作流：如果 LLM 判断用户意图是"投诉"，就走投诉处理流程；否则走普通客服流程。你需要用哪种节点类型？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>条件分支节点（If/Else）</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>循环节点（Iteration）</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>代码节点（Code）</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">提交答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重新作答</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">RAG 管道：让 AI 读你的文档</h1>
+      <p class="module-subtitle">知识库是怎么建立的？AI 是怎么在你的文档里"找到"答案的？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: What is RAG and why -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">为什么 AI 需要"读"你的文档？</h2>
+        <p>LLM 的知识在训练时就固定了——它不认识你公司的产品手册，不知道你昨天发布的公告，也不了解你独特的业务规则。</p>
+        <p><span class="term" data-definition="RAG（Retrieval-Augmented Generation，检索增强生成）：先从文档库里搜索最相关的片段，再把这些片段塞进 Prompt 里一起发给 LLM——AI 就能基于你的私有文档回答问题了。">RAG</span> 解决这个问题的方式非常聪明：不是"训练 AI 学你的知识"（很贵），而是"回答时临时把相关文档页给 AI 看"（很便宜）。</p>
+
+        <div class="callout callout-info animate-in">
+          <div class="callout-icon">📖</div>
+          <div class="callout-content">
+            <strong class="callout-title">类比：开卷考试 vs. 闭卷考试</strong>
+            <p>微调（fine-tuning）让 AI 记住知识 = 闭卷考试。RAG 给 AI 相关页面 = 开卷考试。对于私有知识库，开卷考试便宜 100 倍，效果还往往更好。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: RAG pipeline step by step -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">从上传到回答：RAG 的完整管道</h2>
+        <p>Dify 的 RAG 分两个阶段：<strong>建索引</strong>（你上传文档时）和<strong>检索</strong>（用户提问时）。</p>
+
+        <div class="step-cards animate-in stagger-children">
+          <div class="step-card animate-in">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>提取文本 — ExtractSetting</strong>
+              <p>从 PDF/Word/网页中提取纯文本，支持 20+ 种格式。代码在 <code>api/core/rag/extractor/</code></p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>切块 — TextSplitter</strong>
+              <p>把长文档切成小段落（默认 500 token/段）。代码在 <code>api/core/rag/splitter/</code></p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>向量化 — EmbeddingModel</strong>
+              <p>每个段落被转成一个数字向量（<span class="term" data-definition="向量（Vector）：把文字的语义转成一串数字——语义相近的文字，数字也相近。就像颜色可以用 RGB 三个数字表示一样。">向量</span>），存入向量数据库</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>检索 — 用户提问时</strong>
+              <p>用户的问题也被向量化，在数据库里找"最相似的段落"——余弦相似度计算</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>注入 Prompt — 生成答案</strong>
+              <p>把检索到的段落塞进 Prompt："基于以下资料回答：[检索结果]"，LLM 生成答案</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Code translation - IndexingRunner -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码翻译：索引构建器</h2>
+        <p><code>api/core/indexing_runner.py</code> 里的 <code>IndexingRunner</code> 负责整个建索引流程。看看它的错误处理有多严谨：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-keyword">def</span> <span class="code-function">_handle_indexing_error</span>(</span>
+<span class="code-line">    <span class="code-keyword">self</span>,</span>
+<span class="code-line">    document_id: str,</span>
+<span class="code-line">    error: Exception</span>
+<span class="code-line">) -> <span class="code-keyword">None</span>:</span>
+<span class="code-line">    document = db.session.get(</span>
+<span class="code-line">        DatasetDocument, document_id)</span>
+<span class="code-line">    <span class="code-keyword">if</span> document:</span>
+<span class="code-line">        document.indexing_status = </span>
+<span class="code-line">            IndexingStatus.ERROR</span>
+<span class="code-line">        document.error = str(error_message)</span>
+<span class="code-line">        db.session.commit()</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">定义一个"处理建索引失败"的方法</p>
+              <p class="tl">（self 是类实例）</p>
+              <p class="tl">哪个文档出错了（用 ID 标识）</p>
+              <p class="tl">错误是什么（Python 里所有异常的基类）</p>
+              <p class="tl">返回类型是 None——这个方法只做副作用（更新数据库），不返回值</p>
+              <p class="tl">从数据库里查出这个文档的记录</p>
+              <p class="tl">如果文档还在（没有被删除）</p>
+              <p class="tl">把状态改为 ERROR——前端会显示"处理失败"</p>
+              <p class="tl">记录错误原因——方便用户和管理员排查</p>
+              <p class="tl">提交到数据库——这个修改正式生效</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent animate-in">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">生产级的标志：状态机</strong>
+            <p>注意 IndexingStatus.ERROR 这种模式——文档处理有明确的状态流转：pending → indexing → completed / error。这叫"<span class="term" data-definition="状态机（State Machine）：规定一个事物可以处于哪些状态、在什么条件下从一个状态变到另一个状态。就像交通灯只能是红/黄/绿，不能是紫色。">状态机</span>"。生产代码总是把状态显式化，而不是靠猜测。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Chunking strategy impact -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">切块策略：影响检索质量的隐藏参数</h2>
+        <p>切块大小是 RAG 质量最重要的调参点，也是最容易被忽略的。理解它，你才能在 Dify 里做出正确的配置选择：</p>
+
+        <div class="icon-rows animate-in">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-error)">✂️</div>
+            <div>
+              <strong>切太小（&lt;100 token）</strong>
+              <p>段落缺乏上下文，检索出来的片段 AI 看不懂——答案支离破碎</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-success)">✅</div>
+            <div>
+              <strong>适中（300-500 token）</strong>
+              <p>Dify 默认值。一般覆盖一个完整段落，语义连贯，检索精度和上下文长度平衡</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-error)">📏</div>
+            <div>
+              <strong>切太大（&gt;1000 token）</strong>
+              <p>每个段落包含多个主题，检索出来的内容不够精准，且占用更多 Prompt 空间</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">理解检验</h2>
+
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！RAG 不训练模型，它只是在回答时把相关文档片段临时注入 Prompt。更新文档就能马上生效，不需要重新训练任何东西。"
+               data-explanation-wrong="想想 RAG 和微调（fine-tuning）的本质区别——RAG 是回答时临时检索，不是让模型记住知识。更新文档后需要做什么？">
+            <h3 class="quiz-question">公司今天更新了一份产品手册，你想让知识库里的 AI 立刻用上新版本。你应该怎么做？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>重新训练 AI 模型（微调），让它记住新内容</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>在 Dify 知识库里上传新版手册并重建索引</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>在 Prompt 里把新手册全文贴进去</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="是的！RAG 只能帮 AI 找到"相关段落"，最终答案还是由 LLM 生成。如果找到的段落里根本没有这个信息，AI 就无法给出正确答案——或者会产生幻觉。"
+               data-explanation-wrong="RAG 确实很强大，但它有一个根本限制——想想 RAG 的第一步是"检索"，如果检索不到，会发生什么？">
+            <h3 class="quiz-question">你用 Dify 搭建了一个基于公司文档的 QA 机器人。一个用户问了一个问题，但相关信息根本没有在任何已上传的文档里。AI 最可能会怎么回答？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>AI 可能会"幻觉"出一个听起来合理但错误的答案</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>系统会自动报错，用户看到"未找到相关信息"</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>AI 会拒绝回答，因为 RAG 不让 AI 使用自己的训练知识</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">提交答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重新作答</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">模型层：厂商无关的统一接口</h1>
+      <p class="module-subtitle">为什么换一个 AI 模型只需要点几下，不需要改代码？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: The USB standard metaphor -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">模型层 = USB 标准接口</h2>
+        <p>USB 发明之前，每个设备都有自己的接口——打印机插头、键盘插头、鼠标插头各不相同，换设备就要换接口。USB 统一了标准，任何设备插进去都能用。</p>
+        <p>Dify 的模型层做的是完全一样的事：不管是 OpenAI、Anthropic、百度千帆还是本地 Ollama，Dify 的工作流代码都用<strong>同一套接口</strong>调用——底层细节被屏蔽掉了。</p>
+
+        <div class="pattern-cards animate-in stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🌐</div>
+            <h4 class="pattern-title">OpenAI / Azure</h4>
+            <p class="pattern-desc">GPT-4o, GPT-4, o1，最广泛使用的商业模型</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🤖</div>
+            <h4 class="pattern-title">Anthropic</h4>
+            <p class="pattern-desc">Claude 3.5 Sonnet，长上下文、代码和分析能力强</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🇨🇳</div>
+            <h4 class="pattern-title">国产模型</h4>
+            <p class="pattern-desc">通义千问、GLM、文心一言——数据合规、国内延迟低</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">🏠</div>
+            <h4 class="pattern-title">本地部署</h4>
+            <p class="pattern-desc">Ollama / LM Studio——数据不出内网，适合高合规要求</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: ModelInstance code -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码翻译：ModelInstance 统一模型实例</h2>
+        <p><code>api/core/model_manager.py</code> 里的 <code>ModelInstance</code> 就是那个"USB 接口"——工作流调用它，不需要知道底层是什么模型：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-keyword">class</span> <span class="code-function">ModelInstance</span>:</span>
+<span class="code-line">  <span class="code-keyword">def</span> <span class="code-function">__init__</span>(</span>
+<span class="code-line">    <span class="code-keyword">self</span>,</span>
+<span class="code-line">    provider_model_bundle,</span>
+<span class="code-line">    model: str,</span>
+<span class="code-line">    credentials: dict | <span class="code-keyword">None</span> = <span class="code-keyword">None</span></span>
+<span class="code-line">  ) -> <span class="code-keyword">None</span>:</span>
+<span class="code-line">    <span class="code-keyword">self</span>.provider = </span>
+<span class="code-line">      provider_model_bundle</span>
+<span class="code-line">        .configuration.provider.provider</span>
+<span class="code-line">    <span class="code-keyword">if</span> credentials <span class="code-keyword">is None</span>:</span>
+<span class="code-line">      credentials = </span>
+<span class="code-line">        <span class="code-keyword">self</span>._fetch_credentials_from_bundle(</span>
+<span class="code-line">          provider_model_bundle, model</span>
+<span class="code-line">        )</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">定义"模型实例"类——代表一个准备好被调用的 AI 模型</p>
+              <p class="tl">构造方法：创建实例时调用</p>
+              <p class="tl">（self 是实例自身）</p>
+              <p class="tl">模型的"套餐"——包含厂商配置、认证信息、负载均衡设置</p>
+              <p class="tl">具体的模型名称，比如 "gpt-4o" 或 "claude-3-5-sonnet"</p>
+              <p class="tl">API 密钥，如果不传就自动从数据库读取</p>
+              <p class="tl">记录这个实例用的是哪家厂商（openai / anthropic / xxx）</p>
+              <p class="tl">如果没有传入密钥</p>
+              <p class="tl">就从数据库（provider_model_bundle）里取出</p>
+              <p class="tl">该厂商为该模型配置的 API 密钥</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Load balancing -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">生产级特性：负载均衡 &amp; 限流保护</h2>
+        <p>只配一个 API Key 在生产中会很快触发 <span class="term" data-definition="限流（Rate Limiting）：API 提供商限制你每分钟/每天能发多少请求。超过就会返回 429 错误——就像高速公路收费站每小时只能放行多少辆车。">限流</span>。Dify 内置了两个生产级保护机制：</p>
+
+        <div class="icon-rows animate-in">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">⚖️</div>
+            <div>
+              <strong>多 Key 负载均衡</strong>
+              <p>配置多个 API Key，Dify 自动在它们之间轮转请求——把总配额叠加起来</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">🔄</div>
+            <div>
+              <strong>自动重试 &amp; Fallback</strong>
+              <p>遇到 <span class="term" data-definition="429 错误：Too Many Requests——你超出了 API 的请求限制。服务器说：稍等一下，别太猛了。">429</span>/<span class="term" data-definition="503 错误：Service Unavailable——服务器暂时不可用，可能是维护或过载。通常过一会儿重试就好了。">503</span> 等错误，自动等待后重试；如果主模型持续失败，切换到备用模型</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning animate-in">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">常见踩坑：只配一个 API Key</strong>
+            <p>Demo 阶段一个 Key 够用。但产品上线后如果有 100 个并发用户，单个 OpenAI Key 的每分钟限额（TPM）会瞬间打满。在 Dify 里提前配置多 Key 负载均衡，避免上线即崩。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Model types -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">不止 LLM：Dify 管理的 5 种模型</h2>
+        <p>很多人以为 Dify 只管理聊天模型，其实它统一管理了 5 种不同用途的模型——每种对应不同的业务场景：</p>
+
+        <div class="badge-list animate-in">
+          <div class="badge-item">
+            <code class="badge-code">LLM</code>
+            <span class="badge-desc">大语言模型——对话、生成、推理（GPT-4o 等）</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">Embedding</code>
+            <span class="badge-desc">文本向量化——用于 RAG 知识库的索引和检索（text-embedding-3 等）</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">Reranker</code>
+            <span class="badge-desc">重排序模型——对检索结果二次打分，提升 RAG 精准度</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">TTS / ASR</code>
+            <span class="badge-desc">语音合成 / 语音识别——文字转语音、语音转文字</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">Moderation</code>
+            <span class="badge-desc">内容审核——过滤有害内容，保护产品安全</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">理解检验</h2>
+
+        <div class="quiz-container" id="quiz-module5">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="对！Dify 的模型抽象层让你无需修改任何工作流代码就能切换模型。这是设计上的关键决策——把模型选择从业务逻辑中解耦出来。"
+               data-explanation-wrong="想想 Dify 设计模型层的目的——它是要让切换模型变得很容易，还是很难？只需要改一个地方就够了。">
+            <h3 class="quiz-question">你用 GPT-4o 搭建了一套工作流，现在想切换到 Claude 3.5 试试效果。需要改多少代码？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>需要重写工作流的所有 LLM 调用代码</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>需要修改几个 API 调用的参数格式</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>在 Dify 界面里的模型配置里切换即可，无需改代码</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！Embedding 模型负责把文本转成向量——这是 RAG 知识库能"理解"文档语义的核心。LLM 是聊天用的，Reranker 是优化检索结果排序用的。"
+               data-explanation-wrong="想想 RAG 的管道：文档被切块后，需要被转成数字向量才能做语义检索——这个"翻译"工作由哪种模型完成？">
+            <h3 class="quiz-question">你在 Dify 里建了一个知识库，上传了 100 份文档。文档内容被转成向量存储时，用的是哪种模型？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>LLM（大语言模型）</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Embedding 模型（文本向量化）</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Reranker 模型（重排序）</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">提交答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">重新作答</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-6" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">06</span>
+      <h1 class="module-title">调试生产：当事情出错时</h1>
+      <p class="module-subtitle">学会读懂错误信号，从 AI 的 bug 循环中脱身</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Bug taxonomy -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Dify 应用的三类故障</h2>
+        <p>大多数 Dify 应用故障都可以归入三个大类。知道类型，就知道去哪里查：</p>
+
+        <div class="icon-rows animate-in stagger-children">
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-error)">🤖</div>
+            <div>
+              <strong>AI 质量问题</strong>
+              <p>回答跑题、不遵循格式、产生幻觉——根源是 Prompt 设计或上下文不足</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-4)">⚡</div>
+            <div>
+              <strong>基础设施问题</strong>
+              <p>超时、503、429 限流——根源是配置、并发或 API 配额问题</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🔗</div>
+            <div>
+              <strong>工作流逻辑问题</strong>
+              <p>节点卡住、变量为空、循环不终止——根源是流程设计或数据格式不匹配</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info animate-in">
+          <div class="callout-icon">🔍</div>
+          <div class="callout-content">
+            <strong class="callout-title">第一步永远是：看日志</strong>
+            <p>Dify 在 <code>api/logs/</code> 下记录了所有请求。Docker 部署时用 <code>docker logs dify-api</code> 实时查看。日志里有 <span class="term" data-definition="Stack Trace（堆栈跟踪）：错误发生时的代码调用路径——就像犯罪现场的脚印，从头一路追到出问题的那一行代码。">stack trace</span>，能精确定位出错位置。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Common error patterns chat -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">排查对话：一个真实的调试流程</h2>
+        <p>你的工作流突然开始返回 500 错误。跟着这个排查流程走：</p>
+
+        <div class="chat-window" id="chat-module6">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="user" style="display:none">
+              <div class="chat-avatar" style="background: #6B6560">D</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: #6B6560">开发者</span>
+                <p>完了，工作流一直返回 500 Internal Server Error！</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="api" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">S</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">调试思路</span>
+                <p>先查 API 日志：<code>docker logs dify-api --tail 50</code>，看具体报错</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="user" style="display:none">
+              <div class="chat-avatar" style="background: #6B6560">D</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: #6B6560">开发者</span>
+                <p>日志显示：InvokeAuthorizationError: Incorrect API key provided</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="api" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">S</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">调试思路</span>
+                <p>找到了！API Key 验证失败。去 Dify 设置 → 模型提供商，重新检查 OpenAI Key 是否过期或被删除</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="user" style="display:none">
+              <div class="chat-avatar" style="background: #6B6560">D</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: #6B6560">开发者</span>
+                <p>Key 没问题……换了一下，还是报错。看更多日志，发现还有 QuotaExceededError</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="5" data-sender="api" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">S</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">调试思路</span>
+                <p>配额超限！去 OpenAI 账户检查账单——要么充值，要么在 Dify 配置多个 Key 做负载均衡分散请求</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-module6-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module6-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条</button>
+            <button class="btn chat-all-btn">全部播放</button>
+            <button class="btn chat-reset-btn">重新播放</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Error handling code translation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码翻译：错误处理架构</h2>
+        <p><code>api/core/app/task_pipeline/based_generate_task_pipeline.py</code> 里的错误处理展示了 Dify 如何把底层错误转成对用户友好的信息：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-keyword">def</span> <span class="code-function">handle_error</span>(<span class="code-keyword">self</span>, *, event, ...):</span>
+<span class="code-line">  e = event.error</span>
+<span class="code-line">  <span class="code-keyword">if</span> <span class="code-function">isinstance</span>(</span>
+<span class="code-line">    e, InvokeAuthorizationError</span>
+<span class="code-line">  ):</span>
+<span class="code-line">    err = InvokeAuthorizationError(</span>
+<span class="code-line">      <span class="code-string">"Incorrect API key provided"</span></span>
+<span class="code-line">    )</span>
+<span class="code-line">  <span class="code-keyword">elif</span> <span class="code-function">isinstance</span>(e, InvokeError):</span>
+<span class="code-line">    err = e</span>
+<span class="code-line">  <span class="code-keyword">else</span>:</span>
+<span class="code-line">    description = <span class="code-function">getattr</span>(</span>
+<span class="code-line">      e, <span class="code-string">"description"</span>, <span class="code-keyword">None</span>)</span>
+<span class="code-line">    err = Exception(description)</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">定义处理错误的方法，* 表示后面的参数必须用名字传入</p>
+              <p class="tl">从事件对象里取出原始错误</p>
+              <p class="tl">判断错误类型——isinstance 检查"这个错误是不是某种类型"</p>
+              <p class="tl">如果是 API 密钥认证失败</p>
+              <p class="tl"></p>
+              <p class="tl">包装成统一的认证错误，附上用户能看懂的提示语</p>
+              <p class="tl">如果是其他 LLM 调用错误（超时、限流等）</p>
+              <p class="tl">直接把原始错误往上传——保留完整信息给日志</p>
+              <p class="tl">如果是未知类型的错误</p>
+              <p class="tl">尝试读取 description 字段（如果有的话）</p>
+              <p class="tl">用 description 包装成通用 Exception 传给上层</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Spot the bug -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">找 Bug 挑战</h2>
+        <p>下面这段工作流配置有一个常见问题——导致 LLM 节点总是返回空内容。你能找出来吗？</p>
+
+        <div class="bug-challenge">
+          <h3>找出问题：这个工作流为什么总输出空字符串？</h3>
+          <div class="bug-code">
+            <div class="bug-line" data-line="1" onclick="checkBugLine(this, false)">
+              <span class="line-num">1</span>
+              <code>nodes:</code>
+            </div>
+            <div class="bug-line" data-line="2" onclick="checkBugLine(this, false)">
+              <span class="line-num">2</span>
+              <code>  - type: llm</code>
+            </div>
+            <div class="bug-line" data-line="3" onclick="checkBugLine(this, false)">
+              <span class="line-num">3</span>
+              <code>    model: gpt-4o</code>
+            </div>
+            <div class="bug-line bug-target" data-line="4" onclick="checkBugLine(this, true)">
+              <span class="line-num">4</span>
+              <code>    prompt: "请总结以下内容：{{user_input}}"</code>
+            </div>
+            <div class="bug-line" data-line="5" onclick="checkBugLine(this, false)">
+              <span class="line-num">5</span>
+              <code>    output_var: result</code>
+            </div>
+            <div class="bug-line" data-line="6" onclick="checkBugLine(this, false)">
+              <span class="line-num">6</span>
+              <code>  - type: answer</code>
+            </div>
+            <div class="bug-line" data-line="7" onclick="checkBugLine(this, false)">
+              <span class="line-num">7</span>
+              <code>    content: "{{result}}"</code>
+            </div>
+          </div>
+          <div class="bug-feedback" id="bug-feedback"></div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Debugging strategies -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">三条调试黄金法则</h2>
+        <p>这三条法则能帮你系统性地解决 90% 的 Dify 应用问题：</p>
+
+        <div class="step-cards animate-in stagger-children">
+          <div class="step-card animate-in">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>单步运行，逐节点验证</strong>
+              <p>工作流复杂时，用 Dify 的"单步调试"模式——每个节点执行后暂停，查看输入输出是否符合预期，再继续</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>变量为空时，往上查</strong>
+              <p>LLM 输出为空？先检查输入变量有没有值。输入变量为空？再往上查是哪个节点没有正确输出——沿着数据流回溯</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>AI 质量差时，先加 System Prompt</strong>
+              <p>AI 乱答？90% 的情况是 System Prompt 不够明确。先在 Prompt 里加上"你是…你只能回答…你必须按以下格式输出"</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 6: Final quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">综合检验</h2>
+
+        <div class="quiz-container" id="quiz-module6">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="对！从数据流末端往源头回溯——输出空 → 查 answer 节点的输入 → 查上游 LLM 输出 → 查 LLM 的输入变量。系统性回溯比随机猜测省 80% 的时间。"
+               data-explanation-wrong="想想我们刚才说的「往上查」原则——如果最终输出为空，问题可能在数据流的任意一个环节，应该从哪里开始排查最有效率？">
+            <h3 class="quiz-question">你的工作流最终输出节点总是显示空白。从哪里开始排查最有效率？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>直接换一个 LLM 模型试试</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>从输出节点开始，沿数据流往上查每个节点的输入输出</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>删掉整个工作流重新搭一个</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="准确！InvokeAuthorizationError 明确指向 API 密钥问题。Dify 的错误处理代码（你刚才看过）会把认证失败包装成这个特定错误类型，直接去检查 Key 配置即可。"
+               data-explanation-wrong="再想想——InvokeAuthorizationError 这个错误名字本身就在告诉你问题所在：Authorization = 授权认证。这指向哪里的问题？">
+            <h3 class="quiz-question">日志里出现了 InvokeAuthorizationError。最可能是什么原因？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>PostgreSQL 数据库连接失败</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>工作流 JSON 格式有语法错误</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>模型 API Key 无效或已过期</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module6')">提交答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module6')">重新作答</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+  </main>
+
+</body>
+</html>

@@ -1,0 +1,277 @@
+<section class="module" id="module-3" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">IDE 派 · 辅助驾驶</h1>
+      <p class="module-subtitle">你坐主驾，AI 帮你看路、提示路线、有时直接接管 5 公里。</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">IDE 派的本质：副驾，而非司机</h2>
+        <p>把 IDE 派想成 L2-L4 辅助驾驶——不同 IDE 对应不同自动级别。<span class="term" data-definition="IDE = Integrated Development Environment 集成开发环境。Cursor / Windsurf / VS Code 都是 IDE，本质是&lsquo;带 AI 的代码编辑器&rsquo;，主驾依然是你。">IDE</span> 派最大的价值不是"AI 写代码"——是<strong>上下文管理</strong>。AGENTS.md / cursorrules / <span class="term" data-definition="MCP = Model Context Protocol（Anthropic 提的开放协议）。让 AI 工具可以通过统一接口接入任何外部数据源，比如直接读你的 Notion、Postgres、Slack。">MCP</span> 让 AI 持续了解你的项目，而不是每次重新解释一遍。</p>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🎯</div>
+          <div class="callout-content">
+            <strong class="callout-title">谁应该选 IDE 派</strong>
+            <p>需要长期维护代码的工程师、3-10 人小团队、追求"能看见每一行 diff 再合"的人。共同点：<em>代码质量比首次速度重要</em>。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Top 5 详解</h2>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">⌘</div>
+            <h4 class="pattern-title"><span class="term" data-definition="Cursor 是基于 VS Code 的 fork，把 AI 深度集成到编辑器里——侧边 Composer 可以多文件改、Tab 自动补全比 Copilot 更激进。2026 年 IDE 派标杆。">Cursor</span> 🔥</h4>
+            <p class="pattern-desc">"AI Code Editor with Cloud Agents, JetBrains integration, and 30+ plugins." 2026 IDE 派标杆。</p>
+            <p class="pattern-desc"><em>强项：</em>Composer 多文件改 + 30+ 插件 · <em>弱项：</em>Pro 订阅 $20/月 · <em>典型用户：</em>独立 + 小团队前端</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🌊</div>
+            <h4 class="pattern-title"><span class="term" data-definition="Windsurf 是 Codeium 出品，2025 年被 Cognition（Devin 母公司）收购。卖点是 Cascade——多步自动编码，可以一次跑十几个步骤。">Windsurf</span></h4>
+            <p class="pattern-desc">"Agentic IDE (acquired by Cognition, makers of Devin) with <span class="term" data-definition="Cascade 是 Windsurf 的多步骤 agent 模式——一句话进去，AI 自己规划 → 改代码 → 运行 → 看错误 → 再改，连续做几轮。">Cascade</span> for multi-step coding."</p>
+            <p class="pattern-desc"><em>强项：</em>Cascade 多步执行 + Tab <span class="term" data-definition="Supercomplete 是比传统 Tab 自动补全更激进的版本——不只补当前行，会预测你接下来要写整个函数 / 整段逻辑，一次给你 30 行建议。">supercomplete</span> · <em>弱项：</em>2025 易主后节奏不稳 · <em>典型用户：</em>追求&ldquo;一句话出整段&rdquo;</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">⚡</div>
+            <h4 class="pattern-title"><span class="term" data-definition="Zed 是 Atom 团队第二代作品，Rust 写的极致性能编辑器。原生 120fps、内置 Agent、自带实时协作。开源。">Zed</span></h4>
+            <p class="pattern-desc">Rust 原生 "Agentic IDE"——120fps 实时协作 + 内置 Agent。</p>
+            <p class="pattern-desc"><em>强项：</em>速度 + 开源 + 协作 · <em>弱项：</em>插件生态远不如 VS Code · <em>典型用户：</em>性能洁癖 / 偏好开源</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🇨🇳</div>
+            <h4 class="pattern-title">Trae</h4>
+            <p class="pattern-desc">字节出品，<strong>免费</strong>。免费 GPT-4o / Claude Sonnet / DeepSeek R1。</p>
+            <p class="pattern-desc"><em>强项：</em>免费用顶级模型 · <em>弱项：</em>新工具，生态薄 · <em>典型用户：</em>预算紧 / 国内用户</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🌀</div>
+            <h4 class="pattern-title"><span class="term" data-definition="Amazon Kiro 是 AWS 的 IDE，主打 Spec-driven development——先写需求规格，AI 按规格改代码。和 AWS 服务深度绑定。">Amazon Kiro</span></h4>
+            <p class="pattern-desc"><span class="term" data-definition="Spec-driven（规格驱动）= 写代码前先把 &lsquo;要做什么、输入什么、输出什么、约束是什么&rsquo; 写成结构化规格文档，AI 按规格执行。比直接 prompt 更可控。">Spec-driven</span> 开发 + AWS 深度集成。</p>
+            <p class="pattern-desc"><em>强项：</em>spec-driven 流程 + AWS 集成 · <em>弱项：</em>厂锁强 · <em>典型用户：</em>AWS 重度用户 / 企业团队</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">5 款 IDE 横向对比</h2>
+        <p>对号入座更省时间。同一个团队不同人选不一样的 IDE 也没事——因为下面要讲的 AGENTS.md 跨 IDE 通用。</p>
+
+        <div class="file-tree">
+          <div class="ft-folder open">
+            <span class="ft-name">Cursor</span>
+            <span class="ft-desc">$20/月 · GPT-4 / Claude / o3 任选 · Composer 强 · 大团队偏好</span>
+          </div>
+          <div class="ft-folder open">
+            <span class="ft-name">Windsurf</span>
+            <span class="ft-desc">$15/月 · Cascade 多步 · supercomplete 激进 · 速度玩家偏好</span>
+          </div>
+          <div class="ft-folder open">
+            <span class="ft-name">Zed</span>
+            <span class="ft-desc">免费基础版 / 付费 AI · 120fps · 开源 + 协作 · Rust 程序员偏好</span>
+          </div>
+          <div class="ft-folder open">
+            <span class="ft-name">Trae</span>
+            <span class="ft-desc">完全免费 · 免费 Claude Sonnet / GPT-4o · 国内 / 预算紧团队</span>
+          </div>
+          <div class="ft-folder open">
+            <span class="ft-name">Kiro</span>
+            <span class="ft-desc">AWS 体系内 · Spec-driven 流程 · 适合企业 / 合规要求高</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">解读 .cursorrules：让 AI 永远记得你的项目</h2>
+        <p>IDE 派最关键的文件不是代码——是<span class="term" data-definition=".cursorrules（或 cursor rules）= Cursor 项目根目录里的一个纯文本文件，AI 每次对话开头自动读它。相当于&lsquo;给 AI 的常驻 system prompt&rsquo;。">.cursorrules</span>。它是放在仓库根目录的纯文本，AI 每次对话开头都会读到。下面是真实片段：</p>
+
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">.cursorrules</span>
+            <pre><code><span class="code-line"><span class="code-comment"># Project Rules for AI</span></span>
+<span class="code-line"></span>
+<span class="code-line">- Use TypeScript strict mode.</span>
+<span class="code-line">- Prefer functional components,</span>
+<span class="code-line">  no class components.</span>
+<span class="code-line">- API calls go through</span>
+<span class="code-line">  src/lib/api/client.ts only.</span>
+<span class="code-line">- Test files live next to code:</span>
+<span class="code-line">  foo.ts and foo.test.ts.</span>
+<span class="code-line">- Never edit /generated/ folder.</span>
+<span class="code-line">- Use pnpm, not npm or yarn.</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>"Project Rules for AI"</strong>——下面这堆是给 AI 看的项目家规。</p>
+              <p class="tl"><strong>TypeScript strict mode + 函数组件</strong>——技术风格，AI 不会再生成你已经禁用的 class 组件。</p>
+              <p class="tl"><strong>"API calls go through src/lib/api/client.ts only"</strong>——架构约束。这一句让 AI 永远不会瞎写一个新的 fetch 出来。</p>
+              <p class="tl"><strong>"Test files live next to code"</strong>——文件组织习惯。AI 生成新文件时会自己放对位置。</p>
+              <p class="tl"><strong>"Never edit /generated/"</strong>——保护机制。某些目录是自动生成的，AI 改了就会被覆盖掉。</p>
+              <p class="tl">这些规则<strong>每一次新对话开头都自动读</strong>——你不需要每次重复"用 TypeScript、用 pnpm、别动那个目录"。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">📦</div>
+          <div class="callout-content">
+            <strong class="callout-title">awesome-cursorrules 仓库</strong>
+            <p>GitHub 上有一个 <code>awesome-cursorrules</code> 仓库，按技术栈（Next.js / FastAPI / Rust / 等等）收集精选 .cursorrules。新项目第一件事就是复制一份过来。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">两家 IDE 的"工作风格"差异</h2>
+        <p>同一个需求："把这个组件改成响应式 + 加暗色模式"。Cursor Composer 和 Windsurf Cascade 给出的指令风格不同——读懂这个差异，你就明白选哪一家。</p>
+
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">Cursor Composer</span>
+            <pre><code><span class="code-line">@components/Card.tsx</span>
+<span class="code-line">@styles/theme.ts</span>
+<span class="code-line"></span>
+<span class="code-line">Make Card responsive:</span>
+<span class="code-line">- single column &lt; 640px</span>
+<span class="code-line">- 2 columns 640-1024px</span>
+<span class="code-line">- 3 columns &gt; 1024px</span>
+<span class="code-line"></span>
+<span class="code-line">Add dark mode using</span>
+<span class="code-line">existing theme tokens.</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译 · Cursor 风格</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>"@" 选文件</strong>——你必须明确告诉 AI 操作哪些文件。</p>
+              <p class="tl"><strong>具体断点：&lt; 640px / 640-1024 / &gt; 1024</strong>——Cursor 喜欢精确数字，AI 严格执行。</p>
+              <p class="tl"><strong>"using existing theme tokens"</strong>——指定要复用，不要造新的颜色变量。</p>
+              <p class="tl"><strong>风格总结：</strong>外科手术——你给精确指令，AI 精准执行。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">Windsurf Cascade</span>
+            <pre><code><span class="code-line">Make the Card component</span>
+<span class="code-line">work great on phone, tablet,</span>
+<span class="code-line">and desktop, and add dark</span>
+<span class="code-line">mode that matches our brand.</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment">// Cascade then:</span></span>
+<span class="code-line"><span class="code-comment">// 1. reads project structure</span></span>
+<span class="code-line"><span class="code-comment">// 2. finds theme tokens</span></span>
+<span class="code-line"><span class="code-comment">// 3. plans 6 file edits</span></span>
+<span class="code-line"><span class="code-comment">// 4. asks for approval</span></span>
+<span class="code-line"><span class="code-comment">// 5. runs tests after</span></span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译 · Windsurf 风格</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>更口语</strong>——"在手机、平板、桌面都好用"，不写具体断点。</p>
+              <p class="tl"><strong>Cascade 自己规划</strong>——AI 先看项目结构、找现有变量、规划改哪几个文件，再问你确认。</p>
+              <p class="tl"><strong>"runs tests after"</strong>——改完自己跑测试，失败再调一次。</p>
+              <p class="tl"><strong>风格总结：</strong>多步代理——你给意图，AI 自己拆任务执行循环。</p>
+            </div>
+          </div>
+        </div>
+
+        <p><strong>怎么选：</strong>外科手术派 → Cursor。多步代理派 → Windsurf。两个都试一周再决定。</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">AGENTS.md：跨 IDE 的通用语言</h2>
+        <p>每家 IDE 有自己的配置文件——Cursor 用 .cursorrules、Windsurf 用 .windsurfrules、Kiro 用自己的 spec……每次换 IDE 都重写一遍？</p>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🌍</div>
+          <div class="callout-content">
+            <strong class="callout-title"><span class="term" data-definition="agents.md（AGENTS.md）= Linux Foundation 维护的开放格式，用一个统一的 markdown 文件描述项目给 AI agent 看。Cursor / Windsurf / Zed / Kiro 等主流 IDE 都读它，跨工具迁移零成本。">AGENTS.md</span> 是 Linux Foundation 维护的开放格式</strong>
+            <p>"A simple, open format for guiding coding agents." 一份 markdown，所有 IDE 都读：Cursor / Windsurf / Zed / Kiro / claude-code 都已支持。这一份文件让你换 IDE 零迁移成本。</p>
+            <p style="margin-top:var(--space-2);font-size:var(--text-sm)">仓库：<code>agents.md</code></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">实战测验</h2>
+
+        <div class="quiz-container" id="quiz-m3">
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">场景</span>
+              <p>团队 5 人，想统一 AI 编辑器但<strong>预算紧</strong>。每人 $20/月 × 5 × 12 = $1200/年承受不起。</p>
+            </div>
+            <div class="quiz-question-block"
+                 data-correct="m3-q1-b"
+                 data-explanation-right="对——预算紧 + 5 人统一两个约束下，Trae 免费用 Claude Sonnet 是最直接的解。但更关键的一步是&lsquo;共享 AGENTS.md&rsquo;——这样将来谁要换 IDE 也不用重新教 AI 项目规则。这个组合让你既省钱又留了升级路径。"
+                 data-explanation-wrong="再想想——预算是硬约束，那 Cursor Pro $20 × 5 是顶不住的。&lsquo;每人选自己的&rsquo;短期省事，但缺了统一上下文，每次 review PR 都看到 AI 风格不同。最优是免费工具 + 共享配置。">
+              <h3 class="quiz-question">最合适的方案是？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="m3-q1-a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>A. 所有人 Cursor Pro，咬牙交</span>
+                </button>
+                <button class="quiz-option" data-value="m3-q1-b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>B. 所有人 Trae 免费 + 共享 AGENTS.md</span>
+                </button>
+                <button class="quiz-option" data-value="m3-q1-c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>C. 每人选自己的工具，自由发挥</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+          </div>
+
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">场景 2</span>
+              <p>你最近频繁切换三个项目（一个 Next.js 老项目、一个 Rust CLI、一个 Python 数据科学）。每次进新项目 AI 都从零猜技术栈。</p>
+            </div>
+            <div class="quiz-question-block"
+                 data-correct="m3-q2-c"
+                 data-explanation-right="对——根因是&lsquo;AI 没有项目上下文&rsquo;。每个项目根目录里放一份 AGENTS.md，把技术栈、风格、约束写清楚。AI 进新项目自动读，不需要你每次重复解释。换 IDE 都能用同一份。"
+                 data-explanation-wrong="再想想——换更贵的模型只让 AI &lsquo;更聪明&rsquo;，但它依然不知道你的项目用 pnpm 还是 npm、用 React Query 还是 SWR。问题在&lsquo;上下文&rsquo;不在&lsquo;模型&rsquo;。">
+              <h3 class="quiz-question">最该做的事是？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="m3-q2-a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>A. 换成 Claude Opus 4 / GPT-5 顶级模型</span>
+                </button>
+                <button class="quiz-option" data-value="m3-q2-b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>B. 每次手打 system prompt 解释项目</span>
+                </button>
+                <button class="quiz-option" data-value="m3-q2-c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>C. 每个项目根目录放一份 AGENTS.md</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m3')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m3')">再试一次</button>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Key Insight：上下文 &gt; 模型</strong>
+            <p>IDE 派最大价值不是"AI 写代码"——是<strong>上下文管理</strong>。AGENTS.md / .cursorrules / MCP 让 AI 持续了解你的项目。一个有上下文的中等模型，远胜一个零上下文的最强模型。</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

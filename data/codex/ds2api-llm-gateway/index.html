@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ds2api：多协议 LLM API 网关实现原理</title>
+
+  <!-- Google Fonts: Bricolage Grotesque · DM Sans · JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    :root {
+      --color-accent:       #2A7B9B;
+      --color-accent-hover: #1F6280;
+      --color-accent-light: #E4F2F7;
+      --color-accent-muted: #5A9DB8;
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">ds2api 网关原理</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <button class="nav-dot" data-target="module-1" data-tooltip="它是什么 · 一次请求经历什么" role="tab" aria-label="模块 1：它是什么 · 一次请求经历什么"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="三种 API 形状如何归一" role="tab" aria-label="模块 2：三种 API 形状如何归一"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="账号池 · 公平排队" role="tab" aria-label="模块 3：账号池与公平排队"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="工具调用防泄漏" role="tab" aria-label="模块 4：工具调用防泄漏"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="PoW · Vercel 双 Runtime" role="tab" aria-label="模块 5：PoW 与 Vercel 双 Runtime 桥"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh -->
+    <section class="module" id="module-1">
+      <div class="module-inner">
+
+        <header class="module-header">
+          <span class="module-number">01</span>
+          <h1 class="module-title">没有官方 API？我们自己造一个</h1>
+          <p class="module-tagline">把 DeepSeek 网页对话伪装成 OpenAI / Claude / Gemini API，让既有 SDK 不改一行代码就能跑。</p>
+        </header>
+
+        <section class="screen">
+          <h2>痛点：你的代码不会变，但模型没 API</h2>
+          <p>你已经写好了一套调用 <span class="term" data-definition="SDK = 软件开发工具包。第三方提供的一套现成函数库，你不用自己拼 HTTP 请求，调几个方法就能用它的服务。">SDK</span> 的代码 —— 比如 OpenAI 的 <code>openai.chat.completions.create()</code>。某天你想换成 DeepSeek，结果发现：DeepSeek 只开放网页聊天，没有官方 <span class="term" data-definition="API = 应用程序接口。一个程序对外暴露的"插孔"，别的程序按约定的格式发请求过来就能用它的能力。">API</span>。</p>
+
+          <div class="callout callout-accent">
+            <div class="callout-icon">💡</div>
+            <div class="callout-content">
+              <strong class="callout-title">ds2api 的定位</strong>
+              <p>它是一个 <span class="term" data-definition="网关 = 站在你和真正服务之间的一台中转机。它接你的请求、改写一下、再去问后端、把答案翻译回你期望的格式。">网关</span>：对外假装成 OpenAI / Claude / Gemini API，对内把请求翻译成 DeepSeek 网页能听懂的对话，再把网页的流式回复包装回你期待的 API 格式。<strong>SDK 一行不动，模型已经悄悄换掉了。</strong></p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>谁会用它，为什么有意思</h2>
+          <div class="pattern-cards">
+            <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+              <div class="pattern-icon" style="background: var(--color-actor-1)">🧑‍💻</div>
+              <h4 class="pattern-title">个人开发者</h4>
+              <p class="pattern-desc">想把自己的 AI 工具切到 DeepSeek 省钱，但代码用了一堆 OpenAI SDK，不想全部重写。</p>
+            </div>
+            <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+              <div class="pattern-icon" style="background: var(--color-actor-2)">🏢</div>
+              <h4 class="pattern-title">小团队</h4>
+              <p class="pattern-desc">已经在用 Claude Code / Codex CLI / LangChain，想接入 DeepSeek 做对比实验，又不想改框架。</p>
+            </div>
+            <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+              <div class="pattern-icon" style="background: var(--color-actor-3)">🔧</div>
+              <h4 class="pattern-title">工程学习者</h4>
+              <p class="pattern-desc">想拆解一个真实的"协议适配 + 并发控制 + 流式转发"工程是怎么搭起来的。</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>一次请求会经历什么 —— 跟着数据走</h2>
+          <p>想象你在终端运行 <code>claude "解释一下闭包"</code>。Claude Code 以为它在跟 Anthropic 服务器说话，但环境变量里 <code>ANTHROPIC_BASE_URL</code> 偷偷指向了本地的 ds2api。接下来发生的事：</p>
+
+          <div class="flow-animation" data-steps='[
+            {"highlight":"flow-actor-1","label":"Claude Code 发出 POST /v1/messages，body 是 Anthropic 协议的 JSON"},
+            {"highlight":"flow-actor-2","label":"ds2api 路由器收到请求，认出是 Claude 形状","packet":true,"from":"actor-1","to":"actor-2"},
+            {"highlight":"flow-actor-3","label":"PromptCompat 把 Claude messages 拍扁成纯文本上下文","packet":true,"from":"actor-2","to":"actor-3"},
+            {"highlight":"flow-actor-4","label":"账号池借出一个空闲 DeepSeek 账号槽位","packet":true,"from":"actor-3","to":"actor-4"},
+            {"highlight":"flow-actor-5","label":"DeepSeek 客户端先解 PoW，再发起网页 completion","packet":true,"from":"actor-4","to":"actor-5"},
+            {"highlight":"flow-actor-5","label":"DeepSeek 网页流式吐字（SSE 事件流）"},
+            {"highlight":"flow-actor-2","label":"ds2api 实时把每个 token 包装成 Anthropic 流格式回吐","packet":true,"from":"actor-5","to":"actor-2"},
+            {"highlight":"flow-actor-1","label":"Claude Code 看到熟悉的 Anthropic SSE 流，毫无察觉"}
+          ]'>
+            <div class="flow-actors">
+              <div class="flow-actor" id="flow-actor-1">
+                <div class="flow-actor-icon">CC</div>
+                <span>Claude Code</span>
+              </div>
+              <div class="flow-actor" id="flow-actor-2">
+                <div class="flow-actor-icon">RT</div>
+                <span>chi 路由</span>
+              </div>
+              <div class="flow-actor" id="flow-actor-3">
+                <div class="flow-actor-icon">PC</div>
+                <span>PromptCompat</span>
+              </div>
+              <div class="flow-actor" id="flow-actor-4">
+                <div class="flow-actor-icon">AP</div>
+                <span>账号池</span>
+              </div>
+              <div class="flow-actor" id="flow-actor-5">
+                <div class="flow-actor-icon">DS</div>
+                <span>DeepSeek 网页</span>
+              </div>
+            </div>
+
+            <div class="flow-packet" id="flow-packet"></div>
+            <div class="flow-step-label" id="flow-label">点击"下一步"开始追踪请求</div>
+
+            <div class="flow-controls">
+              <button class="btn flow-next-btn">下一步</button>
+              <button class="btn flow-reset-btn">重新播放</button>
+              <span class="flow-progress"></span>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>仓库结构 —— 五个核心目录</h2>
+          <p>你不需要记目录名。但知道每件事住在哪里，能让你跟 AI 协作时一句话说清要改哪：<em>"去 internal/promptcompat 改一下 Claude 的 system 注入"</em>。</p>
+
+          <div class="file-tree">
+            <div class="ft-folder open">
+              <span class="ft-name">internal/server/</span>
+              <span class="ft-desc">chi 路由 + 中间件，所有 HTTP 请求的第一站</span>
+            </div>
+            <div class="ft-folder">
+              <span class="ft-name">internal/httpapi/</span>
+              <span class="ft-desc">三套协议适配器：openai/ · claude/ · gemini/ · admin/</span>
+            </div>
+            <div class="ft-folder">
+              <span class="ft-name">internal/promptcompat/</span>
+              <span class="ft-desc">把三种协议的消息归一成 DeepSeek 网页能吃的纯文本上下文</span>
+            </div>
+            <div class="ft-folder">
+              <span class="ft-name">internal/account/</span>
+              <span class="ft-desc">账号池 + 并发槽位 + 等待队列</span>
+            </div>
+            <div class="ft-folder">
+              <span class="ft-name">internal/deepseek/</span>
+              <span class="ft-desc">真正去敲 DeepSeek 网页的客户端：登录 / PoW / completion</span>
+            </div>
+            <div class="ft-folder">
+              <span class="ft-name">pow/</span>
+              <span class="ft-desc">DeepSeekHashV1 工作量证明的纯 Go 实现</span>
+            </div>
+            <div class="ft-folder">
+              <span class="ft-name">api/ + internal/js/</span>
+              <span class="ft-desc">Vercel Node Runtime 流式桥接，仅在 serverless 部署生效</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>记一下：路由就是个分检员</h2>
+          <p>Go 后端启动时，<code>internal/server/router.go</code> 把所有协议入口挂到同一棵 chi 路由树上。每条路径只对应一种协议适配器：</p>
+
+          <div class="translation-block animate-in">
+            <div class="translation-code">
+              <span class="translation-label">CODE · internal/server/NewApp()</span>
+              <pre><code><span class="code-line"><span class="code-keyword">store</span>, _ := config.LoadStoreWithError()</span>
+<span class="code-line"><span class="code-keyword">pool</span> := account.NewPool(store)</span>
+<span class="code-line"><span class="code-keyword">resolver</span> := auth.NewResolver(store, pool, ...)</span>
+<span class="code-line"><span class="code-keyword">dsClient</span> := dsclient.NewClient(store, resolver)</span>
+<span class="code-line"><span class="code-keyword">if</span> err := dsClient.PreloadPow(ctx); err != <span class="code-keyword">nil</span> {</span>
+<span class="code-line">  config.Logger.Warn(<span class="code-string">"[PoW] init failed"</span>, ...)</span>
+<span class="code-line">} <span class="code-keyword">else</span> {</span>
+<span class="code-line">  config.Logger.Info(<span class="code-string">"[PoW] pure Go solver ready"</span>)</span>
+<span class="code-line">}</span></code></pre>
+            </div>
+            <div class="translation-english">
+              <span class="translation-label">中文翻译</span>
+              <div class="translation-lines">
+                <p class="tl">先把配置读出来 —— 账号、密钥、阈值这些都在里面。</p>
+                <p class="tl">用配置造一个账号池，专门管"哪个 DeepSeek 账号现在空闲"。</p>
+                <p class="tl">造一个鉴权解析器，把客户端发来的 API key 翻译成具体哪个 DeepSeek 账号该接这单。</p>
+                <p class="tl">造一个 DeepSeek 客户端，真正去敲网页那边。</p>
+                <p class="tl">服务还没接客之前，先把 PoW（工作量证明）的求解器预热一下。</p>
+                <p class="tl">预热失败也不挂 —— 写一条警告，让接到第一单时再现算。</p>
+                <p class="tl">预热成功就打日志说"纯 Go PoW 解算器就绪"，这是它的招牌之一。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout callout-info">
+            <div class="callout-icon">📝</div>
+            <div class="callout-content">
+              <strong class="callout-title">为什么开服前要预热 PoW</strong>
+              <p>DeepSeek 网页每次发对话前要求客户端先算一道哈希难题（防爬）。冷启动时算一次得花几百毫秒，会让第一个用户感觉很慢。预热就是开门前先把灶火点上。</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>检查一下：你抓住了主干吗？</h2>
+          <div class="quiz-container" id="quiz-module1">
+
+            <div class="quiz-question-block"
+                 data-correct="b"
+                 data-explanation-right="对。ds2api 是协议层网关，它不重新训练任何模型，也不改 SDK 代码 —— 它只让上游网页 DeepSeek 看起来像是 3 种主流官方 API。"
+                 data-explanation-wrong="再想想。ds2api 没训练新模型，也不要求你改 SDK；它做的事更接近"翻译大堂"。">
+              <h3 class="quiz-question">朋友问你 ds2api 到底是什么，下面哪个解释最准确？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>它是一个新模型，比 DeepSeek 更便宜。</span>
+                </button>
+                <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>它把 DeepSeek 网页对话伪装成 OpenAI/Claude/Gemini API，让旧代码不改一行就能换模型。</span>
+                </button>
+                <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>它是一个 SDK，要你换掉所有 OpenAI 调用代码。</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <div class="quiz-question-block"
+                 data-correct="c"
+                 data-explanation-right="对。所有协议先汇集到 PromptCompat，统一成纯文本上下文交给 DeepSeek 网页。这一步是整个项目的灵魂。"
+                 data-explanation-wrong="再看一下流程图：三种协议表面不同，但都会先在 PromptCompat 收口，再丢给上游。">
+              <h3 class="quiz-question">在追踪一个 Claude Code 请求时，下一步它会撞到哪个组件？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>账号池 —— 直接抢账号去发请求。</span>
+                </button>
+                <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>PoW 求解器 —— 一切先解题。</span>
+                </button>
+                <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>PromptCompat —— 先把 Claude messages 翻成纯文本上下文。</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <div class="quiz-question-block"
+                 data-correct="b"
+                 data-explanation-right="对。internal/server 只负责把请求分流到对的协议适配器，类似快递分检中心。具体怎么把消息转成 DeepSeek 网页能吃的格式，是 promptcompat 的事。"
+                 data-explanation-wrong="不对。internal/server 是路由 + 中间件层，不做协议翻译。把 Claude/OpenAI 消息归一成 DeepSeek 上下文是 promptcompat 的事。">
+              <h3 class="quiz-question">你想改"Claude 的 system prompt 注入逻辑"，应该改哪个目录？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>internal/server/ —— 因为请求一进来就在这。</span>
+                </button>
+                <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>internal/promptcompat/ —— 因为 system 注入是协议归一这一层的事。</span>
+                </button>
+                <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>internal/account/ —— 因为它管所有账号。</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">检查答案</button>
+            <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">重做</button>
+          </div>
+        </section>
+
+      </div>
+    </section>
+    <section class="module" id="module-2">
+      <div class="module-inner">
+
+        <header class="module-header">
+          <span class="module-number">02</span>
+          <h1 class="module-title">三种协议形状如何归一</h1>
+          <p class="module-tagline">联合国同传亭：三国大使各讲各的语言，最后都翻译成一种"大堂语"递交。</p>
+        </header>
+
+        <section class="screen">
+          <h2>问题：上游只懂一种语言</h2>
+          <p>DeepSeek 网页对话的输入是<strong>一段纯文本上下文</strong> —— 像你在网页框里贴了一长串"用户问、助手答、用户又问"的剧本。它不认识 OpenAI 的 <code>messages: [{role, content}]</code>、不认识 Claude 的 <code>system + messages</code>、更不认识 Gemini 的 <code>contents: [{parts: [{text}]}]</code>。</p>
+
+          <div class="callout callout-accent">
+            <div class="callout-icon">🌐</div>
+            <div class="callout-content">
+              <strong class="callout-title">同传亭比喻</strong>
+              <p>三位大使分别讲法语、阿拉伯语、日语。上游领导只听一种"大堂语"。<strong>同传亭就是 PromptCompat：把任何一种入境语言翻译成大堂语，再把领导的回话翻译回各自原语递回去。</strong> 三种 API 的协议差异，全部在这里被吃掉。</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>三个大使，三种"形状"</h2>
+          <div class="icon-rows">
+            <div class="icon-row">
+              <div class="icon-circle" style="background: var(--color-actor-1)">🅾️</div>
+              <div>
+                <strong>OpenAI 形状</strong>
+                <p>扁平的 <code>messages: [{role: "user"|"assistant"|"system"|"tool", content}]</code>。工具描述放在顶层 <code>tools</code> 字段。</p>
+              </div>
+            </div>
+            <div class="icon-row">
+              <div class="icon-circle" style="background: var(--color-actor-2)">🅰️</div>
+              <div>
+                <strong>Claude 形状</strong>
+                <p>system 单独一个顶层字段；messages 里 user/assistant 严格交替；工具描述放 <code>tools</code>，工具结果以 <code>tool_result</code> 块嵌入 user 消息。</p>
+              </div>
+            </div>
+            <div class="icon-row">
+              <div class="icon-circle" style="background: var(--color-actor-3)">🅶</div>
+              <div>
+                <strong>Gemini 形状</strong>
+                <p><code>contents: [{role, parts: [{text}|{inlineData}|{functionCall}]}]</code>，多模态切片更细，role 只有 user/model。</p>
+              </div>
+            </div>
+            <div class="icon-row">
+              <div class="icon-circle" style="background: var(--color-accent)">🏛️</div>
+              <div>
+                <strong>大堂语：DeepSeek 网页上下文</strong>
+                <p>纯文本剧本，像 <code>System: ...\n\nUser: ...\n\nAssistant: ...\n\nUser: ...</code>。没有结构化字段，只有顺序和角色标记。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>核心代码：归一的入口</h2>
+          <p>不论你来自哪种协议，最终都会调到 <code>BuildOpenAIPrompt</code> 或它的兄弟函数。Claude 和 Gemini 适配器在前面做格式转换，把消息改造成 OpenAI 风格的 <code>messages</code>，然后复用同一条管道。</p>
+
+          <div class="translation-block animate-in">
+            <div class="translation-code">
+              <span class="translation-label">CODE · internal/promptcompat/prompt_build.go</span>
+              <pre><code><span class="code-line"><span class="code-keyword">func</span> <span class="code-function">BuildOpenAIPrompt</span>(messagesRaw []any, toolsRaw any,</span>
+<span class="code-line">    traceID string, toolPolicy ToolChoicePolicy,</span>
+<span class="code-line">    thinkingEnabled bool) (string, []string) {</span>
+<span class="code-line">  messages := <span class="code-function">NormalizeOpenAIMessagesForPrompt</span>(messagesRaw, traceID)</span>
+<span class="code-line">  toolNames := []string{}</span>
+<span class="code-line">  <span class="code-keyword">if</span> tools, ok := toolsRaw.([]any); ok && <span class="code-function">len</span>(tools) > 0 {</span>
+<span class="code-line">    messages, toolNames = <span class="code-function">injectToolPrompt</span>(messages, tools, toolPolicy)</span>
+<span class="code-line">  }</span>
+<span class="code-line">  <span class="code-keyword">return</span> prompt.<span class="code-function">MessagesPrepareWithThinking</span>(messages, thinkingEnabled), toolNames</span>
+<span class="code-line">}</span></code></pre>
+            </div>
+            <div class="translation-english">
+              <span class="translation-label">中文翻译</span>
+              <div class="translation-lines">
+                <p class="tl">这个函数接两件大件：原始消息列表、原始工具描述列表。</p>
+                <p class="tl">还有 traceID（追踪同一个请求的标签）和"是否开启思考链"的开关。</p>
+                <p class="tl">第一步：把消息归一化 —— 同样的 user/assistant/tool 角色都按 OpenAI 形状摆好，缺字段补默认值。</p>
+                <p class="tl">第二步：如果客户端传了工具，就把每个工具的名字和参数 schema 注入到 system 提示里。</p>
+                <p class="tl">DeepSeek 网页根本不懂"工具调用"，所以工具说明只能用人话写进 prompt 里告诉模型："你可以这样调用工具，输出按这个格式"。</p>
+                <p class="tl">最后一步：把所有消息按角色标签拼成纯文本剧本，可选地包一层 <span class="term" data-definition="思考链 = 模型在给出最终答案前，先在脑子里推演一遍中间过程。开启后输出会包含"先想再说"的段落。">思考链</span> 包装。</p>
+                <p class="tl">返回两件东西：拼好的纯文本上下文，以及这次允许调用的工具名清单（用于后面流式防泄漏）。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>看一眼归一前后的对比</h2>
+          <p>同一个"用户问太阳系有几大行星"的请求，OpenAI 形状进来后，最终递给 DeepSeek 网页的样子是一段纯文本：</p>
+
+          <div class="translation-block animate-in">
+            <div class="translation-code">
+              <span class="translation-label">客户端原始请求（OpenAI 形状）</span>
+              <pre><code><span class="code-line">{</span>
+<span class="code-line">  <span class="code-property">"model"</span>: <span class="code-string">"gpt-4.1"</span>,</span>
+<span class="code-line">  <span class="code-property">"messages"</span>: [</span>
+<span class="code-line">    {<span class="code-property">"role"</span>: <span class="code-string">"system"</span>, <span class="code-property">"content"</span>: <span class="code-string">"你是天文学助手"</span>},</span>
+<span class="code-line">    {<span class="code-property">"role"</span>: <span class="code-string">"user"</span>, <span class="code-property">"content"</span>: <span class="code-string">"太阳系有几大行星？"</span>}</span>
+<span class="code-line">  ],</span>
+<span class="code-line">  <span class="code-property">"stream"</span>: <span class="code-keyword">true</span></span>
+<span class="code-line">}</span></code></pre>
+            </div>
+            <div class="translation-english">
+              <span class="translation-label">PromptCompat 拼好后递给 DeepSeek 网页的"剧本"</span>
+              <div class="translation-lines">
+                <p class="tl"><strong>System:</strong> 你是天文学助手</p>
+                <p class="tl"><strong>User:</strong> 太阳系有几大行星？</p>
+                <p class="tl"><strong>Assistant:</strong> <em>（等待网页流式吐字）</em></p>
+                <p class="tl">这一段才是 DeepSeek 网页真正认识的输入。从这里之后，三种协议彻底无差别。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>不同适配器怎么"对话"</h2>
+          <p>三种协议适配器和归一层的实际对话长这样：</p>
+
+          <div class="chat-window" id="chat-promptcompat">
+            <div class="chat-messages">
+              <div class="chat-message" data-msg="0" data-sender="claude" style="display:none">
+                <div class="chat-avatar" style="background: var(--color-actor-2)">CA</div>
+                <div class="chat-bubble">
+                  <span class="chat-sender" style="color: var(--color-actor-2)">Claude 适配器</span>
+                  <p>来活了！客户端发来一个 <code>POST /v1/messages</code>，body 里 system 是顶层字段，messages 严格 user/assistant 交替。</p>
+                </div>
+              </div>
+              <div class="chat-message" data-msg="1" data-sender="claude" style="display:none">
+                <div class="chat-avatar" style="background: var(--color-actor-2)">CA</div>
+                <div class="chat-bubble">
+                  <span class="chat-sender" style="color: var(--color-actor-2)">Claude 适配器</span>
+                  <p>我先把 system 拆出来塞回 messages 头部、把 tool_result 块拆成 tool 角色消息 —— 让它看起来像 OpenAI 形状。</p>
+                </div>
+              </div>
+              <div class="chat-message" data-msg="2" data-sender="pc" style="display:none">
+                <div class="chat-avatar" style="background: var(--color-accent)">PC</div>
+                <div class="chat-bubble">
+                  <span class="chat-sender" style="color: var(--color-accent)">PromptCompat</span>
+                  <p>收到 OpenAI 形状的 messages 数组。我做归一化、注入工具描述、按角色拼成纯文本剧本。</p>
+                </div>
+              </div>
+              <div class="chat-message" data-msg="3" data-sender="gemini" style="display:none">
+                <div class="chat-avatar" style="background: var(--color-actor-3)">GA</div>
+                <div class="chat-bubble">
+                  <span class="chat-sender" style="color: var(--color-actor-3)">Gemini 适配器</span>
+                  <p>同时另一头我也来了！我把 contents.parts 里的 text/inlineData/functionCall 摊平成 OpenAI 风格 messages，丢给 PromptCompat。</p>
+                </div>
+              </div>
+              <div class="chat-message" data-msg="4" data-sender="pc" style="display:none">
+                <div class="chat-avatar" style="background: var(--color-accent)">PC</div>
+                <div class="chat-bubble">
+                  <span class="chat-sender" style="color: var(--color-accent)">PromptCompat</span>
+                  <p>都一样处理。我吐回去的也是同一种纯文本上下文 + 工具名清单。三家适配器再各自包装回原协议格式给客户端。</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="chat-typing" id="chat-promptcompat-typing" style="display:none">
+              <div class="chat-avatar" id="chat-promptcompat-typing-avatar">?</div>
+              <div class="chat-typing-dots">
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+              </div>
+            </div>
+
+            <div class="chat-controls">
+              <button class="btn chat-next-btn">下一条消息</button>
+              <button class="btn chat-all-btn">一次播完</button>
+              <button class="btn chat-reset-btn">重播</button>
+              <span class="chat-progress"></span>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>为什么这样设计</h2>
+          <div class="pattern-cards">
+            <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+              <div class="pattern-icon" style="background: var(--color-actor-1)">🎯</div>
+              <h4 class="pattern-title">单一收敛点</h4>
+              <p class="pattern-desc">所有协议都走同一条管道。新增 Mistral 兼容？只需要加一个适配器把它"翻成 OpenAI 形状"。</p>
+            </div>
+            <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+              <div class="pattern-icon" style="background: var(--color-actor-2)">🧱</div>
+              <h4 class="pattern-title">最小公倍数</h4>
+              <p class="pattern-desc">挑了 OpenAI 风格当中转格式 —— 因为它最接近"扁平消息列表"，转成纯文本最便宜。</p>
+            </div>
+            <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+              <div class="pattern-icon" style="background: var(--color-actor-3)">🔧</div>
+              <h4 class="pattern-title">工具用 prompt 模拟</h4>
+              <p class="pattern-desc">DeepSeek 网页没有结构化 tool call 接口。用一段精心写的 system 提示告诉模型"按 DSML 格式输出工具调用"，再在流上拦截解析。</p>
+            </div>
+          </div>
+
+          <div class="callout callout-accent">
+            <div class="callout-icon">💡</div>
+            <div class="callout-content">
+              <strong class="callout-title">普适设计教训</strong>
+              <p>当你要兼容 N 种输入格式 + M 种输出格式，不要写 N×M 个适配器。<strong>选一种"中转格式"，让所有输入归一到它，所有输出从它分发。</strong> 工程师叫这个 hub-and-spoke 架构。</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>检查理解</h2>
+          <div class="quiz-container" id="quiz-module2">
+
+            <div class="quiz-question-block"
+                 data-correct="b"
+                 data-explanation-right="对。DeepSeek 网页只能消费一段纯文本剧本，所以归一后的"中转格式"就是按角色拼起来的字符串。结构化字段在这一步全部被压扁。"
+                 data-explanation-wrong="再想想。上游 DeepSeek 是网页对话，它没有结构化 messages 接口，PromptCompat 输出必须能直接贴进网页对话框。">
+              <h3 class="quiz-question">PromptCompat 最终递给 DeepSeek 上游的是什么？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>OpenAI 形状的 messages 数组（JSON）。</span>
+                </button>
+                <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>按角色顺序拼接的纯文本剧本。</span>
+                </button>
+                <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>Claude 形状的 system + messages。</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <div class="quiz-question-block"
+                 data-correct="c"
+                 data-explanation-right="对。OpenAI 形状最接近"扁平的角色 + 内容"列表，转纯文本剧本几乎是一对一映射；选它当中转格式，三家适配器写起来都最省事。"
+                 data-explanation-wrong="再想想。中转格式是为了"易于转纯文本"挑的，不是因为它流行或者更标准。">
+              <h3 class="quiz-question">为什么 ds2api 选 OpenAI 形状当所有协议归一的中转格式？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>因为 OpenAI 是最早的 API，最权威。</span>
+                </button>
+                <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>因为客户都用 OpenAI SDK，省得重写。</span>
+                </button>
+                <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>因为它最接近"角色 + 内容"扁平列表，最容易拍扁成纯文本。</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <div class="quiz-question-block"
+                 data-correct="b"
+                 data-explanation-right="对。DeepSeek 网页没有结构化工具调用接口。ds2api 把工具描述写进 system prompt，让模型按约定的 DSML 标记输出"我想调用 X 工具"，然后在流式输出上识别这些标记。"
+                 data-explanation-wrong="再想想：上游网页根本不认识 functionCall 字段，工具调用必须靠 prompt + 流上识别来模拟。">
+              <h3 class="quiz-question">客户端发来一个带 <code>tools</code> 的请求，PromptCompat 怎么处理？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>把 tools 转发给 DeepSeek 网页，它会自己识别。</span>
+                </button>
+                <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>把工具描述用人话写进 system prompt，并约定模型按 DSML 标记输出工具调用。</span>
+                </button>
+                <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>报错，因为 DeepSeek 不支持工具调用。</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">检查答案</button>
+            <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重做</button>
+          </div>
+        </section>
+
+      </div>
+    </section>
+    <section class="module" id="module-3">
+      <div class="module-inner">
+
+        <header class="module-header">
+          <span class="module-number">03</span>
+          <h1 class="module-title">账号池：健身房储物柜的并发哲学</h1>
+          <p class="module-tagline">每个账号是一个储物柜，柜子有满员上限；满员时新人排队，柜子腾出来按到达顺序唤醒。</p>
+        </header>
+
+        <section class="screen">
+          <h2>问题：账号会被掐</h2>
+          <p>DeepSeek 网页对话有反爬规则：单账号短时间发太多请求会被风控。你想跑高并发？要么多备几个账号，要么慢一点 —— 最好两件事都做。<strong>账号池就是给多账号 + 限速排出秩序的那个调度员。</strong></p>
+
+          <div class="callout callout-accent">
+            <div class="callout-icon">🏋️</div>
+            <div class="callout-content">
+              <strong class="callout-title">健身房储物柜比喻</strong>
+              <p>每个 DeepSeek 账号是一个储物柜，每个柜子最多能同时塞两件衣服（<code>maxInflightPerAccount</code>，默认 2）。来锻炼的人（请求）找空柜子；柜子全满时排队等；有人取走衣服，按排队顺序通知下一位。</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>账号池的内部结构</h2>
+          <p>读一下 Pool 的核心字段，就知道它在记什么：</p>
+
+          <div class="translation-block animate-in">
+            <div class="translation-code">
+              <span class="translation-label">CODE · internal/account/pool_core.go</span>
+              <pre><code><span class="code-line"><span class="code-keyword">type</span> Pool <span class="code-keyword">struct</span> {</span>
+<span class="code-line">  store                  *config.Store</span>
+<span class="code-line">  mu                     sync.Mutex</span>
+<span class="code-line">  queue                  []string</span>
+<span class="code-line">  inUse                  map[string]int</span>
+<span class="code-line">  waiters                []chan struct{}</span>
+<span class="code-line">  maxInflightPerAccount  int</span>
+<span class="code-line">  recommendedConcurrency int</span>
+<span class="code-line">  maxQueueSize           int</span>
+<span class="code-line">  globalMaxInflight      int</span>
+<span class="code-line">}</span></code></pre>
+            </div>
+            <div class="translation-english">
+              <span class="translation-label">每个字段在管什么</span>
+              <div class="translation-lines">
+                <p class="tl"><code>store</code>：账号清单的来源，配置改了从这里重新读。</p>
+                <p class="tl"><code>mu</code>：<span class="term" data-definition="Mutex = 互斥锁。一次只允许一个调用方进入受保护的代码段，其他要等。用来保护多线程下的共享状态不被同时改坏。">互斥锁</span>。所有借/还账号的操作都先抢这把锁，避免两个请求同时改同一个柜子。</p>
+                <p class="tl"><code>queue</code>：账号 ID 的"轮询顺序"。每次借出一个账号，把它挪到队尾，让别的账号也有机会被选。</p>
+                <p class="tl"><code>inUse</code>：每个账号当前正在跑几单。比如 <code>{"acc-A": 2, "acc-B": 0}</code> 表示 A 满员、B 空闲。</p>
+                <p class="tl"><code>waiters</code>：等不到空柜子的请求。每个等待者持有一个 <span class="term" data-definition="channel = Go 语言里的"通信管道"。一边写一边读，常用来通知"事件发生了"。这里只是用作信号，写不写值无所谓。">channel</span>，柜子腾出来时被唤醒。</p>
+                <p class="tl"><code>maxInflightPerAccount</code>：单个柜子最多能同时塞几件衣服，默认 2。</p>
+                <p class="tl"><code>recommendedConcurrency</code>：动态算出来的"建议总并发" = 账号数 × 每柜上限。</p>
+                <p class="tl"><code>maxQueueSize</code> / <code>globalMaxInflight</code>：等待队列长度上限和全局正在跑的总数上限，两道保险防止雪崩。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>核心动作：AcquireWait —— 借一个柜子，等不到就排队</h2>
+
+          <div class="translation-block animate-in">
+            <div class="translation-code">
+              <span class="translation-label">CODE · internal/account/pool_acquire.go</span>
+              <pre><code><span class="code-line"><span class="code-keyword">func</span> (p *Pool) <span class="code-function">AcquireWait</span>(ctx context.Context,</span>
+<span class="code-line">    target string, exclude map[string]bool) (config.Account, bool) {</span>
+<span class="code-line">  <span class="code-keyword">for</span> {</span>
+<span class="code-line">    <span class="code-keyword">if</span> ctx.<span class="code-function">Err</span>() != <span class="code-keyword">nil</span> { <span class="code-keyword">return</span> config.Account{}, <span class="code-keyword">false</span> }</span>
+<span class="code-line">    p.mu.<span class="code-function">Lock</span>()</span>
+<span class="code-line">    <span class="code-keyword">if</span> acc, ok := p.<span class="code-function">acquireLocked</span>(target, exclude); ok {</span>
+<span class="code-line">      p.mu.<span class="code-function">Unlock</span>(); <span class="code-keyword">return</span> acc, <span class="code-keyword">true</span></span>
+<span class="code-line">    }</span>
+<span class="code-line">    <span class="code-keyword">if</span> !p.<span class="code-function">canQueueLocked</span>(target, exclude) {</span>
+<span class="code-line">      p.mu.<span class="code-function">Unlock</span>(); <span class="code-keyword">return</span> config.Account{}, <span class="code-keyword">false</span></span>
+<span class="code-line">    }</span>
+<span class="code-line">    waiter := <span class="code-function">make</span>(<span class="code-keyword">chan</span> struct{})</span>
+<span class="code-line">    p.waiters = <span class="code-function">append</span>(p.waiters, waiter)</span>
+<span class="code-line">    p.mu.<span class="code-function">Unlock</span>()</span>
+<span class="code-line">    <span class="code-keyword">select</span> {</span>
+<span class="code-line">      <span class="code-keyword">case</span> &lt;-ctx.<span class="code-function">Done</span>(): <span class="code-comment">/* 客户端取消，登记销毁 */</span></span>
+<span class="code-line">      <span class="code-keyword">case</span> &lt;-waiter:    <span class="code-comment">/* 有人还柜子了，被唤醒 */</span></span>
+<span class="code-line">    }</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span></code></pre>
+            </div>
+            <div class="translation-english">
+              <span class="translation-label">中文翻译</span>
+              <div class="translation-lines">
+                <p class="tl">这是一个"循环重试"风格：先试着借，借不到就排队，被叫醒后再试。</p>
+                <p class="tl">每轮先看 <span class="term" data-definition="context = Go 里跨函数传递"取消信号 / 截止时间"的容器。客户端断开连接时它会被取消，链路上的所有等待都应该立刻退出。">context</span> 是不是已经被取消（客户端跑了？超时？），是就空手回去。</p>
+                <p class="tl">抢锁、调 acquireLocked 试着借柜子。能借到就解锁、立刻拿着账号回去。</p>
+                <p class="tl">借不到，再问一句"我有资格排队吗" —— 全局上限到了 / 队列已经爆了 / 唯一可用账号在 exclude 黑名单里，都直接放弃。</p>
+                <p class="tl">能排队就建一个空 channel，把它登记到 waiters 列表，解锁后挂起来等。</p>
+                <p class="tl">挂起方式：select 在两件事上同时等 —— 上下文取消 或 有人通过 channel 叫醒我。</p>
+                <p class="tl">被叫醒后，循环回到顶部，重新抢锁、重新尝试借柜子。</p>
+                <p class="tl">这种 lock + 排队 + 信号通知的模式叫"生产者-消费者 + 公平唤醒"，是并发编程的经典骨架。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>追一遍三人抢两个柜子</h2>
+          <p>假设你有 1 个账号、单柜上限 2 件。三个请求同时到：</p>
+
+          <div class="flow-animation" data-steps='[
+            {"highlight":"flow-actor-1","label":"请求 R1 到达，账号 A 当前 0 件，借成功 → A=1"},
+            {"highlight":"flow-actor-1","label":"请求 R2 到达，账号 A 当前 1 件，借成功 → A=2","packet":true,"from":"actor-1","to":"actor-2"},
+            {"highlight":"flow-actor-3","label":"请求 R3 到达，账号 A 满员（2/2），R3 排队等待"},
+            {"highlight":"flow-actor-2","label":"R1 完成，归还账号 A → A=1，唤醒 waiters 的第一位 R3","packet":true,"from":"actor-2","to":"actor-3"},
+            {"highlight":"flow-actor-3","label":"R3 被唤醒，循环重试，借成功 → A=2"}
+          ]'>
+            <div class="flow-actors">
+              <div class="flow-actor" id="flow-actor-1">
+                <div class="flow-actor-icon">R1</div>
+                <span>请求 1</span>
+              </div>
+              <div class="flow-actor" id="flow-actor-2">
+                <div class="flow-actor-icon">A</div>
+                <span>账号池</span>
+              </div>
+              <div class="flow-actor" id="flow-actor-3">
+                <div class="flow-actor-icon">R3</div>
+                <span>请求 3（排队中）</span>
+              </div>
+            </div>
+
+            <div class="flow-packet" id="flow-packet"></div>
+            <div class="flow-step-label" id="flow-label">点"下一步"看请求怎么排队</div>
+
+            <div class="flow-controls">
+              <button class="btn flow-next-btn">下一步</button>
+              <button class="btn flow-reset-btn">重新播放</button>
+              <span class="flow-progress"></span>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>设计取舍</h2>
+          <div class="pattern-cards">
+            <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+              <div class="pattern-icon" style="background: var(--color-actor-1)">⚖️</div>
+              <h4 class="pattern-title">公平 vs 性能</h4>
+              <p class="pattern-desc">用 channel 列表 + FIFO 唤醒，保证先到先服务，不会出现"运气不好的请求永远等不到"的饥饿问题。</p>
+            </div>
+            <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+              <div class="pattern-icon" style="background: var(--color-actor-2)">🛑</div>
+              <h4 class="pattern-title">两道保险</h4>
+              <p class="pattern-desc"><code>maxQueueSize</code> 防排队雪崩 —— 队列爆了就直接拒绝，而不是让客户端无限等下去。</p>
+            </div>
+            <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+              <div class="pattern-icon" style="background: var(--color-actor-3)">🔄</div>
+              <h4 class="pattern-title">轮询 + bumpQueue</h4>
+              <p class="pattern-desc">借出一个账号就把它挪到队尾，下次优先选别的 —— 让多账号"轮流喝水"，分散每个账号的瞬时压力。</p>
+            </div>
+          </div>
+
+          <div class="callout callout-info">
+            <div class="callout-icon">📝</div>
+            <div class="callout-content">
+              <strong class="callout-title">为什么不直接信号量</strong>
+              <p>用一个全局 <span class="term" data-definition="信号量 = 一个有上限的"许可证池"。要做事先领一张证，做完归还；证发完了想做事就要等。">信号量</span>限总并发更简单 —— 但你失去了"哪些请求该等更久"的精细控制。账号池的设计允许：让目标账号已被指定的请求只在那一柜里排队，不被别人插队。</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>检查理解</h2>
+          <div class="quiz-container" id="quiz-module3">
+
+            <div class="quiz-question-block"
+                 data-correct="c"
+                 data-explanation-right="对。inUse[acc-A] 已经是 2，等于 maxInflightPerAccount，所以新请求不能直接借这个柜子，会被挂进 waiters 等通知。"
+                 data-explanation-wrong="再看 inUse 的含义：它记的是当前在跑的请求数，达到 maxInflightPerAccount 就满员了。">
+              <h3 class="quiz-question"><code>inUse = {"acc-A": 2}</code>，<code>maxInflightPerAccount=2</code>，新请求要 acc-A，会发生什么？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>立刻借成功，inUse 变成 3。</span>
+                </button>
+                <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>报错，账号已经被锁定。</span>
+                </button>
+                <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>挂进 waiters 排队，等有人归还后被 channel 唤醒重试。</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <div class="quiz-question-block"
+                 data-correct="b"
+                 data-explanation-right="对。canQueueLocked 在两种情况下拒绝排队：全局上限到了、或者队列已经爆。直接返回 false 让客户端立刻知道，比让它排几分钟再超时友好得多。"
+                 data-explanation-wrong="再看代码：if !canQueueLocked → 直接 return false，并不是一定要排队。">
+              <h3 class="quiz-question">为什么 AcquireWait 在挂起前要先调用 canQueueLocked 检查一下？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>性能优化：避免反复抢锁。</span>
+                </button>
+                <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>背压保护：队列满或全局并发超限时立刻拒绝，不让客户端排无尽队。</span>
+                </button>
+                <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>调试用：方便打印日志看队列长度。</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <div class="quiz-question-block"
+                 data-correct="a"
+                 data-explanation-right="对。客户端断开后 ctx.Done 会触发，AcquireWait 立刻退出循环、登记销毁这个 waiter，而不是傻等账号腾出来再返回。这避免了"客户端跑了，服务端还在等账号"的资源泄漏。"
+                 data-explanation-wrong="再看 select 那一段：除了 waiter 唤醒，还监听 ctx.Done()，正是为了客户端取消时能立刻撤退。">
+              <h3 class="quiz-question">客户端在排队过程中断开连接，会发生什么？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>ctx.Done 触发，select 立刻命中取消分支，登记销毁 waiter 后退出。</span>
+                </button>
+                <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>什么都不会发生，请求继续排队，最后超时。</span>
+                </button>
+                <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>Pool 会崩溃，因为 channel 没人读。</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">检查答案</button>
+            <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重做</button>
+          </div>
+        </section>
+
+      </div>
+    </section>
+    <section class="module" id="module-4">
+      <div class="module-inner">
+
+        <header class="module-header">
+          <span class="module-number">04</span>
+          <h1 class="module-title">工具调用防泄漏：直播延迟器的设计</h1>
+          <p class="module-tagline">SSE 是直播，模型可能突然吐出工具调用标记。来不及切的话，"幕后台词"会直接喷给客户端 —— Tool Sieve 就是那 5 秒延迟。</p>
+        </header>
+
+        <section class="screen">
+          <h2>问题：模型嘴比手快</h2>
+          <p>客户端用 OpenAI/Claude/Gemini 协议发来一个带工具的请求。DeepSeek 网页不懂结构化工具调用，所以模型会按 ds2api 在 system prompt 里教的格式，<strong>直接在文本流里吐</strong>类似这样的标记：</p>
+
+          <div class="translation-block animate-in">
+            <div class="translation-code">
+              <span class="translation-label">模型直接吐出来的原文（流式）</span>
+              <pre><code><span class="code-line">好的，我先查一下天气。</span>
+<span class="code-line"></span>
+<span class="code-line">&lt;|DSML|tool_calls&gt;</span>
+<span class="code-line">  &lt;|DSML|invoke name="get_weather"&gt;</span>
+<span class="code-line">    &lt;|DSML|parameter name="city"&gt;Beijing&lt;/parameter&gt;</span>
+<span class="code-line">  &lt;/invoke&gt;</span>
+<span class="code-line">&lt;/tool_calls&gt;</span></code></pre>
+            </div>
+            <div class="translation-english">
+              <span class="translation-label">客户端期待看到的（OpenAI 格式）</span>
+              <div class="translation-lines">
+                <p class="tl">"好的，我先查一下天气。"  ← 普通文本，正常输出</p>
+                <p class="tl">然后是结构化的 <code>delta.tool_calls</code> JSON 字段，里面有 function name 和 arguments。</p>
+                <p class="tl">原始的 <code>&lt;|DSML|tool_calls&gt;...&lt;/tool_calls&gt;</code> 标记<strong>绝不能让客户端看到</strong> —— 那是内部协议，客户端的 SDK 不认识、用户更不认识。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout callout-accent">
+            <div class="callout-icon">📺</div>
+            <div class="callout-content">
+              <strong class="callout-title">直播延迟器比喻</strong>
+              <p>电视直播都有 5 秒缓冲：嘉宾突然说脏话，导播按一下钮把那段切掉。<strong>Tool Sieve 就是那个缓冲 + 切换：流来一段就缓存一段，识别到工具调用前缀就"延迟发布"，等收完整段后切成结构化字段输出。</strong></p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>三种状态：流过、捕获、整段切换</h2>
+          <div class="step-cards">
+            <div class="step-card">
+              <div class="step-num">1</div>
+              <div class="step-body">
+                <strong>流过模式 (passthrough)</strong>
+                <p>不像工具调用前缀的字符直接发给客户端。注意"前缀"两字 —— 哪怕只看到 <code>&lt;|D</code>，也得先停下来等等看完整。</p>
+              </div>
+            </div>
+            <div class="step-card">
+              <div class="step-num">2</div>
+              <div class="step-body">
+                <strong>捕获模式 (capturing)</strong>
+                <p>认出可疑前缀后切到捕获模式，把后续 chunk 都先吃进 capture 缓冲，不发出去。直到看到结束标签 <code>&lt;/tool_calls&gt;</code>，才整段解析。</p>
+              </div>
+            </div>
+            <div class="step-card">
+              <div class="step-num">3</div>
+              <div class="step-body">
+                <strong>整段切换</strong>
+                <p>解析成功 → 当成结构化 <code>tool_calls</code> 事件吐出去；解析失败（其实是误识别） → 把缓冲的原文当普通文本补发，恢复流过模式。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>核心循环：ProcessChunk</h2>
+
+          <div class="translation-block animate-in">
+            <div class="translation-code">
+              <span class="translation-label">CODE · internal/toolstream/tool_sieve_core.go</span>
+              <pre><code><span class="code-line"><span class="code-keyword">func</span> <span class="code-function">ProcessChunk</span>(state *State, chunk string,</span>
+<span class="code-line">    toolNames []string) []Event {</span>
+<span class="code-line">  <span class="code-keyword">if</span> chunk != <span class="code-string">""</span> { state.pending.<span class="code-function">WriteString</span>(chunk) }</span>
+<span class="code-line">  events := <span class="code-function">make</span>([]Event, 0, 2)</span>
+<span class="code-line">  <span class="code-keyword">for</span> {</span>
+<span class="code-line">    <span class="code-keyword">if</span> state.capturing {</span>
+<span class="code-line">      state.capture.<span class="code-function">WriteString</span>(state.pending.<span class="code-function">String</span>())</span>
+<span class="code-line">      state.pending.<span class="code-function">Reset</span>()</span>
+<span class="code-line">      prefix, calls, suffix, ready := <span class="code-function">consumeToolCapture</span>(state, toolNames)</span>
+<span class="code-line">      <span class="code-keyword">if</span> !ready { <span class="code-keyword">break</span> }  <span class="code-comment">// 还没收完整，挂着等下一 chunk</span></span>
+<span class="code-line">      state.capturing = <span class="code-keyword">false</span></span>
+<span class="code-line">      <span class="code-keyword">if</span> <span class="code-function">len</span>(calls) > 0 {</span>
+<span class="code-line">        <span class="code-keyword">if</span> prefix != <span class="code-string">""</span> { events = <span class="code-function">append</span>(events, Event{Content: prefix}) }</span>
+<span class="code-line">        state.pendingToolCalls = calls</span>
+<span class="code-line">      }</span>
+<span class="code-line">      <span class="code-keyword">continue</span></span>
+<span class="code-line">    }</span>
+<span class="code-line">    pending := state.pending.<span class="code-function">String</span>()</span>
+<span class="code-line">    start := <span class="code-function">findToolSegmentStart</span>(state, pending)</span>
+<span class="code-line">    <span class="code-keyword">if</span> start &gt;= 0 {</span>
+<span class="code-line">      <span class="code-comment">// 切捕获，前缀文本先吐出</span></span>
+<span class="code-line">      state.capturing = <span class="code-keyword">true</span></span>
+<span class="code-line">    } <span class="code-keyword">else</span> {</span>
+<span class="code-line">      <span class="code-comment">// 安全字符：直接吐到客户端</span></span>
+<span class="code-line">      events = <span class="code-function">append</span>(events, Event{Content: pending})</span>
+<span class="code-line">    }</span>
+<span class="code-line">  }</span>
+<span class="code-line">  <span class="code-keyword">return</span> events</span>
+<span class="code-line">}</span></code></pre>
+            </div>
+            <div class="translation-english">
+              <span class="translation-label">中文翻译</span>
+              <div class="translation-lines">
+                <p class="tl">每次上游来一段新文本（chunk），先扔进 pending 这个临时缓冲。</p>
+                <p class="tl">events 是这一轮要吐给客户端的事件列表，可能是文本、可能是工具调用、可能两者都没有（还在攒）。</p>
+                <p class="tl">无限循环：根据当前是不是"捕获模式"分两条路。</p>
+                <p class="tl">捕获模式下：把 pending 全倒进 capture 缓冲，调 consumeToolCapture 看能不能解出完整工具调用。</p>
+                <p class="tl">如果 ready=false 说明还没收齐 —— 比如 <code>&lt;invoke&gt;</code> 还没看到结束标签，先 break 等下一 chunk。</p>
+                <p class="tl">如果解析出有效 calls，就退出捕获，把工具调用前面的普通文本（prefix）先发出去。</p>
+                <p class="tl">流过模式下：扫 pending 看有没有可疑工具前缀。</p>
+                <p class="tl">有就切捕获模式，下一轮循环再处理。</p>
+                <p class="tl">没有就把 pending 当普通文本一次性吐给客户端。</p>
+                <p class="tl">这种"边收边判，可疑就缓冲，安全就放行"的状态机模式，就是流式协议解析的标准骨架。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>三个角色的内心对话</h2>
+
+          <div class="chat-window" id="chat-toolsieve">
+            <div class="chat-messages">
+              <div class="chat-message" data-msg="0" data-sender="upstream" style="display:none">
+                <div class="chat-avatar" style="background: var(--color-actor-1)">DS</div>
+                <div class="chat-bubble">
+                  <span class="chat-sender" style="color: var(--color-actor-1)">DeepSeek 上游</span>
+                  <p>来一块 chunk："好的，我先查一下天气。"</p>
+                </div>
+              </div>
+              <div class="chat-message" data-msg="1" data-sender="sieve" style="display:none">
+                <div class="chat-avatar" style="background: var(--color-accent)">TS</div>
+                <div class="chat-bubble">
+                  <span class="chat-sender" style="color: var(--color-accent)">Tool Sieve</span>
+                  <p>扫一遍 → 没看到工具前缀 → 流过。直接转给客户端。</p>
+                </div>
+              </div>
+              <div class="chat-message" data-msg="2" data-sender="upstream" style="display:none">
+                <div class="chat-avatar" style="background: var(--color-actor-1)">DS</div>
+                <div class="chat-bubble">
+                  <span class="chat-sender" style="color: var(--color-actor-1)">DeepSeek 上游</span>
+                  <p>下一块："&lt;|D" —— 只是一个不完整的开头。</p>
+                </div>
+              </div>
+              <div class="chat-message" data-msg="3" data-sender="sieve" style="display:none">
+                <div class="chat-avatar" style="background: var(--color-accent)">TS</div>
+                <div class="chat-bubble">
+                  <span class="chat-sender" style="color: var(--color-accent)">Tool Sieve</span>
+                  <p>这看起来像 DSML 工具前缀的开头！我不放出去，先压在 pending 里等更多字符。</p>
+                </div>
+              </div>
+              <div class="chat-message" data-msg="4" data-sender="upstream" style="display:none">
+                <div class="chat-avatar" style="background: var(--color-actor-1)">DS</div>
+                <div class="chat-bubble">
+                  <span class="chat-sender" style="color: var(--color-actor-1)">DeepSeek 上游</span>
+                  <p>下一块："SML|tool_calls&gt;&lt;|DSML|invoke name=\"get_weather\"&gt;..."</p>
+                </div>
+              </div>
+              <div class="chat-message" data-msg="5" data-sender="sieve" style="display:none">
+                <div class="chat-avatar" style="background: var(--color-accent)">TS</div>
+                <div class="chat-bubble">
+                  <span class="chat-sender" style="color: var(--color-accent)">Tool Sieve</span>
+                  <p>确认是工具调用！进入 capturing 模式，全部吃进 capture 缓冲，不向客户端漏一个字。</p>
+                </div>
+              </div>
+              <div class="chat-message" data-msg="6" data-sender="upstream" style="display:none">
+                <div class="chat-avatar" style="background: var(--color-actor-1)">DS</div>
+                <div class="chat-bubble">
+                  <span class="chat-sender" style="color: var(--color-actor-1)">DeepSeek 上游</span>
+                  <p>"...&lt;/invoke&gt;&lt;/tool_calls&gt;" —— 收尾标签来了。</p>
+                </div>
+              </div>
+              <div class="chat-message" data-msg="7" data-sender="sieve" style="display:none">
+                <div class="chat-avatar" style="background: var(--color-accent)">TS</div>
+                <div class="chat-bubble">
+                  <span class="chat-sender" style="color: var(--color-accent)">Tool Sieve</span>
+                  <p>整段收齐！解析成 <code>{name: "get_weather", arguments: {city: "Beijing"}}</code>，包成 OpenAI 的 delta.tool_calls JSON 吐给客户端。</p>
+                </div>
+              </div>
+              <div class="chat-message" data-msg="8" data-sender="client" style="display:none">
+                <div class="chat-avatar" style="background: var(--color-actor-3)">CL</div>
+                <div class="chat-bubble">
+                  <span class="chat-sender" style="color: var(--color-actor-3)">客户端 SDK</span>
+                  <p>看到了 tool_calls 字段，直接走标准流程：执行工具 → 把结果发回去。完全没察觉中间是 DSML 标记。</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="chat-typing" id="chat-toolsieve-typing" style="display:none">
+              <div class="chat-avatar" id="chat-toolsieve-typing-avatar">?</div>
+              <div class="chat-typing-dots">
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+              </div>
+            </div>
+
+            <div class="chat-controls">
+              <button class="btn chat-next-btn">下一条</button>
+              <button class="btn chat-all-btn">一次播完</button>
+              <button class="btn chat-reset-btn">重播</button>
+              <span class="chat-progress"></span>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>误识别怎么办</h2>
+          <p>模型有时会在解释代码时，正经地写出 <code>&lt;tool_calls&gt;</code> 这种字符串作为示例。Tool Sieve 怎么避免把它当真？</p>
+
+          <div class="pattern-cards">
+            <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+              <div class="pattern-icon" style="background: var(--color-actor-1)">📦</div>
+              <h4 class="pattern-title">代码块跳过</h4>
+              <p class="pattern-desc">先识别 ``` 代码块边界，里面的所有标记都不当工具调用，直接当文本流过。</p>
+            </div>
+            <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+              <div class="pattern-icon" style="background: var(--color-actor-2)">✅</div>
+              <h4 class="pattern-title">白名单校验</h4>
+              <p class="pattern-desc">解析出工具名后必须在 toolNames 清单里 —— 这一单请求允许的工具。不在就当文本放出去。</p>
+            </div>
+            <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+              <div class="pattern-icon" style="background: var(--color-actor-3)">🔁</div>
+              <h4 class="pattern-title">解析失败回放</h4>
+              <p class="pattern-desc">捕获完了但 JSON 不合法，或工具名不认 —— 把整段 capture 当普通文本补发，<strong>客户端看到的就是模型本来想写的字</strong>，不会丢字。</p>
+            </div>
+          </div>
+
+          <div class="callout callout-warning">
+            <div class="callout-icon">⚠️</div>
+            <div class="callout-content">
+              <strong class="callout-title">泄漏 = 灾难</strong>
+              <p>如果让 <code>&lt;|DSML|tool_calls&gt;</code> 漏到客户端，客户端 SDK 解析失败 → 用户看到一段奇怪的 XML/标签。这种 bug 在生产里会立刻被截图发到 issue 区。<strong>"宁可慢半拍，绝不漏一字"</strong> 是流式协议的铁律。</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>检查理解</h2>
+          <div class="quiz-container" id="quiz-module4">
+
+            <div class="quiz-question-block"
+                 data-correct="b"
+                 data-explanation-right="对。看到不完整前缀就要停下来等 —— 直接放出去就漏了；万一后面跟的是工具调用，客户端会看到一半 XML。所以 Tool Sieve 必须缓冲。"
+                 data-explanation-wrong="再想想：客户端不能容忍 DSML 标记的任何片段泄漏，哪怕只有 &lt;|D 三个字符。">
+              <h3 class="quiz-question">上游一个 chunk 只有 <code>&lt;|D</code> 三个字符，Tool Sieve 应该怎么做？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>直接当文本放给客户端，等下一 chunk 再说。</span>
+                </button>
+                <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>压在 pending 里不发，等更多字符到达再判断是不是工具前缀。</span>
+                </button>
+                <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>立刻报错说"协议不完整"。</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <div class="quiz-question-block"
+                 data-correct="c"
+                 data-explanation-right="对。捕获到的整段会作为普通文本补发给客户端。这样既不会丢字，又保证客户端看到的是模型原本想写的内容（比如教程里在解释 tool_calls 这个标签）。"
+                 data-explanation-wrong="再想想：丢字会让用户看到内容缺一截，比泄漏标记还糟糕。">
+              <h3 class="quiz-question">Tool Sieve 切到捕获模式，但最后发现是模型在解释代码，里面的 <code>&lt;tool_calls&gt;</code> 不在白名单里。怎么办？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>丢弃捕获缓冲，恢复流过模式。</span>
+                </button>
+                <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>报错，让客户端重发。</span>
+                </button>
+                <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>把整段 capture 当普通文本补发给客户端，恢复流过模式。</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <div class="quiz-question-block"
+                 data-correct="b"
+                 data-explanation-right="对。延迟来自缓冲：识别到可疑前缀后必须先攒齐再判断。这是流式 + 防泄漏的固有取舍 —— 想要绝对安全，就要付几毫秒延迟。"
+                 data-explanation-wrong="再想想：流式吐字本身没延迟，是 Tool Sieve 在前缀可疑时主动缓冲造成的。">
+              <h3 class="quiz-question">用户反馈"工具调用前的最后几个字总是隔一拍才出来"，原因是？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>网络太慢。</span>
+                </button>
+                <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>Tool Sieve 看到可疑前缀就缓冲等更多字符，确认不是工具调用才一并放出，所以会有几毫秒延迟。</span>
+                </button>
+                <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>DeepSeek 模型本身就这样。</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">检查答案</button>
+            <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重做</button>
+          </div>
+        </section>
+
+      </div>
+    </section>
+    <section class="module" id="module-5">
+      <div class="module-inner">
+
+        <header class="module-header">
+          <span class="module-number">05</span>
+          <h1 class="module-title">PoW + Vercel：进门先做 100 个深蹲，又快又能在云上跑</h1>
+          <p class="module-tagline">DeepSeek 网页要求每个请求先解一道哈希难题（PoW）。ds2api 用纯 Go 实现的解算器把它压到毫秒级，并在 Vercel 上用 Go+Node 双语接力。</p>
+        </header>
+
+        <section class="screen">
+          <h2>什么是 PoW，为什么 DeepSeek 要</h2>
+          <p><span class="term" data-definition="PoW = Proof of Work，工作量证明。要求请求方先做一段算力开销足够大的计算，把答案附在请求里。机器人想发海量请求会被这道题拖垮。">PoW</span> 是反爬手段。DeepSeek 网页给每个请求发一道题：<em>"在 [0, 1,000,000) 内找一个 nonce，使得 DeepSeekHashV1(salt + expireAt + nonce) 的前缀等于这个 challenge"</em>。你不解出来，发请求会被拒。</p>
+
+          <div class="callout callout-accent">
+            <div class="callout-icon">🏋️</div>
+            <div class="callout-content">
+              <strong class="callout-title">健身房门禁比喻</strong>
+              <p>会员卡进门免费 —— 但要做 100 个深蹲。机器人没有耐心做深蹲，<strong>不是不能进，是性价比太低</strong>。PoW 把"发请求的边际成本"从近零拉到几毫秒 CPU，海量爬取就不划算了。</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>DeepSeekHashV1：被改一刀的 SHA3-256</h2>
+          <p>注释里直接写明：<em>"DeepSeekHashV1 = SHA3-256 但跳过 Keccak-f[1600] round 0 (只做 rounds 1..23)"</em>。意思是它<strong>故意改了标准 SHA3 的一行</strong>，让外部 OpenSSL/通用库算不出来 —— 想解 PoW 必须自己实现。</p>
+
+          <div class="translation-block animate-in">
+            <div class="translation-code">
+              <span class="translation-label">CODE · pow/deepseek_hash.go 注释</span>
+              <pre><code><span class="code-line"><span class="code-comment">// Package pow 提供 DeepSeekHashV1 纯 Go 实现。</span></span>
+<span class="code-line"><span class="code-comment">// DeepSeekHashV1 = SHA3-256 但跳过 Keccak-f[1600] round 0</span></span>
+<span class="code-line"><span class="code-comment">// (只做 rounds 1..23)。</span></span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-keyword">func</span> <span class="code-function">keccakF23</span>(s *[<span class="code-property">25</span>]uint64) {</span>
+<span class="code-line">  <span class="code-comment">// 标准 Keccak-f[1600] 是 24 轮（0..23），</span></span>
+<span class="code-line">  <span class="code-comment">// 这里从 r=1 开始，等于跳过第 0 轮。</span></span>
+<span class="code-line">  <span class="code-keyword">for</span> r := <span class="code-property">1</span>; r &lt; <span class="code-property">24</span>; r++ {</span>
+<span class="code-line">    ...</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span></code></pre>
+            </div>
+            <div class="translation-english">
+              <span class="translation-label">中文翻译</span>
+              <div class="translation-lines">
+                <p class="tl">SHA3-256 标准里 Keccak 置换是 24 轮，编号 0..23。</p>
+                <p class="tl">DeepSeekHashV1 只跑 1..23 这 23 轮，等于把第 0 轮跳过。</p>
+                <p class="tl">这一改，标准库的 SHA3 实现就不能直接用了 —— 你必须深入算法层手写一份。</p>
+                <p class="tl">这是 DeepSeek 反爬的"额外门槛"：不光算 PoW 要 CPU，连<strong>能算 PoW 的实现都要自己写</strong>。</p>
+                <p class="tl">ds2api 的卖点之一就是这份纯 Go 实现，不依赖 Python / OpenSSL，毫秒级解题，编译进单二进制。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>SolvePow：在 [0, difficulty) 里碰运气</h2>
+
+          <div class="translation-block animate-in">
+            <div class="translation-code">
+              <span class="translation-label">CODE · pow/deepseek_pow.go（节选）</span>
+              <pre><code><span class="code-line"><span class="code-keyword">func</span> <span class="code-function">SolvePow</span>(ctx context.Context, challengeHex, salt string,</span>
+<span class="code-line">    expireAt, difficulty int64) (int64, error) {</span>
+<span class="code-line">  prefix := []<span class="code-keyword">byte</span>(<span class="code-function">BuildPrefix</span>(salt, expireAt))</span>
+<span class="code-line">  <span class="code-comment">// 把 prefix 预吸收进 Keccak 状态，循环里零分配</span></span>
+<span class="code-line">  <span class="code-keyword">var</span> baseState [<span class="code-property">25</span>]uint64</span>
+<span class="code-line">  <span class="code-comment">// ... prefix 吸收逻辑 ...</span></span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">for</span> n := int64(<span class="code-property">0</span>); n &lt; difficulty; n++ {</span>
+<span class="code-line">    <span class="code-keyword">if</span> n&amp;<span class="code-property">0x3FF</span> == <span class="code-property">0</span> {</span>
+<span class="code-line">      <span class="code-keyword">if</span> err := ctx.<span class="code-function">Err</span>(); err != <span class="code-keyword">nil</span> { <span class="code-keyword">return</span> <span class="code-property">0</span>, err }</span>
+<span class="code-line">    }</span>
+<span class="code-line">    s := baseState</span>
+<span class="code-line">    <span class="code-comment">// 把当前 nonce 写进 numBuf，吸收进 s，跑 keccakF23</span></span>
+<span class="code-line">    <span class="code-comment">// 比较输出前 32 字节是否等于 challenge</span></span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span></code></pre>
+            </div>
+            <div class="translation-english">
+              <span class="translation-label">中文翻译</span>
+              <div class="translation-lines">
+                <p class="tl">入参：上下文、挑战的目标哈希值、盐、过期时间戳、难度上限。</p>
+                <p class="tl">先用 salt 和 expireAt 拼成固定前缀，把它"吸收"进 Keccak 内部状态。这一步只做一次，下面循环里就不重做了 —— 经典优化。</p>
+                <p class="tl">从 0 数到 difficulty，每个 n 当成候选 nonce 试一次。</p>
+                <p class="tl">每 1024 次循环检查一下 context —— 如果客户端断开 / 超时，立刻退出，<strong>不浪费 CPU 在没人要的答案上</strong>。</p>
+                <p class="tl">复制基础状态（不污染原状态），把当前 nonce 的字符串形式吸收进去，跑剩下的 23 轮 Keccak。</p>
+                <p class="tl">输出的 32 字节如果等于 challenge，就找到了，返回这个 nonce。</p>
+                <p class="tl">这就是 PoW 的本质：<span class="term" data-definition="暴力穷举 = 没有数学捷径，从 0 试到上限挨个验证。算力变高就更快，没法投机取巧。">暴力穷举</span>。靠纯 Go 写得足够快（零分配、状态预吸收），DeepSeek 看到的请求带 nonce 才放行。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout callout-info">
+            <div class="callout-icon">⚡</div>
+            <div class="callout-content">
+              <strong class="callout-title">为什么纯 Go 是卖点</strong>
+              <p>很多反向 DeepSeek 项目用 Python 或 wrap C 库实现 PoW —— 部署时要装 OpenSSL、要管 Python 环境。<strong>ds2api 单一 Go 二进制部署</strong>：拷一个文件、改个配置就能跑，Docker 镜像也能小到几兆。这种"零依赖"是它在小团队里被选中的核心原因。</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>Vercel 双语接力：Go 管账，Node 接管直播</h2>
+          <p>本地部署一切都是 Go。但部署到 <span class="term" data-definition="Vercel = 一个 serverless 平台，专门跑前端和 API。Node.js 是它的主语言；Go 也支持，但流式响应的支持没 Node 顺。">Vercel</span> 时遇到一个工程难题：</p>
+
+          <div class="pattern-cards">
+            <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+              <div class="pattern-icon" style="background: var(--color-actor-1)">🐹</div>
+              <h4 class="pattern-title">Go 函数擅长</h4>
+              <p class="pattern-desc">拿 PoW、做鉴权、操作账号池 —— 因为整个核心都在 Go 这边。Vercel 的 Go runtime 在这些事上跑得很好。</p>
+            </div>
+            <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+              <div class="pattern-icon" style="background: var(--color-actor-2)">🟢</div>
+              <h4 class="pattern-title">Node 函数擅长</h4>
+              <p class="pattern-desc">Vercel 上 Node 的<strong>流式响应支持更顺</strong>：能稳定保持长连接、SSE 转发延迟低。Go runtime 在这件事上有时会 buffer 住。</p>
+            </div>
+            <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+              <div class="pattern-icon" style="background: var(--color-actor-3)">🤝</div>
+              <h4 class="pattern-title">于是接力</h4>
+              <p class="pattern-desc">Node 函数收请求 → 调 Go 那边的 prepare（解 PoW、租账号、构造上游请求） → Node 自己直接和 DeepSeek 拉 SSE 流 → 完成后调 Go 的 release（还账号）。</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>Node 桥的入口长这样</h2>
+
+          <div class="translation-block animate-in">
+            <div class="translation-code">
+              <span class="translation-label">CODE · internal/js/chat-stream/index.js（节选）</span>
+              <pre><code><span class="code-line"><span class="code-keyword">async function</span> <span class="code-function">handler</span>(req, res) {</span>
+<span class="code-line">  <span class="code-function">setCorsHeaders</span>(res, req);</span>
+<span class="code-line">  <span class="code-keyword">if</span> (req.method === <span class="code-string">'OPTIONS'</span>) { res.statusCode = <span class="code-property">204</span>; res.<span class="code-function">end</span>(); <span class="code-keyword">return</span>; }</span>
+<span class="code-line">  <span class="code-keyword">const</span> rawBody = <span class="code-keyword">await</span> <span class="code-function">readRawBody</span>(req);</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-comment">// 非 Vercel 环境一律转发给 Go</span></span>
+<span class="code-line">  <span class="code-keyword">if</span> (!<span class="code-function">isVercelRuntime</span>()) {</span>
+<span class="code-line">    <span class="code-keyword">await</span> <span class="code-function">proxyToGo</span>(req, res, rawBody); <span class="code-keyword">return</span>;</span>
+<span class="code-line">  }</span>
+<span class="code-line">  <span class="code-keyword">const</span> payload = <span class="code-function">JSON.parse</span>(rawBody.<span class="code-function">toString</span>(<span class="code-string">'utf8'</span>));</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-comment">// 非流式 / 非 OpenAI chat 路径 → 也丢给 Go</span></span>
+<span class="code-line">  <span class="code-keyword">if</span> (!<span class="code-function">toBool</span>(payload.stream) || !<span class="code-function">isNodeStreamSupportedPath</span>(req.url)) {</span>
+<span class="code-line">    <span class="code-keyword">await</span> <span class="code-function">proxyToGo</span>(req, res, rawBody); <span class="code-keyword">return</span>;</span>
+<span class="code-line">  }</span>
+<span class="code-line">  <span class="code-keyword">await</span> <span class="code-function">handleVercelStream</span>(req, res, rawBody, payload);</span>
+<span class="code-line">}</span></code></pre>
+            </div>
+            <div class="translation-english">
+              <span class="translation-label">中文翻译</span>
+              <div class="translation-lines">
+                <p class="tl">这是 Node 函数的入口。先处理 <span class="term" data-definition="CORS = 跨域资源共享。浏览器为了安全，默认禁止网页跨域请求；服务端写对响应头才放行。">CORS</span> 预检请求。</p>
+                <p class="tl">读完整请求体到 rawBody。</p>
+                <p class="tl">关键判断 1：如果不是 Vercel 环境（比如本地 docker），Node 啥都不做，直接代理给 Go 的 5001 端口。这保证只有云上才用 Node 路径。</p>
+                <p class="tl">关键判断 2：解析 body，看 stream 是不是 true、URL 是不是 OpenAI chat 路径。</p>
+                <p class="tl">如果不是流式、或者是 Claude/Gemini 路径，仍然交给 Go 处理（Go 实现完整、协议形状容易出错的事还是 Go 强）。</p>
+                <p class="tl">只有"OpenAI 风格 + 流式"才交给 Node 自己跑 —— 因为 Vercel 上 Node 流式更稳，这是它唯一的优势区间。</p>
+                <p class="tl">这种"默认 Go，少数情况让 Node 接管"的设计叫<strong>双 runtime 协同</strong>：保留单语言简洁，只在必要时引入第二语言。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>设计哲学</h2>
+          <div class="callout callout-accent">
+            <div class="callout-icon">🎓</div>
+            <div class="callout-content">
+              <strong class="callout-title">这堂课最大的工程教训</strong>
+              <p>当你必须在多个 runtime 之间分工，<strong>把"哪一段在哪边"写成清晰的判断规则</strong>，而不是让两边各做一半。这里 Node 的判断逻辑只有 3 行：不在 Vercel？滚回 Go。不是 stream？滚回 Go。不是 OpenAI 路径？滚回 Go。剩下的才自己干。<strong>简单的边界让协议形状漂移最小化。</strong></p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>检查理解</h2>
+          <div class="quiz-container" id="quiz-module5">
+
+            <div class="quiz-question-block"
+                 data-correct="b"
+                 data-explanation-right="对。SHA3-256 是 24 轮，DeepSeekHashV1 跳过第 0 轮只做 23 轮 —— 一个标准库改不了的小修改，让所有反向项目必须自己手写算法。"
+                 data-explanation-wrong="再读一遍 keccakF23 的代码：循环从 r=1 开始，到 r=23，刚好是 23 轮。">
+              <h3 class="quiz-question">DeepSeekHashV1 跟标准 SHA3-256 最关键的差别是？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>使用了不同的初始化向量。</span>
+                </button>
+                <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>跳过 Keccak 置换的第 0 轮，只做 1..23 共 23 轮。</span>
+                </button>
+                <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>使用更长的输出（512 位而不是 256 位）。</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <div class="quiz-question-block"
+                 data-correct="c"
+                 data-explanation-right="对。客户端断开后继续算 PoW 就是浪费 CPU，所以每 1024 次循环检查一次 ctx.Err()，及时退出。这种"周期性看一眼上下文"的写法是 Go 长循环的标配。"
+                 data-explanation-wrong="再看 if n&0x3FF == 0 那一段：每 1024 次检查一下 context 是不是被取消，是为了避免无意义的算力浪费。">
+              <h3 class="quiz-question">SolvePow 的循环里 <code>if n&amp;0x3FF == 0 { ctx.Err() }</code> 这段是干嘛的？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>性能采样：每 1024 次记一次时长。</span>
+                </button>
+                <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>难度调整：让 PoW 自动变难。</span>
+                </button>
+                <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>每 1024 次检查上下文是不是被取消，客户端断开就立刻退出避免空算。</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <div class="quiz-question-block"
+                 data-correct="b"
+                 data-explanation-right="对。Vercel 上 Node 流式更稳，所以 OpenAI 风格 + stream 这种最高频的路径让 Node 接管；其他场景（Claude/Gemini 协议、非流式、非 Vercel）都让 Go 处理，避免在两个 runtime 各维护一半逻辑。"
+                 data-explanation-wrong="再看入口的判断：Node 只在"Vercel 环境 + stream + OpenAI 路径"三件事都成立时才自己干，否则一律交给 Go。">
+              <h3 class="quiz-question">为什么 Vercel 上的 Node 入口大部分情况会把请求转发给 Go？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>Node 比 Go 慢，所以默认走 Go。</span>
+                </button>
+                <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>只让 Node 处理它真正擅长的"Vercel + 流式 + OpenAI 路径"，其他路径交给 Go 维护单一实现。</span>
+                </button>
+                <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>Node 的鉴权能力不够。</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">检查答案</button>
+            <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">重做</button>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>课程小结</h2>
+          <p>你看完了 ds2api 五个最值钱的设计：</p>
+          <div class="step-cards">
+            <div class="step-card">
+              <div class="step-num">1</div>
+              <div class="step-body">
+                <strong>它是协议层网关</strong>
+                <p>不训新模型，只让上游 DeepSeek 网页假装成 OpenAI/Claude/Gemini API。</p>
+              </div>
+            </div>
+            <div class="step-card">
+              <div class="step-num">2</div>
+              <div class="step-body">
+                <strong>PromptCompat 是灵魂</strong>
+                <p>三种协议归一到一种"扁平消息中转格式"，再压扁成纯文本剧本。Hub-and-spoke。</p>
+              </div>
+            </div>
+            <div class="step-card">
+              <div class="step-num">3</div>
+              <div class="step-body">
+                <strong>账号池公平排队</strong>
+                <p>每账号 in-flight 上限 + waiters channel 列表，FIFO 唤醒，背压双保险。</p>
+              </div>
+            </div>
+            <div class="step-card">
+              <div class="step-num">4</div>
+              <div class="step-body">
+                <strong>Tool Sieve 防泄漏</strong>
+                <p>状态机 passthrough/capturing 切换，可疑前缀就缓冲，宁慢不漏。</p>
+              </div>
+            </div>
+            <div class="step-card">
+              <div class="step-num">5</div>
+              <div class="step-body">
+                <strong>PoW + 双 runtime 接力</strong>
+                <p>纯 Go 解 DeepSeekHashV1，单二进制零依赖；Vercel 上 Node 只在它擅长的路径接管。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout callout-info">
+            <div class="callout-icon">🚀</div>
+            <div class="callout-content">
+              <strong class="callout-title">把这些用到你自己的项目</strong>
+              <p>下次你要兼容多种输入形状，想想 hub-and-spoke。下次你要并发限速，想想"每实例 in-flight 上限 + 等待队列"。下次你要在流上识别特殊标记，想想"状态机 + 缓冲 + 失败回放"。这些就是真实工程师写代码的肌肉记忆。</p>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </section>
+  </main>
+
+</body>
+</html>

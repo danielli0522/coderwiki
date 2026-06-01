@@ -1,0 +1,164 @@
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">12 阶段管道：从源码到知识图谱</h1>
+      <p class="module-subtitle">一行 gitnexus analyze 背后发生了什么？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Pipeline Overview -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码索引就像石油炼化</h2>
+        <p>源文件（原油）进来后，先扫描（探明储量），再解析（蒸馏出符号），然后关联（调和引用关系），聚类（分类存储），追踪（画出调用流程图），最终入库（写入图数据库）。每一道工序都依赖上游的结果，形成 <span class="term" data-definition="DAG（有向无环图）是一种数据结构，节点之间有方向性的依赖关系，但不存在循环依赖。A 依赖 B，B 依赖 C，但 C 不能再依赖 A。">DAG</span> 式的依赖关系。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">12 阶段 DAG</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment">// 阶段依赖关系（简化版）</span></span>
+<span class="code-line">scan → structure → [markdown, cobol]</span>
+<span class="code-line">  → parse → [routes, tools, orm]</span>
+<span class="code-line">  → crossFile → mro → communities</span>
+<span class="code-line">  → processes</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">scan：扫描文件树，记录所有文件路径和大小。</p>
+              <p class="tl">structure：建立文件夹和文件的层级关系。</p>
+              <p class="tl">parse：用 Tree-sitter 解析语法树，提取函数、类、方法等符号。</p>
+              <p class="tl">crossFile：跨文件传播类型信息，解析 import 链。</p>
+              <p class="tl">mro：解析方法解析顺序（继承链上的方法覆盖关系）。</p>
+              <p class="tl">communities：用 Leiden 算法把相关符号聚成功能社区。</p>
+              <p class="tl">processes：从入口点开始追踪执行流（如 HTTP 请求到响应的完整调用链）。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Parse Phase Detail -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">核心：Tree-sitter 解析引擎</h2>
+        <p>parse 阶段是整个管道的心脏。它用 <span class="term" data-definition="Tree-sitter 是一种增量式代码解析器，能快速构建抽象语法树（AST）。它的厉害之处在于支持 14+ 种编程语言，每种语言只需一套 S-expression 查询模板。">Tree-sitter</span> 把每个源文件解析成 <span class="term" data-definition="AST（抽象语法树）是源代码的结构化表示。每个函数、变量、表达式都变成树上的一个节点。Tree-sitter 能在毫秒级完成解析。">AST</span>，然后用统一的捕获标签提取符号。</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>语言检测与查询</strong>
+              <p>根据文件扩展名检测语言（.ts → TypeScript, .py → Python, .rs → Rust），加载对应的 Tree-sitter 语法。关键：不同语言用不同的 AST 节点名，但产出<strong>同一套语义标签</strong>（@definition.class, @call.name, @import.source）。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>分块并行解析</strong>
+              <p>文件按 ~2MB 字节预算分块，通过 Worker 线程池并行解析。每个 Worker：检测语言 → 加载语法 → 运行查询 → 返回统一结果。CLI 最多 16 个 Worker，Web 用 Web Workers + Comlink。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>符号表与边构建</strong>
+              <p>提取的符号（Function, Class, Method 等）作为图谱节点，import、call、extends 等关系作为边。每条边带有置信度分数（same-file 0.95, import-scoped 0.9, global 0.5）。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Call Resolution -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">6 阶段调用解析：如何知道谁调了谁？</h2>
+        <p>这是 GitNexus 最精巧的部分。当你看到 <code>obj.validate()</code>，GitNexus 需要确定 obj 是什么类型、validate 是哪个类的方法。它通过 6 个阶段的管道来完成：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"Stage 1: extract-call — 从 AST 提取调用点（函数名、形式、接收者）"},
+          {"highlight":"flow-actor-1","label":"Stage 2: classify-form — 判断调用形式（free/member/constructor）"},
+          {"highlight":"flow-actor-2","label":"Stage 3: infer-receiver — 推断接收者类型（LanguageProvider 可自定义）"},
+          {"highlight":"flow-actor-2","label":"Stage 4: select-dispatch — 选择分派策略（owner-scoped/free/constructor）"},
+          {"highlight":"flow-actor-3","label":"Stage 5: resolve-target — 通过 MRO 遍历查找目标方法"},
+          {"highlight":"flow-actor-3","label":"Stage 6: emit-edge — 写入 CALLS 边，附带置信度","packet":true,"from":"actor-3","to":"actor-1"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon" style="background: var(--color-accent); color: white;">1-2</div>
+              <span>提取+分类</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon" style="background: var(--color-actor-2); color: white;">3-4</div>
+              <span>推断+分派</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon" style="background: var(--color-actor-4); color: white;">5-6</div>
+              <span>解析+写入</span>
+            </div>
+          </div>
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击"下一步"追踪调用解析流程</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重播</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Community & Process Detection -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">自动发现功能模块和执行流</h2>
+        <p>解析完符号后，GitNexus 还要做两件更高级的事：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#127760;</div>
+            <h4 class="pattern-title">Leiden 社区检测</h4>
+            <p class="pattern-desc">用 Leiden 算法自动把相关符号聚成功能社区（Authentication、Database、UI 等）。每个社区有一个凝聚度分数，帮助 AI 理解代码库的功能分区。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">&#128256;</div>
+            <h4 class="pattern-title">执行流追踪</h4>
+            <p class="pattern-desc">从入口点（HTTP 路由、CLI 命令等）开始追踪完整的调用链。比如一个 LoginFlow 可能追踪 7 步：路由 → 中间件 → 验证 → 查库 → 生成 Token → 返回响应。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-success-light)">&#128269;</div>
+            <h4 class="pattern-title">混合搜索</h4>
+            <p class="pattern-desc">BM25 关键词搜索 + 语义向量搜索，通过 Reciprocal Rank Fusion 融合排序。支持 14 种语言的代码搜索。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！不同语言用不同的 AST 节点名，但产出同一套语义捕获标签（@definition.class, @call.name 等）。这样下游处理逻辑完全不需要针对语言做分支。"
+               data-explanation-wrong="想想 GitNexus 如何统一处理 14 种语言：每种语言的 Tree-sitter 查询产出的是什么？如果每种语言产出不同的格式，下游代码将极其复杂。">
+            <h3 class="quiz-question">GitNexus 支持 14 种编程语言，下游处理代码怎么做到不分语言分支的？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>每种语言写一套完全独立的下游处理逻辑</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>不同语言的 Tree-sitter 查询产出同一套语义捕获标签，下游逻辑统一</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>用一个万能正则匹配所有语言的语法结构</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

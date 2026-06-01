@@ -1,0 +1,269 @@
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">节点大联盟：认识核心角色</h1>
+      <p class="module-subtitle">每个节点都是一个专职员工，它们各司其职又紧密配合</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Metaphor -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">把节点想象成一个电影剧组</h2>
+        <p>生成一张 AI 图片就像拍一部电影：</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">&#128196;</div>
+            <div>
+              <strong>CheckpointLoaderSimple</strong>
+              <p><strong>剧本统筹</strong> — 把核心模型（大模型文件）加载进内存，没它谁都不知道要演什么</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">&#9997;</div>
+            <div>
+              <strong>CLIPTextEncode</strong>
+              <p><strong>编剧</strong> — 把你的文字描述（prompt）翻译成模型能理解的'潜台词'（<span class="term" data-definition="conditioning 是一种向量表示，把人类语言转化成数学空间中的方向，告诉模型'往哪个方向画'。可以理解为给画家一张情绪板。">conditioning</span>）</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">&#127922;</div>
+            <div>
+              <strong>KSampler</strong>
+              <p><strong>导演</strong> — 真正执行创作的核心。它在 <span class="term" data-definition="潜空间（latent space）是一种压缩表示，就像把一张高清图片压缩成小尺寸的'草图'，模型在这个草图上反复修改，最后再还原成高清图。">潜空间</span>里一步步雕刻出图像</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-5)">&#128248;</div>
+            <div>
+              <strong>VAEDecode</strong>
+              <p><strong>摄影师</strong> — 把潜空间里的'草图'解码成你能看到的真实像素图片</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">&#128190;</div>
+            <div>
+              <strong>SaveImage</strong>
+              <p><strong>后期交付</strong> — 把最终图片保存到磁盘，让你可以下载和使用</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Node Registration System -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">节点是怎么注册进系统的？</h2>
+        <p>每个节点都是一个 <span class="term" data-definition="Python 里的 class（类）就像一张蓝图——定义了节点有什么输入、什么输出、怎么处理数据。运行时，ComfyUI 会根据这张蓝图创建实际的节点实例。">Python class</span>。ComfyUI 用一个全局字典 <code>NODE_CLASS_MAPPINGS</code> 来管理它们：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">CLIPTextEncode</span>(ComfyNodeABC):</span>
+<span class="code-line">    <span class="code-keyword">@classmethod</span></span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">INPUT_TYPES</span>(s):</span>
+<span class="code-line">        <span class="code-keyword">return</span> {<span class="code-string">"required"</span>: {</span>
+<span class="code-line">            <span class="code-string">"text"</span>: (IO.STRING, {<span class="code-string">"multiline"</span>: <span class="code-keyword">True</span>}),</span>
+<span class="code-line">            <span class="code-string">"clip"</span>: (IO.CLIP, {})</span>
+<span class="code-line">        }}</span>
+<span class="code-line">    RETURN_TYPES = (IO.CONDITIONING,)</span>
+<span class="code-line">    FUNCTION = <span class="code-string">"encode"</span></span>
+<span class="code-line">    CATEGORY = <span class="code-string">"conditioning"</span></span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">encode</span>(self, clip, text):</span>
+<span class="code-line">        tokens = clip.<span class="code-function">tokenize</span>(text)</span>
+<span class="code-line">        <span class="code-keyword">return</span> (clip.<span class="code-function">encode_from_tokens_scheduled</span>(tokens),)</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">定义一个叫 CLIPTextEncode 的节点类...</p>
+              <p class="tl">声明它需要什么输入（这是一个类方法）...</p>
+              <p class="tl">返回输入规格表...</p>
+              <p class="tl">必须输入：一段文字（支持多行编辑）...</p>
+              <p class="tl">还必须输入：一个 CLIP 模型实例...</p>
+              <p class="tl">这个节点输出一个 conditioning（编码后的语义向量）...</p>
+              <p class="tl">核心处理函数名叫 encode...</p>
+              <p class="tl">在节点菜单里归类到 conditioning 分组...</p>
+              <p class="tl"></p>
+              <p class="tl">执行编码：先把文字拆成 token（词元）...</p>
+              <p class="tl">然后用 CLIP 模型把 token 编码成语义向量并返回...</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">&#128161;</div>
+          <div class="callout-content">
+            <strong class="callout-title">通用模式</strong>
+            <p>这个 <code>INPUT_TYPES</code> + <code>RETURN_TYPES</code> + <code>FUNCTION</code> 的三件套是 ComfyUI 节点的标准模板。几乎所有节点（包括你写的自定义节点）都遵循这个约定。学会这个模式，你就能读懂任何一个节点。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Group Chat -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">节点之间怎么对话？</h2>
+        <p>想象节点们在一个群里协作，每个节点只在需要时发言：</p>
+
+        <div class="chat-window" id="chat-module2">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="checkpoint" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">CK</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">CheckpointLoader</span>
+                <p>我把大模型加载好了，分成三份：MODEL 给采样器，CLIP 给文本编码器，VAE 给解码器。各取所需！</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="clip" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">CL</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">CLIPTextEncode</span>
+                <p>收到 CLIP 模型！我现在把用户的文字 prompt 编码成 conditioning 向量——正面一个，负面一个。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="ksampler" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">KS</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">KSampler</span>
+                <p>MODEL 到手，conditioning 到手。开始采样！我要在潜空间里反复去噪 20 步... 这可能需要几秒到几十秒。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="ksampler" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">KS</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">KSampler</span>
+                <p>采样完成！输出 latent 图像（还是压缩格式的'草图'），现在传给 VAE 解码。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="vae" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">VD</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">VAEDecode</span>
+                <p>latent 草图解码成功，变成真实的 RGB 像素图片了！交给 SaveImage 存盘。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="5" data-sender="save" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">SI</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">SaveImage</span>
+                <p>图片已保存到 output 目录，文件名是 ComfyUI_00001_.png。任务完成！</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-typing" style="display:none">
+            <div class="chat-avatar" id="typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">Next Message</button>
+            <button class="btn chat-all-btn">Play All</button>
+            <button class="btn chat-reset-btn">Replay</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Custom Nodes -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">自定义节点：社区的力量</h2>
+        <p>ComfyUI 最强大的地方之一就是自定义节点系统。任何人都可以写一个 <span class="term" data-definition="Python 文件就是一个包含代码的文本文件，扩展名是 .py。ComfyUI 的自定义节点通常是一个包含 __init__.py 的文件夹。">Python 模块</span> 放到 <code>custom_nodes/</code> 目录，ComfyUI 会自动发现并加载它：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line">node_paths = folder_paths.<span class="code-function">get_folder_paths</span>(<span class="code-string">"custom_nodes"</span>)</span>
+<span class="code-line"><span class="code-keyword">for</span> custom_node_path <span class="code-keyword">in</span> node_paths:</span>
+<span class="code-line">    possible_modules = os.<span class="code-function">listdir</span>(custom_node_path)</span>
+<span class="code-line">    <span class="code-keyword">for</span> possible_module <span class="code-keyword">in</span> possible_modules:</span>
+<span class="code-line">        <span class="code-comment"># 跳过禁用的和缓存文件</span></span>
+<span class="code-line">        <span class="code-keyword">if</span> module_path.<span class="code-function">endswith</span>(<span class="code-string">".disabled"</span>):</span>
+<span class="code-line">            <span class="code-keyword">continue</span></span>
+<span class="code-line">        <span class="code-comment"># 加载并注册这个自定义节点</span></span>
+<span class="code-line">        <span class="code-function">execute_script</span>(script_path)</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">找到所有自定义节点文件夹的路径...</p>
+              <p class="tl">遍历每一个自定义节点目录...</p>
+              <p class="tl">列出目录下的所有文件和子目录...</p>
+              <p class="tl">逐个检查...</p>
+              <p class="tl">被禁用的节点（后缀 .disabled）跳过...</p>
+              <p class="tl">继续下一个...</p>
+              <p class="tl">执行启动脚本，把节点注册进系统...</p>
+              <p class="tl">这样用户的画布上就能看到并使用这个节点了。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Glossary + Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">概念速查</h2>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">NODE_CLASS_MAPPINGS</code>
+            <span class="badge-desc">全局字典，把节点类名映射到实际的 Python class 对象——是节点的'花名册'</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">INPUT_TYPES</code>
+            <span class="badge-desc">类方法，声明节点需要什么输入（类型、默认值、约束）</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">RETURN_TYPES</code>
+            <span class="badge-desc">元组，声明节点输出什么类型的数据——决定了连线时的类型匹配</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">FUNCTION</code>
+            <span class="badge-desc">字符串，指定真正执行逻辑的方法名——ComfyUI 会调用这个名字的方法</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">CATEGORY</code>
+            <span class="badge-desc">节点在菜单中的分类路径，如 "conditioning" 或 "image/upscaling"</span>
+          </div>
+        </div>
+
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="完全正确！ComfyUI 的类型系统通过 RETURN_TYPES 和 INPUT_TYPES 的类型名来匹配。如果连线两端的类型名不一致，验证就会报错。"
+               data-explanation-wrong="提示：看看节点的 RETURN_TYPES 和下一个节点的 INPUT_TYPES 之间的关系。连线的规则不是随意的。">
+            <h3 class="quiz-question">两个节点之间能连线的条件是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>只要连线方向正确就行（输出 -> 输入）</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>两个节点必须在同一个 CATEGORY 下</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>输出端的 RETURN_TYPES 和输入端的 INPUT_TYPES 类型名必须匹配</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

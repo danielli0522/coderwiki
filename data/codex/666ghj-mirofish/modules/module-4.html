@@ -1,0 +1,242 @@
+
+<!-- ═══════════════════════════════════════════════════════════════
+     Module 04 — 上帝视角的报告：ReportAgent
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">上帝视角的报告</h1>
+      <p class="module-subtitle">ReportAgent 如何像一位全知记者，检索模拟世界的每个角落</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Metaphor -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">想象一位拥有读心术的记者</h2>
+        <p>模拟结束后，MiroFish 需要把成千上万个 Agent 的互动整理成一份人类可读的预测报告。这不是简单的摘要——ReportAgent 需要"潜入"模拟世界，像一位拥有<span class="term" data-definition="上帝视角（God Mode）意味着你能看到模拟世界中每一个 Agent 的想法、行动和互动，而不是只能看到公开的帖子。">上帝视角</span>的记者，检索每一条线索。</p>
+        <p>它使用 <span class="term" data-definition="ReACT 模式是 Reason（推理）+ Act（行动）的循环：先思考需要什么信息，然后调用工具获取，再分析结果，直到信息足够后输出最终答案。这是 AI 的"边查边写"模式。">ReACT</span>（推理+行动）模式工作——每个章节都经过多轮思考、检索、再思考的过程。</p>
+
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <p>规划大纲</p>
+          </div>
+          <div class="flow-arrow">&#x2192;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <p>逐章生成</p>
+          </div>
+          <div class="flow-arrow">&#x2192;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <p>组装报告</p>
+          </div>
+          <div class="flow-arrow">&#x2192;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">4</div>
+            <p>交互对话</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Tools — ReportAgent's toolkit -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">记者的四件法宝</h2>
+        <p>ReportAgent 有四个强大的<span class="term" data-definition="工具（Tool）是 AI 可以调用的外部函数。比如搜索知识图谱、采访 Agent 等。AI 通过工具获取自己不知道的信息。">检索工具</span>，每个章节至少调用 3-5 次：</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">&#x1F50D;</div>
+            <div>
+              <strong>深度洞察（InsightForge）</strong>
+              <p>自动将问题分解为多个子问题，从多个维度检索图谱，整合语义搜索、实体分析、关系链追踪的结果。最强大的工具。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">&#x1F30A;</div>
+            <div>
+              <strong>广角全景（PanoramaSearch）</strong>
+              <p>获取模拟的完整全貌——区分当前有效事实和已过期的历史事实，帮你看清舆论是如何演变的。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">&#x26A1;</div>
+            <div>
+              <strong>快速检索（QuickSearch）</strong>
+              <p>轻量级快速查询，适合验证某个具体事实。比如"确认一下校方什么时候发的声明"。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">&#x1F4AC;</div>
+            <div>
+              <strong>深度采访（InterviewAgents）</strong>
+              <p>调用 OASIS 的真实采访 API，对正在运行的模拟 Agent 进行双平台采访。获取各角色的第一人称观点。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Code Translation — ReACT loop -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码翻译：ReACT 循环的精髓</h2>
+        <p>ReportAgent 生成每个章节时的核心逻辑——不断"思考-行动-观察"循环：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">Python 代码</span>
+            <pre><code><span class="code-line"><span class="code-keyword">for</span> iteration <span class="code-keyword">in</span> <span class="code-function">range</span>(max_iterations):</span>
+<span class="code-line">    response = llm.chat(messages)</span>
+<span class="code-line">    tool_calls = parse_tool_calls(response)</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">if</span> <span class="code-string">"Final Answer:"</span> <span class="code-keyword">in</span> response:</span>
+<span class="code-line">        <span class="code-keyword">return</span> extract_final_answer(response)</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">if</span> tool_calls:</span>
+<span class="code-line">        result = execute_tool(tool_calls[<span class="code-number">0</span>])</span>
+<span class="code-line">        messages.append(observation)</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">通俗解释</span>
+            <div class="translation-lines">
+              <p class="tl">最多循环 5 轮（每章最多调 5 次工具）</p>
+              <p class="tl">把之前所有的对话发给 LLM，让它思考</p>
+              <p class="tl">检查 LLM 的回复里有没有工具调用</p>
+              <p class="tl">如果 LLM 说"我写好了"——提取最终答案</p>
+              <p class="tl">返回章节内容，ReACT 循环结束</p>
+              <p class="tl">如果 LLM 想调工具——执行第一个工具</p>
+              <p class="tl">拿到工具结果，追加到对话历史</p>
+              <p class="tl">下一轮循环，LLM 看到工具结果后继续思考</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">&#x1F4A1;</div>
+          <div class="callout-content">
+            <strong class="callout-title">为什么必须至少调 3 次工具？</strong>
+            <p>ReportAgent 有一条硬规则：每个章节至少调用 3 次检索工具，否则拒绝输出。如果 LLM 想偷懒直接写答案，系统会强制它先去检索数据。这确保报告的每一句话都有模拟数据支撑，而不是 AI 编造的。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Group Chat — ReACT in Action -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">旁观 ReACT：记者的工作现场</h2>
+        <p>以下是 ReportAgent 撰写"舆论传播分析"章节时的真实工作过程——点击观看：</p>
+
+        <div class="chat-window" id="chat-module4">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="agent" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">R</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">ReportAgent 思考</span>
+                <p>我需要了解事件的传播路径。先调用 InsightForge 深度分析"信息是如何从源头扩散到全网的"。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="tool" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">T</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">InsightForge 结果</span>
+                <p>自动分解为 5 个子问题，检索到 47 条事实、12 个关键实体。微博首发占 68% 声量，抖音视觉冲击放大了情绪传播...</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="agent" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">R</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">ReportAgent 思考</span>
+                <p>有传播数据了。现在我想采访几个学生 Agent，了解他们的真实心理。调用 InterviewAgents。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="tool" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">T</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">Interview 结果</span>
+                <p>采访了 3 个学生 Agent。Twitter 回答："看到第一反应是愤怒，觉得学校不把我们当人看"；Reddit："我发了长文分析，希望大家理性..."</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="agent" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">R</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">ReportAgent 输出</span>
+                <p>Final Answer: 微博作为舆情的"第一现场"，贡献了 68% 的首发声量。正如 Agent #5 所说："看到第一反应是愤怒..." [输出完整章节内容]</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-module4-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module4-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条消息</button>
+            <button class="btn chat-all-btn">播放全部</button>
+            <button class="btn chat-reset-btn">重新播放</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">测验：你理解报告生成了吗？</h2>
+
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！ReACT 的核心就是"先思考需要什么信息，再调用工具获取，分析结果后决定是继续检索还是输出答案"——这就是 Reason + Act 的循环。"
+               data-explanation-wrong="ReACT 是 Reason（推理）+ Act（行动）的缩写。它不是一个简单的问答，而是 AI 先思考、再行动（调工具）、再思考的循环过程。">
+            <h3 class="quiz-question">ReACT 模式的核心工作方式是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>LLM 一次性生成完整报告，不需要任何外部数据</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>LLM 先思考需要什么信息，调用工具检索，分析结果后决定继续还是输出</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>用户逐步指导 LLM 写什么内容</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="没错！ReportAgent 强制每个章节至少调用 3 次工具（最多 5 次），并且建议混合使用不同工具。如果 LLM 试图偷懒直接写答案，系统会拒绝并要求它先去检索。"
+               data-explanation-wrong="想想为什么需要强制最低次数——因为 LLM 可能会'偷懒'，用自己已有的知识编造内容而不是检索模拟数据。强制 3 次确保内容来自真实模拟。">
+            <h3 class="quiz-question">为什么 ReportAgent 强制每个章节至少调用 3 次检索工具？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为 3 次是 LLM 能处理的最多工具调用次数</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为 Zep API 要求每次查询必须调用 3 次</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>为了防止 LLM 用自己的知识编造内容，确保报告基于真实模拟数据</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

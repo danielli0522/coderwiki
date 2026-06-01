@@ -1,0 +1,296 @@
+    <section class="module" id="module-6" style="background: var(--color-bg)">
+      <div class="module-content">
+        <header class="module-header animate-in">
+          <span class="module-number">06</span>
+          <h1 class="module-title">进阶火候：思考 · 缓存 · Skills</h1>
+          <p class="module-subtitle">三件训练外挂——把同一个 agent 从"能用"推到"生产可用"</p>
+        </header>
+
+        <div class="module-body">
+
+          <!-- Screen 1: Hook + runner metaphor -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">前 5 个模块教的是 agent 的骨架——这一模块是训练外挂</h2>
+            <p>到这里你已经能理解 cookbook 大部分章节。但实战里同一个 agent 经常被三个问题卡住：<strong>推理太浅 / 调用太贵 / 本领太散</strong>。这一模块的三件外挂分别治这三个症。</p>
+
+            <div class="callout callout-accent">
+              <div class="callout-icon">🏃</div>
+              <div class="callout-content">
+                <strong class="callout-title">本课的隐喻：长跑选手的三件训练外挂</strong>
+                <p><strong>Extended Thinking = 起跑前的呼吸调整</strong>——赛前那 30 秒深呼吸，让大脑先预热再开跑。<br><strong>Prompt Caching = 训练后的肌肉记忆</strong>——同一段路跑过 100 次，肌肉自动反应，不用再思考动作。<br><strong>Skills = 教练给的训练计划包</strong>——一份现成的、能直接套用的 SOP（"全马备赛 16 周计划"）。<br>三件外挂对应三种"提速"：思考更深、重复更快、本领更广。每一件都是任何 agent 都能加挂的。</p>
+              </div>
+            </div>
+
+            <div class="pattern-cards stagger-children">
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+                <div class="pattern-icon" style="background: var(--color-actor-1)">🧠</div>
+                <h4 class="pattern-title">Extended Thinking</h4>
+                <p class="pattern-desc"><strong>治什么病</strong>：复杂推理一次想不清。<br><strong>怎么打开</strong>：API 调用加一个 thinking 参数。<br><strong>适合场景</strong>：数学 / 多步规划 / 风险分析。<br><strong>注意</strong>：会增加输出 token 消耗。</p>
+              </div>
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+                <div class="pattern-icon" style="background: var(--color-actor-3)">💾</div>
+                <h4 class="pattern-title">Prompt Caching</h4>
+                <p class="pattern-desc"><strong>治什么病</strong>：长前缀重复花钱。<br><strong>怎么打开</strong>：API 调用加一个 cache_control 参数。<br><strong>适合场景</strong>：固定 system prompt / 长文档反复问 / 工具列表。<br><strong>效果</strong>：第二次起 input token 价格降到 1/10、延迟降一半。</p>
+              </div>
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+                <div class="pattern-icon" style="background: var(--color-actor-4)">📦</div>
+                <h4 class="pattern-title">Skills</h4>
+                <p class="pattern-desc"><strong>治什么病</strong>：本领太散，复用难。<br><strong>怎么打开</strong>：把"代码 + 提示词 + 资源"打包成 Skill。<br><strong>适合场景</strong>：做 PPT / Excel / PDF 等专业产物。<br><strong>意义</strong>：本领能跨项目、跨客户端复用。</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 2: Extended Thinking with chat -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">第一件外挂：Extended Thinking——给模型一段不被打扰的草稿纸</h2>
+            <p>Extended Thinking 不是模型变聪明了，是<strong>给它一段独立的草稿空间</strong>——它把推理过程写在 thinking 块里，最后才给结论。复杂推理任务直接受益。</p>
+
+            <div class="translation-block animate-in">
+              <div class="translation-code">
+                <span class="translation-label">CODE · Python</span>
+<pre><code><span class="code-line">response = client.messages.<span class="code-function">create</span>(</span>
+<span class="code-line">    model=<span class="code-string">"claude-sonnet-4-6"</span>,</span>
+<span class="code-line">    max_tokens=4000,</span>
+<span class="code-line">    thinking={</span>
+<span class="code-line">        <span class="code-string">"type"</span>: <span class="code-string">"enabled"</span>,</span>
+<span class="code-line">        <span class="code-string">"budget_tokens"</span>: 2000</span>
+<span class="code-line">    },</span>
+<span class="code-line">    messages=[{</span>
+<span class="code-line">        <span class="code-string">"role"</span>: <span class="code-string">"user"</span>,</span>
+<span class="code-line">        <span class="code-string">"content"</span>: <span class="code-string">"Solve this puzzle: Three people check into a hotel..."</span></span>
+<span class="code-line">    }]</span>
+<span class="code-line">)</span></code></pre>
+              </div>
+              <div class="translation-english">
+                <span class="translation-label">中文逐行翻译</span>
+                <div class="translation-lines">
+                  <p class="tl"><strong>第 1-3 行：</strong>普通的 API 调用——Sonnet 模型，最终输出最多 4000 <span class="term" data-definition="LLM 处理文本的最小单位。一个英文单词通常是 1-2 个 token，一个中文字大约 1-2 个 token。API 计费按 token 数量算——所以'省 token'就是'省钱'。">token</span>。</p>
+                  <p class="tl"><strong>第 4-7 行（关键开关）：</strong>打开扩展思考，并给它 2000 token 的<strong>"草稿纸预算"</strong>。模型会把推理过程写进一个独立的 thinking 块，再写最终答案。</p>
+                  <p class="tl"><strong>第 8-11 行：</strong>你的实际问题。</p>
+                  <p class="tl"><strong>调用回来后</strong>，<code>response.content</code> 里会有<strong>两类块</strong>：thinking 块（推理过程）和 text 块（最终答案）。</p>
+                  <p class="tl"><strong>对调试 agent 行为价值巨大</strong>——你能看到模型的"内心独白"，立刻知道它哪里想错了，是 prompt 没写好还是模型推理偏了。</p>
+                </div>
+              </div>
+            </div>
+
+            <h3 style="margin-top: var(--space-12); font-family: var(--font-display); font-size: var(--text-xl);">看一遍模型的"内心独白"</h3>
+            <p>cookbook 里给的经典例题——旅馆账单悖论。看 Claude 怎么用 thinking 块把推理过程摊开：</p>
+
+            <div class="chat-window" id="chat-module6">
+              <div class="chat-messages">
+                <div class="chat-message" data-msg="0" data-sender="user" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-2)">用</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-2)">用户</span>
+                    <p>三个人住旅馆付了 $30。经理发现实际只要 $25，让服务员退 $5。服务员私吞 $2，每人退 $1。现在每人付 $9，共 $27，加服务员 $2 = $29。剩下的 $1 去哪了？</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="1" data-sender="thinking" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-text-muted)">💭</div>
+                  <div class="chat-bubble" style="background: var(--color-bg-warm); border: 1px dashed var(--color-text-muted);">
+                    <span class="chat-sender" style="color: var(--color-text-muted)">Claude · thinking 内心独白</span>
+                    <p>让我仔细拆账。$30 总付 = $25 房费 + $3 退还 + $2 服务员私吞 = $30 ✓。客人实际付 = $30 − $3 退还 = $27。这 $27 = $25 房费 + $2 服务员私吞 ✓。所以"$27 + $2 = $29" 是错误的相加方式——$2 已经在 $27 里了，又被加了一次。这是把"客人付出"和"店方+服务员收入"两类账混了……</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="2" data-sender="claude" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-1)">C</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-1)">Claude · text 正式回答</span>
+                    <p>这是一个经典的语言陷阱。客人付的 $27 已经<strong>包含了</strong>服务员私吞的 $2，不应该再加 $2。正确算法：客人付 $27 = 房费 $25 + 服务员 $2。退还的 $3 不在这边账里——所以 $30 = $27（客人最终付）+ $3（退还）。没有"消失的 $1"。</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="chat-typing" id="chat-module6-typing" style="display:none">
+                <div class="chat-avatar" id="chat-module6-typing-avatar">?</div>
+                <div class="chat-typing-dots">
+                  <span class="typing-dot"></span>
+                  <span class="typing-dot"></span>
+                  <span class="typing-dot"></span>
+                </div>
+              </div>
+
+              <div class="chat-controls">
+                <button class="btn chat-next-btn">下一句</button>
+                <button class="btn chat-all-btn">自动播放</button>
+                <button class="btn chat-reset-btn">重播</button>
+                <span class="chat-progress"></span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 3: Prompt Caching -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">第二件外挂：Prompt Caching——一行参数省 90% 的输入 token</h2>
+            <p>Prompt Caching 不是新模型，是 API 的一个 flag——把长的、不变的前缀（一本书、一份代码库、一份 system prompt）<strong>缓存住</strong>。第二次调用同一前缀时，输入 token 价格降到 1/10、延迟降一半。</p>
+
+            <div class="translation-block animate-in">
+              <div class="translation-code">
+                <span class="translation-label">CODE · Python</span>
+<pre><code><span class="code-line">write_response = client.messages.<span class="code-function">create</span>(</span>
+<span class="code-line">    model=MODEL_NAME,</span>
+<span class="code-line">    max_tokens=300,</span>
+<span class="code-line">    cache_control={<span class="code-string">"type"</span>: <span class="code-string">"ephemeral"</span>},  <span class="code-comment"># &lt;-- one-line change</span></span>
+<span class="code-line">    messages=[</span>
+<span class="code-line">        {</span>
+<span class="code-line">            <span class="code-string">"role"</span>: <span class="code-string">"user"</span>,</span>
+<span class="code-line">            <span class="code-string">"content"</span>: <span class="code-function">str</span>(TIMESTAMP)</span>
+<span class="code-line">            + <span class="code-string">"&lt;book&gt;"</span></span>
+<span class="code-line">            + book_content   <span class="code-comment"># 整本《傲慢与偏见》约 187k token</span></span>
+<span class="code-line">            + <span class="code-string">"&lt;/book&gt;"</span></span>
+<span class="code-line">            + <span class="code-string">"\n\nWhat is the title of this book? Only output the title."</span>,</span>
+<span class="code-line">        }</span>
+<span class="code-line">    ],</span>
+<span class="code-line">)</span></code></pre>
+              </div>
+              <div class="translation-english">
+                <span class="translation-label">中文逐行翻译</span>
+                <div class="translation-lines">
+                  <p class="tl"><strong>第 4 行（关键）：</strong>就这一行！<code>cache_control={"type": "ephemeral"}</code>。意思是"我允许系统把这次输入的可缓存部分缓存起来"。<span class="term" data-definition="ephemeral 在英文里指'短暂的'。在 prompt caching 里这是一种缓存类型——存几分钟到几小时（具体看 Anthropic 当时的规则），后续命中时复用。够覆盖一次会话里的多轮调用。">ephemeral</span> 表示短期缓存。</p>
+                  <p class="tl"><strong>第 9-11 行：</strong>把整本《傲慢与偏见》（约 187k token）塞进 prompt 里。如果不缓存，每次问问题都要重新输入这 187k token——账单会爆炸。</p>
+                  <p class="tl"><strong>第 12 行：</strong>实际问题——只占几十 token。</p>
+                  <p class="tl"><strong>第一次调用</strong>：缓存被写入，时间和不缓存差不多（baseline）。</p>
+                  <p class="tl"><strong>第二次调用相同前缀</strong>：API 直接从缓存读，<strong>输入 token 价格降到 1/10、延迟降一半以上</strong>。</p>
+                  <p class="tl"><strong>真实生产场景</strong>：你的 agent 每次都带相同的 system prompt（几千 token）和工具列表？打开 caching，立刻省钱。</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="callout callout-info">
+              <div class="callout-icon">📉</div>
+              <div class="callout-content">
+                <strong class="callout-title">数字感受一下</strong>
+                <p>假设你的 agent 系统每次带 10000 token 的 system prompt，每天 100 万次调用。<br>
+                <strong>不开 caching</strong>：每次按全价付 10000 token 输入费 → 一天烧掉 100 亿 token 输入费。<br>
+                <strong>开 caching</strong>：第一次写入按全价，之后命中按 1/10 → 一天烧掉约 10 亿 token 输入费。<strong>账单立省 90%</strong>。这是 CTO 级别的对话词汇——产品经理说"AI 太贵"，你能立刻问"接 prompt caching 了吗？"</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 4: Drag-and-drop matching -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">练习：把场景拖到对应的外挂上</h2>
+            <p>把左边的"外挂方案"拖到右边对应的"真实场景"。</p>
+
+            <div class="dnd-container" id="dnd-module6">
+              <div class="dnd-chips">
+                <div class="dnd-chip" draggable="true" data-answer="thinking">Extended Thinking</div>
+                <div class="dnd-chip" draggable="true" data-answer="caching">Prompt Caching</div>
+                <div class="dnd-chip" draggable="true" data-answer="both">两个一起开</div>
+                <div class="dnd-chip" draggable="true" data-answer="none">两个都不需要</div>
+              </div>
+              <div class="dnd-zones">
+                <div class="dnd-zone" data-correct="thinking">
+                  <p class="dnd-zone-label">复杂数学推理 / 多步规划任务（一次答不准，需要深度思考）</p>
+                  <div class="dnd-zone-target">把外挂拖到这里</div>
+                </div>
+                <div class="dnd-zone" data-correct="caching">
+                  <p class="dnd-zone-label">客服 agent，每次对话开头都贴 5000 token 的产品 KB 当 system prompt</p>
+                  <div class="dnd-zone-target">把外挂拖到这里</div>
+                </div>
+                <div class="dnd-zone" data-correct="both">
+                  <p class="dnd-zone-label">RAG agent：长文档（缓存友好）+ 复杂多跳问答（推理重）</p>
+                  <div class="dnd-zone-target">把外挂拖到这里</div>
+                </div>
+                <div class="dnd-zone" data-correct="none">
+                  <p class="dnd-zone-label">一个超简单的"今天星期几" 一次性问答</p>
+                  <div class="dnd-zone-target">把外挂拖到这里</div>
+                </div>
+              </div>
+              <div style="display: flex; gap: var(--space-3); margin-top: var(--space-6); flex-wrap: wrap;">
+                <button class="btn" onclick="checkDnD('dnd-module6')">检查匹配</button>
+                <button class="btn" onclick="resetDnD('dnd-module6')">重新开始</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 5: Quiz + closing -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">小测：给真实场景挑外挂</h2>
+
+            <div class="quiz-container" id="quiz-module6">
+
+              <div class="quiz-question-block"
+                   data-correct="option-b"
+                   data-explanation-right="对！这是 caching 的教科书场景——长前缀（8000 token）每次重复，对话本身只有几百 token。开 cache_control 后第二次起 input 费降到 1/10，账单立刻砍掉一大半。Extended Thinking 解决不了'前缀重复'问题。"
+                   data-explanation-wrong="想：账单贵在哪？是输入太多？还是输出太多？或者推理太复杂？8000 token 的 system prompt 每次重复——对应的外挂是哪一件？">
+                <h3 class="quiz-question">Q1. 你的 agent 每次对话开头都要贴一份 8000 token 的 system prompt + 工具说明，对话本身只有几百 token。账单很贵。最优一招？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>开 Extended Thinking——让模型想清楚就少调几次。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>开 Prompt Caching——缓存那 8000 token 的前缀。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>换便宜的 Haiku 模型。</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block"
+                   data-correct="option-a"
+                   data-explanation-right="对！'分析三季度财报识别 5 个潜在风险'是典型的多步推理任务——一次性看完 + 推理 + 排序往往浅尝辄止。给 thinking budget，模型在草稿纸上拆开来想，质量会显著提升。"
+                   data-explanation-wrong="caching 解决的是'前缀重复花钱'，不是'推理深度不够'。switching model 可能有用，但 thinking 是直接对症下药的开关。">
+                <h3 class="quiz-question">Q2. 你的 agent 在做"分析三季度财务报告，识别 5 个潜在风险"。回答经常浅尝辄止——只点 1-2 个明显的风险。最该试的开关？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Extended Thinking——给它草稿空间做深度推理。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Prompt Caching——把财报缓存下来。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>换更大的 Opus 模型。</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block"
+                   data-correct="option-c"
+                   data-explanation-right="对！这正是 Skills 的设计目标——把'做 PPT / Excel / PDF'这种本领以可复用包形式提供给 Claude，并且这本领能在 Claude.ai、API、各种客户端复用。tool use 也能做但你要重写一切；Skills 是 Anthropic 替你打包好的本领。"
+                   data-explanation-wrong="想：做 PPT 这种'专业产物生成'是 Skills 的核心场景。tool use 也能搭，但你要重写整个 PPT 引擎。Skills 已经把这事打包好了。">
+                <h3 class="quiz-question">Q3. 你想让 Claude 在网页应用里直接生成 PowerPoint 文件。最适合的机制？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>用 tool use 自己写一个 generate_pptx 工具。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>开 Extended Thinking 让它"想清楚再做"。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>用 Anthropic 的 Skills——做 PPT/Excel/PDF 是 Skills 的标配本领。</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <button class="quiz-check-btn" onclick="checkQuiz('quiz-module6')">查看答案</button>
+              <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module6')">再做一次</button>
+            </div>
+
+            <div class="callout callout-accent" style="margin-top: var(--space-12)">
+              <div class="callout-icon">🎯</div>
+              <div class="callout-content">
+                <strong class="callout-title">这门课结束了——但 Cookbook 还在更新</strong>
+                <p>整本食谱的脉络其实很简单——先认识 Augmented LLM 这个最小单元（模块 1），学会三种基础工序（模块 2）和两种高阶工序（模块 3），把"动手"机制（模块 4）打通后，用 SDK 把所有这些封装成产品级 agent（模块 5），最后用三件训练外挂（模块 6）把 agent 推到生产可用。<br><br>
+                <strong>回到 cookbook 仓库后，你不再是看 random 一堆 notebook——你能认出每个 notebook 在这张地图上的坐标</strong>。看到 customer_service_agent → 这是 tool use 的实战。看到 contextual-embeddings → 这是 RAG 的优化变体。看到 sub-agents → 这是 orchestrator 的具体实现。<br><br>
+                作为 vibe coder，你拿到的不只是知识——是和工程师对话的<strong>词汇</strong>：你能说出"这部分用 evaluator-optimizer 太重了，改成 chain 加 spot-check"或者"这个 agent 应该把规则放 CLAUDE.md 不要每次塞 prompt"。这就是这门课最大的价值。</p>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </section>

@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodeGraph — 给 AI 编程代理装上代码地图</title>
+
+  <!-- Google Fonts: Bricolage Grotesque · DM Sans · JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <!--
+    CUSTOMIZE PER COURSE — change only the three accent variables below.
+    Options:
+      vermillion  #D94F30 / #C4432A / #FDEEE9 / #E8836C  (default)
+      coral       #E06B56 / #C85A47 / #FDECEA / #E89585
+      teal        #2A7B9B / #1F6280 / #E4F2F7 / #5A9DB8
+      amber       #D4A843 / #BF9530 / #FDF5E0 / #E0C070
+      forest      #2D8B55 / #226B41 / #E8F5EE / #5AAD7A
+  -->
+  <style>
+    :root {
+      --color-accent:       #2D8B55;
+      --color-accent-hover: #226B41;
+      --color-accent-light: #E8F5EE;
+      --color-accent-muted: #5AAD7A;
+      --toc-width: 260px;
+    }
+
+    /* ── TOC Sidebar ── */
+    .toc-sidebar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: var(--toc-width);
+      height: 100vh;
+      background: var(--color-surface);
+      border-left: 1px solid var(--color-border);
+      z-index: 1000;
+      transform: translateX(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: -4px 0 20px rgba(0,0,0,0.05);
+    }
+    .toc-sidebar.open {
+      transform: translateX(0);
+    }
+
+    .toc-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--color-border-light);
+      flex-shrink: 0;
+    }
+    .toc-header-title {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--color-text);
+    }
+    .toc-close {
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      padding: 4px;
+      line-height: 1;
+      border-radius: 6px;
+      transition: color 0.15s, background 0.15s;
+    }
+    .toc-close:hover {
+      color: var(--color-text);
+      background: var(--color-bg-warm);
+    }
+
+    .toc-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 0;
+      list-style: none;
+    }
+
+    .toc-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 20px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      border-left: 3px solid transparent;
+      text-decoration: none;
+    }
+    .toc-item:hover {
+      background: var(--color-bg-warm);
+    }
+    .toc-item.active {
+      background: var(--color-accent-light);
+      border-left-color: var(--color-accent);
+    }
+    .toc-item.active .toc-item-title {
+      color: var(--color-accent);
+      font-weight: 600;
+    }
+
+    .toc-item-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+      flex-shrink: 0;
+      background: var(--color-bg-warm);
+      color: var(--color-text-muted);
+      transition: background 0.15s, color 0.15s;
+    }
+    .toc-item.active .toc-item-num {
+      background: var(--color-accent);
+      color: #fff;
+    }
+
+    .toc-item-title {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      line-height: 1.3;
+      transition: color 0.15s;
+    }
+
+    /* Toggle button — inline in nav-dots */
+    .toc-toggle {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-secondary);
+      font-size: 14px;
+      padding: 0;
+      line-height: 1;
+      transition: color 0.15s;
+    }
+    .toc-toggle:hover {
+      color: var(--color-text);
+    }
+
+    /* Overlay for mobile */
+    .toc-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.2);
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .toc-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Adjust main content when sidebar open */
+    body.toc-open main,
+    body.toc-open nav {
+      margin-right: var(--toc-width);
+      transition: margin-right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @media (max-width: 768px) {
+      body.toc-open main,
+      body.toc-open nav {
+        margin-right: 0;
+      }
+      /* Keep nav-bar offset on mobile */
+      .module {
+        padding-top: calc(var(--nav-height) + var(--space-8)) !important;
+      }
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <!-- TOC Overlay (mobile) -->
+  <div class="toc-overlay" id="toc-overlay"></div>
+
+  <!-- TOC Sidebar -->
+  <aside class="toc-sidebar" id="toc-sidebar">
+    <div class="toc-header">
+      <span class="toc-header-title">目录</span>
+      <button class="toc-close" id="toc-close">✕</button>
+    </div>
+    <ul class="toc-list">
+      <!-- TOC_ITEMS: one <li> per module, auto-generated -->
+      <li class="toc-item" data-target="module-1"><span class="toc-item-num">01</span><span class="toc-item-title">AI 代理的困境与代码地图</span></li>
+      <li class="toc-item" data-target="module-2"><span class="toc-item-num">02</span><span class="toc-item-title">核心角色：六大层如何协作</span></li>
+      <li class="toc-item" data-target="module-3"><span class="toc-item-num">03</span><span class="toc-item-title">从源码到知识图谱：索引管道</span></li>
+      <li class="toc-item" data-target="module-4"><span class="toc-item-num">04</span><span class="toc-item-title">MCP 工具箱：代理怎么用图谱</span></li>
+      <li class="toc-item" data-target="module-5"><span class="toc-item-num">05</span><span class="toc-item-title">技术选型：CodeGraph vs 替代方案</span></li>
+      <li class="toc-item" data-target="module-6"><span class="toc-item-num">06</span><span class="toc-item-title">总结与练习</span></li>
+    </ul>
+  </aside>
+
+  <script>
+    // TOC logic
+    document.addEventListener('DOMContentLoaded', function() {
+      const sidebar = document.getElementById('toc-sidebar');
+      const toggle = document.getElementById('toc-toggle');
+      const close = document.getElementById('toc-close');
+      const overlay = document.getElementById('toc-overlay');
+      const items = document.querySelectorAll('.toc-item');
+      const modules = document.querySelectorAll('.module');
+
+      function openToc() {
+        sidebar.classList.add('open');
+        overlay.classList.add('visible');
+        document.body.classList.add('toc-open');
+      }
+      function closeToc() {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('visible');
+        document.body.classList.remove('toc-open');
+      }
+
+      if (toggle) toggle.addEventListener('click', () => {
+        sidebar.classList.contains('open') ? closeToc() : openToc();
+      });
+      if (close) close.addEventListener('click', closeToc);
+      if (overlay) overlay.addEventListener('click', closeToc);
+
+      items.forEach(item => {
+        item.addEventListener('click', () => {
+          const target = document.getElementById(item.dataset.target);
+          if (target) target.scrollIntoView({ behavior: 'smooth' });
+          if (window.innerWidth <= 768) closeToc();
+        });
+      });
+
+      function updateActiveToc() {
+        let current = 'module-1';
+        modules.forEach(mod => {
+          const rect = mod.getBoundingClientRect();
+          if (rect.top <= window.innerHeight / 3) {
+            current = mod.id;
+          }
+        });
+        items.forEach(item => {
+          item.classList.toggle('active', item.dataset.target === current);
+        });
+      }
+      window.addEventListener('scroll', () => {
+        requestAnimationFrame(updateActiveToc);
+      }, { passive: true });
+      updateActiveToc();
+    });
+  </script>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">CodeGraph — 给 AI 编程代理装上代码地图</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <!--
+          One <button> per module. Replace MODULE_N_NAME with the actual module title.
+
+          <button class="nav-dot" data-target="module-1" data-tooltip="MODULE_1_NAME" role="tab" aria-label="Module 1: MODULE_1_NAME"></button>
+          <button class="nav-dot" data-target="module-2" data-tooltip="MODULE_2_NAME" role="tab" aria-label="Module 2: MODULE_2_NAME"></button>
+          ...
+        -->
+        <button class="toc-toggle" id="toc-toggle" title="目录">&#9776;</button>
+        <button class="nav-dot" data-target="module-1" data-tooltip="AI 代理的困境与代码地图" role="tab" aria-label="Module 1: AI 代理的困境与代码地图"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="核心角色：六大层如何协作" role="tab" aria-label="Module 2: 核心角色：六大层如何协作"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="从源码到知识图谱：索引管道" role="tab" aria-label="Module 3: 从源码到知识图谱：索引管道"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="MCP 工具箱：代理怎么用图谱" role="tab" aria-label="Module 4: MCP 工具箱：代理怎么用图谱"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="技术选型：CodeGraph vs 替代方案" role="tab" aria-label="Module 5: 技术选型：CodeGraph vs 替代方案"></button>
+        <button class="nav-dot" data-target="module-6" data-tooltip="总结与练习" role="tab" aria-label="Module 6: 总结与练习"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh -->
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">AI 代理的困境与代码地图</h1>
+      <p class="module-subtitle">当 Claude Code 需要理解你的代码库时，它在经历什么？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: The Problem -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">想象一下：你在陌生城市开车</h2>
+        <p>没有地图，没有导航。想找到一家咖啡馆，你只能一条街一条街地开过去看。每经过一个路口，你就花掉一点时间和汽油。</p>
+        <p>这就是今天 AI <span class="term" data-definition="AI 编程代理是能自动读写代码的 AI 助手，比如 Claude Code、Cursor Agent、Codex CLI 等。你用自然语言告诉它做什么，它就去改代码。">编程代理</span> 面对代码库的处境——它用 <span class="term" data-definition="Grep 是一种文本搜索工具，能在所有文件里找包含某个关键词的行。相当于在整个项目里做全文搜索。">grep</span> 搜索、用 <span class="term" data-definition="Read 就是让 AI 读取某个文件的完整内容，就像你打开一个文件看里面的代码。">Read</span> 翻文件、用 <span class="term" data-definition="Glob 是一种按文件名模式查找文件的工具，比如找所有 .tsx 结尾的文件。">glob</span> 找路径。每一次调用都要消耗 <span class="term" data-definition="Token 是 AI 模型处理文本的基本单位。大约 4 个英文字符 = 1 个 token。每次 AI 工具调用都要消耗 token，也就是消耗钱和时间。">token</span> 和时间。</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">&#128161;</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键洞察</strong>
+            <p>在没有地图的城市里，找一个地点要挨家挨户问。而有了地图索引，你一眼就知道目标在哪里、怎么走最近。CodeGraph 就是给 AI 代理装的那张地图。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: The Numbers -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">没有地图的代价有多大？</h2>
+        <p>CodeGraph 作者在 7 个真实开源项目上做了基准测试，让 Claude Code 回答同一个架构问题，对比有/无 CodeGraph 的情况：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#128176;</div>
+            <h4 class="pattern-title">平均省 35% 成本</h4>
+            <p class="pattern-desc">大项目（如 VS Code ~10k 文件）省 26%，Tokio（Rust）省 82%——代码库越大，省得越多。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">&#128207;</div>
+            <h4 class="pattern-title">平均减 57% Token</h4>
+            <p class="pattern-desc">Excalidraw 项目从 3.5M token 降到 344K——AI 不再反复读同样的文件。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: #FDF5E0">&#9889;</div>
+            <h4 class="pattern-title">平均快 46%</h4>
+            <p class="pattern-desc">Excalidraw 回答时间从 2m58s 降到 48s。因为不需要反复 grep/read 来回折腾。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-success-light)">&#128295;</div>
+            <h4 class="pattern-title">平均减 71% 工具调用</h4>
+            <p class="pattern-desc">Excalidraw 从 79 次 Read/Grep 降到 3 次。一次图谱查询顶几十次文件翻阅。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Code Translation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">没有地图时，AI 在做什么？</h2>
+        <p>下面是 Claude Code 在没有 CodeGraph 时的典型行为模式——它会启动 Explore 子代理，反复搜索：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment">// AI 代理的典型探索模式（无 CodeGraph）</span></span>
+<span class="code-line"></span>
+<span class="code-line">grep(<span class="code-string">"handleRequest"</span>)     <span class="code-comment">// 第1次搜索：找函数在哪</span></span>
+<span class="code-line">read(<span class="code-string">"src/server.ts"</span>)       <span class="code-comment">// 第2步：读那个文件</span></span>
+<span class="code-line">grep(<span class="code-string">"validateInput"</span>)      <span class="code-comment">// 第3次搜索：找它调用了什么</span></span>
+<span class="code-line">read(<span class="code-string">"src/validators.ts"</span>)   <span class="code-comment">// 第4步：又读一个文件</span></span>
+<span class="code-line">grep(<span class="code-string">"saveToDatabase"</span>)      <span class="code-comment">// 第5次搜索：继续追调用链</span></span>
+<span class="code-line"><span class="code-comment">// ... 如此反复，直到拼凑出完整路径</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">AI 需要找到 "handleRequest" 函数在哪——就像在一栋大楼里挨层找人。</p>
+              <p class="tl">找到了，打开那个文件看看里面写了什么。</p>
+              <p class="tl">发现它调用了 "validateInput"——继续找这个函数在哪。</p>
+              <p class="tl">又打开另一个文件。每一步都要消耗 token 和时间。</p>
+              <p class="tl">还要继续追 "saveToDatabase" 在哪里定义的。</p>
+              <p class="tl">整个过程就像没有地图的快递员，每送一单都要重新认路。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: What CodeGraph Does -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">CodeGraph：预建好的代码地图</h2>
+        <p>CodeGraph 在你写代码的时候就把整个代码库解析成了一张 <span class="term" data-definition="知识图谱是一种数据结构，把信息用「节点」和「边」组织起来。节点是实体（如函数、类），边是关系（如调用、继承）。就像一张社交网络图，人是节点，朋友关系是边。">知识图谱</span>——哪个函数调了谁、哪个类继承了谁、文件之间的依赖关系，全部预先建好索引，存在本地的 <span class="term" data-definition="SQLite 是一种轻量级的本地数据库，不需要单独的服务器进程。它把整个数据库存为一个文件，非常适合单机应用。">SQLite</span> 数据库里。</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"AI 代理问：handlePayment 函数的调用链是什么？"},
+          {"highlight":"flow-actor-1","label":"AI 通过 MCP 协议发送查询","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-2","label":"CodeGraph 在本地 SQLite 图谱中查找"},
+          {"highlight":"flow-actor-2","label":"返回完整的调用链 + 源码","packet":true,"from":"actor-2","to":"actor-1"},
+          {"highlight":"flow-actor-1","label":"AI 直接拿到答案，无需 grep 或 read"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon" style="background: var(--color-accent); color: white;">AI</div>
+              <span>AI 代理</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon" style="background: var(--color-actor-2); color: white;">CG</div>
+              <span>CodeGraph</span>
+            </div>
+          </div>
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击"下一步"开始</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重播</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="完全正确！CodeGraph 的核心价值就是预建索引，让 AI 代理直接查图谱而不是反复 grep/read。代码库越大，这种节省越显著。"
+               data-explanation-wrong="想想 CodeGraph 的核心思路：它是提前建好索引，还是在查询时才做搜索？答案跟搜索引擎的原理一样——Google 不会在你搜索时才去爬网页。">
+            <h3 class="quiz-question">如果你有一个 10000 个文件的项目，AI 代理想理解某个函数的调用关系。没有 CodeGraph 时，它最可能怎么做？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>一次读取所有文件内容，然后在脑中分析</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>直接猜测函数关系，因为代码库太大了</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>反复 grep 搜索关键字，再逐个 read 文件拼凑调用链</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">核心角色：六大层如何协作</h1>
+      <p class="module-subtitle">CodeGraph 不是一个大黑盒，而是六个分工明确的团队</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Metaphor -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">想象一个图书馆</h2>
+        <p>要把几十万本书变成一个能快速查询的知识库，你需要六个角色：有人负责拆封阅读（<span class="term" data-definition="Extraction 即代码提取，负责把源文件解析成结构化的符号信息。就像图书管理员打开每本书，记录书名、目录和关键词。">Extraction</span>），有人负责关联标注（<span class="term" data-definition="Resolution 即引用解析，负责把代码中提到的名字（如 import 路径）对应到实际的代码符号。就像给书里的每个引用找到被引用的书。">Resolution</span>），有人负责整理入库（Database），有人负责查询服务（Graph），有人负责写摘要给读者（Context），还有人负责门面接待（MCP）。</p>
+      </section>
+
+      <!-- Screen 2: Architecture Diagram -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">六层管道架构</h2>
+
+        <div class="arch-diagram">
+          <div class="arch-zone" style="background: var(--color-accent-light); border-radius: var(--radius-md); padding: var(--space-4) var(--space-6);">
+            <h4 class="arch-zone-label" style="color: var(--color-accent)">AI 代理层</h4>
+            <div class="arch-component" data-desc="MCP Server 是 CodeGraph 暴露给 AI 代理的接口层。AI 不需要知道图谱怎么建的，只需要调用 codegraph_context 等工具就能获取信息。" onclick="showArchDesc(this)">
+              <div class="arch-icon">&#127760;</div>
+              <span>MCP Server</span>
+            </div>
+          </div>
+          <div style="text-align: center; padding: var(--space-2); color: var(--color-text-muted);">&#9660;</div>
+          <div class="arch-zone" style="background: var(--color-info-light); border-radius: var(--radius-md); padding: var(--space-4) var(--space-6);">
+            <h4 class="arch-zone-label" style="color: var(--color-info)">上下文层</h4>
+            <div class="arch-component" data-desc="ContextBuilder 把图谱查询结果整理成 AI 能直接理解的文本格式（Markdown 或 JSON），包含相关代码片段、调用关系和依赖说明。" onclick="showArchDesc(this)">
+              <div class="arch-icon">&#128196;</div>
+              <span>ContextBuilder</span>
+            </div>
+          </div>
+          <div style="text-align: center; padding: var(--space-2); color: var(--color-text-muted);">&#9660;</div>
+          <div class="arch-zone" style="background: #FDF5E0; border-radius: var(--radius-md); padding: var(--space-4) var(--space-6);">
+            <h4 class="arch-zone-label" style="color: var(--color-actor-4)">图谱层</h4>
+            <div class="arch-component" data-desc="GraphTraverser 负责在知识图谱上做 BFS/DFS 遍历，查找调用链、影响范围、最短路径等。GraphQueryManager 在它之上提供高级查询 API。" onclick="showArchDesc(this)">
+              <div class="arch-icon">&#128202;</div>
+              <span>GraphTraverser / QueryManager</span>
+            </div>
+          </div>
+          <div style="text-align: center; padding: var(--space-2); color: var(--color-text-muted);">&#9660;</div>
+          <div class="arch-zone" style="background: var(--color-success-light); border-radius: var(--radius-md); padding: var(--space-4) var(--space-6);">
+            <h4 class="arch-zone-label" style="color: var(--color-success)">解析层</h4>
+            <div style="display: flex; gap: var(--space-4); flex-wrap: wrap;">
+              <div class="arch-component" data-desc="ExtractionOrchestrator 用 tree-sitter 把源代码解析成语法树，从中提取函数、类、变量等符号（Node）和它们的关系（Edge）。支持 18+ 种编程语言。" onclick="showArchDesc(this)">
+                <div class="arch-icon">&#128269;</div>
+                <span>Extraction</span>
+              </div>
+              <div class="arch-component" data-desc="ReferenceResolver 把提取阶段留下的未解析引用（如函数调用名）对应到实际的符号定义，建立调用、继承等边关系。还识别 Express、Laravel 等框架的路由。" onclick="showArchDesc(this)">
+                <div class="arch-icon">&#128279;</div>
+                <span>Resolution</span>
+              </div>
+            </div>
+          </div>
+          <div style="text-align: center; padding: var(--space-2); color: var(--color-text-muted);">&#9660;</div>
+          <div class="arch-zone" style="background: var(--color-surface-warm); border-radius: var(--radius-md); padding: var(--space-4) var(--space-6); border: 1px solid var(--color-border);">
+            <h4 class="arch-zone-label">存储层</h4>
+            <div class="arch-component" data-desc="Database 是基于 SQLite 的本地存储，使用 FTS5 全文搜索索引。每个项目一个独立的 .codegraph/ 目录，数据完全留在本地，不发送到任何服务器。" onclick="showArchDesc(this)">
+              <div class="arch-icon">&#128451;</div>
+              <span>SQLite Database</span>
+            </div>
+          </div>
+          <div class="arch-description" id="arch-desc">点击任意组件查看它的职责说明</div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Group Chat -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">六层的协作对话</h2>
+        <p>当 AI 代理问出 "handlePayment 是怎么工作的？" 时，六层之间发生了什么？</p>
+
+        <div class="chat-window" id="chat-module2">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="mcp" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-accent)">MCP</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-accent)">MCP Server</span>
+                <p>收到 AI 代理的请求：codegraph_context("handlePayment 是怎么工作的")</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="context" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">CB</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">ContextBuilder</span>
+                <p>我先搜索 "handlePayment" 找到入口点，然后用 GraphTraverser 沿调用链展开。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="graph" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">GT</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">GraphTraverser</span>
+                <p>从数据库里查到 handlePayment 节点，它的调用链：validateCard -> processCharge -> sendReceipt，共 3 层深度。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="db" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">DB</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">SQLite Database</span>
+                <p>返回这些节点的源码片段和元信息。总共查了 12 个节点、18 条边。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="context" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">CB</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">ContextBuilder</span>
+                <p>整理成 Markdown 格式，包含调用图、关键代码和依赖说明。AI 代理一次调用就能完整回答问题。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module2-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条消息</button>
+            <button class="btn chat-all-btn">播放全部</button>
+            <button class="btn chat-reset-btn">重播</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Code Translation - Node and Edge types -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">图谱的两个基本概念：节点和边</h2>
+        <p>整张图谱只有两种东西——<span class="term" data-definition="Node（节点）代表代码中的一个符号，比如一个函数、一个类、一个变量。每个节点有名称、类型、所在文件和行号。">节点（Node）</span> 和 <span class="term" data-definition="Edge（边）代表两个节点之间的关系，比如函数 A 调用了函数 B，就有一条 calls 类型的边从 A 指向 B。">边（Edge）</span>。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment">// 节点类型（NodeKind）——代码里的"名词"</span></span>
+<span class="code-line"><span class="code-string">'function'</span>   <span class="code-comment">// 函数</span></span>
+<span class="code-line"><span class="code-string">'class'</span>      <span class="code-comment">// 类</span></span>
+<span class="code-line"><span class="code-string">'method'</span>     <span class="code-comment">// 方法</span></span>
+<span class="code-line"><span class="code-string">'interface'</span>  <span class="code-comment">// 接口</span></span>
+<span class="code-line"><span class="code-string">'route'</span>      <span class="code-comment">// 路由端点</span></span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment">// 边类型（EdgeKind）——代码里的"动词"</span></span>
+<span class="code-line"><span class="code-string">'calls'</span>      <span class="code-comment">// A 调用 B</span></span>
+<span class="code-line"><span class="code-string">'contains'</span>   <span class="code-comment">// 文件包含类，类包含方法</span></span>
+<span class="code-line"><span class="code-string">'extends'</span>    <span class="code-comment">// 类继承另一个类</span></span>
+<span class="code-line"><span class="code-string">'references'</span> <span class="code-comment">// 符号引用另一个符号</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">节点就是代码里的"东西"——函数、类、接口、路由等。</p>
+              <p class="tl">每个函数就是一个节点。</p>
+              <p class="tl">每个类也是一个节点。</p>
+              <p class="tl">接口定义了类的契约。</p>
+              <p class="tl">路由是 Web 服务的入口地址。</p>
+              <p class="tl">边就是这些"东西"之间的关系——谁调用了谁、谁包含了谁。</p>
+              <p class="tl">"调用"是最重要的边——函数 A 调用了函数 B。</p>
+              <p class="tl">"包含"描述层级关系——文件包含类，类包含方法。</p>
+              <p class="tl">"继承"是面向对象的核心——子类继承父类。</p>
+              <p class="tl">"引用"是最通用的关系——任何符号间的关联。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Glossary + Quiz -->
+      <section class="screen animate-in">
+        <div class="callout callout-info">
+          <div class="callout-icon">&#128218;</div>
+          <div class="callout-content">
+            <strong class="callout-title">核心词汇速查</strong>
+            <p><span class="term" data-definition="Tree-sitter 是一种代码解析器，能读懂代码的语法结构（就像语法分析器），支持几十种编程语言。CodeGraph 用它来把源码变成结构化的符号信息。">Tree-sitter</span> 把源码解析成语法树；<span class="term" data-definition="BFS（广度优先搜索）是一种图遍历策略，先看近的节点，再看远的。像水波纹一样一层层扩散出去。">BFS</span>/<span class="term" data-definition="DFS（深度优先搜索）是另一种图遍历策略，沿着一条路径一直走到尽头，再回来走另一条。像走迷宫时一直往深处走。">DFS</span> 是在图谱上查找路径的算法；<span class="term" data-definition="MCP（Model Context Protocol）是 AI 模型与外部工具通信的标准协议。AI 代理通过 MCP 调用 CodeGraph 提供的工具来查询代码图谱。">MCP</span> 是 AI 代理和工具之间的通信协议。</p>
+          </div>
+        </div>
+
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！Extraction 层负责从源代码中提取符号和初步关系，Resolution 层负责把这些引用对应到实际定义。两者是先后关系，不是并列关系。"
+               data-explanation-wrong="提示：Extraction 和 Resolution 是两个不同的阶段。第一个是从代码中提取信息，第二个是把这些信息关联起来。哪个先哪个后？">
+            <h3 class="quiz-question">如果你负责把一堆书变成可查询的索引，以下哪个步骤顺序是对的？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>先关联引用 -> 再提取内容 -> 最后存入数据库</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>先提取内容 -> 再关联引用 -> 最后存入数据库</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>提取和关联同时进行 -> 存入数据库</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">从源码到知识图谱：索引管道</h1>
+      <p class="module-subtitle">一个文件变成图谱数据，要经历四道工序</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: The Pipeline Metaphor -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码索引就像石油炼化</h2>
+        <p>原油（源文件）进厂后，先蒸馏（解析语法树），再裂化（提取符号），然后调和（关联引用），最后入库（写入数据库）。每一道工序都依赖上一道的结果。</p>
+      </section>
+
+      <!-- Screen 2: Four Steps -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">四道工序详解</h2>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>ExtractionOrchestrator — 用 Tree-sitter 解析语法树</strong>
+              <p>读取每个源文件，用 <span class="term" data-definition="Tree-sitter 是一种增量式代码解析器，能在代码变化时快速更新语法树，不需要从头重新解析整个文件。">tree-sitter</span> 构建 <span class="term" data-definition="AST（抽象语法树）是源代码的结构化表示。每个函数、变量、表达式都变成树上的一个节点，可以被程序读取和分析。">AST</span>，从中提取函数、类、方法等符号作为节点（Node），同时提取包含、导入等初步关系作为边（Edge）。支持 18+ 种语言。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>ReferenceResolver — 解析未关联的引用</strong>
+              <p>提取阶段留下了一批"我知道这个名字但不知道它指向谁"的引用。Resolver 通过三种策略匹配：框架模式识别（Express/Laravel 路由）、import 路径追踪、名称模糊匹配。还能识别 React 组件渲染、Vue 模板事件等动态分派。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Database — 写入 SQLite</strong>
+              <p>所有节点和边存入本地 SQLite 文件（.codegraph/ 目录下），用 <span class="term" data-definition="FTS5 是 SQLite 的全文搜索引擎扩展，能对文本内容做高效的关键词匹配，支持 BM25 排名算法。">FTS5</span> 建全文搜索索引。用 <span class="term" data-definition="WAL（Write-Ahead Logging）是 SQLite 的一种日志模式，允许读和写同时进行，不会互相阻塞。">WAL 模式</span>实现并发安全。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>FileSync — 监控变化自动更新</strong>
+              <p>启动 FileWatcher 监控文件变化（macOS 用 FSEvents，Linux 用 inotify），文件一改就触发增量同步——只重新解析变化的文件，不重建整个图谱。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Code Translation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码长什么样？</h2>
+        <p>下面是 CodeGraph 主类中索引流程的核心代码：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">async</span> <span class="code-function">indexAll</span>(options?: IndexOptions) {</span>
+<span class="code-line">  <span class="code-keyword">return</span> <span class="code-keyword">this</span>.indexMutex.<span class="code-function">withLock</span>(<span class="code-keyword">async</span> () => {</span>
+<span class="code-line">    <span class="code-keyword">this</span>.fileLock.<span class="code-function">acquire</span>();</span>
+<span class="code-line">    <span class="code-keyword">const</span> result = <span class="code-keyword">await</span> <span class="code-keyword">this</span>.orchestrator</span>
+<span class="code-line">      .<span class="code-function">indexAll</span>(options.onProgress);</span>
+<span class="code-line">    <span class="code-keyword">if</span> (result.filesIndexed > <span class="code-number">0</span>) {</span>
+<span class="code-line">      <span class="code-keyword">await</span> <span class="code-keyword">this</span>.<span class="code-function">resolveReferencesBatched</span>();</span>
+<span class="code-line">    }</span>
+<span class="code-line">    <span class="code-keyword">this</span>.db.<span class="code-function">runMaintenance</span>();</span>
+<span class="code-line">    <span class="code-keyword">return</span> result;</span>
+<span class="code-line">  });</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">indexAll 是"全部重新索引"的入口。</p>
+              <p class="tl">先加一把进程内的互斥锁，防止两个索引任务同时跑。</p>
+              <p class="tl">再获取一个跨进程的文件锁，防止 CLI 和 MCP 同时写数据库。</p>
+              <p class="tl">让 Orchestrator 去解析所有文件，提取符号和初步关系。</p>
+              <p class="tl">如果确实有新文件被索引了……</p>
+              <p class="tl">……就启动引用解析，把未关联的引用匹配到实际符号。</p>
+              <p class="tl">最后做一些数据库维护（刷新统计信息、压缩日志）。</p>
+              <p class="tl">返回索引结果（多少文件、多少节点、多少边）。</p>
+              <p class="tl">锁在函数结束时自动释放。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Framework Detection -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">不只是语法——还有框架智慧</h2>
+        <p>CodeGraph 不只看语法结构，还能识别 <span class="term" data-definition="Web 框架是帮助开发者快速构建网站的工具集。Express（Node.js）、Laravel（PHP）、Django（Python）、Spring（Java）等都是框架。">Web 框架</span> 的路由模式。比如它知道 Express 的 <code>app.get('/users', handler)</code> 意味着有一个路由端点。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#9881;</div>
+            <h4 class="pattern-title">Express / NestJS</h4>
+            <p class="pattern-desc">识别 app.get/post/put/delete 路由注册，建立 route 节点和 handler 引用边。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">&#128640;</div>
+            <h4 class="pattern-title">React / Svelte / Vue</h4>
+            <p class="pattern-desc">识别组件渲染关系、JSX 子组件引用、Vue 模板事件绑定等动态分派。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: #F3E8FF">&#9749;</div>
+            <h4 class="pattern-title">Spring / Laravel / Django</h4>
+            <p class="pattern-desc">识别注解路由（@GetMapping）、控制器映射、Django URL 配置等。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-success-light)">&#128230;</div>
+            <h4 class="pattern-title">Cargo Workspace</h4>
+            <p class="pattern-desc">解析 Rust workspace 成员和模块依赖关系，跨 crate 引用追踪。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="完全正确！FileWatcher 监控文件变化后触发 sync()，sync 只处理变化的文件——这是增量更新，不是全量重建。这样代码库再大也能快速响应变化。"
+               data-explanation-wrong="想想 FileWatcher 的作用：它是在文件变化时触发更新，还是定时全量重建？答案和 Git 的增量提交类似——只处理有变化的部分。">
+            <h3 class="quiz-question">如果你在项目中修改了一个文件，CodeGraph 会怎么更新图谱？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>删除整个数据库，从头重新索引所有文件</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>只重新解析变化的文件，增量更新图谱</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>不自动更新，需要手动运行 codegraph index</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">MCP 工具箱：代理怎么用图谱</h1>
+      <p class="module-subtitle">九个工具，让 AI 代理从"盲目搜索"变成"精确导航"</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: MCP Concept -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">MCP：AI 代理的"万能接口"</h2>
+        <p><span class="term" data-definition="MCP（Model Context Protocol）是 Anthropic 提出的一种标准协议，让 AI 模型能调用外部工具获取信息。就像 USB 接口让电脑能连接各种外设一样，MCP 让 AI 能连接各种数据源和工具。">MCP</span> 就像 AI 代理的 USB 接口——任何工具只要实现了 MCP 协议，AI 就能直接调用。CodeGraph 通过 MCP 暴露了 9 个工具，覆盖从快速搜索到深度追踪的各种场景。</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">&#128161;</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键设计原则</strong>
+            <p>工具设计的核心是"一次调用解决问题"。codegraph_context 把搜索、节点详情、调用链、源码全部打包成一次返回——AI 不需要链式调用 5-6 个工具来拼凑答案。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Tool Overview -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">九把利器</h2>
+
+        <div class="file-tree">
+          <div class="ft-folder open">
+            <span class="ft-name">MCP 工具清单</span>
+            <span class="ft-desc">从最常用到最专业</span>
+            <div class="ft-children">
+              <div class="ft-file">
+                <span class="ft-name">codegraph_context</span>
+                <span class="ft-desc">主力工具——一次返回完整上下文</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">codegraph_explore</span>
+                <span class="ft-desc">多符号源码聚合——一次看多个文件</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">codegraph_search</span>
+                <span class="ft-desc">快速符号搜索——只返回位置不返回代码</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">codegraph_node</span>
+                <span class="ft-desc">单个符号详情——带调用轨迹的深度查看</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">codegraph_trace</span>
+                <span class="ft-desc">调用路径追踪——从 A 到 B 怎么走的</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">codegraph_callers / callees</span>
+                <span class="ft-desc">谁调了它 / 它调了谁</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">codegraph_impact</span>
+                <span class="ft-desc">影响半径分析——改了这个会波及谁</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">codegraph_status</span>
+                <span class="ft-desc">索引状态查看</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">codegraph_files</span>
+                <span class="ft-desc">项目文件结构——比 glob 更快</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Code Translation - Tool Definition -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">工具是怎么定义的？</h2>
+        <p>每个 MCP 工具就是一个 JSON 描述——告诉 AI 这个工具叫什么、接受什么参数、做什么用：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line">{</span>
+<span class="code-line">  <span class="code-property">name</span>: <span class="code-string">'codegraph_context'</span>,</span>
+<span class="code-line">  <span class="code-property">description</span>: <span class="code-string">'PRIMARY TOOL - call this FIRST'</span>,</span>
+<span class="code-line">  <span class="code-property">inputSchema</span>: {</span>
+<span class="code-line">    <span class="code-property">properties</span>: {</span>
+<span class="code-line">      <span class="code-property">task</span>: {</span>
+<span class="code-line">        <span class="code-property">description</span>: <span class="code-string">'Description of the task'</span></span>
+<span class="code-line">      },</span>
+<span class="code-line">      <span class="code-property">maxNodes</span>: { <span class="code-property">default</span>: <span class="code-number">20</span> },</span>
+<span class="code-line">      <span class="code-property">includeCode</span>: { <span class="code-property">default</span>: <span class="code-keyword">true</span> }</span>
+<span class="code-line">    }</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">工具名称——AI 通过这个名字调用它。</p>
+              <p class="tl">工具说明——告诉 AI 什么时候该用这个工具。这里写"主力工具，优先调用"。</p>
+              <p class="tl">输入参数的定义。</p>
+              <p class="tl">task 参数——用自然语言描述你想了解什么。</p>
+              <p class="tl">最多返回多少个符号节点，默认 20 个。</p>
+              <p class="tl">是否包含源码片段，默认包含。</p>
+              <p class="tl">参数定义结束。</p>
+              <p class="tl">整个工具定义结束。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Adaptive Budget -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">智能预算控制</h2>
+        <p>不同大小的项目需要不同量的信息。CodeGraph 根据项目文件数自动调整 explore 工具的输出预算：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"小项目（<500 文件）：1 次 explore 调用就够，最多返回 18000 字符"},
+          {"highlight":"flow-actor-2","label":"中项目（500-5000 文件）：2 次 explore，最多 28000 字符/次"},
+          {"highlight":"flow-actor-3","label":"大项目（5000-15000 文件）：3 次 explore，最多 35000 字符/次"},
+          {"highlight":"flow-actor-3","label":"超大项目（>15000 文件）：5 次 explore，最多 38000 字符/次"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon" style="background: var(--color-success); color: white;">S</div>
+              <span>小项目</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon" style="background: var(--color-actor-4); color: white;">M</div>
+              <span>中项目</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon" style="background: var(--color-accent); color: white;">L</div>
+              <span>大项目</span>
+            </div>
+          </div>
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击"下一步"查看不同规模项目的预算策略</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重播</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">&#9888;</div>
+          <div class="callout-content">
+            <strong class="callout-title">安全硬限制</strong>
+            <p>所有工具输出上限 15000 字符（MAX_OUTPUT_LENGTH），输入上限 10000 字符（MAX_INPUT_LENGTH），路径上限 4096 字符。这些是代码里的常量，防止恶意或失控的请求吃光资源。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="正确！codegraph_context 被标记为 PRIMARY TOOL — 它把搜索、节点详情、调用链、源码全部打包成一次返回。AI 代理一次调用就能回答大部分架构问题。"
+               data-explanation-wrong="提示：哪个工具被描述为 'PRIMARY TOOL - call this FIRST'？它的设计目标就是一次调用就提供足够的上下文，让 AI 不需要再链式调用其他工具。">
+            <h3 class="quiz-question">AI 代理想理解 "用户登录的完整流程"，应该优先调用哪个工具？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>codegraph_context — 一次返回完整上下文</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>codegraph_search — 先找到所有相关函数</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>codegraph_trace — 追踪从登录按钮到数据库的路径</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">技术选型：CodeGraph vs 替代方案</h1>
+      <p class="module-subtitle">技术负责人速查——要不要给团队装 CodeGraph？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Problem + Philosophy -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">解决什么问题？核心哲学</h2>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">核心问题</code>
+            <span class="badge-desc">AI 编程代理在大型代码库中盲目搜索，消耗大量 token、时间和金钱</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">核心哲学</code>
+            <span class="badge-desc">预建本地代码知识图谱，让 AI 代理像查地图一样查代码结构，而不是像翻书一样逐页找</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">本质属性</code>
+            <span class="badge-desc">本地优先、确定性提取（基于 AST 而非 LLM 摘要）、MCP 协议接入、增量同步</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">许可证</code>
+            <span class="badge-desc">MIT — 可商用、可修改、无附加限制</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">成本</code>
+            <span class="badge-desc">完全免费，无 API 调用费用，所有数据存储在本地</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Comparison Table -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">与替代方案对比</h2>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#128220;</div>
+          <div class="callout-content">
+            <p><strong>一句话区分：</strong>CodeGraph 是本地 AST 解析 + 图数据库 + MCP 工具链，不是 LLM 摘要，不是云端索引，不是文件搜索增强。</p>
+          </div>
+        </div>
+
+        <table style="width:100%; border-collapse:collapse; font-size: var(--text-sm); margin: var(--space-6) 0;">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--color-border);">
+              <th style="text-align:left; padding: var(--space-3);">维度</th>
+              <th style="text-align:left; padding: var(--space-3); color: var(--color-accent);">CodeGraph</th>
+              <th style="text-align:left; padding: var(--space-3);">RAG / 向量搜索</th>
+              <th style="text-align:left; padding: var(--space-3);">Grep + Read（原生）</th>
+              <th style="text-align:left; padding: var(--space-3);">全量塞上下文</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid var(--color-border-light);">
+              <td style="padding: var(--space-3);"><strong>数据来源</strong></td>
+              <td style="padding: var(--space-3);">
+                <ul><li>AST 结构化解析</li><li>确定性提取</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>文本分块向量化</li><li>语义相似度匹配</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>原始文本搜索</li><li>正则/关键字匹配</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>把整个文件灌入上下文</li><li>无过滤</li></ul>
+              </td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--color-border-light);">
+              <td style="padding: var(--space-3);"><strong>调用关系</strong></td>
+              <td style="padding: var(--space-3);">
+                <ul><li>完整调用图</li><li>A-&gt;B-&gt;C 追踪</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>无结构关系</li><li>只能做语义近似</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>需要多次搜索拼凑</li><li>无法直接回答路径</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>隐含在代码中</li><li>需要 AI 自己推理</li></ul>
+              </td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--color-border-light);">
+              <td style="padding: var(--space-3);"><strong>Token 成本</strong></td>
+              <td style="padding: var(--space-3);">
+                <ul><li>极低（查询即得）</li><li>平均省 35-57%</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>中等</li><li>嵌入+检索双重成本</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>高（多次 Read）</li><li>重复读同一文件</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>极高</li><li>上下文窗口上限瓶颈</li></ul>
+              </td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--color-border-light);">
+              <td style="padding: var(--space-3);"><strong>隐私/安全</strong></td>
+              <td style="padding: var(--space-3);">
+                <ul><li>100% 本地</li><li>零数据外传</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>依赖嵌入模型</li><li>代码可能需上传</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>本地</li><li>安全</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>本地</li><li>安全</li></ul>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: var(--space-3);"><strong>准确度</strong></td>
+              <td style="padding: var(--space-3);">
+                <ul><li>确定性（AST 级）</li><li>不会产生幻觉</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>概率性</li><li>可能检索到无关内容</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>精确匹配</li><li>但无法理解结构</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>完整但冗余</li><li>关键信息被淹没</li></ul>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Screen 3: Suitable vs Not-suitable -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">适合 vs 不适合</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6);">
+          <div style="background: var(--color-success-light); border-radius: var(--radius-md); padding: var(--space-6);">
+            <h3 style="color: var(--color-success); margin-bottom: var(--space-4);">&#9989; 适合</h3>
+            <ul style="list-style: none; padding: 0;">
+              <li style="padding: var(--space-2) 0;">&#10003; 中大型代码库（500+ 文件），AI 代理探索成本高</li>
+              <li style="padding: var(--space-2) 0;">&#10003; 使用 Claude Code / Cursor / Codex CLI / opencode 的团队</li>
+              <li style="padding: var(--space-2) 0;">&#10003; 需要理解调用链、影响范围的架构分析</li>
+              <li style="padding: var(--space-2) 0;">&#10003; 代码隐私敏感，不能上传到云端的项目</li>
+              <li style="padding: var(--space-2) 0;">&#10003; 多语言混合项目（支持 18+ 语言）</li>
+              <li style="padding: var(--space-2) 0;">&#10003; 需要增量同步、持续跟踪代码变化</li>
+            </ul>
+          </div>
+          <div style="background: var(--color-error-light); border-radius: var(--radius-md); padding: var(--space-6);">
+            <h3 style="color: var(--color-error); margin-bottom: var(--space-4);">&#10060; 不适合</h3>
+            <ul style="list-style: none; padding: 0;">
+              <li style="padding: var(--space-2) 0;">&#10007; 极小项目（<100 文件），grep 就够用</li>
+              <li style="padding: var(--space-2) 0;">&#10007; 不使用 AI 编程代理的团队</li>
+              <li style="padding: var(--space-2) 0;">&#10007; 需要语义级理解（"这段代码为什么这么写"）而非结构分析</li>
+              <li style="padding: var(--space-2) 0;">&#10007; 动态语言重度元编程（eval、猴子补丁），静态解析无法覆盖</li>
+              <li style="padding: var(--space-2) 0;">&#10007; 需要跨仓库全局分析的场景（当前只支持单项目）</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Hard Limits -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">硬限制（来自源码）</h2>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">MAX_OUTPUT_LENGTH = 15000</code>
+            <span class="badge-desc">单个 MCP 工具返回的最大字符数（防止上下文爆炸）</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">MAX_INPUT_LENGTH = 10000</code>
+            <span class="badge-desc">查询字符串最大长度（防止恶意超大输入）</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">MAX_PATH_LENGTH = 4096</code>
+            <span class="badge-desc">路径参数最大长度</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">MAX_HOPS = 7</code>
+            <span class="badge-desc">trace 工具最大追踪跳数（超过 7 跳的路径几乎一定是 BFS 漫游，不是真实流程）</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">Node Engines &gt;=18 &lt;25</code>
+            <span class="badge-desc">运行时要求：Node.js 18-24.x，Node 25.x 会被直接拒绝</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">18+ Languages</code>
+            <span class="badge-desc">支持的编程语言：TypeScript/JavaScript/Python/Go/Rust/Java/C/C++/C#/PHP/Ruby/Swift/Kotlin/Dart/Svelte/Vue/Lua 等</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Costs + Conclusion -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">成本与总结</h2>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>初始索引成本</strong>
+              <p>首次 codegraph init + index 需要解析全部文件。VS Code 规模（~10k 文件）大约需要几分钟。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>磁盘占用</strong>
+              <p>.codegraph/ 目录大小取决于代码库规模。索引数据存储在 SQLite 文件中，通常为源码的 10-30%。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>运行时资源</strong>
+              <p>MCP Server 以 Node.js 进程运行，内存占用取决于查询复杂度。FileWatcher 在后台持续运行，增量更新开销极小。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">&#127919;</div>
+          <div class="callout-content">
+            <strong class="callout-title">一句话结论</strong>
+            <p>如果你的团队用 AI 编程代理开发中大型项目，CodeGraph 是零成本、零风险、高回报的加速器——装了不亏，不装 AI 就在每次提问时反复翻文件浪费 token。MIT 许可证，一行命令安装，一行命令卸载。</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 6: 总结与练习
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-6" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">06</span>
+      <h1 class="module-title">总结与练习</h1>
+      <p class="module-subtitle">回顾 CodeGraph 核心知识，通过实践巩固技能，探索代码图谱生态</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- ── Screen 1: 核心知识回顾 ── -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">核心知识回顾</h2>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#128506;</div>
+            <h4 class="pattern-title">代码地图概念</h4>
+            <p class="pattern-desc">AI 代理面对大代码库时反复 grep/read 浪费大量 token。CodeGraph 预建本地知识图谱，让 AI 像查地图一样查代码结构，平均省 35% 成本、减 57% token、快 46%。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">&#127959;</div>
+            <h4 class="pattern-title">三层架构</h4>
+            <p class="pattern-desc">六层管道分工协作：Extraction（解析源码）-> Resolution（关联引用）-> Database（SQLite 存储）-> Graph（遍历查询）-> Context（整理输出）-> MCP（对外接口）。每层职责单一，可独立测试。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: #FDF5E0">&#9971;</div>
+            <h4 class="pattern-title">索引管道</h4>
+            <p class="pattern-desc">四道工序：tree-sitter 解析 AST 提取符号 -> ReferenceResolver 匹配未关联引用 -> 写入 SQLite（FTS5 + WAL）-> FileWatcher 增量同步。支持 18+ 语言，还能识别 Express/React 等框架模式。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-success-light)">&#128295;</div>
+            <h4 class="pattern-title">MCP 工具集</h4>
+            <p class="pattern-desc">9 个 MCP 工具覆盖从搜索到追踪的全部场景。主力工具 codegraph_context 一次返回完整上下文（符号+调用链+源码）。智能预算控制根据项目规模自动调整输出量。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#9878;</div>
+            <h4 class="pattern-title">技术选型</h4>
+            <p class="pattern-desc">CodeGraph vs RAG/Grep/全量上下文：本地 AST 解析、确定性提取、零 API 成本、100% 隐私。适合 500+ 文件的中大型项目。MIT 许可证，一行命令安装卸载。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Screen 2: 最佳实践清单 ── -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">最佳实践清单</h2>
+
+        <div class="file-tree animate-in">
+          <div class="ft-folder open">
+            <div class="ft-name">&#128196; CodeGraph 使用最佳实践</div>
+            <div class="ft-children">
+              <div class="ft-folder">
+                <div class="ft-name">&#128230; 索引策略</div>
+                <div class="ft-children">
+                  <div class="ft-desc">&#10003; 首次 clone 后立即 codegraph init + index，让索引先跑起来</div>
+                  <div class="ft-desc">&#10003; 保持 FileWatcher 运行，代码变化时自动增量同步</div>
+                  <div class="ft-desc">&#10007; 不要频繁手动 codegraph index，增量同步已经够用</div>
+                  <div class="ft-desc">&#10007; 不要把 .codegraph/ 目录加入 git（本地生成，无需共享）</div>
+                </div>
+              </div>
+              <div class="ft-folder">
+                <div class="ft-name">&#128270; 查询技巧</div>
+                <div class="ft-children">
+                  <div class="ft-desc">&#10003; 优先用 codegraph_context，它是"一次调用解决问题"的主力工具</div>
+                  <div class="ft-desc">&#10003; 用自然语言描述任务意图，比精确符号名更有效</div>
+                  <div class="ft-desc">&#10003; 追踪调用路径时用 codegraph_trace，分析影响范围用 codegraph_impact</div>
+                  <div class="ft-desc">&#10007; 不要链式调用 5-6 个工具拼凑答案，context 工具已内置搜索+追踪</div>
+                </div>
+              </div>
+              <div class="ft-folder">
+                <div class="ft-name">&#9889; 性能优化</div>
+                <div class="ft-children">
+                  <div class="ft-desc">&#10003; 大项目（5000+ 文件）用 maxNodes 控制返回节点数，避免上下文爆炸</div>
+                  <div class="ft-desc">&#10003; 只需要位置信息时用 codegraph_search，不需要源码时设 includeCode=false</div>
+                  <div class="ft-desc">&#10003; trace 工具限制最大 7 跳（MAX_HOPS），超过说明查询本身需要细化</div>
+                  <div class="ft-desc">&#10007; 不要一次性查询整个模块的所有符号，分而治之更高效</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Screen 3: 综合练习 ── -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">综合练习：给开源项目配置 CodeGraph 索引</h2>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">&#127919;</div>
+          <div class="callout-content">
+            <strong class="callout-title">练习目标</strong>
+            <p>选择一个你熟悉的开源项目（如 Express、NestJS、FastAPI），完成 CodeGraph 索引配置，并使用 MCP 工具回答一个架构问题。练习覆盖 init、index、MCP 配置和实际查询的完整流程。</p>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE — 练习模板</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment"># Step 1: 安装 CodeGraph</span></span>
+<span class="code-line">npm install -g codegraph</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># Step 2: 在目标项目中初始化</span></span>
+<span class="code-line"><span class="code-keyword">cd</span> /path/to/your-project</span>
+<span class="code-line"><span class="code-comment"># TODO 1: 写出初始化命令</span></span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># Step 3: 构建索引</span></span>
+<span class="code-line"><span class="code-comment"># TODO 2: 写出构建索引的命令</span></span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># Step 4: 配置 MCP（.mcp.json）</span></span>
+<span class="code-line">{</span>
+<span class="code-line">  <span class="code-string">"mcpServers"</span>: {</span>
+<span class="code-line">    <span class="code-comment"># TODO 3: 补全 CodeGraph MCP Server 配置</span></span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># Step 5: 用 MCP 查询架构</span></span>
+<span class="code-line"><span class="code-comment"># TODO 4: 写一个 codegraph_context 查询，</span></span>
+<span class="code-line"><span class="code-comment">#        了解"用户请求从入口到响应的完整路径"</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">练习提示</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>TODO 1</strong>：初始化命令只有两个单词，第一个是 codegraph</p>
+              <p class="tl"><strong>TODO 2</strong>：构建索引的命令也是两个单词，和初始化命令只有最后一个词不同</p>
+              <p class="tl"><strong>TODO 3</strong>：MCP 配置需要指定 command（node）和 args（指向 CodeGraph 的 MCP 入口文件路径）</p>
+              <p class="tl"><strong>TODO 4</strong>：context 工具接受自然语言 task 参数，尝试描述你的项目的路由入口函数名</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Screen 4: 下一步学习方向 + Quiz ── -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">下一步学习方向</h2>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#129302;</div>
+            <h4 class="pattern-title">Understand-Anything</h4>
+            <p class="pattern-desc">同样基于 tree-sitter 的代码理解框架，但侧重"一键理解任意开源项目"。结合 AI 摘要和交互式探索，适合快速上手陌生代码库。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">&#128200;</div>
+            <h4 class="pattern-title">GitNexus</h4>
+            <p class="pattern-desc">把 Git 提交历史转化为知识图谱——谁改了什么、变更的影响路径、代码热力图。将代码结构分析与版本历史结合，做"时间维度"的代码理解。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: #FDF5E0">&#127757;</div>
+            <h4 class="pattern-title">Graphiti</h4>
+            <p class="pattern-desc">将对话记忆构建为知识图谱的方案。如果把 CodeGraph 理解为"静态代码图谱"，Graphiti 就是"动态记忆图谱"——两者结合可以实现"既懂代码又记得对话"的 AI 代理。</p>
+          </div>
+        </div>
+
+        <div class="quiz-container" id="quiz-module6">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！codegraph_context 被设计为 PRIMARY TOOL——一次调用返回搜索结果、节点详情、调用链和源码片段。AI 不需要链式调用多个工具来拼凑答案。"
+               data-explanation-wrong="提示：回顾 Module 4 中 MCP 工具的设计原则——"一次调用解决问题"。哪个工具被标记为 PRIMARY TOOL？">
+            <h3 class="quiz-question">当你想让 AI 代理快速理解一个函数的完整上下文，最应该用哪个工具？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>先用 codegraph_search 找位置，再逐个 codegraph_node 查详情</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>直接用 codegraph_context，一次返回完整上下文</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>用 codegraph_trace 追踪所有调用路径，再手动分析</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！四道工序的顺序是：AST 解析（提取符号） -> 引用解析（关联引用） -> 写入数据库 -> FileWatcher 增量同步。和石油炼化的比喻一致：蒸馏 -> 裂化 -> 调和 -> 入库。"
+               data-explanation-wrong="提示：回忆 Module 3 的"石油炼化"比喻——先从原油中提取成分，再裂化出更精细的物质，然后调和配方，最后入库存储。索引管道遵循同样的顺序。">
+            <h3 class="quiz-question">CodeGraph 索引管道的正确工序顺序是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>写入数据库 -> 解析语法树 -> 增量同步 -> 解析引用</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>解析引用 -> 解析语法树 -> 增量同步 -> 写入数据库</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>解析语法树 -> 解析引用 -> 写入数据库 -> 增量同步</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="正确！CodeGraph 基于 AST 确定性解析，不依赖 LLM 摘要，不会产生幻觉。而 RAG 使用向量化文本分块和语义匹配，是概率性的，可能检索到无关内容。"
+               data-explanation-wrong="提示：回顾 Module 5 的对比表——CodeGraph 的数据来源是 AST 结构化解析（确定性），RAG 的数据来源是文本分块向量化（概率性语义匹配）。哪个更容易产生错误结果？">
+            <h3 class="quiz-question">CodeGraph 相比 RAG 方案的核心优势是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>基于 AST 确定性解析，不会产生幻觉，准确度更高</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>使用 LLM 做智能摘要，理解能力更强</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>数据存储在云端，查询速度更快</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module6')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module6')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+  </main>
+
+</body>
+</html>

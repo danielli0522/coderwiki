@@ -1,0 +1,189 @@
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">MCP 工具箱：代理怎么用图谱</h1>
+      <p class="module-subtitle">九个工具，让 AI 代理从"盲目搜索"变成"精确导航"</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: MCP Concept -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">MCP：AI 代理的"万能接口"</h2>
+        <p><span class="term" data-definition="MCP（Model Context Protocol）是 Anthropic 提出的一种标准协议，让 AI 模型能调用外部工具获取信息。就像 USB 接口让电脑能连接各种外设一样，MCP 让 AI 能连接各种数据源和工具。">MCP</span> 就像 AI 代理的 USB 接口——任何工具只要实现了 MCP 协议，AI 就能直接调用。CodeGraph 通过 MCP 暴露了 9 个工具，覆盖从快速搜索到深度追踪的各种场景。</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">&#128161;</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键设计原则</strong>
+            <p>工具设计的核心是"一次调用解决问题"。codegraph_context 把搜索、节点详情、调用链、源码全部打包成一次返回——AI 不需要链式调用 5-6 个工具来拼凑答案。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Tool Overview -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">九把利器</h2>
+
+        <div class="file-tree">
+          <div class="ft-folder open">
+            <span class="ft-name">MCP 工具清单</span>
+            <span class="ft-desc">从最常用到最专业</span>
+            <div class="ft-children">
+              <div class="ft-file">
+                <span class="ft-name">codegraph_context</span>
+                <span class="ft-desc">主力工具——一次返回完整上下文</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">codegraph_explore</span>
+                <span class="ft-desc">多符号源码聚合——一次看多个文件</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">codegraph_search</span>
+                <span class="ft-desc">快速符号搜索——只返回位置不返回代码</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">codegraph_node</span>
+                <span class="ft-desc">单个符号详情——带调用轨迹的深度查看</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">codegraph_trace</span>
+                <span class="ft-desc">调用路径追踪——从 A 到 B 怎么走的</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">codegraph_callers / callees</span>
+                <span class="ft-desc">谁调了它 / 它调了谁</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">codegraph_impact</span>
+                <span class="ft-desc">影响半径分析——改了这个会波及谁</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">codegraph_status</span>
+                <span class="ft-desc">索引状态查看</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">codegraph_files</span>
+                <span class="ft-desc">项目文件结构——比 glob 更快</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Code Translation - Tool Definition -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">工具是怎么定义的？</h2>
+        <p>每个 MCP 工具就是一个 JSON 描述——告诉 AI 这个工具叫什么、接受什么参数、做什么用：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line">{</span>
+<span class="code-line">  <span class="code-property">name</span>: <span class="code-string">'codegraph_context'</span>,</span>
+<span class="code-line">  <span class="code-property">description</span>: <span class="code-string">'PRIMARY TOOL - call this FIRST'</span>,</span>
+<span class="code-line">  <span class="code-property">inputSchema</span>: {</span>
+<span class="code-line">    <span class="code-property">properties</span>: {</span>
+<span class="code-line">      <span class="code-property">task</span>: {</span>
+<span class="code-line">        <span class="code-property">description</span>: <span class="code-string">'Description of the task'</span></span>
+<span class="code-line">      },</span>
+<span class="code-line">      <span class="code-property">maxNodes</span>: { <span class="code-property">default</span>: <span class="code-number">20</span> },</span>
+<span class="code-line">      <span class="code-property">includeCode</span>: { <span class="code-property">default</span>: <span class="code-keyword">true</span> }</span>
+<span class="code-line">    }</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">工具名称——AI 通过这个名字调用它。</p>
+              <p class="tl">工具说明——告诉 AI 什么时候该用这个工具。这里写"主力工具，优先调用"。</p>
+              <p class="tl">输入参数的定义。</p>
+              <p class="tl">task 参数——用自然语言描述你想了解什么。</p>
+              <p class="tl">最多返回多少个符号节点，默认 20 个。</p>
+              <p class="tl">是否包含源码片段，默认包含。</p>
+              <p class="tl">参数定义结束。</p>
+              <p class="tl">整个工具定义结束。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Adaptive Budget -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">智能预算控制</h2>
+        <p>不同大小的项目需要不同量的信息。CodeGraph 根据项目文件数自动调整 explore 工具的输出预算：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"小项目（<500 文件）：1 次 explore 调用就够，最多返回 18000 字符"},
+          {"highlight":"flow-actor-2","label":"中项目（500-5000 文件）：2 次 explore，最多 28000 字符/次"},
+          {"highlight":"flow-actor-3","label":"大项目（5000-15000 文件）：3 次 explore，最多 35000 字符/次"},
+          {"highlight":"flow-actor-3","label":"超大项目（>15000 文件）：5 次 explore，最多 38000 字符/次"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon" style="background: var(--color-success); color: white;">S</div>
+              <span>小项目</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon" style="background: var(--color-actor-4); color: white;">M</div>
+              <span>中项目</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon" style="background: var(--color-accent); color: white;">L</div>
+              <span>大项目</span>
+            </div>
+          </div>
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击"下一步"查看不同规模项目的预算策略</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重播</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">&#9888;</div>
+          <div class="callout-content">
+            <strong class="callout-title">安全硬限制</strong>
+            <p>所有工具输出上限 15000 字符（MAX_OUTPUT_LENGTH），输入上限 10000 字符（MAX_INPUT_LENGTH），路径上限 4096 字符。这些是代码里的常量，防止恶意或失控的请求吃光资源。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="正确！codegraph_context 被标记为 PRIMARY TOOL — 它把搜索、节点详情、调用链、源码全部打包成一次返回。AI 代理一次调用就能回答大部分架构问题。"
+               data-explanation-wrong="提示：哪个工具被描述为 'PRIMARY TOOL - call this FIRST'？它的设计目标就是一次调用就提供足够的上下文，让 AI 不需要再链式调用其他工具。">
+            <h3 class="quiz-question">AI 代理想理解 "用户登录的完整流程"，应该优先调用哪个工具？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>codegraph_context — 一次返回完整上下文</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>codegraph_search — 先找到所有相关函数</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>codegraph_trace — 追踪从登录按钮到数据库的路径</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

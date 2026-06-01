@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Archon 交互式课程</title>
+
+  <!-- Google Fonts: Bricolage Grotesque · DM Sans · JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    :root {
+      --color-accent:       #D94F30;
+      --color-accent-hover: #C4432A;
+      --color-accent-light: #FDEEE9;
+      --color-accent-muted: #E8836C;
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">Archon 交互式课程</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <button class="nav-dot" data-target="module-1" data-tooltip="初识 Archon" role="tab" aria-label="Module 1: 初识 Archon"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="核心角色" role="tab" aria-label="Module 2: 核心角色"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="数据流转" role="tab" aria-label="Module 3: 数据流转"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="外部交互" role="tab" aria-label="Module 4: 外部交互"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="设计模式与排查" role="tab" aria-label="Module 5: 设计模式与排查"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh --><section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">初识 Archon：AI Agent 的工厂</h1>
+      <p class="module-subtitle">从用户视角理解 Archon 做了什么，以及它为什么如此有趣</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: What is Archon -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Archon 是什么？</h2>
+        <p>想象你有一个「AI 助手工厂」。你不需要亲手去造每一个 AI 助手，而是告诉工厂：「我需要一个能帮我管理日历的助手，它要能读懂邮件、理解时间冲突、还会自动回复」。工厂就会帮你把这个助手造出来。</p>
+        <p><strong>Archon 就是这样一个工厂。</strong> 它是一个开源项目，专门用来自动生成 <span class="term" data-definition="AI Agent 就是 AI 智能体——一个可以自主完成任务的程序。你可以把它想象成一个数字员工，它能理解你的指令、查阅资料、做出决策并执行操作。">AI Agent</span>。你描述你想要的 Agent 的能力，Archon 就会帮你生成它的代码。</p>
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">核心概念：AI Agent</strong>
+            <p>AI Agent 不是普通的聊天机器人。聊天机器人只能对话，而 Agent 能够<span class="term" data-definition="工具调用是指 AI 主动使用外部工具来完成操作。就像一个人不只是会说话，还会打电话、查资料、写邮件一样。">调用工具</span>、执行操作、查阅知识库，甚至能自我反思和改进。它更像是一个能动手干活的智能助手。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: The problem Archon solves -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">它解决什么问题？</h2>
+        <p>创建一个真正有用的 AI Agent 很难。你需要设计它的「思考流程」、选择合适的工具、编写提示词（<span class="term" data-definition="Prompt 即提示词，就是你告诉 AI 要做什么的那段文字。好的提示词能让 AI 精准理解你的意图，差的提示词会让 AI 胡说八道。">Prompt</span>）、处理错误情况……这一切都需要大量的编程知识和经验。</p>
+        <div class="pattern-cards stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🎯</div>
+            <h4 class="pattern-title">自动化 Agent 设计</h4>
+            <p class="pattern-desc">你只需要描述需求，Archon 帮你设计 Agent 的完整架构。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🔧</div>
+            <h4 class="pattern-title">工具集成</h4>
+            <p class="pattern-desc">自动为 Agent 选择和配置合适的工具（搜索引擎、数据库、API 等）。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🔁</div>
+            <h4 class="pattern-title">迭代优化</h4>
+            <p class="pattern-desc">Archon 会测试生成的 Agent，发现问题后自动优化代码。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Tech Stack Overview -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">技术栈一览</h2>
+        <p>Archon 用到了这些关键技术。别被术语吓到——我们后面会逐一解释。</p>
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🐍</div>
+            <div>
+              <strong>Python</strong>
+              <p>Archon 的主要编程语言，以简洁易读著称</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🧠</div>
+            <div>
+              <strong>LangGraph</strong>
+              <p>用于构建 AI Agent 工作流的框架，让 Agent 能按步骤思考</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🌐</div>
+            <div>
+              <strong>Streamlit</strong>
+              <p>快速搭建 Web 界面的工具，让你能和 Agent 交互</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">📦</div>
+            <div>
+              <strong>Pydantic</strong>
+              <p>数据验证工具，确保信息格式正确不出错</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: A first look at the code -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">第一次看代码：Archon 的入口</h2>
+        <p>让我们看看 Archon 项目最核心的入口文件。不要担心看不懂——右边的白话翻译会帮你理解每一行的含义。</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment"># archon.py 入口文件</span></span>
+<span class="code-line"><span class="code-keyword">from</span> langgraph.graph <span class="code-keyword">import</span> StateGraph</span>
+<span class="code-line"></span>
+<span class="code-line">workflow = <span class="code-function">StateGraph</span>(AgentState)</span>
+<span class="code-line">workflow.<span class="code-function">add_node</span>(<span class="code-string">"reasoner"</span>, reasoner)</span>
+<span class="code-line">workflow.<span class="code-function">add_node</span>(<span class="code-string">"coder"</span>, coder)</span>
+<span class="code-line">workflow.<span class="code-function">add_node</span>(<span class="code-string">"reviewer"</span>, reviewer)</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl"># 这是注释，说明这个文件叫 archon.py</p>
+              <p class="tl">导入 LangGraph 的图结构——可以理解为一条「流水线」</p>
+              <p class="tl">创建一条新的工作流，传入 Agent 的状态信息</p>
+              <p class="tl">在工作流上添加一个「推理者」节点——负责思考问题</p>
+              <p class="tl">添加一个「编码者」节点——负责写代码</p>
+              <p class="tl">添加一个「审查者」节点——负责检查代码质量</p>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-info">
+          <div class="callout-icon">📖</div>
+          <div class="callout-content">
+            <strong class="callout-title">好知识点：图（Graph）</strong>
+            <p>这里的「图」不是指图片。在计算机科学中，<span class="term" data-definition="在计算机科学中，图（Graph）是由节点和连接组成的结构。你可以把它想象成一张地铁线路图——每个站是一个节点，线路是连接。程序通过图来组织工作流程。">图</span>是一种组织工作流程的方式。Archon 用图来定义 Agent 的思考步骤：先推理，再编码，最后审查。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">理解检测</h2>
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="完全正确！Archon 的核心定位就是一个 AI Agent 的自动化工厂——你描述需求，它帮你生成 Agent。"
+               data-explanation-wrong="不太对哦。Archon 不是聊天机器人，也不是普通的代码工具。它专门用来生成 AI Agent。">
+            <h3 class="quiz-question">如果用一句话描述 Archon，你会怎么说？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>一个能和人聊天的 AI 助手</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>一个能自动生成 AI Agent 的工厂</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>一个用来写 Python 代码的编辑器</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="没错！LangGraph 是 Archon 用来构建 Agent 工作流的核心框架。它让 Agent 可以按步骤推理和行动。"
+               data-explanation-wrong="再想想。Archon 用的是 LangGraph 来定义 Agent 的思考和行动流程，而不是其他选项。">
+            <h3 class="quiz-question">Archon 用什么框架来构建 Agent 的工作流？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Django（Web 框架）</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>TensorFlow（机器学习库）</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>LangGraph（Agent 工作流框架）</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section><section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">认识核心角色：Archon 的演员表</h1>
+      <p class="module-subtitle">每个系统都有自己的「演员」，Archon 的演员们各司其职</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: The Cast -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Archon 里的角色们</h2>
+        <p>想象一部电影的拍摄现场。有导演、编剧、演员、剪辑师——每个人负责不同的事情，但都为了同一部电影服务。Archon 也一样，它有几个核心「角色」，每个角色各司其职。</p>
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🧠</div>
+            <div>
+              <strong>Reasoner（推理者）</strong>
+              <p>像导演一样统筹全局——分析用户需求，制定行动计划，决定下一步做什么</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">💻</div>
+            <div>
+              <strong>Coder（编码者）</strong>
+              <p>像编剧一样写出具体的「剧本」——根据推理者的计划生成代码</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🔍</div>
+            <div>
+              <strong>Reviewer（审查者）</strong>
+              <p>像剪辑师一样把关质量——检查生成的代码有没有问题，提出修改建议</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">📚</div>
+            <div>
+              <strong>Knowledge Base（知识库）</strong>
+              <p>像道具仓库一样提供背景资料——存储最佳实践和参考代码供其他角色使用</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Group Chat Animation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">角色之间的对话</h2>
+        <p>当你说「帮我创建一个能管理待办事项的 Agent」时，Archon 的角色们会这样交流：</p>
+        <div class="chat-window" id="chat-module2">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="user" style="display:none">
+              <div class="chat-avatar" style="background: #6B6560">👤</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: #6B6560">用户</span>
+                <p>帮我创建一个能管理待办事项的 Agent，它要能添加、删除、查询任务。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="reasoner" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🧠</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">推理者</span>
+                <p>收到需求。我需要分析一下：这个 Agent 需要哪些工具？我判断需要 CRUD 操作工具和一个状态管理系统。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="reasoner" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🧠</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">推理者</span>
+                <p>编码者，请你根据这个设计生成代码。需要用到 LangGraph 的 StateGraph。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="coder" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">💻</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">编码者</span>
+                <p>好的，我来写代码。我会创建状态模型、定义工具函数、搭建工作流图。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="coder" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">💻</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">编码者</span>
+                <p>代码生成完毕！审查者，请帮我检查一下质量。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="5" data-sender="reviewer" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">🔍</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">审查者</span>
+                <p>检查完毕。第 45 行的错误处理不够完善，建议增加重试机制。其他部分通过！</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-typing" style="display:none">
+            <div class="chat-avatar" id="typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条消息</button>
+            <button class="btn chat-all-btn">播放全部</button>
+            <button class="btn chat-reset-btn">重新播放</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Reasoner deep dive -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">深入推理者（Reasoner）</h2>
+        <p>推理者是整个系统的「大脑」。它的职责是理解用户需求，然后拆解成具体的执行步骤。</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">reasoner</span>(state: AgentState):</span>
+<span class="code-line">    <span class="code-string">"""分析需求，制定计划"""</span></span>
+<span class="code-line">    user_request = state[<span class="code-string">"user_request"</span>]</span>
+<span class="code-line">    plan = llm.<span class="code-function">invoke</span>(</span>
+<span class="code-line">        <span class="code-string">f"为以下需求制定执行计划:</span></span>
+<span class="code-line"><span class="code-string">        {user_request}"</span></span>
+<span class="code-line">    )</span>
+<span class="code-line">    state[<span class="code-string">"plan"</span>] = plan</span>
+<span class="code-line">    <span class="code-keyword">return</span> state</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">定义推理者函数，接收当前的 Agent 状态。</p>
+              <p class="tl">注释说明功能：分析需求并制定计划。</p>
+              <p class="tl">从状态中取出用户的需求描述。</p>
+              <p class="tl">调用大语言模型（LLM），让它分析需求。</p>
+              <p class="tl">告诉 LLM：「为这个需求制定计划」。</p>
+              <p class="tl">把 LLM 的回应传入。</p>
+              <p class="tl">把制定好的计划保存回状态中。</p>
+              <p class="tl">返回更新后的状态给下一步使用。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: File Structure -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">项目的文件结构</h2>
+        <p>Archon 的代码组织得非常清晰。下面是它的主要目录结构——每个文件夹都有自己的职责。</p>
+        <div class="file-tree">
+          <div class="ft-folder open">
+            <span class="ft-name">archon/</span>
+            <span class="ft-desc">项目根目录</span>
+            <div class="ft-children">
+              <div class="ft-folder">
+                <span class="ft-name">graph/</span>
+                <span class="ft-desc">LangGraph 工作流定义——Agent 的「大脑」在这里</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">services/</span>
+                <span class="ft-desc">与外部服务交互的代码（如 OpenAI API）</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">models/</span>
+                <span class="ft-desc">数据模型定义——描述信息的格式和结构</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">utils/</span>
+                <span class="ft-desc">工具函数——可复用的辅助代码</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">archon.py</span>
+                <span class="ft-desc">主入口文件，启动整个系统</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">角色理解测验</h2>
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！推理者负责分析需求和制定计划，是整个系统的起点。就像一部电影里导演先理解剧本再安排拍摄一样。"
+               data-explanation-wrong="不完全对。想一想：用户需求进来后，谁第一个处理？是推理者——它负责理解和规划。">
+            <h3 class="quiz-question">当用户提出需求时，哪个角色最先响应？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>编码者——立刻开始写代码</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>推理者——先分析需求再制定计划</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>审查者——先检查需求是否合理</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="没错！审查者负责检查代码质量，发现问题并提出修改建议。这确保了最终生成的代码是可靠的。"
+               data-explanation-wrong="再想想。代码生成后，需要有人检查质量——这就是审查者的工作。">
+            <h3 class="quiz-question">审查者的主要职责是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>检查代码质量并提出修改建议</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>分析用户需求并制定计划</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>与用户进行对话沟通</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section><section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">数据如何在 Archon 中流转</h1>
+      <p class="module-subtitle">追踪信息从用户输入到代码生成的完整旅程</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Data flow intro -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">一次请求的完整旅程</h2>
+        <p>想象你在网上购物。你点击「下单」后，信息要经过购物车、支付系统、仓库、物流——最后才送到你手上。Archon 中也一样，你的请求会在多个「站点」之间流转。</p>
+        <p>让我们追踪一次完整的请求：从你描述需求到最终生成可用的 Agent 代码。</p>
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>用户输入需求</strong>
+              <p>「帮我创建一个能搜索网页的 Agent」</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>推理者分析需求</strong>
+              <p>确定需要搜索工具、结果解析器、回复生成器</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>编码者生成代码</strong>
+              <p>根据推理结果写出完整的 Agent 代码</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>审查者检查质量</strong>
+              <p>发现代码问题，提出改进建议</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>输出最终代码</strong>
+              <p>用户获得可以直接使用的 Agent 代码</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Data flow animation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">可视化数据流</h2>
+        <p>点击「下一步」按钮，观察数据在各个角色之间是如何传递的。</p>
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"用户输入需求描述"},
+          {"highlight":"flow-actor-2","label":"推理者接收需求，调用 LLM 分析","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-2","label":"推理者制定执行计划，存入状态"},
+          {"highlight":"flow-actor-3","label":"编码者接收计划，开始生成代码","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-3","label":"编码者完成代码生成"},
+          {"highlight":"flow-actor-4","label":"审查者检查代码质量","packet":true,"from":"actor-3","to":"actor-4"},
+          {"highlight":"flow-actor-4","label":"审查者反馈改进建议"},
+          {"highlight":"flow-actor-3","label":"编码者根据反馈优化代码","packet":true,"from":"actor-4","to":"actor-3"},
+          {"highlight":"flow-actor-1","label":"最终代码返回给用户","packet":true,"from":"actor-3","to":"actor-1"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">👤</div>
+              <span>用户</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">🧠</div>
+              <span>推理者</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">💻</div>
+              <span>编码者</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">🔍</div>
+              <span>审查者</span>
+            </div>
+          </div>
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击「下一步」开始</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: State management -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">状态（State）：信息的载体</h2>
+        <p>在 Archon 中，所有角色共享一个「状态」对象。你可以把它想象成一个<span class="term" data-definition="状态（State）是程序在某一时刻保存的所有信息的集合。就像你玩游戏时的存档——记录了你的角色等级、装备、位置等信息。程序在运行时可以读取和修改这些信息。">游戏存档</span>——每个角色都可以查看和修改它，下一个角色看到的是上一个人更新后的版本。</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">AgentState</span>(TypedDict):</span>
+<span class="code-line">    user_request: <span class="code-function">str</span></span>
+<span class="code-line">    plan: <span class="code-function">Optional</span>[<span class="code-function">str</span>]</span>
+<span class="code-line">    generated_code: <span class="code-function">Optional</span>[<span class="code-function">str</span>]</span>
+<span class="code-line">    review_feedback: <span class="code-function">Optional</span>[<span class="code-function">str</span>]</span>
+<span class="code-line">    iterations: <span class="code-function">int</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">定义一个名为 AgentState 的数据结构。</p>
+              <p class="tl">user_request：用户的需求描述（文本）。</p>
+              <p class="tl">plan：推理者制定的计划（可选，一开始为空）。</p>
+              <p class="tl">generated_code：编码者生成的代码（可选）。</p>
+              <p class="tl">review_feedback：审查者的反馈意见（可选）。</p>
+              <p class="tl">iterations：迭代次数，记录优化了多少轮。</p>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键洞察：为什么用共享状态？</strong>
+            <p>共享状态就像一个共享文档（比如 Google Docs）。所有角色都能看到最新内容，也能添加自己的贡献。这样每个角色都不需要直接和其他角色对话——它们只需要读写状态就行了。这大大简化了系统的设计。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: The graph edges -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">工作流图：连接各个节点</h2>
+        <p>LangGraph 的工作流图不仅定义了有哪些角色（节点），还定义了它们之间的连接方式（边）。就像地铁线路图不仅标注了站点，还画出了线路走向。</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line">workflow.<span class="code-function">add_edge</span>(START, <span class="code-string">"reasoner"</span>)</span>
+<span class="code-line">workflow.<span class="code-function">add_edge</span>(<span class="code-string">"reasoner"</span>, <span class="code-string">"coder"</span>)</span>
+<span class="code-line">workflow.<span class="code-function">add_conditional_edges</span>(</span>
+<span class="code-line">    <span class="code-string">"reviewer"</span>,</span>
+<span class="code-line">    should_continue,</span>
+<span class="code-line">    {<span class="code-string">"continue"</span>: <span class="code-string">"coder"</span>,</span>
+<span class="code-line">     <span class="code-string">"finish"</span>: END}</span>
+<span class="code-line">)</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">从起点出发，第一个经过推理者。</p>
+              <p class="tl">推理者完成后，流向编码者。</p>
+              <p class="tl">审查者之后是条件分支——</p>
+              <p class="tl">根据审查结果决定下一步。</p>
+              <p class="tl">如果需要继续优化，返回编码者。</p>
+              <p class="tl">如果质量达标，结束工作流。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">数据流理解测验</h2>
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！共享状态就像 Google Docs——所有角色都能读写同一份信息，不需要直接对话。"
+               data-explanation-wrong="再想想。Archon 的角色不是通过直接对话来协作的，它们通过什么来共享信息呢？">
+            <h3 class="quiz-question">Archon 中的角色通过什么方式共享信息？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>直接互相发送消息</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>保存在数据库中</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>通过共享的状态对象</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！conditional_edges（条件边）让工作流可以根据审查结果决定是继续优化还是结束。这让 Agent 能够自我改进！"
+               data-explanation-wrong="不太对。关键在于审查后的「条件分支」——它决定了工作流是继续循环还是结束。">
+            <h3 class="quiz-question">审查者（Reviewer）完成任务后，下一步取决于什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>总是直接返回给用户</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>根据审查结果决定是继续优化还是结束</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>总是返回推理者重新规划</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section><section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">与外部世界交互：API 和工具</h1>
+      <p class="module-subtitle">Archon 如何调用 AI 模型、使用工具、连接外部服务</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: External services -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Archon 的外部连接</h2>
+        <p>Archon 不是闭门造车。它需要和外部世界打交道——调用 AI 模型来「思考」，搜索网络来获取信息，访问数据库来存储结果。这些外部连接就像一个公司的各个供应商——公司本身不生产原料，但需要和供应商合作才能运作。</p>
+        <div class="arch-diagram">
+          <div class="arch-zone arch-zone-browser">
+            <h4 class="arch-zone-label">Archon 内部</h4>
+            <div class="arch-component" data-desc="推理者节点：调用 LLM 分析需求，制定执行计划。它是工作流的起点。"
+                 onclick="showArchDesc(this)">
+              <div class="arch-icon">🧠</div>
+              <span>推理者</span>
+            </div>
+            <div class="arch-component" data-desc="编码者节点：根据推理者的计划，调用 LLM 生成具体的 Agent 代码。"
+                 onclick="showArchDesc(this)">
+              <div class="arch-icon">💻</div>
+              <span>编码者</span>
+            </div>
+            <div class="arch-component" data-desc="审查者节点：检查生成的代码质量，调用 LLM 进行代码评审，返回改进建议。"
+                 onclick="showArchDesc(this)">
+              <div class="arch-icon">🔍</div>
+              <span>审查者</span>
+            </div>
+          </div>
+          <div class="arch-zone arch-zone-external">
+            <h4 class="arch-zone-label">外部服务</h4>
+            <div class="arch-component" data-desc="OpenAI 的 API：提供大语言模型能力，是 Archon 所有智能的来源。Archon 通过 API 调用来获取 AI 的推理、编码和审查能力。"
+                 onclick="showArchDesc(this)">
+              <div class="arch-icon">🤖</div>
+              <span>OpenAI API</span>
+            </div>
+            <div class="arch-component" data-desc="知识库服务：存储最佳实践、参考代码和项目模板，帮助生成更高质量的 Agent。"
+                 onclick="showArchDesc(this)">
+              <div class="arch-icon">📚</div>
+              <span>知识库</span>
+            </div>
+          </div>
+          <div class="arch-description" id="arch-desc">点击任意组件了解它的作用</div>
+        </div>
+      </section>
+
+      <!-- Screen 2: API calls -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">如何调用 AI 模型？</h2>
+        <p>Archon 通过 <span class="term" data-definition="API（Application Programming Interface，应用程序编程接口）是软件之间通信的桥梁。就像餐厅的服务员——你不需要自己进厨房，只需要告诉服务员你要什么，服务员会帮你传达给厨师，然后把菜端给你。">API</span> 调用 AI 模型。这是 Archon 获取「智能」的方式。</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">from</span> langchain_openai <span class="code-keyword">import</span> ChatOpenAI</span>
+<span class="code-line"></span>
+<span class="code-line">llm = <span class="code-function">ChatOpenAI</span>(</span>
+<span class="code-line">    model=<span class="code-string">"gpt-4o"</span>,</span>
+<span class="code-line">    temperature=<span class="code-number">0.7</span>,</span>
+<span class="code-line">    api_key=settings.api_key</span>
+<span class="code-line">)</span>
+<span class="code-line"></span>
+<span class="code-line">response = llm.<span class="code-function">invoke</span>(prompt)</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">导入 OpenAI 的聊天模型工具。</p>
+              <p class="tl">创建一个 AI 模型实例。</p>
+              <p class="tl">指定使用 GPT-4o 模型。</p>
+              <p class="tl">设置创造性参数为 0.7（越高越有创意）。</p>
+              <p class="tl">提供 API 密钥来验证身份。</p>
+              <p class="tl">发送提示词给 AI，等待回复。</p>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">常见陷阱：API 密钥安全</strong>
+            <p>API 密钥就像你的银行卡密码——绝对不能公开分享。Archon 使用 <span class="term" data-definition="环境变量是存储在操作系统中的配置值，程序运行时可以读取。它的好处是敏感信息（如密码、密钥）不会出现在代码中，降低了泄露风险。">环境变量</span> 来安全地存储密钥，而不是直接写在代码里。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Tools -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">工具系统：给 Agent 装上「手」</h2>
+        <p>AI Agent 只有「大脑」（LLM）是不够的。它还需要「手」——也就是能执行具体操作的工具。Archon 生成 Agent 时，会为它配备合适的工具。</p>
+        <div class="pattern-cards stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🌐</div>
+            <h4 class="pattern-title">网页搜索</h4>
+            <p class="pattern-desc">让 Agent 能搜索互联网获取最新信息。就像给它装了一个浏览器。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">📁</div>
+            <h4 class="pattern-title">文件操作</h4>
+            <p class="pattern-desc">让 Agent 能读写文件。就像给它装了一双手，能翻阅和编辑文档。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🔗</div>
+            <h4 class="pattern-title">API 调用</h4>
+            <p class="pattern-desc">让 Agent 能与外部服务通信。就像给它装了一部电话，能联系其他系统。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🗄️</div>
+            <h4 class="pattern-title">数据库查询</h4>
+            <p class="pattern-desc">让 Agent 能存取结构化数据。就像给它配了一个档案柜。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Tool definition code -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">定义一个工具</h2>
+        <p>下面是如何用代码定义一个工具——这是告诉 Agent「你有这个能力」的方式。</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">from</span> langchain_core.tools <span class="code-keyword">import</span> tool</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-decorator">@tool</span></span>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">search_web</span>(query: <span class="code-function">str</span>) -> <span class="code-function">str</span>:</span>
+<span class="code-line">    <span class="code-string">"""搜索互联网获取信息"""</span></span>
+<span class="code-line">    results = search_api.<span class="code-function">search</span>(query)</span>
+<span class="code-line">    <span class="code-keyword">return</span> results.<span class="code-function">to_string</span>()</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">导入工具定义装饰器。</p>
+              <p class="tl">@tool 标记表示这是一个 Agent 可以使用的工具。</p>
+              <p class="tl">定义一个搜索函数，接收搜索关键词。</p>
+              <p class="tl">用一句话描述这个工具的功能。</p>
+              <p class="tl">调用搜索 API 执行搜索。</p>
+              <p class="tl">将搜索结果转换为文本返回。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">外部交互测验</h2>
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！@tool 装饰器是告诉 LangChain 「这是一个 Agent 可以使用的工具」的标记。有了它，Agent 就知道自己有这个能力。"
+               data-explanation-wrong="不太对。@tool 的作用不是优化性能或保护安全，而是标记这个函数是一个 Agent 可用的工具。">
+            <h3 class="quiz-question">代码中的 @tool 装饰器的作用是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>优化函数的执行性能</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>标记这个函数是一个 Agent 可用的工具</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>加密 API 密钥以保护安全</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！环境变量是最安全的做法——密钥不会出现在代码中，降低了泄露风险。千万不要把密钥硬编码在代码里！"
+               data-explanation-wrong="再想想。把 API 密钥直接写在代码中是非常危险的做法。最安全的方式是用环境变量来存储。">
+            <h3 class="quiz-question">如果要安全地存储 API 密钥，最佳做法是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>直接写在代码里，方便使用</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>保存在 README 文档中</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>使用环境变量存储</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section><section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">精妙的设计模式与故障排查</h1>
+      <p class="module-subtitle">Archon 中值得学习的设计技巧，以及当 Agent 出错时如何排查</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Design patterns intro -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Archon 中的巧妙设计</h2>
+        <p>好的软件就像精心设计的机器——每个零件都有它的道理。Archon 中有几个特别巧妙的设计模式值得学习。理解这些模式不仅能帮你更好地使用 Archon，还能让你在指挥 AI 写代码时提出更专业的需求。</p>
+      </section>
+
+      <!-- Screen 2: Iterative refinement -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">模式一：迭代优化循环</h2>
+        <p>Archon 不满足于一次就写出完美代码。它采用「写代码 → 审查 → 修改 → 再审查」的循环模式，就像写作文时的多轮修改——初稿往往不够好，修改几遍后质量才会上去。</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">should_continue</span>(state):</span>
+<span class="code-line">    <span class="code-keyword">if</span> state[<span class="code-string">"iterations"</span>] >= MAX_ITER:</span>
+<span class="code-line">        <span class="code-keyword">return</span> <span class="code-string">"finish"</span></span>
+<span class="code-line">    <span class="code-keyword">if</span> <span class="code-string">"APPROVED"</span> <span class="code-keyword">in</span> state[<span class="code-string">"review"</span>]:</span>
+<span class="code-line">        <span class="code-keyword">return</span> <span class="code-string">"finish"</span></span>
+<span class="code-line">    <span class="code-keyword">return</span> <span class="code-string">"continue"</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">定义一个函数来决定是否继续优化。</p>
+              <p class="tl">如果迭代次数达到上限...</p>
+              <p class="tl">就结束循环，返回最终结果。</p>
+              <p class="tl">如果审查者认为代码通过了...</p>
+              <p class="tl">也结束循环。</p>
+              <p class="tl">否则，继续返回编码者优化代码。</p>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">通用智慧：迭代优于完美</strong>
+            <p>这个模式在软件工程中极其常见：<span class="term" data-definition="迭代（Iteration）是指重复执行某个过程，每次都在上一次的结果基础上改进。就像雕塑家一点点雕刻——每一刀都让作品更接近完美。">迭代</span>改进比一次做到完美更现实。不管是写代码、写文章还是做设计，「先出初版，再逐步优化」永远是更高效的策略。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Error handling -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">模式二：防御性编程</h2>
+        <p>Archon 的代码中处处体现了「防御性编程」的思想——假设任何可能出错的地方都会出错，提前准备好应对措施。就像一个谨慎的司机，不仅系好安全带，还买了保险、备了备胎。</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">try</span>:</span>
+<span class="code-line">    response = llm.<span class="code-function">invoke</span>(prompt)</span>
+<span class="code-line"><span class="code-keyword">except</span> RateLimitError:</span>
+<span class="code-line">    time.<span class="code-function">sleep</span>(<span class="code-number">60</span>)</span>
+<span class="code-line">    response = llm.<span class="code-function">invoke</span>(prompt)</span>
+<span class="code-line"><span class="code-keyword">except</span> Exception <span class="code-keyword">as</span> e:</span>
+<span class="code-line">    <span class="code-keyword">return</span> {<span class="code-string">"error"</span>: <span class="code-function">str</span>(e)}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">尝试调用 AI 模型。</p>
+              <p class="tl">发送提示词并等待回复。</p>
+              <p class="tl">如果遇到速率限制（调用太频繁）...</p>
+              <p class="tl">等待 60 秒后重试。</p>
+              <p class="tl">如果遇到其他类型的错误...</p>
+              <p class="tl">返回错误信息，而不是让程序崩溃。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Debugging strategies -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">当 Agent 出错了怎么办？</h2>
+        <p>不管代码写得多好，问题总会出现。学会排查问题是使用 AI 工具最重要的能力之一。以下是常见的出错场景和排查方法：</p>
+        <div class="pattern-cards stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-error)">
+            <div class="pattern-icon" style="background: var(--color-error-light)">🔴</div>
+            <h4 class="pattern-title">Agent 无限循环</h4>
+            <p class="pattern-desc"><strong>症状：</strong>Agent 一直在重复同样的操作，不停下来。<strong>排查：</strong>检查 should_continue 函数的退出条件是否正确。可能 MAX_ITER 设得太高，或者审查者永远不会返回 APPROVED。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-info)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">🔵</div>
+            <h4 class="pattern-title">生成代码有语法错误</h4>
+            <p class="pattern-desc"><strong>症状：</strong>生成的代码无法运行。<strong>排查：</strong>检查审查者节点是否正常工作，或者 prompt 是否足够清晰。有时候给 LLM 提供一个代码示例就能大幅提高生成质量。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-success)">
+            <div class="pattern-icon" style="background: var(--color-success-light)">🟢</div>
+            <h4 class="pattern-title">API 调用超时</h4>
+            <p class="pattern-desc"><strong>症状：</strong>Agent 运行到某一步就卡住了。<strong>排查：</strong>查看网络连接和 API 密钥。增加重试逻辑（如上面的代码示例）可以解决大部分问题。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Spot the Bug Challenge -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">找 Bug 挑战</h2>
+        <p>下面这段代码有一个常见的 Bug，看看你能不能找到它！点击你认为有问题的行。</p>
+        <div class="bug-challenge">
+          <div class="bug-code">
+            <div class="bug-line" data-line="1" onclick="checkBugLine(this, false)">
+              <span class="line-num">1</span>
+              <code><span class="code-keyword">def</span> <span class="code-function">should_continue</span>(state):</code>
+            </div>
+            <div class="bug-line" data-line="2" onclick="checkBugLine(this, false)">
+              <span class="line-num">2</span>
+              <code>    <span class="code-keyword">if</span> state[<span class="code-string">"iterations"</span>] >= <span class="code-number">10</span>:</code>
+            </div>
+            <div class="bug-line bug-target" data-line="3" onclick="checkBugLine(this, true)">
+              <span class="line-num">3</span>
+              <code>        <span class="code-keyword">return</span> <span class="code-string">"continue"</span></code>
+            </div>
+            <div class="bug-line" data-line="4" onclick="checkBugLine(this, false)">
+              <span class="line-num">4</span>
+              <code>    <span class="code-keyword">if</span> <span class="code-string">"APPROVED"</span> <span class="code-keyword">in</span> state[<span class="code-string">"review"</span>]:</code>
+            </div>
+            <div class="bug-line" data-line="5" onclick="checkBugLine(this, false)">
+              <span class="line-num">5</span>
+              <code>        <span class="code-keyword">return</span> <span class="code-string">"finish"</span></code>
+            </div>
+            <div class="bug-line" data-line="6" onclick="checkBugLine(this, false)">
+              <span class="line-num">6</span>
+              <code>    <span class="code-keyword">return</span> <span class="code-string">"continue"</span></code>
+            </div>
+          </div>
+          <div class="bug-feedback" id="bug-feedback"></div>
+        </div>
+      </section>
+
+      <!-- Screen 6: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">设计模式测验</h2>
+        <div class="quiz-container" id="quiz-module5">
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="正确！迭代优化循环的核心思想是「先出初版，逐步改进」。这比期望一次就做到完美更现实、更高效。"
+               data-explanation-wrong="再想一想。Archon 的迭代优化模式体现了一个什么哲学？不是速度、不是成本，而是对质量的态度。">
+            <h3 class="quiz-question">Archon 的迭代优化模式体现了什么核心思想？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>先出初版，逐步改进</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>一次做到完美再交付</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>尽量减少迭代次数以节省成本</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！首先检查 should_continue 函数的退出条件——这决定了循环是否会终止。如果退出条件有 Bug，Agent 就会无限循环。"
+               data-explanation-wrong="排查问题时，应该从控制循环的函数开始。这个函数决定了 Agent 什么时候停下来——如果它有问题，整个流程都会出错。">
+            <h3 class="quiz-question">当 Agent 出现无限循环问题时，你首先应该检查什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>网络连接是否正常</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>should_continue 函数的退出条件</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>API 密钥是否正确</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="完全正确！防御性编程的核心就是「假设一切可能出错的地方都会出错」，提前准备好应对措施。这不是悲观，而是负责。"
+               data-explanation-wrong="防御性编程的本质是什么？不是写更多代码、不是处理更多数据，而是一种思维态度——对错误的预见和准备。">
+            <h3 class="quiz-question">「防御性编程」的核心思想是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>写更多的代码来覆盖所有场景</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>让程序运行得更快</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>假设任何可能出错的地方都会出错，提前准备</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>  </main>
+
+</body>
+</html>

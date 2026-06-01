@@ -1,0 +1,203 @@
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">AI 为什么每天早上都"失忆"？</h1>
+      <p class="module-subtitle">你花了两小时向 Claude 解释你的项目结构。明天它什么都不记得了。</p>
+    </header>
+
+    <!-- Screen 1: The hook -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">那个让你崩溃的瞬间</h2>
+      <p>你已经打开了 <span class="term" data-definition="Claude Code 是 Anthropic 推出的命令行 AI 编程助手，你可以用自然语言描述任务，让它帮你读代码、写代码、调试。">Claude Code</span>，跟它讲清楚了你的 monorepo 结构、认证逻辑和数据库设计。终于，它完全理解了你的项目。</p>
+      <p>第二天，你打开新会话，输入"继续昨天的工作"——它回复："我没有之前会话的上下文。"</p>
+
+      <!-- Chat: before claude-mem -->
+      <div class="chat-window" id="chat-no-memory">
+        <div class="chat-messages">
+          <div class="chat-message" data-sender="user" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-3)">你</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-3)">你</span>
+              <p>继续帮我修那个认证 bug，我们昨天分析了 JWT 过期时序的问题。</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="claude" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-2)">C</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-2)">Claude</span>
+              <p>我没有之前会话的上下文。能描述一下你遇到的问题吗？</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="user" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-3)">你</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-3)">你</span>
+              <p>……就是我们昨天花两小时讨论的那个！JWT token 在 Redis 刷新窗口期的竞争条件。</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="claude" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-2)">C</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-2)">Claude</span>
+              <p>抱歉，我真的没有昨天的记录。能分享一下相关代码吗？我们重新分析一次。</p>
+            </div>
+          </div>
+        </div>
+        <div class="chat-typing" style="display:none">
+          <div class="chat-avatar" id="chat-no-memory-typing-avatar" style="background: var(--color-actor-2)">C</div>
+          <div class="chat-typing-dots">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+          </div>
+        </div>
+        <div class="chat-controls">
+          <button class="btn chat-next-btn">下一条消息</button>
+          <button class="btn chat-all-btn">全部展开</button>
+          <button class="btn chat-reset-btn">重播</button>
+          <span class="chat-progress"></span>
+        </div>
+      </div>
+
+      <div class="callout callout-warning">
+        <div class="callout-icon">😤</div>
+        <div class="callout-content">
+          <strong class="callout-title">这不是 Claude 的问题，是架构设计</strong>
+          <p>所有大型语言模型都是"无状态"的：每次对话都是一张白纸。这是设计决定，不是 bug。claude-mem 的任务就是在这个白纸上偷偷预先写好记忆。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 2: The cost -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">重复解释的代价</h2>
+      <p>这不只是烦人的问题，它实际影响你的工作质量。</p>
+
+      <div class="pattern-cards stagger-children">
+        <div class="pattern-card animate-in" style="border-top-color: var(--color-error)">
+          <div class="pattern-icon" style="background: var(--color-error-light)">⏱️</div>
+          <h4 class="pattern-title">时间浪费</h4>
+          <p class="pattern-desc">每次新会话都要花 10-30 分钟重新解释架构、约定和上下文。</p>
+        </div>
+        <div class="pattern-card animate-in" style="border-top-color: var(--color-error)">
+          <div class="pattern-icon" style="background: var(--color-error-light)">🔁</div>
+          <h4 class="pattern-title">重复踩坑</h4>
+          <p class="pattern-desc">AI 重新犯你已经解决过的错误，因为它不记得上次的教训。</p>
+        </div>
+        <div class="pattern-card animate-in" style="border-top-color: var(--color-error)">
+          <div class="pattern-icon" style="background: var(--color-error-light)">📉</div>
+          <h4 class="pattern-title">决策质量降级</h4>
+          <p class="pattern-desc">没有项目历史，AI 的建议可能与你已有的技术决策相矛盾。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 3: The solution metaphor -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">如果 AI 有一本随身笔记本……</h2>
+      <p>想象你有一位顾问，每次拜访前都会翻一翻他们的工作笔记本，上面记着你们上次讨论的决策、你提到的项目偏好、以及他们自己记录的观察。</p>
+      <p>claude-mem 就是那本笔记本。它自动运行在幕后，无声地记录每次 Claude 做的事情，然后在下次会话开始时，把相关记忆偷偷注射进去。</p>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">💡</div>
+        <div class="callout-content">
+          <strong class="callout-title">核心洞察：上下文是专业知识的载体</strong>
+          <p>Claude 之所以能帮你写出高质量代码，靠的是你在对话中传授的上下文。claude-mem 让这份上下文不再随着会话消失。</p>
+        </div>
+      </div>
+
+      <!-- With memory chat comparison -->
+      <div class="chat-window" id="chat-with-memory">
+        <div class="chat-messages">
+          <div class="chat-message" data-sender="system" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-accent)">M</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-accent)">claude-mem</span>
+              <p>🧠 已注入 12 条历史记忆：包括 JWT 竞争条件分析、Redis 刷新策略、monorepo 结构……</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="user" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-3)">你</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-3)">你</span>
+              <p>继续帮我修那个认证 bug，我们昨天分析了 JWT 过期时序的问题。</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="claude" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-2)">C</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-2)">Claude</span>
+              <p>好的，我已看到之前的分析——Redis GETSET 原子性问题在并发刷新时可能导致双写。我们可以用 Lua 脚本或 SET NX 来解决……</p>
+            </div>
+          </div>
+        </div>
+        <div class="chat-typing" style="display:none">
+          <div class="chat-avatar" id="chat-with-memory-typing-avatar" style="background: var(--color-actor-2)">C</div>
+          <div class="chat-typing-dots">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+          </div>
+        </div>
+        <div class="chat-controls">
+          <button class="btn chat-next-btn">下一条消息</button>
+          <button class="btn chat-all-btn">全部展开</button>
+          <button class="btn chat-reset-btn">重播</button>
+          <span class="chat-progress"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 4: Quiz -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">理解检验</h2>
+      <div class="quiz-container" id="quiz-m1">
+        <div class="quiz-question-block"
+             data-correct="b"
+             data-explanation-right="claude-mem 的核心价值正在于此：把之前会话中积累的知识持续带入新会话，让 Claude 不用每次从零开始。"
+             data-explanation-wrong="claude-mem 不需要你手动保存对话，也不是提升单次回答质量——它的价值在于会话间的记忆延续。">
+          <h3 class="quiz-question">你安装了 claude-mem 后，打开明天的新会话。最可能发生的变化是？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Claude 的单次回答质量会提升</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Claude 会自动获得你之前项目工作的相关上下文</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>你需要手动保存每次对话到文件</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <div class="quiz-question-block"
+             data-correct="c"
+             data-explanation-right="对！LLM 是无状态的——每次调用都是全新开始，没有任何内置的跨会话记忆机制。这是设计决定，不是 bug。"
+             data-explanation-wrong="LLM 在服务器上确实需要资源，但这不是它们不记住你的原因。真正的原因是无状态设计。">
+          <h3 class="quiz-question">为什么 Claude 默认不记得昨天的对话？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Claude 的服务器内存不够大</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Anthropic 担心隐私泄露所以删除了记忆</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>大语言模型本质上是无状态的，每次对话都是独立的</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-m1')">检验答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m1')">重新作答</button>
+      </div>
+    </section>
+  </div>
+</section>

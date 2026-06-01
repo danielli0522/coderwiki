@@ -1,0 +1,190 @@
+<section class="module" id="module-4" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number" style="color: var(--color-accent)">04</span>
+      <h1 class="module-title" style="color: var(--color-accent)">进阶主题</h1>
+      <p class="module-subtitle" style="color: var(--color-text-secondary)">深入探讨参数调优与性能优化</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">参数调优的艺术</h2>
+        <p>Evolver 的核心参数就像烹饪中的调料——用量恰到好处才能做出美味佳肴。下面是一个典型的参数配置界面：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-keyword">const</span> config = {
+  populationSize: <span class="code-number">100</span>,       <span class="code-comment">// 种群规模</span>
+  mutationRate:  <span class="code-number">0.05</span>,       <span class="code-comment">// 变异概率</span>
+  crossoverRate: <span class="code-number">0.8</span>,        <span class="code-comment">// 交叉概率</span>
+  maxGenerations: <span class="code-number">500</span>,       <span class="code-comment">// 最大进化代数</span>
+  elitism: <span class="code-keyword">true</span>,             <span class="code-comment">// 是否保留最优个体</span>
+  selectionMethod: <span class="code-string">'roulette'</span>  <span class="code-comment">// 选择策略</span>
+};
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">种群规模：每代有多少候选解...</p>
+              <p class="tl">变异概率：每个基因发生变异的几率...</p>
+              <p class="tl">交叉概率：两个个体进行基因交换的概率...</p>
+              <p class="tl">最大代数：最多进化多少代...</p>
+              <p class="tl">精英主义：是否保留每一代的最优个体...</p>
+              <p class="tl">选择策略：如何挑选优秀个体...</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">常见误区</strong>
+            <p>不要盲目追求大种群和高代数——这会导致计算成本急剧上升，而结果可能并不理想。记住：进化算法是关于"适度"的艺术。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">性能优化技巧</h2>
+        <p>当你的 Evolver 项目变得庞大时，这些优化技巧能帮你保持系统的高效运行：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">⚡</div>
+            <h4 class="pattern-title">并行计算</h4>
+            <p class="pattern-desc">利用多核 CPU，同时评估多个个体的适应度。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🧠</div>
+            <h4 class="pattern-title">记忆化</h4>
+            <p class="pattern-desc">缓存已经计算过的适应度值，避免重复计算。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">📈</div>
+            <h4 class="pattern-title">早停机制</h5>
+            <p class="pattern-desc">当适应度不再显著提升时，提前终止进化过程。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🧬</div>
+            <h4 class="pattern-title">自适应参数</h4>
+            <p class="pattern-desc">根据进化进度动态调整变异率和交叉率。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">收敛监控与可视化</h2>
+        <p>在长时间的进化过程中，监控收敛趋势是判断算法是否有效的重要手段。Evolver 内置了完整的日志和统计系统。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-comment">// 进化过程的统计追踪</span>
+<span class="code-keyword">class</span> <span class="code-function">EvolutionTracker</span> {
+  <span class="code-function">constructor</span>() {
+    <span class="code-keyword">this</span>.history = [];
+    <span class="code-keyword">this</span>.stagnationCount = <span class="code-number">0</span>;
+    <span class="code-keyword">this</span>.bestEver = { fitness: -<span class="code-number">Infinity</span> };
+  }
+
+  <span class="code-function">record</span>(generation, population, fitness) {
+    <span class="code-keyword">const</span> stats = {
+      generation,
+      bestFitness: Math.<span class="code-function">max</span>(...fitness),
+      avgFitness: fitness.<span class="code-function">reduce</span>((s,f) => s+f, <span class="code-number">0</span>) / fitness.length,
+      diversity: <span class="code-keyword">this</span>.<span class="code-function">calcDiversity</span>(population)
+    };
+
+    <span class="code-keyword">if</span> (stats.bestFitness > <span class="code-keyword">this</span>.bestEver.fitness) {
+      <span class="code-keyword">this</span>.bestEver = { ...stats };
+      <span class="code-keyword">this</span>.stagnationCount = <span class="code-number">0</span>;
+    } <span class="code-keyword">else</span> {
+      <span class="code-keyword">this</span>.stagnationCount++;
+    }
+
+    <span class="code-keyword">this</span>.history.<span class="code-function">push</span>(stats);
+    <span class="code-keyword">return</span> stats;
+  }
+}
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">创建一个进化追踪器，记录每代的统计数据...</p>
+              <p class="tl">stagnationCount 记录连续多少代没有改进...</p>
+              <p class="tl">bestEver 保存整个进化过程中的最优个体...</p>
+              <p class="tl">每代记录：最优适应度、平均适应度、种群多样性...</p>
+              <p class="tl">如果这一代比历史最佳还好，重置停滞计数器...</p>
+              <p class="tl">否则停滞计数器加 1——连续停滞太多代就该考虑调整参数或停止了。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">早停的判断标准</strong>
+            <p>当停滞代数超过阈值（如 50 代），有两种策略：(1) 降低变异率以精细化搜索，(2) 提高变异率以跳出局部最优。选择哪种取决于当前的收敛程度——如果平均适应度已经很高，策略 1 更合适；如果种群多样性很低，策略 2 更有效。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">多目标优化</h2>
+        <p>现实问题往往需要同时优化多个互相冲突的目标。比如神经网络搜索中既要高准确率又要低延迟。Evolver 支持 Pareto 最优前沿的多目标优化。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">⚖️</div>
+            <h4 class="pattern-title">权重求和法</h4>
+            <p class="pattern-desc">将多个目标加权求和为单一适应度。简单易用，但权重设定依赖经验。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">📉</div>
+            <h4 class="pattern-title">Pareto 排序</h4>
+            <p class="pattern-desc">维护一个 Pareto 最优前沿，保留所有非支配解。更符合多目标决策理论。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🎯</div>
+            <h4 class="pattern-title">NSGA-II</h4>
+            <p class="pattern-desc">经典的多目标进化算法，使用拥挤度距离保持前沿分布均匀性。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">优化策略测验</h2>
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！记忆化通过缓存已知结果来避免重复计算，是优化性能的经典策略。"
+               data-explanation-wrong="再看看——哪个策略是通过存储已知结果来提升性能的？">
+            <h3 class="quiz-question">以下哪种优化策略可以避免重复计算适应度？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>并行计算</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>早停机制</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>记忆化</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重试</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>

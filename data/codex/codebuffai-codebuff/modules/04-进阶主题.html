@@ -1,0 +1,309 @@
+<section class="module" id="module-4">
+  <div class="module-inner">
+    <h2>进阶主题</h2>
+    <p>Codebuff 提供了多种进阶功能，如自定义代理、SDK 集成和 Freebuff 免费版本。掌握这些高级特性可以让你充分发挥 Codebuff 的潜力。</p>
+
+    <h3>自定义代理</h3>
+    <p>你可以创建自己的代理，定义专用工作流。使用 <code>/init</code> 命令初始化一个自定义代理结构：</p>
+    <div class="code-translation">
+      <div class="code">
+        <pre><code># 初始化自定义代理
+codebuff
+> /init
+
+# 生成的 .agents/ 目录结构
+.agents/
+├── custom-agent.md    # 代理指令文件
+├── context.md         # 上下文说明
+└── tools/             # 自定义工具
+    └── my-tool.md     # 工具定义</code></pre>
+      </div>
+      <div class="translation">
+        <p><code>/init</code> 命令会在 <code>.agents/</code> 目录中创建自定义代理的骨架结构。代理指令使用 Markdown 编写，定义了代理的行为、可用工具和输出格式。</p>
+      </div>
+    </div>
+
+    <h3>自定义代理实战示例</h3>
+    <div class="code-translation">
+      <div class="code">
+        <pre><code># .agents/api-docs-generator.md
+---
+name: API Documentation Generator
+description: Generates comprehensive API
+  documentation from route definitions
+triggers:
+  - "generate api docs"
+  - "document api"
+---
+
+## Instructions
+1. Scan all route files in src/routes/
+2. Extract HTTP method, path, parameters
+3. Identify request/response schemas
+4. Generate OpenAPI 3.0 specification
+5. Create markdown documentation
+
+## Output Format
+- OpenAPI YAML file in docs/api.yaml
+- Markdown files in docs/api/</code></pre>
+      </div>
+      <div class="translation">
+        <p>这是一个 API 文档生成器的自定义代理。它会在触发词匹配时被激活，自动扫描路由文件并生成文档。通过 Markdown 格式定义代理行为，简单直观。</p>
+      </div>
+    </div>
+
+    <h3>SDK 集成</h3>
+    <p>Codebuff 提供了 SDK，允许你将 Codebuff 集成到应用程序中。你可以创建自定义工具、集成 CI/CD 或将编码助手嵌入到产品中。</p>
+
+    <div class="code-translation">
+      <div class="code">
+        <pre><code>// 基础 SDK 使用
+import { CodebuffClient } from '@codebuff/sdk';
+
+const client = new CodebuffClient({
+  apiKey: 'your-api-key',
+  cwd: '/path/to/your/project',
+  onError: (error) =>
+    console.error('Error:', error.message),
+});
+
+// 执行单个任务
+const result = await client.execute(
+  'Add input validation to the registration form'
+);
+console.log('Changes:', result.changes);</code></pre>
+      </div>
+      <div class="translation">
+        <p>SDK 的基础用法非常简单：创建客户端实例、指定项目路径、执行任务。结果包含所有修改的文件和变更详情。</p>
+      </div>
+    </div>
+
+    <h3>SDK 高级用法</h3>
+    <div class="code-translation">
+      <div class="code">
+        <pre><code>// 流式执行 — 实时获取进度
+const stream = client.executeStream(
+  'Refactor the authentication module',
+  {
+    onFileSelected: (file) =>
+      console.log(`Selected: ${file}`),
+    onEditApplied: (edit) =>
+      console.log(`Edited: ${edit.file}`),
+    onReviewComplete: (review) =>
+      console.log(`Review: ${review.status}`),
+  }
+);
+
+for await (const event of stream) {
+  updateUI(event);
+}
+
+// 带约束的执行
+const result = await client.execute(
+  'Update database schema',
+  {
+    scope: ['src/models/', 'src/migrations/'],
+    dryRun: true,  // 只预览不实际修改
+    maxFiles: 10,  // 最多修改 10 个文件
+  }
+);</code></pre>
+      </div>
+      <div class="translation">
+        <p>SDK 支持流式执行，可以实时获取文件选择、编辑和审查的进度。你还可以设置约束条件，如操作范围、文件数量上限和干跑模式。</p>
+      </div>
+    </div>
+
+    <h3>Freebuff 免费版</h3>
+    <p>Freebuff 是 Codebuff 的免费版本，无需订阅、无积分、无需配置。只需安装即可开始编码。</p>
+    <div class="code-translation">
+      <div class="code">
+        <pre><code># 安装 Freebuff
+npm install -g freebuff
+
+# 直接使用
+cd your-project
+freebuff
+
+# Freebuff vs Codebuff 对比
+Feature        | Freebuff | Codebuff
+---------------|----------|--------
+Core editing   | ✅       | ✅
+Multi-agent    | ✅       | ✅
+Custom agents  | ❌       | ✅
+SDK access     | ❌       | ✅
+API rate limit | Standard | Priority
+Support        | Community| Priority</code></pre>
+      </div>
+      <div class="translation">
+        <p>Freebuff 包含 Codebuff 的核心功能（多代理编辑），但不支持自定义代理和 SDK。适合个人开发者快速上手，需要高级功能时可以升级。</p>
+      </div>
+    </div>
+
+    <h3>配置文件详解</h3>
+    <div class="code-translation">
+      <div class="code">
+        <pre><code># .codebuff/config.yaml
+version: 1
+model:
+  provider: anthropic
+  name: claude-sonnet-4-6
+  temperature: 0.1
+
+agents:
+  file_selector:
+    max_files: 20
+    exclude:
+      - "node_modules/**"
+      - "*.test.ts"
+      - "dist/**"
+
+  editor:
+    style: "match-existing"
+    max_changes_per_file: 5
+
+  reviewer:
+    run_tests: true
+    test_command: "npm test"
+    fail_on_test_failure: true
+
+scope:
+  default: ["src/**"]
+  exclude: ["src/generated/**"]</code></pre>
+      </div>
+      <div class="translation">
+        <p>配置文件允许你自定义模型选择、代理行为和操作范围。最常用的配置包括模型提供商、测试命令和排除目录。</p>
+      </div>
+    </div>
+
+    <h3>与其他工具集成</h3>
+    <div class="pattern-cards">
+      <div class="pattern-card">
+        <h4>VS Code 集成</h4>
+        <p>通过 Codebuff 扩展，可以在 VS Code 中直接使用 Codebuff，修改实时显示在编辑器中。</p>
+      </div>
+      <div class="pattern-card">
+        <h4>Git Hooks 集成</h4>
+        <p>在 pre-commit hook 中运行 Codebuff 进行自动格式化和 lint 修复。</p>
+      </div>
+      <div class="pattern-card">
+        <h4>Docker 集成</h4>
+        <p>在 Docker 容器中运行 Codebuff，确保环境一致性。</p>
+      </div>
+    </div>
+
+    <div class="callout callout-accent">
+      <p><strong>安全提示</strong>：在使用 Codebuff 时，确保你的 API Key 安全存储。建议使用环境变量而非硬编码。Codebuff 会在本地处理所有代码，不会上传到云端。</p>
+    </div>
+
+    <section class="screen animate-in">
+      <h3>自定义代理进阶：代码质量守护者</h3>
+      <p>除了文档生成器，你还可以创建一个持续监控代码质量的代理。这个代理会在每次代码变更时自动执行质量检查。</p>
+
+      <div class="code-translation">
+        <div class="code">
+          <pre><code># .agents/quality-guard.md
+---
+name: Quality Guard
+description: Monitors code quality on every change
+triggers:
+  - "check quality"
+  - "quality guard"
+  - "guard"
+---
+
+## Quality Rules
+
+### Security
+- No hardcoded secrets or API keys
+- All user inputs must be validated
+- SQL queries must use parameterized statements
+- Authentication checks on all sensitive endpoints
+
+### Performance
+- No N+1 database queries
+- Pagination on all list endpoints
+- Proper indexing on frequently queried fields
+- Caching for read-heavy data
+
+### Code Style
+- Consistent naming conventions
+- No functions longer than 50 lines
+- No files longer than 500 lines
+- Proper TypeScript typing (no `any`)
+
+## Output Format
+Score: 0-100
+Issues by severity: CRITICAL | WARNING | INFO
+Suggested fixes for each issue</code></pre>
+        </div>
+        <div class="translation">
+          <p>这个质量守护者代理定义了安全、性能和代码风格三方面的检查规则。当你触发它时，它会扫描代码库并生成一个带有评分和具体建议的质量报告。</p>
+        </div>
+      </div>
+
+      <div class="callout callout-accent">
+        <p><strong>代理链式调用</strong>：你可以让质量守护者代理在代码审查代理完成后自动触发。在 <code>.agents/quality-guard.md</code> 中添加 <code>chain: code-reviewer</code>，两个代理会依次执行，结果会合并输出。</p>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>Codebuff 在团队中的最佳实践</h3>
+      <p>当整个团队都使用 Codebuff 时，统一的配置和规范尤为重要。以下是一些团队协作的最佳实践。</p>
+
+      <div class="pattern-cards">
+        <div class="pattern-card">
+          <h4>共享配置</h4>
+          <p>将 <code>.codebuff/</code> 目录提交到 Git 仓库，这样团队成员共享相同的代理配置、工具定义和项目约定。</p>
+        </div>
+        <div class="pattern-card">
+          <h4>代码审查流程</h4>
+          <p>Codebuff 的修改应该和人工编写的代码一样经过 Code Review。建议在 PR 模板中标注"Codebuff 生成"以便审查者重点关注。</p>
+        </div>
+        <div class="pattern-card">
+          <h4>指令日志</h4>
+          <p>在 commit message 中记录使用的 Codebuff 指令，便于团队理解修改的意图和复现修改过程。</p>
+        </div>
+      </div>
+
+      <div class="code-translation">
+        <div class="code">
+          <pre><code># 团队统一的 commit message 格式
+git commit -m "feat(auth): add rate limiting
+  to login endpoint
+
+  Codebuff instruction: 'Add rate limiting
+  to /api/auth/login, max 5 attempts per
+  minute per IP, return 429 when exceeded'
+
+  Files changed:
+  - src/auth/auth.service.ts (rate limit logic)
+  - src/auth/auth.module.ts (import RateLimiterModule)
+  - src/guards/rate-limit.guard.ts (new guard)"</code></pre>
+        </div>
+        <div class="translation">
+          <p>规范的 commit message 不仅记录了修改内容，还包含了 Codebuff 指令和变更文件清单。这对于团队理解和回溯修改非常有帮助。</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="quiz">
+      <p><strong>小测验：</strong>Freebuff 与 Codebuff 的主要区别是什么？</p>
+      <ul>
+        <li><button>A. Freebuff 是收费的</button></li>
+        <li><button>B. Freebuff 无需订阅</button></li>
+        <li><button>C. Freebuff 需要配置</button></li>
+        <li><button>D. Freebuff 不支持自定义代理</button></li>
+      </ul>
+    </div>
+
+    <div class="quiz">
+      <p><strong>进阶题：</strong>如何确保 Codebuff 不会修改不想被改动的文件？</p>
+      <ul>
+        <li><button>A. 在 config.yaml 中设置 exclude 规则和使用 --scope 参数</button></li>
+        <li><button>B. Codebuff 总是正确的，不需要限制</button></li>
+        <li><button>C. 只能通过手动检查来确认</button></li>
+        <li><button>D. 使用 dryRun 模式是唯一的办法</button></li>
+      </ul>
+    </div>
+  </div>
+</section>

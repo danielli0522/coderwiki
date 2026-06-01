@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>claude-mem：给 AI 装上永久记忆</title>
+
+  <!-- Google Fonts: Bricolage Grotesque · DM Sans · JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- AMBER / GOLD palette — warm and distinctive for a memory-themed course -->
+  <style>
+    :root {
+      --color-accent:       #D4A843;
+      --color-accent-hover: #BF9530;
+      --color-accent-light: #FDF5E0;
+      --color-accent-muted: #E0C070;
+    }
+    body {
+      background-image: radial-gradient(
+        ellipse at 20% 50%,
+        rgba(212,168,67,0.04) 0%,
+        transparent 50%
+      );
+    }
+    .flow-actor.active .flow-actor-icon {
+      box-shadow: 0 0 0 3px var(--color-accent-light), 0 0 20px rgba(212,168,67,0.2);
+    }
+    .flow-packet {
+      background: var(--color-accent);
+      box-shadow: 0 0 8px rgba(212,168,67,0.6);
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">claude-mem：给 AI 装上永久记忆</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <button class="nav-dot" data-target="module-1" data-tooltip="AI 为什么失忆" role="tab" aria-label="Module 1: AI 为什么失忆"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="认识五大角色" role="tab" aria-label="Module 2: 认识五大角色"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="捕获：Hook 拦截机制" role="tab" aria-label="Module 3: 捕获：Hook 拦截机制"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="压缩与注入：记忆管道" role="tab" aria-label="Module 4: 压缩与注入：记忆管道"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="安装与驾驶 claude-mem" role="tab" aria-label="Module 5: 安装与驾驶 claude-mem"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh -->
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">AI 为什么每天早上都"失忆"？</h1>
+      <p class="module-subtitle">你花了两小时向 Claude 解释你的项目结构。明天它什么都不记得了。</p>
+    </header>
+
+    <!-- Screen 1: The hook -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">那个让你崩溃的瞬间</h2>
+      <p>你已经打开了 <span class="term" data-definition="Claude Code 是 Anthropic 推出的命令行 AI 编程助手，你可以用自然语言描述任务，让它帮你读代码、写代码、调试。">Claude Code</span>，跟它讲清楚了你的 monorepo 结构、认证逻辑和数据库设计。终于，它完全理解了你的项目。</p>
+      <p>第二天，你打开新会话，输入"继续昨天的工作"——它回复："我没有之前会话的上下文。"</p>
+
+      <!-- Chat: before claude-mem -->
+      <div class="chat-window" id="chat-no-memory">
+        <div class="chat-messages">
+          <div class="chat-message" data-sender="user" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-3)">你</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-3)">你</span>
+              <p>继续帮我修那个认证 bug，我们昨天分析了 JWT 过期时序的问题。</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="claude" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-2)">C</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-2)">Claude</span>
+              <p>我没有之前会话的上下文。能描述一下你遇到的问题吗？</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="user" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-3)">你</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-3)">你</span>
+              <p>……就是我们昨天花两小时讨论的那个！JWT token 在 Redis 刷新窗口期的竞争条件。</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="claude" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-2)">C</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-2)">Claude</span>
+              <p>抱歉，我真的没有昨天的记录。能分享一下相关代码吗？我们重新分析一次。</p>
+            </div>
+          </div>
+        </div>
+        <div class="chat-typing" style="display:none">
+          <div class="chat-avatar" id="chat-no-memory-typing-avatar" style="background: var(--color-actor-2)">C</div>
+          <div class="chat-typing-dots">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+          </div>
+        </div>
+        <div class="chat-controls">
+          <button class="btn chat-next-btn">下一条消息</button>
+          <button class="btn chat-all-btn">全部展开</button>
+          <button class="btn chat-reset-btn">重播</button>
+          <span class="chat-progress"></span>
+        </div>
+      </div>
+
+      <div class="callout callout-warning">
+        <div class="callout-icon">😤</div>
+        <div class="callout-content">
+          <strong class="callout-title">这不是 Claude 的问题，是架构设计</strong>
+          <p>所有大型语言模型都是"无状态"的：每次对话都是一张白纸。这是设计决定，不是 bug。claude-mem 的任务就是在这个白纸上偷偷预先写好记忆。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 2: The cost -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">重复解释的代价</h2>
+      <p>这不只是烦人的问题，它实际影响你的工作质量。</p>
+
+      <div class="pattern-cards stagger-children">
+        <div class="pattern-card animate-in" style="border-top-color: var(--color-error)">
+          <div class="pattern-icon" style="background: var(--color-error-light)">⏱️</div>
+          <h4 class="pattern-title">时间浪费</h4>
+          <p class="pattern-desc">每次新会话都要花 10-30 分钟重新解释架构、约定和上下文。</p>
+        </div>
+        <div class="pattern-card animate-in" style="border-top-color: var(--color-error)">
+          <div class="pattern-icon" style="background: var(--color-error-light)">🔁</div>
+          <h4 class="pattern-title">重复踩坑</h4>
+          <p class="pattern-desc">AI 重新犯你已经解决过的错误，因为它不记得上次的教训。</p>
+        </div>
+        <div class="pattern-card animate-in" style="border-top-color: var(--color-error)">
+          <div class="pattern-icon" style="background: var(--color-error-light)">📉</div>
+          <h4 class="pattern-title">决策质量降级</h4>
+          <p class="pattern-desc">没有项目历史，AI 的建议可能与你已有的技术决策相矛盾。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 3: The solution metaphor -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">如果 AI 有一本随身笔记本……</h2>
+      <p>想象你有一位顾问，每次拜访前都会翻一翻他们的工作笔记本，上面记着你们上次讨论的决策、你提到的项目偏好、以及他们自己记录的观察。</p>
+      <p>claude-mem 就是那本笔记本。它自动运行在幕后，无声地记录每次 Claude 做的事情，然后在下次会话开始时，把相关记忆偷偷注射进去。</p>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">💡</div>
+        <div class="callout-content">
+          <strong class="callout-title">核心洞察：上下文是专业知识的载体</strong>
+          <p>Claude 之所以能帮你写出高质量代码，靠的是你在对话中传授的上下文。claude-mem 让这份上下文不再随着会话消失。</p>
+        </div>
+      </div>
+
+      <!-- With memory chat comparison -->
+      <div class="chat-window" id="chat-with-memory">
+        <div class="chat-messages">
+          <div class="chat-message" data-sender="system" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-accent)">M</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-accent)">claude-mem</span>
+              <p>🧠 已注入 12 条历史记忆：包括 JWT 竞争条件分析、Redis 刷新策略、monorepo 结构……</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="user" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-3)">你</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-3)">你</span>
+              <p>继续帮我修那个认证 bug，我们昨天分析了 JWT 过期时序的问题。</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="claude" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-2)">C</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-2)">Claude</span>
+              <p>好的，我已看到之前的分析——Redis GETSET 原子性问题在并发刷新时可能导致双写。我们可以用 Lua 脚本或 SET NX 来解决……</p>
+            </div>
+          </div>
+        </div>
+        <div class="chat-typing" style="display:none">
+          <div class="chat-avatar" id="chat-with-memory-typing-avatar" style="background: var(--color-actor-2)">C</div>
+          <div class="chat-typing-dots">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+          </div>
+        </div>
+        <div class="chat-controls">
+          <button class="btn chat-next-btn">下一条消息</button>
+          <button class="btn chat-all-btn">全部展开</button>
+          <button class="btn chat-reset-btn">重播</button>
+          <span class="chat-progress"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 4: Quiz -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">理解检验</h2>
+      <div class="quiz-container" id="quiz-m1">
+        <div class="quiz-question-block"
+             data-correct="b"
+             data-explanation-right="claude-mem 的核心价值正在于此：把之前会话中积累的知识持续带入新会话，让 Claude 不用每次从零开始。"
+             data-explanation-wrong="claude-mem 不需要你手动保存对话，也不是提升单次回答质量——它的价值在于会话间的记忆延续。">
+          <h3 class="quiz-question">你安装了 claude-mem 后，打开明天的新会话。最可能发生的变化是？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Claude 的单次回答质量会提升</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Claude 会自动获得你之前项目工作的相关上下文</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>你需要手动保存每次对话到文件</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <div class="quiz-question-block"
+             data-correct="c"
+             data-explanation-right="对！LLM 是无状态的——每次调用都是全新开始，没有任何内置的跨会话记忆机制。这是设计决定，不是 bug。"
+             data-explanation-wrong="LLM 在服务器上确实需要资源，但这不是它们不记住你的原因。真正的原因是无状态设计。">
+          <h3 class="quiz-question">为什么 Claude 默认不记得昨天的对话？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Claude 的服务器内存不够大</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Anthropic 担心隐私泄露所以删除了记忆</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>大语言模型本质上是无状态的，每次对话都是独立的</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-m1')">检验答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m1')">重新作答</button>
+      </div>
+    </section>
+  </div>
+</section>
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">认识五大角色</h1>
+      <p class="module-subtitle">claude-mem 不是一个脚本——它是一个分工明确的小团队，每个成员有自己的专属职责。</p>
+    </header>
+
+    <!-- Screen 1: The cast -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">backstage 的五个演员</h2>
+      <p>就像一台电影的幕后团队——导演、摄影师、剪辑师各司其职，claude-mem 的五个组件各自负责记忆流水线的一个环节。</p>
+
+      <div class="icon-rows stagger-children">
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-actor-1)">🪝</div>
+          <div>
+            <strong>生命周期钩子 (Hooks)</strong>
+            <p>Claude Code 的"事件监听器"——在会话开始、每次工具调用后、会话结束时被触发</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-actor-2)">⚙️</div>
+          <div>
+            <strong>Worker Service（工作进程）</strong>
+            <p>后台常驻的 HTTP 服务，监听 37777 端口，接收 Hook 发来的事件并处理</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-actor-3)">🤖</div>
+          <div>
+            <strong>SDK Agent（AI 观察者）</strong>
+            <p>一个独立的 Claude 子进程，专门负责把原始工具调用数据压缩成结构化"观察"</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-actor-4)">🗄️</div>
+          <div>
+            <strong>SQLite + Chroma（记忆仓库）</strong>
+            <p>持久化存储所有观察和摘要；Chroma 提供语义向量搜索能力</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-actor-5)">💉</div>
+          <div>
+            <strong>Context Generator（注入器）</strong>
+            <p>会话启动时从数据库检索相关记忆，格式化成 XML 注入到 Claude 的上下文窗口</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 2: Architecture diagram -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">点击探索每个组件</h2>
+
+      <div class="arch-diagram">
+        <div class="arch-zone">
+          <h4 class="arch-zone-label">Claude Code 进程（主角）</h4>
+          <div class="arch-component"
+               data-desc="你每次打开终端使用的 Claude Code 主进程。它不知道 claude-mem 在监视它——Hook 系统是在它背后悄悄挂上的。"
+               onclick="this.closest('.arch-diagram').querySelector('.arch-description').textContent = this.dataset.desc; this.closest('.arch-diagram').querySelectorAll('.arch-component').forEach(c=>c.classList.remove('active')); this.classList.add('active')">
+            <div class="arch-icon">💻</div>
+            <span>Claude Code</span>
+          </div>
+          <div class="arch-component"
+               data-desc="生命周期钩子是 Claude Code 内置的事件系统。就像手机的通知权限——你授权 claude-mem 在特定事件发生时运行脚本。共有 6 个钩子：Setup、SessionStart、UserPromptSubmit、PreToolUse、PostToolUse、Stop。"
+               onclick="this.closest('.arch-diagram').querySelector('.arch-description').textContent = this.dataset.desc; this.closest('.arch-diagram').querySelectorAll('.arch-component').forEach(c=>c.classList.remove('active')); this.classList.add('active')">
+            <div class="arch-icon">🪝</div>
+            <span>Hooks 系统</span>
+          </div>
+        </div>
+        <div class="arch-zone">
+          <h4 class="arch-zone-label">后台服务（常驻运行）</h4>
+          <div class="arch-component"
+               data-desc="Worker Service 是一个用 Bun 运行时启动的 HTTP 服务器，监听本地 37777 端口。它是整个记忆系统的大脑，负责协调所有其他组件。你可以在浏览器打开 http://localhost:37777 看到实时记忆流。"
+               onclick="this.closest('.arch-diagram').querySelector('.arch-description').textContent = this.dataset.desc; this.closest('.arch-diagram').querySelectorAll('.arch-component').forEach(c=>c.classList.remove('active')); this.classList.add('active')">
+            <div class="arch-icon">⚙️</div>
+            <span>Worker :37777</span>
+          </div>
+          <div class="arch-component"
+               data-desc="SDK Agent 是 claude-mem 启动的一个独立 Claude 子进程。它的唯一职责是'观察并记录'——把杂乱的工具调用输出压缩成结构化的 XML 观察记录。它被刻意禁用了 Bash、Read、Write 等工具，防止它干扰主进程。"
+               onclick="this.closest('.arch-diagram').querySelector('.arch-description').textContent = this.dataset.desc; this.closest('.arch-diagram').querySelectorAll('.arch-component').forEach(c=>c.classList.remove('active')); this.classList.add('active')">
+            <div class="arch-icon">🤖</div>
+            <span>SDK Agent</span>
+          </div>
+        </div>
+        <div class="arch-zone">
+          <h4 class="arch-zone-label">存储层（持久化记忆）</h4>
+          <div class="arch-component"
+               data-desc="SQLite 是一个轻量级数据库文件，存储在 ~/.claude-mem/data/ 目录。它保存所有的会话记录、观察和摘要。无需安装数据库服务器——整个记忆库就是你本机上的一个文件。"
+               onclick="this.closest('.arch-diagram').querySelector('.arch-description').textContent = this.dataset.desc; this.closest('.arch-diagram').querySelectorAll('.arch-component').forEach(c=>c.classList.remove('active')); this.classList.add('active')">
+            <div class="arch-icon">📦</div>
+            <span>SQLite DB</span>
+          </div>
+          <div class="arch-component"
+               data-desc="Chroma 是一个向量数据库，让你可以用语义搜索找到相关记忆（而不只是关键字匹配）。例如搜索'认证问题'可以找到记录为'JWT 过期竞争条件'的观察，因为它们语义相近。"
+               onclick="this.closest('.arch-diagram').querySelector('.arch-description').textContent = this.dataset.desc; this.closest('.arch-diagram').querySelectorAll('.arch-component').forEach(c=>c.classList.remove('active')); this.classList.add('active')">
+            <div class="arch-icon">🔍</div>
+            <span>Chroma 向量库</span>
+          </div>
+        </div>
+        <div class="arch-description">点击任意组件查看它的职责详解</div>
+      </div>
+    </section>
+
+    <!-- Screen 3: File tree -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">在代码里找到它们</h2>
+      <p>了解文件结构，你就知道当 claude-mem 出问题时该去哪里找原因。</p>
+
+      <div class="file-tree animate-in">
+        <div class="ft-folder">
+          <span class="ft-name">plugin/</span>
+          <span class="ft-desc">插件入口——Claude Code 读取的配置</span>
+          <div class="ft-children">
+            <div class="ft-file"><span class="ft-name">hooks/hooks.json</span><span class="ft-desc">定义所有 6 个 Hook 的触发时机和命令</span></div>
+            <div class="ft-file"><span class="ft-name">scripts/worker-service.cjs</span><span class="ft-desc">打包后的 Worker Service 入口</span></div>
+            <div class="ft-file"><span class="ft-name">scripts/bun-runner.js</span><span class="ft-desc">用 Bun 启动 Worker 的启动器</span></div>
+          </div>
+        </div>
+        <div class="ft-folder">
+          <span class="ft-name">src/services/</span>
+          <span class="ft-desc">核心业务逻辑（TypeScript 源码）</span>
+          <div class="ft-children">
+            <div class="ft-file"><span class="ft-name">worker-service.ts</span><span class="ft-desc">Worker 主编排器，协调所有子模块</span></div>
+            <div class="ft-file"><span class="ft-name">worker/SDKAgent.ts</span><span class="ft-desc">启动观察者 Claude 子进程</span></div>
+            <div class="ft-file"><span class="ft-name">context/ContextBuilder.ts</span><span class="ft-desc">生成要注入的记忆内容</span></div>
+            <div class="ft-file"><span class="ft-name">sqlite/SessionStore.ts</span><span class="ft-desc">SQLite 数据库读写操作</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 4: Quiz -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">理解检验</h2>
+      <div class="quiz-container" id="quiz-m2">
+        <div class="quiz-question-block"
+             data-correct="b"
+             data-explanation-right="SDK Agent 是一个独立的 Claude 子进程，专门负责把工具调用输出压缩成结构化观察。它被刻意限制工具权限，只能观察，不能干预主进程工作。"
+             data-explanation-wrong="Worker Service 负责 HTTP 服务和路由；Context Generator 负责注入；SDK Agent 才是做 AI 压缩的角色。">
+          <h3 class="quiz-question">claude-mem 里，谁负责把"Claude 读了 main.ts 并返回了 500 行输出"这个原始事件，压缩成一条结构化的观察记录？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Worker Service</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>SDK Agent（AI 观察者子进程）</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Context Generator</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <div class="quiz-question-block"
+             data-correct="a"
+             data-explanation-right="正确！你的团队引入新工具时，Claude 很可能不知道这个库的用法。如果之前有会话分析过它，claude-mem 会把那份分析注入进来，让 Claude 不用重新学习。"
+             data-explanation-wrong="claude-mem 确实能帮上很多，但最大价值在于跨会话传递项目专有知识——尤其是那些 Claude 默认训练数据里没有的东西。">
+          <h3 class="quiz-question">你的团队使用了一个公司内部的 SDK（外部没有文档）。你在一次会话里花时间向 Claude 解释了这个 SDK 的用法。claude-mem 对下次会话最大的帮助是？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>把之前会话里对这个 SDK 的分析自动带入新会话，不需要重新解释</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>自动爬取互联网找到这个 SDK 的文档</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>把 SDK 的源码直接写入 CLAUDE.md</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-m2')">检验答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m2')">重新作答</button>
+      </div>
+    </section>
+  </div>
+</section>
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">捕获：Hook 拦截机制</h1>
+      <p class="module-subtitle">claude-mem 怎么在 Claude Code 完全不知情的情况下，监视它的每一次行动？</p>
+    </header>
+
+    <!-- Screen 1: What hooks are -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">Hook 是什么：快递包裹的追踪系统</h2>
+      <p>想象快递公司的包裹追踪：每次包裹状态变化（揽件、分拣、派送、签收），系统自动在日志里记录一条。你不需要手动打电话问——系统自动帮你记。</p>
+      <p>Claude Code 的 <span class="term" data-definition="生命周期钩子（Lifecycle Hooks）是软件系统在特定事件发生时自动调用的回调脚本。就像你可以在手机「收到通知时」自动开启勿扰模式一样。">生命周期钩子</span>也是这样：在特定事件发生时，自动触发 claude-mem 注册的脚本。</p>
+
+      <div class="badge-list animate-in">
+        <div class="badge-item">
+          <code class="badge-code">Setup</code>
+          <span class="badge-desc">Claude Code 首次启动时 — 检查依赖是否安装</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">SessionStart</code>
+          <span class="badge-desc">新会话开始时 — 启动 Worker、注入历史记忆</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">UserPromptSubmit</code>
+          <span class="badge-desc">你每次发消息时 — 确保会话已在数据库中初始化</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">PreToolUse</code>
+          <span class="badge-desc">工具调用前 — 检查文件相关的上下文（目前仅 Read 工具）</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">PostToolUse</code>
+          <span class="badge-desc">工具调用完成后 — 捕获这次工具使用的输入输出，送去分析</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">Stop</code>
+          <span class="badge-desc">Claude 停止响应时 — 触发 AI 对本次工作的总结</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 2: Code translation of hooks.json -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">真实代码：钩子是怎么配置的</h2>
+      <p>这是 <code style="font-family:var(--font-mono); font-size:0.85em; background: var(--color-bg-code); color:#CBA6F7; padding:2px 6px; border-radius:4px;">plugin/hooks/hooks.json</code> 里 PostToolUse 钩子的实际配置。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">hooks.json</span>
+          <pre><code><span class="code-line"><span class="code-string">"PostToolUse"</span><span class="code-operator">:</span> [{</span>
+<span class="code-line">  <span class="code-property">"matcher"</span><span class="code-operator">:</span> <span class="code-string">"*"</span>,</span>
+<span class="code-line">  <span class="code-property">"hooks"</span><span class="code-operator">:</span> [{</span>
+<span class="code-line">    <span class="code-property">"type"</span><span class="code-operator">:</span> <span class="code-string">"command"</span>,</span>
+<span class="code-line">    <span class="code-property">"shell"</span><span class="code-operator">:</span> <span class="code-string">"bash"</span>,</span>
+<span class="code-line">    <span class="code-property">"command"</span><span class="code-operator">:</span> <span class="code-string">"node ... worker-service.cjs hook claude-code observation"</span>,</span>
+<span class="code-line">    <span class="code-property">"timeout"</span><span class="code-operator">:</span> <span class="code-number">120</span></span>
+<span class="code-line">  }]</span>
+<span class="code-line">}]</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">PLAIN ENGLISH</span>
+          <div class="translation-lines">
+            <p class="tl">"PostToolUse" — 每次任何工具（Bash/Read/Write/Edit...）执行完毕后</p>
+            <p class="tl">"matcher: *" — 匹配所有工具，不区分类型</p>
+            <p class="tl">"type: command" — 运行一个 shell 命令</p>
+            <p class="tl">"shell: bash" — 用 Bash 执行（确保跨平台兼容）</p>
+            <p class="tl">"command: ... observation" — 通知 Worker Service 有新观察需要处理</p>
+            <p class="tl">"timeout: 120" — 最多等 120 秒（防止卡死）</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">🔍</div>
+        <div class="callout-content">
+          <strong class="callout-title">为什么 matcher 是 "*"？</strong>
+          <p>claude-mem 想捕获所有类型的工具使用——无论 Claude 是在读文件、执行命令还是搜索代码。每次行动都是潜在的有价值信息。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 3: SessionStart hook — context injection code -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">会话启动时：记忆是怎么注入的</h2>
+      <p>SessionStart 钩子做三件事：安装检查、启动 Worker、然后调用记忆注入。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">src/services/context/ContextBuilder.ts</span>
+          <pre><code><span class="code-line"><span class="code-keyword">function</span> <span class="code-function">buildContextOutput</span>(</span>
+<span class="code-line">  project<span class="code-operator">:</span> <span class="code-keyword">string</span>,</span>
+<span class="code-line">  observations<span class="code-operator">:</span> Observation[],</span>
+<span class="code-line">  summaries<span class="code-operator">:</span> SessionSummary[],</span>
+<span class="code-line">  config<span class="code-operator">:</span> ContextConfig,</span>
+<span class="code-line">)<span class="code-operator">:</span> <span class="code-keyword">string</span> {</span>
+<span class="code-line">  <span class="code-keyword">const</span> output<span class="code-operator">:</span> <span class="code-keyword">string</span>[] <span class="code-operator">=</span> [];</span>
+<span class="code-line">  <span class="code-keyword">const</span> economics <span class="code-operator">=</span> <span class="code-function">calculateTokenEconomics</span>(observations);</span>
+<span class="code-line">  output.<span class="code-function">push</span>(...<span class="code-function">renderHeader</span>(project, economics, config));</span>
+<span class="code-line">  output.<span class="code-function">push</span>(...<span class="code-function">renderTimeline</span>(observations, summaries));</span>
+<span class="code-line">  output.<span class="code-function">push</span>(...<span class="code-function">renderFooter</span>());</span>
+<span class="code-line">  <span class="code-keyword">return</span> output.<span class="code-function">join</span>(<span class="code-string">'\n'</span>);</span>
+<span class="code-line">}</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">PLAIN ENGLISH</span>
+          <div class="translation-lines">
+            <p class="tl">这个函数负责把数据库里的记忆组装成文字</p>
+            <p class="tl">接收：项目名、观察记录列表、会话摘要列表、配置</p>
+            <p class="tl">先算出这些记忆要花多少 token（token 就像字数，AI 处理文字的计量单位）</p>
+            <p class="tl">添加头部（项目名、记忆统计）</p>
+            <p class="tl">添加时间线（按时间排列的观察 + 摘要）</p>
+            <p class="tl">添加尾部说明，然后拼成一整段文字返回</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 4: Flow animation of hook trigger -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">PostToolUse 钩子的完整触发流程</h2>
+      <p>当 Claude 执行完一次 <span class="term" data-definition="工具调用（Tool Use）是 Claude 执行实际操作的方式。当你让 Claude 读一个文件、运行一个命令或搜索代码时，Claude 会发出一个工具调用请求，系统执行它，然后把结果返回给 Claude。">工具调用</span>后，发生了什么？</p>
+
+      <div class="flow-animation" data-steps='[
+        {"highlight":"flow-actor-1","label":"Claude 完成了一次 Bash 工具调用，运行了 npm test"},
+        {"highlight":"flow-actor-1","label":"PostToolUse 钩子被触发，调用 worker-service.cjs hook observation","packet":true,"from":"actor-1","to":"actor-2"},
+        {"highlight":"flow-actor-2","label":"Worker Service 收到 HTTP 请求，把工具输入/输出写入待处理队列"},
+        {"highlight":"flow-actor-3","label":"SDK Agent 收到任务，向观察者 Claude 子进程发送压缩请求","packet":true,"from":"actor-2","to":"actor-3"},
+        {"highlight":"flow-actor-3","label":"观察者 Claude 分析：测试通过了哪些、失败了哪些、用了什么命令"},
+        {"highlight":"flow-actor-4","label":"结构化的观察记录写入 SQLite 数据库","packet":true,"from":"actor-3","to":"actor-4"}
+      ]'>
+        <div class="flow-actors">
+          <div class="flow-actor" id="flow-actor-1">
+            <div class="flow-actor-icon">💻</div>
+            <span>Claude Code</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-2">
+            <div class="flow-actor-icon">⚙️</div>
+            <span>Worker</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-3">
+            <div class="flow-actor-icon">🤖</div>
+            <span>SDK Agent</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-4">
+            <div class="flow-actor-icon">🗄️</div>
+            <span>SQLite</span>
+          </div>
+        </div>
+        <div class="flow-packet" id="flow-packet-m3"></div>
+        <div class="flow-step-label">点击"下一步"开始</div>
+        <div class="flow-controls">
+          <button class="btn flow-next-btn">下一步</button>
+          <button class="btn flow-reset-btn">重置</button>
+          <span class="flow-progress"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 5: Quiz -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">理解检验</h2>
+      <div class="quiz-container" id="quiz-m3">
+        <div class="quiz-question-block"
+             data-correct="b"
+             data-explanation-right="PostToolUse 钩子在每次工具执行完毕后触发，捕获那次工具调用的输入和输出。这是 claude-mem 知道 Claude 做了什么的主要方式。"
+             data-explanation-wrong="Stop 钩子是在 Claude 完全停止响应时触发的，用于生成总结——不是用来捕获单次工具调用的。">
+          <h3 class="quiz-question">你让 Claude 读了 10 个文件、运行了 5 个命令。claude-mem 是通过哪个钩子记录这 15 次操作的？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Stop 钩子，在最后统一处理</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>PostToolUse 钩子，每次操作后立即记录</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>SessionStart 钩子，在会话开始时预读所有文件</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <div class="quiz-question-block"
+             data-correct="c"
+             data-explanation-right="PostToolUse timeout 是 120 秒。如果 AI 压缩超时，那次观察可能会丢失，但 Claude Code 不会卡住——钩子超时只影响 claude-mem 自身。"
+             data-explanation-wrong="思考一下：如果 PostToolUse 钩子超时，Worker 收不到通知，那次工具调用的数据会怎样？">
+          <h3 class="quiz-question">如果 Worker Service 因为某些原因没有响应，PostToolUse 钩子超过了 120 秒超时上限，会发生什么？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Claude Code 主进程会崩溃</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Claude Code 会暂停等待，直到 Worker 恢复</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>那次工具调用的观察可能会丢失，但 Claude Code 继续正常工作</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-m3')">检验答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m3')">重新作答</button>
+      </div>
+    </section>
+  </div>
+</section>
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">压缩与注入：记忆管道</h1>
+      <p class="module-subtitle">原始工具输出是噪音，结构化观察是信号。这一模块讲清楚信号是怎么提炼出来的。</p>
+    </header>
+
+    <!-- Screen 1: The compression problem -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">为什么不直接存储原始输出？</h2>
+      <p>想象一位编辑看完一部 300 页的初稿，然后写了一段 3 句话的摘要。他不会一字不差地复述全书——他提炼了核心决策、关键转折点、重要发现。</p>
+      <p>claude-mem 的压缩机制做的正是同样的事：把可能长达数千行的工具输出，提炼成一条简洁的 <span class="term" data-definition="观察（Observation）是 claude-mem 存储记忆的基本单元。一条观察包含：类型标签、标题、摘要、关键事实列表、涉及文件等结构化字段。">观察</span>记录。</p>
+
+      <div class="pattern-cards stagger-children">
+        <div class="pattern-card animate-in" style="border-top-color: var(--color-error)">
+          <div class="pattern-icon" style="background: var(--color-error-light)">📄</div>
+          <h4 class="pattern-title">原始输出</h4>
+          <p class="pattern-desc">npm test 的完整输出可能有 500 行：每个测试的详细日志、堆栈追踪、覆盖率报告……</p>
+        </div>
+        <div class="pattern-card animate-in" style="border-top-color: var(--color-accent)">
+          <div class="pattern-icon" style="background: var(--color-accent-light)">💡</div>
+          <h4 class="pattern-title">提炼后观察</h4>
+          <p class="pattern-desc">类型: testing | 标题: 认证模块测试 | 结果: 47/48 通过 | 失败: token_refresh_race_test | 原因: 竞争条件</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 2: The observation format -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">一条观察长什么样</h2>
+      <p>SDK Agent 使用固定的 <span class="term" data-definition="XML 是一种结构化数据格式，用尖括号标签来组织信息。就像 Word 文档里的标题、段落、列表是有层级的，XML 用标签定义这种层级关系。">XML</span> 格式输出观察，这让结构化存储和检索变得非常可靠。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">SDK 输出格式（src/sdk/prompts.ts）</span>
+          <pre><code><span class="code-line"><span class="code-tag">&lt;observation&gt;</span></span>
+<span class="code-line">  <span class="code-tag">&lt;type&gt;</span><span class="code-string">bugfix</span><span class="code-tag">&lt;/type&gt;</span></span>
+<span class="code-line">  <span class="code-tag">&lt;title&gt;</span><span class="code-string">JWT 刷新竞争条件修复</span><span class="code-tag">&lt;/title&gt;</span></span>
+<span class="code-line">  <span class="code-tag">&lt;subtitle&gt;</span><span class="code-string">Redis GETSET 原子性问题</span><span class="code-tag">&lt;/subtitle&gt;</span></span>
+<span class="code-line">  <span class="code-tag">&lt;facts&gt;</span></span>
+<span class="code-line">    <span class="code-tag">&lt;fact&gt;</span><span class="code-string">并发刷新触发双写</span><span class="code-tag">&lt;/fact&gt;</span></span>
+<span class="code-line">    <span class="code-tag">&lt;fact&gt;</span><span class="code-string">用 Lua 脚本解决原子性</span><span class="code-tag">&lt;/fact&gt;</span></span>
+<span class="code-line">  <span class="code-tag">&lt;/facts&gt;</span></span>
+<span class="code-line">  <span class="code-tag">&lt;files_modified&gt;</span></span>
+<span class="code-line">    <span class="code-string">src/auth/token-refresh.ts</span></span>
+<span class="code-line">  <span class="code-tag">&lt;/files_modified&gt;</span></span>
+<span class="code-line"><span class="code-tag">&lt;/observation&gt;</span></span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">PLAIN ENGLISH</span>
+          <div class="translation-lines">
+            <p class="tl">一条观察记录的开始标签</p>
+            <p class="tl">类型：bugfix（还有 feature、analysis、investigation 等）</p>
+            <p class="tl">这次工作的简短标题（一眼看懂做了什么）</p>
+            <p class="tl">更具体的副标题（技术细节）</p>
+            <p class="tl">关键事实列表开始——这是记忆的核心内容</p>
+            <p class="tl">关键事实一：发现了什么问题</p>
+            <p class="tl">关键事实二：用什么方案解决的</p>
+            <p class="tl">修改了哪些文件——未来搜索时可以按文件过滤</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 3: The injection mechanism -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">记忆是怎么注入到新会话的</h2>
+      <p>SessionStart 钩子触发时，Context Generator 从数据库检索与当前项目相关的记忆，然后把它们格式化成一段文字，悄悄插入到你给 Claude 的第一条消息之前。</p>
+      <p>Claude 看到的实际上是：</p>
+
+      <div style="background: var(--color-bg-code); border-radius: var(--radius-md); padding: var(--space-6); margin: var(--space-6) 0;">
+        <pre style="color: #6C7086; font-family: var(--font-mono); font-size: var(--text-sm); white-space: pre-wrap;"><span style="color: #CBA6F7;"># 项目记忆（由 claude-mem 自动注入）</span>
+<span style="color: #A6E3A1;">项目：my-saas-app | 记忆：23 条 | 最近：2 天前</span>
+
+<span style="color: #F9E2AF;">[2025-05-01] bugfix: JWT 刷新竞争条件修复</span>
+  并发刷新触发双写；用 Lua 脚本解决原子性
+  文件：src/auth/token-refresh.ts
+
+<span style="color: #F9E2AF;">[2025-04-30] feature: 用户档案页面</span>
+  实现头像上传 + 压缩；使用 sharp 库
+  文件：src/pages/profile.tsx
+
+<span style="color: #6C7086;">... 还有 21 条记忆（使用 mem-search 查询更多）</span></pre>
+      </div>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">💡</div>
+        <div class="callout-content">
+          <strong class="callout-title">渐进式披露（Progressive Disclosure）</strong>
+          <p>claude-mem 不会把所有记忆一股脑丢进上下文——那会浪费大量 token 预算。它只注入最相关的摘要，并告诉 Claude 可以用 mem-search 工具查询更多。这是一个智能的"按需展开"设计。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 4: Full pipeline flow animation -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">完整记忆管道：捕获 → 压缩 → 存储 → 注入</h2>
+
+      <div class="flow-animation" data-steps='[
+        {"highlight":"flow-actor-1","label":"你对 Claude 说：帮我重构认证模块"},
+        {"highlight":"flow-actor-1","label":"Claude 读了 5 个文件，修改了 3 个，运行了测试","packet":true,"from":"actor-1","to":"actor-2"},
+        {"highlight":"flow-actor-2","label":"PostToolUse 触发，Worker Service 收到 8 条原始事件"},
+        {"highlight":"flow-actor-3","label":"SDK Agent 把 8 条事件压缩成 1 条结构化观察","packet":true,"from":"actor-2","to":"actor-3"},
+        {"highlight":"flow-actor-4","label":"观察写入 SQLite，同步到 Chroma 向量索引","packet":true,"from":"actor-3","to":"actor-4"},
+        {"highlight":"flow-actor-5","label":"Stop 钩子触发，AI 生成本次工作的总结"},
+        {"highlight":"flow-actor-1","label":"明天新会话启动，Context Generator 检索相关记忆注入进来","packet":true,"from":"actor-4","to":"actor-1"}
+      ]'>
+        <div class="flow-actors">
+          <div class="flow-actor" id="flow-actor-1">
+            <div class="flow-actor-icon">💻</div>
+            <span>Claude Code</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-2">
+            <div class="flow-actor-icon">⚙️</div>
+            <span>Worker</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-3">
+            <div class="flow-actor-icon">🤖</div>
+            <span>AI 压缩</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-4">
+            <div class="flow-actor-icon">🗄️</div>
+            <span>存储</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-5">
+            <div class="flow-actor-icon">📝</div>
+            <span>总结</span>
+          </div>
+        </div>
+        <div class="flow-packet" id="flow-packet-m4"></div>
+        <div class="flow-step-label">点击"下一步"跟踪一条记忆从诞生到注入的完整旅程</div>
+        <div class="flow-controls">
+          <button class="btn flow-next-btn">下一步</button>
+          <button class="btn flow-reset-btn">重置</button>
+          <span class="flow-progress"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 5: Quiz -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">理解检验</h2>
+      <div class="quiz-container" id="quiz-m4">
+        <div class="quiz-question-block"
+             data-correct="b"
+             data-explanation-right="对！SDK Agent 只负责压缩，ContextBuilder 负责注入。两个不同组件，职责分离。理解这一点，当记忆丢失或注入失败时，你就知道去哪里排查。"
+             data-explanation-wrong="SDK Agent 的任务是在会话进行中把工具输出压缩成观察，Context Generator 才是会话开始时把记忆注入进去的组件。">
+          <h3 class="quiz-question">你发现 Claude 知道昨天的工作（记忆注入正常），但今天做的事情没有被记录下来。你应该排查哪个组件？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Context Generator（记忆注入器）</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>SDK Agent + PostToolUse 钩子（记忆捕获流程）</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>SQLite 数据库（存储层）</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <div class="quiz-question-block"
+             data-correct="a"
+             data-explanation-right="渐进式披露设计故意这样做：先注入摘要（省 token），让 Claude 用 mem-search 按需查询详情。这比一次性倾倒所有记忆高效得多。"
+             data-explanation-wrong="claude-mem 不是因为数据库满了，而是刻意设计成只注入摘要——完整细节通过 mem-search 按需检索，避免消耗大量 token 预算。">
+          <h3 class="quiz-question">你问 Claude 关于两个月前修复的一个 bug，它说它知道这个 bug 修复了（因为记忆摘要里提到了），但不知道详细步骤。这是为什么？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>渐进式披露设计：摘要先注入，详情用 mem-search 按需查询</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>SQLite 数据库容量满了，旧记录被清理</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>SDK Agent 压缩时丢失了细节</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-m4')">检验答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m4')">重新作答</button>
+      </div>
+    </section>
+  </div>
+</section>
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">安装、配置与驾驭 claude-mem</h1>
+      <p class="module-subtitle">从零到第一条记忆被注入，只需要一行命令。但要真正用好它，你还需要知道这几件事。</p>
+    </header>
+
+    <!-- Screen 1: Installation -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">安装：30 秒上手</h2>
+      <p>claude-mem 用 <span class="term" data-definition="npx 是 Node.js 自带的工具，让你可以直接运行一个 npm 包里的命令，不需要先全局安装。就像直接拨通一个号码，不需要先把号码存到手机联系人里。">npx</span> 一键安装，自动完成所有配置。</p>
+
+      <div class="step-cards animate-in">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>运行安装命令</strong>
+            <p><code style="font-family:var(--font-mono); background:var(--color-bg-code); color:#A6E3A1; padding:2px 6px; border-radius:4px;">npx claude-mem install</code> — 自动下载、安装依赖、注册 Hooks</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>重启 Claude Code</strong>
+            <p>重启后 Setup 钩子触发，检查 Bun/Python/Chroma 等依赖是否就绪</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>正常使用 Claude Code</strong>
+            <p>无需任何额外操作。claude-mem 在后台静默运行，你只需要看到成果</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>（可选）打开 Web 监控界面</strong>
+            <p>在浏览器访问 <code style="font-family:var(--font-mono); background:var(--color-bg-code); color:#89B4FA; padding:2px 6px; border-radius:4px;">http://localhost:37777</code> 实时查看记忆流</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">ℹ️</div>
+        <div class="callout-content">
+          <strong class="callout-title">系统要求</strong>
+          <p>Node.js 18+，Claude Code 最新版，macOS/Linux/Windows（WSL）。Bun 和 uv 会自动安装——你不需要手动处理。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 2: Configuration -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">配置文件：调整 claude-mem 行为</h2>
+      <p>所有设置都在 <code style="font-family:var(--font-mono); font-size:0.85em; background: var(--color-bg-code); color:#CBA6F7; padding:2px 6px; border-radius:4px;">~/.claude-mem/settings.json</code>，自动生成，可直接编辑。</p>
+
+      <div class="badge-list animate-in">
+        <div class="badge-item">
+          <code class="badge-code">CLAUDE_MEM_MODE</code>
+          <span class="badge-desc">工作模式：<strong>code</strong>（英文）/ <strong>code--zh</strong>（中文观察）/ <strong>code--ja</strong>（日文）</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">CLAUDE_MEM_PROVIDER</code>
+          <span class="badge-desc">AI 提供商：默认用 Claude SDK，也可以切换 Gemini 或 OpenRouter</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">WORKER_PORT</code>
+          <span class="badge-desc">Worker Service 端口，默认 37777。如果被占用可以改这里</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">CLAUDE_MEM_CHROMA_ENABLED</code>
+          <span class="badge-desc">是否启用向量搜索。设为 false 可以用纯 SQLite 模式，省资源</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">CLAUDE_MEM_MAX_OBSERVATIONS</code>
+          <span class="badge-desc">每次注入的最大观察数量。越多越全，但 token 消耗越大</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 3: Using mem-search -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">主动搜索：mem-search 技能</h2>
+      <p>自动注入是被动记忆，<span class="term" data-definition="mem-search 是 claude-mem 提供的 MCP 工具，让 Claude 可以主动搜索历史记忆。就像你可以主动问同事'上次那个 bug 是怎么解决的'，而不是等他主动告诉你。">mem-search</span> 让 Claude 可以主动检索任何历史记忆。</p>
+
+      <div class="chat-window" id="chat-memsearch">
+        <div class="chat-messages">
+          <div class="chat-message" data-sender="user" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-3)">你</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-3)">你</span>
+              <p>帮我回忆一下我们之前是怎么处理大文件上传超时问题的</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="claude" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-2)">C</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-2)">Claude</span>
+              <p>让我搜一下历史记忆……</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="memsearch" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-accent)">M</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-accent)">mem-search</span>
+              <p>搜索"文件上传超时"，找到 3 条相关记忆：#47 (2025-04-15)、#63 (2025-04-28)、#71 (2025-05-01)</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="claude" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-2)">C</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-2)">Claude</span>
+              <p>根据记忆 #63，你当时用了 S3 分片上传（multipart upload）方案，把大文件切成 5MB 的块分别上传，彻底避免了超时问题。代码在 src/upload/chunked-uploader.ts。</p>
+            </div>
+          </div>
+        </div>
+        <div class="chat-typing" style="display:none">
+          <div class="chat-avatar" id="chat-memsearch-typing-avatar" style="background: var(--color-actor-2)">C</div>
+          <div class="chat-typing-dots">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+          </div>
+        </div>
+        <div class="chat-controls">
+          <button class="btn chat-next-btn">下一条消息</button>
+          <button class="btn chat-all-btn">全部展开</button>
+          <button class="btn chat-reset-btn">重播</button>
+          <span class="chat-progress"></span>
+        </div>
+      </div>
+
+      <p>mem-search 实现了 3 层工作流：先用 <code style="font-family:var(--font-mono); font-size:0.85em; background:var(--color-bg-code); color:#CBA6F7; padding:2px 6px; border-radius:4px;">search</code> 获取 ID 索引，再用 <code style="font-family:var(--font-mono); font-size:0.85em; background:var(--color-bg-code); color:#CBA6F7; padding:2px 6px; border-radius:4px;">timeline</code> 看时间上下文，最后用 <code style="font-family:var(--font-mono); font-size:0.85em; background:var(--color-bg-code); color:#CBA6F7; padding:2px 6px; border-radius:4px;">get_observations</code> 按需获取完整内容。比一次性获取全部节省 10 倍 token。</p>
+    </section>
+
+    <!-- Screen 4: Privacy control -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">隐私控制：不想被记录的内容怎么办</h2>
+      <p>有时候你在对话里输入了 <span class="term" data-definition="敏感信息（Sensitive Data）包括密码、API 密钥、个人身份信息（PII）等不应该被存储或分享的数据。">敏感信息</span>——比如临时 API key 或者内部凭证。</p>
+      <p>claude-mem 支持用 <code style="font-family:var(--font-mono); font-size:0.85em; background:var(--color-bg-code); color:#CBA6F7; padding:2px 6px; border-radius:4px;">&lt;private&gt;...&lt;/private&gt;</code> 标签包裹不想被记录的内容：</p>
+
+      <div style="background: var(--color-bg-code); border-radius: var(--radius-md); padding: var(--space-6); margin: var(--space-6) 0;">
+        <pre style="color: #CDD6F4; font-family: var(--font-mono); font-size: var(--text-sm); white-space: pre-wrap;"><span style="color: #CBA6F7;">你：</span> <span style="color: #A6E3A1;">帮我测试一下这个 API：</span>
+<span style="color: #CBA6F7;">&lt;private&gt;</span>
+<span style="color: #F38BA8;">API_KEY=sk-prod-3x7mN2kL9pQ...</span>
+<span style="color: #CBA6F7;">&lt;/private&gt;</span>
+<span style="color: #A6E3A1;">用上面的 key 调用用户 API</span>
+
+<span style="color: #6C7086;">→ &lt;private&gt; 标签内的内容不会被 claude-mem 记录</span></pre>
+      </div>
+
+      <div class="callout callout-warning">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-content">
+          <strong class="callout-title">记忆存储在本机</strong>
+          <p>所有记忆存储在你本地的 SQLite 文件里（~/.claude-mem/data/），不会上传到任何服务器。但仍然建议用 &lt;private&gt; 标签保护真正敏感的内容。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 5: Final quiz -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">最终综合检验</h2>
+      <div class="quiz-container" id="quiz-m5">
+        <div class="quiz-question-block"
+             data-correct="b"
+             data-explanation-right="对！整个记忆管道：PostToolUse 捕获 → SDK Agent 压缩 → SQLite 存储 → 下次 SessionStart 时 Context Generator 注入。这是四个组件的协作。"
+             data-explanation-wrong="这个流程涉及多个组件协作——思考一下捕获、压缩、存储、注入分别是哪个组件负责的。">
+          <h3 class="quiz-question">你今天用 Claude 实现了一个功能，明天想让新会话知道这个功能已经完成了。哪个说法描述了这个信息是怎么从今天流向明天的？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Claude 自动把今天的工作写入了 CLAUDE.md 文件</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>PostToolUse 钩子捕获工具输出 → SDK Agent 压缩为观察 → 存入 SQLite → 明天 SessionStart 时注入</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Worker Service 直接把整个对话历史保存到磁盘</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="c"
+             data-explanation-right="正确！通过设置 CLAUDE_MEM_CHROMA_ENABLED=false，可以禁用 Chroma 向量搜索，切换到只用 SQLite 的轻量模式，适合资源有限的环境。"
+             data-explanation-wrong="Chroma 是向量搜索组件，可以独立关闭。SQLite 和 Worker Service 是核心组件，关闭会导致整个记忆系统失效。">
+          <h3 class="quiz-question">你在一台配置较低的开发机上运行 claude-mem，发现 Chroma 向量数据库消耗了太多内存。你应该怎么处理？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>卸载 claude-mem，因为它太重了</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>删除 SQLite 数据库文件释放磁盘空间</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>在 settings.json 设置 CLAUDE_MEM_CHROMA_ENABLED=false，降级到纯 SQLite 模式</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="a"
+             data-explanation-right="mem-search 的 3 层工作流正是为此设计的：search 获取 ID 索引（低 token 消耗），get_observations 按 ID 获取完整内容（只拉相关的）。这比一次性获取全部节省约 10 倍 token。"
+             data-explanation-wrong="mem-search 的设计哲学正是避免这种情况。思考一下它的 3 层工作流（search → timeline → get_observations）是如何解决这个问题的。">
+          <h3 class="quiz-question">你问 Claude 关于 6 个月前某个 bug 修复的详细信息，这条记忆的原始内容很长。mem-search 怎么在不消耗大量 token 的情况下找到它？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>先用 search 获取 ID 索引（低消耗），确认相关 ID 后再用 get_observations 只拉那条完整记录</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>一次性加载所有 6 个月的记忆到上下文</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>mem-search 只能搜索最近 30 天的记忆</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-m5')">检验答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m5')">重新作答</button>
+      </div>
+
+      <div class="callout callout-accent" style="margin-top: var(--space-12)">
+        <div class="callout-icon">🎉</div>
+        <div class="callout-content">
+          <strong class="callout-title">你已经理解了 claude-mem 的完整架构</strong>
+          <p>从 AI 失忆的根本原因，到 Hook 拦截机制，到 AI 压缩流水线，到记忆注入——你现在掌握了足够的知识来有效驾驭这个工具，并在它出问题时知道从哪里入手排查。</p>
+        </div>
+      </div>
+    </section>
+  </div>
+</section>
+  </main>
+
+</body>
+</html>

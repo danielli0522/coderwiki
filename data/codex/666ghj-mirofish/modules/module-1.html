@@ -1,0 +1,223 @@
+
+<!-- ═══════════════════════════════════════════════════════════════
+     Module 01 — 鱼群中的每条鱼：多智能体如何模拟真实人群
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">鱼群中的每条鱼</h1>
+      <p class="module-subtitle">千千万万个独立人格的智能体，如何涌现出群体的智慧与疯狂</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Hook — 从鱼群说起 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">想象你站在海边，看到一群鱼</h2>
+        <p>没有一条鱼在指挥，但整群鱼却像有灵魂一样——突然转向、同步闪避、集体加速。这就是<span class="term" data-definition="群体智能（Swarm Intelligence）是指大量简单个体通过局部互动，涌现出超越任何单个个体的集体智慧。鱼群、蚁群、鸟群都是自然界的群体智能。">群体智能</span>。</p>
+        <p>MiroFish 就是这样一个引擎：它创造成千上万个拥有独立人格、记忆和行为的<span class="term" data-definition="智能体（Agent）是一个能感知环境、自主决策并采取行动的程序。你可以把它想象成一个虚拟人物，有自己的性格、记忆和目标。">智能体</span>（Agent），让它们在数字世界中自由互动——然后观察群体行为如何涌现。</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">&#x1F4A1;</div>
+          <div class="callout-content">
+            <strong class="callout-title">核心理念</strong>
+            <p>预测未来不需要一个全知全能的预言家。只要模拟足够多个真实的人，观察他们如何互动，群体涌现的结果就是最可信的未来预测。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Agent Profile — 角色卡片 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">每条鱼都有名字和性格</h2>
+        <p>在 MiroFish 中，每个 Agent 都不是一个随机数，而是一个有血有肉的虚拟人物。系统使用 <span class="term" data-definition="大语言模型（LLM）是像 ChatGPT、Qwen 这样的人工智能，通过阅读海量文本学会了理解和生成人类语言。">大语言模型</span> 从种子材料中提取人物信息，生成详细的<span class="term" data-definition="人设（Persona）是一个虚拟角色的完整描述，包括性格、背景、语言风格、立场态度等。它决定了这个角色在模拟中会如何思考和行动。">人设</span>。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">&#x1F393;</div>
+            <h4 class="pattern-title">学生</h4>
+            <p class="pattern-desc">活跃度 0.8，晚间高峰活跃，发帖频率高，影响力低。愤怒时可能成为舆论引爆点。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">&#x1F3E2;</div>
+            <h4 class="pattern-title">大学官方</h4>
+            <p class="pattern-desc">活跃度 0.2，仅工作时间，响应慢（60-240分钟），但影响力极高（3.0）。发言风格严谨保守。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">&#x1F4F0;</div>
+            <h4 class="pattern-title">媒体机构</h4>
+            <p class="pattern-desc">全天候活跃，快速响应事件（5-30分钟），影响力高（2.5）。内容以报道和评论为主。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">&#x1F468;&#x200D;&#x2695;</div>
+            <h4 class="pattern-title">教授/专家</h4>
+            <p class="pattern-desc">活跃度中等，影响力 2.0。通常保持中立，但一旦发声就会被大量引用。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Code Translation — Profile 数据结构 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码翻译：一条鱼的身份证</h2>
+        <p>以下是 MiroFish 中 Agent 人设数据的结构，每条"鱼"都有这样的完整档案：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">Python 代码</span>
+            <pre><code><span class="code-line"><span class="code-keyword">@dataclass</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">OasisAgentProfile</span>:</span>
+<span class="code-line">    user_id: <span class="code-function">int</span></span>
+<span class="code-line">    user_name: <span class="code-function">str</span></span>
+<span class="code-line">    name: <span class="code-function">str</span></span>
+<span class="code-line">    bio: <span class="code-function">str</span></span>
+<span class="code-line">    persona: <span class="code-function">str</span></span>
+<span class="code-line">    mbti: <span class="code-function">str</span> = <span class="code-string">None</span></span>
+<span class="code-line">    profession: <span class="code-function">str</span> = <span class="code-string">None</span></span>
+<span class="code-line">    interested_topics: List[<span class="code-function">str</span>] = []</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">通俗解释</span>
+            <div class="translation-lines">
+              <p class="tl">定义一个"虚拟人物档案"的数据结构</p>
+              <p class="tl">每个角色有一个唯一的数字编号</p>
+              <p class="tl">在模拟世界中的用户名（自动生成）</p>
+              <p class="tl">角色的真实姓名</p>
+              <p class="tl">一段简短的自我介绍</p>
+              <p class="tl">长达 2000 字的详细人设，包含性格、背景、立场</p>
+              <p class="tl">MBTI 人格类型（如 INTJ、ENFP），决定思维方式</p>
+              <p class="tl">职业，影响发言风格和活跃时段</p>
+              <p class="tl">感兴趣的话题列表，决定会关注哪些事件</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#x1F30A;</div>
+          <div class="callout-content">
+            <strong class="callout-title">为什么需要 2000 字的人设？</strong>
+            <p>简短的"他是一个学生"远远不够。LLM 需要知道：这个学生是大几的？什么专业？经历过什么？对哪些话题敏感？只有这样，模拟中的每个决策才真实可信。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Group Chat Animation — Agents 对话 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">鱼群的对话：当事件发生时</h2>
+        <p>当一个新闻事件在模拟世界中爆发，不同角色的 Agent 会如何反应？点击下方按钮，观看一场模拟对话：</p>
+
+        <div class="chat-window" id="chat-module1">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="student" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">学</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">大三学生 · ENFP</span>
+                <p>天哪！刚看到那个新闻，这也太过分了吧？学校怎么可以这样！我一定要发帖曝光！</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="media" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">媒</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">某新闻媒体</span>
+                <p>注意到大量网友讨论此事，正在核实相关情况，稍后将发布详细报道。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="professor" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">教</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">教授 · INTJ</span>
+                <p>建议大家理性看待，等待更多事实披露。目前信息不足，过早下结论对所有人都不公平。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="university" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">校</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">大学官方</span>
+                <p>学校已关注到相关讨论，高度重视，已成立专项工作组调查核实，后续将及时通报。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="alumni" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">校</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">校友 · ISTJ</span>
+                <p>作为毕业生很痛心。母校应该拿出诚意，而不是等舆论发酵了才出来回应。希望这次能真正解决问题。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-module1-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module1-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条消息</button>
+            <button class="btn chat-all-btn">播放全部</button>
+            <button class="btn chat-reset-btn">重新播放</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+
+        <p>注意每个角色的反应速度和风格都不同——这正是人设数据的功劳。学生立即愤怒，媒体快速跟进，教授理性呼吁，学校慢慢回应，校友带着情感反思。</p>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">测验：你理解鱼群了吗？</h2>
+
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！群体智能的核心就是：没有中央指挥者，群体行为从个体互动中自然涌现。这正是 MiroFish 的设计哲学。"
+               data-explanation-wrong="再想想——蚁群中没有任何一只蚂蚁在指挥全局。群体的智慧来自个体的简单互动，这正是群体智能的本质。">
+            <h3 class="quiz-question">如果要模拟一场大学舆情事件，以下哪种做法最接近 MiroFish 的思路？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>让一个超级 AI 从头到尾编写一个"完美"的故事脚本</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>创建大量有独立人格的虚拟角色，让它们自由互动，观察涌现</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>用统计学模型预测舆论的走向概率分布</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="没错！2000 字的人设包含了性格、背景、记忆、立场等全方位信息，这样 LLM 在模拟中才能做出真实、一致的决策。简短的标签无法做到这一点。"
+               data-explanation-wrong="考虑一下——如果人设只有几个标签（如"学生、男、愤怒"），AI 在模拟中就缺少做出真实决策所需的上下文。详细人设正是让模拟可信的关键。">
+            <h3 class="quiz-question">为什么 MiroFish 的 Agent 人设需要长达 2000 字的描述，而不是简单的几个标签？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为代码写错了，本意是想用短标签</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>为了让用户觉得系统很高级</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为 AI 需要丰富的上下文才能做出真实、一致的决策</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

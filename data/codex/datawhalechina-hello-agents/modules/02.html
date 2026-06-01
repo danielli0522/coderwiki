@@ -1,0 +1,190 @@
+
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">智能体的核心角色</h1>
+      <p class="module-subtitle">一个智能体系统就像一支乐队：有人负责思考，有人负责干活，有人负责记忆。认识这些角色是理解整个代码库的第一步。</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Meet the actors -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码库里的"角色表"</h2>
+        <p>打开 Hello-Agents 的 <code>code/chapter7/</code> 目录，你会看到几个核心文件。每个文件扮演一个角色：</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🧠</div>
+            <div>
+              <strong>my_llm.py — 大脑</strong>
+              <p>封装了
+                <span class="term" data-definition="OpenAI API 是 OpenAI 公司提供的云端接口，开发者通过 HTTP 请求调用 GPT 等模型的能力。市面上大部分 AI 公司都兼容这个接口格式。">OpenAI 兼容接口</span>
+                的调用逻辑，负责把消息发给 LLM、拿回回复
+              </p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🔧</div>
+            <div>
+              <strong>my_calculator_tool.py — 工具</strong>
+              <p>定义了 Agent 可以调用的工具（搜索、计算器等），是 Agent 的"手和脚"</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🤖</div>
+            <div>
+              <strong>my_react_agent.py — 决策者</strong>
+              <p>实现 ReAct 循环：调用 LLM 思考 → 解析出要执行的工具 → 执行工具 → 把结果喂回 LLM → 循环</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">🎯</div>
+            <div>
+              <strong>my_simple_agent.py — 基础版</strong>
+              <p>更简单的 Agent 变体，支持纯对话和可选的工具调用，适合理解基本结构</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: LLM Client deep dive -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">大脑如何工作：LLM 客户端</h2>
+        <p>所有 Agent 的"智能"都来自一个统一的大脑——<code>HelloAgentsLLM</code> 类。它封装了与
+          <span class="term" data-definition="流式响应（Streaming）指服务器边生成边发送内容，就像水龙头流水，而不是等整桶水装满才给你。用户能看到文字一个字一个字出现。">流式响应</span>。
+        </p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">HelloAgentsLLM</span>:</span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(<span class="code-keyword">self</span>, model, apiKey, baseUrl):</span>
+<span class="code-line">        <span class="code-keyword">self</span>.model = model</span>
+<span class="code-line">        <span class="code-keyword">self</span>.client = <span class="code-function">OpenAI</span>(</span>
+<span class="code-line">            api_key=apiKey,</span>
+<span class="code-line">            base_url=baseUrl</span>
+<span class="code-line">        )</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">think</span>(<span class="code-keyword">self</span>, messages):</span>
+<span class="code-line">        response = <span class="code-keyword">self</span>.client.chat.completions.<span class="code-function">create</span>(</span>
+<span class="code-line">            model=<span class="code-keyword">self</span>.model,</span>
+<span class="code-line">            messages=messages,</span>
+<span class="code-line">            stream=<span class="code-keyword">True</span>,</span>
+<span class="code-line">        )</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN CHINESE</span>
+            <div class="translation-lines">
+              <p class="tl">定义一个 LLM 客户端类，管理"用哪个模型"和"怎么连接"。</p>
+              <p class="tl">构造函数接收模型名称、API 密钥和服务地址三个关键参数。</p>
+              <p class="tl">使用 OpenAI 库创建客户端实例——关键是 base_url 可以指向任何兼容服务。</p>
+              <p class="tl">think 方法是核心：把对话历史发给模型，获取回复。</p>
+              <p class="tl">stream=True 开启流式输出，让回复像打字机一样逐字返回。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Group Chat -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">角色之间的对话</h2>
+        <p>当一个用户向 Agent 提问时，各角色之间会发生这样的对话：</p>
+
+        <div class="chat-window" id="chat-module2">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="user" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">👤</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">用户</span>
+                <p>帮我查一下北京今天的天气，然后推荐一个适合的景点</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="agent" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🤖</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Agent</span>
+                <p>收到！让我先思考一下...我需要先查询北京今天的天气数据，然后再根据天气推荐景点。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="agent" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🤖</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Agent</span>
+                <p>我决定调用 get_weather 工具，参数是 city="北京"</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="tool" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">🔧</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">工具</span>
+                <p>北京当前天气：晴，气温 28 摄氏度</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="agent" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🤖</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Agent</span>
+                <p>天气不错！我再去搜索一下适合晴天去的景点...</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="5" data-sender="agent" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🤖</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Agent</span>
+                <p>Finish[北京今天晴天 28 度，推荐去颐和园赏荷花，或去奥林匹克公园骑行！]</p>
+              </div>
+            </div>
+          </div>
+          <div class="chat-typing" id="chat-module2-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module2-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">Next Message</button>
+            <button class="btn chat-all-btn">Play All</button>
+            <button class="btn chat-reset-btn">Replay</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Quiz -->
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="没错！LLM 客户端是所有 Agent 共用的大脑。不同的 Agent（SimpleAgent、ReActAgent）只是不同的"思考策略"，但它们都通过同一个 LLM 客户端来与模型通信。"
+               data-explanation-wrong="仔细看看代码结构——HelloAgentsLLM 是被所有 Agent 共用的。不同的 Agent 类型（Simple、ReAct）代表不同的决策策略，但底层都用同一个 LLM 客户端发请求。">
+            <h3 class="quiz-question">如果你要给系统添加一个新的 Agent 类型（比如一个专门做翻译的 Agent），你需要重写 LLM 客户端吗？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>需要，每个 Agent 都要有自己独立的 LLM 客户端</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>需要，因为不同 Agent 可能用不同的 API 格式</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>不需要，所有 Agent 共用同一个 HelloAgentsLLM 客户端</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

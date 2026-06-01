@@ -1,0 +1,20 @@
+<section class="module" id="module-4" style="background: var(--color-bg-alt)"><div class="module-content"><header class="module-header animate-in"><span class="module-number">04</span><h1 class="module-title">实践应用：怎样把 crewAI 接进自己的项目</h1><p class="module-subtitle">把开源库变成可控能力，而不是一次性 demo。</p></header><div class="module-body">
+    <section class="screen animate-in"><h2 class="screen-heading">接入前的三张清单</h2><div class="pattern-cards"><div class="pattern-card"><h4 class="pattern-title">输入契约</h4><p class="pattern-desc">你的业务会传什么字段，哪些字段必须校验，失败时返回什么。</p></div><div class="pattern-card"><h4 class="pattern-title">运行边界</h4><p class="pattern-desc">是否需要 GPU、浏览器、网络、密钥、数据库或持久化目录。</p></div><div class="pattern-card"><h4 class="pattern-title">观测证据</h4><p class="pattern-desc">日志、trace、任务状态、成本统计，决定上线后能不能查问题。</p></div></div></section>
+    <section class="screen animate-in"><h2 class="screen-heading">代码翻译：最小适配层</h2><div class="translation-block animate-in"><div class="translation-code"><span class="translation-label">CODE</span><pre><code>async function callcrewAI(input) {
+  const payload = validateInput(input);
+  const result = await client.run(payload);
+  return mapToProductResult(result);
+}</code></pre></div><div class="translation-english"><span class="translation-label">中文解释</span><div class="translation-lines"><p class="tl">外面包一层适配函数，不让业务代码直接依赖第三方细节。</p><p class="tl">validateInput 先把不合法输入挡住。</p><p class="tl">client.run 调用 crewAI 的核心能力。</p><p class="tl">mapToProductResult 把返回值变成产品自己的格式。</p></div></div></div></section>
+    <section class="screen animate-in"><h2 class="screen-heading">上线风险</h2><div class="callout callout-warning"><div class="callout-icon">!</div><div class="callout-content"><strong class="callout-title">别只跑通 happy path</strong><p>AI 项目最容易忽略三类失败：模型超时、外部工具返回脏数据、状态目录权限错误。让 AI 写接入代码时，要明确要求这些失败都可见、可重试、可回滚。</p></div></div><div class="quiz-container" id="quiz-crewaiinc-crewai-4">
+    <div class="quiz-question-block" data-correct="option-b" data-explanation-right="答对了。真实输入、失败路径和权限/网络边界都要被验证。" data-explanation-wrong="再想想：这个项目的核心价值通常藏在输入、编排、模型调用、状态保存这几层之间。">
+      <h3 class="quiz-question">把 crewAI 接入业务前，最该补哪类验证？</h3>
+      <div class="quiz-options">
+        <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>只验证首页能打开</span></button>
+        <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>验证真实输入、失败路径、权限和网络边界</span></button>
+        <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>只看 GitHub Star 数</span></button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+    <button class="quiz-check-btn" onclick="checkQuiz('quiz-crewaiinc-crewai-4')">检查答案</button>
+    <button class="quiz-reset-btn" onclick="resetQuiz('quiz-crewaiinc-crewai-4')">再试一次</button>
+  </div></section></div></div></section>

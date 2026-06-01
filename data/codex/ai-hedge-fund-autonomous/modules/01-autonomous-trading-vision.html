@@ -1,0 +1,157 @@
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">自主交易的愿景</h1>
+      <p class="module-subtitle">当 AI 接管华尔街的分析工作——这个项目究竟在做什么</p>
+    </header>
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">想象一个 AI 投资团队</h2>
+        <p>想象你雇了 19 位顶级投资分析师——沃伦·巴菲特、查理·芒格、迈克尔·伯里、凯西·伍德……每人有自己的投资哲学，分析同一支股票，然后一位投资组合经理综合所有意见做出最终交易决策。</p>
+        <p>ai-hedge-fund 就是这样的系统——但每个"分析师"都是一个 <span class="term" data-definition="AI Agent（AI 智能体）是一个能自主感知环境、做决策并执行动作的 AI 系统。与普通 AI 聊天不同，Agent 有明确的目标，能一步步地计划和执行复杂任务。">AI Agent</span>，用代码模拟了传奇投资者的分析风格。</p>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">重要免责声明</strong>
+            <p>这个项目是教育和研究用途——不做真实交易，不是投资建议。它演示的是 AI Agent 协作的架构模式，不是炒股指南。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">19 位 AI 分析师——每人一种哲学</h2>
+        <p>系统里有 13 位模拟著名投资者的 Agent，加上 6 个专业分析 Agent：</p>
+
+        <div class="pattern-cards stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">📊</div>
+            <h4 class="pattern-title">Warren Buffett Agent</h4>
+            <p class="pattern-desc">寻找"美好企业以合理价格"——品牌护城河、稳定现金流、长期持有。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">📉</div>
+            <h4 class="pattern-title">Michael Burry Agent</h4>
+            <p class="pattern-desc">反向投资者，专找被市场低估的深度价值股，有"大空头"精神。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">🚀</div>
+            <h4 class="pattern-title">Cathie Wood Agent</h4>
+            <p class="pattern-desc">科技颠覆性增长投资——ARK Innovation 风格，押注 5-10 年后的未来。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">⚡</div>
+            <h4 class="pattern-title">Risk Manager Agent</h4>
+            <p class="pattern-desc">不分析个股——专门计算波动率、最大回撤、相关性，控制整体风险敞口。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码翻译：系统的主入口</h2>
+        <p>整个对冲基金系统的启动代码（来自 <code>src/main.py</code>）展示了它如何组装所有 Agent：</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">run_hedge_fund</span>(</span>
+<span class="code-line">    tickers: <span class="code-function">list</span>[<span class="code-keyword">str</span>],</span>
+<span class="code-line">    portfolio: <span class="code-keyword">dict</span>,</span>
+<span class="code-line">    selected_analysts: <span class="code-function">list</span>[<span class="code-keyword">str</span>] = [],</span>
+<span class="code-line">    model_name: <span class="code-keyword">str</span> = <span class="code-string">"gpt-4.1"</span>,</span>
+<span class="code-line">):</span>
+<span class="code-line">    workflow = <span class="code-function">create_workflow</span>(selected_analysts)</span>
+<span class="code-line">    agent = workflow.<span class="code-function">compile</span>()</span>
+<span class="code-line">    final_state = agent.<span class="code-function">invoke</span>({</span>
+<span class="code-line">        <span class="code-string">"messages"</span>: [<span class="code-function">HumanMessage</span>(</span>
+<span class="code-line">            <span class="code-string">"Make trading decisions."</span></span>
+<span class="code-line">        )]</span>
+<span class="code-line">    })</span>
+<span class="code-line">    <span class="code-keyword">return</span> final_state</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">run_hedge_fund：启动整个 AI 对冲基金分析流程</p>
+              <p class="tl">tickers：要分析的股票代码列表，比如 ["AAPL", "TSLA"]</p>
+              <p class="tl">portfolio：当前持仓情况——持有什么、多少股、多少现金</p>
+              <p class="tl">selected_analysts：选哪些 AI 分析师参与（可以只用部分）</p>
+              <p class="tl">model_name：用哪个大语言模型（GPT/Claude/DeepSeek 都可以）</p>
+              <p class="tl"></p>
+              <p class="tl">创建 LangGraph 工作流——把所有选中的 Agent 串成有向图</p>
+              <p class="tl">编译工作流，生成可执行的 Agent 系统</p>
+              <p class="tl">发起运行：给整个系统一个"做交易决策"的指令</p>
+              <p class="tl"></p>
+              <p class="tl"></p>
+              <p class="tl">等所有 Agent 跑完，返回最终状态（包含每个分析师的信号和最终决策）</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">从人类交易员到 AI 交易员</h2>
+        <p>传统的量化交易系统用数学公式和统计模型做决策。AI 对冲基金则走了另一条路——让 AI 模拟人类分析师的思维过程。这两种方式有什么本质区别？</p>
+
+        <div class="pattern-cards stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">📊</div>
+            <h4 class="pattern-title">传统量化交易</h4>
+            <p class="pattern-desc">规则明确：如果 RSI < 30 且成交量 > 均值 2 倍，则买入。每条规则由人编写，模型只是执行器。优点是可解释，缺点是灵活性差——遇到新情况需要手动添加规则。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">🤖</div>
+            <h4 class="pattern-title">AI Agent 交易</h4>
+            <p class="pattern-desc">意图驱动：「像巴菲特那样分析这只股票」。AI 理解投资哲学，综合财报、新闻、技术指标，输出有理由的判断。不写规则，而是给 AI 角色「人格」。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">🔀</div>
+            <h4 class="pattern-title">混合模式（本项目）</h4>
+            <p class="pattern-desc">Agent 框架编排 + LLM 推理 + 结构化数据。技术指标用代码计算（精确），投资决策用 LLM 综合（灵活），风控用硬规则（安全）。</p>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">为什么用 LangGraph 而不直接调 LLM？</strong>
+            <p>如果你只是让一个 AI 分析股票，直接调 GPT-4 就行了。但当你需要 19 个 AI 同时工作、互相协作、按特定顺序执行、共享数据——就需要一个工作流引擎。LangGraph 就是这个引擎，它管理的是「谁来做什么、什么时候做、怎么传数据」。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">初步理解检验</h2>
+        <div class="quiz-container" id="quiz-ahf-1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！LangGraph 工作流决定了哪些 Agent 参与分析，以及它们之间如何传递信息。增减 Agent 就是修改工作流的节点配置。"
+               data-explanation-wrong="再想想系统架构——每个 Agent 是独立的分析模块，工作流控制它们的协作方式。">
+            <h3 class="quiz-question">你想给 ai-hedge-fund 添加一个新的"ESG 投资分析师"Agent（只投资环保公司）。你需要修改什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>修改 Warren Buffett Agent 的代码，加入 ESG 逻辑</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>创建新的 esg_analyst_agent 函数，并在 create_workflow 里注册它</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>修改 portfolio_manager_agent，让它自动识别 ESG 股票</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-ahf-1')">提交答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-ahf-1')">再试一次</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

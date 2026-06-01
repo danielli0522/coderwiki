@@ -1,0 +1,207 @@
+<section class="module" id="module-3">
+  <div class="module-content">
+
+    <div class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">Building the Knowledge Map</h1>
+      <p class="module-subtitle">How CodeGraph reads every file, extracts every symbol, and stores every connection</p>
+    </div>
+
+    <!-- Screen 1: What is an AST? -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">The X-Ray Machine for Code</h2>
+      <p>When CodeGraph reads a source file, it doesn't just scan for text. It runs each file through a parser that produces an <span class="term" data-definition="Abstract Syntax Tree — a tree-shaped data structure that represents the grammatical structure of source code. It strips away whitespace and comments, leaving just the logical skeleton: what's a function, what's a variable, what calls what.">Abstract Syntax Tree (AST)</span>.</p>
+      <p>Think of it like an X-ray. A photograph of a person shows skin, clothing, and hair. An X-ray shows bones — the underlying structure that everything else rests on. The AST is the skeleton of your code: which lines are function declarations, which are method calls, which are import statements.</p>
+
+      <div class="callout callout-info animate-in">
+        <span class="callout-icon">🦴</span>
+        <div class="callout-content">
+          <span class="callout-title">Why AST Instead of Text Search?</span>
+          <p>A text search for "login" finds every comment, string, and variable name containing those letters. An AST query finds exactly "function declarations named login" — nothing more. That precision is what makes CodeGraph's results reliable, not just approximate.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 2: Tree-Sitter -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">Tree-Sitter: The Universal Parser</h2>
+      <p>CodeGraph uses <span class="term" data-definition="An open-source parsing library that can parse 100+ programming languages using pre-compiled grammar modules. Each grammar is compiled to WebAssembly (WASM) for portability — it runs on any OS and architecture without native compilation.">tree-sitter</span> — one engine that handles 19+ languages using separate grammar modules. Each grammar is compiled to <span class="term" data-definition="WebAssembly — a binary format that runs in any JavaScript environment (browser or Node.js) at near-native speed. Grammars compiled to WASM work on any OS and CPU without requiring a C compiler.">WASM</span>.</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">src/extraction/tree-sitter.ts (simplified)</span>
+          <span class="code-line"><span class="code-keyword">async function</span> <span class="code-function">extractFromSource</span>(</span>
+          <span class="code-line">  source: <span class="code-function">string</span>,</span>
+          <span class="code-line">  language: <span class="code-function">Language</span></span>
+          <span class="code-line">) {</span>
+          <span class="code-line">  <span class="code-keyword">const</span> parser = <span class="code-keyword">new</span> <span class="code-function">Parser</span>();</span>
+          <span class="code-line">  <span class="code-keyword">const</span> grammar = <span class="code-keyword">await</span> <span class="code-function">getLanguage</span>(language);</span>
+          <span class="code-line">  parser.<span class="code-function">setLanguage</span>(grammar);</span>
+          <span class="code-line">  <span class="code-keyword">const</span> tree = parser.<span class="code-function">parse</span>(source);</span>
+          <span class="code-line">  <span class="code-comment">// Query tree for functions, classes, imports...</span></span>
+          <span class="code-line">  <span class="code-keyword">return</span> <span class="code-function">extractNodes</span>(tree, language);</span>
+          <span class="code-line">}</span>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">Plain English</span>
+          <div class="translation-lines">
+            <div class="tl">Function that takes source code text + language name</div>
+            <div class="tl">What's the source file content?</div>
+            <div class="tl">Which language is it? (TypeScript, Python, Go…)</div>
+            <div class="tl"> </div>
+            <div class="tl">Create a parser engine</div>
+            <div class="tl">Load the grammar rules for this language (from WASM file)</div>
+            <div class="tl">Tell the parser which language to expect</div>
+            <div class="tl">Parse the text → produce an AST (a tree of nodes)</div>
+            <div class="tl">Find functions, classes, methods, imports in the tree</div>
+            <div class="tl">Return the list of nodes and edges found</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent animate-in">
+        <span class="callout-icon">🗂️</span>
+        <div class="callout-content">
+          <span class="callout-title">19+ Languages, One Engine</span>
+          <p>TypeScript, JavaScript, Python, Go, Rust, Java, C#, PHP, Ruby, C, C++, Swift, Kotlin, Dart, Svelte, Vue, Liquid, Pascal, Scala. Each has its own grammar module (.wasm file), loaded on demand. Adding a new language is as simple as adding a new grammar.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 3: Flow Animation -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">The Indexing Pipeline: Step by Step</h2>
+      <p>When you run <code>codegraph index</code>, five stages run in sequence. Click "Next Step" to walk through the pipeline.</p>
+
+      <div class="flow-animation" id="flow-m3" data-steps='[
+        {"highlight": "scanner", "label": "Step 1: File Scanner runs git ls-files to list all tracked files, respecting .gitignore at every directory level — no build artifacts, no node_modules."},
+        {"highlight": "parser", "label": "Step 2: Tree-Sitter loads the correct grammar WASM for each file language and parses the source text into a syntax tree.", "packet": true, "from": "scanner", "to": "parser"},
+        {"highlight": "extractor", "label": "Step 3: Language-specific extractors query the AST for functions, classes, methods, imports, and their relationships. Processed in batches of 10 files.", "packet": true, "from": "parser", "to": "extractor"},
+        {"highlight": "db", "label": "Step 4: Extracted nodes and edges are stored in SQLite inside a single transaction. FTS5 triggers auto-update the full-text search index.", "packet": true, "from": "extractor", "to": "db"},
+        {"highlight": "resolver", "label": "Step 5: ReferenceResolver follows import paths and uses fuzzy name-matching to link unresolved symbol calls to their definitions across files.", "packet": true, "from": "db", "to": "resolver"},
+        {"highlight": "db", "label": "Step 6: Resolved edges (function-calls-function, file-imports-file) are written back. The graph is now complete and queryable.", "packet": true, "from": "resolver", "to": "db"}
+      ]'>
+        <div class="flow-actors">
+          <div class="flow-actor" id="flow-scanner">
+            <div class="flow-actor-icon">📂</div>
+            <span>File<br>Scanner</span>
+          </div>
+          <div class="flow-actor" id="flow-parser">
+            <div class="flow-actor-icon">🔬</div>
+            <span>Tree-<br>Sitter</span>
+          </div>
+          <div class="flow-actor" id="flow-extractor">
+            <div class="flow-actor-icon">⚙️</div>
+            <span>Extractor</span>
+          </div>
+          <div class="flow-actor" id="flow-db">
+            <div class="flow-actor-icon">🗃️</div>
+            <span>SQLite</span>
+          </div>
+          <div class="flow-actor" id="flow-resolver">
+            <div class="flow-actor-icon">🧵</div>
+            <span>Resolver</span>
+          </div>
+        </div>
+
+        <div class="flow-packet"></div>
+
+        <div class="flow-step-label">Click "Next Step" to begin the indexing pipeline</div>
+
+        <div class="flow-controls">
+          <button class="flow-next-btn" style="padding: var(--space-2) var(--space-5); background: var(--color-accent); color: white; border: none; border-radius: var(--radius-sm); font-family: var(--font-body); font-size: var(--text-sm); font-weight: 600; cursor: pointer;">Next Step</button>
+          <button class="flow-reset-btn" style="padding: var(--space-2) var(--space-4); background: var(--color-surface); color: var(--color-text-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-family: var(--font-body); font-size: var(--text-sm); cursor: pointer; margin-left: var(--space-2);">Reset</button>
+          <span class="flow-progress">Step 0 / 6</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 4: Reference Resolution -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">Reference Resolution: Following the Threads</h2>
+      <p>After the AST pass, CodeGraph knows every symbol that <em>exists</em> — but doesn't yet know how they connect <em>across files</em>. That's the resolver's job: follow every import statement to its definition.</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">src/resolution/import-resolver.ts (simplified)</span>
+          <span class="code-line"><span class="code-keyword">function</span> <span class="code-function">resolveViaImport</span>(</span>
+          <span class="code-line">  fromFile: <span class="code-function">string</span>,</span>
+          <span class="code-line">  importPath: <span class="code-function">string</span>,</span>
+          <span class="code-line">  projectRoot: <span class="code-function">string</span></span>
+          <span class="code-line">) {</span>
+          <span class="code-line">  <span class="code-keyword">let</span> resolved = path.<span class="code-function">resolve</span>(</span>
+          <span class="code-line">    path.<span class="code-function">dirname</span>(fromFile), importPath</span>
+          <span class="code-line">  );</span>
+          <span class="code-line">  <span class="code-keyword">for</span> (<span class="code-keyword">const</span> ext <span class="code-keyword">of</span> [<span class="code-string">'.ts'</span>, <span class="code-string">'.js'</span>, <span class="code-string">'.tsx'</span>]) {</span>
+          <span class="code-line">    <span class="code-keyword">if</span> (fs.<span class="code-function">existsSync</span>(resolved + ext))</span>
+          <span class="code-line">      <span class="code-keyword">return</span> resolved + ext;</span>
+          <span class="code-line">  }</span>
+          <span class="code-line">  <span class="code-keyword">return null</span>; <span class="code-comment">// unresolved</span></span>
+          <span class="code-line">}</span>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">Plain English</span>
+          <div class="translation-lines">
+            <div class="tl">Function: "where does this import actually point?"</div>
+            <div class="tl">The file doing the importing</div>
+            <div class="tl">The import path written in code (e.g. './utils')</div>
+            <div class="tl">The project root (for absolute path resolution)</div>
+            <div class="tl"> </div>
+            <div class="tl">Compute the candidate file path by joining directory + import path</div>
+            <div class="tl"> </div>
+            <div class="tl">Try each common file extension (.ts, .js, .tsx)</div>
+            <div class="tl">If the file exists with this extension, return the full path</div>
+            <div class="tl"> </div>
+            <div class="tl">Couldn't find it — mark as unresolved for later retry</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-info animate-in">
+        <span class="callout-icon">🔗</span>
+        <div class="callout-content">
+          <span class="callout-title">Four Resolution Strategies</span>
+          <p>CodeGraph tries four approaches for every unresolved reference: <strong>(1)</strong> Follow the import path, <strong>(2)</strong> Resolve TypeScript path aliases from tsconfig.json, <strong>(3)</strong> Fuzzy name-match across all known symbols, <strong>(4)</strong> Framework-specific route detection. If all four fail, the reference stays marked "unresolved."</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 5: Quiz -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">Check Your Understanding</h2>
+
+      <div class="quiz-container" id="quiz-m3">
+
+        <div class="quiz-question-block" data-correct="b"
+          data-explanation-right="Exactly! AST parsing finds precise structural elements — 'function named login' — rather than any text containing 'login'. That precision is the key advantage."
+          data-explanation-wrong="Text search would find 'login' in comments, variable names, and strings too. The AST tells CodeGraph what IS a function vs. what just mentions functions.">
+          <p class="quiz-question">Why does CodeGraph use AST parsing instead of simple text search?</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)"><span class="quiz-option-radio"></span>AST parsing is faster than string searching for large files</button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)"><span class="quiz-option-radio"></span>AST queries find precise structural elements (like "function declarations") rather than any text match</button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)"><span class="quiz-option-radio"></span>AST parsing works on minified code, which text search cannot</button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block" data-correct="a"
+          data-explanation-right="Right! git ls-files respects .gitignore at all levels — it's the most reliable way to list 'files that belong to this project' without accidentally including build outputs."
+          data-explanation-wrong="CodeGraph specifically uses 'git ls-files' to get git-tracked files. This automatically respects .gitignore at all directory levels — no build artifacts, no node_modules.">
+          <p class="quiz-question">How does CodeGraph know which files to index (and avoid indexing build outputs)?</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)"><span class="quiz-option-radio"></span>It runs git ls-files to get all git-tracked files, respecting .gitignore automatically</button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)"><span class="quiz-option-radio"></span>It scans every file and manually skips directories named node_modules or dist</button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)"><span class="quiz-option-radio"></span>It reads a hardcoded list of allowed file extensions</button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div style="margin-top: var(--space-6); display: flex; gap: var(--space-3);">
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m3')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m3')">Reset</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>

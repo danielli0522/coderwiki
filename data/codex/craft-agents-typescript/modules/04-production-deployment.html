@@ -1,0 +1,169 @@
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">生产部署</h1>
+      <p class="module-subtitle">把 Craft Agents 跑起来——从本地开发到 Docker 生产环境</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Two modes -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">两种运行模式</h2>
+        <p>Craft Agents 有两种运行形态，适合不同场景。就像同一款软件，可以安装到个人电脑上用，也可以部署到公司服务器上让全团队访问：</p>
+
+        <div class="pattern-cards stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">💻</div>
+            <h4 class="pattern-title">Electron 桌面应用</h4>
+            <p class="pattern-desc">个人使用。所有数据存在本地，MCP 工具以子进程方式运行。适合个人效率工具场景。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">🐳</div>
+            <h4 class="pattern-title">Docker Server 模式</h4>
+            <p class="pattern-desc">团队共享。通过 HTTP 提供服务，WebUI 连接服务端，多人可同时访问同一个 Agent 服务。</p>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🔍</div>
+          <div class="callout-content">
+            <strong class="callout-title">Monorepo 结构意味着什么</strong>
+            <p>Craft Agents 采用 <span class="term" data-definition="Monorepo 是把多个相关项目放在同一个 Git 仓库里管理的方式。好处是代码共享方便，坏处是仓库体积大。Craft Agents 用 Bun 的 workspace 功能管理多个子包。">Monorepo</span> 结构，apps/ 目录放可运行的应用，packages/ 目录放共享的代码库。两个应用（electron 和 server）共享同一套核心业务逻辑——改一处，两边都受益。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: File tree -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">项目结构地图</h2>
+        <p>理解这个目录结构，你就能告诉 AI"去 packages/messaging-gateway 里修改路由逻辑"，而不是让它到处乱找：</p>
+
+        <div class="file-tree animate-in">
+          <div class="ft-folder open">
+            <span class="ft-name">craft-agents-oss/</span>
+            <span class="ft-desc">整个项目根目录</span>
+            <div class="ft-children">
+              <div class="ft-folder">
+                <span class="ft-name">apps/</span>
+                <span class="ft-desc">可运行的完整应用</span>
+                <div class="ft-children">
+                  <div class="ft-file"><span class="ft-name">electron/</span><span class="ft-desc">桌面客户端（Electron + React）</span></div>
+                  <div class="ft-file"><span class="ft-name">webui/</span><span class="ft-desc">Web 界面（当后端是 Server 模式时使用）</span></div>
+                  <div class="ft-file"><span class="ft-name">cli/</span><span class="ft-desc">命令行工具</span></div>
+                </div>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">packages/</span>
+                <span class="ft-desc">共享的核心代码包</span>
+                <div class="ft-children">
+                  <div class="ft-file"><span class="ft-name">core/</span><span class="ft-desc">类型定义和工具函数（Session、Workspace、Message）</span></div>
+                  <div class="ft-file"><span class="ft-name">messaging-gateway/</span><span class="ft-desc">命令路由中心——所有操作的入口</span></div>
+                  <div class="ft-file"><span class="ft-name">server-core/</span><span class="ft-desc">HTTP 服务端核心逻辑</span></div>
+                  <div class="ft-file"><span class="ft-name">session-mcp-server/</span><span class="ft-desc">让 Agent 感知会话上下文的 MCP 服务</span></div>
+                  <div class="ft-file"><span class="ft-name">session-tools-core/</span><span class="ft-desc">内置工具函数库</span></div>
+                </div>
+              </div>
+              <div class="ft-file"><span class="ft-name">Dockerfile.server</span><span class="ft-desc">Server 模式的 Docker 构建配置</span></div>
+              <div class="ft-file"><span class="ft-name">package.json</span><span class="ft-desc">Monorepo 根配置，使用 Bun 管理</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Code translation - Docker server setup -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码翻译：Server 启动逻辑</h2>
+        <p>下面是 Craft Agents 在 Server 模式下的启动流程（来自 <code>packages/server-core/src/bootstrap/</code>）：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">export async function</span> <span class="code-function">bootstrap</span>(config: <span class="code-function">ServerConfig</span>) {</span>
+<span class="code-line">  <span class="code-keyword">const</span> gateway = <span class="code-keyword">await</span> <span class="code-function">createGateway</span>(config);</span>
+<span class="code-line">  <span class="code-keyword">const</span> transport = <span class="code-keyword">new</span> <span class="code-function">HttpTransport</span>(gateway);</span>
+<span class="code-line">  <span class="code-keyword">await</span> transport.<span class="code-function">listen</span>(config.port);</span>
+<span class="code-line">  <span class="code-keyword">return</span> { gateway, transport };</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">bootstrap 函数：启动整个服务的入口，像开店前的"开业准备"</p>
+              <p class="tl">先创建 MessagingGateway——注册所有命令处理器，准备好"收件室"</p>
+              <p class="tl">创建 HTTP 传输层——把 Gateway 包装成一个 HTTP 服务，这样浏览器可以连进来</p>
+              <p class="tl">开始监听指定端口，等待外部请求。就像挂出"营业中"牌子</p>
+              <p class="tl">返回 gateway 和 transport 的引用，以便后续可以关闭或查询状态</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Final quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">综合考验</h2>
+
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！packages/ 里的代码是共享库，改它会影响所有使用它的应用（electron 和 server 都会受益）。如果你只想改某个应用，就去对应的 apps/ 子目录。"
+               data-explanation-wrong="再想想 Monorepo 的结构。apps/ 是具体应用，packages/ 是共享代码。改共享代码，所有应用都会获得这个改动。">
+            <h3 class="quiz-question">你发现 Craft Agents 里的"工作区切换"逻辑有个 bug，在 electron 版和 server 版里都会复现。你应该去哪里修复它？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>分别修改 apps/electron 和 apps/webui 里的代码，各修一遍</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>在 packages/messaging-gateway 里修复，两个应用都会自动获得修复</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>只修复 electron 版，server 版使用的代码不同所以不需要改</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="完全正确！环境变量是配置密钥的标准做法。API 密钥绝不应该写在代码里——代码可能被推到 GitHub 上被别人看到，而环境变量在部署环境里单独配置，不进入版本控制。"
+               data-explanation-wrong="把密钥写入代码是非常危险的做法，一旦代码被公开，密钥就泄露了。正确方式是使用环境变量。">
+            <h3 class="quiz-question">你要在 Docker 生产环境部署 Craft Agents，需要配置 ANTHROPIC_API_KEY。最安全的做法是？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>直接把 API Key 硬写在 Dockerfile 里</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>把 API Key 写在代码里的配置对象中</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>通过环境变量传入：docker run -e ANTHROPIC_API_KEY=xxx</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">提交答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">再试一次</button>
+        </div>
+
+        <div class="callout callout-accent" style="margin-top: var(--space-8)">
+          <div class="callout-icon">🎉</div>
+          <div class="callout-content">
+            <strong class="callout-title">你已经掌握了 Craft Agents 的核心架构！</strong>
+            <p>现在你知道 Session/Workspace 的边界、工具系统的工作原理、技能和自动化的价值，以及如何告诉 AI 在正确的地方做正确的修改。这就是 AI 原生开发者的技术底气。</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

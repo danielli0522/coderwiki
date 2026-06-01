@@ -1,0 +1,224 @@
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">模型管家：显存、缓存与智能调度</h1>
+      <p class="module-subtitle">GPU 显存是稀缺资源，ComfyUI 如何聪明地管理它？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: The Problem -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">显存：AI 绘图最稀缺的资源</h2>
+        <p>生成一张 AI 图片需要加载好几个模型——一个主模型（几 GB）、一个文本编码器（几百 MB）、一个 VAE 解码器——全都得塞进 <span class="term" data-definition="GPU 显存（VRAM）是显卡上专用的快速内存。AI 模型运行时需要先把权重数据加载到显存里，就像厨师做菜前要先把食材摆在案板上。8GB 显存大概能同时放一个 SDXL 模型。">GPU 显存</span> 里。</p>
+
+        <p>如果你的显卡只有 8GB 显存，而模型需要 10GB，就会报 <span class="term" data-definition="OOM 全称 Out of Memory，意思是内存不够用了。就像你试图打开太多浏览器标签页，电脑内存装不下就崩溃了。在 AI 绘图中，通常是模型太大或分辨率太高导致。">OOM（Out of Memory）</span> 错误。</p>
+
+        <p>ComfyUI 的 <code>model_management</code> 模块就像一个精明的<strong>仓库管理员</strong>，决定哪些模型该上架、哪些该先收起来。</p>
+      </section>
+
+      <!-- Screen 2: Model Loading Flow -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">模型加载的完整流程</h2>
+        <p>当你拖入一个 CheckpointLoader 节点并执行时：</p>
+
+        <div class="chat-window" id="chat-module4">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="loader" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">LD</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">CheckpointLoader</span>
+                <p>用户选了 sdxl_base.safetensors。我先检查这个文件在 folder_paths 里注册的路径对不对...</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="mgmt" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">MM</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">ModelManagement</span>
+                <p>收到加载请求！先算算这个模型需要多少显存... 大约 6.5GB。当前可用显存只剩 3GB。需要先卸载一些不用的模型腾空间。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="mgmt" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">MM</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">ModelManagement</span>
+                <p>把上次缓存的旧模型移出 GPU，换到系统内存（RAM）暂存。现在显存有 7GB 空间了，够用了。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="loader" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">LD</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">CheckpointLoader</span>
+                <p>开始用 safetensors 库加载权重文件... 加载成功！拆分出 MODEL、CLIP、VAE 三部分，分别传给下游节点。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="mgmt" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">MM</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">ModelManagement</span>
+                <p>模型已就位。我会一直监控显存使用。如果后续节点需要加载 ControlNet 或 LoRA，我会继续动态调度空间。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-typing-module4" style="display:none">
+            <div class="chat-avatar" id="chat-module4-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">Next Message</button>
+            <button class="btn chat-all-btn">Play All</button>
+            <button class="btn chat-reset-btn">Replay</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Memory Management Code -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">显存管理的关键代码</h2>
+        <p>ComfyUI 在执行完每个节点后，会自动做显存清理：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">if</span> comfy.model_management.<span class="code-function">is_oom</span>(ex):</span>
+<span class="code-line">    tips = <span class="code-string">"This error means you ran out of memory on your GPU."</span></span>
+<span class="code-line">    comfy.model_management.<span class="code-function">unload_all_models</span>()</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 正常执行完后的清理</span></span>
+<span class="code-line"><span class="code-keyword">if</span> need_gc:</span>
+<span class="code-line">    gc.<span class="code-function">collect</span>()</span>
+<span class="code-line">    comfy.model_management.<span class="code-function">soft_empty_cache</span>()</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">如果捕获到 OOM（显存不足）错误...</p>
+              <p class="tl">给用户一个提示：GPU 显存不够了...</p>
+              <p class="tl">紧急措施：立刻卸载所有模型释放显存！</p>
+              <p class="tl"></p>
+              <p class="tl">正常流程里的清理逻辑...</p>
+              <p class="tl">如果需要垃圾回收...</p>
+              <p class="tl">先调用 Python 的垃圾回收器...</p>
+              <p class="tl">再调用 ComfyUI 的轻量缓存清理，释放不必要的显存占用。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: folder_paths -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">模型文件怎么找到的？</h2>
+        <p><code>folder_paths.py</code> 是 ComfyUI 的<strong>文件导航系统</strong>。它把各种模型类型映射到对应的文件夹：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line">folder_names_and_paths[<span class="code-string">"checkpoints"</span>] = (</span>
+<span class="code-line">    [os.path.<span class="code-function">join</span>(models_dir, <span class="code-string">"checkpoints"</span>)],</span>
+<span class="code-line">    supported_pt_extensions</span>
+<span class="code-line">)</span>
+<span class="code-line">folder_names_and_paths[<span class="code-string">"loras"</span>] = (</span>
+<span class="code-line">    [os.path.<span class="code-function">join</span>(models_dir, <span class="code-string">"loras"</span>)],</span>
+<span class="code-line">    supported_pt_extensions</span>
+<span class="code-line">)</span>
+<span class="code-line">folder_names_and_paths[<span class="code-string">"custom_nodes"</span>] = (</span>
+<span class="code-line">    [os.path.<span class="code-function">join</span>(base_path, <span class="code-string">"custom_nodes"</span>)],</span>
+<span class="code-line">    <span class="code-function">set</span>()</span>
+<span class="code-line">)</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">注册 checkpoints 的搜索路径...</p>
+              <p class="tl">指向 models/checkpoints/ 目录...</p>
+              <p class="tl">只识别特定扩展名（.safetensors, .ckpt, .pt 等）...</p>
+              <p class="tl"></p>
+              <p class="tl">注册 lora 微调模型的搜索路径...</p>
+              <p class="tl">指向 models/loras/ 目录...</p>
+              <p class="tl">同样只识别模型文件扩展名...</p>
+              <p class="tl"></p>
+              <p class="tl">注册自定义节点的搜索路径...</p>
+              <p class="tl">指向 custom_nodes/ 目录...</p>
+              <p class="tl">不限制文件类型（set() 表示接受任何扩展名）。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">&#128161;</div>
+          <div class="callout-content">
+            <strong class="callout-title">实用技巧</strong>
+            <p>你可以通过 <code>extra_model_paths.yaml</code> 文件添加额外的模型目录。这样你的模型可以放在外部硬盘或其他位置，而不用全部塞进 ComfyUI 的 models 文件夹。ComfyUI 启动时会自动读取这个配置文件。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！ComfyUI 使用动态模型管理——当新模型需要空间时，旧模型会被自动移出 GPU 到系统内存（RAM），而不是直接丢弃。下次需要时还能快速加载回来。"
+               data-explanation-wrong="想想 ComfyUI 的仓库管理员比喻——它不会随便扔东西，也不会无限堆叠。它会在需要时腾空间，但保留回收的可能。">
+            <h3 class="quiz-question">当 ComfyUI 需要加载一个新模型但显存不够时，它会怎么做？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>直接报错，让用户手动关闭一些模型</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>自动把不常用的模型从 GPU 移到系统内存，腾出空间</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>把所有模型都存到硬盘，需要时再加载</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="对！extra_model_paths.yaml 让你可以指定多个额外的模型搜索路径，这样模型不用全放在 ComfyUI 安装目录下。"
+               data-explanation-wrong="这个功能跟 ComfyUI 的文件路径系统有关——看看 folder_paths.py 相关的配置。">
+            <h3 class="quiz-question">如果你想把自己的模型放在外接硬盘上让 ComfyUI 使用，应该怎么做？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>编辑 extra_model_paths.yaml 文件，添加外接硬盘的路径</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>把模型文件复制到 ComfyUI 的 models 目录下</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>修改 nodes.py 里的路径常量</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

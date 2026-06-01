@@ -1,0 +1,220 @@
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">网络爬虫与搜索：如何从全网抓取信息</h1>
+      <p class="module-subtitle">GPT Researcher 的核心能力——搜索和爬虫——是如何实现的？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Retriever system -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">搜索引擎适配器：20+ 搜索引擎即插即用</h2>
+        <p>GPT Researcher 支持超过 20 种搜索引擎。它用了一个巧妙的工厂模式——每种搜索引擎都是一个 <span class="term" data-definition="Retriever（检索器）是一个统一的搜索接口。不管底层用 Google、DuckDuckGo 还是 ArXiv，对上层来说都是调用同一个 search() 方法。">Retriever</span> 类，实现相同的接口。就像万能插座，不管你插什么插头都能用：</p>
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># actions/retriever.py</span></span>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">get_retriever</span>(retriever: str):</span>
+<span class="code-line">    match retriever:</span>
+<span class="code-line">        <span class="code-keyword">case</span> <span class="code-string">"google"</span>:</span>
+<span class="code-line">            <span class="code-keyword">from</span> gpt_researcher.retrievers <span class="code-keyword">import</span> GoogleSearch</span>
+<span class="code-line">            <span class="code-keyword">return</span> GoogleSearch</span>
+<span class="code-line">        <span class="code-keyword">case</span> <span class="code-string">"tavily"</span>:</span>
+<span class="code-line">            <span class="code-keyword">from</span> gpt_researcher.retrievers <span class="code-keyword">import</span> TavilySearch</span>
+<span class="code-line">            <span class="code-keyword">return</span> TavilySearch</span>
+<span class="code-line">        <span class="code-keyword">case</span> <span class="code-string">"duckduckgo"</span>:</span>
+<span class="code-line">            <span class="code-keyword">from</span> gpt_researcher.retrievers <span class="code-keyword">import</span> Duckduckgo</span>
+<span class="code-line">            <span class="code-keyword">return</span> Duckduckgo</span>
+<span class="code-line">        <span class="code-keyword">case</span> <span class="code-string">"arxiv"</span>:</span>
+<span class="code-line">            <span class="code-keyword">from</span> gpt_researcher.retrievers <span class="code-keyword">import</span> ArxivSearch</span>
+<span class="code-line">            <span class="code-keyword">return</span> ArxivSearch</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">这是一个工厂函数：传入名字，返回对应的搜索引擎类</p>
+              <p class="tl">用 Python 3.10 的 match-case 语法（类似 switch）</p>
+              <p class="tl">如果用户要 Google 搜索...</p>
+              <p class="tl">导入 Google 搜索适配器</p>
+              <p class="tl">返回这个类（注意是类本身，不是实例）</p>
+              <p class="tl">如果要 Tavily 搜索...</p>
+              <p class="tl">导入 Tavily 适配器</p>
+              <p class="tl">如果要 DuckDuckGo...</p>
+              <p class="tl">如果要 ArXiv（学术论文搜索）...</p>
+              <p class="tl">以此类推，支持 20+ 搜索引擎</p>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">设计模式：工厂模式 + 延迟导入</strong>
+            <p>注意每个 <code>case</code> 分支都用 <code>from ... import</code> 做延迟导入——只有在真正使用某个搜索引擎时才加载它的代码。这样即使你只用了 Tavily，也不会因为没装 Google SDK 而报错。这是 Python 中非常实用的「按需加载」技巧。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Supported search engines -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">支持哪些搜索引擎？</h2>
+        <p>GPT Researcher 的 <code>retrievers/</code> 目录下，每个子目录就是一个搜索引擎适配器：</p>
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🌐</div>
+            <h4 class="pattern-title">通用搜索</h4>
+            <p class="pattern-desc">Google、Bing、DuckDuckGo、Tavily、Serper、SearX、SearchAPI、Exa、BoCha</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">📚</div>
+            <h4 class="pattern-title">学术搜索</h4>
+            <p class="pattern-desc">ArXiv（预印本）、Semantic Scholar（学术论文）、PubMed Central（医学文献）</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🔗</div>
+            <h4 class="pattern-title">社交/自定义</h4>
+            <p class="pattern-desc">XQuik（X/Twitter 搜索）、自定义 Retriever（你可以自己写）、MCP 协议</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">🔌</div>
+            <h4 class="pattern-title">MCP 协议</h4>
+            <p class="pattern-desc">Model Context Protocol——让 Agent 调用外部工具服务，是最新扩展方式</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Scraper system -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">爬虫系统：从 URL 到正文</h2>
+        <p>搜索只是第一步——你拿到了一堆 URL，但 URL 里的内容才是你需要的。GPT Researcher 的 <span class="term" data-definition="Scraper（爬虫）是自动访问网页并提取其中内容的程序。就像你打开一个网页，复制里面的文字，但爬虫是自动完成的。">Scraper</span> 系统负责从 URL 提取正文：</p>
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># scraper/scraper.py</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">Scraper</span>:</span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, urls, user_agent, scraper, worker_pool):</span>
+<span class="code-line">        unique_urls = list(dict.fromkeys(urls))</span>
+<span class="code-line">        self.urls = unique_urls</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">async def</span> <span class="code-function">run</span>(self):</span>
+<span class="code-line">        contents = <span class="code-keyword">await</span> asyncio.gather(</span>
+<span class="code-line">            *(self.extract_data_from_url(url, self.session)</span>
+<span class="code-line">              <span class="code-keyword">for</span> url <span class="code-keyword">in</span> self.urls)</span>
+<span class="code-line">        )</span>
+<span class="code-line">        res = [c <span class="code-keyword">for</span> c <span class="code-keyword">in</span> contents <span class="code-keyword">if</span> c[<span class="code-string">"raw_content"</span>]]</span>
+<span class="code-line">        <span class="code-keyword">return</span> res</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">爬虫类：接收 URL 列表，提取内容</p>
+              <p class="tl">初始化时去重——同一个 URL 不爬两次</p>
+              <p class="tl">用字典去重，保留原始顺序</p>
+              <p class="tl"></p>
+              <p class="tl">核心方法：并行爬取所有 URL</p>
+              <p class="tl">asyncio.gather 让所有爬取同时进行（并行！）</p>
+              <p class="tl">对每个 URL 调用提取方法</p>
+              <p class="tl"></p>
+              <p class="tl">过滤掉提取失败的（raw_content 为空的）</p>
+              <p class="tl">返回成功提取的内容列表</p>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-info">
+          <div class="callout-icon">⚡</div>
+          <div class="callout-content">
+            <strong class="callout-title">性能优化：asyncio.gather 并行爬取</strong>
+            <p><code>asyncio.gather</code> 是 Python 异步编程的核心技巧。它让所有 URL 的爬取同时进行，而不是一个一个排队。如果你要爬 20 个网页，每个花 2 秒，串行需要 40 秒，并行只需要 2 秒左右。这在网络密集型任务中是巨大的性能提升。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Scraper backends -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">多种爬虫后端</h2>
+        <p>不同网站需要不同的爬取策略。静态网页可以用简单的 HTML 解析，动态网页需要用浏览器模拟。GPT Researcher 支持多种后端：</p>
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">BeautifulSoup</code>
+            <span class="badge-desc">轻量级 HTML 解析器。适合静态网页，速度快，不需要浏览器</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">Browser (NoDriver)</code>
+            <span class="badge-desc">无头浏览器爬虫。能执行 JavaScript，适合动态加载的网页</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">FireCrawl</code>
+            <span class="badge-desc">专业爬虫 API 服务。质量高但需要付费 API Key</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">Tavily Extract</code>
+            <span class="badge-desc">Tavily 的内容提取 API。适合快速提取，集成简单</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">PyMuPDF</code>
+            <span class="badge-desc">PDF 文档解析器。专门处理 PDF 文件的提取</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">ArXiv Scraper</code>
+            <span class="badge-desc">学术论文专用爬虫。提取 ArXiv 论文标题、摘要和正文</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验你的理解</h2>
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！工厂模式通过 get_retriever() 函数，传入名字返回对应的类。上层代码不需要知道具体用了哪个搜索引擎，只调用统一的 search() 方法。"
+               data-explanation-wrong="再看看 get_retriever() 函数——它接收一个字符串名字，返回对应的类。这就是工厂模式的标准实现。">
+            <h3 class="quiz-question">GPT Researcher 的搜索引擎适配系统使用了什么设计模式？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>观察者模式——搜索引擎变化时自动通知</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>工厂模式——通过名字动态创建对应的搜索引擎</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>单例模式——全局只有一个搜索引擎实例</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="正确！asyncio.gather 让所有爬取同时发起，等最慢的那个完成就返回。这是异步编程的核心优势——网络 I/O 密集型任务的并行处理。"
+               data-explanation-wrong="提示：代码里的 asyncio.gather() 就是答案。它让所有 URL 的爬取同时进行。">
+            <h3 class="quiz-question">Scraper 为什么爬取 20 个网页只需要约 2 秒而不是 40 秒？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为用了 asyncio.gather 并行爬取，所有请求同时发起</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为用了多进程，每个网页一个进程</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为用了缓存，第二次访问直接读取缓存</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

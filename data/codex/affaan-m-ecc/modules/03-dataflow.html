@@ -1,0 +1,209 @@
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">数据流转 -- 从你敲命令到代码生成</h1>
+      <p class="module-subtitle">跟踪一条指令在系统中的完整旅程，理解各组件如何协作。</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: The Request Journey -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">一条命令的完整旅程</h2>
+        <p>你在终端输入 <code>/tdd add user login</code>，这背后发生了一连串事件。点击下方逐步观看：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"你输入 /tdd add user login 命令"},
+          {"highlight":"flow-actor-2","label":"Command 解析器识别 /tdd 是测试驱动开发命令，提取意图","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-3","label":"Planner Agent 被唤醒，分析现有代码库结构，制定实施步骤","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-4","label":"Skill 加载 TDD 工作流模板 -- 先写测试、再写实现、最后重构","packet":true,"from":"actor-3","to":"actor-4"},
+          {"highlight":"flow-actor-5","label":"AI 模型按模板生成测试代码和实现代码","packet":true,"from":"actor-4","to":"actor-5"},
+          {"highlight":"flow-actor-5","label":"测试运行通过，代码提交到你的项目"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">⌨️</div>
+              <span>终端</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">📝</div>
+              <span>Command</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">📋</div>
+              <span>Planner</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">📦</div>
+              <span>Skill</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-5">
+              <div class="flow-actor-icon">🤖</div>
+              <span>AI 模型</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击 "Next Step" 开始</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">Next Step</button>
+            <button class="btn flow-reset-btn">Restart</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: CLI Entry Point Code Translation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">命令入口是如何工作的</h2>
+        <p>ECC 的 <span class="term" data-definition="CLI（Command Line Interface）是命令行界面，你在终端里输入命令与程序交互的方式。">CLI</span> 入口把你的命令路由到对应的脚本：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">const</span> COMMANDS = {</span>
+<span class="code-line">  <span class="code-property">install</span>: {</span>
+<span class="code-line">    <span class="code-property">script</span>: <span class="code-string">'install-apply.js'</span>,</span>
+<span class="code-line">    <span class="code-property">description</span>: <span class="code-string">'Install ECC content'</span>,</span>
+<span class="code-line">  },</span>
+<span class="code-line">  <span class="code-property">plan</span>: {</span>
+<span class="code-line">    <span class="code-property">script</span>: <span class="code-string">'install-plan.js'</span>,</span>
+<span class="code-line">    <span class="code-property">description</span>: <span class="code-string">'Inspect install plans'</span>,</span>
+<span class="code-line">  },</span>
+<span class="code-line">  <span class="code-property">doctor</span>: {</span>
+<span class="code-line">    <span class="code-property">script</span>: <span class="code-string">'doctor.js'</span>,</span>
+<span class="code-line">    <span class="code-property">description</span>: <span class="code-string">'Diagnose issues'</span>,</span>
+<span class="code-line">  },</span>
+<span class="code-line">};</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">定义一个命令表 -- 每个命令名对应一个脚本文件</p>
+              <p class="tl">当你输入 ecc install 时...</p>
+              <p class="tl">...系统会去找 install-apply.js 这个脚本执行</p>
+              <p class="tl">附带一段简短描述</p>
+              <p class="tl">当你输入 ecc plan 时...</p>
+              <p class="tl">...系统去找 install-plan.js</p>
+              <p class="tl">当你输入 ecc doctor 时...</p>
+              <p class="tl">...系统去找 doctor.js -- 它像医生一样诊断问题</p>
+              <p class="tl">这就是路由表 -- 命令名 → 脚本文件的映射</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Install Pipeline -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">安装流水线的四个阶段</h2>
+
+        <div class="step-cards">
+          <div class="step-card animate-in">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>解析意图</strong>
+              <p><code>install-apply.js</code> 读取你的参数（比如 typescript），决定你需要哪些组件</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>生成计划</strong>
+              <p>从 135 个 Skill、30 个 Agent 中筛选出匹配的子集，生成安装计划</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>执行安装</strong>
+              <p>将选中的文件复制到你的 <code>.claude/</code> 目录（或 Cursor/Codex 等对应目录）</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>记录状态</strong>
+              <p>在 <span class="term" data-definition="SQLite 是一种轻量级的数据库，整个数据库就是一个文件，非常适合本地工具使用。ECC 用它记录安装了什么、什么版本。">SQLite</span> 数据库中记录安装了哪些文件，方便后续升级和卸载</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">📖</div>
+          <div class="callout-content">
+            <strong class="callout-title">Dry-Run 模式</strong>
+            <p>加上 <code>--dry-run</code> 参数，ECC 只会显示计划安装什么，不会真的复制文件。这就像装修前先看效果图，满意了再施工。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: LLM Provider Interface -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">与 AI 模型对话的接口</h2>
+        <p>ECC 内部有一个 Python 编写的 <span class="term" data-definition="LLM（Large Language Model）是大语言模型，比如 Claude、GPT 等。Provider 是提供这些模型的供应商。">LLM Provider</span> 接口层：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">LLMProvider</span>(ABC):</span>
+<span class="code-line">    <span class="code-property">provider_type</span>: ProviderType</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">@abstractmethod</span></span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">generate</span>(<span class="code-keyword">self</span>, input): LLMOutput</span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">supports_tools</span>(<span class="code-keyword">self</span>) -> bool:</span>
+<span class="code-line">        <span class="code-keyword">return</span> <span class="code-keyword">True</span></span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">supports_vision</span>(<span class="code-keyword">self</span>) -> bool:</span>
+<span class="code-line">        <span class="code-keyword">return</span> <span class="code-keyword">False</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">定义一个抽象基类 -- 所有 AI 模型供应商都要实现它</p>
+              <p class="tl">每个供应商有自己的类型标识（Claude、OpenAI 等）</p>
+              <p class="tl">子类必须实现 generate 方法 -- 这是生成 AI 回复的核心</p>
+              <p class="tl">默认支持工具调用（function calling）</p>
+              <p class="tl">默认不支持图片理解能力</p>
+              <p class="tl">具体的供应商（如 Claude、OpenAI）可以覆盖这些默认值</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="对！ecc doctor 就像系统体检，检查哪些文件缺失、哪些被手动改乱了，然后告诉你怎么修。"
+               data-explanation-wrong="doctor 命令的作用是诊断，不是安装。想想医生是看病还是开药？">
+            <h3 class="quiz-question">如果安装 ECC 后发现有些功能不正常，你应该先运行什么命令？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>ecc install --force（强制重装）</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>ecc uninstall（卸载重来）</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>ecc doctor（先诊断问题在哪）</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

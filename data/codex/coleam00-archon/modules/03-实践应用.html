@@ -1,0 +1,222 @@
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">数据如何在 Archon 中流转</h1>
+      <p class="module-subtitle">追踪信息从用户输入到代码生成的完整旅程</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Data flow intro -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">一次请求的完整旅程</h2>
+        <p>想象你在网上购物。你点击「下单」后，信息要经过购物车、支付系统、仓库、物流——最后才送到你手上。Archon 中也一样，你的请求会在多个「站点」之间流转。</p>
+        <p>让我们追踪一次完整的请求：从你描述需求到最终生成可用的 Agent 代码。</p>
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>用户输入需求</strong>
+              <p>「帮我创建一个能搜索网页的 Agent」</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>推理者分析需求</strong>
+              <p>确定需要搜索工具、结果解析器、回复生成器</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>编码者生成代码</strong>
+              <p>根据推理结果写出完整的 Agent 代码</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>审查者检查质量</strong>
+              <p>发现代码问题，提出改进建议</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>输出最终代码</strong>
+              <p>用户获得可以直接使用的 Agent 代码</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Data flow animation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">可视化数据流</h2>
+        <p>点击「下一步」按钮，观察数据在各个角色之间是如何传递的。</p>
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"用户输入需求描述"},
+          {"highlight":"flow-actor-2","label":"推理者接收需求，调用 LLM 分析","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-2","label":"推理者制定执行计划，存入状态"},
+          {"highlight":"flow-actor-3","label":"编码者接收计划，开始生成代码","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-3","label":"编码者完成代码生成"},
+          {"highlight":"flow-actor-4","label":"审查者检查代码质量","packet":true,"from":"actor-3","to":"actor-4"},
+          {"highlight":"flow-actor-4","label":"审查者反馈改进建议"},
+          {"highlight":"flow-actor-3","label":"编码者根据反馈优化代码","packet":true,"from":"actor-4","to":"actor-3"},
+          {"highlight":"flow-actor-1","label":"最终代码返回给用户","packet":true,"from":"actor-3","to":"actor-1"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">👤</div>
+              <span>用户</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">🧠</div>
+              <span>推理者</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">💻</div>
+              <span>编码者</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">🔍</div>
+              <span>审查者</span>
+            </div>
+          </div>
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击「下一步」开始</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: State management -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">状态（State）：信息的载体</h2>
+        <p>在 Archon 中，所有角色共享一个「状态」对象。你可以把它想象成一个<span class="term" data-definition="状态（State）是程序在某一时刻保存的所有信息的集合。就像你玩游戏时的存档——记录了你的角色等级、装备、位置等信息。程序在运行时可以读取和修改这些信息。">游戏存档</span>——每个角色都可以查看和修改它，下一个角色看到的是上一个人更新后的版本。</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">AgentState</span>(TypedDict):</span>
+<span class="code-line">    user_request: <span class="code-function">str</span></span>
+<span class="code-line">    plan: <span class="code-function">Optional</span>[<span class="code-function">str</span>]</span>
+<span class="code-line">    generated_code: <span class="code-function">Optional</span>[<span class="code-function">str</span>]</span>
+<span class="code-line">    review_feedback: <span class="code-function">Optional</span>[<span class="code-function">str</span>]</span>
+<span class="code-line">    iterations: <span class="code-function">int</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">定义一个名为 AgentState 的数据结构。</p>
+              <p class="tl">user_request：用户的需求描述（文本）。</p>
+              <p class="tl">plan：推理者制定的计划（可选，一开始为空）。</p>
+              <p class="tl">generated_code：编码者生成的代码（可选）。</p>
+              <p class="tl">review_feedback：审查者的反馈意见（可选）。</p>
+              <p class="tl">iterations：迭代次数，记录优化了多少轮。</p>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键洞察：为什么用共享状态？</strong>
+            <p>共享状态就像一个共享文档（比如 Google Docs）。所有角色都能看到最新内容，也能添加自己的贡献。这样每个角色都不需要直接和其他角色对话——它们只需要读写状态就行了。这大大简化了系统的设计。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: The graph edges -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">工作流图：连接各个节点</h2>
+        <p>LangGraph 的工作流图不仅定义了有哪些角色（节点），还定义了它们之间的连接方式（边）。就像地铁线路图不仅标注了站点，还画出了线路走向。</p>
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line">workflow.<span class="code-function">add_edge</span>(START, <span class="code-string">"reasoner"</span>)</span>
+<span class="code-line">workflow.<span class="code-function">add_edge</span>(<span class="code-string">"reasoner"</span>, <span class="code-string">"coder"</span>)</span>
+<span class="code-line">workflow.<span class="code-function">add_conditional_edges</span>(</span>
+<span class="code-line">    <span class="code-string">"reviewer"</span>,</span>
+<span class="code-line">    should_continue,</span>
+<span class="code-line">    {<span class="code-string">"continue"</span>: <span class="code-string">"coder"</span>,</span>
+<span class="code-line">     <span class="code-string">"finish"</span>: END}</span>
+<span class="code-line">)</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">从起点出发，第一个经过推理者。</p>
+              <p class="tl">推理者完成后，流向编码者。</p>
+              <p class="tl">审查者之后是条件分支——</p>
+              <p class="tl">根据审查结果决定下一步。</p>
+              <p class="tl">如果需要继续优化，返回编码者。</p>
+              <p class="tl">如果质量达标，结束工作流。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">数据流理解测验</h2>
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！共享状态就像 Google Docs——所有角色都能读写同一份信息，不需要直接对话。"
+               data-explanation-wrong="再想想。Archon 的角色不是通过直接对话来协作的，它们通过什么来共享信息呢？">
+            <h3 class="quiz-question">Archon 中的角色通过什么方式共享信息？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>直接互相发送消息</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>保存在数据库中</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>通过共享的状态对象</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！conditional_edges（条件边）让工作流可以根据审查结果决定是继续优化还是结束。这让 Agent 能够自我改进！"
+               data-explanation-wrong="不太对。关键在于审查后的「条件分支」——它决定了工作流是继续循环还是结束。">
+            <h3 class="quiz-question">审查者（Reviewer）完成任务后，下一步取决于什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>总是直接返回给用户</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>根据审查结果决定是继续优化还是结束</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>总是返回推理者重新规划</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

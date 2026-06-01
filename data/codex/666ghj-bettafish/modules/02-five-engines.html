@@ -1,0 +1,373 @@
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 2: 五大引擎各司其职 — 深入每个 Agent 的内部
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">五大引擎各司其职</h1>
+      <p class="module-subtitle">深入理解 MindSpider、Insight Agent、Media Agent、Query Agent 和 Report Agent 各自的工具集与内部工作方式。</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: MindSpider — the data collector -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">MindSpider：不知疲倦的数据采集蜘蛛</h2>
+        <p>就像蜘蛛结网一样，MindSpider 在互联网上织起一张覆盖 30+ 社媒的采集网。它有两个核心模块：</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-accent-light)">&#x1F4F0;</div>
+            <div>
+              <strong>BroadTopicExtraction（广域话题提取）</strong>
+              <p>每天自动抓取热点新闻，用 <span class="term" data-definition="LLM（大语言模型）：像 GPT、Qwen 这样的人工智能模型，能理解和生成人类语言。在这里它用来从新闻中自动提取关键词。">LLM</span> 提取关键词，存入数据库</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-info-light)">&#x1F50D;</div>
+            <div>
+              <strong>DeepSentimentCrawling（深度舆情爬取）</strong>
+              <p>根据关键词下钻到各平台抓取帖子和评论，支持微博、小红书、抖音、快手、B站等七大平台</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># MindSpider/main.py — 爬虫主程序入口</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">MindSpider</span>:</span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self):</span>
+<span class="code-line">        self.broad_topic_path = (</span>
+<span class="code-line">            self.project_root / <span class="code-string">"BroadTopicExtraction"</span>)</span>
+<span class="code-line">        self.deep_sentiment_path = (</span>
+<span class="code-line">            self.project_root / <span class="code-string">"DeepSentimentCrawling"</span>)</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">MindSpider 主类——整个爬虫系统的总指挥</p>
+              <p class="tl">初始化时设置两个子模块的路径</p>
+              <p class="tl">广域话题提取模块——负责"今天有什么热点"</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">深度舆情爬取模块——负责"挖掘大众评论"</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Insight Agent — the database miner -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Insight Agent：私有数据库的深度矿工</h2>
+        <p>Insight Agent 的专长是在本地舆情数据库中挖掘金矿。它拥有 5 种专用查询工具，还有一个秘密武器——<strong>情感分析模型</strong>。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#x1F525;</div>
+            <h4 class="pattern-title">search_hot_content</h4>
+            <p class="pattern-desc">查找指定时间范围内综合热度最高的内容——综合点赞、评论、分享、观看的加权评分</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">&#x1F30D;</div>
+            <h4 class="pattern-title">search_topic_globally</h4>
+            <p class="pattern-desc">在整个数据库中全局搜索与特定话题相关的所有内容和评论</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: #EDE8F5">&#x1F4C5;</div>
+            <h4 class="pattern-title">search_topic_by_date</h4>
+            <p class="pattern-desc">在指定历史日期范围内搜索与话题相关的内容</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#x1F4AC;</div>
+            <h4 class="pattern-title">get_comments_for_topic</h4>
+            <p class="pattern-desc">专门提取公众对某一话题的评论数据——这就是"听到最真实声音"的关键</p>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># InsightEngine/tools/search.py</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">MediaCrawlerDB</span>:</span>
+<span class="code-line">    <span class="code-comment"># 权重定义</span></span>
+<span class="code-line">    W_LIKE    = <span class="code-number">1.0</span></span>
+<span class="code-line">    W_COMMENT = <span class="code-number">5.0</span></span>
+<span class="code-line">    W_SHARE   = <span class="code-number">10.0</span>  <span class="code-comment"># 高价值互动</span></span>
+<span class="code-line">    W_VIEW    = <span class="code-number">0.1</span></span>
+<span class="code-line">    W_DANMAKU = <span class="code-number">0.5</span></span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">本地舆情数据库查询工具集</p>
+              <p class="tl">热度计算的权重配置——不同互动价值不同</p>
+              <p class="tl">点赞权重 1.0——基础的互动指标</p>
+              <p class="tl">评论权重 5.0——评论代表更深度的参与</p>
+              <p class="tl">分享/转发权重 10.0——传播力最强，价值最高</p>
+              <p class="tl">观看权重 0.1——看的人多但价值较低</p>
+              <p class="tl">弹幕权重 0.5——中等互动深度</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">&#x1F9E0;</div>
+          <div class="callout-content">
+            <strong class="callout-title">情感分析武器库</strong>
+            <p>Insight Agent 集成了多种情感分析模型：BERT 中文微调、GPT-2 LoRA 微调、小参数 Qwen3 微调、多语言情感分析，甚至还有传统的 <span class="term" data-definition="SVM（支持向量机）：一种经典的机器学习算法，通过找到最优分界线来分类数据——比如把评论分为"正面"和"负面"。">SVM</span> 机器学习方法。不同模型各有优势，系统可以根据场景灵活选择。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Media Agent — multimodal analyst -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Media Agent：看图看视频的分析师</h2>
+        <p>Media Agent 是整个系统里"眼睛"最好的成员。它使用博查多模态搜索引擎，能理解图片和视频内容。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># MediaEngine/agent.py</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">DeepSearchAgent</span>:</span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, config=<span class="code-keyword">None</span>):</span>
+<span class="code-line">        self.llm_client = self._initialize_llm()</span>
+<span class="code-line">        self.search_agency = (</span>
+<span class="code-line">            BochaMultimodalSearch(</span>
+<span class="code-line">                api_key=self.config.BOCHA_API_KEY))</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">Media Agent 的主类</p>
+              <p class="tl">初始化时准备两样东西</p>
+              <p class="tl">1. LLM 客户端——用来理解和分析内容</p>
+              <p class="tl">2. 多模态搜索引擎——能搜图片和视频</p>
+              <p class="tl">使用博查搜索 API 作为多模态搜索工具</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Query Agent — precision search -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Query Agent：精准信息搜索专家</h2>
+        <p>Query Agent 使用 <span class="term" data-definition="Tavily：一个专为 AI Agent 设计的搜索 API，能返回结构化的搜索结果，包括新闻发布日期、相关性评分等，比传统搜索更适合 AI 分析使用。">Tavily</span> 搜索工具集，专门负责精准的国内外新闻搜索。它有 6 种搜索模式：</p>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">basic_search_news</code>
+            <span class="badge-desc">标准通用新闻搜索——快速获取概况</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">deep_search_news</code>
+            <span class="badge-desc">最全面的深度分析——适合重要话题</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">search_news_last_24_hours</code>
+            <span class="badge-desc">24 小时最新动态——时效性最强</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">search_news_last_week</code>
+            <span class="badge-desc">过去一周主要报道——看趋势</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">search_images_for_news</code>
+            <span class="badge-desc">搜索新闻相关图片——视觉维度</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">search_news_by_date</code>
+            <span class="badge-desc">指定历史日期范围搜索——回溯事件</span>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># QueryEngine/agent.py</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">DeepSearchAgent</span>:</span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, config=<span class="code-keyword">None</span>):</span>
+<span class="code-line">        self.llm_client = self._initialize_llm()</span>
+<span class="code-line">        self.search_agency = TavilyNewsAgency(</span>
+<span class="code-line">            api_key=self.config.TAVILY_API_KEY)</span>
+<span class="code-line">        <span class="code-comment"># 初始化搜索、反思、总结等节点</span></span>
+<span class="code-line">        self._initialize_nodes()</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">Query Agent 主类——和 Media Agent 结构类似</p>
+              <p class="tl">初始化 LLM 客户端</p>
+              <p class="tl">但搜索工具不同——用 Tavily 新闻搜索</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">然后初始化内部的处理节点管线</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Report Agent — the publisher -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Report Agent：把分析变成精美报告</h2>
+        <p>Report Agent 是整个系统的最后一棒。它把三个 Agent 的分析结果和论坛讨论内容，变成一份精美的交互式 HTML 报告。这个过程有六个步骤：</p>
+
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <p>模板选择</p>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <p>布局设计</p>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <p>篇幅规划</p>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">4</div>
+            <p>章节生成</p>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">5</div>
+            <p>IR 装订</p>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">6</div>
+            <p>HTML 渲染</p>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#x1F4D6;</div>
+          <div class="callout-content">
+            <strong class="callout-title">什么是 IR？</strong>
+            <p><span class="term" data-definition="IR（中间表示，Intermediate Representation）：一种数据格式，介于原始分析和最终报告之间。就像建筑图纸——先把设计意图画成标准化的图纸（IR），再由施工队（渲染器）按图纸盖房子（HTML 报告）。">IR</span> 是 Report Agent 的独创设计。它不直接生成 HTML，而是先生成一个标准化的 JSON 结构（IR），再由渲染器翻译成 HTML。这样做的好处是：同一份 IR 可以渲染成不同格式——HTML 网页、PDF 文档、Markdown 文本。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 6: Drag-and-drop matching -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">把引擎和它的专长匹配起来</h2>
+        <p>把左侧的 Agent 名称拖到右侧对应的描述上：</p>
+
+        <div class="dnd-container" id="dnd-module2">
+          <div class="dnd-chips">
+            <div class="dnd-chip" draggable="true" data-answer="insight">Insight Agent</div>
+            <div class="dnd-chip" draggable="true" data-answer="media">Media Agent</div>
+            <div class="dnd-chip" draggable="true" data-answer="query">Query Agent</div>
+            <div class="dnd-chip" draggable="true" data-answer="mindspider">MindSpider</div>
+            <div class="dnd-chip" draggable="true" data-answer="report">Report Agent</div>
+          </div>
+          <div class="dnd-zones">
+            <div class="dnd-zone" data-correct="mindspider">
+              <p class="dnd-zone-label">7x24 爬虫集群，覆盖 30+ 社媒平台</p>
+              <div class="dnd-zone-target">拖到这里</div>
+            </div>
+            <div class="dnd-zone" data-correct="insight">
+              <p class="dnd-zone-label">私有数据库挖掘 + 情感分析模型</p>
+              <div class="dnd-zone-target">拖到这里</div>
+            </div>
+            <div class="dnd-zone" data-correct="media">
+              <p class="dnd-zone-label">多模态搜索——能理解图片和短视频</p>
+              <div class="dnd-zone-target">拖到这里</div>
+            </div>
+            <div class="dnd-zone" data-correct="query">
+              <p class="dnd-zone-label">Tavily 新闻搜索——6 种精准搜索模式</p>
+              <div class="dnd-zone-target">拖到这里</div>
+            </div>
+            <div class="dnd-zone" data-correct="report">
+              <p class="dnd-zone-label">IR 中间表示 → HTML/PDF/Markdown 渲染</p>
+              <div class="dnd-zone-target">拖到这里</div>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="checkDnD('dnd-module2')">检查匹配</button>
+          <button class="btn" onclick="resetDnD('dnd-module2')">重新匹配</button>
+        </div>
+      </section>
+
+      <!-- Screen 7: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验你的理解</h2>
+
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！Insight Agent 使用本地数据库（MediaCrawlerDB）+ 情感分析模型 + 聚类采样来挖掘数据，而不是在线搜索。"
+               data-explanation-wrong="仔细看看 Insight Agent 的工具集——它的数据来源是什么？是在线搜索引擎还是本地数据库？">
+            <h3 class="quiz-question">如果要分析的是企业内部数据库中的客户反馈，哪个 Agent 最适合？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Query Agent——因为它擅长精准搜索</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Insight Agent——因为它专攻私有数据库挖掘</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Media Agent——因为它能处理多模态内容</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！热度 = 点赞 x 1 + 评论 x 5 + 分享 x 10 + 观看 x 0.1。分享/转发的传播力最强，所以权重最高。"
+               data-explanation-wrong="回忆一下 Insight Agent 的热度计算权重——哪种互动的权重是 10.0？">
+            <h3 class="quiz-question">在 Insight Agent 的热度计算中，哪种互动的权重最高？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>点赞——因为参与人数最多</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>评论——因为它代表更深度的参与</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>分享/转发——因为传播力最强</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="完全正确！IR 是中间表示——先把内容变成标准化的 JSON，再由渲染器翻译成不同格式。这就像有了蓝图，可以盖不同风格的房子。"
+               data-explanation-wrong="想想 Report Agent 为什么要引入 IR 这一层——是为了生成更多格式，还是为了速度？">
+            <h3 class="quiz-question">Report Agent 为什么要用 IR 中间表示，而不是直接生成 HTML？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为直接生成 HTML 速度太慢</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>同一份 IR 可以渲染成 HTML、PDF、Markdown 等多种格式</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为 LLM 不擅长直接写 HTML</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重新作答</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

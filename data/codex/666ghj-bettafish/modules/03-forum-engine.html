@@ -1,0 +1,359 @@
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 3: 论坛协作机制 — Agent 们如何"讨论"出更好的答案
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">论坛协作机制</h1>
+      <p class="module-subtitle">BettaFish 最独特的设计：三个 Agent 不只是各自分析，而是通过"论坛"进行多轮辩论、纠正和融合，催生集体智能。</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Why collaboration matters -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">为什么单个 Agent 不够？</h2>
+        <p>想象你是一个公司老板，要做一个重大决策。你会只问一个部门的意见吗？当然不会——你会召集市场部（看外部趋势）、客服部（听用户声音）、财务部（看数据）。让不同视角碰撞，才能做出更好的决策。</p>
+        <p>BettaFish 的"论坛"就是这个道理。三个 Agent 各有专长，但单独看都有盲区。通过论坛讨论，它们互相补充、互相纠错，最终产出远超任何一个 Agent 独自能做到的分析质量。</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">&#x1F4A1;</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键洞察</strong>
+            <p>在 AI 系统中，<span class="term" data-definition="多智能体系统（Multi-Agent System）：多个 AI Agent 协同工作的架构。每个 Agent 有自己的专长和工具，通过协作解决单个 Agent 无法处理的复杂任务。就像一个团队，每个人都有自己的角色。">多智能体协作</span> 的核心优势不只是"干得更快"，而是"想得更全面"。通过引入不同视角和辩论机制，可以有效减少单一模型的偏见和盲区。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: ForumEngine internals — how it monitors -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">ForumEngine 如何监听 Agent 发言？</h2>
+        <p>ForumEngine 的核心是一个 <span class="term" data-definition="LogMonitor（日志监控器）：一个后台线程，持续监视三个日志文件（insight.log、media.log、query.log）的变化，从中提取 Agent 的"发言"内容，写入论坛日志。就像会议室里的书记员，记录每个人的发言。">LogMonitor</span>。它监控三个日志文件，一旦发现 Agent 产出了有价值的分析内容，就把它记录到论坛日志（forum.log）中。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># ForumEngine/monitor.py</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">LogMonitor</span>:</span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, log_dir=<span class="code-string">"logs"</span>):</span>
+<span class="code-line">        self.monitored_logs = {</span>
+<span class="code-line">            <span class="code-string">'insight'</span>: self.log_dir / <span class="code-string">'insight.log'</span>,</span>
+<span class="code-line">            <span class="code-string">'media'</span>:   self.log_dir / <span class="code-string">'media.log'</span>,</span>
+<span class="code-line">            <span class="code-string">'query'</span>:   self.log_dir / <span class="code-string">'query.log'</span></span>
+<span class="code-line">        }</span>
+<span class="code-line">        self.agent_speeches_buffer = []</span>
+<span class="code-line">        self.host_speech_threshold = <span class="code-number">5</span></span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">日志监控器——论坛引擎的核心组件</p>
+              <p class="tl">监控三个日志文件——每个 Agent 一个</p>
+              <p class="tl">Insight Agent 的日志</p>
+              <p class="tl">Media Agent 的日志</p>
+              <p class="tl">Query Agent 的日志</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">Agent 发言缓冲区——收集发言</p>
+              <p class="tl">每收集 5 条发言，触发一次主持人发言</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Forum Host — the moderator -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">论坛主持人：智能的讨论引导者</h2>
+        <p>每收集 5 条 Agent 发言，ForumEngine 就会触发一个独立的 LLM（论坛主持人）来生成引导性发言。主持人不是简单地总结，而是<strong>梳理事件、整合观点、纠正错误、引导方向</strong>。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># ForumEngine/llm_host.py</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">ForumHost</span>:</span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">generate_host_speech</span>(self, forum_logs):</span>
+<span class="code-line">        parsed = self._parse_forum_logs(forum_logs)</span>
+<span class="code-line">        system_prompt = self._build_system_prompt()</span>
+<span class="code-line">        user_prompt = self._build_user_prompt(parsed)</span>
+<span class="code-line">        response = self._call_qwen_api(</span>
+<span class="code-line">            system_prompt, user_prompt)</span>
+<span class="code-line">        <span class="code-keyword">return</span> response[<span class="code-string">"content"</span>]</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">论坛主持人类——用一个独立 LLM 来引导讨论</p>
+              <p class="tl">生成主持人发言的流程：</p>
+              <p class="tl">1. 解析论坛日志，提取 Agent 发言</p>
+              <p class="tl">2. 构建系统提示——定义主持人角色</p>
+              <p class="tl">3. 构建用户提示——附上最近的发言内容</p>
+              <p class="tl">4. 调用 LLM API 生成发言</p>
+              <p class="tl">5. 返回主持人的发言内容</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">&#x26A0;&#xFE0F;</div>
+          <div class="callout-content">
+            <strong class="callout-title">防止"回音室"效应</strong>
+            <p>注意：主持人使用的是<strong>独立的 LLM</strong>（可配置为不同于分析 Agent 的模型），这确保了它的视角不会和分析 Agent 完全一致——这是 BettaFish 避免集体偏见的关键设计。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Group Chat Animation — the forum in action -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">论坛讨论实况模拟</h2>
+        <p>点击"下一条消息"，体验一次真实的论坛讨论流程。注意观察：每个 Agent 从不同角度分析同一个话题，主持人如何整合和引导。</p>
+
+        <div class="chat-window" id="chat-module3">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="query" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">Q</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">Query Agent</span>
+                <p>我刚搜索了过去 24 小时关于"武汉大学"的新闻，发现 3 条热点：1) 校庆活动引发关注；2) 某论文争议在学术圈扩散；3) 招生政策调整被媒体解读。其中第 2 条热度上升最快。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="insight" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">I</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Insight Agent</span>
+                <p>我从数据库中检索到关于该论文的 2,847 条评论。情感分析显示：62% 为中性、23% 为负面、15% 为正面。负面评论集中在"学术诚信"话题，其中 40% 来自教育从业者账号。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="media" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">M</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">Media Agent</span>
+                <p>我在抖音和 B 站上找到了 15 个相关视频，总播放量 320 万。视频评论的情绪比文字评论更激烈——负面比例达 35%。值得注意的是，一条教授回应视频获得了最高的正面互动。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="query" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">Q</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">Query Agent</span>
+                <p>补充搜索发现，该论文争议最早由一个学术自媒体在知乎发起，12 小时后被微博大 V 转发开始扩散。目前尚未被主流官媒报道。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="insight" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">I</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Insight Agent</span>
+                <p>聚类分析显示评论者主要分为三类：学术圈人士（关注规范）、在校生（关注学校声誉）、普通网民（跟风讨论）。建议后续重点分析学术圈的观点分布。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="5" data-sender="host" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">H</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">主持人</span>
+                <p>综合各方信息：事件目前处于"自媒体扩散→主流媒体关注前"阶段。三个关键发现：1) 负面情绪集中在学术圈，尚未大规模外溢；2) 视频平台的情绪比文字平台更极端；3) 教授回应视频是正面转折点。建议 Query Agent 追踪官媒动态，Media Agent 关注短视频传播路径变化。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module3-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条消息</button>
+            <button class="btn chat-all-btn">播放全部</button>
+            <button class="btn chat-reset-btn">重新播放</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: How Agents read forum — the forum_reader tool -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Agent 们如何"听到"论坛讨论？</h2>
+        <p>论坛不是单向的——Agent 们也有一个工具叫 <code>forum_reader</code>，可以读取主持人的引导发言和其他 Agent 的分析，然后据此调整自己的研究方向。这就是"交流融合"。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># InsightEngine/nodes/summary_node.py</span></span>
+<span class="code-line"><span class="code-keyword">from</span> utils.forum_reader <span class="code-keyword">import</span> (</span>
+<span class="code-line">    get_latest_host_speech,</span>
+<span class="code-line">    format_host_speech_for_prompt</span>
+<span class="code-line">)</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 在总结节点中读取主持人发言</span></span>
+<span class="code-line">host_speech = get_latest_host_speech()</span>
+<span class="code-line"><span class="code-keyword">if</span> host_speech:</span>
+<span class="code-line">    guidance = format_host_speech_for_prompt(</span>
+<span class="code-line">        host_speech)</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">导入论坛读取工具</p>
+              <p class="tl">get_latest_host_speech：获取主持人最新发言</p>
+              <p class="tl">format_host_speech_for_prompt：格式化为提示词</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">在生成总结前，先读取主持人说了什么</p>
+              <p class="tl">如果有主持人引导</p>
+              <p class="tl">把主持人的引导格式化为提示词的一部分</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 6: Message flow animation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">论坛消息流——数据如何流转</h2>
+        <p>点击"下一步"，观察一条消息从 Agent 到论坛再到其他 Agent 的完整流转路径：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"Agent 生成分析结果，写入自己的日志文件"},
+          {"highlight":"flow-actor-2","label":"LogMonitor 检测到日志变化，提取有价值的发言","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-2","label":"发言被写入 forum.log，添加 Agent 标签"},
+          {"highlight":"flow-actor-3","label":"缓冲区积累 5 条发言，触发主持人 LLM","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-3","label":"主持人分析发言，生成引导内容写入 forum.log"},
+          {"highlight":"flow-actor-1","label":"其他 Agent 通过 forum_reader 读取主持人引导，调整研究方向","packet":true,"from":"actor-3","to":"actor-1"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">&#x1F916;</div>
+              <span>Agent</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">&#x1F4DD;</div>
+              <span>LogMonitor</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">&#x1F3DB;&#xFE0F;</div>
+              <span>主持人</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label">点击"下一步"开始追踪消息流</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 7: Spot the bug challenge -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">找找这段代码的 Bug</h2>
+        <p>下面是 ForumEngine 的日志监控代码，其中有一个微妙的 Bug。点击你认为有问题的那一行：</p>
+
+        <div class="bug-challenge">
+          <h3>ForumEngine 日志处理中的 Bug</h3>
+          <div class="bug-code">
+            <div class="bug-line" data-line="1" onclick="checkBugLine(this, false)">
+              <span class="line-num">1</span>
+              <code><span class="code-keyword">def</span> <span class="code-function">_trigger_host_speech</span>(self):</code>
+            </div>
+            <div class="bug-line" data-line="2" onclick="checkBugLine(this, false)">
+              <span class="line-num">2</span>
+              <code>    recent_speeches = self.agent_speeches_buffer[:<span class="code-number">5</span>]</code>
+            </div>
+            <div class="bug-line" data-line="3" onclick="checkBugLine(this, true)" data-explanation="找到了！这里只取了前 5 条发言，但如果缓冲区超过 5 条（比如 10 条），后面的发言永远不会被处理。而且清空操作 self.agent_speeches_buffer = self.agent_speeches_buffer[5:] 是在生成发言之后执行的，如果在生成过程中有新发言加入，它们可能被意外丢弃。">
+              <span class="line-num">3</span>
+              <code>    <span class="code-keyword">if</span> len(recent_speeches) &lt; <span class="code-number">5</span>: <span class="code-keyword">return</span></code>
+            </div>
+            <div class="bug-line" data-line="4" onclick="checkBugLine(this, false)">
+              <span class="line-num">4</span>
+              <code>    host_speech = generate_host_speech(recent_speeches)</code>
+            </div>
+            <div class="bug-line" data-line="5" onclick="checkBugLine(this, false)">
+              <span class="line-num">5</span>
+              <code>    self.agent_speeches_buffer = self.agent_speeches_buffer[<span class="code-number">5</span>:]</code>
+            </div>
+          </div>
+          <div class="bug-feedback"></div>
+        </div>
+      </section>
+
+      <!-- Screen 8: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验你的理解</h2>
+
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！ForumEngine 使用独立的 LLM 作为主持人，确保它的视角不会和分析 Agent 完全一致，这是避免集体偏见的关键设计。"
+               data-explanation-wrong="主持人的独特之处在于它的"独立性"——它使用什么模型？它和分析 Agent 是同一个吗？">
+            <h3 class="quiz-question">ForumEngine 的主持人（ForumHost）使用什么来生成引导发言？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>复用分析 Agent 的同一个 LLM，节省 API 调用</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>一个独立的 LLM（可配置不同模型），保证视角多样性</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>不使用 LLM，用固定规则来引导讨论</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！forum_reader 工具让 Agent 可以读取主持人的引导发言，然后据此调整自己的研究方向——这就是"交流融合"环节。"
+               data-explanation-wrong="Agent 们不是只看自己的分析结果。它们有一个专门的工具来获取论坛信息——叫什么？">
+            <h3 class="quiz-question">Agent 们如何"听到"论坛中主持人的引导？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>主持人直接调用 Agent 的 API 推送引导内容</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Agent 们共享同一个内存空间，自动获取最新发言</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Agent 使用 forum_reader 工具主动读取论坛日志</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！每积累 5 条 Agent 发言就触发一次主持人发言。这个频率既保证了讨论的连贯性，又不会因为太频繁而影响分析效率。"
+               data-explanation-wrong="回顾 LogMonitor 的初始化代码——有一个叫 host_speech_threshold 的变量，它的值是多少？">
+            <h3 class="quiz-question">论坛主持人每隔多少条 Agent 发言触发一次？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>每 3 条发言触发一次</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>每 5 条发言触发一次</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>每 10 条发言触发一次</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重新作答</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

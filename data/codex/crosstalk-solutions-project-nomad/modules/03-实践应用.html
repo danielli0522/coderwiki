@@ -1,0 +1,286 @@
+<section class="module" id="module-3">
+  <div class="screen">
+    <h2>实践应用</h2>
+    <p>在本模块中，我们将通过实际操作来学习如何使用工具进行 Android 逆向工程。</p>
+
+    <!-- 步骤 1 -->
+    <section class="screen animate-in">
+      <h2>步骤 1：搭建逆向工程环境</h2>
+      <p>在开始逆向分析之前，你需要搭建一个完整的工具链。以下是推荐的环境配置：</p>
+
+      <div class="step-cards">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>安装 JDK 17+</strong>
+            <p>Java 开发工具包是所有 Android 逆向工具的基础依赖。确保 JAVA_HOME 环境变量正确设置。</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>安装 jadx</strong>
+            <p>Dex 到 Java 的反编译器，是静态分析的核心工具。支持图形界面和命令行两种模式。</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>安装 apktool</strong>
+            <p>APK 资源解析工具，可以提取 AndroidManifest.xml、资源文件和 Smali 代码。</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>安装 Frida</strong>
+            <p>动态插桩工具，可以在运行时修改应用行为、拦截函数调用和读取内存数据。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-translation">
+        <div class="code">
+          <pre><code class="language-bash"># 环境安装命令
+# 安装 jadx（macOS）
+brew install jadx
+
+# 安装 apktool
+brew install apktool
+
+# 安装 Frida（需要 Python3）
+pip3 install frida-tools
+
+# 验证安装
+jadx --version
+apktool --version
+frida --version</code></pre>
+        </div>
+        <div class="translation">
+          <p>工具安装验证步骤：</p>
+          <div class="translation-lines">
+            <p class="tl">macOS 用户可以直接用 Homebrew 安装 jadx 和 apktool</p>
+            <p class="tl">Frida 通过 pip 安装，需要 Python 3 环境</p>
+            <p class="tl">安装完成后运行 --version 验证安装是否成功</p>
+            <p class="tl">如果遇到权限问题，可能需要使用 sudo 或虚拟环境</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 步骤 2 -->
+    <section class="screen animate-in">
+      <h2>步骤 2：反编译 APK 并理解输出结构</h2>
+      <p>使用 jadx 反编译 APK 后，你会得到一个完整的 Java 项目结构。让我们理解每个部分：</p>
+
+      <div class="code-translation">
+        <div class="code">
+          <pre><code class="language-bash"># 反编译 APK
+jadx -d output/ target_app.apk
+
+# 输出目录结构：
+# output/
+# ├── resources/          # 资源文件
+# │   ├── AndroidManifest.xml   # 应用清单（组件声明）
+# │   ├── res/                  # 布局、图片、字符串等
+# │   └── assets/               # 原始资源文件
+# └── sources/            # 反编译的 Java 源代码
+#     └── com/
+#         └── example/
+#             ├── MainActivity.java
+#             ├── api/
+#             │   ├── ApiClient.java       # API 客户端
+#             │   ├── ApiService.java      # API 接口定义
+#             │   └── ApiInterceptor.java  # 请求拦截器
+#             ├── model/
+#             │   ├── User.java
+#             │   └── Response.java
+#             └── utils/
+#                 ├── Constants.java       # 常量定义（含 API URL）
+#                 └── CryptoUtil.java      # 加密工具</code></pre>
+        </div>
+        <div class="translation">
+          <p>反编译输出结构解读：</p>
+          <div class="translation-lines">
+            <p class="tl">resources/ 目录包含应用的所有资源文件</p>
+            <p class="tl">AndroidManifest.xml 是最重要的文件，记录了所有组件</p>
+            <p class="tl">sources/ 目录是反编译得到的 Java 源代码</p>
+            <p class="tl">api/ 子目录通常包含网络通信相关的代码</p>
+            <p class="tl">Constants.java 中经常包含硬编码的 API 基础 URL</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">💡</div>
+        <div class="callout-content">
+          <strong class="callout-title">反编译结果的质量</strong>
+          <p>jadx 的反编译质量通常很高，但对于经过 ProGuard/R8 混淆的代码，类名和方法名会被替换为 a、b、c 等无意义的名称。此时需要通过上下文推断代码的功能。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 步骤 3 -->
+    <section class="screen animate-in">
+      <h2>步骤 3：识别和提取 API 调用</h2>
+      <p>API 提取是逆向工程的核心目标。不同网络框架有不同的 API 定义方式：</p>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid #3B82F6">
+          <div class="pattern-icon" style="background: #3B82F6">🔗</div>
+          <h4 class="pattern-title">Retrofit 接口</h4>
+          <p class="pattern-desc">使用 Java 注解定义 API 端点。搜索 @GET、@POST、@PUT、@DELETE 注解即可找到所有 API 定义。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid #10B981">
+          <div class="pattern-icon" style="background: #10B981">🌐</div>
+          <h4 class="pattern-title">OkHttp 请求</h4>
+          <p class="pattern-desc">通过 Request.Builder 构建请求。搜索 new Request.Builder() 可以找到所有手动构建的 HTTP 请求。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid #F59E0B">
+          <div class="pattern-icon" style="background: #F59E0B">📡</div>
+          <h4 class="pattern-title">硬编码 URL</h4>
+          <p class="pattern-desc">直接在代码中写死的 URL 字符串。搜索 "http://" 和 "https://" 可以找到所有硬编码的 URL。</p>
+        </div>
+      </div>
+
+      <div class="code-translation">
+        <div class="code">
+          <pre><code class="language-java">// Retrofit API 接口定义示例
+public interface ApiService {
+    @GET("api/v1/users/{id}")
+    Call&lt;User&gt; getUser(@Path("id") String userId);
+
+    @POST("api/v1/auth/login")
+    Call&lt;AuthResponse&gt; login(@Body LoginRequest request);
+
+    @GET("api/v1/products")
+    Call&lt;List&lt;Product&gt;&gt; getProducts(
+        @Query("category") String category,
+        @Query("page") int page
+    );
+
+    @Multipart
+    @POST("api/v1/upload")
+    Call&lt;UploadResponse&gt; uploadFile(
+        @Part MultipartBody.Part file
+    );
+}</code></pre>
+        </div>
+        <div class="translation">
+          <p>Retrofit API 定义解读：</p>
+          <div class="translation-lines">
+            <p class="tl">@GET 注解定义了 GET 请求和路径</p>
+            <p class="tl">@Path 替换 URL 中的 {id} 占位符</p>
+            <p class="tl">@POST 注解定义了 POST 请求</p>
+            <p class="tl">@Body 注解标记请求体参数</p>
+            <p class="tl">@Query 注解添加 URL 查询参数</p>
+            <p class="tl">@Multipart 用于文件上传接口</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 步骤 4：自动提取 -->
+    <section class="screen animate-in">
+      <h2>步骤 4：使用自动化工具批量提取</h2>
+      <p>手动查找效率太低，Project Nomad 提供了自动化脚本来批量提取 API 调用：</p>
+
+      <div class="code-translation">
+        <div class="code">
+          <pre><code class="language-python"># API 自动提取器核心逻辑
+class ApiExtractor:
+    """从反编译的源代码中自动提取 API 端点"""
+
+    def extract(self, source_dir: str) -> List[ApiEndpoint]:
+        endpoints = []
+
+        # 策略 1：扫描 Retrofit 注解
+        for file in find_java_files(source_dir):
+            if "@GET" in file.content or "@POST" in file.content:
+                endpoints.extend(
+                    self._parse_retrofit(file)
+                )
+
+        # 策略 2：扫描 OkHttp 请求构建
+        for file in find_java_files(source_dir):
+            if "Request.Builder" in file.content:
+                endpoints.extend(
+                    self._parse_okhttp(file)
+                )
+
+        # 策略 3：扫描硬编码 URL
+        for url in find_urls(source_dir):
+            endpoints.append(
+                ApiEndpoint(url=url, source="hardcoded")
+            )
+
+        return self._deduplicate(endpoints)
+
+    def _parse_retrofit(self, file):
+        """解析 Retrofit 接口定义"""
+        endpoints = []
+        for match in re.finditer(
+            r'@(GET|POST|PUT|DELETE|PATCH)\("([^"]+)"\)',
+            file.content
+        ):
+            method = match.group(1)
+            path = match.group(2)
+            endpoints.append(
+                ApiEndpoint(method=method, path=path,
+                           source_file=file.path)
+            )
+        return endpoints</code></pre>
+        </div>
+        <div class="translation">
+          <p>API 自动提取器的工作原理：</p>
+          <div class="translation-lines">
+            <p class="tl">三管齐下：Retrofit 注解 + OkHttp 构建器 + 硬编码 URL</p>
+            <p class="tl">Retrofit 解析通过正则表达式匹配注解</p>
+            <p class="tl">每种策略独立扫描，最后合并去重</p>
+            <p class="tl">每个端点都记录了来源文件，方便回溯</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">💡</div>
+        <div class="callout-content">
+          <strong class="callout-title">提取结果的利用</strong>
+          <p>提取出的 API 端点列表可以用于多种场景：安全漏洞扫描、后端 API 文档编写、竞品功能分析，甚至可以用来自动化测试应用的接口稳定性。</p>
+        </div>
+      </div>
+    </section>
+
+    <h3>步骤 5：反编译命令</h3>
+    <div class="code-translation">
+      <div class="code">
+        <pre>// 反编译命令
+bash scripts/decompile.sh app.apk</pre>
+      </div>
+      <div class="translation">
+        <p>这条命令会启动 jadx 反编译器，将 APK 文件中的 DEX 字节码转换为可读的 Java 源代码。输出结果会保存在 output 目录中。</p>
+      </div>
+    </div>
+    <h3>步骤 6：提取 API 调用</h3>
+    <div class="code-translation">
+      <div class="code">
+        <pre>// 查找 API 调用
+bash scripts/find-api-calls.sh output/sources/</pre>
+      </div>
+      <div class="translation">
+        <p>这条命令会扫描反编译后的源代码，自动识别所有的 HTTP API 调用，包括 Retrofit 接口定义、OkHttp 请求和硬编码的 URL 地址。</p>
+      </div>
+    </div>
+    <div class="callout">
+      <p>提示：API 提取是逆向工程中最实用的技能之一。通过提取应用的 API，你可以了解应用如何与后端服务器通信，这对于安全研究和应用分析非常有价值。</p>
+    </div>
+    <div class="quiz">
+      <p>小测试：find-api-calls.sh 脚本可以识别哪些类型的 API 调用？</p>
+      <ul>
+        <li data-correct="false">仅 Retrofit 接口</li>
+        <li data-correct="false">仅 OkHttp 请求</li>
+        <li data-correct="true">Retrofit 接口、OkHttp 请求和硬编码 URL</li>
+      </ul>
+    </div>
+  </div>
+</section>

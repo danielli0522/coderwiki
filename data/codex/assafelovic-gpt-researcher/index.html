@@ -1,0 +1,1479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GPT Researcher：自主研究Agent源码解析</title>
+
+  <!-- Google Fonts: Bricolage Grotesque · DM Sans · JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <!--
+    CUSTOMIZE PER COURSE — change only the three accent variables below.
+    Options:
+      vermillion  #D94F30 / #C4432A / #FDEEE9 / #E8836C  (default)
+      coral       #E06B56 / #C85A47 / #FDECEA / #E89585
+      teal        #2A7B9B / #1F6280 / #E4F2F7 / #5A9DB8
+      amber       #D4A843 / #BF9530 / #FDF5E0 / #E0C070
+      forest      #2D8B55 / #226B41 / #E8F5EE / #5AAD7A
+  -->
+  <style>
+    :root {
+      --color-accent:       #2A7B9B;
+      --color-accent-hover: #1F6280;
+      --color-accent-light: #E4F2F7;
+      --color-accent-muted: #5A9DB8;
+      --toc-width: 260px;
+    }
+
+    /* ── TOC Sidebar ── */
+    .toc-sidebar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: var(--toc-width);
+      height: 100vh;
+      background: var(--color-surface);
+      border-left: 1px solid var(--color-border);
+      z-index: 1000;
+      transform: translateX(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: -4px 0 20px rgba(0,0,0,0.05);
+    }
+    .toc-sidebar.open {
+      transform: translateX(0);
+    }
+
+    .toc-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--color-border-light);
+      flex-shrink: 0;
+    }
+    .toc-header-title {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--color-text);
+    }
+    .toc-close {
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      padding: 4px;
+      line-height: 1;
+      border-radius: 6px;
+      transition: color 0.15s, background 0.15s;
+    }
+    .toc-close:hover {
+      color: var(--color-text);
+      background: var(--color-bg-warm);
+    }
+
+    .toc-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 0;
+      list-style: none;
+    }
+
+    .toc-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 20px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      border-left: 3px solid transparent;
+      text-decoration: none;
+    }
+    .toc-item:hover {
+      background: var(--color-bg-warm);
+    }
+    .toc-item.active {
+      background: var(--color-accent-light);
+      border-left-color: var(--color-accent);
+    }
+    .toc-item.active .toc-item-title {
+      color: var(--color-accent);
+      font-weight: 600;
+    }
+
+    .toc-item-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+      flex-shrink: 0;
+      background: var(--color-bg-warm);
+      color: var(--color-text-muted);
+      transition: background 0.15s, color 0.15s;
+    }
+    .toc-item.active .toc-item-num {
+      background: var(--color-accent);
+      color: #fff;
+    }
+
+    .toc-item-title {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      line-height: 1.3;
+      transition: color 0.15s;
+    }
+
+    /* Toggle button — inline in nav-dots */
+    .toc-toggle {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-secondary);
+      font-size: 14px;
+      padding: 0;
+      line-height: 1;
+      transition: color 0.15s;
+    }
+    .toc-toggle:hover {
+      color: var(--color-text);
+    }
+
+    /* Overlay for mobile */
+    .toc-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.2);
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .toc-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Adjust main content when sidebar open */
+    body.toc-open main,
+    body.toc-open nav {
+      margin-right: var(--toc-width);
+      transition: margin-right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @media (max-width: 768px) {
+      body.toc-open main,
+      body.toc-open nav {
+        margin-right: 0;
+      }
+      /* Keep nav-bar offset on mobile */
+      .module {
+        padding-top: calc(var(--nav-height) + var(--space-8)) !important;
+      }
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <!-- TOC Overlay (mobile) -->
+  <div class="toc-overlay" id="toc-overlay"></div>
+
+  <!-- TOC Sidebar -->
+  <aside class="toc-sidebar" id="toc-sidebar">
+    <div class="toc-header">
+      <span class="toc-header-title">目录</span>
+      <button class="toc-close" id="toc-close">✕</button>
+    </div>
+    <ul class="toc-list">
+      <li class="toc-item" data-target="module-1"><span class="toc-item-num">01</span><span class="toc-item-title">从提问到报告：一次研究的完整旅程</span></li>
+      <li class="toc-item" data-target="module-2"><span class="toc-item-num">02</span><span class="toc-item-title">认识核心角色：七大组件各司其职</span></li>
+      <li class="toc-item" data-target="module-3"><span class="toc-item-num">03</span><span class="toc-item-title">信息如何流动：从搜索到报告的数据管道</span></li>
+      <li class="toc-item" data-target="module-4"><span class="toc-item-num">04</span><span class="toc-item-title">网络爬虫与搜索：如何从全网抓取信息</span></li>
+      <li class="toc-item" data-target="module-5"><span class="toc-item-num">05</span><span class="toc-item-title">架构选型指南：该不该用 GPT Researcher</span></li>
+    </ul>
+  </aside>
+
+  <script>
+    // TOC logic
+    document.addEventListener('DOMContentLoaded', function() {
+      const sidebar = document.getElementById('toc-sidebar');
+      const toggle = document.getElementById('toc-toggle');
+      const close = document.getElementById('toc-close');
+      const overlay = document.getElementById('toc-overlay');
+      const items = document.querySelectorAll('.toc-item');
+      const modules = document.querySelectorAll('.module');
+
+      function openToc() {
+        sidebar.classList.add('open');
+        overlay.classList.add('visible');
+        document.body.classList.add('toc-open');
+      }
+      function closeToc() {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('visible');
+        document.body.classList.remove('toc-open');
+      }
+
+      if (toggle) toggle.addEventListener('click', () => {
+        sidebar.classList.contains('open') ? closeToc() : openToc();
+      });
+      if (close) close.addEventListener('click', closeToc);
+      if (overlay) overlay.addEventListener('click', closeToc);
+
+      items.forEach(item => {
+        item.addEventListener('click', () => {
+          const target = document.getElementById(item.dataset.target);
+          if (target) target.scrollIntoView({ behavior: 'smooth' });
+          if (window.innerWidth <= 768) closeToc();
+        });
+      });
+
+      function updateActiveToc() {
+        let current = 'module-1';
+        modules.forEach(mod => {
+          const rect = mod.getBoundingClientRect();
+          if (rect.top <= window.innerHeight / 3) {
+            current = mod.id;
+          }
+        });
+        items.forEach(item => {
+          item.classList.toggle('active', item.dataset.target === current);
+        });
+      }
+      window.addEventListener('scroll', () => {
+        requestAnimationFrame(updateActiveToc);
+      }, { passive: true });
+      updateActiveToc();
+    });
+  </script>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">GPT Researcher：自主研究Agent源码解析</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <button class="toc-toggle" id="toc-toggle" title="目录">&#9776;</button>
+        <button class="nav-dot" data-target="module-1" data-tooltip="从提问到报告" role="tab" aria-label="Module 1: 从提问到报告"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="认识核心角色" role="tab" aria-label="Module 2: 认识核心角色"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="信息如何流动" role="tab" aria-label="Module 3: 信息如何流动"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="网络爬虫与搜索" role="tab" aria-label="Module 4: 网络爬虫与搜索"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="架构选型指南" role="tab" aria-label="Module 5: 架构选型指南"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh -->
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">从提问到报告：一次研究的完整旅程</h1>
+      <p class="module-subtitle">想象你输入一个问题，几分钟后拿到一份带引用的研究报告——中间发生了什么？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: What is GPT Researcher -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">GPT Researcher 是什么？</h2>
+        <p>假设你是一位创业者，想知道「<strong>Nvidia 股价为什么一直在涨？</strong>」。你可以花一整天自己搜索、阅读、整理；也可以用 GPT Researcher——一个能自主完成整轮研究的 <span class="term" data-definition="Agent（智能体）是一个能自主决策、调用工具、完成复杂任务的 AI 程序。区别于普通的聊天机器人，Agent 会自己规划步骤，一步步执行，而不只是回答一个问题。">Agent</span>。</p>
+        <p>你只需给它一个问题，它就会自动：</p>
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>理解问题，拆解子问题</strong>
+              <p>把大问题拆成多个搜索角度</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>全网搜索，抓取网页内容</strong>
+              <p>并行搜索 20+ 来源，爬取网页正文</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>整理信息，生成研究报告</strong>
+              <p>汇总去重，写出带引用的完整报告</p>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键洞察</strong>
+            <p>GPT Researcher 的灵感来自「计划-求解（Plan-and-Solve）」论文——先规划搜索策略，再逐个执行。这和人类做研究的方式一模一样：先列提纲，再填内容。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: The main entry point code -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">三行代码启动研究</h2>
+        <p>GPT Researcher 的使用非常简单。你只需要创建一个 <span class="term" data-definition="GPTResearcher 是整个系统的主控类。它像一个项目管理者，协调搜索、爬虫、写作等组件一起工作。">GPTResearcher</span> 对象，传入你的问题，然后调用 <code>conduct_research()</code>：</p>
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-keyword">from</span> gpt_researcher <span class="code-keyword">import</span> GPTResearcher</span>
+<span class="code-line"></span>
+<span class="code-line">query = <span class="code-string">"why is Nvidia stock going up?"</span></span>
+<span class="code-line">researcher = GPTResearcher(query=query)</span>
+<span class="code-line">research_result = <span class="code-keyword">await</span> researcher.conduct_research()</span>
+<span class="code-line">report = <span class="code-keyword">await</span> researcher.write_report()</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">引入 GPT Researcher 工具包</p>
+              <p class="tl"></p>
+              <p class="tl">定义你想研究的问题</p>
+              <p class="tl">创建一个「研究 Agent」，把问题交给它</p>
+              <p class="tl">让 Agent 开始自主搜索和研究，等待结果</p>
+              <p class="tl">让 Agent 把研究结果写成一份完整的报告</p>
+            </div>
+          </div>
+        </div>
+        <p>就这么简单。但在这三行代码背后，有一整套精密的协作系统在工作。接下来我们就来拆解它。</p>
+      </section>
+
+      <!-- Screen 3: Architecture overview -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">整体架构一览</h2>
+        <p>把 GPT Researcher 想象成一个虚拟的研究团队。团队里有不同的角色，各司其职：</p>
+        <div class="arch-diagram">
+          <div class="arch-zone">
+            <h4 class="arch-zone-label">用户层</h4>
+            <div class="arch-component" data-desc="你输入一个问题，系统返回一份研究报告。这是唯一的用户交互点。">
+              <div class="arch-icon">👤</div>
+              <span>用户（提问）</span>
+            </div>
+          </div>
+          <div class="arch-zone">
+            <h4 class="arch-zone-label">控制层</h4>
+            <div class="arch-component" data-desc="GPTResearcher 是总指挥。它创建并协调 ResearchConductor（搜索）、ReportGenerator（写作）、ContextManager（上下文管理）、BrowserManager（浏览器爬虫）等组件。">
+              <div class="arch-icon">🎯</div>
+              <span>GPTResearcher 主控</span>
+            </div>
+            <div class="arch-component" data-desc="ResearchConductor 负责规划搜索策略、生成子问题、协调多个搜索引擎并行搜索、爬取网页内容。">
+              <div class="arch-icon">🔍</div>
+              <span>ResearchConductor 搜索指挥</span>
+            </div>
+          </div>
+          <div class="arch-zone">
+            <h4 class="arch-zone-label">执行层</h4>
+            <div class="arch-component" data-desc="Retriever 是搜索引擎适配器，支持 Google、Tavily、DuckDuckGo、Bing、ArXiv 等 20+ 搜索引擎。">
+              <div class="arch-icon">🌐</div>
+              <span>Retriever 搜索引擎</span>
+            </div>
+            <div class="arch-component" data-desc="Scraper 负责从搜索结果中的 URL 爬取网页正文内容，支持 BeautifulSoup、Browser、FireCrawl 等多种爬虫。">
+              <div class="arch-icon">🕷️</div>
+              <span>Scraper 网页爬虫</span>
+            </div>
+            <div class="arch-component" data-desc="ReportGenerator 把收集到的所有信息整理成一份结构化的研究报告，包含引言、正文和结论。">
+              <div class="arch-icon">📝</div>
+              <span>ReportGenerator 报告生成</span>
+            </div>
+          </div>
+          <div class="arch-description">点击任意组件，了解它的职责</div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Group Chat - how components talk -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">组件之间如何协作？</h2>
+        <p>当 GPT Researcher 运行时，内部组件之间就像一个微信群在聊天——各角色分工明确，按顺序发言。点击「Play All」看看完整的对话：</p>
+        <div class="chat-window" id="chat-module1">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="user" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">U</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">用户</span>
+                <p>我想研究：为什么 Nvidia 股价一直在涨？</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="gptr" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">G</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">GPTResearcher 主控</span>
+                <p>收到！我先让 Agent Selector 分析一下这个问题，看看该用哪种研究策略。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="selector" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">A</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">Agent Selector</span>
+                <p>这是一个金融市场分析类问题。我推荐用「Finance Agent」策略，角色设定为金融分析师。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="gptr" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">G</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">GPTResearcher 主控</span>
+                <p>好的。ResearchConductor，请先用 Tavily 做一次初始搜索，然后规划子问题。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="researcher" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">R</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">ResearchConductor</span>
+                <p>初始搜索完成，找到 8 条结果。现在规划 4 个子问题：1) GPU 市场份额 2) AI 芯片需求 3) 财报数据 4) 竞争格局。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="5" data-sender="researcher" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">R</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">ResearchConductor</span>
+                <p>4 个子问题并行搜索中...每个问题搜索到 5 条结果，共爬取 20 个网页，提取正文内容。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="6" data-sender="gptr" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">G</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">GPTResearcher 主控</span>
+                <p>所有素材收集完毕。ReportGenerator，请根据这些信息写一份研究报告。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="7" data-sender="writer" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">W</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">ReportGenerator</span>
+                <p>报告写好了！包含引言、4 个章节的正文分析和结论，所有关键数据都标注了引用来源。</p>
+              </div>
+            </div>
+          </div>
+          <div class="chat-typing" id="chat-module1-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module1-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条消息</button>
+            <button class="btn chat-all-btn">播放全部</button>
+            <button class="btn chat-reset-btn">重播</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验你的理解</h2>
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！GPT Researcher 的核心流程是：规划子问题 -> 搜索并爬取 -> 汇总写报告。这就是「Plan-and-Solve」模式。"
+               data-explanation-wrong="再想想——GPT Researcher 不是只搜一次就写，而是先把大问题拆成子问题，每个子问题分别搜索，最后汇总。">
+            <h3 class="quiz-question">GPT Researcher 的工作流程最接近哪个比喻？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>像搜索引擎——输入关键词，返回一串链接</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>像研究助理——先列提纲，再分头查资料，最后写成报告</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>像聊天机器人——你问一句它答一句</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！GPTResearcher 是主控类，它创建和协调其他所有组件。你可以把它理解为整个系统的「CEO」。"
+               data-explanation-wrong="提示：看看代码中的类名——GPTResearcher 里创建了 ResearchConductor、ReportGenerator、BrowserManager 等组件。它是总指挥。">
+            <h3 class="quiz-question">在代码中，哪个类是整个系统的「总指挥」？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>ResearchConductor（搜索指挥）</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>ReportGenerator（报告生成器）</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>GPTResearcher（主控类）</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">认识核心角色：七大组件各司其职</h1>
+      <p class="module-subtitle">就像一部电影有不同的演员，GPT Researcher 也有不同的组件扮演不同角色。</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: The Cast -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">项目目录结构</h2>
+        <p>先看看代码是怎么组织的。就像了解一个公司的部门设置一样，目录结构能帮你快速理解系统分工：</p>
+        <div class="file-tree">
+          <div class="ft-folder open">
+            <span class="ft-name">gpt_researcher/</span>
+            <span class="ft-desc">核心研究引擎</span>
+            <div class="ft-children">
+              <div class="ft-file">
+                <span class="ft-name">agent.py</span>
+                <span class="ft-desc">主控类 GPTResearcher，系统的 CEO</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">actions/</span>
+                <span class="ft-desc">具体动作：搜索、爬虫、生成查询</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">skills/</span>
+                <span class="ft-desc">高级技能：研究执行、报告写作、深度研究</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">retrievers/</span>
+                <span class="ft-desc">20+ 搜索引擎适配器</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">scraper/</span>
+                <span class="ft-desc">网页爬虫工具箱</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">memory/</span>
+                <span class="ft-desc">向量存储和记忆管理</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">config/</span>
+                <span class="ft-desc">配置管理</span>
+              </div>
+            </div>
+          </div>
+          <div class="ft-folder">
+            <span class="ft-name">multi_agents/</span>
+            <span class="ft-desc">多 Agent 协作模式（高级）</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: The Seven Components -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">七个核心角色</h2>
+        <p>GPT Researcher 内部有七个关键组件。把每个组件想象成一个团队成员：</p>
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🎯</div>
+            <div>
+              <strong>GPTResearcher（主控）</strong>
+              <p>团队 CEO。创建并协调所有其他组件。你只跟它打交道。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🔍</div>
+            <div>
+              <strong>ResearchConductor（搜索指挥）</strong>
+              <p>研究经理。规划搜索策略、生成子问题、协调搜索引擎并行工作。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">📝</div>
+            <div>
+              <strong>ReportGenerator（报告写手）</strong>
+              <p>资深撰稿人。把收集到的信息整理成结构化的研究报告。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">🧠</div>
+            <div>
+              <strong>ContextManager（上下文管家）</strong>
+              <p>资料管理员。把爬取到的内容做 <span class="term" data-definition="向量嵌入（Embedding）是把文本转换成一串数字的过程。语义相似的文本，数字也相似。这样计算机就能通过「距离」找到相关内容。">向量嵌入</span>，找到跟研究问题最相关的内容。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-5)">🕷️</div>
+            <div>
+              <strong>BrowserManager（浏览器管家）</strong>
+              <p>浏览器操作员。负责打开网页、提取正文内容、过滤广告和无关信息。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: #E89585">✂️</div>
+            <div>
+              <strong>SourceCurator（素材筛选）</strong>
+              <p>质量审核员。对搜索结果做排序和筛选，去掉重复和低质量来源。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: #7B6DAA">🔬</div>
+            <div>
+              <strong>DeepResearchSkill（深度研究）</strong>
+              <p>进阶研究员。可选组件，用于更深入的多轮迭代研究。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Code Translation - How components are initialized -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">组件是怎么创建出来的？</h2>
+        <p>看看 <code>agent.py</code> 的 <code>__init__</code> 方法——GPTResearcher 在初始化时就创建了所有团队成员：</p>
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># Initialize components</span></span>
+<span class="code-line">self.research_conductor = ResearchConductor(self)</span>
+<span class="code-line">self.report_generator = ReportGenerator(self)</span>
+<span class="code-line">self.context_manager = ContextManager(self)</span>
+<span class="code-line">self.scraper_manager = BrowserManager(self)</span>
+<span class="code-line">self.source_curator = SourceCurator(self)</span>
+<span class="code-line">self.deep_researcher = DeepResearchSkill(self)</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">注释：初始化各个组件</p>
+              <p class="tl">雇佣搜索经理，把自己（self）传给它，让它能调用其他资源</p>
+              <p class="tl">雇佣报告写手，同样传入自己的引用</p>
+              <p class="tl">雇佣上下文管家</p>
+              <p class="tl">雇佣浏览器操作员</p>
+              <p class="tl">雇佣素材筛选员</p>
+              <p class="tl">雇佣深度研究员（仅在深度研究模式下）</p>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-info">
+          <div class="callout-icon">🧩</div>
+          <div class="callout-content">
+            <strong class="callout-title">设计模式：组合优于继承</strong>
+            <p>GPT Researcher 没有把所有功能写在一个巨大的类里，而是把不同职责拆成独立的 Skill 类，每个都接收 <code>self</code>（主控的引用）。这叫「组合模式」——像搭积木一样组合功能。如果你想加新功能，只需要创建新的 Skill 类，不用改动主控代码。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Multi-Agent architecture -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">进阶：多 Agent 协作模式</h2>
+        <p>除了单 Agent 模式，GPT Researcher 还有一个更强大的 <span class="term" data-definition="Multi-Agent（多智能体）模式是指多个专业化的 AI Agent 协同工作，就像一个团队里有研究员、编辑、审核员等不同角色。">多 Agent</span> 模式。在 <code>multi_agents/</code> 目录下，有一个用 <span class="term" data-definition="LangGraph 是 LangChain 推出的图编排框架，可以把多个 Agent 连接成一个有向图，定义谁先执行、谁后执行、什么条件下分支。">LangGraph</span> 编排的完整研究团队：</p>
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🔍</div>
+            <h4 class="pattern-title">ResearchAgent</h4>
+            <p class="pattern-desc">负责执行初始研究，收集原始信息。是团队的「一线调查员」。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">📋</div>
+            <h4 class="pattern-title">EditorAgent</h4>
+            <p class="pattern-desc">负责规划研究和分配任务。是团队的「主编」，决定研究哪些方向。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">✍️</div>
+            <h4 class="pattern-title">WriterAgent</h4>
+            <p class="pattern-desc">根据研究结果撰写报告。是团队的「专栏作家」。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">👥</div>
+            <h4 class="pattern-title">HumanAgent</h4>
+            <p class="pattern-desc">人类审核环节。可以批准或修改研究计划，实现人机协作。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🚀</div>
+            <h4 class="pattern-title">PublisherAgent</h4>
+            <p class="pattern-desc">最终发布报告。负责格式化输出和保存文件。</p>
+          </div>
+        </div>
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># multi_agents/agents/orchestrator.py</span></span>
+<span class="code-line">workflow = StateGraph(ResearchState)</span>
+<span class="code-line">workflow.add_node(<span class="code-string">"browser"</span>, agents[<span class="code-string">"research"</span>].run_initial_research)</span>
+<span class="code-line">workflow.add_node(<span class="code-string">"planner"</span>, agents[<span class="code-string">"editor"</span>].plan_research)</span>
+<span class="code-line">workflow.add_node(<span class="code-string">"researcher"</span>, agents[<span class="code-string">"editor"</span>].run_parallel_research)</span>
+<span class="code-line">workflow.add_node(<span class="code-string">"writer"</span>, agents[<span class="code-string">"writer"</span>].run)</span>
+<span class="code-line">workflow.add_node(<span class="code-string">"publisher"</span>, agents[<span class="code-string">"publisher"</span>].run)</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">创建一个状态图（工作流）来编排 Agent</p>
+              <p class="tl">第 1 步：ResearchAgent 做初始调研</p>
+              <p class="tl">第 2 步：EditorAgent 规划研究计划</p>
+              <p class="tl">第 3 步：EditorAgent 并行执行研究任务</p>
+              <p class="tl">第 4 步：WriterAgent 撰写报告</p>
+              <p class="tl">第 5 步：PublisherAgent 发布报告</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验你的理解</h2>
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！每个 Skill 组件（ResearchConductor、ReportGenerator 等）都接收 self（主控的引用），通过 self 访问共享的配置、上下文和工具。这就是组合模式。"
+               data-explanation-wrong="再想想：所有组件都在 GPTResearcher.__init__ 中创建，并且都传入 self。它们通过 self 访问共享资源。">
+            <h3 class="quiz-question">GPTResearcher 和它的 Skill 组件之间是什么关系？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>继承关系——每个 Skill 都是 GPTResearcher 的子类</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>组合关系——GPTResearcher 持有各 Skill 的实例，通过 self 共享资源</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>独立关系——各 Skill 互不相关，各自运行</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="没错！多 Agent 模式用 LangGraph 编排 ResearchAgent、EditorAgent、WriterAgent 等，形成一个有向工作流图。单 Agent 模式只有一个 GPTResearcher 内部协调。"
+               data-explanation-wrong="提示：multi_agents/ 目录下的代码使用 LangGraph 的 StateGraph 来编排多个 Agent。这是和单 Agent 模式最大的区别。">
+            <h3 class="quiz-question">GPT Researcher 的多 Agent 模式使用了什么框架来编排工作流？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>LangGraph（LangChain 的图编排框架）</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Celery（Python 异步任务队列）</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Airflow（数据流水线工具）</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">信息如何流动：从搜索到报告的数据管道</h1>
+      <p class="module-subtitle">数据在组件之间是如何传递的？像追踪快递一样追踪一条信息的旅程。</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Data flow overview -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">一条信息的旅程</h2>
+        <p>想象你在快递公司工作。用户寄出一个包裹（研究问题），这个包裹要经过分拣中心（拆解子问题）、配送站（搜索爬取）、质检部（筛选排序）、包装车间（写报告），最后送达目的地。GPT Researcher 的数据流也是如此：</p>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <p>用户提问</p>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <p>选择 Agent</p>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <p>初始搜索</p>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">4</div>
+            <p>规划子问题</p>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">5</div>
+            <p>并行搜索</p>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">6</div>
+            <p>爬取网页</p>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">7</div>
+            <p>写报告</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Data flow animation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">数据流动画：一步步追踪</h2>
+        <p>点击「Next Step」看看数据是如何在组件之间流动的：</p>
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"用户输入研究问题，传递给 GPTResearcher 主控"},
+          {"highlight":"flow-actor-2","label":"Agent Selector 调用 LLM，分析问题类型，返回 Agent 角色和策略","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-3","label":"Retriever 用初始问题做第一次搜索，返回搜索结果列表","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-4","label":"LLM 根据搜索结果，规划出 3-5 个子问题","packet":true,"from":"actor-3","to":"actor-4"},
+          {"highlight":"flow-actor-3","label":"对每个子问题并行搜索，Retriever 返回更多搜索结果","packet":true,"from":"actor-4","to":"actor-3"},
+          {"highlight":"flow-actor-5","label":"Scraper 爬取搜索结果中的 URL，提取网页正文","packet":true,"from":"actor-3","to":"actor-5"},
+          {"highlight":"flow-actor-6","label":"ContextManager 对爬取内容做向量嵌入，筛选最相关的段落","packet":true,"from":"actor-5","to":"actor-6"},
+          {"highlight":"flow-actor-7","label":"ReportGenerator 用筛选后的上下文，生成完整研究报告","packet":true,"from":"actor-6","to":"actor-7"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">👤</div>
+              <span>用户</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">🤖</div>
+              <span>Agent Selector</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">🔍</div>
+              <span>Retriever</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">🧠</div>
+              <span>LLM 规划</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-5">
+              <div class="flow-actor-icon">🕷️</div>
+              <span>Scraper</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-6">
+              <div class="flow-actor-icon">📊</div>
+              <span>ContextManager</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-7">
+              <div class="flow-actor-icon">📝</div>
+              <span>Reporter</span>
+            </div>
+          </div>
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击「Next Step」开始追踪</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">Next Step</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Code translation - conduct_research -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">核心方法：conduct_research()</h2>
+        <p>整个数据管道的入口是 <code>conduct_research()</code>。看看它怎么协调搜索流程：</p>
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># skills/researcher.py</span></span>
+<span class="code-line"><span class="code-keyword">async def</span> <span class="code-function">conduct_research</span>(self):</span>
+<span class="code-line">    <span class="code-comment"># Step 1: Choose agent type</span></span>
+<span class="code-line">    self.researcher.agent, self.researcher.role = \</span>
+<span class="code-line">        <span class="code-keyword">await</span> choose_agent(</span>
+<span class="code-line">            query=self.researcher.query,</span>
+<span class="code-line">            cfg=self.researcher.cfg)</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-comment"># Step 2: Search based on source type</span></span>
+<span class="code-line">    <span class="code-keyword">if</span> self.researcher.report_source == ReportSource.Web.value:</span>
+<span class="code-line">        research_data = <span class="code-keyword">await</span> \</span>
+<span class="code-line">            self._get_context_by_web_search(</span>
+<span class="code-line">                self.researcher.query, [],</span>
+<span class="code-line">                self.researcher.query_domains)</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">研究执行器的核心方法</p>
+              <p class="tl">第 1 步：让 LLM 根据问题选择合适的研究 Agent 类型</p>
+              <p class="tl">把问题类型和配置传给选择器</p>
+              <p class="tl"></p>
+              <p class="tl">第 2 步：根据数据来源类型选择搜索策略</p>
+              <p class="tl">如果是 Web 搜索模式...</p>
+              <p class="tl">就通过网络搜索获取上下文</p>
+              <p class="tl">传入查询词、已有的文档数据、限定搜索的域名</p>
+              <p class="tl"></p>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键洞察：上下文累积</strong>
+            <p>注意 <code>self.researcher.context</code> 这个变量——它就像一个不断增长的文件夹。每一步搜索爬取的内容都会追加进去。最后报告生成器就是从这个「文件夹」里提取素材来写报告的。这种「逐步累积上下文」的模式在 AI Agent 中非常常见。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: How sub-queries work -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">子问题是怎么生成的？</h2>
+        <p>一个研究问题往往太大了，需要拆成几个角度来搜索。比如「Nvidia 为什么涨」可能被拆成「GPU 市场份额」「AI 芯片需求」「最新财报」等。看看代码怎么做：</p>
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># actions/query_processing.py</span></span>
+<span class="code-line">gen_queries_prompt = \</span>
+<span class="code-line">    prompt_family.generate_search_queries_prompt(</span>
+<span class="code-line">        query,</span>
+<span class="code-line">        parent_query,</span>
+<span class="code-line">        report_type,</span>
+<span class="code-line">        max_iterations=cfg.max_iterations <span class="code-keyword">or</span> <span class="code-number">3</span>,</span>
+<span class="code-line">        context=context,</span>
+<span class="code-line">    )</span>
+<span class="code-line">response = <span class="code-keyword">await</span> create_chat_completion(</span>
+<span class="code-line">    model=cfg.strategic_llm_model,</span>
+<span class="code-line">    messages=[{<span class="code-string">"role"</span>: <span class="code-string">"user"</span>,</span>
+<span class="code-line">              <span class="code-string">"content"</span>: gen_queries_prompt}]</span>
+<span class="code-line">)</span>
+<span class="code-line"><span class="code-keyword">return</span> json_repair.loads(response)</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">用 Prompt 模板生成一个「子问题生成指令」</p>
+              <p class="tl">传入：原始问题、父问题（如果有）、报告类型</p>
+              <p class="tl">最多搜索 3 轮</p>
+              <p class="tl">附带初始搜索结果作为上下文参考</p>
+              <p class="tl"></p>
+              <p class="tl">把这个指令发给 LLM（大语言模型）</p>
+              <p class="tl">LLM 会返回一组子问题（JSON 格式）</p>
+              <p class="tl">用 json_repair 解析可能格式不规范的 JSON</p>
+              <p class="tl">返回子问题列表，比如 ["市场份额","AI需求","财报"]</p>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">实用提示：LLM 输出不稳定怎么办？</strong>
+            <p>LLM 返回的 JSON 经常格式不规范。GPT Researcher 用 <code>json_repair</code> 库来修复——这是一个专门处理「LLM 返回的半合法 JSON」的工具。当你在构建 Agent 时，永远要考虑 LLM 输出的不稳定性。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验你的理解</h2>
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！self.researcher.context 是一个列表，每轮搜索爬取的内容都会追加进去。最终 ReportGenerator 从这个列表中提取素材来写报告。"
+               data-explanation-wrong="提示：在 conduct_research() 方法的末尾，你会看到 self.researcher.context = research_data。这就是所有搜索结果的累积容器。">
+            <h3 class="quiz-question">搜索爬取到的所有内容，最终存放在哪里？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>数据库中——每次搜索结果都写入 SQLite</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>文件系统中——每个搜索结果保存为一个文件</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>内存变量中——self.researcher.context 列表逐步累积</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！代码里用 json_repair.loads(response) 来解析 LLM 返回的 JSON。这是因为 LLM 经常返回格式不规范的 JSON，普通 json.loads 会报错。"
+               data-explanation-wrong="看看代码里的 json_repair.loads(response)——这是专门用来修复 LLM 输出的工具。它比普通的 json.loads 更容错。">
+            <h3 class="quiz-question">子问题的生成结果是怎么解析的？为什么不用普通的 json.loads？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>用正则表达式提取——因为 LLM 输出的是纯文本</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>用 json_repair.loads——因为 LLM 经常返回格式不规范的 JSON</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>用 ast.literal_eval——因为 LLM 输出的是 Python 字典</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">网络爬虫与搜索：如何从全网抓取信息</h1>
+      <p class="module-subtitle">GPT Researcher 的核心能力——搜索和爬虫——是如何实现的？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Retriever system -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">搜索引擎适配器：20+ 搜索引擎即插即用</h2>
+        <p>GPT Researcher 支持超过 20 种搜索引擎。它用了一个巧妙的工厂模式——每种搜索引擎都是一个 <span class="term" data-definition="Retriever（检索器）是一个统一的搜索接口。不管底层用 Google、DuckDuckGo 还是 ArXiv，对上层来说都是调用同一个 search() 方法。">Retriever</span> 类，实现相同的接口。就像万能插座，不管你插什么插头都能用：</p>
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># actions/retriever.py</span></span>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">get_retriever</span>(retriever: str):</span>
+<span class="code-line">    match retriever:</span>
+<span class="code-line">        <span class="code-keyword">case</span> <span class="code-string">"google"</span>:</span>
+<span class="code-line">            <span class="code-keyword">from</span> gpt_researcher.retrievers <span class="code-keyword">import</span> GoogleSearch</span>
+<span class="code-line">            <span class="code-keyword">return</span> GoogleSearch</span>
+<span class="code-line">        <span class="code-keyword">case</span> <span class="code-string">"tavily"</span>:</span>
+<span class="code-line">            <span class="code-keyword">from</span> gpt_researcher.retrievers <span class="code-keyword">import</span> TavilySearch</span>
+<span class="code-line">            <span class="code-keyword">return</span> TavilySearch</span>
+<span class="code-line">        <span class="code-keyword">case</span> <span class="code-string">"duckduckgo"</span>:</span>
+<span class="code-line">            <span class="code-keyword">from</span> gpt_researcher.retrievers <span class="code-keyword">import</span> Duckduckgo</span>
+<span class="code-line">            <span class="code-keyword">return</span> Duckduckgo</span>
+<span class="code-line">        <span class="code-keyword">case</span> <span class="code-string">"arxiv"</span>:</span>
+<span class="code-line">            <span class="code-keyword">from</span> gpt_researcher.retrievers <span class="code-keyword">import</span> ArxivSearch</span>
+<span class="code-line">            <span class="code-keyword">return</span> ArxivSearch</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">这是一个工厂函数：传入名字，返回对应的搜索引擎类</p>
+              <p class="tl">用 Python 3.10 的 match-case 语法（类似 switch）</p>
+              <p class="tl">如果用户要 Google 搜索...</p>
+              <p class="tl">导入 Google 搜索适配器</p>
+              <p class="tl">返回这个类（注意是类本身，不是实例）</p>
+              <p class="tl">如果要 Tavily 搜索...</p>
+              <p class="tl">导入 Tavily 适配器</p>
+              <p class="tl">如果要 DuckDuckGo...</p>
+              <p class="tl">如果要 ArXiv（学术论文搜索）...</p>
+              <p class="tl">以此类推，支持 20+ 搜索引擎</p>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">设计模式：工厂模式 + 延迟导入</strong>
+            <p>注意每个 <code>case</code> 分支都用 <code>from ... import</code> 做延迟导入——只有在真正使用某个搜索引擎时才加载它的代码。这样即使你只用了 Tavily，也不会因为没装 Google SDK 而报错。这是 Python 中非常实用的「按需加载」技巧。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Supported search engines -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">支持哪些搜索引擎？</h2>
+        <p>GPT Researcher 的 <code>retrievers/</code> 目录下，每个子目录就是一个搜索引擎适配器：</p>
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🌐</div>
+            <h4 class="pattern-title">通用搜索</h4>
+            <p class="pattern-desc">Google、Bing、DuckDuckGo、Tavily、Serper、SearX、SearchAPI、Exa、BoCha</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">📚</div>
+            <h4 class="pattern-title">学术搜索</h4>
+            <p class="pattern-desc">ArXiv（预印本）、Semantic Scholar（学术论文）、PubMed Central（医学文献）</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🔗</div>
+            <h4 class="pattern-title">社交/自定义</h4>
+            <p class="pattern-desc">XQuik（X/Twitter 搜索）、自定义 Retriever（你可以自己写）、MCP 协议</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">🔌</div>
+            <h4 class="pattern-title">MCP 协议</h4>
+            <p class="pattern-desc">Model Context Protocol——让 Agent 调用外部工具服务，是最新扩展方式</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Scraper system -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">爬虫系统：从 URL 到正文</h2>
+        <p>搜索只是第一步——你拿到了一堆 URL，但 URL 里的内容才是你需要的。GPT Researcher 的 <span class="term" data-definition="Scraper（爬虫）是自动访问网页并提取其中内容的程序。就像你打开一个网页，复制里面的文字，但爬虫是自动完成的。">Scraper</span> 系统负责从 URL 提取正文：</p>
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># scraper/scraper.py</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">Scraper</span>:</span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, urls, user_agent, scraper, worker_pool):</span>
+<span class="code-line">        unique_urls = list(dict.fromkeys(urls))</span>
+<span class="code-line">        self.urls = unique_urls</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">async def</span> <span class="code-function">run</span>(self):</span>
+<span class="code-line">        contents = <span class="code-keyword">await</span> asyncio.gather(</span>
+<span class="code-line">            *(self.extract_data_from_url(url, self.session)</span>
+<span class="code-line">              <span class="code-keyword">for</span> url <span class="code-keyword">in</span> self.urls)</span>
+<span class="code-line">        )</span>
+<span class="code-line">        res = [c <span class="code-keyword">for</span> c <span class="code-keyword">in</span> contents <span class="code-keyword">if</span> c[<span class="code-string">"raw_content"</span>]]</span>
+<span class="code-line">        <span class="code-keyword">return</span> res</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">爬虫类：接收 URL 列表，提取内容</p>
+              <p class="tl">初始化时去重——同一个 URL 不爬两次</p>
+              <p class="tl">用字典去重，保留原始顺序</p>
+              <p class="tl"></p>
+              <p class="tl">核心方法：并行爬取所有 URL</p>
+              <p class="tl">asyncio.gather 让所有爬取同时进行（并行！）</p>
+              <p class="tl">对每个 URL 调用提取方法</p>
+              <p class="tl"></p>
+              <p class="tl">过滤掉提取失败的（raw_content 为空的）</p>
+              <p class="tl">返回成功提取的内容列表</p>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-info">
+          <div class="callout-icon">⚡</div>
+          <div class="callout-content">
+            <strong class="callout-title">性能优化：asyncio.gather 并行爬取</strong>
+            <p><code>asyncio.gather</code> 是 Python 异步编程的核心技巧。它让所有 URL 的爬取同时进行，而不是一个一个排队。如果你要爬 20 个网页，每个花 2 秒，串行需要 40 秒，并行只需要 2 秒左右。这在网络密集型任务中是巨大的性能提升。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Scraper backends -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">多种爬虫后端</h2>
+        <p>不同网站需要不同的爬取策略。静态网页可以用简单的 HTML 解析，动态网页需要用浏览器模拟。GPT Researcher 支持多种后端：</p>
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">BeautifulSoup</code>
+            <span class="badge-desc">轻量级 HTML 解析器。适合静态网页，速度快，不需要浏览器</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">Browser (NoDriver)</code>
+            <span class="badge-desc">无头浏览器爬虫。能执行 JavaScript，适合动态加载的网页</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">FireCrawl</code>
+            <span class="badge-desc">专业爬虫 API 服务。质量高但需要付费 API Key</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">Tavily Extract</code>
+            <span class="badge-desc">Tavily 的内容提取 API。适合快速提取，集成简单</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">PyMuPDF</code>
+            <span class="badge-desc">PDF 文档解析器。专门处理 PDF 文件的提取</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">ArXiv Scraper</code>
+            <span class="badge-desc">学术论文专用爬虫。提取 ArXiv 论文标题、摘要和正文</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验你的理解</h2>
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！工厂模式通过 get_retriever() 函数，传入名字返回对应的类。上层代码不需要知道具体用了哪个搜索引擎，只调用统一的 search() 方法。"
+               data-explanation-wrong="再看看 get_retriever() 函数——它接收一个字符串名字，返回对应的类。这就是工厂模式的标准实现。">
+            <h3 class="quiz-question">GPT Researcher 的搜索引擎适配系统使用了什么设计模式？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>观察者模式——搜索引擎变化时自动通知</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>工厂模式——通过名字动态创建对应的搜索引擎</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>单例模式——全局只有一个搜索引擎实例</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="正确！asyncio.gather 让所有爬取同时发起，等最慢的那个完成就返回。这是异步编程的核心优势——网络 I/O 密集型任务的并行处理。"
+               data-explanation-wrong="提示：代码里的 asyncio.gather() 就是答案。它让所有 URL 的爬取同时进行。">
+            <h3 class="quiz-question">Scraper 为什么爬取 20 个网页只需要约 2 秒而不是 40 秒？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为用了 asyncio.gather 并行爬取，所有请求同时发起</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为用了多进程，每个网页一个进程</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为用了缓存，第二次访问直接读取缓存</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">架构选型指南：该不该用 GPT Researcher</h1>
+      <p class="module-subtitle">面向技术决策者的快速参考——问题、理念、对比、边界、成本。</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Problem + Philosophy -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">解决什么问题？核心理念？</h2>
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">核心问题</code>
+            <span class="badge-desc">手动研究耗时数周，LLM 训练数据过时且容易产生幻觉，现有服务信息来源有限导致偏见</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">核心方案</code>
+            <span class="badge-desc">用 AI Agent 自主完成「搜索-爬取-筛选-写作」全流程，聚合 20+ 信息源，生成带引用的研究报告</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">设计哲学</code>
+            <span class="badge-desc">Plan-and-Solve：先规划策略再逐步执行；并行搜索提速；组合模式可扩展</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">本质属性</code>
+            <span class="badge-desc">开源 Python 研究Agent框架，MIT 许可证，单Agent + 多Agent 双模式</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">技术栈</code>
+            <span class="badge-desc">Python 3.11+ / LangChain / LangGraph / asyncio / 多种 LLM（OpenAI、Anthropic 等）</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Comparison -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">与同类方案对比</h2>
+        <div class="callout callout-info">
+          <div class="callout-icon">📊</div>
+          <div class="callout-content">
+            <strong class="callout-title">核心区别</strong>
+            <p>GPT Researcher 是唯一一个专注「自主研究报告生成」的开源框架，同时支持单 Agent 轻量使用和多 Agent 编排。</p>
+          </div>
+        </div>
+        <table style="width:100%; border-collapse:collapse; margin: var(--space-6) 0; font-size: var(--text-sm);">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--color-border);">
+              <th style="text-align:left; padding: var(--space-3); color: var(--color-text-secondary);">维度</th>
+              <th style="text-align:left; padding: var(--space-3); color: var(--color-accent);">GPT Researcher</th>
+              <th style="text-align:left; padding: var(--space-3); color: var(--color-text-secondary);">LangChain Agent</th>
+              <th style="text-align:left; padding: var(--space-3); color: var(--color-text-secondary);">Perplexity API</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid var(--color-border-light);">
+              <td style="padding: var(--space-3); font-weight:600;">定位</td>
+              <td style="padding: var(--space-3);">
+                <ul><li>完整研究报告生成</li><li>端到端自动化</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>通用 Agent 框架</li><li>需要自己编排</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>搜索增强问答</li><li>API 服务</li></ul>
+              </td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--color-border-light);">
+              <td style="padding: var(--space-3); font-weight:600;">开源</td>
+              <td style="padding: var(--space-3);"><ul><li>MIT 许可，完全开源</li></ul></td>
+              <td style="padding: var(--space-3);"><ul><li>MIT 许可，完全开源</li></ul></td>
+              <td style="padding: var(--space-3);"><ul><li>闭源，按量付费 API</li></ul></td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--color-border-light);">
+              <td style="padding: var(--space-3); font-weight:600;">搜索引擎</td>
+              <td style="padding: var(--space-3);"><ul><li>20+ 搜索引擎即插即用</li></ul></td>
+              <td style="padding: var(--space-3);"><ul><li>需自行集成</li></ul></td>
+              <td style="padding: var(--space-3);"><ul><li>自有搜索引擎</li></ul></td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--color-border-light);">
+              <td style="padding: var(--space-3); font-weight:600;">报告质量</td>
+              <td style="padding: var(--space-3);"><ul><li>2000+ 词完整报告</li><li>带引用和来源追踪</li></ul></td>
+              <td style="padding: var(--space-3);"><ul><li>取决于你的 Prompt 设计</li><li>无内置报告模板</li></ul></td>
+              <td style="padding: var(--space-3);"><ul><li>简洁摘要式回答</li><li>带引用链接</li></ul></td>
+            </tr>
+            <tr>
+              <td style="padding: var(--space-3); font-weight:600;">定制性</td>
+              <td style="padding: var(--space-3);"><ul><li>可自定义 Agent 角色、Prompt、搜索引擎</li></ul></td>
+              <td style="padding: var(--space-3);"><ul><li>完全自由，但需要更多开发</li></ul></td>
+              <td style="padding: var(--space-3);"><ul><li>API 参数有限</li></ul></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Screen 3: Suitable vs Not-suitable -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">适合 vs 不适合</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+          <div style="background: var(--color-success-light); border-radius: var(--radius-md); padding: var(--space-6);">
+            <h3 style="color: var(--color-success); font-size: var(--text-lg); margin-bottom: var(--space-4); font-family: var(--font-display);">✅ 适合</h3>
+            <ul style="list-style: none; padding: 0;">
+              <li style="padding: var(--space-2) 0; color: var(--color-text); font-size: var(--text-sm);">需要自动化市场调研的创业团队</li>
+              <li style="padding: var(--space-2) 0; color: var(--color-text); font-size: var(--text-sm);">学术研究中的文献综述辅助</li>
+              <li style="padding: var(--space-2) 0; color: var(--color-text); font-size: var(--text-sm);">竞品分析和行业趋势追踪</li>
+              <li style="padding: var(--space-2) 0; color: var(--color-text); font-size: var(--text-sm);">需要定期生成研究报告的自动化流水线</li>
+              <li style="padding: var(--space-2) 0; color: var(--color-text); font-size: var(--text-sm);">想学习 Agent 架构的 AI 工程师</li>
+              <li style="padding: var(--space-2) 0; color: var(--color-text); font-size: var(--text-sm);">需要自建研究 Agent 而不想从零开始</li>
+            </ul>
+          </div>
+          <div style="background: var(--color-error-light); border-radius: var(--radius-md); padding: var(--space-6);">
+            <h3 style="color: var(--color-error); font-size: var(--text-lg); margin-bottom: var(--space-4); font-family: var(--font-display);">❌ 不适合</h3>
+            <ul style="list-style: none; padding: 0;">
+              <li style="padding: var(--space-2) 0; color: var(--color-text); font-size: var(--text-sm);">需要 100% 事实准确性的法律/医疗报告</li>
+              <li style="padding: var(--space-2) 0; color: var(--color-text); font-size: var(--text-sm);">实时性要求极高的新闻快讯</li>
+              <li style="padding: var(--space-2) 0; color: var(--color-text); font-size: var(--text-sm);">纯中文环境下搜索引擎支持有限</li>
+              <li style="padding: var(--space-2) 0; color: var(--color-text); font-size: var(--text-sm);">不需要报告、只需要简短回答的场景</li>
+              <li style="padding: var(--space-2) 0; color: var(--color-text); font-size: var(--text-sm);">对 LLM 成本极度敏感的应用</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Hard limits from source code -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">源码中的硬限制</h2>
+        <p>以下是直接从源码中提取的关键常量和限制：</p>
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">max_iterations = 3</code>
+            <span class="badge-desc">默认最多搜索 3 轮。可在配置中修改，但更多轮次意味着更高的 LLM API 成本</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">max_subtopics = 5</code>
+            <span class="badge-desc">子主题报告最多 5 个子主题。这是 GPTResearcher.__init__ 中的默认值</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">temperature = 0.15</code>
+            <span class="badge-desc">Agent 选择时的温度参数。低温度确保选择结果稳定可复现</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">20+ 搜索引擎</code>
+            <span class="badge-desc">retrievers/ 目录下有 20+ 搜索适配器，每个都需要对应的 API Key</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">Python 3.11+</code>
+            <span class="badge-desc">最低 Python 版本要求。因为使用了 match-case 语法（3.10+）和类型注解新特性</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">MIT License</code>
+            <span class="badge-desc">开源许可证，可自由商用。但部分搜索引擎 API 可能需要付费</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Costs + Conclusion -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">成本与结论</h2>
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>LLM API 成本</strong>
+              <p>每次研究至少调用 LLM 5-8 次（Agent 选择、子问题生成、每个子问题的搜索、报告生成）。使用 GPT-4o 级别模型，单次研究约 $0.05-0.15。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>搜索引擎 API 成本</strong>
+              <p>Tavily 有免费额度（1000 次/月），Google Custom Search 每天 100 次免费。DuckDuckGo 免费但稳定性较差。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>时间成本</strong>
+              <p>单次完整研究约 30-90 秒，取决于并行搜索数量和网页爬取速度。深度研究模式需要 3-5 分钟。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>自托管 vs 云服务</strong>
+              <p>代码完全开源可自托管。也可用 Docker 一键部署。前端支持轻量 HTML 版本和生产级 Next.js 版本。</p>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-accent">
+          <div class="callout-icon">🎯</div>
+          <div class="callout-content">
+            <strong class="callout-title">一句话结论</strong>
+            <p>GPT Researcher 是目前最成熟的开源研究 Agent 框架。如果你的项目需要「自动搜索+自动写报告」的能力，它是最快上手的选择。但要注意：它的输出质量受 LLM 和搜索引擎双重限制，不适合对事实准确性要求极高的场景。</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+  </main>
+
+</body>
+</html>

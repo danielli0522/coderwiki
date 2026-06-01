@@ -1,0 +1,197 @@
+<section class="module" id="module-4">
+  <div class="screen">
+    <h2>进阶主题</h2>
+    <p>在本模块中，我们将深入探讨一些 Android 逆向工程的进阶主题。</p>
+
+    <!-- 主题 1：混淆对抗 -->
+    <section class="screen animate-in">
+      <h2>主题 1：对抗代码混淆技术</h2>
+      <p>ProGuard 和 R8 是 Android 开发中常用的代码混淆工具。混淆后的代码给逆向工程带来了挑战。我们将学习如何应对这种挑战：</p>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid #EF4444">
+          <div class="pattern-icon" style="background: #EF4444">🔀</div>
+          <h4 class="pattern-title">名称混淆</h4>
+          <p class="pattern-desc">将类名、方法名、字段名替换为无意义的短名称（如 a.b.c）。通过分析调用链和上下文来恢复含义。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid #F59E0B">
+          <div class="pattern-icon" style="background: #F59E0B">📦</div>
+          <h4 class="pattern-title">代码压缩</h4>
+          <p class="pattern-desc">移除未使用的代码和资源，减小 APK 体积。虽然不影响反编译，但可能丢失部分上下文信息。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid #3B82F6">
+          <div class="pattern-icon" style="background: #3B82F6">🔄</div>
+          <h4 class="pattern-title">控制流混淆</h4>
+          <p class="pattern-desc">插入无效代码分支、扁平化控制流、添加不透明谓词。需要使用专门的反混淆工具处理。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid #10B981">
+          <div class="pattern-icon" style="background: #10B981">🔑</div>
+          <h4 class="pattern-title">字符串加密</h4>
+          <p class="pattern-desc">将字符串常量加密存储，运行时解密。可以通过动态分析（Frida hook）在解密后获取明文。</p>
+        </div>
+      </div>
+
+      <div class="code-translation">
+        <div class="code">
+          <pre><code class="language-python"># 反混淆工具的核心逻辑
+class Deobfuscator:
+    """基于上下文推断混淆代码的含义"""
+
+    def __init__(self, decompiled_source):
+        self.source = decompiled_source
+        self.rename_map = {}
+
+    def analyze(self):
+        # 策略 1：通过字符串常量推断方法功能
+        string_methods = self._find_string_references()
+
+        # 策略 2：通过 API 调用推断类功能
+        api_classes = self._find_api_callers()
+
+        # 策略 3：通过 UI 资源 ID 关联
+        resource_mappings = self._find_resource_refs()
+
+        # 策略 4：通过继承关系推断
+        inheritance_map = self._analyze_inheritance()
+
+        # 生成重命名映射
+        self.rename_map = self._build_rename_map(
+            string_methods, api_classes,
+            resource_mappings, inheritance_map
+        )
+
+        return self.rename_map</code></pre>
+        </div>
+        <div class="translation">
+          <p>反混淆的核心策略：</p>
+          <div class="translation-lines">
+            <p class="tl">通过字符串常量推断：如果方法中包含 "login" 字符串，它很可能是登录方法</p>
+            <p class="tl">通过 API 调用推断：调用了网络请求的方法很可能是数据获取方法</p>
+            <p class="tl">通过资源 ID 关联：R.id.xxx 可以追溯到 UI 布局中的元素</p>
+            <p class="tl">通过继承关系推断：继承自 ViewModel 的类通常是视图模型</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 主题 2：调用链路分析 -->
+    <section class="screen animate-in">
+      <h2>主题 2：深入分析应用调用链路</h2>
+      <p>通过分析 Activity、Fragment、ViewModel 和 Repository 之间的调用关系，我们可以理解应用的完整工作流程。</p>
+
+      <div class="code-translation">
+        <div class="code">
+          <pre><code>// 典型的 MVVM 调用链路
+// 1. 用户点击登录按钮
+LoginActivity.onLoginClick()
+    → LoginViewModel.login(email, password)
+        → AuthRepository.login(credentials)
+            → ApiService.login(request)      // Retrofit 接口
+                → HTTP POST /api/v1/auth/login
+            ← AuthResponse (token, user)
+        ← Result.success(user)
+    → navigateTo(MainActivity)</code></pre>
+        </div>
+        <div class="translation">
+          <p>MVVM 调用链路详解：</p>
+          <div class="translation-lines">
+            <p class="tl">用户操作触发 Activity 中的事件处理方法</p>
+            <p class="tl">Activity 将业务逻辑委托给 ViewModel</p>
+            <p class="tl">ViewModel 通过 Repository 获取数据</p>
+            <p class="tl">Repository 调用 API 接口发起网络请求</p>
+            <p class="tl">数据沿相反路径返回，最终更新 UI</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 主题 3：Frida 动态分析 -->
+    <section class="screen animate-in">
+      <h2>主题 3：使用 Frida 进行动态插桩</h2>
+      <p>Frida 是最强大的动态分析工具之一。它可以在应用运行时注入 JavaScript 代码，拦截和修改任意函数：</p>
+
+      <div class="code-translation">
+        <div class="code">
+          <pre><code class="language-javascript">// Frida 脚本：拦截网络请求
+Java.perform(function() {
+    // 拦截 OkHttp 的请求
+    var OkHttpClient = Java.use("okhttp3.OkHttpClient");
+    var Request = Java.use("okhttp3.Request");
+    var RealCall = Java.use("okhttp3.internal.connection.RealCall");
+
+    // Hook execute 方法
+    RealCall.execute.implementation = function() {
+        var request = this.request();
+        var url = request.url().toString();
+        var method = request.method();
+        var headers = request.headers().toString();
+
+        console.log("[HTTP] " + method + " " + url);
+        console.log("[Headers] " + headers);
+
+        // 获取请求体
+        var body = request.body();
+        if (body !== null) {
+            console.log("[Body] " + body.toString());
+        }
+
+        // 调用原始方法
+        var response = this.execute();
+
+        // 打印响应
+        console.log("[Response] " + response.code());
+        return response;
+    };
+});</code></pre>
+        </div>
+        <div class="translation">
+          <p>Frida 动态插桩脚本解读：</p>
+          <div class="translation-lines">
+            <p class="tl">Java.perform 确保在 Java 虚拟机线程中执行</p>
+            <p class="tl">Java.use 获取目标类的引用</p>
+            <p class="tl">implementation 替换原始方法的实现</p>
+            <p class="tl">在替换函数中先打印请求信息，再调用原始方法</p>
+            <p class="tl">这样可以在不修改 APK 的情况下拦截所有网络请求</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">💡</div>
+        <div class="callout-content">
+          <strong class="callout-title">Frida 的优势</strong>
+          <p>Frida 最大的优势是不需要修改和重新打包 APK。它通过 ptrace 附加到目标进程，实时注入代码。这意味着你可以分析任何应用，包括那些有完整性校验的应用。</p>
+        </div>
+      </div>
+    </section>
+
+    <h3>混淆代码处理技巧总结</h3>
+    <ul>
+      <li>理解混淆规则</li>
+      <li>使用工具恢复可读性</li>
+      <li>识别常见的混淆模式</li>
+    </ul>
+    <h3>调用链路分析总结</h3>
+    <p>通过分析 Activity、Fragment、ViewModel 和 Repository 之间的调用关系，我们可以理解应用的完整工作流程。</p>
+    <div class="code-translation">
+      <div class="code">
+        <pre>// 调用链路示例
+LoginActivity -> LoginViewModel -> AuthRepository</pre>
+      </div>
+      <div class="translation">
+        <p>这条调用链路展示了从用户界面到数据层的完整流程。理解这种关系有助于我们更好地分析应用的行为。</p>
+      </div>
+    </div>
+    <div class="callout">
+      <p>提示：调用链路分析是理解复杂应用架构的关键。通过绘制调用关系图，你可以快速掌握应用的各个模块是如何协作的。</p>
+    </div>
+    <div class="quiz">
+      <p>小测试：以下哪项不是 ProGuard/R8 的主要功能？</p>
+      <ul>
+        <li data-correct="false">代码压缩</li>
+        <li data-correct="false">名称混淆</li>
+        <li data-correct="true">性能优化</li>
+      </ul>
+    </div>
+  </div>
+</section>

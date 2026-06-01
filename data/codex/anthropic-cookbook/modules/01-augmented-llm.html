@@ -1,0 +1,315 @@
+    <section class="module" id="module-1" style="background: var(--color-bg-warm)">
+      <div class="module-content">
+        <header class="module-header animate-in">
+          <span class="module-number">01</span>
+          <h1 class="module-title">食谱开张：从一道"加强版 LLM"开始</h1>
+          <p class="module-subtitle">Anthropic Cookbook 整本书在教什么 · 以及全书的最小可用单元——Augmented LLM</p>
+        </header>
+
+        <div class="module-body">
+
+          <!-- Screen 1: Welcome / Hook -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">先回答一个问题：你打开 ChatGPT 问"今天上海下雨吗"——会发生什么？</h2>
+            <p>它会说："抱歉，我没有访问实时数据的能力。" 这一秒，你就触碰到了"裸 <span class="term" data-definition="Large Language Model，大语言模型。可以理解为一个被海量文本训练出来的、特别会接话、但被冻结在训练截止日的'文字大脑'。它本身不能上网、不能查数据库、不能记住你昨天说过什么。">LLM</span>" 的边界——它是一颗会说话的大脑，但被困在一个没有窗户、没有电话、没有日历的房间里。</p>
+            <p><strong>Anthropic Cookbook 这本食谱整本书在教的，就是怎么给这颗大脑配上窗户、电话、日历、还有一个能干活的助手。</strong></p>
+            <div class="callout callout-accent">
+              <div class="callout-icon">🧗</div>
+              <div class="callout-content">
+                <strong class="callout-title">本课的隐喻：户外攀岩者与登山套件</strong>
+                <p>赤手空拳的攀岩者只能爬最简单的路线。给他/她加上四件套——绳索、保护塞、对讲机、教练——他/她突然就能去挑战更难的山壁。一个普通 LLM 调用就是"赤手攀岩"，本课要教的 <em>Augmented LLM</em>（加强版 LLM）就是"装备齐全的攀岩"。</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 2: The four-piece kit -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">Augmented LLM 的"四件套"</h2>
+            <p>Anthropic 工程师在论文 <span class="term" data-definition="Anthropic 2024 年发表的工程论文，提出'Augmented LLM' 这个最小可用单元，并给出 5 种基础编排模式。整本 cookbook 的理论框架。"><em>Building Effective Agents</em></span> 里把"加强版 LLM"定义成基础单元——一个 LLM 配上以下四种装备的某些子集：</p>
+
+            <div class="pattern-cards stagger-children">
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+                <div class="pattern-icon" style="background: var(--color-actor-1)">🔍</div>
+                <h4 class="pattern-title">检索（Retrieval）</h4>
+                <p class="pattern-desc">让 LLM 能从你自己的知识库里"翻书"——产品文档、客服 FAQ、内部 wiki。背后机制是 <span class="term" data-definition="Retrieval-Augmented Generation，先用关键词或向量检索找到相关文档片段，再把片段塞进 prompt 让模型基于它回答。是企业 AI 应用最常见的范式。">RAG</span>。</p>
+              </div>
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+                <div class="pattern-icon" style="background: var(--color-actor-3)">🛠️</div>
+                <h4 class="pattern-title">工具（Tools）</h4>
+                <p class="pattern-desc">让 LLM 能"叫别人去做事"——查天气、发邮件、调用计算器。LLM 自己不动手，它输出一个"请求工单"，你的程序去执行。</p>
+              </div>
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+                <div class="pattern-icon" style="background: var(--color-actor-4)">💾</div>
+                <h4 class="pattern-title">记忆（Memory）</h4>
+                <p class="pattern-desc">让 LLM 能"记住你昨天说过什么"——历史对话、用户偏好、长期事实。否则它每次都像初次见面。</p>
+              </div>
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+                <div class="pattern-icon" style="background: var(--color-actor-2)">📜</div>
+                <h4 class="pattern-title">系统提示（System Prompt）</h4>
+                <p class="pattern-desc">给 LLM 一份"岗位说明书"——你是谁、说什么风格、不能碰哪些话题。本质上是把训练好的通用模型"角色化"成你的专属助手。</p>
+              </div>
+            </div>
+
+            <div class="callout callout-info">
+              <div class="callout-icon">💡</div>
+              <div class="callout-content">
+                <strong class="callout-title">关键洞察</strong>
+                <p>整本 cookbook 之后所有的复杂模式（链式、路由、Orchestrator、Agent SDK、SRE 自动修复），归根结底都是<strong>多个 Augmented LLM 之间的不同接线方式</strong>。先把这个最小单元吃透，整本书就是同一个乐高积木的不同组合。</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 3: Code translation - one-liner research agent -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">看一段真实代码：7 行做一个能上网的研究员</h2>
+            <p>这段代码来自 <code>claude_agent_sdk/00_The_one_liner_research_agent.ipynb</code>——整本 cookbook 的 "Hello World"。它是<strong>最小可用的 Augmented LLM</strong>：LLM + 一件工具（网页搜索）。</p>
+
+            <div class="translation-block animate-in">
+              <div class="translation-code">
+                <span class="translation-label">CODE · Python</span>
+<pre><code><span class="code-line"><span class="code-keyword">from</span> claude_agent_sdk <span class="code-keyword">import</span> ClaudeAgentOptions, query</span>
+<span class="code-line"></span>
+<span class="code-line">messages = []</span>
+<span class="code-line"><span class="code-keyword">async for</span> msg <span class="code-keyword">in</span> <span class="code-function">query</span>(</span>
+<span class="code-line">    <span class="code-property">prompt</span>=<span class="code-string">"Research the latest trends in AI agents and give me a brief summary and relevant citations."</span>,</span>
+<span class="code-line">    <span class="code-property">options</span>=<span class="code-function">ClaudeAgentOptions</span>(<span class="code-property">model</span>=MODEL, <span class="code-property">allowed_tools</span>=[<span class="code-string">"WebSearch"</span>]),</span>
+<span class="code-line">):</span>
+<span class="code-line">    <span class="code-function">print_activity</span>(msg)</span>
+<span class="code-line">    messages.<span class="code-function">append</span>(msg)</span></code></pre>
+              </div>
+              <div class="translation-english">
+                <span class="translation-label">中文逐行翻译</span>
+                <div class="translation-lines">
+                  <p class="tl"><strong>第 1 行：</strong>从 Anthropic 官方 SDK 里把"提问"函数和"配置"工具拿进来。</p>
+                  <p class="tl"><strong>第 3 行：</strong>准备一个空列表，待会儿 agent 跟我们说的每一句话都收进去。</p>
+                  <p class="tl"><strong>第 4 行：</strong>开启异步流式接收——像看直播一样，agent 每说一句、做一步，你都能立刻看到。</p>
+                  <p class="tl"><strong>第 5 行：</strong>我们的"任务订单"——研究 AI agent 最新趋势，给我摘要和引用链接。</p>
+                  <p class="tl"><strong>第 6 行：</strong>关键配置——选用哪个模型，并且 <strong>只</strong> 允许它使用一个工具：网页搜索。这就是"Augmented LLM"：一个 LLM + 一件工具。</p>
+                  <p class="tl"><strong>第 8-9 行：</strong>把 agent 的每一条思考、每一次搜索、每一段答复都打印出来并存档。</p>
+                  <p class="tl"><strong>整段共 7 行有效代码——一个能上网做调研的研究员。</strong>这就是 cookbook 的 Hello World。</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 4: Group Chat — bare LLM vs augmented -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">看场对话：裸 LLM vs 加强版 LLM</h2>
+            <p>同一个用户、同一个问题，两次对话——区别是有没有装备。</p>
+
+            <div class="chat-window" id="chat-module1">
+              <div class="chat-messages">
+                <div class="chat-message" data-msg="0" data-sender="user" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-2)">用</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-2)">用户</span>
+                    <p>今天上海下雨吗？</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="1" data-sender="bare" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-text-muted)">L</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-text-muted)">裸 LLM</span>
+                    <p>抱歉，我没有访问实时天气数据的能力。建议你查询气象网站。</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="2" data-sender="user" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-2)">用</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-2)">用户</span>
+                    <p>（叹气，关掉应用）</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="3" data-sender="narrator" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-accent)">★</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-accent)">旁白</span>
+                    <p>—— 现在我们给同一个 LLM 装上"工具 + 记忆"两件套 ——</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="4" data-sender="user" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-2)">用</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-2)">用户</span>
+                    <p>今天上海下雨吗？</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="5" data-sender="claude" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-1)">C</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-1)">Augmented LLM</span>
+                    <p>让我查一下…（调用 WebSearch 工具：上海 天气 今天）</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="6" data-sender="claude" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-1)">C</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-1)">Augmented LLM</span>
+                    <p>上海现在小雨，气温 18°C。建议带伞，傍晚有阵雨。</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="7" data-sender="user" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-2)">用</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-2)">用户</span>
+                    <p>太好了！顺便记一下——我喜欢冷一点的天气。</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="8" data-sender="claude" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-1)">C</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-1)">Augmented LLM</span>
+                    <p>已写入记忆 ✓（user_preference: prefers_cold_weather=true）。下次推荐穿搭时我会记得。</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="chat-typing" id="chat-module1-typing" style="display:none">
+                <div class="chat-avatar" id="chat-module1-typing-avatar">?</div>
+                <div class="chat-typing-dots">
+                  <span class="typing-dot"></span>
+                  <span class="typing-dot"></span>
+                  <span class="typing-dot"></span>
+                </div>
+              </div>
+
+              <div class="chat-controls">
+                <button class="btn chat-next-btn">下一句</button>
+                <button class="btn chat-all-btn">自动播放</button>
+                <button class="btn chat-reset-btn">重播</button>
+                <span class="chat-progress"></span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 5: Cookbook map -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">这本食谱里有什么——给你一张全景地图</h2>
+            <p>整个 cookbook 仓库按"教学价值"重排后是这样的——后续 5 个模块，会按这张地图带你走完最重要的章节：</p>
+
+            <div class="file-tree">
+              <div class="ft-folder open">
+                <span class="ft-name">anthropic-cookbook/</span>
+                <span class="ft-desc">本食谱根目录</span>
+                <div class="ft-children">
+                  <div class="ft-folder">
+                    <span class="ft-name">patterns/agents/</span>
+                    <span class="ft-desc">5 大基础编排模式（模块 2、3 主讲）</span>
+                  </div>
+                  <div class="ft-folder">
+                    <span class="ft-name">tool_use/</span>
+                    <span class="ft-desc">让模型动手——function calling 全套（模块 4 主讲）</span>
+                  </div>
+                  <div class="ft-folder">
+                    <span class="ft-name">claude_agent_sdk/</span>
+                    <span class="ft-desc">7 个 notebook 从 one-liner 到 SRE（模块 5 主讲）</span>
+                  </div>
+                  <div class="ft-folder">
+                    <span class="ft-name">capabilities/</span>
+                    <span class="ft-desc">RAG / 知识图谱 / 文本转 SQL / 分类 / 摘要</span>
+                  </div>
+                  <div class="ft-folder">
+                    <span class="ft-name">skills/</span>
+                    <span class="ft-desc">Claude Skills——可复用的"本领包"（模块 6 涉及）</span>
+                  </div>
+                  <div class="ft-folder">
+                    <span class="ft-name">multimodal/</span>
+                    <span class="ft-desc">视觉 / PDF / 图表理解</span>
+                  </div>
+                  <div class="ft-folder">
+                    <span class="ft-name">extended_thinking/</span>
+                    <span class="ft-desc">让模型有"思考预算"（模块 6 主讲）</span>
+                  </div>
+                  <div class="ft-folder">
+                    <span class="ft-name">misc/</span>
+                    <span class="ft-desc">prompt_caching / JSON 模式 / PDF 上传等实用配方</span>
+                  </div>
+                  <div class="ft-folder">
+                    <span class="ft-name">managed_agents/ · observability/ · finetuning/ · tool_evaluation/</span>
+                    <span class="ft-desc">进阶或特定领域配方（本课不展开，你已有钥匙自己读）</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 6: Quiz -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">小测：你能认出哪一颗 LLM 装备齐了吗？</h2>
+
+            <div class="quiz-container" id="quiz-module1">
+
+              <div class="quiz-question-block"
+                   data-correct="option-c"
+                   data-explanation-right="对！纯文本生成（写诗、改文案）不需要外部信息。Augmented 的四件套是为'需要查、需要做、需要记'的任务设计的——给一个写诗任务装上 WebSearch，反而是浪费。"
+                   data-explanation-wrong="再想想——写一首诗这个任务，模型需要'查实时数据'吗？需要'调用计算器'吗？需要'记得你昨天的对话'吗？">
+                <h3 class="quiz-question">Q1. 你想让 Claude 写一首关于秋天的现代诗。最合理的做法是？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>给它配上 WebSearch 工具，让它先查一下当下流行的诗体。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>开 RAG 接入一个唐诗数据库做检索增强。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>就用裸 LLM——不需要 Augmented 四件套，纯生成任务用不上。</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block"
+                   data-correct="option-b"
+                   data-explanation-right="正解。'我没有实时数据'是模型在告诉你它缺'检索 / 工具'这一件——给它接 WebSearch 或者一个能查你数据库的工具就解决。"
+                   data-explanation-wrong="这是模型在告诉你它缺访问实时世界的能力——加'记忆'或'更换模型'都解决不了根本问题。它需要的是能伸出去拿信息的'手'。">
+                <h3 class="quiz-question">Q2. 你的 AI 助手反复说"抱歉我没有实时数据 / 我不知道现在几点 / 我访问不了你公司的内部 wiki"。你应该给它加什么？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>加更长的对话记忆。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>加工具或检索（让它能上网搜 / 能查内部 wiki）。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>换一个更大的模型（比如从 Sonnet 换成 Opus）。</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block"
+                   data-correct="option-a"
+                   data-explanation-right="对。每次对话开头都要重新自我介绍，说明它没有跨对话的'记忆'装备。给它加上长期记忆/会话存储，下次开聊它就知道'哦你是 Daniel，喜欢茶不喜欢咖啡'。"
+                   data-explanation-wrong="再想想——'每次都得重新介绍自己'这个症状指向哪一件装备的缺失？是工具？检索？还是记忆？">
+                <h3 class="quiz-question">Q3. 你公司的客服机器人每次新会话都要让用户重新报姓名、订单号、产品型号——同一个用户上次刚说过这些。最缺的是哪一件装备？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>记忆（Memory）——跨会话持久化用户信息。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>工具——多接几个 API。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>系统提示——重写 prompt 让它别忘事。</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">查看答案</button>
+              <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">再做一次</button>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </section>

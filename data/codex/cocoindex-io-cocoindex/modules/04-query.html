@@ -1,0 +1,257 @@
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 4: 查询与检索
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-4" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">查询与检索</h1>
+      <p class="module-subtitle">从向量相似度搜索到知识图谱查询——让 AI Agent 获取精准上下文</p>
+    </header>
+
+    <!-- ── Screen 1: 向量相似度搜索 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">向量相似度搜索：用自然语言查找代码和文档</h2>
+
+      <p>构建索引的最终目的是查询。CocoIndex 将数据存入 Postgres + pgvector 后，你可以用标准的 SQL 进行 <span class="term" data-definition="向量相似度搜索（Vector Similarity Search）通过计算查询向量和数据库中每个向量之间的距离（如余弦距离），找到语义最接近的结果。pgvector 使用 &lt;=&gt; 运算符表示余弦距离。">向量相似度搜索</span>。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE — 向量查询函数</span>
+          <pre><code><span class="code-line"><span class="code-keyword">async def</span> <span class="code-function">query_once</span>(pool, embedder, query, *, top_k=5):</span>
+<span class="code-line">    <span class="code-comment"># 1. 将查询文本转换为向量</span></span>
+<span class="code-line">    query_vec = <span class="code-keyword">await</span> embedder.<span class="code-function">embed</span>(query)</span>
+<span class="code-line">    </span>
+<span class="code-line">    <span class="code-comment"># 2. 在 Postgres 中搜索最相似的向量</span></span>
+<span class="code-line">    <span class="code-keyword">async with</span> pool.<span class="code-function">acquire</span>() <span class="code-keyword">as</span> conn:</span>
+<span class="code-line">        rows = <span class="code-keyword">await</span> conn.<span class="code-function">fetch</span>(</span>
+<span class="code-line">            <span class="code-string">f"""</span></span>
+<span class="code-line"><span class="code-string">            SELECT filename, code,</span></span>
+<span class="code-line"><span class="code-string">                   embedding &lt;=&gt; $1 AS distance,</span></span>
+<span class="code-line"><span class="code-string">                   start_line, end_line</span></span>
+<span class="code-line"><span class="code-string">            FROM "{SCHEMA}"."{TABLE}"</span></span>
+<span class="code-line"><span class="code-string">            ORDER BY distance ASC</span></span>
+<span class="code-line"><span class="code-string">            LIMIT $2</span></span>
+<span class="code-line"><span class="code-string">            """</span>,</span>
+<span class="code-line">            query_vec,</span>
+<span class="code-line">            top_k,</span>
+<span class="code-line">        )</span>
+<span class="code-line">    </span>
+<span class="code-line">    <span class="code-comment"># 3. 打印结果</span></span>
+<span class="code-line">    <span class="code-keyword">for</span> r <span class="code-keyword">in</span> rows:</span>
+<span class="code-line">        score = 1.0 - float(r[<span class="code-string">"distance"</span>])</span>
+<span class="code-line">        <span class="code-function">print</span>(<span class="code-string">f"[{score:.3f}] {r['filename']}"</span>)</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">定义查询函数，接受连接池、嵌入器和查询文本</p>
+            <p class="tl">第一步：用同一个嵌入模型将查询文本转为向量</p>
+            <p class="tl">第二步：在 Postgres 中执行向量相似度搜索</p>
+            <p class="tl">从连接池获取一个连接</p>
+            <p class="tl">SQL 查询：计算每个行向量与查询向量的距离</p>
+            <p class="tl">embedding &lt;=&gt; $1 是 pgvector 的余弦距离运算符</p>
+            <p class="tl">ORDER BY distance ASC 按相似度排序（越小越相似）</p>
+            <p class="tl">LIMIT $2 只返回 top_k 个最相似的结果</p>
+            <p class="tl">第三步：将距离转换为相似度分数并打印</p>
+            <p class="tl">score = 1 - distance，范围 [0, 1]，越大越相似</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">📖</div>
+        <div class="callout-content">
+          <strong class="callout-title">余弦距离 &lt;=&gt; 是什么？</strong>
+          <p><code>&lt;=&gt;</code> 是 pgvector 提供的余弦距离运算符。它计算两个向量之间的夹角余弦值。距离为 0 表示完全相同，距离为 2 表示完全相反。查询时用 <code>ORDER BY distance ASC</code> 获取最相似的结果。CocoIndex 会自动管理 pgvector 扩展的安装和索引创建。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 2: 交互式查询 REPL ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">交互式查询 REPL：实时搜索体验</h2>
+
+      <p>CocoIndex 的示例代码通常包含一个交互式查询函数，让你可以像聊天一样搜索索引——输入自然语言，即时返回相关代码片段。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">TERMINAL — 交互式查询演示</span>
+          <pre><code><span class="code-line"><span class="code-comment"># 运行查询（命令行传入查询文本）</span></span>
+<span class="code-line">$ python main.py <span class="code-string">"how to split text into chunks"</span></span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 输出示例：</span></span>
+<span class="code-line">[0.847] python/cocoindex/ops/text.py (L120-L155)</span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">split</span>(self, text, chunk_size, ...):</span>
+<span class="code-line">        raw_chunks = self._splitter.split(</span>
+<span class="code-line">            text, chunk_size, min_chunk_size, ...</span>
+<span class="code-line">        )</span>
+<span class="code-line">---</span>
+<span class="code-line">[0.792] python/cocoindex/ops/text.py (L39-L84)</span>
+<span class="code-line">    <span class="code-keyword">class</span> <span class="code-function">SeparatorSplitter</span>:</span>
+<span class="code-line">        <span class="code-keyword">def</span> <span class="code-function">split</span>(self, text) -> list[Chunk]:</span>
+<span class="code-line">---</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 也可以进入 REPL 模式</span></span>
+<span class="code-line">$ python main.py</span>
+<span class="code-line">Enter search query (or Enter to quit): <span class="code-string">embedding model configuration</span></span>
+<span class="code-line">[0.831] python/cocoindex/ops/sentence_transformers.py</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">通过命令行参数传入查询文本</p>
+            <p class="tl">查询："如何将文本分割为块"</p>
+            <p class="tl">输出示例——每个结果包含：</p>
+            <p class="tl">[0.847] 相似度分数，越高越匹配</p>
+            <p class="tl">文件名和行号范围</p>
+            <p class="tl">匹配的代码片段内容</p>
+            <p class="tl">第二个结果：分隔符分割器类</p>
+            <p class="tl">也可以不带参数运行，进入交互式 REPL</p>
+            <p class="tl">在 REPL 中可以连续输入查询</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 3: Live 模式 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">Live 模式：持续监控与实时更新</h2>
+
+      <p>CocoIndex 的 <span class="term" data-definition="Live 模式是 CocoIndex 的持续运行模式。管道启动后持续监控数据源变化，发现变化时自动增量处理。适用于生产环境的 AI Agent，确保 Agent 始终获得最新鲜的上下文。">Live 模式</span> 让管道持续运行——源数据变化时自动增量更新，不需要手动触发。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE — Live 模式运行</span>
+          <pre><code><span class="code-line"><span class="code-comment"># 命令行方式：-L 标志启用 Live 模式</span></span>
+<span class="code-line">$ cocoindex update -L main</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 或者代码方式：</span></span>
+<span class="code-line">app = coco.<span class="code-function">App</span>(<span class="code-string">"CodeEmbedding"</span>, app_main, sourcedir=<span class="code-string">"./src"</span>)</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 同步运行一次（扫描 + 处理 + 完成）</span></span>
+<span class="code-line">app.<span class="code-function">update_blocking</span>()</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># Live 模式（持续监控，发现变化自动更新）</span></span>
+<span class="code-line">handle = app.<span class="code-function">update</span>(<span class="code-property">live</span>=<span class="code-keyword">True</span>)</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 监控进度</span></span>
+<span class="code-line"><span class="code-keyword">async for</span> snapshot <span class="code-keyword">in</span> handle.<span class="code-function">watch</span>():</span>
+<span class="code-line">    <span class="code-function">print</span>(<span class="code-string">f"Status: {snapshot.status}"</span>)</span>
+<span class="code-line">    <span class="code-function">print</span>(<span class="code-string">f"Stats: {snapshot.stats}"</span>)</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 获取最终结果</span></span>
+<span class="code-line">result = <span class="code-keyword">await</span> handle.<span class="code-function">result</span>()</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">命令行方式：cocoindex update -L 启用 Live 模式</p>
+            <p class="tl">创建 App 实例</p>
+            <p class="tl">update_blocking() 同步运行一次——扫描、处理、完成</p>
+            <p class="tl">update(live=True) 启动 Live 模式</p>
+            <p class="tl">返回 UpdateHandle 用于监控进度</p>
+            <p class="tl">watch() 返回异步迭代器，实时获取进度快照</p>
+            <p class="tl">snapshot.status 可能是 RUNNING 或 READY</p>
+            <p class="tl">snapshot.stats 包含各组件的处理统计</p>
+            <p class="tl">result() 等待并获取最终结果</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">🎯</div>
+        <div class="callout-content">
+          <strong class="callout-title">Live 模式的核心价值</strong>
+          <p>在 Live 模式下，CocoIndex 持续监控数据源变化。当你编辑了一个文件，引擎在<strong>亚秒级</strong>内检测到变化并增量更新索引。AI Agent 始终获得最新鲜的上下文——不需要定时任务、不需要手动触发、不需要全量重建。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 4: 多目标存储 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">多目标存储：向量数据库、图数据库、消息队列</h2>
+
+      <p>CocoIndex 支持多种目标存储，满足不同的 AI 应用场景。选择合适的目标存储取决于你的查询需求。</p>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">🐘</div>
+          <h4 class="pattern-title">Postgres + pgvector</h4>
+          <p class="pattern-desc">最常用的组合。关系型数据 + 向量搜索一体化。支持 SQL 查询和混合检索。适合 RAG 场景。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">🔮</div>
+          <h4 class="pattern-title">Neo4j / FalkorDB</h4>
+          <p class="pattern-desc">图数据库，存储实体和关系。适合知识图谱、社交网络分析、会议纪要智能等场景。使用 Cypher 查询。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">🚀</div>
+          <h4 class="pattern-title">LanceDB / Qdrant / Turbopuffer</h4>
+          <p class="pattern-desc">专用向量数据库。LanceDB 嵌入式、零运维；Qdrant 高性能过滤；Turbopuffer 无服务器。适合纯向量检索。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+          <div class="pattern-icon" style="background: var(--color-actor-4)">📨</div>
+          <h4 class="pattern-title">Kafka Target</h4>
+          <p class="pattern-desc">将处理结果发布到 Kafka Topic。适合流式场景——处理完的文档立即通知下游消费者。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 5: 测验 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">检验你的理解</h2>
+
+      <div class="quiz-container" id="quiz-module4">
+        <div class="quiz-question-block"
+             data-correct="option-b"
+             data-explanation-right="正确！pgvector 的 &lt;=&gt; 运算符计算余弦距离（Cosine Distance）。距离为 0 表示完全相同，距离越大表示越不相似。查询时用 ORDER BY distance ASC 获取最相似的结果，score = 1 - distance 转换为相似度。"
+             data-explanation-wrong="回忆一下 pgvector 的距离运算符。&lt;=&gt; 计算的是哪种距离？">
+          <h3 class="quiz-question">pgvector 的 &lt;=&gt; 运算符计算的是什么距离？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>欧氏距离（L2 Distance）</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>余弦距离（Cosine Distance）</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>内积距离（Inner Product）</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-c"
+             data-explanation-right="正确！Live 模式通过 app.update(live=True) 启动。管道持续监控数据源变化，发现变化时自动增量更新，不需要手动触发。AI Agent 始终获得最新鲜的上下文。"
+             data-explanation-wrong="Live 模式和普通模式的区别在于'持续性'。普通模式运行一次就结束，Live 模式持续运行。">
+          <h3 class="quiz-question">Live 模式和普通模式的核心区别是什么？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Live 模式更快，普通模式更准确</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Live 模式使用更多内存</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Live 模式持续监控并自动增量更新，普通模式运行一次就结束</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重新作答</button>
+      </div>
+    </section>
+
+  </div>
+</section>

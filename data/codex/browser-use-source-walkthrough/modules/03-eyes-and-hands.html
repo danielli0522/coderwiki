@@ -1,0 +1,216 @@
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="hero-title module-title">AI 的眼睛和手</h1>
+      <p class="module-subtitle">DomService 怎么把网页变成 AI 能读的文本？Tools 怎么把 AI 的想法变成真实操作？</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">DomService：给 AI 一双"读网页"的眼睛</h2>
+        <p>LLM 不能直接看 HTML——它需要一段结构化的文本描述，告诉它"页面上有什么、在哪里、能干什么"。DomService 就是干这个的：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">DomService</span>:</span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(</span>
+<span class="code-line">        self,</span>
+<span class="code-line">        browser_session: <span class="code-string">'BrowserSession'</span>,</span>
+<span class="code-line">        cross_origin_iframes: bool = <span class="code-keyword">False</span>,</span>
+<span class="code-line">        paint_order_filtering: bool = <span class="code-keyword">True</span>,</span>
+<span class="code-line">        max_iframes: int = <span class="code-keyword">100</span>,</span>
+<span class="code-line">        max_iframe_depth: int = <span class="code-keyword">5</span>,</span>
+<span class="code-line">        viewport_threshold: int | <span class="code-keyword">None</span> = <span class="code-keyword">1000</span>,</span>
+<span class="code-line">    ):</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">DomService 绑定一个浏览器会话——它要解析哪个页面的 DOM，就看这个会话。</p>
+              <p class="tl">cross_origin_iframes：要不要解析跨域的 iframe（嵌套网页）。默认不解析，安全。</p>
+              <p class="tl">paint_order_filtering：按绘制顺序过滤元素——被遮挡的元素不传给 AI，减少噪音。</p>
+              <p class="tl">max_iframes / max_iframe_depth：防止嵌套太多 iframe 导致性能爆炸。</p>
+              <p class="tl">viewport_threshold：视口阈值——超出视口太远的元素会被标记为"不可见"。</p>
+            </div>
+          </div>
+        </div>
+
+        <p>DomService 最终调用 <code>DOMTreeSerializer</code> 把 DOM 树变成一段文本。这段文本长这样：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line">&lt;<span class="code-keyword">page_stats</span>&gt;</span>
+<span class="code-line">12 links, 5 interactive, 1 iframes, 48 total elements</span>
+<span class="code-line">&lt;/<span class="code-keyword">page_stats</span>&gt;</span>
+<span class="code-line"></span>
+<span class="code-line">[Start of page]</span>
+<span class="code-line">&lt;<span class="code-keyword">nav</span>&gt;</span>
+<span class="code-line">  [&lt;<span class="code-keyword">a</span> href=<span class="code-string">"/"</span>&gt;] Home</span>
+<span class="code-line">  [&lt;<span class="code-keyword">input</span> type=<span class="code-string">"search"</span> placeholder=<span class="code-string">"Search..."*</span>&gt;]</span>
+<span class="code-line">&lt;/<span class="code-keyword">nav</span>&gt;</span>
+<span class="code-line">[End of page]</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">先是页面统计：有多少链接、多少可交互元素、多少 iframe——给 AI 一个全局概览。</p>
+              <p class="tl">然后是页面的结构化表示，用类似 HTML 的格式，但只保留 AI 需要关心的元素。</p>
+              <p class="tl">方括号标记可交互元素（链接、输入框、按钮），AI 看到这些就知道"这里可以点击/输入"。</p>
+              <p class="tl">[Start/End of page] 告诉 AI 当前视口是否覆盖了整个页面——没覆盖就要滚动。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Tools：把 AI 的想法变成真实操作</h2>
+        <p>LLM 返回的不是 Python 代码，而是结构化的 JSON，像这样：<code>{"click": {"index": 5}}</code>。Tools 类负责把这个 JSON 翻译成真实的浏览器操作。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">ClickElementAction</span>(BaseModel):</span>
+<span class="code-line">    index: int | <span class="code-keyword">None</span> = Field(</span>
+<span class="code-line">        default=<span class="code-keyword">None</span>, ge=<span class="code-keyword">1</span>,</span>
+<span class="code-line">        description=<span class="code-string">'Element index from browser_state'</span></span>
+<span class="code-line">    )</span>
+<span class="code-line">    coordinate_x: int | <span class="code-keyword">None</span> = Field(</span>
+<span class="code-line">        default=<span class="code-keyword">None</span>,</span>
+<span class="code-line">        description=<span class="code-string">'Horizontal coordinate relative to viewport left edge'</span></span>
+<span class="code-line">    )</span>
+<span class="code-line">    coordinate_y: int | <span class="code-keyword">None</span> = Field(</span>
+<span class="code-line">        default=<span class="code-keyword">None</span>,</span>
+<span class="code-line">        description=<span class="code-string">'Vertical coordinate relative to viewport top edge'</span></span>
+<span class="code-line">    )</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">ClickElementAction 是一个 Pydantic 模型——定义了"点击"动作的参数格式。</p>
+              <p class="tl">index：通过元素编号点击。DomService 给每个可交互元素编了号，AI 引用编号就行。</p>
+              <p class="tl">coordinate_x / y：通过坐标点击。有些模型（如 Claude Sonnet 4）支持坐标点击，更精准。</p>
+              <p class="tl">两种方式二选一——有 index 用 index，没有就用坐标。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">数据流动：从网页到 AI 再到手</h2>
+        <p>一次完整的"点击"操作，数据经历了这些环节：</p>
+
+        <div class="flow-animation" data-steps='[{"highlight":"flow-actor-1","label":"1. BrowserSession 通过 CDP 获取页面 DOM 和截图"},{"highlight":"flow-actor-2","label":"2. DomService 解析 DOM 树，生成带编号的元素列表文本","packet":true,"from":"actor-1","to":"actor-2"},{"highlight":"flow-actor-3","label":"3. Agent 把元素列表 + 截图 + 任务历史打包发给 LLM","packet":true,"from":"actor-2","to":"actor-3"},{"highlight":"flow-actor-3","label":"4. LLM 返回 JSON 动作：{click: {index: 5}}"},{"highlight":"flow-actor-4","label":"5. Tools 解析 JSON，找到编号 5 的元素坐标，通过 CDP 执行点击","packet":true,"from":"actor-3","to":"actor-4"},{"highlight":"flow-actor-1","label":"6. BrowserSession 执行完毕，返回 ActionResult（成功/失败）","packet":true,"from":"actor-4","to":"actor-1"}]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">🌐</div>
+              <span>Browser</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">👁️</div>
+              <span>DomService</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">🧠</div>
+              <span>LLM</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">🔧</div>
+              <span>Tools</span>
+            </div>
+          </div>
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击"下一步"开始演示</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">不只是点击：Tools 支持的所有动作</h2>
+        <p>browser-use 内置了大量动作类型，每种都对应一个 Pydantic 模型：</p>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">NavigateAction</code>
+            <span class="badge-desc">打开一个 URL——就像你在地址栏输入网址按回车</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">ClickElementAction</code>
+            <span class="badge-desc">点击元素——通过编号或坐标，就像鼠标左键单击</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">InputTextAction</code>
+            <span class="badge-desc">在输入框里打字——先点击，再输入文字</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">ScrollAction</code>
+            <span class="badge-desc">滚动页面——上下滚、滚到指定元素位置</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">SearchAction</code>
+            <span class="badge-desc">用搜索引擎搜索——默认用 DuckDuckGo（验证码少）</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">ExtractAction</code>
+            <span class="badge-desc">从当前页面提取信息——用 LLM 从页面内容中抽取结构化数据</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">SendKeysAction</code>
+            <span class="badge-desc">发送键盘按键——回车、Tab、Escape 等特殊键</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">DoneAction</code>
+            <span class="badge-desc">任务完成！告诉 Agent "我搞定了"，并附上最终答案</span>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键设计</strong>
+            <p>所有动作都用 Pydantic 模型定义——这意味着 LLM 的输出会被自动校验。如果 AI 说了"点击编号 -1 的元素"，Pydantic 会拒绝（因为 ge=1 限制最小值为 1）。这种"在数据层面保证安全"的思路很值得学习。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">测测你理解了多少</h2>
+
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block" data-correct="option-b" data-explanation-right="正确！DomService 把 DOM 树序列化为带编号的文本格式，每个可交互元素都有唯一编号，LLM 输出 click:{index:5} 就是点击编号 5 的元素。" data-explanation-wrong="关键在于：LLM 并不知道网页的 CSS 选择器或 XPath。它只能看到 DomService 生成的带编号元素列表，然后用编号来指定要操作的元素。">
+            <h3 class="quiz-question">LLM 怎么知道要点击哪个元素？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div><span>LLM 自己分析 CSS 选择器来定位元素</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div><span>DomService 给每个可交互元素编号，LLM 通过编号引用</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div><span>LLM 直接使用 XPath 来定位页面元素</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

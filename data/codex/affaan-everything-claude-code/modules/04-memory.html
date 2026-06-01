@@ -1,0 +1,192 @@
+<section class="module" id="module-4">
+  <div class="module-inner">
+
+    <div class="screen">
+      <div class="screen-content">
+        <div class="eyebrow">Module 4</div>
+        <h1 class="display">记忆持久化：<br>让 AI 永不失忆</h1>
+        <p class="lead">每次新开一个 Claude 会话，它都是全新的——不记得你上次做到哪里，不记得你的偏好，不记得已经踩过的坑。ECC 解决的最重要的问题之一，就是<strong>记忆持久化</strong>：让昨天的经验成为今天的起点。</p>
+      </div>
+    </div>
+
+    <div class="screen">
+      <div class="screen-content">
+        <h2>记忆的三个层次</h2>
+        <p>ECC 把记忆分成三个层次，就像人类记忆的工作原理：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card">
+            <div class="pattern-card-icon">📌</div>
+            <div class="pattern-card-name">长期记忆：CLAUDE.md</div>
+            <div class="pattern-card-desc">你的项目规范、不能违反的规则、架构决策。每次会话自动加载——相当于公司的入职手册。</div>
+          </div>
+          <div class="pattern-card">
+            <div class="pattern-card-icon">🗒️</div>
+            <div class="pattern-card-name">会话记忆：Session Files</div>
+            <div class="pattern-card-desc">每次会话结束时保存的进度摘要。下次告诉 Claude 文件路径，它就能接着干。</div>
+          </div>
+          <div class="pattern-card">
+            <div class="pattern-card-icon">🧪</div>
+            <div class="pattern-card-name">学习记忆：Skills 提取</div>
+            <div class="pattern-card-desc">从成功的会话中自动提取可复用的模式，写成新的 Skill——经验的自动结晶化。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <div class="screen-content">
+        <h2>会话持久化 Hook 的工作方式</h2>
+
+        <div class="flow-animation" data-steps='[
+          {"from": "你", "to": "Claude", "label": "开始开发任务", "color": "#2A7B9B"},
+          {"from": "Claude", "to": "代码库", "label": "读取文件、编写代码", "color": "#7B6DAA"},
+          {"from": "Stop Hook", "to": "会话文件", "label": "自动保存进度摘要", "color": "#2D8B55"},
+          {"from": "下次的你", "to": "Claude", "label": "提供文件路径：cat session.md", "color": "#2A7B9B"},
+          {"from": "Claude", "to": "你", "label": "我记得了，继续上次的工作...", "color": "#D4A843"}
+        ]'></div>
+
+        <div class="callout callout-aha">
+          <strong>💡 关键洞察：</strong> 会话文件的内容应该包含三件事：<strong>哪些方法成功了</strong>（有验证证据）、<strong>哪些方法失败了</strong>（避免重复踩坑）、<strong>还有什么没做</strong>（下一步清单）。这不只是摘要——这是给未来 Claude 的行动手册。
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <div class="screen-content">
+        <h2>动态系统提示注入：手术刀式上下文</h2>
+
+        <div class="code-translation">
+          <div class="code-panel">
+            <div class="code-panel-label">真实代码 <span class="code-file">the-longform-guide.md</span></div>
+            <pre><code class="language-bash"># 日常开发模式
+alias claude-dev=\
+  'claude --system-prompt \
+  "$(cat ~/.claude/contexts/dev.md)"'
+
+# PR 审查模式（不同的上下文）
+alias claude-review=\
+  'claude --system-prompt \
+  "$(cat ~/.claude/contexts/review.md)"'
+
+# 研究探索模式
+alias claude-research=\
+  'claude --system-prompt \
+  "$(cat ~/.claude/contexts/research.md)"'</code></pre>
+          </div>
+          <div class="translation-panel">
+            <div class="translation-panel-label">这段代码在说什么</div>
+            <div class="translation-lines">
+              <div class="translation-line">
+                <span class="tl-code">alias claude-dev=...</span>
+                <span class="tl-text">不同工作场景用不同的"入职包"。写代码时加载开发上下文，审查 PR 时加载审查标准</span>
+              </div>
+              <div class="translation-line">
+                <span class="tl-code">--system-prompt "$(cat ...)"</span>
+                <span class="tl-text">系统提示（System Prompt）优先级最高——Claude 会把它当作最重要的指令来遵循</span>
+              </div>
+              <div class="translation-line">
+                <span class="tl-code">~/.claude/contexts/</span>
+                <span class="tl-text">上下文文件放在用户主目录的 .claude 文件夹——跨项目通用，不绑定到特定代码库</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <div class="screen-content">
+        <h2>会话摘要：给未来自己的信</h2>
+        <p>一个高质量的会话摘要就像给未来 Claude（和未来的你）写的一封精密的信——不遗漏关键信息，也不浪费一个多余的词。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card">
+            <div class="pattern-card-icon">✅</div>
+            <div class="pattern-card-name">已完成项（有证据）</div>
+            <div class="pattern-card-desc">不只是"做了 X"，而是"X 已通过测试验证，输出结果如下"。带证据的完成才是真正的完成。</div>
+          </div>
+          <div class="pattern-card">
+            <div class="pattern-card-icon">❌</div>
+            <div class="pattern-card-name">已失败路径（避坑）</div>
+            <div class="pattern-card-desc">记录尝试过但失败的方法及原因。这是最有价值的记忆——避免明天重复踩同一个坑。</div>
+          </div>
+          <div class="pattern-card">
+            <div class="pattern-card-icon">📋</div>
+            <div class="pattern-card-name">待办清单（下一步）</div>
+            <div class="pattern-card-desc">明确的下一步行动列表，优先级排序。新 Claude 读到这个列表就能立即开工。</div>
+          </div>
+          <div class="pattern-card">
+            <div class="pattern-card-icon">🏗️</div>
+            <div class="pattern-card-name">架构决策（含理由）</div>
+            <div class="pattern-card-desc">为什么选择了方案 A 而不是方案 B。未来做决策时需要这些上下文，否则会反复纠结同样的问题。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <div class="screen-content">
+        <h2>CLAUDE.md 的分层架构</h2>
+        <p>ECC 推荐将项目规范拆分成多个层次的文件，按需加载而非一次全部塞入上下文：</p>
+
+        <div class="arch-diagram" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 12px; padding: 2rem; margin: 1.5rem 0;">
+          <div style="text-align:center; margin-bottom:1.5rem; font-weight:600; color:#2A7B9B; font-size:1.1rem;">记忆分层架构图</div>
+          <div style="display:flex; flex-direction:column; gap:1rem;">
+            <div style="background:#2A7B9B; color:#fff; border-radius:8px; padding:1rem 1.5rem; text-align:center;">
+              <div style="font-weight:700; font-size:1rem;">Layer 1: 全局配置</div>
+              <div style="font-size:0.85rem; opacity:0.9; margin-top:0.25rem;">~/.claude/CLAUDE.md — 跨所有项目通用规则</div>
+            </div>
+            <div style="background:#7B6DAA; color:#fff; border-radius:8px; padding:1rem 1.5rem; text-align:center;">
+              <div style="font-weight:700; font-size:1rem;">Layer 2: 项目配置</div>
+              <div style="font-size:0.85rem; opacity:0.9; margin-top:0.25rem;">项目根目录/CLAUDE.md — 项目特定规则与架构决策</div>
+            </div>
+            <div style="background:#D4A843; color:#fff; border-radius:8px; padding:1rem 1.5rem; text-align:center;">
+              <div style="font-weight:700; font-size:1rem;">Layer 3: 上下文文件</div>
+              <div style="font-size:0.85rem; opacity:0.9; margin-top:0.25rem;">~/.claude/contexts/dev.md — 按工作模式动态加载</div>
+            </div>
+            <div style="background:#2D8B55; color:#fff; border-radius:8px; padding:1rem 1.5rem; text-align:center;">
+              <div style="font-weight:700; font-size:1rem;">Layer 4: 会话文件</div>
+              <div style="font-size:0.85rem; opacity:0.9; margin-top:0.25rem;">.claude/sessions/ — 每次会话的临时记忆，按需引用</div>
+            </div>
+          </div>
+          <div style="margin-top:1rem; text-align:center; font-size:0.85rem; color:#666;">
+            层级越高 → 加载频率越高 → 越需要精简
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <strong>实战案例：</strong> 你的 API 端点规范放在 Layer 2（项目 CLAUDE.md），因为它和具体项目强绑定；你的代码审查习惯放在 Layer 1（全局 CLAUDE.md），因为跨项目通用；而"今天下午的进度记录"只在 Layer 4（会话文件），不需要每次都加载。
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <div class="screen-content">
+        <h2>模块测验</h2>
+        <div class="quiz" data-quiz-id="q6">
+          <div class="quiz-question">你在开发一个复杂功能，花了 4 小时后需要休息。明天继续时，你希望 Claude 能无缝接上。基于 ECC 的方法，你在结束今天的会话前应该做什么？</div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-correct="false">截图所有重要代码，明天手动粘贴给 Claude</button>
+            <button class="quiz-option" data-correct="false">保持对话窗口开着，不要关闭</button>
+            <button class="quiz-option" data-correct="true">让 Claude 生成一个包含"已完成/已失败/待完成"的会话摘要文件，明天用文件路径恢复上下文</button>
+            <button class="quiz-option" data-correct="false">在 CLAUDE.md 里记录当前进度</button>
+          </div>
+          <div class="quiz-feedback" style="display:none"></div>
+        </div>
+
+        <div class="quiz" data-quiz-id="q7">
+          <div class="quiz-question">你发现你的团队中每个人都在重复教 Claude 同一套代码审查标准。从 ECC 的架构来看，最好的解决方案是？</div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-correct="false">把标准贴在公司 Wiki 上，每次手动粘贴</button>
+            <button class="quiz-option" data-correct="false">让每个人都创建自己的 CLAUDE.md</button>
+            <button class="quiz-option" data-correct="true">把标准写成 Skill，放在项目的 .claude/skills/ 目录，所有人共享同一份</button>
+            <button class="quiz-option" data-correct="false">每次开会口头传达标准给 Claude</button>
+          </div>
+          <div class="quiz-feedback" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>

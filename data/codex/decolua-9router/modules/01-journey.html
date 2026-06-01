@@ -1,0 +1,179 @@
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">一个请求的旅程</h1>
+      <p class="module-subtitle">当你用 Claude Code 写代码时，你的请求经历了怎样的冒险？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Hook — what does 9Router do? -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">想象你在写代码，AI 突然断了</h2>
+        <p>你正用 <span class="term" data-definition="Claude Code 是 Anthropic 出品的一个命令行 AI 编程工具，可以在终端里用自然语言让 AI 帮你写代码。">Claude Code</span> 专心写代码，突然弹出"配额用尽"。你的 $20/月 <span class="term" data-definition="订阅制指的是按月付费使用某个 AI 服务，比如 Claude Pro 每月 20 美元，有使用配额限制。">订阅</span> 额度花完了，代码写了一半，怎么办？</p>
+        <p><strong>9Router 就是你的"智能总机"</strong>——当你的主力 <span class="term" data-definition="AI 提供商是提供 AI 大模型服务的公司，比如 Anthropic（Claude）、OpenAI（GPT）、Google（Gemini）等。">AI 提供商</span> 挂了，它自动帮你切换到备用线路，让你的代码永不停歇。</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">核心洞察</strong>
+            <p>9Router 的本质是一个"本地 <span class="term" data-definition="代理服务器是一台中间服务器，客户端不直接访问目标服务器，而是通过代理转发请求。就像打电话时通过总机转接。">代理服务器</span>"——所有 AI 请求先到它这里，它再帮你转发到合适的 AI 服务商。你只需要改一个地址，就能接入 40+ 家 AI 服务商、100+ 个模型。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: The big picture flow -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">一个请求的完整旅程</h2>
+        <p>你在 Claude Code 里输入"帮我写个排序算法"，然后发生了什么？点"下一步"来看：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"你在 Claude Code 里输入提示词，请求发往 localhost:20128"},
+          {"highlight":"flow-actor-2","label":"9Router 收到请求，识别出你要用 claude-opus-4-7 模型"},
+          {"highlight":"flow-actor-2","label":"检查你的 Claude 订阅额度... 发现用完了！","packet":true,"from":"actor-2","to":"actor-2"},
+          {"highlight":"flow-actor-2","label":"自动切换到备用方案：GLM-5.1（便宜，$0.6/百万token）","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-3","label":"GLM 服务商处理请求，返回排序算法代码"},
+          {"highlight":"flow-actor-2","label":"9Router 把结果转回 Claude Code 格式，流式推送到你的终端","packet":true,"from":"actor-3","to":"actor-2"},
+          {"highlight":"flow-actor-1","label":"你在终端里看到代码流式出现，全程无感切换！","packet":true,"from":"actor-2","to":"actor-1"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">⌨️</div>
+              <span>Claude Code</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">🔀</div>
+              <span>9Router</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">🤖</div>
+              <span>AI 提供商</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击"下一步"开始旅程</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Code translation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">入口代码长什么样</h2>
+        <p>所有 AI 请求都从 <code>handleChat</code> 这个函数开始。它就像是 9Router 的前台接待员：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">export async function</span> <span class="code-function">handleChat</span>(request) {</span>
+<span class="code-line">  <span class="code-keyword">const</span> body = <span class="code-keyword">await</span> request.<span class="code-function">json</span>();</span>
+<span class="code-line">  <span class="code-keyword">const</span> modelStr = body.model;</span>
+<span class="code-line">  <span class="code-keyword">const</span> settings = <span class="code-keyword">await</span> <span class="code-function">getSettings</span>();</span>
+<span class="code-line">  <span class="code-keyword">const</span> modelInfo = <span class="code-function">getModelInfo</span>(modelStr);</span>
+<span class="code-line">  <span class="code-keyword">return</span> <span class="code-function">handleSingleModelChat</span>(body, modelInfo);</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">定义一个"处理聊天"的函数，接收来自客户端的请求</p>
+              <p class="tl">把请求体解析成 JS 对象，拿到用户想用的模型名</p>
+              <p class="tl">提取出模型名称字符串，比如 "cc/claude-opus-4-7"</p>
+              <p class="tl">读取全局设置（是否需要 API Key、使用什么策略等）</p>
+              <p class="tl">解析模型名，得到"提供商 + 模型"的组合信息</p>
+              <p class="tl">把请求交给专门处理单个模型的函数去执行</p>
+              <p class="tl">函数结束，返回响应给客户端</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Three-tier architecture -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">三层架构一览</h2>
+        <p>9Router 由三层组成，各司其职：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🚪</div>
+            <h4 class="pattern-title">API 接口层</h4>
+            <p class="pattern-desc">Next.js <span class="term" data-definition="路由是指 URL 路径到处理函数的映射。比如 /v1/chat/completions 这个路径会触发一个处理聊天请求的函数。">路由</span>——接收请求、验证身份、解析模型名。就像大厦的入口大堂。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🧠</div>
+            <h4 class="pattern-title">SSE 核心</h4>
+            <p class="pattern-desc">翻译格式、选择执行器、管理 <span class="term" data-definition="流式传输是指数据不是一次性全部返回，而是像流水一样一点一点推送过来。SSE（Server-Sent Events）是浏览器原生支持的一种流式传输技术。">流式传输</span>。是整个系统的大脑。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">💾</div>
+            <h4 class="pattern-title">持久化层</h4>
+            <p class="pattern-desc">用 JSON 文件存储配置、<span class="term" data-definition="凭据是指用来证明身份的密钥或令牌，比如 API Key、OAuth Token 等，相当于你访问服务的通行证。">凭据</span>和使用记录。轻量级，无需数据库。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">测验：你理解了请求旅程吗？</h2>
+
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！9Router 就是一个本地代理，所有请求先经过它，它负责转发和降级。这就像你打电话先经过总机，总机帮你转接。"
+               data-explanation-wrong="想一想 9Router 在整个流程中的位置——它站在你的工具和 AI 服务商之间。">
+            <h3 class="quiz-question">9Router 在整个 AI 编程流程中扮演什么角色？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>一个 AI 模型，负责生成代码</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>一个中间代理，帮你路由请求到不同 AI 提供商</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>一个代码编辑器，用来写代码</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="对！9Router 的所有配置都存在 JSON 文件里（db.json），不需要安装 MySQL 或 PostgreSQL 这样的重量级数据库。"
+               data-explanation-wrong="9Router 的持久化方案非常轻量。想想什么数据库技术最简单——甚至不需要额外安装？">
+            <h3 class="quiz-question">9Router 用什么来存储提供商配置和使用数据？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>MySQL 数据库</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Redis 缓存</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>JSON 文件</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

@@ -1,0 +1,174 @@
+<!-- Module 5: 性能分析与内存诊断 -->
+<section class="module" id="module-5">
+  <div class="module-content">
+
+    <div class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">性能分析与内存诊断</h1>
+      <p class="module-subtitle">Trace 录制、CrUX 真实用户数据、Heap Snapshot 分析 —— 专业级浏览器诊断能力。</p>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">性能分析三件套</h2>
+      <p>性能工具由三个工具组成一个完整的工作流：</p>
+
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="flow-step-num">1</div>
+          <p>performance_start_trace</p>
+        </div>
+        <span class="flow-arrow">&rarr;</span>
+        <div class="flow-step">
+          <div class="flow-step-num">2</div>
+          <p>performance_stop_trace</p>
+        </div>
+        <span class="flow-arrow">&rarr;</span>
+        <div class="flow-step">
+          <div class="flow-step-num">3</div>
+          <p>performance_analyze_insight</p>
+        </div>
+      </div>
+
+      <div class="callout callout-accent animate-in">
+        <span class="callout-icon">&#x1F4A1;</span>
+        <div class="callout-content">
+          <span class="callout-title">autoStop 模式</span>
+          <p>最简单的用法：设置 <code>autoStop=true</code>（默认）和 <code>reload=true</code>（默认），MCP Server 会自动清空页面、开始录制、重新加载、等 5 秒、停止录制、解析结果 —— 一条指令完成全部性能分析。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">Trace 录制的内部流程</h2>
+
+      <div class="flow-animation" data-steps='[
+        {"label":"1. 清空页面状态（导航到 about:blank）","highlight":"flow-step1"},
+        {"label":"2. 启动 Chrome Tracing（指定 15 个事件类别）","highlight":"flow-step2","from":"step1","to":"step2","packet":true},
+        {"label":"3. 导航到目标 URL，等待 load 事件","highlight":"flow-step3","from":"step2","to":"step3","packet":true},
+        {"label":"4. 等待 5 秒收集 Trace 数据","highlight":"flow-step4"},
+        {"label":"5. 停止录制，获取 Trace Buffer","highlight":"flow-step5","from":"step4","to":"step5","packet":true},
+        {"label":"6. 解析 Trace：提取 Insights + Core Web Vitals + CrUX","highlight":"flow-step6","from":"step5","to":"step6","packet":true}
+      ]'>
+        <div class="flow-actors">
+          <div class="flow-actor" id="flow-step1">
+            <div class="flow-actor-icon">&#x1F504;</div>
+            <span>清空状态</span>
+          </div>
+          <div class="flow-actor" id="flow-step2">
+            <div class="flow-actor-icon">&#x23F0;</div>
+            <span>启动录制</span>
+          </div>
+          <div class="flow-actor" id="flow-step3">
+            <div class="flow-actor-icon">&#x1F310;</div>
+            <span>加载页面</span>
+          </div>
+          <div class="flow-actor" id="flow-step4">
+            <div class="flow-actor-icon">&#x23F3;</div>
+            <span>收集数据</span>
+          </div>
+          <div class="flow-actor" id="flow-step5">
+            <div class="flow-actor-icon">&#x1F4BE;</div>
+            <span>停止录制</span>
+          </div>
+          <div class="flow-actor" id="flow-step6">
+            <div class="flow-actor-icon">&#x1F4CA;</div>
+            <span>解析分析</span>
+          </div>
+        </div>
+        <div class="flow-step-label">点击 "Next Step" 开始</div>
+        <div class="flow-packet"></div>
+        <div class="flow-controls">
+          <button class="btn btn-primary flow-next-btn">Next Step</button>
+          <button class="btn flow-reset-btn">Reset</button>
+          <span class="flow-progress">Step 0 / 6</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">CrUX 真实用户数据集成</h2>
+      <p>Trace 录制完成后，如果启用了 CrUX（默认），系统会自动请求 Google Chrome User Experience Report API，获取真实用户的性能数据：</p>
+
+      <div class="translation-block">
+        <div class="translation-code">
+          <span class="translation-label">performance.ts — CrUX 集成</span>
+          <span class="code-line"><span class="code-keyword">async function</span> <span class="code-function">populateCruxData</span>(result: TraceResult) {</span>
+          <span class="code-line">  <span class="code-comment">// 1. 获取 CrUX Manager 实例</span></span>
+          <span class="code-line">  <span class="code-keyword">const</span> cruxManager = CrUXManager.<span class="code-function">instance</span>();</span>
+          <span class="code-line"></span>
+          <span class="code-line">  <span class="code-comment">// 2. 收集所有相关 URL</span></span>
+          <span class="code-line">  <span class="code-keyword">const</span> urls = [...result.parsedTrace.insights.values()]</span>
+          <span class="code-line">    .<span class="code-function">map</span>(c =&gt; c.url.toString());</span>
+          <span class="code-line">  urls.<span class="code-function">push</span>(result.parsedTrace.data.Meta.mainFrameURL);</span>
+          <span class="code-line"></span>
+          <span class="code-line">  <span class="code-comment">// 3. 并发请求每个 URL 的 CrUX 数据</span></span>
+          <span class="code-line">  <span class="code-keyword">const</span> cruxData = <span class="code-keyword">await</span> Promise.<span class="code-function">all</span>(</span>
+          <span class="code-line">    urls.<span class="code-function">map</span>(url =&gt; cruxManager.<span class="code-function">getFieldDataForPage</span>(url))</span>
+          <span class="code-line">  );</span>
+          <span class="code-line"></span>
+          <span class="code-line">  <span class="code-comment">// 4. 附加到 Trace 结果</span></span>
+          <span class="code-line">  result.parsedTrace.metadata.cruxFieldData = cruxData;</span>
+          <span class="code-line">}</span>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文解读</span>
+          <div class="translation-lines">
+            <div class="tl">从 Insights 集合和主框架 URL 中收集所有需要查询 CrUX 的 URL。</div>
+            <div class="tl">并发请求每个 URL 的真实用户性能数据（LCP、FID、CLS 等）。</div>
+            <div class="tl">将 CrUX 数据附加到 Trace 结果的 metadata 中，最终格式化输出时一并展示。</div>
+            <div class="tl">这样 LLM 就能同时看到实验室数据和真实用户数据，做出更准确的分析。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">内存分析：Heap Snapshot</h2>
+      <p>内存工具（实验性）允许 LLM 分析 JavaScript 堆内存，找出内存泄漏：</p>
+
+      <div class="icon-rows stagger-children">
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-accent-light); color: var(--color-accent);">&#x1F4BE;</div>
+          <div>
+            <strong>take_heapsnapshot</strong>
+            <p>拍摄当前页面的 V8 堆快照，保存为文件。使用 DevTools 前端的 HeapSnapshotWorker 解析。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-info-light); color: var(--color-info);">&#x1F4CA;</div>
+          <div>
+            <strong>get_heapsnapshot_summary</strong>
+            <p>按构造函数分组统计对象数量和保留大小，快速定位可疑类型。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-success-light); color: var(--color-success);">&#x1F50D;</div>
+          <div>
+            <strong>get_heapsnapshot_retainers</strong>
+            <p>查看某个对象的保留链（GC Root 到该对象的路径），这是定位内存泄漏的关键。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">知识检测</h2>
+      <div class="quiz-container" id="quiz-5">
+        <div class="quiz-question-block" data-correct="b" data-explanation-right="默认 autoStop 模式下，录制 5 秒后自动停止并解析。整个过程只需一条工具调用。" data-explanationwrong="回顾 autoStop 参数的默认行为。">
+          <p class="quiz-question">autoStop=true 模式下，performance_start_trace 的完整流程是什么？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)"><span class="quiz-option-radio"></span>只启动录制，需要手动调用 stop</button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)"><span class="quiz-option-radio"></span>清空页面 -> 启动录制 -> 重新加载 -> 等 5 秒 -> 停止 -> 解析</button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)"><span class="quiz-option-radio"></span>直接截取当前页面状态的性能数据</button>
+            <button class="quiz-option" data-value="d" onclick="selectOption(this)"><span class="quiz-option-radio"></span>启动 Lighthouse 审计并生成报告</button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-5')">Check Answers</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-5')">Reset</button>
+      </div>
+    </div>
+
+  </div>
+</section>

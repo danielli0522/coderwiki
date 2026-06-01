@@ -1,0 +1,230 @@
+
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">智能扩展机制</h1>
+      <p class="module-subtitle">Skill 技能系统、Memory 长期记忆、Sandbox 沙箱执行——DeerFlow 的三大扩展支柱</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: 三大扩展机制概览 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">三根支柱撑起整个系统</h2>
+        <p>如果把 DeerFlow 比作一棵树，Lead Agent 是树干，那么 Skill、Memory 和 Sandbox 就是三根主要的树枝——分别负责"能力"、"经验"和"安全"。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🎯</div>
+            <h4 class="pattern-title">Skills 技能系统</h4>
+            <p class="pattern-desc">像给 AI 装"技能包"——深度研究、PPT 生成、代码文档、数据分析。每个技能包含最佳实践和工作流模板。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🧠</div>
+            <h4 class="pattern-title">Memory 长期记忆</h4>
+            <p class="pattern-desc">像日记本——Agent 记住你的偏好、项目上下文、历史对话要点。下次对话不需要重复说明。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">🔒</div>
+            <h4 class="pattern-title">Sandbox 沙箱执行</h4>
+            <p class="pattern-desc">像隔离实验室——子 Agent 在 Docker 容器里执行代码、安装包、操作文件，不会影响宿主系统。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Skills 深入 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Skills：Agent 的技能背包</h2>
+        <p>每个 Skill 就是一个 <code>SKILL.md</code> 文件，包含了这个任务的最佳实践、工作流程和参考资料。DeerFlow 内置了 20+ 个技能：</p>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">deep-research</code>
+            <span class="badge-desc">深度研究——多轮搜索 + 信息综合 + 报告生成</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">ppt-generation</code>
+            <span class="badge-desc">PPT 生成——从文本大纲到完整的演示文稿</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">data-analysis</code>
+            <span class="badge-desc">数据分析——读取 CSV/Excel，生成图表和洞察</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">code-documentation</code>
+            <span class="badge-desc">代码文档——自动为代码库生成文档</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">skill-creator</code>
+            <span class="badge-desc">技能创建器——让 Agent 自己创建新的技能包</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">podcast-generation</code>
+            <span class="badge-desc">播客生成——把研究内容转成播客脚本</span>
+          </div>
+        </div>
+
+        <p>技能加载遵循"渐进式加载"模式：Agent 先看到技能列表，匹配到相关技能后才加载完整内容——这就像你不会一次打开所有 App，而是按需打开。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">get_skills_prompt_section</span>(</span>
+<span class="code-line">    available_skills):</span>
+<span class="code-line">    skills = get_enabled_skills()</span>
+<span class="code-line">    skill_items = <span class="code-string">"\n"</span>.join(</span>
+<span class="code-line">        f<span class="code-string">"&lt;skill&gt;&lt;name&gt;{s.name}&lt;/name&gt;"</span></span>
+<span class="code-line">        f<span class="code-string">"&lt;description&gt;{s.description}"</span></span>
+<span class="code-line">        f<span class="code-string">"&lt;/description&gt;&lt;/skill&gt;"</span></span>
+<span class="code-line">        <span class="code-keyword">for</span> s <span class="code-keyword">in</span> skills)</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">生成技能部分的系统提示词。</p>
+              <p class="tl">先从磁盘加载所有已启用的技能元数据。</p>
+              <p class="tl">把每个技能格式化成 XML 标签，告诉 Agent 有哪些技能可用。</p>
+              <p class="tl">Agent 看到这个列表后，只在需要时才用 read_file 读取完整技能内容。</p>
+              <p class="tl">这避免了把所有技能内容都塞进上下文——节省 token、提高响应速度。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Memory 深入 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Memory：Agent 的记忆系统</h2>
+        <p>DeerFlow 的记忆不是简单的"把历史聊天存下来"。它有一个结构化的记忆模型，分为多个维度——就像一个人的记忆分为工作记忆、个人经历、长期背景知识：</p>
+
+        <div class="chat-window" id="chat-module4-memory">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="memory" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">🧠</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">MemoryMiddleware</span>
+                <p>这段对话值得记住，我来提取关键信息...</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="summarizer" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">📝</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">Summarizer</span>
+                <p>用户是一个 Python 开发者，正在做一个电商项目，偏好使用 FastAPI 框架。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="storage" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">💾</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">FileStorage</span>
+                <p>已保存到 memory.json：用户偏好已更新，项目上下文已记录。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="next-session" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🔄</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">下次对话</span>
+                <p>DynamicContextMiddleware 自动注入记忆："该用户偏好 Python + FastAPI..."</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module4-memory-typing-avatar">🧠</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">Next Message</button>
+            <button class="btn chat-all-btn">Play All</button>
+            <button class="btn chat-reset-btn">Replay</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Sandbox 深入 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Sandbox：安全的执行环境</h2>
+        <p>子 Agent 需要执行代码、安装软件包、读写文件——这些操作不能直接在你的服务器上跑。DeerFlow 使用
+          <span class="term" data-definition="Docker 容器——一种轻量级的虚拟化技术，把应用和它的依赖打包在一个隔离环境中运行，就像在电脑里开了一个完全独立的小电脑">Docker 容器</span>
+          作为沙箱：
+        </p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">AioSandbox</span>(Sandbox):</span>
+<span class="code-line">    _MAX_DOWNLOAD_SIZE = <span class="code-number">100</span> * <span class="code-number">1024</span> * <span class="code-number">1024</span></span>
+<span class="code-line">    _DEFAULT_NO_CHANGE_TIMEOUT = <span class="code-number">600</span></span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, id, base_url, home_dir):</span>
+<span class="code-line">        self._client = AioSandboxClient(</span>
+<span class="code-line">            base_url=base_url,</span>
+<span class="code-line">            timeout=<span class="code-number">600</span>)</span>
+<span class="code-line">        self._lock = threading.Lock()</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">AioSandbox 通过 HTTP API 连接到一个 Docker 容器——就像远程操控一台独立的小电脑。</p>
+              <p class="tl">下载文件大小上限 100MB，防止子 Agent 搞出巨型文件占满磁盘。</p>
+              <p class="tl">命令无输出超时 600 秒（10 分钟），防止命令卡死。</p>
+              <p class="tl">初始化时连接到指定的沙箱容器 URL。</p>
+              <p class="tl">API 超时也是 600 秒。</p>
+              <p class="tl">线程锁确保同一时间只有一个命令在执行——因为容器的 shell 是单会话的。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">安全边界设计</strong>
+            <p>沙箱有三个挂载目录：<code>/mnt/user-data/uploads</code>（用户上传）、<code>/mnt/user-data/workspace</code>（工作目录）、<code>/mnt/user-data/outputs</code>（最终产出）。子 Agent 只能在这个范围内活动。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验你的理解</h2>
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！渐进式加载意味着 Agent 先看到一个轻量的技能列表（名称 + 描述），只有匹配到具体任务时才用 read_file 加载完整的 SKILL.md 内容。这大幅节省了上下文窗口中的 token 消耗。"
+               data-explanation-wrong="想一想：如果 20 多个技能的完整内容都塞进系统提示词，那得多长？每次对话都要发送这么多 token？DeerFlow 是怎么避免这个问题的？">
+            <h3 class="quiz-question">DeerFlow 的 Skill 系统采用"渐进式加载"（Progressive Loading），这主要是为了解决什么问题？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>防止用户一次性看到太多技能选项而困惑</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>节省 LLM 上下文窗口的 token，只按需加载技能的完整内容</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>减少磁盘读取次数，提高系统性能</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

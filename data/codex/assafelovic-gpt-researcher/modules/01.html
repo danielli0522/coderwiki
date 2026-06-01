@@ -1,0 +1,254 @@
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">从提问到报告：一次研究的完整旅程</h1>
+      <p class="module-subtitle">想象你输入一个问题，几分钟后拿到一份带引用的研究报告——中间发生了什么？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: What is GPT Researcher -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">GPT Researcher 是什么？</h2>
+        <p>假设你是一位创业者，想知道「<strong>Nvidia 股价为什么一直在涨？</strong>」。你可以花一整天自己搜索、阅读、整理；也可以用 GPT Researcher——一个能自主完成整轮研究的 <span class="term" data-definition="Agent（智能体）是一个能自主决策、调用工具、完成复杂任务的 AI 程序。区别于普通的聊天机器人，Agent 会自己规划步骤，一步步执行，而不只是回答一个问题。">Agent</span>。</p>
+        <p>你只需给它一个问题，它就会自动：</p>
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>理解问题，拆解子问题</strong>
+              <p>把大问题拆成多个搜索角度</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>全网搜索，抓取网页内容</strong>
+              <p>并行搜索 20+ 来源，爬取网页正文</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>整理信息，生成研究报告</strong>
+              <p>汇总去重，写出带引用的完整报告</p>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键洞察</strong>
+            <p>GPT Researcher 的灵感来自「计划-求解（Plan-and-Solve）」论文——先规划搜索策略，再逐个执行。这和人类做研究的方式一模一样：先列提纲，再填内容。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: The main entry point code -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">三行代码启动研究</h2>
+        <p>GPT Researcher 的使用非常简单。你只需要创建一个 <span class="term" data-definition="GPTResearcher 是整个系统的主控类。它像一个项目管理者，协调搜索、爬虫、写作等组件一起工作。">GPTResearcher</span> 对象，传入你的问题，然后调用 <code>conduct_research()</code>：</p>
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-keyword">from</span> gpt_researcher <span class="code-keyword">import</span> GPTResearcher</span>
+<span class="code-line"></span>
+<span class="code-line">query = <span class="code-string">"why is Nvidia stock going up?"</span></span>
+<span class="code-line">researcher = GPTResearcher(query=query)</span>
+<span class="code-line">research_result = <span class="code-keyword">await</span> researcher.conduct_research()</span>
+<span class="code-line">report = <span class="code-keyword">await</span> researcher.write_report()</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">引入 GPT Researcher 工具包</p>
+              <p class="tl"></p>
+              <p class="tl">定义你想研究的问题</p>
+              <p class="tl">创建一个「研究 Agent」，把问题交给它</p>
+              <p class="tl">让 Agent 开始自主搜索和研究，等待结果</p>
+              <p class="tl">让 Agent 把研究结果写成一份完整的报告</p>
+            </div>
+          </div>
+        </div>
+        <p>就这么简单。但在这三行代码背后，有一整套精密的协作系统在工作。接下来我们就来拆解它。</p>
+      </section>
+
+      <!-- Screen 3: Architecture overview -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">整体架构一览</h2>
+        <p>把 GPT Researcher 想象成一个虚拟的研究团队。团队里有不同的角色，各司其职：</p>
+        <div class="arch-diagram">
+          <div class="arch-zone">
+            <h4 class="arch-zone-label">用户层</h4>
+            <div class="arch-component" data-desc="你输入一个问题，系统返回一份研究报告。这是唯一的用户交互点。">
+              <div class="arch-icon">👤</div>
+              <span>用户（提问）</span>
+            </div>
+          </div>
+          <div class="arch-zone">
+            <h4 class="arch-zone-label">控制层</h4>
+            <div class="arch-component" data-desc="GPTResearcher 是总指挥。它创建并协调 ResearchConductor（搜索）、ReportGenerator（写作）、ContextManager（上下文管理）、BrowserManager（浏览器爬虫）等组件。">
+              <div class="arch-icon">🎯</div>
+              <span>GPTResearcher 主控</span>
+            </div>
+            <div class="arch-component" data-desc="ResearchConductor 负责规划搜索策略、生成子问题、协调多个搜索引擎并行搜索、爬取网页内容。">
+              <div class="arch-icon">🔍</div>
+              <span>ResearchConductor 搜索指挥</span>
+            </div>
+          </div>
+          <div class="arch-zone">
+            <h4 class="arch-zone-label">执行层</h4>
+            <div class="arch-component" data-desc="Retriever 是搜索引擎适配器，支持 Google、Tavily、DuckDuckGo、Bing、ArXiv 等 20+ 搜索引擎。">
+              <div class="arch-icon">🌐</div>
+              <span>Retriever 搜索引擎</span>
+            </div>
+            <div class="arch-component" data-desc="Scraper 负责从搜索结果中的 URL 爬取网页正文内容，支持 BeautifulSoup、Browser、FireCrawl 等多种爬虫。">
+              <div class="arch-icon">🕷️</div>
+              <span>Scraper 网页爬虫</span>
+            </div>
+            <div class="arch-component" data-desc="ReportGenerator 把收集到的所有信息整理成一份结构化的研究报告，包含引言、正文和结论。">
+              <div class="arch-icon">📝</div>
+              <span>ReportGenerator 报告生成</span>
+            </div>
+          </div>
+          <div class="arch-description">点击任意组件，了解它的职责</div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Group Chat - how components talk -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">组件之间如何协作？</h2>
+        <p>当 GPT Researcher 运行时，内部组件之间就像一个微信群在聊天——各角色分工明确，按顺序发言。点击「Play All」看看完整的对话：</p>
+        <div class="chat-window" id="chat-module1">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="user" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">U</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">用户</span>
+                <p>我想研究：为什么 Nvidia 股价一直在涨？</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="gptr" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">G</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">GPTResearcher 主控</span>
+                <p>收到！我先让 Agent Selector 分析一下这个问题，看看该用哪种研究策略。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="selector" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">A</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">Agent Selector</span>
+                <p>这是一个金融市场分析类问题。我推荐用「Finance Agent」策略，角色设定为金融分析师。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="gptr" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">G</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">GPTResearcher 主控</span>
+                <p>好的。ResearchConductor，请先用 Tavily 做一次初始搜索，然后规划子问题。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="researcher" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">R</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">ResearchConductor</span>
+                <p>初始搜索完成，找到 8 条结果。现在规划 4 个子问题：1) GPU 市场份额 2) AI 芯片需求 3) 财报数据 4) 竞争格局。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="5" data-sender="researcher" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">R</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">ResearchConductor</span>
+                <p>4 个子问题并行搜索中...每个问题搜索到 5 条结果，共爬取 20 个网页，提取正文内容。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="6" data-sender="gptr" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">G</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">GPTResearcher 主控</span>
+                <p>所有素材收集完毕。ReportGenerator，请根据这些信息写一份研究报告。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="7" data-sender="writer" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">W</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">ReportGenerator</span>
+                <p>报告写好了！包含引言、4 个章节的正文分析和结论，所有关键数据都标注了引用来源。</p>
+              </div>
+            </div>
+          </div>
+          <div class="chat-typing" id="chat-module1-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module1-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条消息</button>
+            <button class="btn chat-all-btn">播放全部</button>
+            <button class="btn chat-reset-btn">重播</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验你的理解</h2>
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！GPT Researcher 的核心流程是：规划子问题 -> 搜索并爬取 -> 汇总写报告。这就是「Plan-and-Solve」模式。"
+               data-explanation-wrong="再想想——GPT Researcher 不是只搜一次就写，而是先把大问题拆成子问题，每个子问题分别搜索，最后汇总。">
+            <h3 class="quiz-question">GPT Researcher 的工作流程最接近哪个比喻？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>像搜索引擎——输入关键词，返回一串链接</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>像研究助理——先列提纲，再分头查资料，最后写成报告</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>像聊天机器人——你问一句它答一句</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！GPTResearcher 是主控类，它创建和协调其他所有组件。你可以把它理解为整个系统的「CEO」。"
+               data-explanation-wrong="提示：看看代码中的类名——GPTResearcher 里创建了 ResearchConductor、ReportGenerator、BrowserManager 等组件。它是总指挥。">
+            <h3 class="quiz-question">在代码中，哪个类是整个系统的「总指挥」？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>ResearchConductor（搜索指挥）</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>ReportGenerator（报告生成器）</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>GPTResearcher（主控类）</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

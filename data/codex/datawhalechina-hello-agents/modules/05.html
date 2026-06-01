@@ -1,0 +1,147 @@
+
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">评测、记忆与安全</h1>
+      <p class="module-subtitle">让 Agent "能做事"只是第一步。真正的挑战是：怎么确保它做得好？怎么让它记住过去的经验？怎么防止它被恶意利用？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Memory systems -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">给 Agent 装上"记忆"</h2>
+        <p>没有记忆的 Agent 就像金鱼——每次对话都从零开始。Hello-Agents 第 8 章深入讲解了
+          <span class="term" data-definition="记忆系统（Memory System）是 Agent 保存和检索过去信息的能力。分为短期记忆（本次对话上下文）和长期记忆（跨会话的知识积累）。">记忆系统</span>：
+        </p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light); color: var(--color-info)">📝</div>
+            <h4 class="pattern-title">短期记忆</h4>
+            <p class="pattern-desc">就是当前对话的上下文历史。每次调用 LLM 都带上之前的消息列表。用 <code>self._history</code> 存储在代码里。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: #EDE9FE; color: #7B6DAA">🗄️</div>
+            <h4 class="pattern-title">长期记忆</h4>
+            <p class="pattern-desc">跨对话的知识持久化。用 <code>MemoryTool</code> 把重要信息存储到数据库，下次对话时可以检索。赛博小镇里的 NPC 就靠这个记住"昨天和张三聊了什么"。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: #E8F5EE; color: #2D8B55">🔍</div>
+            <h4 class="pattern-title">RAG 检索</h4>
+            <p class="pattern-desc"><span class="term" data-definition="RAG（检索增强生成）= 先从知识库搜索相关内容，再把搜索结果作为上下文喂给 LLM。像开卷考试——先翻书找到相关段落，再回答问题。">RAG</span> 让 Agent 能从海量文档中精准找到需要的信息，而不是把所有内容都塞进上下文。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Evaluation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">怎么知道 Agent 做得好不好？</h2>
+        <p>第 12 章讲了一个关键问题：
+          <span class="term" data-definition="智能体评估（Agent Evaluation）是用标准化的测试集和指标来衡量 Agent 性能的过程。就像学生考试一样，有固定的题目和评分标准。">智能体评估</span>。
+          项目引入了 BFCL 和 GAIA 两个评估基准。
+        </p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment"># BFCL 评估：测试 function calling 能力</span></span>
+<span class="code-line"><span class="code-keyword">from</span> bfcl <span class="code-keyword">import</span> evaluate_agent</span>
+<span class="code-line"></span>
+<span class="code-line">result = <span class="code-function">evaluate_agent</span>(</span>
+<span class="code-line">    agent=my_agent,</span>
+<span class="code-line">    test_cases=[</span>
+<span class="code-line">        {<span class="code-string">"input"</span>: <span class="code-string">"北京的天气"</span>,</span>
+<span class="code-line">         <span class="code-string">"expected_tool"</span>: <span class="code-string">"get_weather"</span>,</span>
+<span class="code-line">         <span class="code-string">"expected_args"</span>: {<span class="code-string">"city"</span>: <span class="code-string">"北京"</span>}},</span>
+<span class="code-line">    ]</span>
+<span class="code-line">)</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN CHINESE</span>
+            <div class="translation-lines">
+              <p class="tl">BFCL 专门测试 Agent 的 function calling 能力——它是否选对了工具。</p>
+              <p class="tl">每个测试用例定义了输入、期望调用的工具名和期望的参数。</p>
+              <p class="tl">评估器会对比 Agent 实际调用的工具和期望工具是否一致。</p>
+              <p class="tl">参数也要匹配——Agent 不能调对工具但传错参数。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">常见陷阱：只测正确率</strong>
+            <p>很多人只看"Agent 回答对了几个问题"。但真正重要的是：<strong>它在什么情况下会出错？</strong> 是工具选择错了？参数传错了？还是根本没意识到需要用工具？分类统计错误类型，才能有针对性地改进。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Context Engineering -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">上下文工程：喂什么给 AI 很关键</h2>
+        <p>第 9 章提出了一个重要概念：<strong>上下文工程</strong>——精心设计每次发给 LLM 的信息，让它能做出最好的决策。</p>
+
+        <div class="step-cards animate-in">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>选什么信息放进 Prompt</strong>
+              <p>不是所有历史消息都有用。要选择最相关的事实、最近的对话、最适合的工具描述</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>控制信息的顺序和格式</strong>
+              <p>把重要信息放在 Prompt 开头或结尾（LLM 对这些位置更敏感），用清晰的分隔符区分不同部分</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>管理 Token 预算</strong>
+              <p>LLM 有
+                <span class="term" data-definition="Token 是 LLM 处理文字的最小单位。一个中文字大约是 1-2 个 token。每次调用有最大 token 上限（如 8K、128K），超过就要截断。">Token</span>
+                上限。上下文越长，成本越高，延迟越大。要像理财一样管理你的 token 预算
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Quiz -->
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-module5">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="对！RAG 的核心是"先检索再生成"——从知识库搜索相关内容，把搜索结果作为上下文喂给 LLM，然后让 LLM 基于这些真实数据回答。这比让 LLM 凭记忆回答准确得多。"
+               data-explanation-wrong="回忆一下 RAG 的含义：Retrieval-Augmented Generation（检索增强生成）。它的核心是先用搜索引擎找到相关文档，再把文档内容提供给 LLM 作为参考资料。">
+            <h3 class="quiz-question">你的 Agent 需要回答关于公司内部文档的问题。哪种方法最靠谱？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>把所有文档都放进系统 Prompt，让 LLM 每次都读全部内容</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>用 Function Calling 让 LLM 自己决定什么时候查文档</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>用 RAG：先把文档向量化存储，每次根据问题检索最相关的片段，再喂给 LLM</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

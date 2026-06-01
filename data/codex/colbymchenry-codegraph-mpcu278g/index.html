@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodeGraph: The AI Codebase Navigator</title>
+
+  <!-- Google Fonts: Bricolage Grotesque · DM Sans · JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <!--
+    CUSTOMIZE PER COURSE — change only the three accent variables below.
+    Options:
+      vermillion  #D94F30 / #C4432A / #FDEEE9 / #E8836C  (default)
+      coral       #E06B56 / #C85A47 / #FDECEA / #E89585
+      teal        #2A7B9B / #1F6280 / #E4F2F7 / #5A9DB8
+      amber       #D4A843 / #BF9530 / #FDF5E0 / #E0C070
+      forest      #2D8B55 / #226B41 / #E8F5EE / #5AAD7A
+  -->
+  <style>
+    :root {
+      --color-accent:       #2A7B9B;
+      --color-accent-hover: #1F6280;
+      --color-accent-light: #E4F2F7;
+      --color-accent-muted: #5A9DB8;
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">CodeGraph: The AI Codebase Navigator</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <!--
+          One <button> per module. Replace MODULE_N_NAME with the actual module title.
+
+          <button class="nav-dot" data-target="module-1" data-tooltip="MODULE_1_NAME" role="tab" aria-label="Module 1: MODULE_1_NAME"></button>
+          <button class="nav-dot" data-target="module-2" data-tooltip="MODULE_2_NAME" role="tab" aria-label="Module 2: MODULE_2_NAME"></button>
+          ...
+        -->
+        <button class="nav-dot" data-target="module-1" data-tooltip="The Problem" role="tab" aria-label="Module 1: The Problem"></button>
+          <button class="nav-dot" data-target="module-2" data-tooltip="The Players" role="tab" aria-label="Module 2: The Players"></button>
+          <button class="nav-dot" data-target="module-3" data-tooltip="Building the Map" role="tab" aria-label="Module 3: Building the Map"></button>
+          <button class="nav-dot" data-target="module-4" data-tooltip="Answering the AI" role="tab" aria-label="Module 4: Answering the AI"></button>
+          <button class="nav-dot" data-target="module-5" data-tooltip="Engineering Superpowers" role="tab" aria-label="Module 5: Engineering Superpowers"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh -->
+<section class="module" id="module-1">
+  <div class="module-content">
+
+    <div class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">The Problem: AI Assistants Are Flying Blind</h1>
+      <p class="module-subtitle">Why your AI coding tool spends most of its time just exploring — and how one local tool changes everything</p>
+    </div>
+
+    <!-- Screen 1: The Blind Guide -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">Your AI Guide Is Navigating Without a Map</h2>
+      <p>Picture a brilliant tour guide — knows history, architecture, local secrets — but has never visited this city. Every question you ask sends them reading every street sign, peeking into every building, flipping through directories. Forty minutes later: you have directions.</p>
+      <p>That's what Claude Code, Cursor, or Codex does with your codebase. Every single task starts from scratch. The AI reads files, searches for patterns, and pieces together how things connect — <em>every time you ask a question.</em></p>
+
+      <div class="callout callout-info animate-in">
+        <span class="callout-icon">📊</span>
+        <div class="callout-content">
+          <span class="callout-title">The Real Cost</span>
+          <p>On a typical codebase task, AI coding tools make <strong>40–50 tool calls</strong> just exploring before any real work begins. Most of that exploration is wasted — the same paths walked again and again, on every single query.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 2: The Solution -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">What If the Map Was Already Built?</h2>
+      <p><span class="term" data-definition="A CLI tool and npm library that pre-indexes your codebase into a local searchable database. Runs 100% offline — no API keys, no cloud. Gives AI tools instant answers instead of forcing them to explore files from scratch.">CodeGraph</span> indexes your entire project once and stores everything in a local <span class="term" data-definition="A lightweight, file-based database. No server to run, no setup needed. It lives in .codegraph/codegraph.db inside your project. Used by more devices than any other database in the world.">SQLite</span> database. Every function, every class, every method — and crucially, every <em>connection</em> between them: what calls what, what imports what, what extends what.</p>
+      <p>When your AI then asks "how does login work?", CodeGraph answers instantly: here's the function, here's who calls it, here's what it calls. No wandering required.</p>
+
+      <div class="pattern-cards animate-in stagger-children">
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-error-light)">🧭</div>
+          <div class="pattern-title">Before CodeGraph</div>
+          <p class="pattern-desc"><strong>40–50 tool calls</strong> per task. The AI reads dozens of files to understand relationships it could look up in milliseconds.</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-success-light)">⚡</div>
+          <div class="pattern-title">With CodeGraph</div>
+          <p class="pattern-desc"><strong>3–6 tool calls</strong> per task. The AI queries a pre-built graph and gets precise answers instantly. That's 94% fewer interruptions.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 3: Code Translation -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">What This Looks Like in Practice</h2>
+      <p>Below is the real CodeGraph <span class="term" data-definition="Application Programming Interface — the set of functions a library exposes for you to call. It's the 'official menu' of what a piece of software can do for you.">API</span>. You call <code>indexAll()</code> once. From then on, every question is instant.</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">TypeScript (src/index.ts)</span>
+          <span class="code-line"><span class="code-comment">// One-time setup</span></span>
+          <span class="code-line"><span class="code-keyword">const</span> cg = <span class="code-keyword">await</span> <span class="code-function">CodeGraph</span>.<span class="code-function">init</span>(<span class="code-string">'/my-project'</span>);</span>
+          <span class="code-line"><span class="code-keyword">await</span> cg.<span class="code-function">indexAll</span>();</span>
+          <span class="code-line"> </span>
+          <span class="code-line"><span class="code-comment">// Instant answers forever after</span></span>
+          <span class="code-line"><span class="code-keyword">const</span> callers = <span class="code-keyword">await</span> cg.<span class="code-function">getCallers</span>(<span class="code-string">'AuthService.login'</span>);</span>
+          <span class="code-line"><span class="code-keyword">const</span> callees = <span class="code-keyword">await</span> cg.<span class="code-function">getCallees</span>(<span class="code-string">'AuthService.login'</span>);</span>
+          <span class="code-line"><span class="code-keyword">const</span> ctx = <span class="code-keyword">await</span> cg.<span class="code-function">buildContext</span>(<span class="code-string">'explain login flow'</span>);</span>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">Plain English</span>
+          <div class="translation-lines">
+            <div class="tl">Start CodeGraph and point it at your project folder</div>
+            <div class="tl">Scan every file — store results in a local database</div>
+            <div class="tl"> </div>
+            <div class="tl">Now, whenever you (or Claude) want to know something…</div>
+            <div class="tl">"Who calls the login method?" → instant answer from database</div>
+            <div class="tl">"What does login call?" → instant answer from database</div>
+            <div class="tl">"Summarize the login flow" → formatted context for AI</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent animate-in">
+        <span class="callout-icon">🏎️</span>
+        <div class="callout-content">
+          <span class="callout-title">Tested on the Swift Compiler</span>
+          <p>CodeGraph was battle-tested on one of the largest open-source codebases: the Swift Compiler — <strong>25,874 files</strong>, <strong>272,898 symbols</strong>. Indexing takes minutes. Answering queries takes milliseconds.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 4: Quiz -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">Check Your Understanding</h2>
+
+      <div class="quiz-container" id="quiz-m1">
+
+        <div class="quiz-question-block" data-correct="b"
+          data-explanation-right="Exactly! CodeGraph is 100% offline — a SQLite file inside your project at .codegraph/codegraph.db. Nothing leaves your machine."
+          data-explanation-wrong="CodeGraph runs entirely locally with no cloud and no API keys. The database is a single file: .codegraph/codegraph.db inside your project.">
+          <p class="quiz-question">Where does CodeGraph store the index of your codebase?</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)"><span class="quiz-option-radio"></span>In the cloud, synced to your developer account</button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)"><span class="quiz-option-radio"></span>In a local SQLite file at .codegraph/codegraph.db inside your project</button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)"><span class="quiz-option-radio"></span>In your AI assistant's memory between sessions</button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block" data-correct="c"
+          data-explanation-right="Correct! Pre-building the map means the AI skips exploration entirely — 40–50 tool calls collapse to 3–6 targeted database lookups."
+          data-explanation-wrong="The key insight is about eliminating the 'exploration phase' that happens before every task — not about faster hardware or better prompts.">
+          <p class="quiz-question">What is the core insight behind CodeGraph's speed improvement?</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)"><span class="quiz-option-radio"></span>It uses a faster LLM model to process requests more quickly</button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)"><span class="quiz-option-radio"></span>It compresses source files so the AI reads less text</button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)"><span class="quiz-option-radio"></span>It replaces 40–50 file-reading tool calls with 3–6 targeted database lookups</button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div style="margin-top: var(--space-6); display: flex; gap: var(--space-3);">
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m1')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m1')">Reset</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+
+    <div class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">Meet the Players: Who Does What</h1>
+      <p class="module-subtitle">CodeGraph is built from eight specialized components — each with a narrow, clear job</p>
+    </div>
+
+    <!-- Screen 1: Architecture Diagram -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">The Eight Actors (Click Any to Learn More)</h2>
+      <p>Think of CodeGraph as a small, well-organized company. Each department has one job and does it brilliantly. Click any component below to see what it does.</p>
+
+      <div class="arch-diagram animate-in">
+
+        <div class="arch-zone">
+          <div class="arch-zone-label">Entry Points</div>
+          <div style="display: flex; flex-wrap: wrap;">
+            <div class="arch-component" data-desc="The CLI (command-line interface) — the front door. Routes commands like 'init', 'index', 'sync', 'query' to the right internal systems. Entry file: src/bin/codegraph.ts">
+              <span class="arch-icon">⌨️</span>
+              <span>CLI</span>
+            </div>
+            <div class="arch-component" data-desc="The MCP Server — CodeGraph's bridge to AI assistants. Speaks the Model Context Protocol (a standardized language for AI tools), exposing tools like codegraph_explore and codegraph_query. Entry file: src/mcp/index.ts">
+              <span class="arch-icon">🤖</span>
+              <span>MCPServer</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="arch-zone">
+          <div class="arch-zone-label">Orchestration</div>
+          <div style="display: flex; flex-wrap: wrap;">
+            <div class="arch-component" data-desc="The main CodeGraph class — the conductor of the whole orchestra. Coordinates all layers, exposes the public API (init, indexAll, getCallers, buildContext), and manages the project lifecycle. Entry file: src/index.ts">
+              <span class="arch-icon">🎯</span>
+              <span>CodeGraph</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="arch-zone">
+          <div class="arch-zone-label">Core Layers</div>
+          <div style="display: flex; flex-wrap: wrap;">
+            <div class="arch-component" data-desc="The ExtractionOrchestrator — scans your project files, loads tree-sitter grammars for each language, parses files into syntax trees, and extracts nodes (functions, classes) and edges (calls, imports). Entry file: src/extraction/index.ts">
+              <span class="arch-icon">🔬</span>
+              <span>Extractor</span>
+            </div>
+            <div class="arch-component" data-desc="The DatabaseConnection — wraps SQLite. Stores nodes, edges, and files. Manages prepared statements and transactions. Uses either native 'better-sqlite3' (fast) or 'node-sqlite3-wasm' (portable fallback). Entry file: src/db/index.ts">
+              <span class="arch-icon">🗃️</span>
+              <span>Database</span>
+            </div>
+            <div class="arch-component" data-desc="The ReferenceResolver — after extraction, connects the dots. It follows import paths across files, resolves TypeScript path aliases, and uses fuzzy name-matching to link unresolved symbol references to their definitions. Entry file: src/resolution/index.ts">
+              <span class="arch-icon">🧵</span>
+              <span>Resolver</span>
+            </div>
+            <div class="arch-component" data-desc="The GraphTraverser — answers graph questions. Uses breadth-first search to find all callers (who calls this function?) and all callees (what does this function call?). Also calculates impact radius — what breaks if you change something. Entry file: src/graph/traversal.ts">
+              <span class="arch-icon">🕸️</span>
+              <span>GraphTraverser</span>
+            </div>
+            <div class="arch-component" data-desc="The ContextBuilder — the translator for AI. Takes raw graph data and formats it into structured markdown that AI assistants can understand: entry points, call chains, code snippets, and impact analysis. Entry file: src/context/index.ts">
+              <span class="arch-icon">📝</span>
+              <span>ContextBuilder</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="arch-zone">
+          <div class="arch-zone-label">Background Service</div>
+          <div style="display: flex; flex-wrap: wrap;">
+            <div class="arch-component" data-desc="The FileWatcher — monitors your project for changes using native OS APIs (FSEvents on macOS, inotify on Linux, ReadDirectoryChangesW on Windows). Debounces rapid file changes into one re-index pass. Keeps the database fresh automatically. Entry file: src/sync/watcher.ts">
+              <span class="arch-icon">👁️</span>
+              <span>FileWatcher</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="arch-description">Click a component above to see its description</div>
+      </div>
+    </div>
+
+    <!-- Screen 2: Code Translation of the Public API -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">The Public API: What CodeGraph Exposes</h2>
+      <p>The <span class="term" data-definition="A class is a blueprint — it defines properties (data) and methods (functions) for objects of that type. Think of it as a cookie cutter; each 'instance' is a cookie made from that cutter.">CodeGraph class</span> is the only thing you (and AI tools) ever directly touch. Everything else is hidden behind it. Here's what the public surface looks like.</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">src/index.ts (simplified)</span>
+          <span class="code-line"><span class="code-keyword">export class</span> <span class="code-function">CodeGraph</span> {</span>
+          <span class="code-line">  <span class="code-keyword">static async</span> <span class="code-function">init</span>(path: <span class="code-function">string</span>): <span class="code-keyword">Promise</span>&lt;CodeGraph&gt; { ... }</span>
+          <span class="code-line">  <span class="code-keyword">async</span> <span class="code-function">indexAll</span>(): <span class="code-keyword">Promise</span>&lt;IndexResult&gt; { ... }</span>
+          <span class="code-line">  <span class="code-keyword">async</span> <span class="code-function">sync</span>(): <span class="code-keyword">Promise</span>&lt;<span class="code-keyword">void</span>&gt; { ... }</span>
+          <span class="code-line">  <span class="code-keyword">async</span> <span class="code-function">getCallers</span>(name: <span class="code-function">string</span>): <span class="code-keyword">Promise</span>&lt;Node[]&gt; { ... }</span>
+          <span class="code-line">  <span class="code-keyword">async</span> <span class="code-function">getCallees</span>(name: <span class="code-function">string</span>): <span class="code-keyword">Promise</span>&lt;Node[]&gt; { ... }</span>
+          <span class="code-line">  <span class="code-keyword">async</span> <span class="code-function">searchNodes</span>(query: <span class="code-function">string</span>): <span class="code-keyword">Promise</span>&lt;Node[]&gt; { ... }</span>
+          <span class="code-line">  <span class="code-keyword">async</span> <span class="code-function">buildContext</span>(task: <span class="code-function">string</span>): <span class="code-keyword">Promise</span>&lt;Context&gt; { ... }</span>
+          <span class="code-line">}</span>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">Plain English</span>
+          <div class="translation-lines">
+            <div class="tl">The CodeGraph class — this is the only door in</div>
+            <div class="tl">Set up a new CodeGraph for a project folder (class method)</div>
+            <div class="tl">Read and index every file in the project</div>
+            <div class="tl">Update the index after file changes</div>
+            <div class="tl">Find everything that calls a given function</div>
+            <div class="tl">Find everything a given function calls</div>
+            <div class="tl">Full-text search across all symbol names</div>
+            <div class="tl">Build a formatted summary for an AI to read</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-info animate-in">
+        <span class="callout-icon">💡</span>
+        <div class="callout-content">
+          <span class="callout-title">Why a "Facade" Class?</span>
+          <p>Having one class as the only entry point is a classic design pattern called a <strong>Facade</strong>. It keeps the complex internals hidden. You never need to know about ExtractionOrchestrator or GraphTraverser — you just ask CodeGraph and it figures out who to delegate to.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 3: Group Chat Animation -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">A Query Arrives: What Happens Inside</h2>
+      <p>When Claude Code asks "how does authentication work?", here's the internal conversation that happens in milliseconds.</p>
+
+      <div class="chat-window" id="chat-m2">
+        <div class="chat-messages">
+          <div class="chat-message" data-sender="mcp" style="display:none">
+            <div class="chat-avatar" style="background: #D94F30">M</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: #D94F30">MCPServer</span>
+              <p>Claude just sent a query: <strong>"Explain how authentication works."</strong> Who's handling this?</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="cg" style="display:none">
+            <div class="chat-avatar" style="background: #2A7B9B">C</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: #2A7B9B">CodeGraph</span>
+              <p>I'll coordinate. ExtractionOrchestrator — was this project already indexed?</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="ex" style="display:none">
+            <div class="chat-avatar" style="background: #7B6DAA">E</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: #7B6DAA">ExtractionOrchestrator</span>
+              <p>✅ Already done. Parsed 1,234 TypeScript files using tree-sitter. Found 45,678 symbols and 134,567 edges. All stored.</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="db" style="display:none">
+            <div class="chat-avatar" style="background: #D4A843">D</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: #D4A843">DatabaseConnection</span>
+              <p>All safely in SQLite — nodes, edges, file records, and a full-text search index. Ready for queries.</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="gt" style="display:none">
+            <div class="chat-avatar" style="background: #2D8B55">G</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: #2D8B55">GraphTraverser</span>
+              <p>I'll run FTS5 search for "auth" and "login", then BFS-traverse outward to map the full authentication call graph.</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="cg" style="display:none">
+            <div class="chat-avatar" style="background: #2A7B9B">C</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: #2A7B9B">CodeGraph</span>
+              <p>ContextBuilder will format that for Claude. Total tool call count: <strong>3</strong>. FTS5 search, graph traversal, context build.</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="mcp" style="display:none">
+            <div class="chat-avatar" style="background: #D94F30">M</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: #D94F30">MCPServer</span>
+              <p>Response delivered to Claude in under 200ms. ⚡ This is why we exist.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-typing" style="display:none">
+          <div class="chat-avatar" id="chat-m2-typing-avatar" style="background: #2A7B9B">?</div>
+          <div class="chat-bubble chat-typing-dots">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
+        </div>
+
+        <div class="chat-controls">
+          <button class="btn btn-sm chat-next-btn" style="padding: var(--space-2) var(--space-4); background: var(--color-accent); color: white; border: none; border-radius: var(--radius-sm); font-family: var(--font-body); font-size: var(--text-sm); font-weight: 600; cursor: pointer;">Next Message</button>
+          <button class="btn btn-sm chat-all-btn" style="padding: var(--space-2) var(--space-4); background: var(--color-surface); color: var(--color-text-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-family: var(--font-body); font-size: var(--text-sm); cursor: pointer;">Play All</button>
+          <button class="btn btn-sm chat-reset-btn" style="padding: var(--space-2) var(--space-4); background: transparent; color: var(--color-text-muted); border: none; font-family: var(--font-body); font-size: var(--text-sm); cursor: pointer;">Reset</button>
+          <span class="chat-progress">0 / 7 messages</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 4: Drag and Drop Quiz -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">Match the Actor to Its Job</h2>
+      <p>Drag each description to the correct actor. (On mobile: tap and drag.)</p>
+
+      <div class="dnd-container" id="dnd-m2">
+        <div class="dnd-chips">
+          <div class="dnd-chip" draggable="true" data-answer="extractor">Parses files into AST nodes</div>
+          <div class="dnd-chip" draggable="true" data-answer="database">Stores nodes &amp; edges in SQLite</div>
+          <div class="dnd-chip" draggable="true" data-answer="resolver">Resolves import paths across files</div>
+          <div class="dnd-chip" draggable="true" data-answer="traverser">Traverses the call graph via BFS</div>
+          <div class="dnd-chip" draggable="true" data-answer="mcp">Talks to AI assistants via MCP</div>
+        </div>
+
+        <div class="dnd-zones">
+          <div class="dnd-zone" data-correct="extractor">
+            <div class="dnd-zone-label">ExtractionOrchestrator (src/extraction/index.ts)</div>
+            <div class="dnd-zone-target">Drop here</div>
+          </div>
+          <div class="dnd-zone" data-correct="database">
+            <div class="dnd-zone-label">DatabaseConnection (src/db/index.ts)</div>
+            <div class="dnd-zone-target">Drop here</div>
+          </div>
+          <div class="dnd-zone" data-correct="resolver">
+            <div class="dnd-zone-label">ReferenceResolver (src/resolution/index.ts)</div>
+            <div class="dnd-zone-target">Drop here</div>
+          </div>
+          <div class="dnd-zone" data-correct="traverser">
+            <div class="dnd-zone-label">GraphTraverser (src/graph/traversal.ts)</div>
+            <div class="dnd-zone-target">Drop here</div>
+          </div>
+          <div class="dnd-zone" data-correct="mcp">
+            <div class="dnd-zone-label">MCPServer (src/mcp/index.ts)</div>
+            <div class="dnd-zone-target">Drop here</div>
+          </div>
+        </div>
+
+        <div style="margin-top: var(--space-6); display: flex; gap: var(--space-3);">
+          <button class="quiz-check-btn" onclick="checkDnD('dnd-m2')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetDnD('dnd-m2')">Reset</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+<section class="module" id="module-3">
+  <div class="module-content">
+
+    <div class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">Building the Knowledge Map</h1>
+      <p class="module-subtitle">How CodeGraph reads every file, extracts every symbol, and stores every connection</p>
+    </div>
+
+    <!-- Screen 1: What is an AST? -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">The X-Ray Machine for Code</h2>
+      <p>When CodeGraph reads a source file, it doesn't just scan for text. It runs each file through a parser that produces an <span class="term" data-definition="Abstract Syntax Tree — a tree-shaped data structure that represents the grammatical structure of source code. It strips away whitespace and comments, leaving just the logical skeleton: what's a function, what's a variable, what calls what.">Abstract Syntax Tree (AST)</span>.</p>
+      <p>Think of it like an X-ray. A photograph of a person shows skin, clothing, and hair. An X-ray shows bones — the underlying structure that everything else rests on. The AST is the skeleton of your code: which lines are function declarations, which are method calls, which are import statements.</p>
+
+      <div class="callout callout-info animate-in">
+        <span class="callout-icon">🦴</span>
+        <div class="callout-content">
+          <span class="callout-title">Why AST Instead of Text Search?</span>
+          <p>A text search for "login" finds every comment, string, and variable name containing those letters. An AST query finds exactly "function declarations named login" — nothing more. That precision is what makes CodeGraph's results reliable, not just approximate.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 2: Tree-Sitter -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">Tree-Sitter: The Universal Parser</h2>
+      <p>CodeGraph uses <span class="term" data-definition="An open-source parsing library that can parse 100+ programming languages using pre-compiled grammar modules. Each grammar is compiled to WebAssembly (WASM) for portability — it runs on any OS and architecture without native compilation.">tree-sitter</span> — one engine that handles 19+ languages using separate grammar modules. Each grammar is compiled to <span class="term" data-definition="WebAssembly — a binary format that runs in any JavaScript environment (browser or Node.js) at near-native speed. Grammars compiled to WASM work on any OS and CPU without requiring a C compiler.">WASM</span>.</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">src/extraction/tree-sitter.ts (simplified)</span>
+          <span class="code-line"><span class="code-keyword">async function</span> <span class="code-function">extractFromSource</span>(</span>
+          <span class="code-line">  source: <span class="code-function">string</span>,</span>
+          <span class="code-line">  language: <span class="code-function">Language</span></span>
+          <span class="code-line">) {</span>
+          <span class="code-line">  <span class="code-keyword">const</span> parser = <span class="code-keyword">new</span> <span class="code-function">Parser</span>();</span>
+          <span class="code-line">  <span class="code-keyword">const</span> grammar = <span class="code-keyword">await</span> <span class="code-function">getLanguage</span>(language);</span>
+          <span class="code-line">  parser.<span class="code-function">setLanguage</span>(grammar);</span>
+          <span class="code-line">  <span class="code-keyword">const</span> tree = parser.<span class="code-function">parse</span>(source);</span>
+          <span class="code-line">  <span class="code-comment">// Query tree for functions, classes, imports...</span></span>
+          <span class="code-line">  <span class="code-keyword">return</span> <span class="code-function">extractNodes</span>(tree, language);</span>
+          <span class="code-line">}</span>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">Plain English</span>
+          <div class="translation-lines">
+            <div class="tl">Function that takes source code text + language name</div>
+            <div class="tl">What's the source file content?</div>
+            <div class="tl">Which language is it? (TypeScript, Python, Go…)</div>
+            <div class="tl"> </div>
+            <div class="tl">Create a parser engine</div>
+            <div class="tl">Load the grammar rules for this language (from WASM file)</div>
+            <div class="tl">Tell the parser which language to expect</div>
+            <div class="tl">Parse the text → produce an AST (a tree of nodes)</div>
+            <div class="tl">Find functions, classes, methods, imports in the tree</div>
+            <div class="tl">Return the list of nodes and edges found</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent animate-in">
+        <span class="callout-icon">🗂️</span>
+        <div class="callout-content">
+          <span class="callout-title">19+ Languages, One Engine</span>
+          <p>TypeScript, JavaScript, Python, Go, Rust, Java, C#, PHP, Ruby, C, C++, Swift, Kotlin, Dart, Svelte, Vue, Liquid, Pascal, Scala. Each has its own grammar module (.wasm file), loaded on demand. Adding a new language is as simple as adding a new grammar.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 3: Flow Animation -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">The Indexing Pipeline: Step by Step</h2>
+      <p>When you run <code>codegraph index</code>, five stages run in sequence. Click "Next Step" to walk through the pipeline.</p>
+
+      <div class="flow-animation" id="flow-m3" data-steps='[
+        {"highlight": "scanner", "label": "Step 1: File Scanner runs git ls-files to list all tracked files, respecting .gitignore at every directory level — no build artifacts, no node_modules."},
+        {"highlight": "parser", "label": "Step 2: Tree-Sitter loads the correct grammar WASM for each file language and parses the source text into a syntax tree.", "packet": true, "from": "scanner", "to": "parser"},
+        {"highlight": "extractor", "label": "Step 3: Language-specific extractors query the AST for functions, classes, methods, imports, and their relationships. Processed in batches of 10 files.", "packet": true, "from": "parser", "to": "extractor"},
+        {"highlight": "db", "label": "Step 4: Extracted nodes and edges are stored in SQLite inside a single transaction. FTS5 triggers auto-update the full-text search index.", "packet": true, "from": "extractor", "to": "db"},
+        {"highlight": "resolver", "label": "Step 5: ReferenceResolver follows import paths and uses fuzzy name-matching to link unresolved symbol calls to their definitions across files.", "packet": true, "from": "db", "to": "resolver"},
+        {"highlight": "db", "label": "Step 6: Resolved edges (function-calls-function, file-imports-file) are written back. The graph is now complete and queryable.", "packet": true, "from": "resolver", "to": "db"}
+      ]'>
+        <div class="flow-actors">
+          <div class="flow-actor" id="flow-scanner">
+            <div class="flow-actor-icon">📂</div>
+            <span>File<br>Scanner</span>
+          </div>
+          <div class="flow-actor" id="flow-parser">
+            <div class="flow-actor-icon">🔬</div>
+            <span>Tree-<br>Sitter</span>
+          </div>
+          <div class="flow-actor" id="flow-extractor">
+            <div class="flow-actor-icon">⚙️</div>
+            <span>Extractor</span>
+          </div>
+          <div class="flow-actor" id="flow-db">
+            <div class="flow-actor-icon">🗃️</div>
+            <span>SQLite</span>
+          </div>
+          <div class="flow-actor" id="flow-resolver">
+            <div class="flow-actor-icon">🧵</div>
+            <span>Resolver</span>
+          </div>
+        </div>
+
+        <div class="flow-packet"></div>
+
+        <div class="flow-step-label">Click "Next Step" to begin the indexing pipeline</div>
+
+        <div class="flow-controls">
+          <button class="flow-next-btn" style="padding: var(--space-2) var(--space-5); background: var(--color-accent); color: white; border: none; border-radius: var(--radius-sm); font-family: var(--font-body); font-size: var(--text-sm); font-weight: 600; cursor: pointer;">Next Step</button>
+          <button class="flow-reset-btn" style="padding: var(--space-2) var(--space-4); background: var(--color-surface); color: var(--color-text-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-family: var(--font-body); font-size: var(--text-sm); cursor: pointer; margin-left: var(--space-2);">Reset</button>
+          <span class="flow-progress">Step 0 / 6</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 4: Reference Resolution -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">Reference Resolution: Following the Threads</h2>
+      <p>After the AST pass, CodeGraph knows every symbol that <em>exists</em> — but doesn't yet know how they connect <em>across files</em>. That's the resolver's job: follow every import statement to its definition.</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">src/resolution/import-resolver.ts (simplified)</span>
+          <span class="code-line"><span class="code-keyword">function</span> <span class="code-function">resolveViaImport</span>(</span>
+          <span class="code-line">  fromFile: <span class="code-function">string</span>,</span>
+          <span class="code-line">  importPath: <span class="code-function">string</span>,</span>
+          <span class="code-line">  projectRoot: <span class="code-function">string</span></span>
+          <span class="code-line">) {</span>
+          <span class="code-line">  <span class="code-keyword">let</span> resolved = path.<span class="code-function">resolve</span>(</span>
+          <span class="code-line">    path.<span class="code-function">dirname</span>(fromFile), importPath</span>
+          <span class="code-line">  );</span>
+          <span class="code-line">  <span class="code-keyword">for</span> (<span class="code-keyword">const</span> ext <span class="code-keyword">of</span> [<span class="code-string">'.ts'</span>, <span class="code-string">'.js'</span>, <span class="code-string">'.tsx'</span>]) {</span>
+          <span class="code-line">    <span class="code-keyword">if</span> (fs.<span class="code-function">existsSync</span>(resolved + ext))</span>
+          <span class="code-line">      <span class="code-keyword">return</span> resolved + ext;</span>
+          <span class="code-line">  }</span>
+          <span class="code-line">  <span class="code-keyword">return null</span>; <span class="code-comment">// unresolved</span></span>
+          <span class="code-line">}</span>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">Plain English</span>
+          <div class="translation-lines">
+            <div class="tl">Function: "where does this import actually point?"</div>
+            <div class="tl">The file doing the importing</div>
+            <div class="tl">The import path written in code (e.g. './utils')</div>
+            <div class="tl">The project root (for absolute path resolution)</div>
+            <div class="tl"> </div>
+            <div class="tl">Compute the candidate file path by joining directory + import path</div>
+            <div class="tl"> </div>
+            <div class="tl">Try each common file extension (.ts, .js, .tsx)</div>
+            <div class="tl">If the file exists with this extension, return the full path</div>
+            <div class="tl"> </div>
+            <div class="tl">Couldn't find it — mark as unresolved for later retry</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-info animate-in">
+        <span class="callout-icon">🔗</span>
+        <div class="callout-content">
+          <span class="callout-title">Four Resolution Strategies</span>
+          <p>CodeGraph tries four approaches for every unresolved reference: <strong>(1)</strong> Follow the import path, <strong>(2)</strong> Resolve TypeScript path aliases from tsconfig.json, <strong>(3)</strong> Fuzzy name-match across all known symbols, <strong>(4)</strong> Framework-specific route detection. If all four fail, the reference stays marked "unresolved."</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 5: Quiz -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">Check Your Understanding</h2>
+
+      <div class="quiz-container" id="quiz-m3">
+
+        <div class="quiz-question-block" data-correct="b"
+          data-explanation-right="Exactly! AST parsing finds precise structural elements — 'function named login' — rather than any text containing 'login'. That precision is the key advantage."
+          data-explanation-wrong="Text search would find 'login' in comments, variable names, and strings too. The AST tells CodeGraph what IS a function vs. what just mentions functions.">
+          <p class="quiz-question">Why does CodeGraph use AST parsing instead of simple text search?</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)"><span class="quiz-option-radio"></span>AST parsing is faster than string searching for large files</button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)"><span class="quiz-option-radio"></span>AST queries find precise structural elements (like "function declarations") rather than any text match</button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)"><span class="quiz-option-radio"></span>AST parsing works on minified code, which text search cannot</button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block" data-correct="a"
+          data-explanation-right="Right! git ls-files respects .gitignore at all levels — it's the most reliable way to list 'files that belong to this project' without accidentally including build outputs."
+          data-explanation-wrong="CodeGraph specifically uses 'git ls-files' to get git-tracked files. This automatically respects .gitignore at all directory levels — no build artifacts, no node_modules.">
+          <p class="quiz-question">How does CodeGraph know which files to index (and avoid indexing build outputs)?</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)"><span class="quiz-option-radio"></span>It runs git ls-files to get all git-tracked files, respecting .gitignore automatically</button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)"><span class="quiz-option-radio"></span>It scans every file and manually skips directories named node_modules or dist</button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)"><span class="quiz-option-radio"></span>It reads a hardcoded list of allowed file extensions</button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div style="margin-top: var(--space-6); display: flex; gap: var(--space-3);">
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m3')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m3')">Reset</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+
+    <div class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">Answering the AI in Milliseconds</h1>
+      <p class="module-subtitle">How a query from Claude Code travels through CodeGraph and comes back as structured context</p>
+    </div>
+
+    <!-- Screen 1: MCP Protocol -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">The AI's Hotline: Model Context Protocol</h2>
+      <p>When Claude Code, Cursor, or Codex wants to ask CodeGraph a question, it doesn't make an HTTP request to a web server. Instead, it communicates through <span class="term" data-definition="Model Context Protocol — an open standard for AI assistants to call external tools. Communication happens over stdin/stdout as JSON messages. No network port, no authentication, no latency — just a direct pipe between the AI and the tool.">MCP (Model Context Protocol)</span>.</p>
+      <p>Think of it as a private telephone line between the AI assistant and CodeGraph. When Claude sends a message, CodeGraph reads it from standard input, processes it, and writes the answer back to standard output — all in the same process, with zero network hops.</p>
+
+      <div class="badge-list animate-in">
+        <div class="badge-item">
+          <div class="badge-code">codegraph_explore</div>
+          <div class="badge-desc">Search symbols by name and get full context: callers, callees, and code snippets formatted for AI</div>
+        </div>
+        <div class="badge-item">
+          <div class="badge-code">codegraph_query</div>
+          <div class="badge-desc">Run a raw full-text search and get back matching nodes with file paths and line numbers</div>
+        </div>
+        <div class="badge-item">
+          <div class="badge-code">codegraph_affected</div>
+          <div class="badge-desc">Given a list of changed files, find which test files should be re-run based on the dependency graph</div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent animate-in">
+        <span class="callout-icon">🔌</span>
+        <div class="callout-content">
+          <span class="callout-title">Install Once, Works in All AI Tools</span>
+          <p>Run <code>npx @colbymchenry/codegraph</code> — the installer detects which AI tools you have (Claude Code, Cursor, Codex, opencode) and writes the MCP configuration into each one automatically. One command, all tools configured.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 2: Group Chat Animation — The Star of This Module -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">A Query in Action: Inside the Black Box</h2>
+      <p>Here's what happens — in real time — when Claude asks CodeGraph "how does login work?" The whole exchange takes under 200ms.</p>
+
+      <div class="chat-window" id="chat-m4">
+        <div class="chat-messages">
+          <div class="chat-message" data-sender="claude" style="display:none">
+            <div class="chat-avatar" style="background: #D94F30">AI</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: #D94F30">Claude Code</span>
+              <p><strong>codegraph_explore</strong>: "how does user login work?" — I need to understand the authentication flow to help this developer.</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="mcp" style="display:none">
+            <div class="chat-avatar" style="background: #2A7B9B">M</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: #2A7B9B">MCPServer</span>
+              <p>Received. Parsing query text… triggering FTS5 full-text search for "login" and "auth".</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="sqlite" style="display:none">
+            <div class="chat-avatar" style="background: #D4A843">DB</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: #D4A843">SQLite (FTS5)</span>
+              <p>FTS5 search complete. 12 matches ranked by relevance: <code>LoginController</code> (score: 8.4), <code>AuthService.login()</code> (8.1), <code>UserRepository.findByEmail()</code> (6.2)…</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="mcp" style="display:none">
+            <div class="chat-avatar" style="background: #2A7B9B">M</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: #2A7B9B">MCPServer</span>
+              <p>Top results found. Now traversing the call graph outward from <code>AuthService.login</code>…</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="graph" style="display:none">
+            <div class="chat-avatar" style="background: #2D8B55">G</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: #2D8B55">GraphTraverser</span>
+              <p>BFS complete. <strong>Callers:</strong> LoginController.handlePost() (line 34), OAuthController.callback() (line 89). <strong>Callees:</strong> UserRepository.findByEmail(), PasswordHasher.verify(), JwtService.sign(). Full chain: 3 levels deep.</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="ctx" style="display:none">
+            <div class="chat-avatar" style="background: #7B6DAA">CB</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: #7B6DAA">ContextBuilder</span>
+              <p>Formatting for AI… Done. 2,400 chars of structured markdown: entry points → call chain → code snippets → impact analysis.</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="claude" style="display:none">
+            <div class="chat-avatar" style="background: #D94F30">AI</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: #D94F30">Claude Code</span>
+              <p>🎯 Got it. Total tool calls: <strong>3</strong>. I now have the full login flow and can help precisely. Without CodeGraph, that would have taken 40+ file reads.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-typing" style="display:none">
+          <div class="chat-avatar" id="chat-m4-typing-avatar" style="background: #2A7B9B">?</div>
+          <div class="chat-bubble chat-typing-dots">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
+        </div>
+
+        <div class="chat-controls">
+          <button class="btn btn-sm chat-next-btn" style="padding: var(--space-2) var(--space-4); background: var(--color-accent); color: white; border: none; border-radius: var(--radius-sm); font-family: var(--font-body); font-size: var(--text-sm); font-weight: 600; cursor: pointer;">Next Message</button>
+          <button class="btn btn-sm chat-all-btn" style="padding: var(--space-2) var(--space-4); background: var(--color-surface); color: var(--color-text-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-family: var(--font-body); font-size: var(--text-sm); cursor: pointer;">Play All</button>
+          <button class="btn btn-sm chat-reset-btn" style="padding: var(--space-2) var(--space-4); background: transparent; color: var(--color-text-muted); border: none; font-family: var(--font-body); font-size: var(--text-sm); cursor: pointer;">Reset</button>
+          <span class="chat-progress">0 / 7 messages</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 3: FTS5 Code Translation -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">The Search Engine Inside: SQLite FTS5</h2>
+      <p>The "instant search" you saw above is powered by <span class="term" data-definition="Full-Text Search version 5 — a SQLite extension that creates an inverted index over text columns, similar to how a search engine like Elasticsearch works. Queries against FTS5 tables are 100–1000x faster than LIKE queries on regular tables.">FTS5</span>, a full-text search extension built right into SQLite. CodeGraph creates a virtual FTS5 table over the nodes, and a trigger keeps it in sync automatically.</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">src/db/schema.sql (key parts)</span>
+          <span class="code-line"><span class="code-comment">-- The main nodes table</span></span>
+          <span class="code-line"><span class="code-keyword">CREATE TABLE</span> <span class="code-function">nodes</span> (</span>
+          <span class="code-line">  id <span class="code-function">TEXT</span> <span class="code-keyword">PRIMARY KEY</span>,</span>
+          <span class="code-line">  name <span class="code-function">TEXT</span>, qualified_name <span class="code-function">TEXT</span>,</span>
+          <span class="code-line">  kind <span class="code-function">TEXT</span>, file_path <span class="code-function">TEXT</span></span>
+          <span class="code-line">);</span>
+          <span class="code-line"> </span>
+          <span class="code-line"><span class="code-comment">-- Virtual FTS5 search index</span></span>
+          <span class="code-line"><span class="code-keyword">CREATE VIRTUAL TABLE</span> nodes_fts</span>
+          <span class="code-line"><span class="code-keyword">USING</span> fts5(name, qualified_name,</span>
+          <span class="code-line">  docstring, signature,</span>
+          <span class="code-line">  content=<span class="code-string">'nodes'</span>);</span>
+          <span class="code-line"> </span>
+          <span class="code-line"><span class="code-comment">-- Auto-sync trigger on insert</span></span>
+          <span class="code-line"><span class="code-keyword">CREATE TRIGGER</span> nodes_ai</span>
+          <span class="code-line"><span class="code-keyword">AFTER INSERT ON</span> nodes <span class="code-keyword">BEGIN</span></span>
+          <span class="code-line">  <span class="code-keyword">INSERT INTO</span> nodes_fts ... <span class="code-keyword">END</span>;</span>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">Plain English</span>
+          <div class="translation-lines">
+            <div class="tl">The main table — one row per symbol</div>
+            <div class="tl">Each symbol has a unique ID</div>
+            <div class="tl">Its short name and its full dotted name</div>
+            <div class="tl">What kind of symbol (function/class/method) and where it lives</div>
+            <div class="tl"> </div>
+            <div class="tl">A "virtual" search table — like an index at the back of a book</div>
+            <div class="tl">Search across these four text fields simultaneously…</div>
+            <div class="tl">…with automatic ranking by relevance</div>
+            <div class="tl">Backed by the real nodes table (stays in sync)</div>
+            <div class="tl"> </div>
+            <div class="tl">Every time a node is inserted…</div>
+            <div class="tl">…the database automatically adds it to the search index too</div>
+            <div class="tl">No manual sync required — the database handles it</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 4: Quiz -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">Check Your Understanding</h2>
+
+      <div class="quiz-container" id="quiz-m4">
+
+        <div class="quiz-question-block" data-correct="b"
+          data-explanation-right="Correct! MCP uses stdin/stdout JSON-RPC — no network port, no HTTP, no authentication. It's a direct pipe in the same process, which makes it faster and simpler than a web server."
+          data-explanation-wrong="MCP doesn't use HTTP or network ports. It communicates through stdin/stdout — standard process I/O streams that every program has. That's why it needs no authentication and has no network latency.">
+          <p class="quiz-question">How does Claude Code communicate with the CodeGraph MCP server?</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)"><span class="quiz-option-radio"></span>Via HTTP requests to a local web server on a specific port</button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)"><span class="quiz-option-radio"></span>Via stdin/stdout JSON-RPC — a direct pipe with no network overhead</button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)"><span class="quiz-option-radio"></span>Via WebSocket connection on localhost</button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block" data-correct="a"
+          data-explanation-right="Exactly! The FTS5 trigger fires automatically after every INSERT on the nodes table, keeping the search index perfectly in sync without any manual synchronization code."
+          data-explanation-wrong="The key is the SQLite TRIGGER — it fires automatically on every insert. CodeGraph never manually syncs the FTS5 index; the database handles it transparently.">
+          <p class="quiz-question">How does CodeGraph keep the FTS5 search index in sync with the nodes table?</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)"><span class="quiz-option-radio"></span>A SQLite trigger fires automatically after every INSERT on the nodes table</button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)"><span class="quiz-option-radio"></span>A background job runs every 30 seconds to rebuild the FTS index</button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)"><span class="quiz-option-radio"></span>It drops and rebuilds the FTS index after each full indexing pass</button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div style="margin-top: var(--space-6); display: flex; gap: var(--space-3);">
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m4')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m4')">Reset</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+<section class="module" id="module-5">
+  <div class="module-content">
+
+    <div class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">Engineering Superpowers</h1>
+      <p class="module-subtitle">The clever patterns inside CodeGraph that make it fast, portable, and reliable at scale</p>
+    </div>
+
+    <!-- Screen 1: Worker Threads + WASM Heap Recycling -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">The Parallel Brain: Worker Threads</h2>
+      <p>Parsing 25,000 files is slow. If CodeGraph did that work on the main thread, your terminal would freeze for minutes while the progress bar crept along. Instead, CodeGraph offloads all heavy parsing to a <span class="term" data-definition="A separate execution context in Node.js that runs in parallel with the main thread. Think of it like a separate tab in your browser — it can do CPU-intensive work without freezing the page you're looking at.">worker thread</span>.</p>
+      <p>But there's a subtle problem: <span class="term" data-definition="WebAssembly — the binary format used to run tree-sitter grammars. The WASM runtime in V8 (Node.js's JavaScript engine) has a quirk: once memory is allocated in the WASM heap, it is never given back to the OS, even after all objects are freed.">WASM</span> heaps never shrink. Every file parsed consumes a little more heap memory — and that memory is never released. Parse enough files and the worker runs out of memory and crashes.</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">src/extraction/parse-worker.ts (key logic)</span>
+          <span class="code-line"><span class="code-keyword">const</span> FILE_RECYCLE_LIMIT = <span class="code-number">250</span>;</span>
+          <span class="code-line"><span class="code-keyword">let</span> filesProcessed = <span class="code-number">0</span>;</span>
+          <span class="code-line"> </span>
+          <span class="code-line"><span class="code-keyword">async function</span> <span class="code-function">processFile</span>(filePath: <span class="code-function">string</span>) {</span>
+          <span class="code-line">  filesProcessed++;</span>
+          <span class="code-line">  <span class="code-keyword">if</span> (filesProcessed >= FILE_RECYCLE_LIMIT) {</span>
+          <span class="code-line">    <span class="code-comment">// WASM heap never shrinks — recycle the worker</span></span>
+          <span class="code-line">    <span class="code-keyword">await</span> <span class="code-function">restartWorker</span>();</span>
+          <span class="code-line">    filesProcessed = <span class="code-number">0</span>;</span>
+          <span class="code-line">  }</span>
+          <span class="code-line">  <span class="code-keyword">return</span> <span class="code-function">extractFromFile</span>(filePath);</span>
+          <span class="code-line">}</span>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">Plain English</span>
+          <div class="translation-lines">
+            <div class="tl">After 250 files, kill and restart the worker process</div>
+            <div class="tl">How many files this worker has parsed so far</div>
+            <div class="tl"> </div>
+            <div class="tl">Parse one file…</div>
+            <div class="tl">Count it</div>
+            <div class="tl">Have we hit 250 files?</div>
+            <div class="tl">Yes — the WASM heap is filling up</div>
+            <div class="tl">Start a fresh worker process (empty WASM heap)</div>
+            <div class="tl">Reset the counter</div>
+            <div class="tl"> </div>
+            <div class="tl">Actually parse this file and return the results</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-info animate-in">
+        <span class="callout-icon">🧠</span>
+        <div class="callout-content">
+          <span class="callout-title">Why 250 Files Specifically?</span>
+          <p>This is based on empirical testing. At 250 files, the WASM heap is large enough to matter but small enough that recycling overhead is negligible. The fix is a workaround for a fundamental V8 engine limitation — not a CodeGraph bug, but a quirk of the runtime it runs on.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 2: Native vs WASM Fallback -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">The Backup Generator: Native vs WASM SQLite</h2>
+      <p>CodeGraph needs SQLite for its database. The fastest way to use SQLite in Node.js is via a <span class="term" data-definition="A native addon is code compiled from C/C++ for a specific OS and CPU architecture. It's ~5x faster than pure JavaScript alternatives, but it requires a C compiler to install — which not every machine has.">native addon</span> (better-sqlite3). But native addons require a C compiler to build — which fails in some Docker containers, CI environments, and Windows setups without build tools.</p>
+      <p>So CodeGraph uses an auto-detection pattern: try the fast native version first; if it fails, silently fall back to the pure-JavaScript WASM version. Same API, different speed.</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">src/db/sqlite-adapter.ts (simplified)</span>
+          <span class="code-line"><span class="code-keyword">async function</span> <span class="code-function">createDatabase</span>(path: <span class="code-function">string</span>) {</span>
+          <span class="code-line">  <span class="code-keyword">try</span> {</span>
+          <span class="code-line">    <span class="code-keyword">const</span> { Database } =</span>
+          <span class="code-line">      <span class="code-keyword">await import</span>(<span class="code-string">'better-sqlite3'</span>);</span>
+          <span class="code-line">    <span class="code-keyword">return new</span> <span class="code-function">Database</span>(path); <span class="code-comment">// fast</span></span>
+          <span class="code-line">  } <span class="code-keyword">catch</span> {</span>
+          <span class="code-line">    <span class="code-keyword">const</span> { Database } =</span>
+          <span class="code-line">      <span class="code-keyword">await import</span>(<span class="code-string">'node-sqlite3-wasm'</span>);</span>
+          <span class="code-line">    <span class="code-keyword">return new</span> <span class="code-function">Database</span>(path); <span class="code-comment">// portable</span></span>
+          <span class="code-line">  }</span>
+          <span class="code-line">}</span>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">Plain English</span>
+          <div class="translation-lines">
+            <div class="tl">Create a database connection — figure out which engine to use</div>
+            <div class="tl">Try first…</div>
+            <div class="tl"> </div>
+            <div class="tl">Load the native C++ SQLite binding</div>
+            <div class="tl">Open the database using native code (~5x faster)</div>
+            <div class="tl">If that fails (no build tools, wrong platform)…</div>
+            <div class="tl"> </div>
+            <div class="tl">Load the pure-JavaScript WASM version instead</div>
+            <div class="tl">Open the database — slower but works everywhere</div>
+            <div class="tl"> </div>
+            <div class="tl">Caller gets a database — doesn't need to know which engine</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent animate-in">
+        <span class="callout-icon">🔋</span>
+        <div class="callout-content">
+          <span class="callout-title">The "Try Native, Fall Back to WASM" Pattern</span>
+          <p>This pattern — attempt the fast native path, silently fall back to portable — appears all over production Node.js libraries (sharp, canvas, argon2). It's how you ship software that works on a developer's MacBook, a teammate's Windows machine, and a Linux Docker container all at once.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 3: Impact Radius + Pattern Cards -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">The Ripple Calculator: Impact Radius BFS</h2>
+      <p>One of CodeGraph's most powerful features is <strong>impact analysis</strong>: "If I change this function, what else breaks?" It uses a <span class="term" data-definition="Breadth-First Search — a graph traversal algorithm that explores all neighbors of the current node before moving deeper. Imagine ripples spreading from a pebble dropped in water — BFS explores level by level outward.">BFS</span> traversal starting from the changed symbol, following edges outward to find everything in the dependency chain.</p>
+
+      <div class="pattern-cards animate-in stagger-children">
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-accent-light)">🕸️</div>
+          <div class="pattern-title">getCallers(name)</div>
+          <p class="pattern-desc">BFS traversal following inbound "calls" edges. Who calls this function? All callers, up to maxDepth=3 levels up the call tree.</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-info-light)">🌊</div>
+          <div class="pattern-title">getCallees(name)</div>
+          <p class="pattern-desc">BFS traversal following outbound "calls" edges. What does this function call? All dependencies, down into the call tree.</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-success-light)">💥</div>
+          <div class="pattern-title">getImpactRadius(name)</div>
+          <p class="pattern-desc">Multi-level BFS in both directions. The full blast radius of a change — everything that could break if this symbol changes.</p>
+        </div>
+      </div>
+
+      <div class="callout callout-info animate-in">
+        <span class="callout-icon">🎯</span>
+        <div class="callout-content">
+          <span class="callout-title">Why BFS and Not DFS?</span>
+          <p><span class="term" data-definition="Depth-First Search — explores as far as possible along one branch before backtracking. Goes deep before going wide.">DFS</span> could explore infinitely deep call chains (recursive functions, circular references). BFS with a depth limit (maxDepth=3) naturally stops at a useful boundary — close enough to be relevant, not so far that you get every function in the codebase.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 4: Spot the Bug Challenge -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">Spot the Bug: Worker Recycling</h2>
+      <p>Below is a simplified version of the worker recycling logic. One line contains a bug that would cause the worker to be recycled too aggressively — recycling after almost every file instead of every 250 files. Click the buggy line.</p>
+
+      <div class="bug-challenge">
+        <h3>Find the bug in this worker recycling code</h3>
+        <div class="bug-code">
+          <div class="bug-line" onclick="checkBugLine(this, false)" data-hint="This is fine — 250 is the correct batch size limit.">
+            <span class="line-num">1</span>
+            <code><span class="code-keyword">const</span> FILE_RECYCLE_LIMIT = <span class="code-number">250</span>;</code>
+          </div>
+          <div class="bug-line" onclick="checkBugLine(this, false)" data-hint="Initializing to 0 is correct — the counter starts at zero.">
+            <span class="line-num">2</span>
+            <code><span class="code-keyword">let</span> filesProcessed = <span class="code-number">0</span>;</code>
+          </div>
+          <div class="bug-line" onclick="checkBugLine(this, false)" data-hint="Incrementing filesProcessed is correct — we want to count processed files.">
+            <span class="line-num">3</span>
+            <code>filesProcessed++;</code>
+          </div>
+          <div class="bug-line" onclick="checkBugLine(this, true)"
+            data-explanation="The condition should be >= (greater-than-or-equal), not > (strictly greater-than). With >, the worker would only recycle after processing file #251 — missing the 250-file boundary. But more critically, after restartWorker() resets filesProcessed to 0, it increments again before the check, so the logic would be off-by-one throughout. A subtle fence-post error."
+            data-hint="Look at the comparison operator — is it checking the right boundary?">
+            <span class="line-num">4</span>
+            <code><span class="code-keyword">if</span> (filesProcessed <span style="color: #F38BA8; font-weight: bold;">&gt;</span> FILE_RECYCLE_LIMIT) {</code>
+          </div>
+          <div class="bug-line" onclick="checkBugLine(this, false)" data-hint="Restarting the worker is the correct action to free WASM heap memory.">
+            <span class="line-num">5</span>
+            <code>  <span class="code-keyword">await</span> <span class="code-function">restartWorker</span>();</code>
+          </div>
+          <div class="bug-line" onclick="checkBugLine(this, false)" data-hint="Resetting the counter to 0 after restart is correct.">
+            <span class="line-num">6</span>
+            <code>  filesProcessed = <span class="code-number">0</span>;</code>
+          </div>
+        </div>
+        <div class="bug-feedback"></div>
+      </div>
+
+      <div class="callout callout-accent animate-in" style="margin-top: var(--space-8);">
+        <span class="callout-icon">🚀</span>
+        <div class="callout-content">
+          <span class="callout-title">You Now Understand CodeGraph</span>
+          <p>You've traced the full journey: problem → solution → architecture → indexing pipeline → query answering → clever engineering patterns. You can now tell an AI coding tool exactly <em>how</em> to use CodeGraph, what to expect from it, and where its limits are. That's the real superpower.</p>
+        </div>
+      </div>
+
+      <!-- Final Quiz -->
+      <div class="quiz-container" id="quiz-m5" style="margin-top: var(--space-8);">
+
+        <div class="quiz-question-block" data-correct="b"
+          data-explanation-right="Exactly! The WASM heap is the constraint — V8 never frees WASM-allocated memory. Recycling the worker process is the only way to reclaim that heap space."
+          data-explanation-wrong="The 250-file limit isn't about CPU or file count preferences — it's about the WASM heap that tree-sitter uses. WASM memory grows but never shrinks, so the worker must be recycled periodically.">
+          <p class="quiz-question">Why does CodeGraph restart the parse worker every 250 files?</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)"><span class="quiz-option-radio"></span>To prevent the TypeScript compiler from consuming too much CPU</button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)"><span class="quiz-option-radio"></span>Because WASM heap memory (used by tree-sitter) grows but never shrinks — recycling frees it</button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)"><span class="quiz-option-radio"></span>To comply with Node.js file descriptor limits</button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block" data-correct="c"
+          data-explanation-right="Right! The caller of createDatabase() gets back a Database object and never needs to know whether it's powered by native C++ or WASM JavaScript. That's the beauty of the facade pattern."
+          data-explanation-wrong="The pattern hides the implementation detail from callers. Whatever code calls createDatabase() just gets a working database — the adapter handles the native vs. WASM decision internally.">
+          <p class="quiz-question">What design benefit does the native-vs-WASM SQLite adapter provide?</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)"><span class="quiz-option-radio"></span>It forces all developers to install native build tools for the best performance</button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)"><span class="quiz-option-radio"></span>It lets users choose which database engine they prefer at runtime</button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)"><span class="quiz-option-radio"></span>It makes CodeGraph work on any machine — the caller never needs to know which engine is running</button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div style="margin-top: var(--space-6); display: flex; gap: var(--space-3);">
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m5')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m5')">Reset</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+  </main>
+
+</body>
+</html>

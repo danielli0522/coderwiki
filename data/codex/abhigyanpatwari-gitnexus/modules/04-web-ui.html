@@ -1,0 +1,152 @@
+<section class="module" id="module-4" style="background: var(--color-surface-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">Web 界面：交互式图谱浏览器</h1>
+      <p class="module-subtitle">可视化探索代码结构、AI 对话问答、多语言支持</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Graph Visualization -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">把代码变成可以"走"的地图</h2>
+        <p>GitNexus Web 用 <span class="term" data-definition="Sigma.js 是一个基于 WebGL 的图可视化库，能在浏览器里渲染数万个节点和边而不卡顿。它把节点画成圆点，边画成连线，形成网络图。">Sigma.js</span> + <span class="term" data-definition="Graphology 是一个 JavaScript 图数据结构库，提供节点/边的增删查改、社区检测、最短路径等算法。GitNexus 用它做聚类和图谱操作。">Graphology</span> 把知识图谱渲染成交互式网络图。你可以拖拽节点、缩放视图、点击查看详情——就像用 Google Maps 探索城市一样探索代码。</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">&#127757;</div>
+          <div class="callout-content">
+            <strong class="callout-title">WebGL 渲染 = 性能保证</strong>
+            <p>Sigma.js 用 WebGL 渲染，GPU 加速。即使图谱有数千个节点和上万条边，拖拽和缩放依然流畅。这是 Canvas 2D 做不到的。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: AI Chat -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Graph RAG Agent：对着图谱问问题</h2>
+        <p>Web 界面内置一个基于 <span class="term" data-definition="LangChain ReAct 是一种 AI 代理模式：Reason（推理）+ Act（行动）循环。AI 先思考该用什么工具，调用工具拿到结果，再思考下一步，直到得出最终答案。">LangChain ReAct</span> 的 AI 代理。你可以用自然语言提问，它会自动调用图谱工具查找答案：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">AI 对话示例</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment">// 用户提问：</span></span>
+<span class="code-line">"认证模块是怎么工作的？"</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment">// AI Agent 的推理+行动循环：</span></span>
+<span class="code-line"><span class="code-comment">// 1. query("authentication")</span></span>
+<span class="code-line"><span class="code-comment">//    → 找到 LoginFlow 执行流</span></span>
+<span class="code-line"><span class="code-comment">// 2. context("validateUser")</span></span>
+<span class="code-line"><span class="code-comment">//    → 拿到 360 度符号视图</span></span>
+<span class="code-line"><span class="code-comment">// 3. 组织回答：</span></span>
+<span class="code-line"><span class="code-comment">//    认证流程分 7 步：</span></span>
+<span class="code-line"><span class="code-comment">//    路由 → 中间件 → validateUser</span></span>
+<span class="code-line"><span class="code-comment">//    → checkPassword → createSession</span></span>
+<span class="code-line"><span class="code-comment">//    → 生成 JWT → 返回响应</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">你用中文问"认证模块怎么工作的"，不需要知道任何 API。</p>
+              <p class="tl">AI 代理先用 query 工具搜索"authentication"相关的执行流。</p>
+              <p class="tl">找到 LoginFlow 后，用 context 工具查看关键函数的上下游。</p>
+              <p class="tl">最后用自然语言总结出完整的认证流程，就像一个熟悉代码的同事在给你讲解。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: 16 MCP Tools -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">16 个工具：AI 的代码透视眼镜</h2>
+        <p>GitNexus 通过 MCP 协议暴露 16 个工具，让 AI 代理拥有了前所未有的代码洞察力：</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num" style="background: var(--color-accent); color: white;">Q</div>
+            <div class="step-body">
+              <strong>query — 混合搜索</strong>
+              <p>BM25 + 语义向量 + RRF 融合。搜索结果按执行流分组，标注每个符号在流程中的位置。跨社区流程优先展示。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num" style="background: var(--color-actor-2); color: white;">C</div>
+            <div class="step-body">
+              <strong>context — 360 度符号视图</strong>
+              <p>选中一个函数，立刻看到：谁调它、它调谁、属于哪个社区、参与哪些执行流。就像 LinkedIn 的人际关系全景图。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num" style="background: var(--color-error); color: white;">I</div>
+            <div class="step-body">
+              <strong>impact — 影响范围分析</strong>
+              <p>修改一个函数前先跑 impact。返回：上游（谁依赖我，会断裂）、下游（我依赖谁，可能连锁崩溃）、风险等级、置信度。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num" style="background: var(--color-actor-4); color: white;">D</div>
+            <div class="step-body">
+              <strong>detect_changes — 变更检测</strong>
+              <p>提交前跑一下，自动对比 git diff 和图谱，告诉你改了哪些符号、影响了哪些执行流、风险多高。防止"改一行坏一片"。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Editor Integrations -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">五大 AI 编辑器全覆盖</h2>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#129302;</div>
+            <h4 class="pattern-title">Claude Code（最深集成）</h4>
+            <p class="pattern-desc">MCP 工具 + Agent Skills + PreToolUse/PostToolUse Hooks。修改前自动跑影响分析，提交后自动检测索引过期。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">&#128187;</div>
+            <h4 class="pattern-title">Cursor / Windsurf / Codex</h4>
+            <p class="pattern-desc">MCP 工具 + Skills。一行命令配置，立即可用。Cursor 还支持 PostToolUse Hook。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-success-light)">&#127760;</div>
+            <h4 class="pattern-title">Web UI（无需安装）</h4>
+            <p class="pattern-desc">打开 gitnexus.vercel.app，拖入 GitHub 仓库或 ZIP 文件，即刻开始探索。LangChain ReAct Agent 提供对话式问答。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！impact 工具专门做影响范围分析，返回上游（依赖你的）和下游（你依赖的）的完整列表，附带风险等级和置信度。这是防止'改一行坏一片'的利器。"
+               data-explanation-wrong="想想每个工具的专长：query 是搜索，context 是符号全景，impact 是影响范围分析。如果 AI 要改一个函数，它最需要知道的是'改了这个会影响谁'——这对应哪个工具？">
+            <h3 class="quiz-question">AI 代理要修改 validateUser 函数，它应该先用哪个工具来评估风险？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>先用 query 搜索 validateUser 的定义</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>先用 context 查看 validateUser 的调用者</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>先用 impact 分析 validateUser 的上游和下游影响范围</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

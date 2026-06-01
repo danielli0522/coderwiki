@@ -1,0 +1,337 @@
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 3: 提交与签署流程
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">提交与签署流程</h1>
+      <p class="module-subtitle">追踪 Submission 从创建到完成的完整生命周期——状态机、签署表单、邮件通知和异步任务</p>
+    </header>
+
+    <!-- ── Screen 1: Submission 生命周期 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">Submission 生命周期：从创建到完成</h2>
+
+      <p><span class="term" data-definition="Submission（提交）代表一次签署流程实例。它从模板创建，包含多个 Submitter（签署人）。Submission 追踪整个签署流程的状态：待签署、进行中、已完成、已过期、已拒绝、已归档。">Submission</span> 的生命周期就像一个快递包裹——从"已下单"到"已送达"，中间经历多个状态转换。DocuSeal 用 scope（查询范围）来定义这些状态。</p>
+
+      <div class="step-cards">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>创建（submission.created）</strong>
+            <p>管理员通过 API 或界面发起签署。系统创建 Submission 记录，从模板复制 fields、schema、submitters 配置。source 字段记录来源：link（链接分享）、api（API 调用）、embed（嵌入式）、invite（邀请）、bulk（批量发送）。</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>分配签署人（Submitter 创建）</strong>
+            <p>为每个角色创建 Submitter 记录，生成唯一的签署链接 slug。每个 Submitter 有独立的状态：awaiting -> sent -> opened -> completed/declined。metadata 字段可以存储自定义数据（如用户 ID、订单号）。</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>发送邀请（send_email）</strong>
+            <p>SendSubmitterInvitationEmailJob 异步发送邀请邮件。邮件包含签署链接（/s/:slug），支持自定义邮件模板和回复地址。sent_at 字段记录发送时间。也可以通过 SMS 发送（Pro 功能）。</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>签署人填写（form.viewed -> form.started）</strong>
+            <p>签署人打开链接，SubmitFormController#show 渲染签署表单。opened_at 记录打开时间。支持签署顺序控制（enforce_signing_order）和 2FA 验证（邮件验证码/手机验证码）。</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <strong>完成签署（form.completed）</strong>
+            <p>签署人提交表单，SubmitFormController#update 调用 Submitters::SubmitValues 处理。ProcessSubmitterCompletionJob 异步生成签署后的 PDF、嵌入电子签名、创建审计日志、触发 Webhook 通知。completed_at 记录完成时间。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 2: Submitter 状态机 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">Submitter 的五种状态</h2>
+
+      <p>每个 <span class="term" data-definition="Submitter（签署人）代表一个签署流程中的具体参与者。每个 Submitter 有独立的状态追踪：awaiting（等待中）→ sent（已发送邀请）→ opened（已打开链接）→ completed（已完成）或 declined（已拒绝）。">Submitter</span> 有独立的状态追踪。Submitter 模型的 status 方法是一个简单的状态机：</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-comment"># app/models/submitter.rb</span></span>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">status</span></span>
+<span class="code-line">  <span class="code-keyword">if</span> declined_at?</span>
+<span class="code-line">    <span class="code-string">'declined'</span></span>
+<span class="code-line">  <span class="code-keyword">elsif</span> completed_at?</span>
+<span class="code-line">    <span class="code-string">'completed'</span></span>
+<span class="code-line">  <span class="code-keyword">elsif</span> opened_at?</span>
+<span class="code-line">    <span class="code-string">'opened'</span></span>
+<span class="code-line">  <span class="code-keyword">elsif</span> sent_at?</span>
+<span class="code-line">    <span class="code-string">'sent'</span></span>
+<span class="code-line">  <span class="code-keyword">else</span></span>
+<span class="code-line">    <span class="code-string">'awaiting'</span></span>
+<span class="code-line">  <span class="code-keyword">end</span></span>
+<span class="code-line"><span class="code-keyword">end</span></span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">status 方法使用时间戳字段判断当前状态</p>
+            <p class="tl">declined_at 不为空 = 签署人已拒绝签署</p>
+            <p class="tl">declined 状态——签署人点击了"拒绝"按钮</p>
+            <p class="tl">completed_at 不为空 = 签署人已完成签署</p>
+            <p class="tl">completed 状态——签署人填写完所有必填字段并提交</p>
+            <p class="tl">opened_at 不为空 = 签署人已打开签署链接</p>
+            <p class="tl">opened 状态——签署人正在查看/填写表单</p>
+            <p class="tl">sent_at 不为空 = 邀请邮件已发送</p>
+            <p class="tl">sent 状态——邀请已发出，等待签署人打开</p>
+            <p class="tl">以上时间戳都为空 = 尚未发送邀请</p>
+            <p class="tl">awaiting 状态——等待管理员发送邀请</p>
+            <p class="tl">状态判断结束</p>
+            <p class="tl">方法结束</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">&#128218;</div>
+        <div class="callout-content">
+          <strong class="callout-title">时间戳驱动的状态机</strong>
+          <p>DocuSeal 使用时间戳（declined_at、completed_at、opened_at、sent_at）而非枚举字段来实现状态机。这种设计的好处是：状态判断和数据审计合二为一——你不仅能知道当前状态，还能精确知道状态变化的时间。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 3: SubmitFormController 签署表单处理 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">代码翻译：签署表单控制器</h2>
+
+      <p>SubmitFormController 是签署人直接交互的入口。当签署人打开链接 /s/:slug 时，show 方法渲染签署表单；当签署人提交表单时，update 方法处理数据。这段代码体现了 DocuSeal 的核心安全设计：</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-comment"># app/controllers/submit_form_controller.rb</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">SubmitFormController</span></span>
+<span class="code-line">  skip_before_action</span>
+<span class="code-line">    <span class="code-symbol">:authenticate_user!</span></span>
+<span class="code-line">  skip_authorization_check</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">def</span> <span class="code-function">show</span></span>
+<span class="code-line">    <span class="code-keyword">return</span> render <span class="code-symbol">:email_2fa</span></span>
+<span class="code-line">      <span class="code-keyword">unless</span> authorized?</span>
+<span class="code-line">    <span class="code-keyword">return</span> redirect_to <span class="code-symbol">:completed</span></span>
+<span class="code-line">      <span class="code-keyword">if</span> submitter.completed_at?</span>
+<span class="code-line">    <span class="code-keyword">return</span> render <span class="code-symbol">:awaiting</span></span>
+<span class="code-line">      <span class="code-keyword">if</span> enforce_order?</span>
+<span class="code-line">  <span class="code-keyword">end</span></span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">def</span> <span class="code-function">update</span></span>
+<span class="code-line">    <span class="code-keyword">return</span> error <span class="code-keyword">if</span> completed?</span>
+<span class="code-line">    <span class="code-keyword">return</span> error <span class="code-keyword">if</span> archived?</span>
+<span class="code-line">    <span class="code-keyword">return</span> error <span class="code-keyword">if</span> expired?</span>
+<span class="code-line">    <span class="code-keyword">return</span> error <span class="code-keyword">if</span> declined?</span>
+<span class="code-line"></span>
+<span class="code-line">    Submitters::SubmitValues.call(</span>
+<span class="code-line">      submitter, params, request</span>
+<span class="code-line">    )</span>
+<span class="code-line">    head <span class="code-symbol">:ok</span></span>
+<span class="code-line">  <span class="code-keyword">end</span></span>
+<span class="code-line"><span class="code-keyword">end</span></span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">控制器定义</p>
+            <p class="tl">跳过身份认证——签署人无需登录（签署链接本身就是认证凭证）</p>
+            <p class="tl">跳过权限检查——签署链接已包含授权信息</p>
+            <p class="tl">空行</p>
+            <p class="tl">show 方法：渲染签署表单页面</p>
+            <p class="tl">安全检查 1：如果需要 2FA 验证且未通过，显示验证码页面</p>
+            <p class="tl">安全检查 2：如果已完成签署，重定向到完成页面</p>
+            <p class="tl">安全检查 3：如果启用签署顺序且轮到别人，显示等待页面</p>
+            <p class="tl">show 方法结束</p>
+            <p class="tl">空行</p>
+            <p class="tl">update 方法：处理签署人提交的表单数据</p>
+            <p class="tl">防御性检查：已完成签署 -> 拒绝（防重复提交）</p>
+            <p class="tl">防御性检查：模板或提交已归档 -> 拒绝</p>
+            <p class="tl">防御性检查：签署链接已过期 -> 拒绝（expire_at 检查）</p>
+            <p class="tl">防御性检查：签署人已拒绝 -> 拒绝（不能再修改）</p>
+            <p class="tl">空行</p>
+            <p class="tl">所有检查通过，调用 SubmitValues 服务处理表单数据</p>
+            <p class="tl">传入 submitter、params（表单数据）和 request（用于审计追踪）</p>
+            <p class="tl">返回 200 OK</p>
+            <p class="tl">update 方法结束</p>
+            <p class="tl">控制器结束</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 4: 异步任务管道 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">异步任务管道：签署完成后的幕后工作</h2>
+
+      <p>当签署人提交表单后，系统不会同步执行所有操作——那样会让用户等待太久。DocuSeal 使用 <span class="term" data-definition="Sidekiq 是 Ruby 生态最流行的异步任务处理框架。它将任务（Job）放入 Redis 队列，后台 Worker 进程异步执行。DocuSeal 用它处理邮件发送、PDF 生成、Webhook 推送等耗时操作。">Sidekiq</span> 异步任务队列来处理后续工作。</p>
+
+      <div class="flow-animation" data-steps='[
+        {"highlight":"flow-actor-1","label":"签署人提交表单，SubmitFormController#update 调用 Submitters::SubmitValues"},
+        {"highlight":"flow-actor-1","label":"SubmitValues 验证必填字段，保存 values 数据，设置 completed_at 时间戳","packet":true,"from":"actor-1","to":"actor-2"},
+        {"highlight":"flow-actor-2","label":"ProcessSubmitterCompletionJob 启动——生成签署后的 PDF，嵌入电子签名到指定区域"},
+        {"highlight":"flow-actor-2","label":"生成审计日志（audit_trail）——记录签署人 IP、时间戳、UA 等信息，附加到 Submission","packet":true,"from":"actor-2","to":"actor-3"},
+        {"highlight":"flow-actor-3","label">"SendFormCompletedWebhookRequestJob——向配置的 Webhook URL 发送 form.completed 事件通知"},
+        {"highlight":"flow-actor-3","label":"SubmitterMailer.completed_email——向管理员发送签署完成通知，附件包含签署后 PDF","packet":true,"from":"actor-3","to":"actor-4"},
+        {"highlight":"flow-actor-4","label":"如果所有签署人都完成——GeneratePreviewImagesJob 更新文档预览图，标记 Submission 为 completed 状态"}
+      ]'>
+        <div class="flow-actors">
+          <div class="flow-actor" id="flow-actor-1">
+            <div class="flow-actor-icon">&#9999;</div>
+            <span>表单提交</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-2">
+            <div class="flow-actor-icon">&#128196;</div>
+            <span>PDF 生成</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-3">
+            <div class="flow-actor-icon">&#128279;</div>
+            <span>通知推送</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-4">
+            <div class="flow-actor-icon">&#9989;</div>
+            <span>状态更新</span>
+          </div>
+        </div>
+
+        <div class="flow-packet" id="flow-packet"></div>
+        <div class="flow-step-label" id="flow-label">点击"下一步"开始旅程</div>
+
+        <div class="flow-controls">
+          <button class="btn flow-next-btn">下一步</button>
+          <button class="btn flow-reset-btn">重新开始</button>
+          <span class="flow-progress"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 5: 邮件通知系统 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">邮件通知系统：四种核心邮件</h2>
+
+      <p>DocuSeal 的邮件系统（SubmitterMailer）负责签署流程中所有与用户的邮件交互。理解这四种核心邮件，就掌握了签署流程的用户体验设计：</p>
+
+      <div class="icon-rows">
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-accent-light); color: var(--color-accent)">&#128233;</div>
+          <div>
+            <strong>invitation_email（签署邀请）</strong>
+            <p>发送给签署人的邀请邮件，包含签署链接 /s/:slug。支持自定义邮件标题和正文（request_email_subject/body），可使用变量替换（如 {{submitter.name}}）。这是签署流程的起点。</p>
+          </div>
+        </div>
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-success-light); color: var(--color-success)">&#9989;</div>
+          <div>
+            <strong>completed_email（完成通知）</strong>
+            <p>当签署人完成签署后，发送给模板创建者的通知邮件。附件自动包含签署后的 PDF 文档和审计日志（总计不超过 10MB）。支持自定义邮件模板。</p>
+          </div>
+        </div>
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-error-light); color: var(--color-error)">&#10060;</div>
+          <div>
+            <strong>declined_email（拒绝通知）</strong>
+            <p>当签署人拒绝签署时，发送给创建者的通知邮件。reply_to 设置为签署人邮箱，方便创建者直接回复了解拒绝原因。</p>
+          </div>
+        </div>
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-info-light); color: var(--color-info)">&#128230;</div>
+          <div>
+            <strong>documents_copy_email（文档副本）</strong>
+            <p>签署完成后，发送给签署人的文档副本邮件。包含签署后的 PDF 和审计日志。确保签署人保留一份完整记录。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 6: 测验 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">检验你的理解</h2>
+
+      <div class="quiz-container" id="quiz-module3">
+        <div class="quiz-question-block"
+             data-correct="option-b"
+             data-explanation-right="正确！Submitter 使用时间戳字段（declined_at、completed_at、opened_at、sent_at）来判断状态。这种方式的好处是：既知道状态，又知道状态变化的精确时间，数据审计天然集成。"
+             data-explanation-wrong="回忆一下 Submitter 的 status 方法。它是如何判断当前状态的？用了枚举字段还是时间戳？">
+          <h3 class="quiz-question">Submitter 模型如何判断签署人的当前状态？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>使用 status 枚举字段（0=awaiting, 1=sent, 2=opened...）</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>使用时间戳字段（sent_at、opened_at、completed_at、declined_at）是否为空</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>使用独立的 SubmissionEvent 事件记录查询最新状态</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-a"
+             data-explanation-right="正确！SubmitFormController 使用 skip_before_action :authenticate_user! 和 skip_authorization_check。签署人无需登录，签署链接中的 slug 本身就是认证凭证。这是签署场景的典型设计——降低签署门槛。"
+             data-explanation-wrong="想想签署人打开链接 /s/:slug 时需要登录吗？如果需要登录，签署体验会怎样？">
+          <h3 class="quiz-question">签署人打开签署链接时，需要登录吗？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>不需要——签署链接（slug）本身就是认证凭证</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>需要——签署人必须先注册 DocuSeal 账户</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>取决于模板配置——有些模板需要登录，有些不需要</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-c"
+             data-explanation-right="正确！ProcessSubmitterCompletionJob 是签署完成后的核心异步任务。它负责：生成签署后的 PDF（嵌入电子签名到指定区域）、创建审计日志（记录 IP、时间、UA）、触发后续 Webhook 通知和邮件发送。"
+             data-explanation-wrong="想想签署人提交表单后，谁负责把签名'印'到 PDF 上？这是一个异步任务。">
+          <h3 class="quiz-question">哪个异步任务负责将签名嵌入到 PDF 文档中？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>GeneratePreviewImagesJob（生成预览图）</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>SendFormCompletedWebhookRequestJob（发送 Webhook 通知）</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>ProcessSubmitterCompletionJob（处理签署完成）</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重新作答</button>
+      </div>
+    </section>
+
+  </div>
+</section>

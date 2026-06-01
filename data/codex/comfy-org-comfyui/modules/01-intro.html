@@ -1,0 +1,229 @@
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">从一张图说起：ComfyUI 的工作全貌</h1>
+      <p class="module-subtitle">当你在画布上点下 Queue Prompt，背后究竟发生了什么？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Hook -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">你用过 ComfyUI，但你知道它是什么吗？</h2>
+        <p>ComfyUI 是当下最流行的 <span class="term" data-definition="AI 图像生成引擎就是一套软件系统，它能根据你输入的文字描述（叫 prompt），用深度学习模型画出对应的图片。类似于'你说话，它画画'的智能助手。">AI 图像生成引擎</span> 之一。你拖拽节点、连上连线、输入一段文字描述，然后点下 Queue Prompt——一张图就出来了。</p>
+        <p>但这一秒到下一秒之间，发生了非常复杂而优雅的事情。这个课程就是带你走进那段时间里发生的一切。</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">&#128161;</div>
+          <div class="callout-content">
+            <strong class="callout-title">为什么要学这些？</strong>
+            <p>因为理解了 ComfyUI 的内部机制，你就能：设计更高效的工作流、快速定位报错节点、给 AI 助手更精准的指令、甚至自己写 <span class="term" data-definition="自定义节点是你用 Python 写的一个小模块，可以插入 ComfyUI 来做官方节点没覆盖到的事情。比如你想接一个新的图像处理算法，就可以写一个自定义节点。">自定义节点</span>。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: What ComfyUI Does -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">ComfyUI 能做什么？</h2>
+        <p>ComfyUI 不只是一个画图工具。它是一个<strong>通用的 AI 内容创作流水线</strong>：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">&#127912;</div>
+            <h4 class="pattern-title">图像生成</h4>
+            <p class="pattern-desc">支持 Flux、SDXL、SD3.5 等主流模型，文生图、图生图、ControlNet 精准控制。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">&#127909;</div>
+            <h4 class="pattern-title">视频生成</h4>
+            <p class="pattern-desc">通过 AnimateDiff、SVD 等扩展，把静态图变成视频片段。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">&#127925;</div>
+            <h4 class="pattern-title">音频 &amp; 3D</h4>
+            <p class="pattern-desc">通过 API 节点和社区扩展，还能做音频生成和 3D 模型生成。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">&#128736;</div>
+            <h4 class="pattern-title">无限扩展</h4>
+            <p class="pattern-desc">数千个社区自定义节点，涵盖后处理、批处理、图像融合、API 调用等。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Core User Journey Flow Animation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">点下 Queue Prompt 后发生了什么？</h2>
+        <p>想象你在用一条<strong>快递流水线</strong>：每个节点是一个工位，数据是传送带上的包裹，从一个工站流向下一个工站。</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"你在画布上连好节点，点下 Queue Prompt"},
+          {"highlight":"flow-actor-1","label":"前端把整个节点图序列化成 JSON prompt","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-2","label":"服务端验证 prompt：节点类型对不对？连线合不合法？"},
+          {"highlight":"flow-actor-2","label":"验证通过，prompt 进入执行队列排队","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-3","label":"执行引擎按拓扑排序逐个执行节点：加载模型 -> 编码文字 -> 采样 -> 解码图片"},
+          {"highlight":"flow-actor-3","label":"最终图片保存到 output 目录，结果通过 WebSocket 推送回前端","packet":true,"from":"actor-3","to":"actor-1"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">UI</div>
+              <span>前端画布</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">SRV</div>
+              <span>服务端</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">EXE</div>
+              <span>执行引擎</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击 "Next Step" 开始追踪一条图片生成的完整旅程</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">Next Step</button>
+            <button class="btn flow-reset-btn">Restart</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Key files -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">源码长什么样？</h2>
+        <p>ComfyUI 的核心代码并不庞大。下面是关键文件的地图——这门课的所有内容都围绕这几个文件展开：</p>
+
+        <div class="file-tree">
+          <div class="ft-folder open">
+            <span class="ft-name">ComfyUI/</span>
+            <span class="ft-desc">项目根目录</span>
+            <div class="ft-children">
+              <div class="ft-file">
+                <span class="ft-name">main.py</span>
+                <span class="ft-desc">启动入口：初始化服务器、加载节点、启动工作线程</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">server.py</span>
+                <span class="ft-desc">HTTP + WebSocket 服务端：接收 prompt、管理队列、推送进度</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">execution.py</span>
+                <span class="ft-desc">执行引擎：验证、拓扑排序、逐节点执行、缓存管理</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">nodes.py</span>
+                <span class="ft-desc">内置节点定义：CLIPTextEncode、KSampler、VAEDecode 等</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">comfy/</span>
+                <span class="ft-desc">核心算法层：模型加载、采样器、ControlNet 等</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">comfy_execution/</span>
+                <span class="ft-desc">执行基础设施：图结构、缓存策略、验证逻辑</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">folder_paths.py</span>
+                <span class="ft-desc">模型文件路径管理：checkpoints、loras 等都注册在这里</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">custom_nodes/</span>
+                <span class="ft-desc">社区自定义节点：数千个扩展功能的插件</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Code Translation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">入口代码长什么样？</h2>
+        <p>看看 <code>main.py</code> 里的启动逻辑——这就是 ComfyUI 从代码变成一个可交互服务的起点：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">start_comfyui</span>(asyncio_loop=<span class="code-keyword">None</span>):</span>
+<span class="code-line">    prompt_server = server.<span class="code-function">PromptServer</span>(asyncio_loop)</span>
+<span class="code-line"></span>
+<span class="code-line">    asyncio_loop.<span class="code-function">run_until_complete</span>(</span>
+<span class="code-line">        nodes.<span class="code-function">init_extra_nodes</span>(</span>
+<span class="code-line">            init_custom_nodes=<span class="code-keyword">not</span> args.disable_all_custom_nodes</span>
+<span class="code-line">        )</span>
+<span class="code-line">    )</span>
+<span class="code-line"></span>
+<span class="code-line">    prompt_server.<span class="code-function">add_routes</span>()</span>
+<span class="code-line">    <span class="code-function">hijack_progress</span>(prompt_server)</span>
+<span class="code-line"></span>
+<span class="code-line">    threading.<span class="code-function">Thread</span>(</span>
+<span class="code-line">        target=prompt_worker, daemon=<span class="code-keyword">True</span>,</span>
+<span class="code-line">        args=(prompt_server.prompt_queue, prompt_server)</span>
+<span class="code-line">    ).<span class="code-function">start</span>()</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">定义启动函数，可以传入一个已有的事件循环...</p>
+              <p class="tl">创建 PromptServer——这就是接收你操作请求的服务器...</p>
+              <p class="tl"></p>
+              <p class="tl">加载所有自定义节点（那些社区开发的插件）...</p>
+              <p class="tl">如果你没禁用自定义节点，就把它们全加载进来...</p>
+              <p class="tl"></p>
+              <p class="tl">注册所有 HTTP 路由（API 接口）...</p>
+              <p class="tl">把进度条显示'劫持'到前端，让你能看到生成进度...</p>
+              <p class="tl"></p>
+              <p class="tl">在后台线程里启动工作队列——它会一直等待新任务到来...</p>
+              <p class="tl">传入队列和服务器实例，线程就跑起来了...</p>
+              <p class="tl"></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#128218;</div>
+          <div class="callout-content">
+            <strong class="callout-title">补充知识</strong>
+            <p><span class="term" data-definition="守护线程（daemon thread）是一种在后台默默运行的线程。当主程序退出时，守护线程会自动跟着退出，不会阻止程序关闭。就像便利店门口的自动门——店关门了，自动门也就不工作了。">守护线程（daemon=True）</span> 意味着执行队列不会阻止程序退出——当你关闭 ComfyUI，工作线程自动跟着停。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 6: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验你的理解</h2>
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！prompt 就是把画布上所有节点和连线翻译成 JSON，告诉服务端'请按这个结构执行'。"
+               data-explanation-wrong="想想 Queue Prompt 按钮做了什么——它不是直接执行，而是把画布信息变成一种中间格式发给后端。">
+            <h3 class="quiz-question">当你在 ComfyUI 画布上点下 Queue Prompt，前端发送给后端的是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>一张截图 + 文字描述</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>一个 JSON 格式的 prompt，描述所有节点和连线关系</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>一段 Python 代码，直接调用生成函数</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

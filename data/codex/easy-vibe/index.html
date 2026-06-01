@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vibe Coding 系列1（入门）· Easy-Vibe 启蒙之旅</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    :root {
+      --color-accent:       #2A7B9B;
+      --color-accent-hover: #1F6280;
+      --color-accent-light: #E4F2F7;
+      --color-accent-muted: #5A9DB8;
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">Vibe Coding · 入门</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <button class="nav-dot" data-target="module-1" data-tooltip="你已经在做软件" role="tab" aria-label="模块 1：你已经在做软件"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="AI IDE 三件套" role="tab" aria-label="模块 2：AI IDE 三件套"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="一句话生成原型" role="tab" aria-label="模块 3：一句话生成原型"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="把原型变真产品" role="tab" aria-label="模块 4：把原型变真产品"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="学习地图与下一步" role="tab" aria-label="模块 5：学习地图与下一步"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh -->
+<section class="module" id="module-1" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="hero-title module-title">你早就在做软件了</h1>
+      <p class="module-subtitle">嘴动一下，应用就来了——这一站，先帮你看清"原来我已经在路上"。</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">"要是有个 X 就好了"——那一刻你已经开干</h2>
+        <p>你在生活里说过多少次"要是有个记账小程序、要是有个倒计时、要是有个早上催我喝水的小工具"——那一刻你脑子里诞生的那段话，技术圈有个词叫<span class="term" data-definition="一份用大白话写清楚的产品要求：要做什么、给谁用、有哪些功能。是软件世界最早的一份'剧本'。">产品需求文档</span>。</p>
+        <p>过去：你需要先学三年代码，才能把这句话变成软件。<br>现在：<span class="term" data-definition="Vibe Coding 是用自然语言驱动 AI 写代码的开发方式。Karpathy 提出——你只描述意图，AI 把它翻译成可运行的代码。">Vibe Coding</span> 把这句话直接翻译成能跑的应用。</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键认知</strong>
+            <p>Vibe Coding 的本质不是放弃理解，而是把"理解"从"语法记忆"挪到了"目标定义"。你的真实工作变成了——把想要什么说清楚。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">从自家厨房点外卖：一个比喻看清差别</h2>
+        <p>以前做软件像开酒店——先学厨艺、买设备、招厨师，开张前你已经累趴下了。</p>
+        <p>现在像在自家厨房点外卖——你说"今晚我想吃红烧肉"，<span class="term" data-definition="AI IDE 指内置 AI 助手的代码编辑器。它能听懂自然语言、读写你的项目文件、运行命令。例如 Cursor、Claude Code、Trae。">AI IDE</span> 把菜端上桌让你尝。你的角色从"厨师"变成"美食家+老板"——尝味道、提改进、做决定。</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🗣️</div>
+            <div>
+              <strong>你只做一件事——把想要什么说清楚</strong>
+              <p>用中文，用大白话，越具体越好。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🤖</div>
+            <div>
+              <strong>AI 干所有"翻译成代码"的脏活累活</strong>
+              <p>读你的项目、生成代码、跑命令、装依赖——它都自己来。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">道生一→万物：AI 能力的四层进化</h2>
+        <p>Vibe Coding 圈子里有句口诀，叫"道生一万物"——意思是 AI 能力是分阶进化的，从一个最小起点扩散到一切：</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>一：装一个 <span class="term" data-definition="CLI 是 Command Line Interface 的缩写——通过终端命令使用的程序。装好后，你在终端里输一句话，AI 就回一句话。">AI CLI</span></strong>
+              <p>获得跟 AI 对话的能力——这是入场券，5 分钟搞定。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>二：AI 能读写一切文件</strong>
+              <p>你不再需要手动复制粘贴代码——它直接改文件。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>三：AI 能配置一切环境</strong>
+              <p>装依赖、配数据库、部署项目——它自己跑命令搞定。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>万物：一切皆可生成</strong>
+              <p>代码、文档、测试、脚本、营销文案——你说要啥就有啥。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">人机分工：你是导演，AI 是剧组</h2>
+        <p>把电影类比拿过来——你是导演（管方向和判断），AI 是整个剧组（管执行和产出）。两边各干各的，互不抢戏。</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🎯</div>
+            <div>
+              <strong>你：说目标 / 定约束 / 做判断 / 设门禁</strong>
+              <p>"我要一个能跑在手机上的记账 App，不要联网，最多 3 个页面"——这种话只有你能说。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">⚙️</div>
+            <div>
+              <strong>AI：理解意图 / 执行操作 / 生成产出 / 整理证据</strong>
+              <p>读懂你说的话、写代码、跑命令、把测试结果摆给你看——这是它的活。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🌀</div>
+          <div class="callout-content">
+            <strong class="callout-title">心法</strong>
+            <p>"我是 AI 的寄生者，没有 AI 我失去一切能力"——这不是自嘲，这是新工作方式的核心宣言。承认它，你就上路了。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">动手翻译：把"中文心愿"变成 AI 听得懂的话</h2>
+        <p>左边是你平时随口讲的需求；右边是把它整理成 AI 能精准接住的 <span class="term" data-definition="Prompt 就是你发给 AI 的一段指令。好的 Prompt 像菜谱——目标、用料、步骤、要避坑的地方都写清楚，AI 才能稳定产出。">Prompt</span> 模板。差别只在于"五段式"的明确化：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">中文心愿</span>
+<pre><code>我想要个记账 App，
+能记每天花了多少钱，
+最好简单点，
+我妈也能用。</code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">五段式 PROMPT</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>1. 目标：</strong>做一个个人记账 App，给完全不懂技术的中老年人用。</p>
+              <p class="tl"><strong>2. 界面：</strong>单页面，最大字号，三个按钮——加一笔、看本月、清空。</p>
+              <p class="tl"><strong>3. 功能：</strong>每笔输入金额+一句备注，自动累计本月总额。</p>
+              <p class="tl"><strong>4. 数据：</strong>存在浏览器本地，不联网、不登录。</p>
+              <p class="tl"><strong>5. 技术栈：</strong>HTML+CSS+JavaScript 单文件，能直接双击打开。</p>
+            </div>
+          </div>
+        </div>
+
+        <p>看见区别了吗？左边是<em>愿望</em>，右边是<em>规格</em>。AI 不是读心术——你说得越清楚，它给得越准。</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">小测验：场景判断</h2>
+
+        <div class="quiz-container" id="quiz-m1">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="完全正确——这就是 Vibe Coding 的工作方式。你最大的杠杆是把想法说清楚，AI 替你翻译成代码。"
+               data-explanation-wrong="不太对——在 2026 年，'先学三年 Python' 或 '花钱请人' 都不是最划算的路。把想法说清楚扔给 AI IDE，是最快的方式。">
+            <h3 class="quiz-question">你今晚突然想要一个"记账小程序"，自己也不会写代码。最划算的下一步是？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>A. 先报个 Python 培训班，学三个月再说</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>B. 上网找个程序员朋友，花 2000 块请他做</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>C. 把"五段式"想法写清楚，扔给 AI IDE 让它直接生成</span>
+              </button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>D. 算了，太难，下辈子吧</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m1')">看看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m1')">再试一次</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-2" style="background: var(--color-bg)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">AI IDE 三件套——你的新装备库</h1>
+      <p class="module-subtitle">不是 1979 年的 Vim，也不是传统 VS Code——你需要一个"听得懂中文、能改你文件、会跑命令"的编辑器。</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">选车比喻：家用 SUV、跑车、卡车</h2>
+        <p>三款主流的 <span class="term" data-definition="IDE 是 Integrated Development Environment 的缩写——集成开发环境。可以把它理解成程序员的'大型工作台'：写代码、运行、调试、看错误日志都在同一个窗口里。">AI IDE</span>，定位完全不同。挑工具就像挑车——你要看自己跑的是什么路。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🚙</div>
+            <h4 class="pattern-title">Cursor · 家用 SUV</h4>
+            <p class="pattern-desc"><strong>上手难度：</strong>中<br><strong>是否免费：</strong>有免费额度，深度用要订阅<br><strong>适合场景：</strong>窗口里直接写代码、改代码、看预览，全程图形界面。第一次接触 AI IDE 的人最容易找到感觉。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🏎️</div>
+            <h4 class="pattern-title">Claude Code · 跑车</h4>
+            <p class="pattern-desc"><strong>上手难度：</strong>中高<br><strong>是否免费：</strong>需 Claude 订阅<br><strong>适合场景：</strong>在<span class="term" data-definition="终端是命令行窗口——一个只能用键盘打字的黑色窗口。它看着原始，但比图形界面更精准、更快。">终端</span>里跑，能读懂整个项目结构、批量改文件、自己跑命令。专业玩家的"长跑利器"。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🚛</div>
+            <h4 class="pattern-title">Trae · 重型卡车（免费）</h4>
+            <p class="pattern-desc"><strong>上手难度：</strong>低<br><strong>是否免费：</strong>完全免费<br><strong>适合场景：</strong>字节出品，内置 GPT-4o / Claude Sonnet / DeepSeek R1 多模型可选。零门槛、不用付费、想体验 vibe coding 但不想先掏钱的人首选。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">同一句需求，三家工具怎么接</h2>
+        <p>下面这段对话演示：你说"做个待办 App"，三个 IDE 各自的<em>响应风格</em>是什么样的。点 "下一句" 一句句看。</p>
+
+        <div class="chat-window" id="chat-m2-tools">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="user" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">你</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">你</span>
+                <p>帮我做个简单的待办 App，能加任务、能勾掉，本地存就行。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="cursor" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">C</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Cursor</span>
+                <p>收到。我会在编辑器右侧 Composer 面板里直接生成 index.html、style.css、app.js 三个文件，左边窗口你能立刻看到代码，右下角点"运行"就能预览效果。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="claude" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">CC</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">Claude Code</span>
+                <p>好的。我先扫一下当前文件夹结构，确认是空目录后，分三步：(1) 写 index.html (2) 写 app.js 接 localStorage (3) 用 python -m http.server 起一个本地服务给你看效果。每一步会停下来等你确认。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="trae" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">T</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">Trae</span>
+                <p>好嘞！要不要先选个模型？免费的 GPT-4o 写前端比较稳，Claude Sonnet 注释更细。我建议这种小项目用 GPT-4o，三秒后开始生成。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="user" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">你</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">你</span>
+                <p>三家都行，我最看重——不想付钱，今晚就要能玩。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="5" data-sender="trae" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">T</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">Trae</span>
+                <p>那就是我了。完全免费、登录就能用、不用绑卡，5 分钟内出 demo。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="6" data-sender="cursor" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">C</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Cursor</span>
+                <p>我有免费额度，但每月用量上来后会提示你订阅 Pro。短期玩没问题。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="7" data-sender="claude" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">CC</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">Claude Code</span>
+                <p>我需要 Claude 订阅。如果你之后想做更大的项目、批量改文件、自动化跑测试，那时再来找我。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" style="display:none">
+            <div class="chat-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一句</button>
+            <button class="btn chat-all-btn">全部播放</button>
+            <button class="btn chat-reset-btn">重新开始</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">三步上手：从下载到第一个项目</h2>
+        <p>不管选哪一家，路径都是这三步——先装好，再登录，再开第一个文件夹。</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>下载安装包</strong>
+              <p>去对应官网（cursor.com / claude.ai/code / trae.ai），按操作系统下载，双击装好——和装一个普通 App 完全一样。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>登录账号</strong>
+              <p>第一次打开会让你登录。Cursor 用邮箱、Claude Code 用 Anthropic 账号、Trae 用字节抖音/手机号——都是常见登录方式。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>"打开文件夹"开第一个项目</strong>
+              <p>菜单里点 Open Folder，新建一个空文件夹（比如 my-todo），打开它。从此你的 vibe coding 工位就开张了。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">同一需求两种界面：Composer vs 终端</h2>
+        <p>Cursor 的 <span class="term" data-definition="Composer 是 Cursor 内置的 AI 对话面板——你在右侧输入需求，AI 会直接修改你左侧打开的代码文件。属于'图形界面'风格。">Composer</span> 让你用聊天框；Claude Code 让你在终端里说话。下面是同一句需求在两种界面里的样子：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CURSOR · COMPOSER</span>
+<pre><code># 在右侧 Composer 输入框里粘贴：
+新建一个 index.html，
+做个待办 App，
+能加任务、勾掉、删除，
+存在 localStorage 里。
+完成后帮我打开预览。</code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">同一需求 · CLAUDE CODE 终端</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>启动：</strong>在 my-todo/ 文件夹里跑 <code>claude</code>。</p>
+              <p class="tl"><strong>提问：</strong>直接打字"做个待办 App，能加任务、勾掉、删除，存 localStorage"。</p>
+              <p class="tl"><strong>差异：</strong>它会先列出"我准备做这几步，你 OK 吗"，等你回 "go" 才开始动手。</p>
+              <p class="tl"><strong>结果：</strong>同样产出 index.html，但你看到的是终端日志而非可视面板。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">prompt 翻译：一句中文 → AI 听得懂的"做单"</h2>
+        <p>同样的需求，写得越像"工单"，AI 出错越少：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">中文一句话</span>
+<pre><code>给我做个待办 App，
+能加任务能勾掉。</code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">工单式 PROMPT</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>1. 目标：</strong>单文件待办 App。</p>
+              <p class="tl"><strong>2. 文件：</strong>只生成 index.html，CSS/JS 内嵌。</p>
+              <p class="tl"><strong>3. 功能：</strong>输入框加任务 / 复选框勾掉 / 红叉删除。</p>
+              <p class="tl"><strong>4. 存储：</strong>localStorage 持久化，刷新不丢。</p>
+              <p class="tl"><strong>5. 完成判定：</strong>双击 html 在浏览器打开能用。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🔑</div>
+          <div class="callout-content">
+            <strong class="callout-title">小贴士</strong>
+            <p>遇到 <span class="term" data-definition="Agent Mode 是让 AI 自动连续做多步操作的模式：它会自己跑命令、看结果、再决定下一步——而不是只回你一句话。">Agent Mode</span> 选项一定要打开——它代表"AI 自己跑、自己看结果、自己迭代"，这是 vibe coding 真正的爽点。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">小测验：怎么挑工具</h2>
+
+        <div class="quiz-container" id="quiz-m2">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="对——Trae 完全免费，对'晚上摸鱼想试一下不愿付费'的人最友好。Cursor/Claude Code 是性能更强但要钱。"
+               data-explanation-wrong="再想想——题目里关键词是'不想付费'。Cursor 和 Claude Code 长期用都要订阅。Trae 是字节出的免费 AI IDE。">
+            <h3 class="quiz-question">你只想晚上摸鱼做个小工具，绝对不想付费——选哪个？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>A. Cursor（先用免费额度，超了再说）</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>B. Claude Code（功能最强）</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>C. Trae（字节出品，完全免费）</span>
+              </button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>D. 装 Vim 自己写</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m2')">看看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m2')">再试一次</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-3" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">从一句话到能跑的原型</h1>
+      <p class="module-subtitle">15 分钟做一个贪吃蛇——这是 vibe coding 的"折纸第一只鸟"。</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">折纸比喻：白纸 → 小鸟</h2>
+        <p>原型就像折纸——一开始是张白纸（空文件夹），按几个折法折几下，立马变成一只能"立"起来的小鸟（能跑的<span class="term" data-definition="MVP 是 Minimum Viable Product 的缩写——最小可用产品。一个砍到极致、只保留核心功能、能跑给人看的版本。">MVP</span>）。</p>
+        <p>贪吃蛇是 Stage 1 教程里最经典的"第一只鸟"——它简单到一屏代码就够，又复杂到包含了"画布、键盘、循环、计分"四件事，是 vibe coding 的最佳成就解锁副本。</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>开 IDE，新建空文件夹 snake/</strong>
+              <p>从干净的空白起步——AI 不会被旧文件干扰。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>把"五段式"需求贴进对话框</strong>
+              <p>画布尺寸、操作方式、计分规则、技术栈、完成判定——一次写清楚。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>等 AI 写代码，秒级生成</strong>
+              <p>它会自动建 index.html，把 HTML+CSS+JS 内嵌进去。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>双击打开，浏览器里玩</strong>
+              <p>没错——你已经在玩自己的第一个游戏了。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>改色、加分数、加最高分</strong>
+              <p>"把蛇换成蓝色 / 加一个最高纪录 localStorage"——继续聊就行。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">幕后追踪：你按下回车后发生了什么</h2>
+        <p>这一屏是 vibe coding 的"地铁线路图"——从你打字到游戏跑起来，6 站全程。点 "下一步" 一站站走。</p>
+
+        <div class="flow-animation" id="flow-m3-prototype" data-steps='[
+          {"highlight":"flow-actor-1","label":"第一步：你在 IDE 里输入需求——画 200x200 的贪吃蛇，方向键控制，吃苹果加 1 分。"},
+          {"highlight":"flow-actor-2","label":"第二步：IDE 把你的中文需求打包成结构化的 prompt。","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-3","label":"第三步：AI 模型读懂意图，开始生成 HTML+CSS+JS 代码。","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-4","label":"第四步：IDE 把 AI 返回的代码写入 index.html 文件。","packet":true,"from":"actor-3","to":"actor-4"},
+          {"highlight":"flow-actor-5","label":"第五步：浏览器加载这个 HTML 文件，渲染画布。","packet":true,"from":"actor-4","to":"actor-5"},
+          {"highlight":"flow-actor-5","label":"第六步：你按方向键——能玩了。这就是从一句话到能跑的全过程。"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon" style="background: var(--color-actor-2)">🗣️</div>
+              <span>你</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon" style="background: var(--color-actor-1)">🛠️</div>
+              <span>AI IDE</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon" style="background: var(--color-actor-3)">🧠</div>
+              <span>AI 模型</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon" style="background: var(--color-actor-4)">📁</div>
+              <span>文件系统</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-5">
+              <div class="flow-actor-icon" style="background: var(--color-actor-5)">🌐</div>
+              <span>浏览器</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+
+          <div class="flow-step-label" id="flow-label">点"下一步"开始追踪</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">prompt 翻译：你只描述了 What，没描述 How</h2>
+        <p>下面这段贪吃蛇 prompt 看着很短，但已经足够。注意——你只说了"画什么、怎么操作、怎么得分"，<em>完全没说</em>"用 canvas 还是 div、定时器多少毫秒、数组怎么存"——那是 AI 该想的事。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">你的中文 PROMPT</span>
+<pre><code>做个 200x200 的贪吃蛇网页，
+方向键控制，
+吃到苹果加 1 分，
+撞墙或撞自己游戏结束。
+HTML+CSS+JS 单文件，
+双击就能玩。</code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PROMPT 各段在干嘛</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>1. 画布尺寸：</strong>200x200——告诉 AI 大小，避免它给你来个全屏。</p>
+              <p class="tl"><strong>2. 操作方式：</strong>方向键——锁定输入设备，不会做出鼠标点击版。</p>
+              <p class="tl"><strong>3. 计分规则：</strong>吃苹果 +1——明确产出，AI 知道要做计分 UI。</p>
+              <p class="tl"><strong>4. 失败条件：</strong>撞墙/撞自己——边界清晰，AI 不会自己加奇怪规则。</p>
+              <p class="tl"><strong>5. 技术约束：</strong>单文件 + 双击运行——这一句帮你避开 80% 装环境的坑。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码翻译：AI 给你写了什么</h2>
+        <p>AI 生成的代码里有这么一段——这是"键盘控制"的核心。看不懂没关系，右边白话能让你知道它在做啥：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">AI 生成的 JS</span>
+<pre><code><span class="code-function">document</span>.<span class="code-function">addEventListener</span>(<span class="code-string">"keydown"</span>, (e) =&gt; {
+  <span class="code-keyword">if</span> (e.<span class="code-property">key</span> === <span class="code-string">"ArrowUp"</span>)    snake.<span class="code-function">setDir</span>(<span class="code-number">0</span>, -<span class="code-number">1</span>);
+  <span class="code-keyword">if</span> (e.<span class="code-property">key</span> === <span class="code-string">"ArrowDown"</span>)  snake.<span class="code-function">setDir</span>(<span class="code-number">0</span>,  <span class="code-number">1</span>);
+  <span class="code-keyword">if</span> (e.<span class="code-property">key</span> === <span class="code-string">"ArrowLeft"</span>)  snake.<span class="code-function">setDir</span>(-<span class="code-number">1</span>, <span class="code-number">0</span>);
+  <span class="code-keyword">if</span> (e.<span class="code-property">key</span> === <span class="code-string">"ArrowRight"</span>) snake.<span class="code-function">setDir</span>( <span class="code-number">1</span>, <span class="code-number">0</span>);
+});</code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">这段代码在说啥</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>第 1 行：</strong>"嘿浏览器，帮我盯着键盘——一旦有人按键，叫我一声。"</p>
+              <p class="tl"><strong>第 2 行：</strong>按了上箭头？——蛇头方向改成"向上一格"。</p>
+              <p class="tl"><strong>第 3 行：</strong>下箭头——"向下一格"。</p>
+              <p class="tl"><strong>第 4-5 行：</strong>左右同理。</p>
+              <p class="tl"><strong>整段意思：</strong>把键盘的物理按键 → 翻译成蛇的运动方向。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">别被甜头冲昏头</strong>
+            <p>贪吃蛇能跑 ≠ 代码能上线——它只是 demo。Stage 2 才教你怎么从 demo 变成"全网用户都能玩"的产品。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">练手三选一：把贪吃蛇换成你自己的产品</h2>
+        <p>掌握了套路，下面这三个想法，你今晚都能跑出 demo——选一个，照"五要素"写 prompt：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">💰</div>
+            <h4 class="pattern-title">记账小程序</h4>
+            <p class="pattern-desc"><strong>五要素：</strong><br>① 单页面记账<br>② 加一笔含金额+备注<br>③ 自动算本月总额<br>④ localStorage 存储<br>⑤ 单 html 双击打开</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🍅</div>
+            <h4 class="pattern-title">番茄钟</h4>
+            <p class="pattern-desc"><strong>五要素：</strong><br>① 25 分钟工作 5 分钟休息<br>② 圆环倒计时 + 听觉提醒<br>③ 一天累计完成几个番茄<br>④ 数据本地存<br>⑤ 单 html 直开</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">📝</div>
+            <h4 class="pattern-title">个人博客首页</h4>
+            <p class="pattern-desc"><strong>五要素：</strong><br>① 首页+文章列表+正文三页<br>② Markdown 写正文<br>③ 暗色/亮色切换<br>④ 文章存 JSON 文件<br>⑤ 静态站、可直接部署</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">小测验：找出 prompt 里的硬伤</h2>
+
+        <div class="quiz-container" id="quiz-m3">
+          <div class="quiz-question-block"
+               data-correct="option-d"
+               data-explanation-right="完全正确——少了'技术栈+完成判定'这两段，AI 可能给你来个 React + 后端数据库的方案，复杂度爆炸。技术约束是新手最容易漏的'防坑句'。"
+               data-explanation-wrong="再看一眼——这段 prompt 缺了关键的'技术栈/完成判定'约束，AI 容易过度发挥。看 D 选项的解释。">
+            <h3 class="quiz-question">你写了如下 prompt，但 AI 给你生成的项目复杂得跑不起来：<br><em>"做一个待办 App，能加任务、能勾掉，要好看一点。"</em><br>哪句话漏了，导致 AI 跑偏？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>A. 没说颜色——AI 不知道用什么色</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>B. 没说作者名字——AI 不知道版权写谁</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>C. 没说"用中文"——AI 默认会写英文</span>
+              </button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>D. 没说"单文件 HTML、双击就能跑"——AI 没有技术栈约束，可能给你做了一套要装环境的复杂工程</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m3')">看看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m3')">再试一次</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-4" style="background: var(--color-bg)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">让原型变成真产品</h1>
+      <p class="module-subtitle">能跑 ≠ 能上线——从家庭作坊到工厂，多了一整套 SOP。</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">家庭作坊 → 工厂：少了什么？</h2>
+        <p>贪吃蛇能在你电脑上跑，但要"全网用户都能用"，缺了一整套配套：数据库（SOP）、部署（质检+物流）、支付（合规）、AI 工作流（生产线）……这就是 Stage 2/3 的内容，也是从原型到产品的真实差距。</p>
+
+        <p>下面这 7 块拼图，每一块都是"工厂"绕不开的工种。一个一个认识就行——你不用今晚学完，但听过一遍后，下次别人提起时你不会再陌生。</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">全栈拼图：7 块工厂零件</h2>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🔄</div>
+            <h4 class="pattern-title">Dify</h4>
+            <p class="pattern-desc"><span class="term" data-definition="Dify 是一个'AI 应用搭建平台'——你拖拽节点就能拼出一条 AI 工作流（比如：拿用户输入 → 调大模型 → 查知识库 → 返回结果），不用手写代码。">Dify</span> 是 AI 工作流工厂——拖拽节点拼一条 AI 流水线，不用写代码。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🗄️</div>
+            <h4 class="pattern-title">Supabase</h4>
+            <p class="pattern-desc"><span class="term" data-definition="Supabase 是一个开源的'后端即服务'平台——开箱即用的数据库、用户登录、文件存储。可以理解成'谷歌网盘+SQL 数据库+登录系统'三合一。">Supabase</span> 是数据库+登录系统二合一——存数据、管用户，五分钟搞定后端。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🌳</div>
+            <h4 class="pattern-title">Git</h4>
+            <p class="pattern-desc"><span class="term" data-definition="Git 是版本管理系统——给你的项目存档每一步改动。出了问题能一键回滚到之前任何版本，团队协作不打架。">Git</span> 是代码的"时光机"——每一版改动都存档，不怕改坏。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🚀</div>
+            <h4 class="pattern-title">Vercel</h4>
+            <p class="pattern-desc"><span class="term" data-definition="Vercel 是一个网站部署平台——你把代码推上去，它自动给你生成一个公网链接，全世界都能访问。免费额度够个人项目长期用。">Vercel</span> 是上线发射器——push 一下，全世界 30 秒后能访问你的站。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">💳</div>
+            <h4 class="pattern-title">Stripe</h4>
+            <p class="pattern-desc"><span class="term" data-definition="Stripe 是一个国际支付服务商——帮你的产品收信用卡、订阅费、跨境支付。开发者圈最常用的支付方案。">Stripe</span> 是收银台——海外信用卡、订阅、退款，半天接完。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🔌</div>
+            <h4 class="pattern-title">MCP</h4>
+            <p class="pattern-desc"><span class="term" data-definition="MCP 是 Model Context Protocol 的缩写——让 AI 模型能调用外部工具（比如读文件、查数据库、发邮件）的标准协议。Anthropic 在 2024 年提出。">MCP</span> 是 AI 的"USB 接口"——让大模型能调你的工具、数据库、API。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">📚</div>
+            <h4 class="pattern-title">RAG</h4>
+            <p class="pattern-desc"><span class="term" data-definition="RAG 是 Retrieval Augmented Generation 的缩写——检索增强生成。先在你的私有资料库里找相关内容，再让大模型基于这些内容回答。让 AI 用'你的知识'说话。">RAG</span> 是"AI 的私域知识库"——把你的文档喂进去，AI 用你的资料回答。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">数据库一瞥：Supabase 建表的 SQL</h2>
+        <p>下面这段是 Supabase 里建一张"用户表"的 <span class="term" data-definition="SQL 是 Structured Query Language 的缩写——结构化查询语言。专门用来跟数据库说话的标准语法：建表、查数据、改数据、删数据。">SQL</span> 语句。看不懂没关系，右边白话告诉你它在干嘛：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">SUPABASE SCHEMA</span>
+<pre><code><span class="code-keyword">create table</span> <span class="code-function">users</span> (
+  <span class="code-property">id</span>         <span class="code-keyword">uuid</span> <span class="code-keyword">primary key</span>,
+  <span class="code-property">email</span>      <span class="code-keyword">text</span> <span class="code-keyword">unique not null</span>,
+  <span class="code-property">created_at</span> <span class="code-keyword">timestamp</span> <span class="code-keyword">default now</span>()
+);</code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">这段 SQL 在说啥</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>第 1 行：</strong>"建一个名叫 users 的表"——就像新建一张 Excel 工作表。</p>
+              <p class="tl"><strong>第 2 行：</strong>表里有一列叫 id，每个用户一个唯一编号。</p>
+              <p class="tl"><strong>第 3 行：</strong>有一列叫 email，每人一个、不能重复、不能空。</p>
+              <p class="tl"><strong>第 4 行：</strong>有一列叫 created_at，自动填进"这个用户什么时候注册的"。</p>
+              <p class="tl"><strong>整段意思：</strong>建一张用户表，每个用户记录"是谁、邮箱什么、什么时候来的"。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">跨平台：从浏览器到手机到桌面</h2>
+        <p>Stage 3 教程把"原型"扩展到三大跨平台分支——你可以选一个最贴近你目标用户的方向：</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-5)">💬</div>
+            <div>
+              <strong><span class="term" data-definition="微信小程序是只在微信里运行的轻量 App——不用下载、扫码即用。是国内做 toC 产品的最低门槛入口。">微信小程序</span></strong>
+              <p>不用下载、扫码即用、覆盖 14 亿微信用户——做国内 toC 产品的首选。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">📱</div>
+            <div>
+              <strong>Android · iOS（React Native）</strong>
+              <p>一套 JavaScript 代码，同时编译出安卓和苹果的原生 App——上架两个商店。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🖥️</div>
+            <div>
+              <strong><span class="term" data-definition="Electron 是用网页技术做桌面 App 的框架——VS Code、Discord、Slack 都是它做的。你写一遍前端，能在 Mac/Windows/Linux 都跑。">Electron</span> 桌面端</strong>
+              <p>把网页打包成 Mac/Windows 桌面 App——VS Code、Discord 都是这么来的。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">小测验：朋友想用你的 demo</h2>
+
+        <div class="quiz-container" id="quiz-m4">
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="对——部署到 Vercel 拿到一个公网链接，朋友点链接就能用；数据存 Supabase，他自己也能加任务还能保存。这才是'真产品'的最小形态。"
+               data-explanation-wrong="再想想——发 zip 让朋友本地跑，他还得装 Node、跑命令；截图根本不能用；让他来你电脑就更不现实。把它部署到公网才是答案。">
+            <h3 class="quiz-question">你今晚做了一个待办 demo，朋友想用——下一步最合理是？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>A. 部署到 Vercel（拿到公网链接），用 Supabase 存任务，发链接给他</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>B. 把整个项目打成 zip 发他，让他自己本地跑</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>C. 截几张图发给他看一下就行</span>
+              </button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>D. 让他来你电脑前用</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m4')">看看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m4')">再试一次</button>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">不必现在懂 MCP</strong>
+            <p>MCP / RAG / Stripe 都是 Stage 3 才需要碰的。你今天听过一次，下次别人提起时就不会陌生——这就是这模块的目标。</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-5" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">学习地图与下一步</h1>
+      <p class="module-subtitle">80+ 主题听起来吓人——但你不用全学，你只要会查"我现在卡在哪、去哪查"。</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">地铁线路图：找到你的当前站</h2>
+        <p>Easy-Vibe 仓库就像北京地铁——你不会一口气坐完所有线，但你随时能查"我在哪个站、要换乘几次到目的地"。</p>
+        <p>下面是仓库的"线路图"，<span class="term" data-definition="Stage 是仓库里按学习阶段组织的目录。stage-0 起步 → stage-1 原型 → stage-2 全栈 → stage-3 跨平台，循序渐进。">stage-0</span> 入门起点 → stage-1/2/3 三条主干线 → <span class="term" data-definition="Appendix 是仓库里的'附录'目录，按 9 大领域整理了 80+ 交互式专题——是个查得到、不用全读的字典式知识库。">appendix</span> 是 9 大附录知识库：</p>
+
+        <div class="file-tree">
+          <div class="ft-folder open">
+            <span class="ft-name">easy-vibe/</span>
+            <span class="ft-desc">Vibe Coding 中文入门仓库</span>
+            <div class="ft-children">
+              <div class="ft-folder">
+                <span class="ft-name">stage-0/</span>
+                <span class="ft-desc">零基础起步——装 AI CLI、心法、第一句对话</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">stage-1/</span>
+                <span class="ft-desc">原型 MVP——贪吃蛇、Cursor/Claude/Trae、产品思维</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">stage-2/</span>
+                <span class="ft-desc">全栈上线——Dify / Supabase / Git / Vercel / Stripe / UI 设计</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">stage-3/</span>
+                <span class="ft-desc">跨平台——MCP、RAG、微信小程序、Android、iOS、Electron</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">appendix/</span>
+                <span class="ft-desc">9 大领域 80+ 交互式专题</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">llms.txt</span>
+                <span class="ft-desc">AI 友好版导航（喂给 ChatGPT 让它给你找路）</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">9 大附录：什么时候来翻它</h2>
+        <p>这 9 块是"图书馆里的 9 个书架"——不需要全看，遇到具体问题来翻对应那一架就够。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">💻</div>
+            <h4 class="pattern-title">计算机基础</h4>
+            <p class="pattern-desc">操作系统、文件、进程——遇到"这条命令为啥不工作"时来。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🎨</div>
+            <h4 class="pattern-title">前端</h4>
+            <p class="pattern-desc">HTML / CSS / JS / React——做 UI 时来。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">⚙️</div>
+            <h4 class="pattern-title">后端</h4>
+            <p class="pattern-desc">Node / Python / API 设计——做服务端逻辑时来。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🧠</div>
+            <h4 class="pattern-title">AI 原理</h4>
+            <p class="pattern-desc">大模型、token、上下文——想搞清"AI 为啥这样答"时来。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">🏛️</div>
+            <h4 class="pattern-title">架构</h4>
+            <p class="pattern-desc">分层、解耦、SOLID——项目变大开始乱时来。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🗄️</div>
+            <h4 class="pattern-title">数据库</h4>
+            <p class="pattern-desc">SQL / NoSQL / 索引——存数据查不快时来。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🚢</div>
+            <h4 class="pattern-title">部署运维</h4>
+            <p class="pattern-desc">Docker / CI / 监控——上线后稳不住时来。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🌐</div>
+            <h4 class="pattern-title">网络</h4>
+            <p class="pattern-desc">HTTP / WebSocket / 跨域——前后端通信报错时来。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🛠️</div>
+            <h4 class="pattern-title">工具链</h4>
+            <p class="pattern-desc">Git / npm / 包管理——装东西/版本冲突时来。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">卡点求救公式：每次卡住就跑这三步</h2>
+        <p>新手最容易死在"装环境"和"报错信息看不懂"上——这套求救公式，把"卡住的具体内容"打包给网页 AI（ChatGPT / Claude），让它给你做一份按你电脑量身定制的拆解。</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>把现场材料三件套全复制</strong>
+              <p>当前小节全文 + 你执行的命令 + 完整<span class="term" data-definition="报错（Error/Stack Trace）就是程序跑崩时打出来的红色文字。看上去吓人，但里面藏着定位问题的关键线索——别只复制最后一行，要全段。">报错</span>——一字不漏，越啰嗦越好。AI 不嫌烦。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>发给网页版 AI（ChatGPT / Claude / Gemini）</strong>
+              <p>注意——是网页版，不是你卡住的那个 AI IDE。让另一个"局外人 AI"来诊断。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>告诉它你的系统，让它给你"逐步修复命令"</strong>
+              <p>"我用 Mac M3 / Windows 11 / Ubuntu 24，请按我的系统给逐条 <span class="term" data-definition="Shell 命令就是你在终端窗口里打的那些命令——比如 cd、ls、npm install。它是操作电脑最直接的方式，AI 给的修复方案通常就是一串 shell 命令。">shell 命令</span>，每条说为什么这么做"。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">求救 prompt 模板：拿走就能用</h2>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">完整模板</span>
+<pre><code>你是一个专业的 AI 编程环境配置助手。
+我要从新电脑开始学习 Vibe Coding。
+
+请先问我：
+1. 我的操作系统？
+2. 我是否能访问 OpenAI/GitHub？
+3. 是否已有 Codex 订阅？
+
+然后帮我：
+1. 判断网络与订阅
+2. 生成安装 Codex CLI 步骤
+3. 命令单独放代码块
+4. 跑通后让本地 Agent 配剩余环境
+5. 报错逐条解释
+
+要求：不跳步；每步只做一件事；每步说明如何判断成功。</code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">这模板每段为啥这么写</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>"专业的 AI 编程环境配置助手"：</strong>给 AI 一个清晰角色，它会切换到"耐心师傅"模式。</p>
+              <p class="tl"><strong>"请先问我"三件事：</strong>避免 AI 凭空猜你环境。它会先采访你，再给方案。</p>
+              <p class="tl"><strong>"命令单独放代码块"：</strong>方便你复制粘贴，不混进解释里。</p>
+              <p class="tl"><strong>"跑通后让本地 Agent 配剩余环境"：</strong>第一步 CLI 装好后，剩下的让本地 AI 接手。</p>
+              <p class="tl"><strong>"报错逐条解释"：</strong>这是新手的救命绳——AI 会给你"这条报错什么意思 + 怎么修"。</p>
+              <p class="tl"><strong>"不跳步"：</strong>逼 AI 慢下来，不会一次扔给你 50 条命令把你淹死。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">终关测验：你照教程做但跑不起来</h2>
+
+        <div class="quiz-container" id="quiz-m5">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="完全正确——求救 prompt 模板把'现场三件套'打包给网页 AI，它会按你的系统出一份逐步修复方案。这是 vibe coder 真正的内功：不是不卡，而是卡住了能爬出来。"
+               data-explanation-wrong="再想想——'放弃' 'GitHub Issue 抱怨' '等更新' 都不会让你今晚把项目跑起来。系统化地用'求救 prompt 模板'让网页 AI 拆 bug，才是入门到精通的本质动作。">
+            <h3 class="quiz-question">你照着教程一步步操作，命令报错跑不起来——下一步最该做什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>A. 这教程有 bug 吧，先放弃</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>B. 去 GitHub Issue 骂作者</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>C. 用"求救 prompt 模板"把小节全文+我执行的命令+完整报错打包发给网页 AI</span>
+              </button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>D. 等下一版教程更新</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m5')">看看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m5')">再试一次</button>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">收束：你已经在路上了</h2>
+
+        <p>回头看这五站——</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">01</div>
+            <div>
+              <strong>你早就在做软件了</strong>
+              <p>"要是有个 X 就好了"那一刻你已经是产品经理。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">02</div>
+            <div>
+              <strong>AI IDE 三件套</strong>
+              <p>Cursor / Claude Code / Trae，挑一个开张。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">03</div>
+            <div>
+              <strong>从一句话到原型</strong>
+              <p>贪吃蛇 15 分钟——折纸第一只鸟。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">04</div>
+            <div>
+              <strong>原型变产品</strong>
+              <p>Supabase + Vercel + Stripe，从作坊到工厂。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-5)">05</div>
+            <div>
+              <strong>地图 + 求救公式</strong>
+              <p>知道去哪查 + 知道怎么呼救——你已具备入门 vibe coder 的全部内功。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">🌟</div>
+          <div class="callout-content">
+            <strong class="callout-title">收尾心法</strong>
+            <p>入门到精通从来不是线性进步——而是"每解决一个卡点就升一级"。你不需要把 80+ 主题全学完才动手，你只需要现在就开干，遇到卡点拿求救公式爬出来。</p>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🚉</div>
+          <div class="callout-content">
+            <strong class="callout-title">下一站：系列 2 · 方法论</strong>
+            <p>系列 1 教你"上路"，系列 2 教你"开得稳"——怎么写出 AI 听得稳的 prompt、怎么管多文件项目、怎么避开 vibe coder 最常见的 7 个坑。系列 3 教你工具地图。<br>地图已经在你手里。下一站见。</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+  </main>
+
+</body>
+</html>

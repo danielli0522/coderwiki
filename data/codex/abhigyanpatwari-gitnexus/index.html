@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitNexus：浏览器里的代码知识图谱课程</title>
+
+  <!-- Google Fonts: Bricolage Grotesque · DM Sans · JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <!--
+    CUSTOMIZE PER COURSE — change only the three accent variables below.
+    Options:
+      vermillion  #D94F30 / #C4432A / #FDEEE9 / #E8836C  (default)
+      coral       #E06B56 / #C85A47 / #FDECEA / #E89585
+      teal        #2A7B9B / #1F6280 / #E4F2F7 / #5A9DB8
+      amber       #D4A843 / #BF9530 / #FDF5E0 / #E0C070
+      forest      #2D8B55 / #226B41 / #E8F5EE / #5AAD7A
+  -->
+  <style>
+    :root {
+      --color-accent:       #2A7B9B;
+      --color-accent-hover: #1F6280;
+      --color-accent-light: #E4F2F7;
+      --color-accent-muted: #5A9DB8;
+      --toc-width: 260px;
+    }
+
+    /* ── TOC Sidebar ── */
+    .toc-sidebar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: var(--toc-width);
+      height: 100vh;
+      background: var(--color-surface);
+      border-left: 1px solid var(--color-border);
+      z-index: 1000;
+      transform: translateX(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: -4px 0 20px rgba(0,0,0,0.05);
+    }
+    .toc-sidebar.open {
+      transform: translateX(0);
+    }
+
+    .toc-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--color-border-light);
+      flex-shrink: 0;
+    }
+    .toc-header-title {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--color-text);
+    }
+    .toc-close {
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      padding: 4px;
+      line-height: 1;
+      border-radius: 6px;
+      transition: color 0.15s, background 0.15s;
+    }
+    .toc-close:hover {
+      color: var(--color-text);
+      background: var(--color-bg-warm);
+    }
+
+    .toc-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 0;
+      list-style: none;
+    }
+
+    .toc-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 20px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      border-left: 3px solid transparent;
+      text-decoration: none;
+    }
+    .toc-item:hover {
+      background: var(--color-bg-warm);
+    }
+    .toc-item.active {
+      background: var(--color-accent-light);
+      border-left-color: var(--color-accent);
+    }
+    .toc-item.active .toc-item-title {
+      color: var(--color-accent);
+      font-weight: 600;
+    }
+
+    .toc-item-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+      flex-shrink: 0;
+      background: var(--color-bg-warm);
+      color: var(--color-text-muted);
+      transition: background 0.15s, color 0.15s;
+    }
+    .toc-item.active .toc-item-num {
+      background: var(--color-accent);
+      color: #fff;
+    }
+
+    .toc-item-title {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      line-height: 1.3;
+      transition: color 0.15s;
+    }
+
+    /* Toggle button — inline in nav-dots */
+    .toc-toggle {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-secondary);
+      font-size: 14px;
+      padding: 0;
+      line-height: 1;
+      transition: color 0.15s;
+    }
+    .toc-toggle:hover {
+      color: var(--color-text);
+    }
+
+    /* Overlay for mobile */
+    .toc-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.2);
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .toc-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Adjust main content when sidebar open */
+    body.toc-open main,
+    body.toc-open nav {
+      margin-right: var(--toc-width);
+      transition: margin-right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @media (max-width: 768px) {
+      body.toc-open main,
+      body.toc-open nav {
+        margin-right: 0;
+      }
+      /* Keep nav-bar offset on mobile */
+      .module {
+        padding-top: calc(var(--nav-height) + var(--space-8)) !important;
+      }
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <!-- TOC Overlay (mobile) -->
+  <div class="toc-overlay" id="toc-overlay"></div>
+
+  <!-- TOC Sidebar -->
+  <aside class="toc-sidebar" id="toc-sidebar">
+    <div class="toc-header">
+      <span class="toc-header-title">目录</span>
+      <button class="toc-close" id="toc-close">✕</button>
+    </div>
+    <ul class="toc-list">
+      <li class="toc-item" data-target="module-1"><span class="toc-item-num">01</span><span class="toc-item-title">仓库/ZIP 如何变成图谱</span></li>
+      <li class="toc-item" data-target="module-2"><span class="toc-item-num">02</span><span class="toc-item-title">认识五个关键角色</span></li>
+      <li class="toc-item" data-target="module-3"><span class="toc-item-num">03</span><span class="toc-item-title">从导入到可提问上下文</span></li>
+      <li class="toc-item" data-target="module-4"><span class="toc-item-num">04</span><span class="toc-item-title">图上下文如何帮 AI 少浪费 token</span></li>
+      <li class="toc-item" data-target="module-5"><span class="toc-item-num">05</span><span class="toc-item-title">架构师选型总览</span></li>
+      <li class="toc-item" data-target="module-6"><span class="toc-item-num">06</span><span class="toc-item-title">总结与练习</span></li>
+    </ul>
+  </aside>
+
+  <script>
+    // TOC logic
+    document.addEventListener('DOMContentLoaded', function() {
+      const sidebar = document.getElementById('toc-sidebar');
+      const toggle = document.getElementById('toc-toggle');
+      const close = document.getElementById('toc-close');
+      const overlay = document.getElementById('toc-overlay');
+      const items = document.querySelectorAll('.toc-item');
+      const modules = document.querySelectorAll('.module');
+
+      function openToc() {
+        sidebar.classList.add('open');
+        overlay.classList.add('visible');
+        document.body.classList.add('toc-open');
+      }
+      function closeToc() {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('visible');
+        document.body.classList.remove('toc-open');
+      }
+
+      if (toggle) toggle.addEventListener('click', () => {
+        sidebar.classList.contains('open') ? closeToc() : openToc();
+      });
+      if (close) close.addEventListener('click', closeToc);
+      if (overlay) overlay.addEventListener('click', closeToc);
+
+      items.forEach(item => {
+        item.addEventListener('click', () => {
+          const target = document.getElementById(item.dataset.target);
+          if (target) target.scrollIntoView({ behavior: 'smooth' });
+          if (window.innerWidth <= 768) closeToc();
+        });
+      });
+
+      function updateActiveToc() {
+        let current = 'module-1';
+        modules.forEach(mod => {
+          const rect = mod.getBoundingClientRect();
+          if (rect.top <= window.innerHeight / 3) {
+            current = mod.id;
+          }
+        });
+        items.forEach(item => {
+          item.classList.toggle('active', item.dataset.target === current);
+        });
+      }
+      window.addEventListener('scroll', () => {
+        requestAnimationFrame(updateActiveToc);
+      }, { passive: true });
+      updateActiveToc();
+    });
+  </script>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">GitNexus：浏览器里的代码知识图谱课程</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <!--
+          One <button> per module. Replace MODULE_N_NAME with the actual module title.
+
+          <button class="nav-dot" data-target="module-1" data-tooltip="MODULE_1_NAME" role="tab" aria-label="Module 1: MODULE_1_NAME"></button>
+          <button class="nav-dot" data-target="module-2" data-tooltip="MODULE_2_NAME" role="tab" aria-label="Module 2: MODULE_2_NAME"></button>
+          ...
+        -->
+        <button class="toc-toggle" id="toc-toggle" title="目录">☰</button>
+        <button class="nav-dot" data-target="module-1" data-tooltip="仓库变图谱" role="tab" aria-label="Module 1: 仓库变图谱"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="五个角色" role="tab" aria-label="Module 2: 五个角色"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="数据流" role="tab" aria-label="Module 3: 数据流"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="AI 上下文" role="tab" aria-label="Module 4: AI 上下文"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="架构选型" role="tab" aria-label="Module 5: 架构选型"></button>
+        <button class="nav-dot" data-target="module-6" data-tooltip="总结与练习" role="tab" aria-label="Module 6: 总结与练习"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh -->
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">给代码装上"神经系统"</h1>
+      <p class="module-subtitle">GitNexus 是什么？为什么 40k+ 开发者给它点了 Star？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: The Problem -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">AI 代理的致命盲区</h2>
+        <p>你让 Cursor 修改 <code>UserService.validate()</code>，它改了返回类型。看起来没问题。但它不知道：整个项目里有 47 个函数依赖这个返回类型。上线后，47 个地方全部报错。</p>
+        <p>这不是 AI 不够聪明，而是它根本<strong>看不到</strong>代码之间的依赖关系。它只能一个文件一个文件地 grep、read、guess——就像蒙着眼在迷宫里找路。</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">&#128161;</div>
+          <div class="callout-content">
+            <strong class="callout-title">核心问题</strong>
+            <p>Cursor、Claude Code、Codex 等 AI 工具能读写代码，但<strong>不真正理解代码库的结构</strong>。它们不知道谁调了谁、改一个函数会影响多少地方。GitNexus 就是来补这块拼图的。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: What GitNexus Does -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">GitNexus：代码的"神经系统"</h2>
+        <p>GitNexus 把你的整个代码库解析成一张 <span class="term" data-definition="知识图谱把信息用「节点」和「边」组织起来。节点是实体（函数、类、文件），边是关系（调用、继承、导入）。GitNexus 构建的就是代码的知识图谱。">知识图谱</span>——每个函数、每个类、每条调用链、每个依赖关系，全部预先计算好，存在本地图数据库里。AI 代理一次查询就能拿到完整的上下文。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#128373;</div>
+            <h4 class="pattern-title">预计算关系智能</h4>
+            <p class="pattern-desc">索引时就把聚类、执行流追踪、影响范围评分全部算好。查询时一次返回完整上下文，LLM 不可能遗漏。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">&#128176;</div>
+            <h4 class="pattern-title">Token 极省</h4>
+            <p class="pattern-desc">传统方式需要 10+ 次 grep/read 查询才能理解一个函数。GitNexus 一次查询就给完整答案，省掉 70%+ 的工具调用。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: #FDF5E0">&#127919;</div>
+            <h4 class="pattern-title">小模型也能用</h4>
+            <p class="pattern-desc">工具做了重活，LLM 只需要读懂结构化结果。即使较小的模型也能获得完整的架构视野。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-success-light)">&#128274;</div>
+            <h4 class="pattern-title">完全本地运行</h4>
+            <p class="pattern-desc">CLI 模式全部本机运行，不联网；Web 模式全部浏览器内运行，不上传代码。你的代码永远不离开你的机器。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Two Modes -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">两种使用方式，覆盖所有场景</h2>
+        <p>GitNexus 提供两种互补的使用模式：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CLI + MCP 模式</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment"># 一行命令索引整个代码库</span></span>
+<span class="code-line">npx gitnexus analyze</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 启动 MCP 服务器，AI 代理自动连接</span></span>
+<span class="code-line"><span class="code-comment"># Cursor / Claude Code / Codex / Windsurf</span></span>
+<span class="code-line"><span class="code-comment"># 都能直接使用 16 个图谱工具</span></span>
+<span class="code-line">gitnexus mcp</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">在项目根目录跑一行命令，GitNexus 就会把整个代码库解析成知识图谱。</p>
+              <p class="tl">启动 MCP 服务器后，你的 AI 编辑器（Cursor、Claude Code 等）就自动拥有了"代码透视"能力。</p>
+              <p class="tl">16 个工具覆盖：影响分析、上下文查询、变更检测、跨文件重命名、Cypher 图查询……</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Traditional RAG vs GitNexus -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">为什么比传统 Graph RAG 更强？</h2>
+        <p>传统方案把原始图谱边丢给 LLM，让它自己慢慢探索。GitNexus 在索引阶段就预计算好了结构——聚类、追踪、评分——工具一次调用返回完整上下文：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"传统 RAG：LLM 收到原始图谱边，开始自己探索"},
+          {"highlight":"flow-actor-1","label":"查询1：找调用者 → 查询2：哪些文件？→ 查询3：过滤测试？→ 查询4：高风险？"},
+          {"highlight":"flow-actor-2","label":"GitNexus：impact(UserService, upstream) 一次调用"},
+          {"highlight":"flow-actor-2","label":"返回：8 个调用者、3 个聚类、全部 90%+ 置信度","packet":true,"from":"actor-2","to":"actor-1"},
+          {"highlight":"flow-actor-1","label":"完整答案，1 次查询 vs 传统 4+ 次查询"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon" style="background: var(--color-accent); color: white;">RAG</div>
+              <span>传统方案</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon" style="background: var(--color-actor-2); color: white;">GN</div>
+              <span>GitNexus</span>
+            </div>
+          </div>
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击"下一步"看对比</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重播</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！GitNexus 的核心创新是预计算关系智能——索引时就完成聚类、追踪和评分，查询时一次返回完整结构化结果，LLM 不需要多轮探索。"
+               data-explanation-wrong="想想 GitNexus 和传统方案的本质区别：传统方案让 LLM 自己在图谱里探索，GitNexus 则在索引时就把重活干完了。答案跟搜索引擎的思路一样——Google 不会在你搜索时才去爬网页。">
+            <h3 class="quiz-question">GitNexus 相比传统 Graph RAG 的核心优势是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>使用更大的 LLM 模型来理解代码结构</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>索引时预计算好聚类、追踪和评分，查询一次返回完整结果</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>把代码上传到云端用 GPU 加速分析</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-2" style="background: var(--color-surface-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">Zero-Server 架构：代码不出浏览器</h1>
+      <p class="module-subtitle">为什么 GitNexus 能做到"代码永远不离开你的机器"？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Monorepo Layout -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">两个包，一套逻辑</h2>
+        <p>GitNexus 是一个 monorepo，包含两个核心包和共享类型库：</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">CLI</div>
+            <div class="step-body">
+              <strong>gitnexus/ — 核心引擎</strong>
+              <p>CLI 命令行工具 + <span class="term" data-definition="MCP（Model Context Protocol）是一种让 AI 代理通过标准化接口访问外部工具的协议。就像 USB 接口统一了外设连接，MCP 统一了 AI 访问工具的方式。">MCP</span> 服务器 + 索引管道 + 图数据库。用 Tree-sitter 原生绑定解析代码，LadybugDB 原生模式存储图谱。Node.js 运行时。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">WEB</div>
+            <div class="step-body">
+              <strong>gitnexus-web/ — 浏览器界面</strong>
+              <p>React 18 + Vite + Tailwind v4 构建的可视化图谱浏览器。Tree-sitter WASM 解析代码，LadybugDB WASM 存储图谱，<span class="term" data-definition="WASM（WebAssembly）是一种在浏览器里运行接近原生速度代码的技术。它让 C++/Rust 写的程序能在网页里直接跑。">WASM</span> 模式运行嵌入模型。一切在浏览器里完成。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">SHARED</div>
+            <div class="step-body">
+              <strong>gitnexus-shared/ — 共享类型</strong>
+              <p>TypeScript 类型和常量，CLI 和 Web 都用。支持 14 种语言的枚举、图谱 schema 定义、搜索接口等。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Zero-Server Philosophy -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Zero-Server 理念的三个层次</h2>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">&#128274;</div>
+          <div class="callout-content">
+            <strong class="callout-title">隐私优先</strong>
+            <p>CLI 模式全部本机运行，零网络请求。Web 模式全部浏览器内完成，API Key 只存在 localStorage。代码永远不离开你的机器。</p>
+          </div>
+        </div>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#127760;</div>
+            <h4 class="pattern-title">解析层 — Tree-sitter WASM</h4>
+            <p class="pattern-desc">Web 版把 Tree-sitter 编译成 WASM 在浏览器里运行。14 种语言的语法解析，全部在用户浏览器里完成，不调用任何外部 API。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">&#128451;</div>
+            <h4 class="pattern-title">存储层 — LadybugDB WASM</h4>
+            <p class="pattern-desc">图数据库也编译成 WASM，在浏览器内存中运行。每次会话独立，关掉标签页数据自动清除。CLI 版则用原生 LadybugDB，持久化到 .gitnexus/ 目录。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: #F3E8FF">&#129302;</div>
+            <h4 class="pattern-title">嵌入层 — transformers.js</h4>
+            <p class="pattern-desc">用 HuggingFace 的 transformers.js 在浏览器里生成文本嵌入向量（WebGPU 加速或 WASM 降级）。CLI 版用 Node.js 原生版本，支持 GPU 加速。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Bridge Mode -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Bridge 模式：本地最强组合</h2>
+        <p>CLI 和 Web 不是割裂的。通过 Bridge 模式，你可以两全其美：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">Bridge 模式启动</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment"># 终端1：启动本地 HTTP 服务器</span></span>
+<span class="code-line">gitnexus serve</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 浏览器打开 gitnexus.vercel.app</span></span>
+<span class="code-line"><span class="code-comment"># 页面自动检测本地服务器</span></span>
+<span class="code-line"><span class="code-comment"># 所有 CLI 索引过的仓库直接可用</span></span>
+<span class="code-line"><span class="code-comment"># 无需重新上传或重新索引</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">在终端启动 gitnexus serve，它会在 4747 端口开一个本地 HTTP 服务。</p>
+              <p class="tl">然后打开网页版 GitNexus，它会自动发现你本地的服务器。</p>
+              <p class="tl">所有你在 CLI 模式下索引过的仓库，在网页里直接浏览、搜索、问答。</p>
+              <p class="tl">代码不走外网——本地服务器和浏览器之间直接通信。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Multi-Repo MCP Architecture -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">一个 MCP 服务器，服务所有仓库</h2>
+        <p>GitNexus 用全局注册表实现多仓库支持——配置一次 MCP，所有索引过的仓库都能用：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"gitnexus analyze 索引仓库 A，注册到 ~/.gitnexus/registry.json"},
+          {"highlight":"flow-actor-2","label":"gitnexus analyze 索引仓库 B，也注册到 registry.json"},
+          {"highlight":"flow-actor-3","label":"AI 代理启动 MCP 服务器，读取 registry.json"},
+          {"highlight":"flow-actor-3","label":"按需懒加载 LadybugDB 连接，5分钟无活动自动释放","packet":true,"from":"actor-3","to":"actor-1"},
+          {"highlight":"flow-actor-1","label":"query/impact/context 等工具跨仓库查询"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon" style="background: var(--color-accent); color: white;">A</div>
+              <span>仓库 A</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon" style="background: var(--color-actor-2); color: white;">B</div>
+              <span>仓库 B</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon" style="background: var(--color-actor-5); color: white;">MCP</div>
+              <span>MCP 服务器</span>
+            </div>
+          </div>
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击"下一步"看多仓库架构</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重播</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！Web 版的 Tree-sitter、LadybugDB、嵌入模型全部编译成 WASM 在浏览器里运行，不需要服务器。Bridge 模式是可选增强，不是必需的。"
+               data-explanation-wrong="想想 Zero-Server 的含义：Web 版的解析、存储、嵌入全部在浏览器里完成。Bridge 模式是可选的增强，不是基础要求。">
+            <h3 class="quiz-question">GitNexus Web 版如果要分析一个 GitHub 仓库，需要什么后端服务？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>需要一台云服务器运行索引服务</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>需要连接 GitNexus 官方的 API 服务器</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>不需要任何服务器，浏览器里用 WASM 完成全部解析</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">12 阶段管道：从源码到知识图谱</h1>
+      <p class="module-subtitle">一行 gitnexus analyze 背后发生了什么？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Pipeline Overview -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码索引就像石油炼化</h2>
+        <p>源文件（原油）进来后，先扫描（探明储量），再解析（蒸馏出符号），然后关联（调和引用关系），聚类（分类存储），追踪（画出调用流程图），最终入库（写入图数据库）。每一道工序都依赖上游的结果，形成 <span class="term" data-definition="DAG（有向无环图）是一种数据结构，节点之间有方向性的依赖关系，但不存在循环依赖。A 依赖 B，B 依赖 C，但 C 不能再依赖 A。">DAG</span> 式的依赖关系。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">12 阶段 DAG</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment">// 阶段依赖关系（简化版）</span></span>
+<span class="code-line">scan → structure → [markdown, cobol]</span>
+<span class="code-line">  → parse → [routes, tools, orm]</span>
+<span class="code-line">  → crossFile → mro → communities</span>
+<span class="code-line">  → processes</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">scan：扫描文件树，记录所有文件路径和大小。</p>
+              <p class="tl">structure：建立文件夹和文件的层级关系。</p>
+              <p class="tl">parse：用 Tree-sitter 解析语法树，提取函数、类、方法等符号。</p>
+              <p class="tl">crossFile：跨文件传播类型信息，解析 import 链。</p>
+              <p class="tl">mro：解析方法解析顺序（继承链上的方法覆盖关系）。</p>
+              <p class="tl">communities：用 Leiden 算法把相关符号聚成功能社区。</p>
+              <p class="tl">processes：从入口点开始追踪执行流（如 HTTP 请求到响应的完整调用链）。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Parse Phase Detail -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">核心：Tree-sitter 解析引擎</h2>
+        <p>parse 阶段是整个管道的心脏。它用 <span class="term" data-definition="Tree-sitter 是一种增量式代码解析器，能快速构建抽象语法树（AST）。它的厉害之处在于支持 14+ 种编程语言，每种语言只需一套 S-expression 查询模板。">Tree-sitter</span> 把每个源文件解析成 <span class="term" data-definition="AST（抽象语法树）是源代码的结构化表示。每个函数、变量、表达式都变成树上的一个节点。Tree-sitter 能在毫秒级完成解析。">AST</span>，然后用统一的捕获标签提取符号。</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>语言检测与查询</strong>
+              <p>根据文件扩展名检测语言（.ts → TypeScript, .py → Python, .rs → Rust），加载对应的 Tree-sitter 语法。关键：不同语言用不同的 AST 节点名，但产出<strong>同一套语义标签</strong>（@definition.class, @call.name, @import.source）。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>分块并行解析</strong>
+              <p>文件按 ~2MB 字节预算分块，通过 Worker 线程池并行解析。每个 Worker：检测语言 → 加载语法 → 运行查询 → 返回统一结果。CLI 最多 16 个 Worker，Web 用 Web Workers + Comlink。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>符号表与边构建</strong>
+              <p>提取的符号（Function, Class, Method 等）作为图谱节点，import、call、extends 等关系作为边。每条边带有置信度分数（same-file 0.95, import-scoped 0.9, global 0.5）。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Call Resolution -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">6 阶段调用解析：如何知道谁调了谁？</h2>
+        <p>这是 GitNexus 最精巧的部分。当你看到 <code>obj.validate()</code>，GitNexus 需要确定 obj 是什么类型、validate 是哪个类的方法。它通过 6 个阶段的管道来完成：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"Stage 1: extract-call — 从 AST 提取调用点（函数名、形式、接收者）"},
+          {"highlight":"flow-actor-1","label":"Stage 2: classify-form — 判断调用形式（free/member/constructor）"},
+          {"highlight":"flow-actor-2","label":"Stage 3: infer-receiver — 推断接收者类型（LanguageProvider 可自定义）"},
+          {"highlight":"flow-actor-2","label":"Stage 4: select-dispatch — 选择分派策略（owner-scoped/free/constructor）"},
+          {"highlight":"flow-actor-3","label":"Stage 5: resolve-target — 通过 MRO 遍历查找目标方法"},
+          {"highlight":"flow-actor-3","label":"Stage 6: emit-edge — 写入 CALLS 边，附带置信度","packet":true,"from":"actor-3","to":"actor-1"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon" style="background: var(--color-accent); color: white;">1-2</div>
+              <span>提取+分类</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon" style="background: var(--color-actor-2); color: white;">3-4</div>
+              <span>推断+分派</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon" style="background: var(--color-actor-4); color: white;">5-6</div>
+              <span>解析+写入</span>
+            </div>
+          </div>
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击"下一步"追踪调用解析流程</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重播</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Community & Process Detection -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">自动发现功能模块和执行流</h2>
+        <p>解析完符号后，GitNexus 还要做两件更高级的事：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#127760;</div>
+            <h4 class="pattern-title">Leiden 社区检测</h4>
+            <p class="pattern-desc">用 Leiden 算法自动把相关符号聚成功能社区（Authentication、Database、UI 等）。每个社区有一个凝聚度分数，帮助 AI 理解代码库的功能分区。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">&#128256;</div>
+            <h4 class="pattern-title">执行流追踪</h4>
+            <p class="pattern-desc">从入口点（HTTP 路由、CLI 命令等）开始追踪完整的调用链。比如一个 LoginFlow 可能追踪 7 步：路由 → 中间件 → 验证 → 查库 → 生成 Token → 返回响应。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-success-light)">&#128269;</div>
+            <h4 class="pattern-title">混合搜索</h4>
+            <p class="pattern-desc">BM25 关键词搜索 + 语义向量搜索，通过 Reciprocal Rank Fusion 融合排序。支持 14 种语言的代码搜索。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！不同语言用不同的 AST 节点名，但产出同一套语义捕获标签（@definition.class, @call.name 等）。这样下游处理逻辑完全不需要针对语言做分支。"
+               data-explanation-wrong="想想 GitNexus 如何统一处理 14 种语言：每种语言的 Tree-sitter 查询产出的是什么？如果每种语言产出不同的格式，下游代码将极其复杂。">
+            <h3 class="quiz-question">GitNexus 支持 14 种编程语言，下游处理代码怎么做到不分语言分支的？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>每种语言写一套完全独立的下游处理逻辑</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>不同语言的 Tree-sitter 查询产出同一套语义捕获标签，下游逻辑统一</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>用一个万能正则匹配所有语言的语法结构</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-4" style="background: var(--color-surface-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">Web 界面：交互式图谱浏览器</h1>
+      <p class="module-subtitle">可视化探索代码结构、AI 对话问答、多语言支持</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Graph Visualization -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">把代码变成可以"走"的地图</h2>
+        <p>GitNexus Web 用 <span class="term" data-definition="Sigma.js 是一个基于 WebGL 的图可视化库，能在浏览器里渲染数万个节点和边而不卡顿。它把节点画成圆点，边画成连线，形成网络图。">Sigma.js</span> + <span class="term" data-definition="Graphology 是一个 JavaScript 图数据结构库，提供节点/边的增删查改、社区检测、最短路径等算法。GitNexus 用它做聚类和图谱操作。">Graphology</span> 把知识图谱渲染成交互式网络图。你可以拖拽节点、缩放视图、点击查看详情——就像用 Google Maps 探索城市一样探索代码。</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">&#127757;</div>
+          <div class="callout-content">
+            <strong class="callout-title">WebGL 渲染 = 性能保证</strong>
+            <p>Sigma.js 用 WebGL 渲染，GPU 加速。即使图谱有数千个节点和上万条边，拖拽和缩放依然流畅。这是 Canvas 2D 做不到的。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: AI Chat -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Graph RAG Agent：对着图谱问问题</h2>
+        <p>Web 界面内置一个基于 <span class="term" data-definition="LangChain ReAct 是一种 AI 代理模式：Reason（推理）+ Act（行动）循环。AI 先思考该用什么工具，调用工具拿到结果，再思考下一步，直到得出最终答案。">LangChain ReAct</span> 的 AI 代理。你可以用自然语言提问，它会自动调用图谱工具查找答案：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">AI 对话示例</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment">// 用户提问：</span></span>
+<span class="code-line">"认证模块是怎么工作的？"</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment">// AI Agent 的推理+行动循环：</span></span>
+<span class="code-line"><span class="code-comment">// 1. query("authentication")</span></span>
+<span class="code-line"><span class="code-comment">//    → 找到 LoginFlow 执行流</span></span>
+<span class="code-line"><span class="code-comment">// 2. context("validateUser")</span></span>
+<span class="code-line"><span class="code-comment">//    → 拿到 360 度符号视图</span></span>
+<span class="code-line"><span class="code-comment">// 3. 组织回答：</span></span>
+<span class="code-line"><span class="code-comment">//    认证流程分 7 步：</span></span>
+<span class="code-line"><span class="code-comment">//    路由 → 中间件 → validateUser</span></span>
+<span class="code-line"><span class="code-comment">//    → checkPassword → createSession</span></span>
+<span class="code-line"><span class="code-comment">//    → 生成 JWT → 返回响应</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">你用中文问"认证模块怎么工作的"，不需要知道任何 API。</p>
+              <p class="tl">AI 代理先用 query 工具搜索"authentication"相关的执行流。</p>
+              <p class="tl">找到 LoginFlow 后，用 context 工具查看关键函数的上下游。</p>
+              <p class="tl">最后用自然语言总结出完整的认证流程，就像一个熟悉代码的同事在给你讲解。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: 16 MCP Tools -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">16 个工具：AI 的代码透视眼镜</h2>
+        <p>GitNexus 通过 MCP 协议暴露 16 个工具，让 AI 代理拥有了前所未有的代码洞察力：</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num" style="background: var(--color-accent); color: white;">Q</div>
+            <div class="step-body">
+              <strong>query — 混合搜索</strong>
+              <p>BM25 + 语义向量 + RRF 融合。搜索结果按执行流分组，标注每个符号在流程中的位置。跨社区流程优先展示。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num" style="background: var(--color-actor-2); color: white;">C</div>
+            <div class="step-body">
+              <strong>context — 360 度符号视图</strong>
+              <p>选中一个函数，立刻看到：谁调它、它调谁、属于哪个社区、参与哪些执行流。就像 LinkedIn 的人际关系全景图。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num" style="background: var(--color-error); color: white;">I</div>
+            <div class="step-body">
+              <strong>impact — 影响范围分析</strong>
+              <p>修改一个函数前先跑 impact。返回：上游（谁依赖我，会断裂）、下游（我依赖谁，可能连锁崩溃）、风险等级、置信度。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num" style="background: var(--color-actor-4); color: white;">D</div>
+            <div class="step-body">
+              <strong>detect_changes — 变更检测</strong>
+              <p>提交前跑一下，自动对比 git diff 和图谱，告诉你改了哪些符号、影响了哪些执行流、风险多高。防止"改一行坏一片"。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Editor Integrations -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">五大 AI 编辑器全覆盖</h2>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#129302;</div>
+            <h4 class="pattern-title">Claude Code（最深集成）</h4>
+            <p class="pattern-desc">MCP 工具 + Agent Skills + PreToolUse/PostToolUse Hooks。修改前自动跑影响分析，提交后自动检测索引过期。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">&#128187;</div>
+            <h4 class="pattern-title">Cursor / Windsurf / Codex</h4>
+            <p class="pattern-desc">MCP 工具 + Skills。一行命令配置，立即可用。Cursor 还支持 PostToolUse Hook。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-success-light)">&#127760;</div>
+            <h4 class="pattern-title">Web UI（无需安装）</h4>
+            <p class="pattern-desc">打开 gitnexus.vercel.app，拖入 GitHub 仓库或 ZIP 文件，即刻开始探索。LangChain ReAct Agent 提供对话式问答。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！impact 工具专门做影响范围分析，返回上游（依赖你的）和下游（你依赖的）的完整列表，附带风险等级和置信度。这是防止'改一行坏一片'的利器。"
+               data-explanation-wrong="想想每个工具的专长：query 是搜索，context 是符号全景，impact 是影响范围分析。如果 AI 要改一个函数，它最需要知道的是'改了这个会影响谁'——这对应哪个工具？">
+            <h3 class="quiz-question">AI 代理要修改 validateUser 函数，它应该先用哪个工具来评估风险？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>先用 query 搜索 validateUser 的定义</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>先用 context 查看 validateUser 的调用者</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>先用 impact 分析 validateUser 的上游和下游影响范围</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">技术选型与对比：为什么是浏览器端？</h1>
+      <p class="module-subtitle">GitNexus 的每一个关键选型背后的思考</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Browser vs Server -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">为什么选择"零服务器"？</h2>
+        <p>大部分代码分析工具都需要服务器：把代码上传到云端解析，返回结果。GitNexus 反其道而行——全部在浏览器或本机完成。为什么？</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#128274;</div>
+            <h4 class="pattern-title">企业代码不出墙</h4>
+            <p class="pattern-desc">企业客户的源代码是核心资产。要求上传到第三方服务器？门都没有。GitNexus 的零服务器架构从根上消除了这个障碍。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">&#9889;</div>
+            <h4 class="pattern-title">零延迟体验</h4>
+            <p class="pattern-desc">本地解析 + 本地查询 = 毫秒级响应。不需要等网络传输、不需要排队等服务器资源。WebGL 渲染数千节点丝滑流畅。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-success-light)">&#128176;</div>
+            <h4 class="pattern-title">零运维成本</h4>
+            <p class="pattern-desc">不需要维护服务器集群、不需要扩缩容、不需要担心宕机。开源项目也没有服务器账单的压力。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Key Technology Choices -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">关键技术选型</h2>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num" style="background: var(--color-accent); color: white;">TS</div>
+            <div class="step-body">
+              <strong>Tree-sitter 而非 LSP</strong>
+              <p><span class="term" data-definition="LSP（Language Server Protocol）是微软定义的语言服务协议。IDE 用它获得代码补全、跳转定义等功能。但它需要每种语言启动一个服务器进程，开销大。">LSP</span> 虽然语义更丰富，但需要为每种语言启动独立的语言服务器进程，不适合浏览器环境。Tree-sitter 是轻量级的 AST 解析器，能编译成 WASM，14 种语言共享同一套处理逻辑。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num" style="background: var(--color-actor-2); color: white;">DB</div>
+            <div class="step-body">
+              <strong>LadybugDB 而非 Neo4j</strong>
+              <p>Neo4j 是重量级图数据库，需要 Java 运行时和独立服务器进程。LadybugDB（原 KuzuDB）是嵌入式图数据库，支持向量搜索，能编译成 WASM 在浏览器里跑。原生模式和 WASM 模式共享同一套查询接口。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num" style="background: var(--color-actor-4); color: white;">EM</div>
+            <div class="step-body">
+              <strong>transformers.js 而非 OpenAI API</strong>
+              <p>用 HuggingFace 的 transformers.js 在本地生成嵌入向量（Snowflake arctic-embed-xs, 384维），不依赖任何外部 API。Web 版用 WebGPU 加速或 WASM 降级，CLI 版支持 Node.js GPU 加速。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num" style="background: var(--color-actor-5); color: white;">MCP</div>
+            <div class="step-body">
+              <strong>MCP 而非自定义插件协议</strong>
+              <p><span class="term" data-definition="MCP（Model Context Protocol）是 Anthropic 发起的开放协议，让 AI 代理通过标准化接口访问外部工具。就像 USB 统一了外设连接，MCP 统一了 AI 访问工具的方式。">MCP</span> 是 AI 工具领域的"USB 接口"。一套 MCP 服务器，Cursor、Claude Code、Codex、Windsurf 全部能用。不需要为每个编辑器写独立插件。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Comparison with Similar Tools -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">横向对比：GitNexus vs 其他工具</h2>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">工具对比</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment">/*       运行方式  代码分析深度  AI集成  多语言 */</span></span>
+<span class="code-line"><span class="code-comment">/* DeepWiki   云端    描述级      有     少量 */</span></span>
+<span class="code-line"><span class="code-comment">/* Sourcegraph 云端   文本搜索    有     通用 */</span></span>
+<span class="code-line"><span class="code-comment">/* CodeGraph  本地    图谱级      MCP    18+  */</span></span>
+<span class="code-line"><span class="code-comment">/* GitNexus   本地/浏览器 图谱级  MCP    14+  */</span></span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment">// GitNexus 独有特性：</span></span>
+<span class="code-line"><span class="code-comment">// - 预计算聚类+执行流+置信度</span></span>
+<span class="code-line"><span class="code-comment">// - 浏览器端全 WASM 运行</span></span>
+<span class="code-line"><span class="code-comment">// - 一个 MCP 服务多仓库</span></span>
+<span class="code-line"><span class="code-comment">// - 影响分析+变更检测+重命名</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">DeepWiki 帮你"理解"代码，生成文档描述。GitNexus 帮你"分析"代码——跟踪每一条依赖关系。</p>
+              <p class="tl">Sourcegraph 是云端文本搜索，基于关键词匹配。GitNexus 是本地图谱查询，基于语义关系。</p>
+              <p class="tl">CodeGraph 和 GitNexus 最接近，都是本地图谱引擎。GitNexus 多了浏览器端运行和预计算智能。</p>
+              <p class="tl">GitNexus 独有的杀手锏：在浏览器里就能跑完整的代码分析，不用装任何东西。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Tech Stack Summary -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">完整技术栈一览</h2>
+        <p>CLI 和 Web 用同一套核心逻辑，不同的运行时适配：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#128421;</div>
+            <h4 class="pattern-title">CLI 运行时</h4>
+            <p class="pattern-desc">Node.js 原生运行。Tree-sitter 原生绑定。LadybugDB 原生。Worker 线程池并行。本地文件系统持久化。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">&#127760;</div>
+            <h4 class="pattern-title">Web 运行时</h4>
+            <p class="pattern-desc">浏览器 + WASM。Tree-sitter WASM 解析。LadybugDB WASM 存储。Web Workers + Comlink 并行。内存会话级存储。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: #FDF5E0">&#127912;</div>
+            <h4 class="pattern-title">Web 前端</h4>
+            <p class="pattern-desc">React 18 + TypeScript + Vite 构建。Tailwind v4 样式。Sigma.js + Graphology (WebGL) 图可视化。i18n 多语言支持。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-success-light)">&#128279;</div>
+            <h4 class="pattern-title">AI 接口</h4>
+            <p class="pattern-desc">CLI 通过 MCP（stdio）暴露工具。Web 通过 LangChain ReAct Agent 提供对话。Bridge 模式让 Web 连接 CLI 后端获得完整能力。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-module5">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！GitNexus 选择 MCP 是因为它是 AI 工具领域的通用协议——一套 MCP 服务器就能被 Cursor、Claude Code、Codex、Windsurf 等所有主流编辑器使用，不需要为每个编辑器写独立插件。"
+               data-explanation-wrong="想想 GitNexus 面临的挑战：要让多种 AI 编辑器都能用它的工具。如果为每个编辑器写独立插件，维护成本爆炸。MCP 解决了什么问题？">
+            <h3 class="quiz-question">GitNexus 为什么选择 MCP 协议而不是为每个编辑器写独立插件？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>MCP 是性能最高的通信协议</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>MCP 是通用协议，一套服务器服务所有编辑器，避免重复开发</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为只有 MCP 支持 stdio 通信方式</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 6: 总结与练习
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-6" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">06</span>
+      <h1 class="module-title">总结与练习</h1>
+      <p class="module-subtitle">回顾 GitNexus 核心知识，通过综合练习巩固技能，探索代码图谱生态</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- ── Screen 1: 核心知识回顾 ── -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">核心知识回顾</h2>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#128274;</div>
+            <h4 class="pattern-title">零服务器理念</h4>
+            <p class="pattern-desc">Tree-sitter WASM 解析代码、LadybugDB WASM 存储图谱、transformers.js 生成本地嵌入。三大 WASM 组件全部在浏览器运行，代码永远不离开你的机器。隐私、性能、零运维三赢。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">&#9889;</div>
+            <h4 class="pattern-title">WASM 三件套</h4>
+            <p class="pattern-desc">Tree-sitter（AST 解析，14 种语言统一语义标签）+ LadybugDB（嵌入式图数据库，支持向量搜索）+ transformers.js（本地嵌入，WebGPU 加速）。CLI 用原生绑定，Web 用 WASM，共享同一套查询逻辑。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: #FDF5E0">&#128200;</div>
+            <h4 class="pattern-title">12 阶段 DAG 管道</h4>
+            <p class="pattern-desc">scan &#8594; structure &#8594; parse &#8594; crossFile &#8594; mro &#8594; communities &#8594; processes。解析用 Tree-sitter 提取符号，6 阶段调用解析推断类型，Leiden 算法聚类社区，执行流追踪入口到终点的完整调用链。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-success-light)">&#127760;</div>
+            <h4 class="pattern-title">Sigma.js WebGL 可视化</h4>
+            <p class="pattern-desc">Sigma.js + Graphology 渲染交互式网络图，WebGL GPU 加速支撑数千节点。Graph RAG Agent 基于 LangChain ReAct 提供自然语言问答，16 个 MCP 工具覆盖查询、影响分析、变更检测。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: #F3E8FF">&#127919;</div>
+            <h4 class="pattern-title">技术选型哲学</h4>
+            <p class="pattern-desc">Tree-sitter 而非 LSP（轻量可 WASM 化）、LadybugDB 而非 Neo4j（嵌入式无服务器）、transformers.js 而非 OpenAI API（本地隐私）、MCP 而非自定义协议（一套服务多编辑器）。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Screen 2: 最佳实践清单 ── -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">最佳实践清单</h2>
+
+        <div class="file-tree animate-in">
+          <div class="ft-folder open">
+            <div class="ft-name">&#128196; GitNexus 使用最佳实践</div>
+            <div class="ft-children">
+              <div class="ft-folder">
+                <div class="ft-name">&#128736; 图谱构建</div>
+                <div class="ft-children">
+                  <div class="ft-desc">1. 先 analyze 再提问——索引是所有功能的基础</div>
+                  <div class="ft-desc">2. 大型项目调整 --budget 参数控制内存占用</div>
+                  <div class="ft-desc">3. 增量索引用 detect_changes，不要每次全量重建</div>
+                  <div class="ft-desc">4. 不支持的语言会自动跳过，不会中断管道</div>
+                </div>
+              </div>
+              <div class="ft-folder">
+                <div class="ft-name">&#127912; 可视化调优</div>
+                <div class="ft-children">
+                  <div class="ft-desc">5. 超过 5000 节点时启用社区折叠，避免渲染卡顿</div>
+                  <div class="ft-desc">6. 用 Bridge 模式获得 CLI 的原生性能 + Web 的交互体验</div>
+                  <div class="ft-desc">7. 搜索结果按执行流分组比按文件分组更有价值</div>
+                  <div class="ft-desc">8. WebGL 渲染是标配，Canvas 2D 在大规模图谱下会掉帧</div>
+                </div>
+              </div>
+              <div class="ft-folder">
+                <div class="ft-name">&#129302; Graph RAG Agent 使用</div>
+                <div class="ft-children">
+                  <div class="ft-desc">9. impact 先于修改——改代码前先评估影响范围</div>
+                  <div class="ft-desc">10. context 而非 query——理解一个符号用它，搜索用 query</div>
+                  <div class="ft-desc">11. 小模型 + 结构化工具输出 &gt; 大模型 + 原始图谱边</div>
+                  <div class="ft-desc">12. MCP 工具的置信度分数是天然的优先级排序依据</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Screen 3: 综合练习 ── -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">综合练习：分析一个 GitHub 项目，找出核心依赖链</h2>
+
+        <p>选择一个你熟悉的 GitHub 项目，用 GitNexus CLI 分析它的代码结构，找出核心依赖链。</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">&#127919;</div>
+          <div class="callout-content">
+            <strong class="callout-title">练习目标</strong>
+            <p>完成以下任务：1) 克隆并索引一个开源项目；2) 用 query 找到核心模块；3) 用 impact 分析关键函数的上下游；4) 用 context 查看核心符号的完整关系。</p>
+          </div>
+        </div>
+
+        <div class="code-translation">
+          <div class="translation-code">
+            <div class="translation-label">CLI — 练习模板</div>
+            <pre class="translation-lines"><code><span class="code-line"><span class="code-comment"># TODO 1: 克隆一个开源项目</span></span>
+<span class="code-line">git clone https://github.com/<span class="code-comment">/* 你的选择 */</span></span>
+<span class="code-line"><span class="code-keyword">cd</span> your-project</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># TODO 2: 索引整个代码库</span></span>
+<span class="code-line">npx gitnexus <span class="code-comment">/* ??? */</span></span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># TODO 3: 启动 MCP 服务器</span></span>
+<span class="code-line"><span class="code-comment">/* ??? */</span></span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># TODO 4: 用 AI 代理分析核心依赖</span></span>
+<span class="code-line"><span class="code-comment"># 提问："这个项目的核心入口函数是什么？</span></span>
+<span class="code-line"><span class="code-comment">#        它依赖哪些模块？"</span></span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># TODO 5: 用 impact 分析修改风险</span></span>
+<span class="code-line"><span class="code-comment"># 提问："如果修改 [核心函数]，会影响多少地方？"</span></span></code></pre>
+          </div>
+          <div class="translation-block animate-in">
+            <div class="translation-english">
+              <div class="translation-label">练习提示</div>
+              <p>完成这个练习的建议：</p>
+              <ul>
+                <li><strong>TODO 2</strong>：npx gitnexus analyze — 一行命令索引整个代码库</li>
+                <li><strong>TODO 3</strong>：gitnexus mcp — 启动 MCP 服务器，AI 编辑器自动连接</li>
+                <li><strong>TODO 4</strong>：AI 代理会自动调用 query 工具搜索入口函数</li>
+                <li><strong>TODO 5</strong>：AI 代理会自动调用 impact 工具分析上下游影响</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Screen 4: 下一步学习方向 + Quiz ── -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">下一步学习方向</h2>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#128640;</div>
+            <h4 class="pattern-title">Understand-Anything</h4>
+            <p class="pattern-desc">用 AI 自动解读任意 GitHub 仓库的交互式课程生成器。把 GitNexus 的图谱能力延伸到教学场景，让代码理解不再只是开发者的专利。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">&#128202;</div>
+            <h4 class="pattern-title">CodeGraph</h4>
+            <p class="pattern-desc">微软开源的代码图谱引擎。与 GitNexus 对比学习：不同的图构建策略、不同的查询接口、不同的可视化方案。理解设计权衡。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-success-light)">&#129302;</div>
+            <h4 class="pattern-title">Graphiti</h4>
+            <p class="pattern-desc">时序知识图谱，自动从对话和文档中构建实体关系图。与 GitNexus 的静态代码图谱互补——一个理解代码结构，一个理解业务知识。</p>
+          </div>
+        </div>
+
+        <div class="quiz-container">
+          <div class="quiz-question-block">
+            <p class="quiz-question">GitNexus 的"零服务器"架构依赖哪三项 WASM 技术？</p>
+            <div class="quiz-options">
+              <label class="quiz-option">
+                <input type="radio" name="q6a" class="quiz-option-radio" data-correct="true">
+                <span>Tree-sitter + LadybugDB + transformers.js</span>
+              </label>
+              <label class="quiz-option">
+                <input type="radio" name="q6a" class="quiz-option-radio" data-correct="false">
+                <span>Babel + MongoDB + TensorFlow.js</span>
+              </label>
+              <label class="quiz-option">
+                <input type="radio" name="q6a" class="quiz-option-radio" data-correct="false">
+                <span>ESBuild + PostgreSQL + ONNX Runtime</span>
+              </label>
+              <label class="quiz-option">
+                <input type="radio" name="q6a" class="quiz-option-radio" data-correct="false">
+                <span>Syntax Tree + Redis + OpenAI API</span>
+              </label>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <div class="quiz-question-block">
+            <p class="quiz-question">GitNexus 支持 14 种编程语言，下游处理代码如何做到不分语言分支？</p>
+            <div class="quiz-options">
+              <label class="quiz-option">
+                <input type="radio" name="q6b" class="quiz-option-radio" data-correct="false">
+                <span>每种语言写一套完全独立的处理逻辑</span>
+              </label>
+              <label class="quiz-option">
+                <input type="radio" name="q6b" class="quiz-option-radio" data-correct="true">
+                <span>不同语言的 Tree-sitter 查询产出同一套语义标签，下游逻辑统一</span>
+              </label>
+              <label class="quiz-option">
+                <input type="radio" name="q6b" class="quiz-option-radio" data-correct="false">
+                <span>用万能正则匹配所有语言的语法结构</span>
+              </label>
+              <label class="quiz-option">
+                <input type="radio" name="q6b" class="quiz-option-radio" data-correct="false">
+                <span>把所有语言先转译成 TypeScript 再统一处理</span>
+              </label>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <div class="quiz-question-block">
+            <p class="quiz-question">修改一个函数前，应该优先使用哪个 GitNexus 工具评估风险？</p>
+            <div class="quiz-options">
+              <label class="quiz-option">
+                <input type="radio" name="q6c" class="quiz-option-radio" data-correct="false">
+                <span>query — 搜索函数定义</span>
+              </label>
+              <label class="quiz-option">
+                <input type="radio" name="q6c" class="quiz-option-radio" data-correct="false">
+                <span>context — 查看符号关系</span>
+              </label>
+              <label class="quiz-option">
+                <input type="radio" name="q6c" class="quiz-option-radio" data-correct="true">
+                <span>impact — 分析上游下游影响范围和风险等级</span>
+              </label>
+              <label class="quiz-option">
+                <input type="radio" name="q6c" class="quiz-option-radio" data-correct="false">
+                <span>detect_changes — 检测已发生的变更</span>
+              </label>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <div class="quiz-question-block">
+            <p class="quiz-question">GitNexus 为什么选择 MCP 协议而非自定义插件协议？</p>
+            <div class="quiz-options">
+              <label class="quiz-option">
+                <input type="radio" name="q6d" class="quiz-option-radio" data-correct="false">
+                <span>MCP 的通信延迟最低</span>
+              </label>
+              <label class="quiz-option">
+                <input type="radio" name="q6d" class="quiz-option-radio" data-correct="true">
+                <span>一套 MCP 服务器能被 Cursor、Claude Code、Codex 等所有主流编辑器使用</span>
+              </label>
+              <label class="quiz-option">
+                <input type="radio" name="q6d" class="quiz-option-radio" data-correct="false">
+                <span>MCP 是唯一支持图数据库的协议</span>
+              </label>
+              <label class="quiz-option">
+                <input type="radio" name="q6d" class="quiz-option-radio" data-correct="false">
+                <span>MCP 只支持 stdio 通信，最安全</span>
+              </label>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>  </main>
+
+</body>
+</html>

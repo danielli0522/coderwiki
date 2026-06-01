@@ -1,0 +1,442 @@
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 5: 动手扩展你的微舆 — 从学习到实践
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">动手扩展你的微舆</h1>
+      <p class="module-subtitle">理解了架构之后，来看看如何把 BettaFish 改造成你自己的分析引擎——接入不同的 LLM、添加自定义工具、甚至变成金融分析系统。</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Modular design philosophy -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">模块化设计：像搭积木一样扩展</h2>
+        <p>BettaFish 的代码结构遵循一个清晰的模块化原则：每个引擎都是独立的 Python 包，有自己的 Agent、LLM 客户端、节点、工具集、状态管理和提示词。你可以替换任何一个模块，而不影响其他部分。</p>
+
+        <div class="file-tree">
+          <div class="ft-folder open">
+            <span class="ft-name">BettaFish/</span>
+            <span class="ft-desc">项目根目录</span>
+            <div class="ft-children">
+              <div class="ft-folder">
+                <span class="ft-name">QueryEngine/</span>
+                <span class="ft-desc">新闻搜索 Agent — 可替换搜索工具</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">MediaEngine/</span>
+                <span class="ft-desc">多模态 Agent — 可替换搜索 API</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">InsightEngine/</span>
+                <span class="ft-desc">数据库 Agent — 可接入不同数据库</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">ReportEngine/</span>
+                <span class="ft-desc">报告生成 Agent — 可自定义模板</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">ForumEngine/</span>
+                <span class="ft-desc">论坛协作 — 可调整主持人模型</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">MindSpider/</span>
+                <span class="ft-desc">爬虫系统 — 可添加新平台</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Swap the LLM -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">一键切换 LLM 模型</h2>
+        <p>所有 LLM 调用都遵循 <span class="term" data-definition="OpenAI API 格式：一种通用的 AI 模型调用标准。只要 API 兼容这个格式（有 chat.completions.create 方法），就可以无缝切换不同供应商的模型——GPT、Qwen、DeepSeek 等。">OpenAI API 格式</span>，你只需在 .env 文件中修改三个参数就能切换模型。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># .env — 切换 LLM 只需改三个参数</span></span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># Insight Agent 的 LLM</span></span>
+<span class="code-line">INSIGHT_ENGINE_API_KEY=sk-xxx</span>
+<span class="code-line">INSIGHT_ENGINE_BASE_URL=https://api.openai.com/v1</span>
+<span class="code-line">INSIGHT_ENGINE_MODEL_NAME=gpt-4o-mini</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 换成 DeepSeek？只改这三行：</span></span>
+<span class="code-line"><span class="code-comment"># INSIGHT_ENGINE_API_KEY=sk-deepseek</span></span>
+<span class="code-line"><span class="code-comment"># INSIGHT_ENGINE_BASE_URL=https://api.deepseek.com</span></span>
+<span class="code-line"><span class="code-comment"># INSIGHT_ENGINE_MODEL_NAME=deepseek-chat</span></span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">环境变量配置文件——不用改代码就能换模型</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">API 密钥——你的账户凭证</p>
+              <p class="tl">API 地址——模型服务的入口</p>
+              <p class="tl">模型名称——你想用哪个模型</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">想换模型？注释掉旧的，取消注释新的就行</p>
+              <p class="tl">三个 Agent 可以用不同的模型</p>
+              <p class="tl">每个 Agent 独立配置，互不影响</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Add custom tools -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">给 Agent 添加自定义工具</h2>
+        <p>每个 Agent 的工具集都是可扩展的。比如，你可以给 Insight Agent 添加一个"企业内部数据库查询工具"，让它不只分析公开舆情，还能分析你公司的业务数据。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># InsightEngine/tools/custom_db_tool.py</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">CustomBusinessDBTool</span>:</span>
+<span class="code-line">    <span class="code-string">"""自定义业务数据库查询工具"""</span></span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self):</span>
+<span class="code-line">        self.connection_config = {</span>
+<span class="code-line">            <span class="code-string">'host'</span>: config.BUSINESS_DB_HOST,</span>
+<span class="code-line">            <span class="code-string">'port'</span>: config.BUSINESS_DB_PORT,</span>
+<span class="code-line">            <span class="code-string">'user'</span>: config.BUSINESS_DB_USER,</span>
+<span class="code-line">        }</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">search_business_data</span>(</span>
+<span class="code-line">            self, query: str, table: str):</span>
+<span class="code-line">        <span class="code-string">"""查询业务数据"""</span></span>
+<span class="code-line">        <span class="code-comment"># 实现你的业务逻辑</span></span>
+<span class="code-line">        <span class="code-keyword">pass</span></span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">自定义工具文件——你的业务数据接口</p>
+              <p class="tl">类名可以自由命名</p>
+              <p class="tl">描述这个工具的用途</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">初始化数据库连接配置</p>
+              <p class="tl">从全局配置读取连接参数</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">定义查询方法——Agent 会调用这个方法</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">在这里写你的查询逻辑</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">&#x1F680;</div>
+          <div class="callout-content">
+            <strong class="callout-title">不止于舆情</strong>
+            <p>README 中提到：你只需简单修改 Agent 工具集的 API 参数和 prompt，就可以把它变成一个金融领域的市场分析系统。这就是模块化设计的威力——同一套架构，不同的工具和提示词，就能适应不同的领域。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Custom report templates -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">自定义报告模板</h2>
+        <p>Report Agent 的模板是 Markdown 文件，放在 <code>ReportEngine/report_template/</code> 目录下。你可以创建自己的模板，Agent 会自动选择最合适的。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#x1F4C4;</div>
+            <h4 class="pattern-title">企业品牌声誉分析报告</h4>
+            <p class="pattern-desc">内置模板，包含品牌认知度、美誉度、危机事件等维度</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">&#x1F4B0;</div>
+            <h4 class="pattern-title">金融市场分析报告（你可以创建）</h4>
+            <p class="pattern-desc">只需创建一个 Markdown 模板，包含市场概览、趋势分析、风险评估等章节</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: #E8F5EE">&#x1F3AD;</div>
+            <h4 class="pattern-title">竞品监测报告（你可以创建）</h4>
+            <p class="pattern-desc">追踪竞争对手的动态、用户反馈和市场反应</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Sentiment model selection -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">选择你的情感分析模型</h2>
+        <p>BettaFish 集成了多种情感分析方法，从传统机器学习到大模型微调，你可以根据场景选择：</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-accent-light)">&#x1F9E0;</div>
+            <div>
+              <strong>BERT 中文 LoRA 微调</strong>
+              <p>经典 NLP 模型，适合中文微博评论的情感分析</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-info-light)">&#x1F422;</div>
+            <div>
+              <strong>GPT-2 LoRA 微调</strong>
+              <p>生成式模型微调，能捕获更细腻的情感变化</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: #EDE8F5">&#x1F30D;</div>
+            <div>
+              <strong>多语言情感分析</strong>
+              <p>支持 22 种语言——分析英文、日文评论也不在话下</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: #E8F5EE">&#x26A1;</div>
+            <div>
+              <strong>小参数 Qwen3 微调</strong>
+              <p>轻量高效，适合资源有限的环境</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># 情感分析配置示例</span></span>
+<span class="code-line">SENTIMENT_CONFIG = {</span>
+<span class="code-line">    <span class="code-string">'model_type'</span>: <span class="code-string">'multilingual'</span>,</span>
+<span class="code-line">    <span class="code-string">'confidence_threshold'</span>: <span class="code-number">0.8</span>,</span>
+<span class="code-line">    <span class="code-string">'batch_size'</span>: <span class="code-number">32</span>,</span>
+<span class="code-line">    <span class="code-string">'max_sequence_length'</span>: <span class="code-number">512</span>,</span>
+<span class="code-line">}</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">情感分析器的配置参数</p>
+              <p class="tl">模型类型：multilingual（多语言）——还可选 bert、qwen 等</p>
+              <p class="tl">置信度阈值 0.8——低于 80% 确信的结果会被标记</p>
+              <p class="tl">批处理大小 32——一次分析 32 条评论</p>
+              <p class="tl">最大序列长度 512——每条评论最多 512 个字符</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 6: Architecture recap with layer toggle -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">三层架构总览</h2>
+        <p>BettaFish 的架构可以看作三个层次。切换下面的标签，逐层了解：</p>
+
+        <div class="layer-demo">
+          <div class="layer-tabs">
+            <button class="layer-tab active" onclick="showLayer('layer-data', this)">数据层</button>
+            <button class="layer-tab" onclick="showLayer('layer-analysis', this)">分析层</button>
+            <button class="layer-tab" onclick="showLayer('layer-output', this)">输出层</button>
+          </div>
+          <div class="layer-viewport">
+            <div class="layer" id="layer-data" style="display:block">
+              <div style="padding: var(--space-6); background: var(--color-surface); border-radius: var(--radius-md);">
+                <div class="icon-rows">
+                  <div class="icon-row">
+                    <div class="icon-circle" style="background: var(--color-accent-light)">&#x1F577;&#xFE0F;</div>
+                    <div>
+                      <strong>MindSpider 爬虫集群</strong>
+                      <p>30+ 社媒平台的持续数据采集，存入 PostgreSQL 数据库</p>
+                    </div>
+                  </div>
+                  <div class="icon-row">
+                    <div class="icon-circle" style="background: var(--color-info-light)">&#x1F4BE;</div>
+                    <div>
+                      <strong>PostgreSQL / MySQL</strong>
+                      <p>存储所有抓取的帖子、评论、互动数据，供 Insight Agent 查询</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="layer" id="layer-analysis" style="display:none">
+              <div style="padding: var(--space-6); background: var(--color-surface); border-radius: var(--radius-md);">
+                <div class="icon-rows">
+                  <div class="icon-row">
+                    <div class="icon-circle" style="background: var(--color-actor-1)">&#x1F4CA;</div>
+                    <div>
+                      <strong>Insight + Media + Query（并行）</strong>
+                      <p>三个 Agent 同时工作，各自用专属工具集搜索和分析</p>
+                    </div>
+                  </div>
+                  <div class="icon-row">
+                    <div class="icon-circle" style="background: var(--color-actor-4)">&#x1F3DB;&#xFE0F;</div>
+                    <div>
+                      <strong>ForumEngine（后台）</strong>
+                      <p>监控发言、主持人引导、多轮辩论——催生集体智能</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="layer" id="layer-output" style="display:none">
+              <div style="padding: var(--space-6); background: var(--color-surface); border-radius: var(--radius-md);">
+                <div class="icon-rows">
+                  <div class="icon-row">
+                    <div class="icon-circle" style="background: #EDE8F5">&#x1F4DD;</div>
+                    <div>
+                      <strong>Report Agent（六步流程）</strong>
+                      <p>模板选择→布局→篇幅→章节→IR装订→HTML渲染</p>
+                    </div>
+                  </div>
+                  <div class="icon-row">
+                    <div class="icon-circle" style="background: #E8F5EE">&#x1F4C4;</div>
+                    <div>
+                      <strong>多格式输出</strong>
+                      <p>交互式 HTML + PDF 导出 + Markdown 纯文本——一份 IR，三种呈现</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="layer-description">数据层：所有原始数据的采集和存储</p>
+        </div>
+      </section>
+
+      <!-- Screen 7: Design philosophy recap -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">BettaFish 的设计哲学</h2>
+        <p>通过前四个模块的学习，我们可以总结出 BettaFish 背后的设计哲学——这些原则不仅适用于舆情分析，也适用于任何多智能体系统：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#x1F504;</div>
+            <h4 class="pattern-title">并行 + 反思</h4>
+            <p class="pattern-desc">Agent 并行启动保证速度，内部反思机制保证深度——速度和质量兼得</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">&#x1F5E3;&#xFE0F;</div>
+            <h4 class="pattern-title">辩论优于独白</h4>
+            <p class="pattern-desc">多个 Agent 通过论坛辩论产生的集体智能，远超任何单一模型的输出</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: #EDE8F5">&#x1F6E0;&#xFE0F;</div>
+            <h4 class="pattern-title">工具即身份</h4>
+            <p class="pattern-desc">每个 Agent 的"性格"由其工具集决定——换工具就换了视角</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#x1F4D0;</div>
+            <h4 class="pattern-title">IR 解耦</h4>
+            <p class="pattern-desc">中间表示（IR）把内容生成和格式渲染解耦——一份内容，多种输出</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 8: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">最终测验</h2>
+
+        <div class="quiz-container" id="quiz-module5">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！只需修改 .env 文件中的 API_KEY、BASE_URL、MODEL_NAME 三个参数，就能切换到任何兼容 OpenAI 格式的 LLM。不用改一行代码。"
+               data-explanation-wrong="切换 LLM 不需要改代码。想想 BettaFish 是如何配置模型的——是在代码里硬编码，还是通过配置文件？">
+            <h3 class="quiz-question">如果你想把 BettaFish 的 LLM 从 GPT-4o 切换到 DeepSeek，需要修改什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>需要修改每个 Agent 的源代码中的 API 调用</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>只需修改 .env 文件中的 API_KEY、BASE_URL、MODEL_NAME</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>需要重新训练所有情感分析模型</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="正确！Insight Agent 专攻本地数据库查询，只需要为它写一个新的工具类（CustomBusinessDBTool），就能接入你的业务数据库。"
+               data-explanation-wrong="回想模块 2 的内容——哪个 Agent 是专门做数据库查询的？它的工具集是怎么设计的？">
+            <h3 class="quiz-question">如果你想分析企业内部数据库中的客户反馈数据，应该修改哪个 Agent？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Insight Agent——为它添加自定义数据库查询工具</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Query Agent——修改它的 Tavily 搜索参数</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Report Agent——修改报告模板即可</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="完全正确！BettaFish 的模块化设计让你只需替换工具集的 API 参数和 prompt，就能把它变成任何领域的分析系统——金融、医疗、教育，都可以。"
+               data-explanation-wrong="BettaFish 不仅仅是一个舆情工具。它的架构有什么特性让它可以适应不同领域？">
+            <h3 class="quiz-question">BettaFish "始于舆情，而不止于舆情"的关键是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>它使用了最先进的 LLM 模型</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>它能同时搜索国内外新闻</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>模块化设计让工具集和提示词可以替换，适应任何领域</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">重新作答</button>
+        </div>
+      </section>
+
+      <!-- Screen 9: What's next -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">接下来做什么？</h2>
+        <p>恭喜你完成了 BettaFish 的全部课程！现在你已经理解了一个 41K Star 的多智能体系统是如何设计和实现的。以下是你的下一步选择：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#x1F4BB;</div>
+            <h4 class="pattern-title">阅读源码</h4>
+            <p class="pattern-desc">克隆仓库，从 app.py 入口开始追踪一次完整运行。现在你能看懂每一行代码的用意了。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">&#x1F6E0;&#xFE0F;</div>
+            <h4 class="pattern-title">动手改造</h4>
+            <p class="pattern-desc">试试把 Query Agent 的搜索工具换成另一个 API，或者给 Insight Agent 添加一个自定义查询工具。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#x1F31F;</div>
+            <h4 class="pattern-title">探索 MiroFish</h4>
+            <p class="pattern-desc">BettaFish 团队还发布了 MiroFish——一个"群体智能预测引擎"。从分析到预测，数据分析的完整闭环。</p>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#x1F4DA;</div>
+          <div class="callout-content">
+            <strong class="callout-title">推荐学习路径</strong>
+            <p>如果你刚开始学习 Agent 系统，作者推荐从 <strong>Deep Search Agent Demo</strong> 开始——一个极简的单 Agent 搜索系统。理解了单 Agent 的搜索-反思模式后，再来看 BettaFish 的多 Agent 协作，会事半功倍。</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

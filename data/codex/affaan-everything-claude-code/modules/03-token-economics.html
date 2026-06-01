@@ -1,0 +1,235 @@
+<section class="module" id="module-3">
+  <div class="module-inner">
+
+    <div class="screen">
+      <div class="screen-content">
+        <div class="eyebrow">Module 3</div>
+        <h1 class="display">Token 经济学：<br>用好每一个字符</h1>
+        <p class="lead">每次和 Claude 对话，你都在消耗<span class="tooltip-term" data-tooltip="Token（词元）：AI 模型处理文本的基本单位。大约 1 token ≈ 0.75 个英文单词，或 0.5 个中文字。发送和接收的 token 都计费。">Token</span>。Token 就是 AI 对话的燃料——用完了，要么截断上下文，要么付更多钱。ECC 的核心价值之一，就是让每个 Token 都物有所值。</p>
+      </div>
+    </div>
+
+    <div class="screen">
+      <div class="screen-content">
+        <h2>上下文窗口：AI 的工作台</h2>
+        <p>把 Claude 的<span class="tooltip-term" data-tooltip="上下文窗口（Context Window）：AI 模型在一次对话中能同时"看到"的最大文本量。超过这个限制，早期的内容会被遗忘或截断。">上下文窗口</span>想象成一张办公桌。桌子空间有限——摆的东西越多，每样东西的注意力就越分散。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card">
+            <div class="pattern-card-icon">💾</div>
+            <div class="pattern-card-name">系统提示（System Prompt）</div>
+            <div class="pattern-card-desc">CLAUDE.md 和规则文件。每次会话都加载，占用固定空间。<strong>要精简。</strong></div>
+          </div>
+          <div class="pattern-card">
+            <div class="pattern-card-icon">💬</div>
+            <div class="pattern-card-name">对话历史</div>
+            <div class="pattern-card-desc">你和 Claude 之前说的所有内容。随会话增长，最终引发<span class="tooltip-term" data-tooltip="上下文腐烂（Context Rot）：随着对话越来越长，AI 模型注意力分散，早期重要信息被稀释，回复质量下降的现象。">上下文腐烂</span>。</div>
+          </div>
+          <div class="pattern-card">
+            <div class="pattern-card-icon">🔧</div>
+            <div class="pattern-card-name">工具调用结果</div>
+            <div class="pattern-card-desc">读文件、运行命令的结果。可能非常大——要选择性读取，不要整个文件塞进去。</div>
+          </div>
+          <div class="pattern-card">
+            <div class="pattern-card-icon">⚡</div>
+            <div class="pattern-card-name">MCP 工具定义</div>
+            <div class="pattern-card-desc">每个激活的 MCP 服务器都占用上下文空间。ECC 的建议：能用 CLI 替代的，不用 MCP。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <div class="screen-content">
+        <h2>ECC 的 Token 优化策略</h2>
+
+        <div class="code-translation">
+          <div class="code-panel">
+            <div class="code-panel-label">优化思路 <span class="code-file">the-longform-guide.md</span></div>
+            <pre><code class="language-bash"># 代替 GitHub MCP（占大量上下文）
+# 用 CLI 封装成 Skill
+alias gh-pr='gh pr create \
+  --title "$1" \
+  --body "$2" \
+  --base main'
+
+# 代替 Supabase MCP
+# 用 CLI 直接操作
+alias db-migrate='npx supabase \
+  migration up --linked'</code></pre>
+          </div>
+          <div class="translation-panel">
+            <div class="translation-panel-label">这段代码在说什么</div>
+            <div class="translation-lines">
+              <div class="translation-line">
+                <span class="tl-code">alias gh-pr='gh pr create...'</span>
+                <span class="tl-text">创建快捷命令替代 GitHub MCP。CLI 不占上下文，MCP 工具定义会持续消耗 Token</span>
+              </div>
+              <div class="translation-line">
+                <span class="tl-code">--title "$1" --body "$2"</span>
+                <span class="tl-text">$1 和 $2 是传入的参数，让这个命令可以接受动态标题和正文</span>
+              </div>
+              <div class="translation-line">
+                <span class="tl-code">alias db-migrate='npx supabase...'</span>
+                <span class="tl-text">同理，数据库迁移用 CLI 而非 MCP，节省每次对话中的上下文空间</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <div class="screen-content">
+        <h2>CLAUDE.md：每个字符都在消耗 Token</h2>
+        <p>CLAUDE.md 是每次会话自动加载的"项目宪法"。但它也是 Token 消耗的第一大户——无论你这次对话用不用到它，它都占着上下文空间。</p>
+
+        <div class="arch-diagram" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 12px; padding: 2rem; margin: 1.5rem 0;">
+          <div style="text-align:center; margin-bottom:1rem; font-weight:600; color:#2A7B9B; font-size:1.1rem;">上下文窗口 Token 分配全景</div>
+          <div style="display:flex; flex-direction:column; gap:0.75rem;">
+            <div style="display:flex; align-items:center; gap:0.75rem;">
+              <span style="min-width:140px; font-weight:600; font-size:0.9rem;">CLAUDE.md</span>
+              <div style="flex:1; background:#D4A843; border-radius:6px; height:28px; position:relative; width:15%;">
+                <span style="position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:0.75rem; color:#fff; font-weight:600;">~15%</span>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:0.75rem;">
+              <span style="min-width:140px; font-weight:600; font-size:0.9rem;">对话历史</span>
+              <div style="flex:1; background:#2A7B9B; border-radius:6px; height:28px; position:relative; width:45%;">
+                <span style="position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:0.75rem; color:#fff; font-weight:600;">~45% 随时间增长</span>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:0.75rem;">
+              <span style="min-width:140px; font-weight:600; font-size:0.9rem;">工具调用结果</span>
+              <div style="flex:1; background:#7B6DAA; border-radius:6px; height:28px; position:relative; width:25%;">
+                <span style="position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:0.75rem; color:#fff; font-weight:600;">~25%</span>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:0.75rem;">
+              <span style="min-width:140px; font-weight:600; font-size:0.9rem;">MCP 定义</span>
+              <div style="flex:1; background:#D94F30; border-radius:6px; height:28px; position:relative; width:15%;">
+                <span style="position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:0.75rem; color:#fff; font-weight:600;">~15%</span>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:1rem; text-align:center; font-size:0.85rem; color:#666;">
+            每一项都在争抢有限的上下文窗口空间 — 优化从这里开始
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <strong>实战法则：</strong> CLAUDE.md 保持在 <strong>170 行以内</strong>（ECC 铁律）。超过这个长度，要么拆分子文件按需加载，要么精简冗余内容。记住：CLAUDE.md 里的每一个字，都是你在为每次对话持续买单。
+        </div>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <div class="screen-content">
+        <h2>Compact 指令：上下文的"垃圾回收"</h2>
+        <p>Claude Code 内置了 <code>/compact</code> 指令，就像编程语言里的垃圾回收（GC）——自动回收不再使用的上下文空间，但保留关键信息。</p>
+
+        <div class="code-translation">
+          <div class="code-panel">
+            <div class="code-panel-label">终端操作 <span class="code-file">Claude Code 内置指令</span></div>
+            <pre><code class="language-bash"># 在 Claude Code 中输入：
+/compact
+
+# Claude 会自动：
+# 1. 总结当前对话的关键信息
+# 2. 删除冗余的历史消息
+# 3. 保留代码片段和关键决策
+# 4. 用压缩后的摘要替换原始上下文
+
+# 带自定义提示的压缩
+/compact 保留所有数据库 Schema
+  相关的讨论，删除 UI 样式的讨论</code></pre>
+          </div>
+          <div class="translation-panel">
+            <div class="translation-panel-label">这段代码在说什么</div>
+            <div class="translation-lines">
+              <div class="translation-line">
+                <span class="tl-code">/compact</span>
+                <span class="tl-text">触发 Claude 的内置压缩功能——自动总结并压缩当前对话历史，释放上下文空间</span>
+              </div>
+              <div class="translation-line">
+                <span class="tl-code">保留所有数据库 Schema 相关的讨论</span>
+                <span class="tl-text">你可以精确控制什么该留、什么该删——像垃圾分类一样管理上下文</span>
+              </div>
+              <div class="translation-line">
+                <span class="tl-code">删除 UI 样式的讨论</span>
+                <span class="tl-text">已经完成的话题（比如已经定稿的 UI）可以安全丢弃，把空间留给当前焦点</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-aha">
+          <strong>💡 专业技巧：</strong> 当你发现 Claude 开始"重复自己"或"忘记刚刚说过的内容"时，就是该 /compact 的信号。ECC 经验法则：每 30-45 分钟高强度对话后主动执行一次。
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <div class="screen-content">
+        <h2>何时该"清空桌面"：战略性压缩</h2>
+        <p>长时间会话后，办公桌（上下文）会积累大量"已处理的文件"——这些历史内容对当前任务已经没用，却占着宝贵空间。</p>
+
+        <div class="chat-container" id="compact-chat">
+          <div class="chat-bubble chat-bubble-a" data-actor="你">
+            我们已经讨论了 3 小时，Claude 开始变得"犯糊涂"了...
+          </div>
+          <div class="chat-bubble chat-bubble-c" data-actor="Claude（上下文腐烂状态）">
+            [重复之前的建议] 你可以考虑用 React 来实现这个功能...（已经说过了）
+          </div>
+          <div class="chat-bubble chat-bubble-a" data-actor="你">
+            好，压缩一下。总结当前进度，保存到文件，然后我们开新对话。
+          </div>
+          <div class="chat-bubble chat-bubble-d" data-actor="Stop Hook（自动触发）">
+            ✅ 已保存会话摘要到 .claude/sessions/2026-05-01-14h.md
+            内容：已完成功能、未完成项目、下一步计划
+          </div>
+          <div class="chat-bubble chat-bubble-c" data-actor="Claude（新会话，清爽状态）">
+            好，我看了上次的摘要。继续——我们需要完成支付模块的测试...
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <div class="screen-content">
+        <h2>模型选择：用对型号的锤子</h2>
+        <p>ECC 推荐的模型分层策略，就像工具箱里要有螺丝刀也要有电钻：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card">
+            <div class="pattern-card-icon">🧠</div>
+            <div class="pattern-card-name">Opus — 重型任务</div>
+            <div class="pattern-card-desc">架构设计、复杂调试、深度代码审查。贵但值得——只用在真正需要深度思考的地方。</div>
+          </div>
+          <div class="pattern-card">
+            <div class="pattern-card-icon">⚡</div>
+            <div class="pattern-card-name">Sonnet — 日常编码</div>
+            <div class="pattern-card-desc">大多数功能开发、测试编写、重构。速度与质量的黄金平衡点。</div>
+          </div>
+          <div class="pattern-card">
+            <div class="pattern-card-icon">🚀</div>
+            <div class="pattern-card-name">Haiku — 快速查询</div>
+            <div class="pattern-card-desc">简单问题、格式转换、快速确认。最便宜最快——别用大炮打蚊子。</div>
+          </div>
+        </div>
+
+        <div class="quiz" data-quiz-id="q5">
+          <div class="quiz-question">你需要把一个 100 行的 JSON 文件转换成 CSV 格式。用哪个模型最合理？</div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-correct="false">Opus — 确保转换质量最高</button>
+            <button class="quiz-option" data-correct="false">Sonnet — 稳妥的选择</button>
+            <button class="quiz-option" data-correct="true">Haiku — 简单格式转换，Haiku 完全够用且最便宜</button>
+            <button class="quiz-option" data-correct="false">不重要，随便哪个都行</button>
+          </div>
+          <div class="quiz-feedback" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>

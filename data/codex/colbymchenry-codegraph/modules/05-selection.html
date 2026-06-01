@@ -1,0 +1,239 @@
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">技术选型：CodeGraph vs 替代方案</h1>
+      <p class="module-subtitle">技术负责人速查——要不要给团队装 CodeGraph？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Problem + Philosophy -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">解决什么问题？核心哲学</h2>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">核心问题</code>
+            <span class="badge-desc">AI 编程代理在大型代码库中盲目搜索，消耗大量 token、时间和金钱</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">核心哲学</code>
+            <span class="badge-desc">预建本地代码知识图谱，让 AI 代理像查地图一样查代码结构，而不是像翻书一样逐页找</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">本质属性</code>
+            <span class="badge-desc">本地优先、确定性提取（基于 AST 而非 LLM 摘要）、MCP 协议接入、增量同步</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">许可证</code>
+            <span class="badge-desc">MIT — 可商用、可修改、无附加限制</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">成本</code>
+            <span class="badge-desc">完全免费，无 API 调用费用，所有数据存储在本地</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Comparison Table -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">与替代方案对比</h2>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#128220;</div>
+          <div class="callout-content">
+            <p><strong>一句话区分：</strong>CodeGraph 是本地 AST 解析 + 图数据库 + MCP 工具链，不是 LLM 摘要，不是云端索引，不是文件搜索增强。</p>
+          </div>
+        </div>
+
+        <table style="width:100%; border-collapse:collapse; font-size: var(--text-sm); margin: var(--space-6) 0;">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--color-border);">
+              <th style="text-align:left; padding: var(--space-3);">维度</th>
+              <th style="text-align:left; padding: var(--space-3); color: var(--color-accent);">CodeGraph</th>
+              <th style="text-align:left; padding: var(--space-3);">RAG / 向量搜索</th>
+              <th style="text-align:left; padding: var(--space-3);">Grep + Read（原生）</th>
+              <th style="text-align:left; padding: var(--space-3);">全量塞上下文</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid var(--color-border-light);">
+              <td style="padding: var(--space-3);"><strong>数据来源</strong></td>
+              <td style="padding: var(--space-3);">
+                <ul><li>AST 结构化解析</li><li>确定性提取</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>文本分块向量化</li><li>语义相似度匹配</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>原始文本搜索</li><li>正则/关键字匹配</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>把整个文件灌入上下文</li><li>无过滤</li></ul>
+              </td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--color-border-light);">
+              <td style="padding: var(--space-3);"><strong>调用关系</strong></td>
+              <td style="padding: var(--space-3);">
+                <ul><li>完整调用图</li><li>A-&gt;B-&gt;C 追踪</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>无结构关系</li><li>只能做语义近似</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>需要多次搜索拼凑</li><li>无法直接回答路径</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>隐含在代码中</li><li>需要 AI 自己推理</li></ul>
+              </td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--color-border-light);">
+              <td style="padding: var(--space-3);"><strong>Token 成本</strong></td>
+              <td style="padding: var(--space-3);">
+                <ul><li>极低（查询即得）</li><li>平均省 35-57%</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>中等</li><li>嵌入+检索双重成本</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>高（多次 Read）</li><li>重复读同一文件</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>极高</li><li>上下文窗口上限瓶颈</li></ul>
+              </td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--color-border-light);">
+              <td style="padding: var(--space-3);"><strong>隐私/安全</strong></td>
+              <td style="padding: var(--space-3);">
+                <ul><li>100% 本地</li><li>零数据外传</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>依赖嵌入模型</li><li>代码可能需上传</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>本地</li><li>安全</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>本地</li><li>安全</li></ul>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: var(--space-3);"><strong>准确度</strong></td>
+              <td style="padding: var(--space-3);">
+                <ul><li>确定性（AST 级）</li><li>不会产生幻觉</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>概率性</li><li>可能检索到无关内容</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>精确匹配</li><li>但无法理解结构</li></ul>
+              </td>
+              <td style="padding: var(--space-3);">
+                <ul><li>完整但冗余</li><li>关键信息被淹没</li></ul>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Screen 3: Suitable vs Not-suitable -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">适合 vs 不适合</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6);">
+          <div style="background: var(--color-success-light); border-radius: var(--radius-md); padding: var(--space-6);">
+            <h3 style="color: var(--color-success); margin-bottom: var(--space-4);">&#9989; 适合</h3>
+            <ul style="list-style: none; padding: 0;">
+              <li style="padding: var(--space-2) 0;">&#10003; 中大型代码库（500+ 文件），AI 代理探索成本高</li>
+              <li style="padding: var(--space-2) 0;">&#10003; 使用 Claude Code / Cursor / Codex CLI / opencode 的团队</li>
+              <li style="padding: var(--space-2) 0;">&#10003; 需要理解调用链、影响范围的架构分析</li>
+              <li style="padding: var(--space-2) 0;">&#10003; 代码隐私敏感，不能上传到云端的项目</li>
+              <li style="padding: var(--space-2) 0;">&#10003; 多语言混合项目（支持 18+ 语言）</li>
+              <li style="padding: var(--space-2) 0;">&#10003; 需要增量同步、持续跟踪代码变化</li>
+            </ul>
+          </div>
+          <div style="background: var(--color-error-light); border-radius: var(--radius-md); padding: var(--space-6);">
+            <h3 style="color: var(--color-error); margin-bottom: var(--space-4);">&#10060; 不适合</h3>
+            <ul style="list-style: none; padding: 0;">
+              <li style="padding: var(--space-2) 0;">&#10007; 极小项目（<100 文件），grep 就够用</li>
+              <li style="padding: var(--space-2) 0;">&#10007; 不使用 AI 编程代理的团队</li>
+              <li style="padding: var(--space-2) 0;">&#10007; 需要语义级理解（"这段代码为什么这么写"）而非结构分析</li>
+              <li style="padding: var(--space-2) 0;">&#10007; 动态语言重度元编程（eval、猴子补丁），静态解析无法覆盖</li>
+              <li style="padding: var(--space-2) 0;">&#10007; 需要跨仓库全局分析的场景（当前只支持单项目）</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Hard Limits -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">硬限制（来自源码）</h2>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">MAX_OUTPUT_LENGTH = 15000</code>
+            <span class="badge-desc">单个 MCP 工具返回的最大字符数（防止上下文爆炸）</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">MAX_INPUT_LENGTH = 10000</code>
+            <span class="badge-desc">查询字符串最大长度（防止恶意超大输入）</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">MAX_PATH_LENGTH = 4096</code>
+            <span class="badge-desc">路径参数最大长度</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">MAX_HOPS = 7</code>
+            <span class="badge-desc">trace 工具最大追踪跳数（超过 7 跳的路径几乎一定是 BFS 漫游，不是真实流程）</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">Node Engines &gt;=18 &lt;25</code>
+            <span class="badge-desc">运行时要求：Node.js 18-24.x，Node 25.x 会被直接拒绝</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">18+ Languages</code>
+            <span class="badge-desc">支持的编程语言：TypeScript/JavaScript/Python/Go/Rust/Java/C/C++/C#/PHP/Ruby/Swift/Kotlin/Dart/Svelte/Vue/Lua 等</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Costs + Conclusion -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">成本与总结</h2>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>初始索引成本</strong>
+              <p>首次 codegraph init + index 需要解析全部文件。VS Code 规模（~10k 文件）大约需要几分钟。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>磁盘占用</strong>
+              <p>.codegraph/ 目录大小取决于代码库规模。索引数据存储在 SQLite 文件中，通常为源码的 10-30%。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>运行时资源</strong>
+              <p>MCP Server 以 Node.js 进程运行，内存占用取决于查询复杂度。FileWatcher 在后台持续运行，增量更新开销极小。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">&#127919;</div>
+          <div class="callout-content">
+            <strong class="callout-title">一句话结论</strong>
+            <p>如果你的团队用 AI 编程代理开发中大型项目，CodeGraph 是零成本、零风险、高回报的加速器——装了不亏，不装 AI 就在每次提问时反复翻文件浪费 token。MIT 许可证，一行命令安装，一行命令卸载。</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

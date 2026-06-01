@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ComfyUI 内部架构：节点图引擎如何驱动 AI 创作流水线</title>
+
+  <!-- Google Fonts: Bricolage Grotesque · DM Sans · JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <!--
+    CUSTOMIZE PER COURSE — change only the three accent variables below.
+    Options:
+      vermillion  #D94F30 / #C4432A / #FDEEE9 / #E8836C  (default)
+      coral       #E06B56 / #C85A47 / #FDECEA / #E89585
+      teal        #2A7B9B / #1F6280 / #E4F2F7 / #5A9DB8
+      amber       #D4A843 / #BF9530 / #FDF5E0 / #E0C070
+      forest      #2D8B55 / #226B41 / #E8F5EE / #5AAD7A
+  -->
+  <style>
+    :root {
+      --color-accent:       #2A7B9B;
+      --color-accent-hover: #1F6280;
+      --color-accent-light: #E4F2F7;
+      --color-accent-muted: #5A9DB8;
+      --toc-width: 260px;
+    }
+
+    /* ── TOC Sidebar ── */
+    .toc-sidebar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: var(--toc-width);
+      height: 100vh;
+      background: var(--color-surface);
+      border-left: 1px solid var(--color-border);
+      z-index: 1000;
+      transform: translateX(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: -4px 0 20px rgba(0,0,0,0.05);
+    }
+    .toc-sidebar.open {
+      transform: translateX(0);
+    }
+
+    .toc-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--color-border-light);
+      flex-shrink: 0;
+    }
+    .toc-header-title {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--color-text);
+    }
+    .toc-close {
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      padding: 4px;
+      line-height: 1;
+      border-radius: 6px;
+      transition: color 0.15s, background 0.15s;
+    }
+    .toc-close:hover {
+      color: var(--color-text);
+      background: var(--color-bg-warm);
+    }
+
+    .toc-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 0;
+      list-style: none;
+    }
+
+    .toc-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 20px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      border-left: 3px solid transparent;
+      text-decoration: none;
+    }
+    .toc-item:hover {
+      background: var(--color-bg-warm);
+    }
+    .toc-item.active {
+      background: var(--color-accent-light);
+      border-left-color: var(--color-accent);
+    }
+    .toc-item.active .toc-item-title {
+      color: var(--color-accent);
+      font-weight: 600;
+    }
+
+    .toc-item-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+      flex-shrink: 0;
+      background: var(--color-bg-warm);
+      color: var(--color-text-muted);
+      transition: background 0.15s, color 0.15s;
+    }
+    .toc-item.active .toc-item-num {
+      background: var(--color-accent);
+      color: #fff;
+    }
+
+    .toc-item-title {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      line-height: 1.3;
+      transition: color 0.15s;
+    }
+
+    /* Toggle button — inline in nav-dots */
+    .toc-toggle {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-secondary);
+      font-size: 14px;
+      padding: 0;
+      line-height: 1;
+      transition: color 0.15s;
+    }
+    .toc-toggle:hover {
+      color: var(--color-text);
+    }
+
+    /* Overlay for mobile */
+    .toc-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.2);
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .toc-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Adjust main content when sidebar open */
+    body.toc-open main,
+    body.toc-open nav {
+      margin-right: var(--toc-width);
+      transition: margin-right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @media (max-width: 768px) {
+      body.toc-open main,
+      body.toc-open nav {
+        margin-right: 0;
+      }
+      /* Keep nav-bar offset on mobile */
+      .module {
+        padding-top: calc(var(--nav-height) + var(--space-8)) !important;
+      }
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <!-- TOC Overlay (mobile) -->
+  <div class="toc-overlay" id="toc-overlay"></div>
+
+  <!-- TOC Sidebar -->
+  <aside class="toc-sidebar" id="toc-sidebar">
+    <div class="toc-header">
+      <span class="toc-header-title">目录</span>
+      <button class="toc-close" id="toc-close">&#10005;</button>
+    </div>
+    <ul class="toc-list">
+      <li class="toc-item" data-target="module-1"><span class="toc-item-num">01</span><span class="toc-item-title">从一张图说起：ComfyUI 的工作全貌</span></li>
+      <li class="toc-item" data-target="module-2"><span class="toc-item-num">02</span><span class="toc-item-title">节点大联盟：认识核心角色</span></li>
+      <li class="toc-item" data-target="module-3"><span class="toc-item-num">03</span><span class="toc-item-title">数据在节点间流淌：执行引擎揭秘</span></li>
+      <li class="toc-item" data-target="module-4"><span class="toc-item-num">04</span><span class="toc-item-title">模型管家：显存、缓存与智能调度</span></li>
+      <li class="toc-item" data-target="module-5"><span class="toc-item-num">05</span><span class="toc-item-title">架构选型：ComfyUI 适合你吗</span></li>
+    </ul>
+  </aside>
+
+  <script>
+    // TOC logic
+    document.addEventListener('DOMContentLoaded', function() {
+      const sidebar = document.getElementById('toc-sidebar');
+      const toggle = document.getElementById('toc-toggle');
+      const close = document.getElementById('toc-close');
+      const overlay = document.getElementById('toc-overlay');
+      const items = document.querySelectorAll('.toc-item');
+      const modules = document.querySelectorAll('.module');
+
+      function openToc() {
+        sidebar.classList.add('open');
+        overlay.classList.add('visible');
+        document.body.classList.add('toc-open');
+      }
+      function closeToc() {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('visible');
+        document.body.classList.remove('toc-open');
+      }
+
+      if (toggle) toggle.addEventListener('click', () => {
+        sidebar.classList.contains('open') ? closeToc() : openToc();
+      });
+      if (close) close.addEventListener('click', closeToc);
+      if (overlay) overlay.addEventListener('click', closeToc);
+
+      items.forEach(item => {
+        item.addEventListener('click', () => {
+          const target = document.getElementById(item.dataset.target);
+          if (target) target.scrollIntoView({ behavior: 'smooth' });
+          if (window.innerWidth <= 768) closeToc();
+        });
+      });
+
+      function updateActiveToc() {
+        let current = 'module-1';
+        modules.forEach(mod => {
+          const rect = mod.getBoundingClientRect();
+          if (rect.top <= window.innerHeight / 3) {
+            current = mod.id;
+          }
+        });
+        items.forEach(item => {
+          item.classList.toggle('active', item.dataset.target === current);
+        });
+      }
+      window.addEventListener('scroll', () => {
+        requestAnimationFrame(updateActiveToc);
+      }, { passive: true });
+      updateActiveToc();
+    });
+  </script>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">ComfyUI 内部架构</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <button class="toc-toggle" id="toc-toggle" title="目录">&#9776;</button>
+        <button class="nav-dot" data-target="module-1" data-tooltip="从一张图说起" role="tab" aria-label="Module 1: 从一张图说起"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="节点大联盟" role="tab" aria-label="Module 2: 节点大联盟"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="执行引擎揭秘" role="tab" aria-label="Module 3: 执行引擎揭秘"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="模型管家" role="tab" aria-label="Module 4: 模型管家"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="架构选型" role="tab" aria-label="Module 5: 架构选型"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh -->
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">从一张图说起：ComfyUI 的工作全貌</h1>
+      <p class="module-subtitle">当你在画布上点下 Queue Prompt，背后究竟发生了什么？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Hook -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">你用过 ComfyUI，但你知道它是什么吗？</h2>
+        <p>ComfyUI 是当下最流行的 <span class="term" data-definition="AI 图像生成引擎就是一套软件系统，它能根据你输入的文字描述（叫 prompt），用深度学习模型画出对应的图片。类似于'你说话，它画画'的智能助手。">AI 图像生成引擎</span> 之一。你拖拽节点、连上连线、输入一段文字描述，然后点下 Queue Prompt——一张图就出来了。</p>
+        <p>但这一秒到下一秒之间，发生了非常复杂而优雅的事情。这个课程就是带你走进那段时间里发生的一切。</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">&#128161;</div>
+          <div class="callout-content">
+            <strong class="callout-title">为什么要学这些？</strong>
+            <p>因为理解了 ComfyUI 的内部机制，你就能：设计更高效的工作流、快速定位报错节点、给 AI 助手更精准的指令、甚至自己写 <span class="term" data-definition="自定义节点是你用 Python 写的一个小模块，可以插入 ComfyUI 来做官方节点没覆盖到的事情。比如你想接一个新的图像处理算法，就可以写一个自定义节点。">自定义节点</span>。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: What ComfyUI Does -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">ComfyUI 能做什么？</h2>
+        <p>ComfyUI 不只是一个画图工具。它是一个<strong>通用的 AI 内容创作流水线</strong>：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">&#127912;</div>
+            <h4 class="pattern-title">图像生成</h4>
+            <p class="pattern-desc">支持 Flux、SDXL、SD3.5 等主流模型，文生图、图生图、ControlNet 精准控制。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">&#127909;</div>
+            <h4 class="pattern-title">视频生成</h4>
+            <p class="pattern-desc">通过 AnimateDiff、SVD 等扩展，把静态图变成视频片段。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">&#127925;</div>
+            <h4 class="pattern-title">音频 &amp; 3D</h4>
+            <p class="pattern-desc">通过 API 节点和社区扩展，还能做音频生成和 3D 模型生成。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">&#128736;</div>
+            <h4 class="pattern-title">无限扩展</h4>
+            <p class="pattern-desc">数千个社区自定义节点，涵盖后处理、批处理、图像融合、API 调用等。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Core User Journey Flow Animation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">点下 Queue Prompt 后发生了什么？</h2>
+        <p>想象你在用一条<strong>快递流水线</strong>：每个节点是一个工位，数据是传送带上的包裹，从一个工站流向下一个工站。</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"你在画布上连好节点，点下 Queue Prompt"},
+          {"highlight":"flow-actor-1","label":"前端把整个节点图序列化成 JSON prompt","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-2","label":"服务端验证 prompt：节点类型对不对？连线合不合法？"},
+          {"highlight":"flow-actor-2","label":"验证通过，prompt 进入执行队列排队","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-3","label":"执行引擎按拓扑排序逐个执行节点：加载模型 -> 编码文字 -> 采样 -> 解码图片"},
+          {"highlight":"flow-actor-3","label":"最终图片保存到 output 目录，结果通过 WebSocket 推送回前端","packet":true,"from":"actor-3","to":"actor-1"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">UI</div>
+              <span>前端画布</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">SRV</div>
+              <span>服务端</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">EXE</div>
+              <span>执行引擎</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击 "Next Step" 开始追踪一条图片生成的完整旅程</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">Next Step</button>
+            <button class="btn flow-reset-btn">Restart</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Key files -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">源码长什么样？</h2>
+        <p>ComfyUI 的核心代码并不庞大。下面是关键文件的地图——这门课的所有内容都围绕这几个文件展开：</p>
+
+        <div class="file-tree">
+          <div class="ft-folder open">
+            <span class="ft-name">ComfyUI/</span>
+            <span class="ft-desc">项目根目录</span>
+            <div class="ft-children">
+              <div class="ft-file">
+                <span class="ft-name">main.py</span>
+                <span class="ft-desc">启动入口：初始化服务器、加载节点、启动工作线程</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">server.py</span>
+                <span class="ft-desc">HTTP + WebSocket 服务端：接收 prompt、管理队列、推送进度</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">execution.py</span>
+                <span class="ft-desc">执行引擎：验证、拓扑排序、逐节点执行、缓存管理</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">nodes.py</span>
+                <span class="ft-desc">内置节点定义：CLIPTextEncode、KSampler、VAEDecode 等</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">comfy/</span>
+                <span class="ft-desc">核心算法层：模型加载、采样器、ControlNet 等</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">comfy_execution/</span>
+                <span class="ft-desc">执行基础设施：图结构、缓存策略、验证逻辑</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">folder_paths.py</span>
+                <span class="ft-desc">模型文件路径管理：checkpoints、loras 等都注册在这里</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">custom_nodes/</span>
+                <span class="ft-desc">社区自定义节点：数千个扩展功能的插件</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Code Translation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">入口代码长什么样？</h2>
+        <p>看看 <code>main.py</code> 里的启动逻辑——这就是 ComfyUI 从代码变成一个可交互服务的起点：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">start_comfyui</span>(asyncio_loop=<span class="code-keyword">None</span>):</span>
+<span class="code-line">    prompt_server = server.<span class="code-function">PromptServer</span>(asyncio_loop)</span>
+<span class="code-line"></span>
+<span class="code-line">    asyncio_loop.<span class="code-function">run_until_complete</span>(</span>
+<span class="code-line">        nodes.<span class="code-function">init_extra_nodes</span>(</span>
+<span class="code-line">            init_custom_nodes=<span class="code-keyword">not</span> args.disable_all_custom_nodes</span>
+<span class="code-line">        )</span>
+<span class="code-line">    )</span>
+<span class="code-line"></span>
+<span class="code-line">    prompt_server.<span class="code-function">add_routes</span>()</span>
+<span class="code-line">    <span class="code-function">hijack_progress</span>(prompt_server)</span>
+<span class="code-line"></span>
+<span class="code-line">    threading.<span class="code-function">Thread</span>(</span>
+<span class="code-line">        target=prompt_worker, daemon=<span class="code-keyword">True</span>,</span>
+<span class="code-line">        args=(prompt_server.prompt_queue, prompt_server)</span>
+<span class="code-line">    ).<span class="code-function">start</span>()</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">定义启动函数，可以传入一个已有的事件循环...</p>
+              <p class="tl">创建 PromptServer——这就是接收你操作请求的服务器...</p>
+              <p class="tl"></p>
+              <p class="tl">加载所有自定义节点（那些社区开发的插件）...</p>
+              <p class="tl">如果你没禁用自定义节点，就把它们全加载进来...</p>
+              <p class="tl"></p>
+              <p class="tl">注册所有 HTTP 路由（API 接口）...</p>
+              <p class="tl">把进度条显示'劫持'到前端，让你能看到生成进度...</p>
+              <p class="tl"></p>
+              <p class="tl">在后台线程里启动工作队列——它会一直等待新任务到来...</p>
+              <p class="tl">传入队列和服务器实例，线程就跑起来了...</p>
+              <p class="tl"></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#128218;</div>
+          <div class="callout-content">
+            <strong class="callout-title">补充知识</strong>
+            <p><span class="term" data-definition="守护线程（daemon thread）是一种在后台默默运行的线程。当主程序退出时，守护线程会自动跟着退出，不会阻止程序关闭。就像便利店门口的自动门——店关门了，自动门也就不工作了。">守护线程（daemon=True）</span> 意味着执行队列不会阻止程序退出——当你关闭 ComfyUI，工作线程自动跟着停。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 6: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验你的理解</h2>
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！prompt 就是把画布上所有节点和连线翻译成 JSON，告诉服务端'请按这个结构执行'。"
+               data-explanation-wrong="想想 Queue Prompt 按钮做了什么——它不是直接执行，而是把画布信息变成一种中间格式发给后端。">
+            <h3 class="quiz-question">当你在 ComfyUI 画布上点下 Queue Prompt，前端发送给后端的是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>一张截图 + 文字描述</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>一个 JSON 格式的 prompt，描述所有节点和连线关系</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>一段 Python 代码，直接调用生成函数</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">节点大联盟：认识核心角色</h1>
+      <p class="module-subtitle">每个节点都是一个专职员工，它们各司其职又紧密配合</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Metaphor -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">把节点想象成一个电影剧组</h2>
+        <p>生成一张 AI 图片就像拍一部电影：</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">&#128196;</div>
+            <div>
+              <strong>CheckpointLoaderSimple</strong>
+              <p><strong>剧本统筹</strong> — 把核心模型（大模型文件）加载进内存，没它谁都不知道要演什么</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">&#9997;</div>
+            <div>
+              <strong>CLIPTextEncode</strong>
+              <p><strong>编剧</strong> — 把你的文字描述（prompt）翻译成模型能理解的'潜台词'（<span class="term" data-definition="conditioning 是一种向量表示，把人类语言转化成数学空间中的方向，告诉模型'往哪个方向画'。可以理解为给画家一张情绪板。">conditioning</span>）</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">&#127922;</div>
+            <div>
+              <strong>KSampler</strong>
+              <p><strong>导演</strong> — 真正执行创作的核心。它在 <span class="term" data-definition="潜空间（latent space）是一种压缩表示，就像把一张高清图片压缩成小尺寸的'草图'，模型在这个草图上反复修改，最后再还原成高清图。">潜空间</span>里一步步雕刻出图像</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-5)">&#128248;</div>
+            <div>
+              <strong>VAEDecode</strong>
+              <p><strong>摄影师</strong> — 把潜空间里的'草图'解码成你能看到的真实像素图片</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">&#128190;</div>
+            <div>
+              <strong>SaveImage</strong>
+              <p><strong>后期交付</strong> — 把最终图片保存到磁盘，让你可以下载和使用</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Node Registration System -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">节点是怎么注册进系统的？</h2>
+        <p>每个节点都是一个 <span class="term" data-definition="Python 里的 class（类）就像一张蓝图——定义了节点有什么输入、什么输出、怎么处理数据。运行时，ComfyUI 会根据这张蓝图创建实际的节点实例。">Python class</span>。ComfyUI 用一个全局字典 <code>NODE_CLASS_MAPPINGS</code> 来管理它们：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">CLIPTextEncode</span>(ComfyNodeABC):</span>
+<span class="code-line">    <span class="code-keyword">@classmethod</span></span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">INPUT_TYPES</span>(s):</span>
+<span class="code-line">        <span class="code-keyword">return</span> {<span class="code-string">"required"</span>: {</span>
+<span class="code-line">            <span class="code-string">"text"</span>: (IO.STRING, {<span class="code-string">"multiline"</span>: <span class="code-keyword">True</span>}),</span>
+<span class="code-line">            <span class="code-string">"clip"</span>: (IO.CLIP, {})</span>
+<span class="code-line">        }}</span>
+<span class="code-line">    RETURN_TYPES = (IO.CONDITIONING,)</span>
+<span class="code-line">    FUNCTION = <span class="code-string">"encode"</span></span>
+<span class="code-line">    CATEGORY = <span class="code-string">"conditioning"</span></span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">encode</span>(self, clip, text):</span>
+<span class="code-line">        tokens = clip.<span class="code-function">tokenize</span>(text)</span>
+<span class="code-line">        <span class="code-keyword">return</span> (clip.<span class="code-function">encode_from_tokens_scheduled</span>(tokens),)</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">定义一个叫 CLIPTextEncode 的节点类...</p>
+              <p class="tl">声明它需要什么输入（这是一个类方法）...</p>
+              <p class="tl">返回输入规格表...</p>
+              <p class="tl">必须输入：一段文字（支持多行编辑）...</p>
+              <p class="tl">还必须输入：一个 CLIP 模型实例...</p>
+              <p class="tl">这个节点输出一个 conditioning（编码后的语义向量）...</p>
+              <p class="tl">核心处理函数名叫 encode...</p>
+              <p class="tl">在节点菜单里归类到 conditioning 分组...</p>
+              <p class="tl"></p>
+              <p class="tl">执行编码：先把文字拆成 token（词元）...</p>
+              <p class="tl">然后用 CLIP 模型把 token 编码成语义向量并返回...</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">&#128161;</div>
+          <div class="callout-content">
+            <strong class="callout-title">通用模式</strong>
+            <p>这个 <code>INPUT_TYPES</code> + <code>RETURN_TYPES</code> + <code>FUNCTION</code> 的三件套是 ComfyUI 节点的标准模板。几乎所有节点（包括你写的自定义节点）都遵循这个约定。学会这个模式，你就能读懂任何一个节点。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Group Chat -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">节点之间怎么对话？</h2>
+        <p>想象节点们在一个群里协作，每个节点只在需要时发言：</p>
+
+        <div class="chat-window" id="chat-module2">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="checkpoint" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">CK</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">CheckpointLoader</span>
+                <p>我把大模型加载好了，分成三份：MODEL 给采样器，CLIP 给文本编码器，VAE 给解码器。各取所需！</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="clip" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">CL</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">CLIPTextEncode</span>
+                <p>收到 CLIP 模型！我现在把用户的文字 prompt 编码成 conditioning 向量——正面一个，负面一个。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="ksampler" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">KS</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">KSampler</span>
+                <p>MODEL 到手，conditioning 到手。开始采样！我要在潜空间里反复去噪 20 步... 这可能需要几秒到几十秒。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="ksampler" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">KS</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">KSampler</span>
+                <p>采样完成！输出 latent 图像（还是压缩格式的'草图'），现在传给 VAE 解码。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="vae" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">VD</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">VAEDecode</span>
+                <p>latent 草图解码成功，变成真实的 RGB 像素图片了！交给 SaveImage 存盘。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="5" data-sender="save" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">SI</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">SaveImage</span>
+                <p>图片已保存到 output 目录，文件名是 ComfyUI_00001_.png。任务完成！</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-typing" style="display:none">
+            <div class="chat-avatar" id="typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">Next Message</button>
+            <button class="btn chat-all-btn">Play All</button>
+            <button class="btn chat-reset-btn">Replay</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Custom Nodes -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">自定义节点：社区的力量</h2>
+        <p>ComfyUI 最强大的地方之一就是自定义节点系统。任何人都可以写一个 <span class="term" data-definition="Python 文件就是一个包含代码的文本文件，扩展名是 .py。ComfyUI 的自定义节点通常是一个包含 __init__.py 的文件夹。">Python 模块</span> 放到 <code>custom_nodes/</code> 目录，ComfyUI 会自动发现并加载它：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line">node_paths = folder_paths.<span class="code-function">get_folder_paths</span>(<span class="code-string">"custom_nodes"</span>)</span>
+<span class="code-line"><span class="code-keyword">for</span> custom_node_path <span class="code-keyword">in</span> node_paths:</span>
+<span class="code-line">    possible_modules = os.<span class="code-function">listdir</span>(custom_node_path)</span>
+<span class="code-line">    <span class="code-keyword">for</span> possible_module <span class="code-keyword">in</span> possible_modules:</span>
+<span class="code-line">        <span class="code-comment"># 跳过禁用的和缓存文件</span></span>
+<span class="code-line">        <span class="code-keyword">if</span> module_path.<span class="code-function">endswith</span>(<span class="code-string">".disabled"</span>):</span>
+<span class="code-line">            <span class="code-keyword">continue</span></span>
+<span class="code-line">        <span class="code-comment"># 加载并注册这个自定义节点</span></span>
+<span class="code-line">        <span class="code-function">execute_script</span>(script_path)</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">找到所有自定义节点文件夹的路径...</p>
+              <p class="tl">遍历每一个自定义节点目录...</p>
+              <p class="tl">列出目录下的所有文件和子目录...</p>
+              <p class="tl">逐个检查...</p>
+              <p class="tl">被禁用的节点（后缀 .disabled）跳过...</p>
+              <p class="tl">继续下一个...</p>
+              <p class="tl">执行启动脚本，把节点注册进系统...</p>
+              <p class="tl">这样用户的画布上就能看到并使用这个节点了。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Glossary + Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">概念速查</h2>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">NODE_CLASS_MAPPINGS</code>
+            <span class="badge-desc">全局字典，把节点类名映射到实际的 Python class 对象——是节点的'花名册'</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">INPUT_TYPES</code>
+            <span class="badge-desc">类方法，声明节点需要什么输入（类型、默认值、约束）</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">RETURN_TYPES</code>
+            <span class="badge-desc">元组，声明节点输出什么类型的数据——决定了连线时的类型匹配</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">FUNCTION</code>
+            <span class="badge-desc">字符串，指定真正执行逻辑的方法名——ComfyUI 会调用这个名字的方法</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">CATEGORY</code>
+            <span class="badge-desc">节点在菜单中的分类路径，如 "conditioning" 或 "image/upscaling"</span>
+          </div>
+        </div>
+
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="完全正确！ComfyUI 的类型系统通过 RETURN_TYPES 和 INPUT_TYPES 的类型名来匹配。如果连线两端的类型名不一致，验证就会报错。"
+               data-explanation-wrong="提示：看看节点的 RETURN_TYPES 和下一个节点的 INPUT_TYPES 之间的关系。连线的规则不是随意的。">
+            <h3 class="quiz-question">两个节点之间能连线的条件是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>只要连线方向正确就行（输出 -> 输入）</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>两个节点必须在同一个 CATEGORY 下</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>输出端的 RETURN_TYPES 和输入端的 INPUT_TYPES 类型名必须匹配</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">数据在节点间流淌：执行引擎揭秘</h1>
+      <p class="module-subtitle">从验证到执行，一条 prompt 走过的完整旅途</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: The Problem -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">为什么需要执行引擎？</h2>
+        <p>你画的节点图可能有几十个节点，连成复杂的网络。但计算机不能'同时'执行所有节点——就像地铁线路图上，列车必须按顺序从起点开到终点。</p>
+
+        <p>执行引擎的核心工作就是：<strong>确定顺序，按序执行，传递数据</strong>。</p>
+
+        <p>把执行引擎想象成一个<strong>快递分拣中心</strong>。每个包裹（数据）都有明确的目的地（下游节点），分拣员（引擎）要确保：</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>验证</strong>
+              <p>包裹上的地址格式对不对？收件人存在吗？（类型检查、循环依赖检测）</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>排序</strong>
+              <p>哪些包裹要先送？不能让收件人等不到上游的包裹。（<span class="term" data-definition="拓扑排序是一种算法，能把有依赖关系的任务排成一个线性顺序。就像穿衣服——你得先穿袜子再穿鞋，拓扑排序就是在算这种先后关系。">拓扑排序</span>）</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>执行</strong>
+              <p>按排好的顺序逐个节点执行，把输出传给下游节点，直到所有输出节点完成</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>缓存</strong>
+              <p>上次已经算过的结果如果输入没变，直接复用，不用重新算（智能缓存）</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Validation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">第一步：验证 Prompt</h2>
+        <p><code>validate_prompt</code> 函数是第一道关卡。它做什么？</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">async def</span> <span class="code-function">validate_prompt</span>(prompt_id, prompt, partial_execution_list):</span>
+<span class="code-line">    outputs = <span class="code-function">set</span>()</span>
+<span class="code-line">    <span class="code-keyword">for</span> x <span class="code-keyword">in</span> prompt:</span>
+<span class="code-line">        class_type = prompt[x][<span class="code-string">"class_type"</span>]</span>
+<span class="code-line">        class_ = nodes.NODE_CLASS_MAPPINGS.<span class="code-function">get</span>(class_type)</span>
+<span class="code-line">        <span class="code-keyword">if</span> class_ <span class="code-keyword">is None</span>:</span>
+<span class="code-line">            <span class="code-keyword">return</span> (<span class="code-keyword">False</span>, error, [], {})</span>
+<span class="code-line">        <span class="code-keyword">if</span> hasattr(class_, <span class="code-string">"OUTPUT_NODE"</span>):</span>
+<span class="code-line">            outputs.<span class="code-function">add</span>(x)</span>
+<span class="code-line">    <span class="code-keyword">if</span> <span class="code-function">len</span>(outputs) == <span class="code-number">0</span>:</span>
+<span class="code-line">        <span class="code-keyword">return</span> (<span class="code-keyword">False</span>, error, [], {})</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">定义异步验证函数，接收 prompt ID 和节点字典...</p>
+              <p class="tl">准备一个集合来记录哪些节点是'输出节点'...</p>
+              <p class="tl">遍历 prompt 里的每一个节点...</p>
+              <p class="tl">取出这个节点的类型名称...</p>
+              <p class="tl">在全局注册表里查找这个类型——如果找不到...</p>
+              <p class="tl">说明自定义节点没安装，直接返回错误...</p>
+              <p class="tl">如果这个节点标记了 OUTPUT_NODE = True...</p>
+              <p class="tl">就把它记到输出集合里（SaveImage 就是输出节点）...</p>
+              <p class="tl">如果整个图连一个输出节点都没有...</p>
+              <p class="tl">返回错误：这个图没有终点，执行了也没意义。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">&#9888;</div>
+          <div class="callout-content">
+            <strong class="callout-title">常见报错</strong>
+            <p>如果你看到 "Node 'XXX' not found. The custom node may not be installed"——这就是 <code>validate_prompt</code> 发现一个节点的 class_type 在 NODE_CLASS_MAPPINGS 里找不到。解决方案：安装对应的自定义节点。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Execution Flow -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">执行引擎的完整数据流</h2>
+        <p>验证通过后，真正的执行开始了。数据像水流一样从上游节点流向下游：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"用户点击 Queue Prompt，前端发送 JSON prompt"},
+          {"highlight":"flow-actor-2","label":"validate_prompt 检查所有节点的类型和连线是否合法"},
+          {"highlight":"flow-actor-2","label":"验证通过！prompt 进入 PromptQueue 排队","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-3","label":"prompt_worker 线程从队列取出任务"},
+          {"highlight":"flow-actor-3","label":"PromptExecutor 按 ExecutionList 顺序执行节点"},
+          {"highlight":"flow-actor-3","label":"每个节点的输出缓存起来，传给下游节点","packet":true,"from":"actor-3","to":"actor-4"},
+          {"highlight":"flow-actor-4","label":"最终结果通过 WebSocket 推送回前端显示","packet":true,"from":"actor-4","to":"actor-1"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">FE</div>
+              <span>前端</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">VAL</div>
+              <span>验证器</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">EXE</div>
+              <span>执行器</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">WS</div>
+              <span>WebSocket</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击 "Next Step" 追踪数据从点击到出图的完整旅程</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">Next Step</button>
+            <button class="btn flow-reset-btn">Restart</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Caching Strategies -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">智能缓存：不重复造轮子</h2>
+        <p>如果一张图你生成两次，但只改了最后的 SaveImage 参数，前面的模型加载、文本编码都不需要重新算。ComfyUI 提供了多种缓存策略：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">&#128260;</div>
+            <h4 class="pattern-title">Classic 缓存</h4>
+            <p class="pattern-desc">用完即丢——最保守的策略，每次执行都重新计算。适合调试场景。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">&#128230;</div>
+            <h4 class="pattern-title">LRU 缓存</h4>
+            <p class="pattern-desc">最近用过的留着，很久没用的丢掉。通过 <code>--cache-lru N</code> 设置大小。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">&#128184;</div>
+            <h4 class="pattern-title">RAM Pressure 缓存</h4>
+            <p class="pattern-desc">默认策略。根据可用内存动态决定保留多少缓存，内存紧张时自动清理。</p>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">CacheType</span>(Enum):</span>
+<span class="code-line">    CLASSIC = <span class="code-number">0</span></span>
+<span class="code-line">    LRU = <span class="code-number">1</span></span>
+<span class="code-line">    NONE = <span class="code-number">2</span></span>
+<span class="code-line">    RAM_PRESSURE = <span class="code-number">3</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">用枚举定义四种缓存策略...</p>
+              <p class="tl">Classic：经典模式，用完就清...</p>
+              <p class="tl">LRU：保留最近使用的，丢弃最久没用的...</p>
+              <p class="tl">NONE：完全不缓存，每次都从头算...</p>
+              <p class="tl">RAM_PRESSURE：根据内存压力动态调整，默认选择。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">理解执行引擎</h2>
+
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！如果没有输出节点（如 SaveImage），整个图没有终点，执行引擎不知道该算到什么时候停。即使中间节点都定义好了，也必须至少有一个 OUTPUT_NODE = True 的节点。"
+               data-explanation-wrong="想象一下：如果一张节点图没有任何终点（输出节点），执行引擎会怎么判断？它需要知道'算到哪个节点算完'。">
+            <h3 class="quiz-question">如果一个 ComfyUI 工作流里没有任何 SaveImage 或 PreviewImage 等输出节点，会发生什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>正常执行，只是不会保存图片</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>验证阶段直接报错：Prompt has no outputs</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>执行会陷入死循环，一直算下去</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="对！RAM Pressure 缓存会监控可用内存，当内存紧张时自动清理旧的缓存条目，在性能和内存使用之间取得平衡。"
+               data-explanation-wrong="想想 ComfyUI 默认的缓存策略是怎么工作的——它需要同时考虑速度和内存。">
+            <h3 class="quiz-question">RAM Pressure 缓存策略的核心思想是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>把所有缓存都存到硬盘上，不占内存</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>固定保留最近 N 个节点的结果</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>根据可用内存动态调整缓存大小，内存紧张时自动释放</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">模型管家：显存、缓存与智能调度</h1>
+      <p class="module-subtitle">GPU 显存是稀缺资源，ComfyUI 如何聪明地管理它？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: The Problem -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">显存：AI 绘图最稀缺的资源</h2>
+        <p>生成一张 AI 图片需要加载好几个模型——一个主模型（几 GB）、一个文本编码器（几百 MB）、一个 VAE 解码器——全都得塞进 <span class="term" data-definition="GPU 显存（VRAM）是显卡上专用的快速内存。AI 模型运行时需要先把权重数据加载到显存里，就像厨师做菜前要先把食材摆在案板上。8GB 显存大概能同时放一个 SDXL 模型。">GPU 显存</span> 里。</p>
+
+        <p>如果你的显卡只有 8GB 显存，而模型需要 10GB，就会报 <span class="term" data-definition="OOM 全称 Out of Memory，意思是内存不够用了。就像你试图打开太多浏览器标签页，电脑内存装不下就崩溃了。在 AI 绘图中，通常是模型太大或分辨率太高导致。">OOM（Out of Memory）</span> 错误。</p>
+
+        <p>ComfyUI 的 <code>model_management</code> 模块就像一个精明的<strong>仓库管理员</strong>，决定哪些模型该上架、哪些该先收起来。</p>
+      </section>
+
+      <!-- Screen 2: Model Loading Flow -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">模型加载的完整流程</h2>
+        <p>当你拖入一个 CheckpointLoader 节点并执行时：</p>
+
+        <div class="chat-window" id="chat-module4">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="loader" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">LD</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">CheckpointLoader</span>
+                <p>用户选了 sdxl_base.safetensors。我先检查这个文件在 folder_paths 里注册的路径对不对...</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="mgmt" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">MM</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">ModelManagement</span>
+                <p>收到加载请求！先算算这个模型需要多少显存... 大约 6.5GB。当前可用显存只剩 3GB。需要先卸载一些不用的模型腾空间。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="mgmt" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">MM</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">ModelManagement</span>
+                <p>把上次缓存的旧模型移出 GPU，换到系统内存（RAM）暂存。现在显存有 7GB 空间了，够用了。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="loader" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">LD</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">CheckpointLoader</span>
+                <p>开始用 safetensors 库加载权重文件... 加载成功！拆分出 MODEL、CLIP、VAE 三部分，分别传给下游节点。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="mgmt" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">MM</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">ModelManagement</span>
+                <p>模型已就位。我会一直监控显存使用。如果后续节点需要加载 ControlNet 或 LoRA，我会继续动态调度空间。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-typing-module4" style="display:none">
+            <div class="chat-avatar" id="chat-module4-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">Next Message</button>
+            <button class="btn chat-all-btn">Play All</button>
+            <button class="btn chat-reset-btn">Replay</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Memory Management Code -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">显存管理的关键代码</h2>
+        <p>ComfyUI 在执行完每个节点后，会自动做显存清理：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">if</span> comfy.model_management.<span class="code-function">is_oom</span>(ex):</span>
+<span class="code-line">    tips = <span class="code-string">"This error means you ran out of memory on your GPU."</span></span>
+<span class="code-line">    comfy.model_management.<span class="code-function">unload_all_models</span>()</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 正常执行完后的清理</span></span>
+<span class="code-line"><span class="code-keyword">if</span> need_gc:</span>
+<span class="code-line">    gc.<span class="code-function">collect</span>()</span>
+<span class="code-line">    comfy.model_management.<span class="code-function">soft_empty_cache</span>()</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">如果捕获到 OOM（显存不足）错误...</p>
+              <p class="tl">给用户一个提示：GPU 显存不够了...</p>
+              <p class="tl">紧急措施：立刻卸载所有模型释放显存！</p>
+              <p class="tl"></p>
+              <p class="tl">正常流程里的清理逻辑...</p>
+              <p class="tl">如果需要垃圾回收...</p>
+              <p class="tl">先调用 Python 的垃圾回收器...</p>
+              <p class="tl">再调用 ComfyUI 的轻量缓存清理，释放不必要的显存占用。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: folder_paths -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">模型文件怎么找到的？</h2>
+        <p><code>folder_paths.py</code> 是 ComfyUI 的<strong>文件导航系统</strong>。它把各种模型类型映射到对应的文件夹：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line">folder_names_and_paths[<span class="code-string">"checkpoints"</span>] = (</span>
+<span class="code-line">    [os.path.<span class="code-function">join</span>(models_dir, <span class="code-string">"checkpoints"</span>)],</span>
+<span class="code-line">    supported_pt_extensions</span>
+<span class="code-line">)</span>
+<span class="code-line">folder_names_and_paths[<span class="code-string">"loras"</span>] = (</span>
+<span class="code-line">    [os.path.<span class="code-function">join</span>(models_dir, <span class="code-string">"loras"</span>)],</span>
+<span class="code-line">    supported_pt_extensions</span>
+<span class="code-line">)</span>
+<span class="code-line">folder_names_and_paths[<span class="code-string">"custom_nodes"</span>] = (</span>
+<span class="code-line">    [os.path.<span class="code-function">join</span>(base_path, <span class="code-string">"custom_nodes"</span>)],</span>
+<span class="code-line">    <span class="code-function">set</span>()</span>
+<span class="code-line">)</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">注册 checkpoints 的搜索路径...</p>
+              <p class="tl">指向 models/checkpoints/ 目录...</p>
+              <p class="tl">只识别特定扩展名（.safetensors, .ckpt, .pt 等）...</p>
+              <p class="tl"></p>
+              <p class="tl">注册 lora 微调模型的搜索路径...</p>
+              <p class="tl">指向 models/loras/ 目录...</p>
+              <p class="tl">同样只识别模型文件扩展名...</p>
+              <p class="tl"></p>
+              <p class="tl">注册自定义节点的搜索路径...</p>
+              <p class="tl">指向 custom_nodes/ 目录...</p>
+              <p class="tl">不限制文件类型（set() 表示接受任何扩展名）。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">&#128161;</div>
+          <div class="callout-content">
+            <strong class="callout-title">实用技巧</strong>
+            <p>你可以通过 <code>extra_model_paths.yaml</code> 文件添加额外的模型目录。这样你的模型可以放在外部硬盘或其他位置，而不用全部塞进 ComfyUI 的 models 文件夹。ComfyUI 启动时会自动读取这个配置文件。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！ComfyUI 使用动态模型管理——当新模型需要空间时，旧模型会被自动移出 GPU 到系统内存（RAM），而不是直接丢弃。下次需要时还能快速加载回来。"
+               data-explanation-wrong="想想 ComfyUI 的仓库管理员比喻——它不会随便扔东西，也不会无限堆叠。它会在需要时腾空间，但保留回收的可能。">
+            <h3 class="quiz-question">当 ComfyUI 需要加载一个新模型但显存不够时，它会怎么做？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>直接报错，让用户手动关闭一些模型</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>自动把不常用的模型从 GPU 移到系统内存，腾出空间</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>把所有模型都存到硬盘，需要时再加载</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="对！extra_model_paths.yaml 让你可以指定多个额外的模型搜索路径，这样模型不用全放在 ComfyUI 安装目录下。"
+               data-explanation-wrong="这个功能跟 ComfyUI 的文件路径系统有关——看看 folder_paths.py 相关的配置。">
+            <h3 class="quiz-question">如果你想把自己的模型放在外接硬盘上让 ComfyUI 使用，应该怎么做？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>编辑 extra_model_paths.yaml 文件，添加外接硬盘的路径</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>把模型文件复制到 ComfyUI 的 models 目录下</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>修改 nodes.py 里的路径常量</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">架构选型：ComfyUI 适合你吗</h1>
+      <p class="module-subtitle">技术负责人的决策参考：问题、哲学、对比与边界</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Problem + Philosophy -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">它解决什么问题？</h2>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">核心问题</code>
+            <span class="badge-desc">AI 模型推理需要把多个处理步骤编排成流水线——加载模型、编码文本、采样、解码——但用户不想写代码</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">设计哲学</code>
+            <span class="badge-desc">节点图 = 可视化编程。每个节点是一个纯函数，连线就是数据流，画布就是 IDE</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">本质特征</code>
+            <span class="badge-desc">基于 <span class="term" data-definition="DAG（有向无环图）是一种数据结构，节点之间有方向性的连线，但不能绕回自己。就像河流只能从上游流向下游，不会循环。ComfyUI 的工作流就是一个 DAG。">DAG</span> 的数据流引擎 + 插件化的节点注册系统 + 动态显存管理</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">扩展模型</code>
+            <span class="badge-desc">通过 custom_nodes 目录自动发现并加载 Python 模块，每个模块可注册任意数量的节点类</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Comparison Table -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">与其他方案对比</h2>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#128218;</div>
+          <div class="callout-content">
+            <p>ComfyUI 的核心优势是<strong>可编程性和精确控制</strong>。如果你需要批量处理、条件分支、API 集成，它是最佳选择。</p>
+          </div>
+        </div>
+
+        <table style="width:100%; border-collapse:collapse; font-size:var(--text-sm); margin-top:var(--space-4);">
+          <thead>
+            <tr style="background:var(--color-bg-warm); text-align:left;">
+              <th style="padding:var(--space-3); border-bottom:2px solid var(--color-border);">维度</th>
+              <th style="padding:var(--space-3); border-bottom:2px solid var(--color-accent); color:var(--color-accent);">ComfyUI</th>
+              <th style="padding:var(--space-3); border-bottom:2px solid var(--color-border);">Automatic1111</th>
+              <th style="padding:var(--space-3); border-bottom:2px solid var(--color-border);">InvokeAI</th>
+              <th style="padding:var(--space-3); border-bottom:2px solid var(--color-border);">Fooocus</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);"><strong>操作方式</strong></td>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);">
+                <ul><li>节点图拖拽</li><li>精确控制每一步</li></ul>
+              </td>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);">
+                <ul><li>表单填参数</li><li>插件扩展</li></ul>
+              </td>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);">
+                <ul><li>画布 + 工具栏</li><li>面向设计师</li></ul>
+              </td>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);">
+                <ul><li>极简界面</li><li>开箱即用</li></ul>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);"><strong>学习曲线</strong></td>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);">
+                <ul><li>较陡</li><li>需理解节点概念</li></ul>
+              </td>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);">
+                <ul><li>中等</li><li>参数多但直观</li></ul>
+              </td>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);">
+                <ul><li>较低</li><li>操作贴近 Photoshop</li></ul>
+              </td>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);">
+                <ul><li>最低</li><li>输入文字就出图</li></ul>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);"><strong>可编程性</strong></td>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);">
+                <ul><li>极强</li><li>条件分支/循环/API调用</li></ul>
+              </td>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);">
+                <ul><li>中等</li><li>依赖插件脚本</li></ul>
+              </td>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);">
+                <ul><li>有限</li><li>侧重手动操作</li></ul>
+              </td>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);">
+                <ul><li>无</li><li>纯预设驱动</li></ul>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);"><strong>API 集成</strong></td>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);">
+                <ul><li>原生 HTTP + WebSocket</li><li>完整的 REST API</li></ul>
+              </td>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);">
+                <ul><li>有 API 扩展</li><li>功能有限</li></ul>
+              </td>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);">
+                <ul><li>基础 API</li><li>面向手动使用</li></ul>
+              </td>
+              <td style="padding:var(--space-3); border-bottom:1px solid var(--color-border-light);">
+                <ul><li>无 API</li><li>纯桌面应用</li></ul>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:var(--space-3);"><strong>生态规模</strong></td>
+              <td style="padding:var(--space-3);">
+                <ul><li>数千自定义节点</li><li>ComfyUI Manager 管理</li></ul>
+              </td>
+              <td style="padding:var(--space-3);">
+                <ul><li>大量插件</li><li>历史最久</li></ul>
+              </td>
+              <td style="padding:var(--space-3);">
+                <ul><li>适中</li><li>精选节点</li></ul>
+              </td>
+              <td style="padding:var(--space-3);">
+                <ul><li>极简</li><li>几乎无扩展</li></ul>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Screen 3: Suitable vs Not Suitable -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">适用 vs 不适用场景</h2>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: var(--space-6);">
+          <div style="background:var(--color-success-light); border-radius:var(--radius-md); padding:var(--space-6);">
+            <h4 style="color:var(--color-success); margin-bottom:var(--space-3);">&#9989; 适合</h4>
+            <ul style="list-style:none; padding:0;">
+              <li style="padding:var(--space-2) 0;">&#10003; 需要精确控制每一步参数的高级用户</li>
+              <li style="padding:var(--space-2) 0;">&#10003; 批量处理：一次生成几百张图</li>
+              <li style="padding:var(--space-2) 0;">&#10003; API 集成：把 AI 生成嵌入产品后端</li>
+              <li style="padding:var(--space-2) 0;">&#10003; 复杂工作流：ControlNet 组合、多模型串联</li>
+              <li style="padding:var(--space-2) 0;">&#10003; 自定义开发：写自己的节点扩展功能</li>
+              <li style="padding:var(--space-2) 0;">&#10003; 研究用途：对比不同采样器、调度器效果</li>
+            </ul>
+          </div>
+          <div style="background:var(--color-error-light); border-radius:var(--radius-md); padding:var(--space-6);">
+            <h4 style="color:var(--color-error); margin-bottom:var(--space-3);">&#10060; 不适合</h4>
+            <ul style="list-style:none; padding:0;">
+              <li style="padding:var(--space-2) 0;">&#10007; 只想快速出图、不想学习的轻度用户</li>
+              <li style="padding:var(--space-2) 0;">&#10007; 需要 Photoshop 级别手动修图的设计师</li>
+              <li style="padding:var(--space-2) 0;">&#10007; 对节点图界面有强烈抵触的用户</li>
+              <li style="padding:var(--space-2) 0;">&#10007; 纯移动端使用场景（只有桌面端）</li>
+              <li style="padding:var(--space-2) 0;">&#10007; 追求一键出效果、不想调参的场景</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Hard Limits from Source Code -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">硬限制（从源码提取）</h2>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">MAX_RESOLUTION = 16384</code>
+            <span class="badge-desc">内置节点的最大分辨率限制。超过此值的宽高参数会被拒绝。</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">MAXIMUM_HISTORY_SIZE = 10000</code>
+            <span class="badge-desc">PromptQueue 的历史记录上限。超过时自动丢弃最老的记录。</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">supported_pt_extensions</code>
+            <span class="badge-desc">模型文件只识别 .ckpt, .pt, .pt2, .bin, .pth, .safetensors, .pkl, .sft 扩展名</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">license: GPL-3.0</code>
+            <span class="badge-desc">开源协议为 GPL-3.0——商业使用需注意传染性条款。你的衍生作品也必须开源。</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Costs + Conclusion -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">成本与风险</h2>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>硬件成本</strong>
+              <p>推荐至少 8GB VRAM 的 NVIDIA GPU（SDXL 最低要求）。理想配置 12-24GB。无 GPU 可用 CPU 但极慢。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>学习成本</strong>
+              <p>节点图思维需要适应期。复杂工作流需要理解模型架构（CLIP/VAE/UNet）。预计 2-5 天熟悉基础。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>维护成本</strong>
+              <p>自定义节点可能跟不上 ComfyUI 版本更新。依赖管理需要 Python 环境。Docker 部署可行但需要配置。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent" style="margin-top:var(--space-8);">
+          <div class="callout-icon">&#127919;</div>
+          <div class="callout-content">
+            <strong class="callout-title">最终判定</strong>
+            <p>ComfyUI 是 AI 图像生成领域最灵活、最强大的编排工具。如果你的需求超出'输入文字出图'的范畴——需要批处理、API 集成、复杂流水线、或者想深入理解 AI 绘图的每一步——ComfyUI 是最佳选择。代价是学习曲线和硬件要求。</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+  </main>
+
+</body>
+</html>

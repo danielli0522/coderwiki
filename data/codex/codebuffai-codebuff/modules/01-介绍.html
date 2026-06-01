@@ -1,0 +1,266 @@
+<section class="module" id="module-1">
+  <div class="module-inner">
+    <h2>Codebuff 简介</h2>
+    <p>Codebuff 是一个开源的 AI 编码助手，它通过自然语言指令来编辑你的代码库。与单一模型不同，Codebuff 协调多个专门的代理，共同理解你的项目并做出精确的修改。</p>
+
+    <div class="callout callout-accent">
+      <p><strong>核心数据</strong>：Codebuff 在 175+ 个编码任务上的评估结果优于 Claude Code，准确率达到 61% vs 53%。</p>
+    </div>
+
+    <h3>Codebuff 的工作原理</h3>
+    <p>当你要求 Codebuff "为我的 API 添加身份验证"时，它会调用：</p>
+    <ol>
+      <li><strong>文件选择代理</strong>：扫描代码库以了解架构并找到相关文件</li>
+      <li><strong>规划代理</strong>：计划需要修改的文件及其顺序</li>
+      <li><strong>编辑代理</strong>：进行精确的编辑</li>
+      <li><strong>审查代理</strong>：验证更改</li>
+    </ol>
+
+    <div class="arch-diagram">
+      <h4>多代理协作架构</h4>
+      <div class="diagram-flow">
+        <div class="diagram-node">用户指令<br><small>"添加身份验证"</small></div>
+        <div class="diagram-arrow">→</div>
+        <div class="diagram-node highlight">文件选择代理<br><small>扫描代码库</small></div>
+        <div class="diagram-arrow">→</div>
+        <div class="diagram-node highlight">规划代理<br><small>制定修改计划</small></div>
+        <div class="diagram-arrow">→</div>
+        <div class="diagram-node highlight">编辑代理<br><small>精确修改代码</small></div>
+        <div class="diagram-arrow">→</div>
+        <div class="diagram-node highlight">审查代理<br><small>验证变更</small></div>
+      </div>
+    </div>
+
+    <h3>为什么选择 Codebuff</h3>
+    <div class="pattern-cards">
+      <div class="pattern-card">
+        <h4>精准理解</h4>
+        <p>多代理架构让 Codebuff 能够深入理解项目结构，不像单一模型那样只看到局部代码。</p>
+      </div>
+      <div class="pattern-card">
+        <h4>安全编辑</h4>
+        <p>内置审查代理确保每次修改都经过验证，降低引入新 bug 的风险。</p>
+      </div>
+      <div class="pattern-card">
+        <h4>开源自托管</h4>
+        <p>完全开源，你可以在自己的环境中运行，代码始终在本地，无需担心数据安全。</p>
+      </div>
+    </div>
+
+    <h3>Codebuff vs 其他工具</h3>
+    <div class="code-translation">
+      <div class="code">
+        <pre><code># Codebuff 的独特优势
+单一模型工具:
+  用户指令 → 模型 → 输出代码
+  问题：缺少全局上下文，容易遗漏依赖
+
+Codebuff 多代理:
+  用户指令 → 文件选择 → 规划 → 编辑 → 审查
+  优势：每一步都有专门的代理负责</code></pre>
+      </div>
+      <div class="translation">
+        <p>单一模型工具往往只能看到你提供的上下文，容易遗漏跨文件的依赖关系。Codebuff 的多代理架构通过分工协作，每个代理专注于一个环节，从全局到细节层层把关。</p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <p><strong>快速上手</strong>：Codebuff 支持所有主流编程语言，无需额外配置。只需要 Node.js 环境即可开始使用。</p>
+    </div>
+
+    <h3>适用场景</h3>
+    <ul>
+      <li><strong>功能开发</strong>：描述你想要的功能，Codebuff 自动定位并修改相关文件</li>
+      <li><strong>漏洞修复</strong>：描述问题现象，Codebuff 自动诊断并修复</li>
+      <li><strong>代码重构</strong>：指定重构目标，Codebuff 确保不破坏现有功能</li>
+      <li><strong>代码审查</strong>：让 Codebuff 审查你的改动，提供改进建议</li>
+      <li><strong>测试编写</strong>：为现有代码生成测试用例</li>
+    </ul>
+
+    <h3>性能基准测试</h3>
+    <div class="code-translation">
+      <div class="code">
+        <pre><code># SWE-bench Lite 基准测试结果
+Tool                | Accuracy | Files Modified
+--------------------|----------|---------------
+Codebuff            | 61.0%    | 1.8 avg
+Claude Code         | 53.0%    | 2.3 avg
+Aider               | 48.5%    | 2.1 avg
+Cursor Agent        | 45.2%    | 2.5 avg
+Copilot Workspace   | 42.0%    | 2.8 avg</code></pre>
+      </div>
+      <div class="translation">
+        <p>Codebuff 在 SWE-bench Lite 基准测试中排名第一，准确率 61%，平均每次修改的文件数也更少（1.8 个），说明它更精准地定位到需要修改的文件。</p>
+      </div>
+    </div>
+
+    <h3>技术架构概览</h3>
+    <div class="code-translation">
+      <div class="code">
+        <pre><code># Codebuff 技术栈
+Language:       TypeScript / Node.js
+Agent Model:    Claude Sonnet (默认)
+Runtime:        本地 CLI / SDK
+Config:         .codebuff/ 目录
+Agents:         文件选择 / 规划 / 编辑 / 审查
+Extensions:     自定义代理 (.agents/)</code></pre>
+      </div>
+      <div class="translation">
+        <p>Codebuff 使用 TypeScript 构建，默认使用 Claude Sonnet 作为底层模型。你可以通过 <code>.agents/</code> 目录创建自定义代理来扩展功能。</p>
+      </div>
+    </div>
+
+    <div class="callout callout-accent">
+      <p><strong>学习路径提示</strong>：本课程将从 Codebuff 的核心概念出发，逐步深入到实践应用和高级主题。学完本课程后，你将能够熟练使用 Codebuff 提升日常开发效率。</p>
+    </div>
+
+    <h3>Codebuff 的命令行界面</h3>
+    <div class="code-translation">
+      <div class="code">
+        <pre><code># 安装后即可使用
+$ codebuff --help
+
+Usage: codebuff [options] [instruction]
+
+Options:
+  --scope &lt;path&gt;     限制操作范围
+  --dry-run           预览修改但不实际执行
+  --model &lt;model&gt;    指定使用的模型
+  --config &lt;file&gt;    指定配置文件路径
+  --verbose           显示详细执行日志
+
+Examples:
+  codebuff "Add auth middleware"
+  codebuff --scope src/api "Fix rate limiting"
+  codebuff --dry-run "Refactor database layer"</code></pre>
+      </div>
+      <div class="translation">
+        <p>Codebuff 的 CLI 简洁直观。最常用的选项是 <code>--scope</code>（限制范围）和 <code>--dry-run</code>（预览模式）。建议在大型项目中始终使用 <code>--scope</code> 来控制修改范围。</p>
+      </div>
+    </div>
+
+    <h3>安全机制详解</h3>
+    <div class="pattern-cards">
+      <div class="pattern-card">
+        <h4>本地执行</h4>
+        <p>所有代码处理都在本地完成，你的代码不会上传到云端。API 调用仅用于获取 LLM 推理结果，不传输完整源代码。</p>
+      </div>
+      <div class="pattern-card">
+        <h4>变更预览</h4>
+        <p>每次修改都以 diff 格式展示，你可以逐行审核。使用 <code>--dry-run</code> 可以只预览不执行。</p>
+      </div>
+      <div class="pattern-card">
+        <h4>Git 集成</h4>
+        <p>Codebuff 会在执行前检查 Git 状态，建议在工作区干净时使用。所有修改都可以通过 Git 轻松撤销。</p>
+      </div>
+    </div>
+
+    <h3>社区与生态</h3>
+    <ul>
+      <li><strong>GitHub Stars</strong>：Codebuff 在 GitHub 上拥有活跃的开源社区，持续更新迭代</li>
+      <li><strong>自定义代理市场</strong>：社区贡献了大量实用的自定义代理模板</li>
+      <li><strong>插件系统</strong>：通过插件扩展 Codebuff 的功能，支持自定义工具和集成</li>
+      <li><strong>企业版</strong>：提供团队协作、审计日志和企业级支持</li>
+    </ul>
+
+    <section class="screen animate-in">
+      <h3>Codebuff 安装与环境准备</h3>
+      <p>在开始使用 Codebuff 之前，你需要确保开发环境满足基本要求。Codebuff 基于 Node.js 运行，需要 Node.js 18 或更高版本。</p>
+
+      <div class="code-translation">
+        <div class="code">
+          <pre><code># 检查 Node.js 版本
+$ node --version
+v20.11.0
+
+# 安装 Codebuff（推荐全局安装）
+$ npm install -g codebuff
+
+# 验证安装成功
+$ codebuff --version
+1.2.0
+
+# 设置 API Key（以 Anthropic 为例）
+$ export ANTHROPIC_API_KEY="sk-ant-..."
+
+# 在项目中初始化 Codebuff
+$ cd ~/projects/my-app
+$ codebuff init
+# 生成 .codebuff/ 目录和默认配置</code></pre>
+        </div>
+        <div class="translation">
+          <p>安装过程非常简单。全局安装后，在项目目录中运行 <code>codebuff init</code> 即可创建配置目录。你需要设置 LLM 提供商的 API Key 作为环境变量。</p>
+        </div>
+      </div>
+
+      <div class="callout callout-accent">
+        <p><strong>环境要求提醒</strong>：确保 Node.js >= 18、Git 已安装（Codebuff 依赖 Git 做变更管理）、API Key 已配置。首次使用建议在一个有 Git 仓库的项目中操作，这样可以随时撤销修改。</p>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>Codebuff 工作流全景图</h3>
+      <p>理解 Codebuff 的完整工作流有助于你更高效地使用它。从输入指令到最终输出，每个环节都有明确的职责划分。</p>
+
+      <div class="arch-diagram">
+        <h4>端到端工作流</h4>
+        <div class="diagram-flow">
+          <div class="diagram-node">
+            <strong>用户输入</strong><br>
+            <small>自然语言指令<br>代码上下文</small>
+          </div>
+          <div class="diagram-arrow">→</div>
+          <div class="diagram-node highlight">
+            <strong>指令解析</strong><br>
+            <small>意图识别<br>约束提取<br>优先级排序</small>
+          </div>
+          <div class="diagram-arrow">→</div>
+          <div class="diagram-node highlight">
+            <strong>四代理流水线</strong><br>
+            <small>选择→规划→编辑→审查</small>
+          </div>
+          <div class="diagram-arrow">→</div>
+          <div class="diagram-node">
+            <strong>输出验证</strong><br>
+            <small>Diff 预览<br>测试运行<br>用户确认</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="pattern-cards">
+        <div class="pattern-card">
+          <h4>指令质量决定输出质量</h4>
+          <p>模糊的指令会产生模糊的结果。好的指令包含：明确的目标、约束条件、期望的行为描述。例如"添加认证"不如"为 /api/* 路由添加 JWT 认证中间件，未认证返回 401"。</p>
+        </div>
+        <div class="pattern-card">
+          <h4>上下文是关键</h4>
+          <p>Codebuff 会自动扫描项目结构获取上下文。你可以通过 .codebuff/config.yaml 补充项目约定，比如命名规范、文件组织偏好等，帮助代理做出更准确的判断。</p>
+        </div>
+        <div class="pattern-card">
+          <h4>渐进式确认</h4>
+          <p>对于大型修改，建议使用 --dry-run 先预览，确认方向正确后再实际执行。Codebuff 的审查代理会检查语法和逻辑，但最终的合理性判断仍需要开发者确认。</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="quiz">
+      <p><strong>小测验：</strong>Codebuff 使用了多少个代理来完成一个任务？</p>
+      <ul>
+        <li><button>A. 1</button></li>
+        <li><button>B. 2</button></li>
+        <li><button>C. 3</button></li>
+        <li><button>D. 4</button></li>
+      </ul>
+    </div>
+
+    <div class="quiz">
+      <p><strong>思考题：</strong>Codebuff 相比单一模型工具的核心优势是什么？</p>
+      <ul>
+        <li><button>A. 运行速度更快</button></li>
+        <li><button>B. 多代理分工协作，更精准的上下文理解</button></li>
+        <li><button>C. 支持更多编程语言</button></li>
+        <li><button>D. 界面更美观</button></li>
+      </ul>
+    </div>
+  </div>
+</section>

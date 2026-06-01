@@ -1,0 +1,215 @@
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">从一次点击开始</h1>
+      <p class="module-subtitle">你在 Dify 里点下"运行"，背后发生了什么？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: What is Dify -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Dify 是什么？用一句话说清楚</h2>
+        <p>想象你是一个厨师，但你不需要从零建造厨房——你只需要说"我要做这道菜"，Dify 会把所有厨具、食材通道、出菜窗口都帮你准备好。</p>
+        <p>Dify 是一个 <span class="term" data-definition="LLM 即大语言模型（Large Language Model），比如 GPT-4、Claude、Llama——能理解和生成人类语言的 AI 大脑。">LLM</span> 应用开发平台：你不用写底层代码，就能把 AI 能力组合成真正能用的产品——聊天机器人、文档问答、自动化工作流。</p>
+
+        <div class="pattern-cards stagger-children animate-in">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🔀</div>
+            <h4 class="pattern-title">工作流编排</h4>
+            <p class="pattern-desc">像拼乐高一样把 AI 步骤串联成流程，无需写代码</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">📚</div>
+            <h4 class="pattern-title">RAG 知识库</h4>
+            <p class="pattern-desc">上传你的文档，AI 就能基于它们回答问题</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🤖</div>
+            <h4 class="pattern-title">Agent 能力</h4>
+            <p class="pattern-desc">AI 能主动调用工具、搜索网络、执行多步骤任务</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🔌</div>
+            <h4 class="pattern-title">模型无关</h4>
+            <p class="pattern-desc">GPT、Claude、Llama、国产模型——随时切换，一行不改</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: The journey of a single request -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">你点下"发送"之后的 7 秒</h2>
+        <p>想象你在 Dify 搭建的客服机器人里发了一条消息："我的订单什么时候到？"</p>
+        <p>这 7 秒里，至少有 <strong>6 个系统</strong>协同工作。让我们逐步追踪这段旅程：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"浏览器里的 Next.js 前端捕获你的输入，发出 HTTP 请求"},
+          {"highlight":"flow-actor-2","label":"Nginx 反向代理接收请求，转发给后端 Flask API","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-3","label":"Flask API 验证身份、检查配额，把任务推入消息队列","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-4","label":"Celery Worker 从队列取出任务，召唤 LLM","packet":true,"from":"actor-3","to":"actor-4"},
+          {"highlight":"flow-actor-5","label":"LLM 厂商返回流式 token，Worker 写入 Redis 并推送 SSE","packet":true,"from":"actor-4","to":"actor-5"},
+          {"highlight":"flow-actor-1","label":"浏览器通过 SSE 实时接收 token，字符一个一个蹦出来","packet":true,"from":"actor-5","to":"actor-1"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">🖥️</div>
+              <span>浏览器</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">⚡</div>
+              <span>Nginx</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">🐍</div>
+              <span>Flask API</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">⚙️</div>
+              <span>Worker</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-5">
+              <div class="flow-actor-icon">🤖</div>
+              <span>LLM</span>
+            </div>
+          </div>
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击"下一步"开始追踪请求</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Why this matters -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">为什么 Dify 要这样设计？</h2>
+        <p>你可能会问：为什么需要这么多层？直接调 OpenAI 的 <span class="term" data-definition="API（应用程序编程接口）是软件之间对话的标准方式——就像插座规格，任何符合规格的插头都能用。">API</span> 不就好了？</p>
+
+        <div class="callout callout-accent animate-in">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键洞察：为什么生产级≠Demo 级</strong>
+            <p>直接调 API 能做出 Demo，但无法处理：并发 1000 个用户、API 限流重试、对话历史存储、多模型切换、用量计费……这就是 Dify 的价值所在。</p>
+          </div>
+        </div>
+
+        <div class="icon-rows animate-in">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🔄</div>
+            <div>
+              <strong>队列 + Worker 解耦</strong>
+              <p>API 收到请求立即返回，Worker 在后台慢慢处理——用户不等待，系统不崩溃</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">📡</div>
+            <div>
+              <strong>SSE 流式响应</strong>
+              <p><span class="term" data-definition="SSE（Server-Sent Events）是服务器向浏览器推送数据的技术——就像广播电台，服务器播，浏览器收，不需要浏览器反复询问。">SSE</span> 让 AI 的回答像打字一样逐字出现，而不是等 30 秒后突然弹出一大段</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🗄️</div>
+            <div>
+              <strong>PostgreSQL 持久化</strong>
+              <p>每一条消息、每一次工作流运行都存档——可回溯、可分析、可审计</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Code translation - app_factory -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码翻译：Flask 应用工厂</h2>
+        <p>Dify 后端的入口文件 <code>api/app_factory.py</code> 里有一段很有代表性的代码，它展示了生产级应用如何处理每一个请求：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-keyword">def</span> <span class="code-function">create_flask_app_with_configs</span>() -> DifyApp:</span>
+<span class="code-line">    dify_app = DifyApp(__name__)</span>
+<span class="code-line">    dify_app.config.from_mapping(</span>
+<span class="code-line">        dify_config.model_dump()</span>
+<span class="code-line">    )</span>
+<span class="code-line">    @dify_app.before_request</span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">before_request</span>():</span>
+<span class="code-line">        init_request_context()</span>
+<span class="code-line">        RecyclableContextVar</span>
+<span class="code-line">            .increment_thread_recycles()</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">定义一个"工厂函数"——它每次被调用都会创建并返回一个全新的 Web 应用实例</p>
+              <p class="tl">造一个新的 Dify 应用对象，__name__ 告诉它自己在哪个文件里</p>
+              <p class="tl">从配置文件加载所有设置——数据库地址、密钥、API 限制等</p>
+              <p class="tl">model_dump() 把 Python 对象转成普通字典，方便 Flask 读取</p>
+              <p class="tl">注册一个"钩子"——每一个请求到达之前，都先执行 before_request 里的代码</p>
+              <p class="tl">初始化这次请求的日志上下文，这样后续所有日志都会带上请求 ID</p>
+              <p class="tl">清理线程变量，防止上一个请求的数据污染这一个请求</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">理解检验</h2>
+
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！Celery Worker 在后台异步处理 LLM 调用，API 层立即返回，这就是为什么用户不会在等待 AI 响应时看到超时错误。"
+               data-explanation-wrong="再想想——Flask API 收到请求后会直接调用 LLM 吗？想想为什么 Dify 要引入消息队列。">
+            <h3 class="quiz-question">你在 Dify 里发了一条消息，等了 15 秒才收到回答。这个 15 秒主要消耗在哪里？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Flask API 处理 HTTP 请求的时间</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Celery Worker 调用 LLM 并等待生成回答的时间</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Nginx 转发请求的时间</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="完全正确！SSE（Server-Sent Events）正是为了解决这个问题——服务器可以把 token 一个一个推给浏览器，用户看到实时打字效果，而不是干等 30 秒。"
+               data-explanation-wrong="WebSocket 也能做到，但 Dify 选择了 SSE——因为 SSE 是单向的（服务器→浏览器），更简单，而且 AI 生成文字这个场景恰好只需要单向推送。">
+            <h3 class="quiz-question">用户为什么能看到 AI 回答"一个字一个字蹦出来"的效果，而不是等待后一次性显示全部内容？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>前端用 JavaScript 动画模拟了打字效果</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>WebSocket 双向连接实时传输</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>SSE 流式传输——服务器生成多少就推多少</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">提交答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">重新作答</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

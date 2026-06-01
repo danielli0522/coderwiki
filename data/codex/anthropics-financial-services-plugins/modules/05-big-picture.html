@@ -1,0 +1,267 @@
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">全局视角</h1>
+      <p class="module-subtitle">完整架构、部署流程、和如何让它成为你自己的</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Full architecture overview -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">完整的系统架构</h2>
+        <p>把前四个模块学到的所有角色拼在一起，整个系统的架构长这样：</p>
+
+        <div class="arch-diagram">
+          <div class="arch-zone arch-zone-browser">
+            <h4 class="arch-zone-label">用户层</h4>
+            <div class="arch-component" data-desc="用户在 Claude 对话界面输入 /comps、/dcf 等命令，或者通过 Managed Agent API 在后台自动触发任务。"
+                 onclick="showArchDesc(this)">
+              <div class="arch-icon">👤</div>
+              <span>用户（Cowork 或 API）</span>
+            </div>
+          </div>
+          <div class="arch-zone arch-zone-external">
+            <h4 class="arch-zone-label">Agent 层</h4>
+            <div class="arch-component" data-desc="10 个命名 Agent，每个是独立的插件。Agent 读取系统提示词（角色说明）+ 技能文件（方法论）来完成工作。"
+                 onclick="showArchDesc(this)">
+              <div class="arch-icon">🤖</div>
+              <span>Agent Plugin（10 个）</span>
+            </div>
+          </div>
+          <div class="arch-zone arch-zone-external">
+            <h4 class="arch-zone-label">技能层</h4>
+            <div class="arch-component" data-desc="7 个行业垂直插件的技能源。包括：金融分析（核心）、投行、股票研究、私募、财富管理、基金管理、运营。每个包含技能文件 + 命令 + MCP 连接器。"
+                 onclick="showArchDesc(this)">
+              <div class="arch-icon">📘</div>
+              <span>Vertical Plugins（7 个）</span>
+            </div>
+          </div>
+          <div class="arch-zone arch-zone-external">
+            <h4 class="arch-zone-label">数据层</h4>
+            <div class="arch-component" data-desc="11 个 MCP 数据连接器，集中配置在 financial-analysis 插件里。包括 Daloopa、Morningstar、S&P Global、FactSet、Moody's、LSEG、PitchBook 等。"
+                 onclick="showArchDesc(this)">
+              <div class="arch-icon">🔌</div>
+              <span>MCP Connectors（11 个）</span>
+            </div>
+          </div>
+          <div class="arch-zone arch-zone-external">
+            <h4 class="arch-zone-label">部署层</h4>
+            <div class="arch-component" data-desc="Managed Agent Cookbooks 提供企业级部署模板。deploy-managed-agent.sh 脚本处理 YAML→JSON 转换、技能上传、子代理创建、API 部署全流程。"
+                 onclick="showArchDesc(this)">
+              <div class="arch-icon">🚀</div>
+              <span>Managed Agent Cookbooks</span>
+            </div>
+          </div>
+          <div class="arch-description" id="arch-desc">点击任意组件查看详细说明</div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Deploy flow animation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">部署一个 Agent 到企业后台</h2>
+        <p>一条命令 <code>scripts/deploy-managed-agent.sh gl-reconciler</code> 背后发生了什么？</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"脚本读取 agent.yaml，解析 YAML 为 JSON"},
+          {"highlight":"flow-actor-1","label":"解析 {file:} 引用，读取系统提示词文件并内联"},
+          {"highlight":"flow-actor-2","label":"解析 {path:} 引用，打包每个技能目录为 ZIP"},
+          {"highlight":"flow-actor-2","label":"上传 ZIP 到 /v1/skills，获得 skill_id"},
+          {"highlight":"flow-actor-3","label":"递归创建子代理：先创建 Reader、Critic、Resolver"},
+          {"highlight":"flow-actor-3","label":"每个子代理 POST /v1/agents，获得 agent_id"},
+          {"highlight":"flow-actor-4","label":"最终 POST 创建编排器（Orchestrator）Agent"},
+          {"highlight":"flow-actor-4","label":"输出 agent_id 和 Console URL，部署完成！"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">📄</div>
+              <span>解析配置</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">📦</div>
+              <span>打包上传</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">👷</div>
+              <span>创建子代理</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">🚀</div>
+              <span>创建编排器</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击「下一步」开始</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: The orchestration layer -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Agent 之间怎么交接任务？</h2>
+        <p>在企业场景中，多个 Agent 可能需要协作。比如 Pitch Agent 做完分析后，要把结果交给 Meeting Prep Agent 准备客户会议。这通过 <span class="term" data-definition="交接请求（Handoff Request）是一个 Agent 在输出中发出的信号，表示「我干完了，请让另一个 Agent 接手」。就像接力赛中交接棒一样。">handoff_request</span> 机制实现：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">orchestrate.py</span>
+            <pre><code>
+<span class="code-line"><span class="code-function">ALLOWED_TARGETS</span> = {</span>
+<span class="code-line">  <span class="code-string">"pitch-agent"</span>,</span>
+<span class="code-line">  <span class="code-string">"market-researcher"</span>,</span>
+<span class="code-line">  <span class="code-string">"earnings-reviewer"</span>,</span>
+<span class="code-line">  <span class="code-string">"gl-reconciler"</span>,</span>
+<span class="code-line">  <span class="code-string">"kyc-screener"</span>,</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">定义了哪些 Agent 可以被交接任务。</p>
+              <p class="tl">只有在这个白名单里的 Agent 才能收到交接。</p>
+              <p class="tl">market-researcher（市场研究员）</p>
+              <p class="tl">earnings-reviewer（财报审阅员）</p>
+              <p class="tl">gl-reconciler（总账对账员）</p>
+              <p class="tl">kyc-screener（KYC 审核员）</p>
+              <p class="tl">不在名单里的 Agent 无法被触发 —— 安全防护。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Customization guide -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">让它成为你自己的</h2>
+        <p>这些是参考模板，不是成品。真正有价值的是根据你公司的特点来定制：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🔌</div>
+            <h4 class="pattern-title">换连接器</h4>
+            <p class="pattern-desc">把 .mcp.json 指向你们公司的数据供应商和内部系统</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">📝</div>
+            <h4 class="pattern-title">加公司语境</h4>
+            <p class="pattern-desc">在技能文件里加入你们的术语、流程、格式标准</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">📊</div>
+            <h4 class="pattern-title">带自己的模板</h4>
+            <p class="pattern-desc">用 /ppt-template 教 Claude 你们品牌的 PPT 布局</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🔧</div>
+            <h4 class="pattern-title">调整 Agent 范围</h4>
+            <p class="pattern-desc">编辑 agents/*.md 来匹配你们团队的实际工作流</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">➕</div>
+            <h4 class="pattern-title">加你自己的</h4>
+            <p class="pattern-desc">复制目录结构，为你们独有的工作流创建新 Agent</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Everything is files -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">全文都是 Markdown 和 JSON</h2>
+        <p>回顾整个项目，你会发现一个优雅的事实：</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">全文件，零构建</strong>
+            <p>整个项目<strong>没有编译步骤</strong>。每个 Agent 就是一组 Markdown 文件（技能、命令、系统提示词）加几个 JSON/YAML 配置文件。修改立刻生效，不需要 build、不需要打包、不需要重启。这种「纯文本即配置」的设计哲学，让非工程师也能定制 AI 的行为 —— 只需要会写文档就行。</p>
+          </div>
+        </div>
+
+        <div class="file-tree">
+          <div class="ft-folder open">
+            <span class="ft-name">项目文件类型</span>
+            <div class="ft-children">
+              <div class="ft-file">
+                <span class="ft-name">*.md</span>
+                <span class="ft-desc">系统提示词、技能文件、命令文件、README</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">*.json</span>
+                <span class="ft-desc">插件元数据、MCP 连接器配置、市场清单</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">*.yaml</span>
+                <span class="ft-desc">Managed Agent 部署模板、子代理配置</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">*.py / *.sh</span>
+                <span class="ft-desc">部署脚本、同步脚本、校验脚本</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 6: Final quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">最终检验</h2>
+
+        <div class="quiz-container" id="quiz-module5">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！deploy-managed-agent.sh 做了很多事：解析 YAML 配置、内联系统提示词、打包上传技能、递归创建子代理、最后创建编排器。这一条命令处理了完整的部署流程。"
+               data-explanation-wrong="deploy-managed-agent.sh 不只是上传文件。它要解析 YAML 配置中的文件引用、打包技能目录为 ZIP 并上传、先创建子代理再创建编排器，处理了很多复杂的转换工作。">
+            <h3 class="quiz-question">部署一个 Managed Agent（比如 GL Reconciler）时，deploy-managed-agent.sh 做了什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>只是把 YAML 文件上传到 API</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>解析配置、上传技能、创建子代理、创建编排器</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>编译 Markdown 文件为二进制格式然后部署</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="没错！ALLOWED_TARGETS 白名单确保只有预定义的 Agent 可以被交接任务。这是为了防止恶意文档通过 Reader 子代理注入交接指令来触发未授权的 Agent。即使攻击者控制了文档内容，也无法让系统交接给白名单以外的 Agent。"
+               data-explanation-wrong="想一想安全模型：orchestrate.py 里的白名单限制了什么？它限制了 Agent 之间的交接目标，防止恶意文档通过操控 AI 输出来触发未授权的操作。">
+            <h3 class="quiz-question">为什么 orchestrate.py 里要用 ALLOWED_TARGETS 白名单限制 Agent 交接？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>防止恶意文档注入的交接指令触发未授权的 Agent</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>提高系统性能，减少不必要的 Agent 创建</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>方便管理，只列出常用的 Agent</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">再试一次</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

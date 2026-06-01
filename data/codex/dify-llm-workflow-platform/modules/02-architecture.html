@@ -1,0 +1,275 @@
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">架构全景：五大角色</h1>
+      <p class="module-subtitle">认识 Dify 的演员阵容——每个服务扮演什么角色</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: The orchestra metaphor -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">一场管弦乐演出</h2>
+        <p>Dify 的架构像一场管弦乐：<strong>指挥（Nginx）</strong>站在最前面分配任务，<strong>不同乐手（各个服务）</strong>各司其职，<strong>乐谱（共享配置）</strong>确保大家演奏同一首曲子。</p>
+        <p>没有人"全部都做"——每个服务只做好自己那一件事。这是软件工程里最重要的原则之一：<span class="term" data-definition="单一职责原则（Single Responsibility Principle）：每个模块只负责一件事，改变一个功能只需要修改对应的模块，不会影响其他部分。">单一职责</span>。</p>
+
+        <div class="icon-rows animate-in stagger-children">
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: #6B6560">🎯</div>
+            <div>
+              <strong>Nginx — 门卫 &amp; 指挥</strong>
+              <p>所有流量入口。把 /console/api 转给 API 服务，把 / 转给 Web 服务</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🐍</div>
+            <div>
+              <strong>API Service — 大脑</strong>
+              <p>Python Flask 应用。处理所有业务逻辑：验证、路由、协调其他服务</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-2)">⚙️</div>
+            <div>
+              <strong>Worker Service — 苦力</strong>
+              <p>Celery <span class="term" data-definition="异步任务（Async Task）：把耗时工作放到后台执行，主程序不等待。就像你把衣服放进洗衣机后就去做其他事，不用站在旁边等。">异步</span>工作进程。专门执行耗时任务：调用 LLM、处理文档、发邮件</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🖥️</div>
+            <div>
+              <strong>Web Service — 脸面</strong>
+              <p>Next.js 前端。用户看到的所有界面——工作流画布、聊天界面、配置面板</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-4)">🗄️</div>
+            <div>
+              <strong>PostgreSQL + Redis — 记忆</strong>
+              <p>PostgreSQL 存持久数据（消息、工作流、用户）；Redis 存临时状态和任务队列</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Group chat between services -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">服务之间怎么"说话"？</h2>
+        <p>当你在 Dify 里创建一个新的聊天应用时，这几个服务是这样沟通的：</p>
+
+        <div class="chat-window" id="chat-module2">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="user" style="display:none">
+              <div class="chat-avatar" style="background: #6B6560">U</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: #6B6560">用户（浏览器）</span>
+                <p>我点了"创建新应用"，选了「聊天助手」模板</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="nginx" style="display:none">
+              <div class="chat-avatar" style="background: #9E9790">N</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: #9E9790">Nginx</span>
+                <p>收到 POST /console/api/apps 请求，转发给 API Service</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="api" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">A</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">API Service</span>
+                <p>验证 JWT Token 通过，检查用户创建权限……开始写数据库</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="db" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">D</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">PostgreSQL</span>
+                <p>INSERT INTO apps 完成。新应用 ID: abc-123，已保存 ✓</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="api" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">A</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">API Service</span>
+                <p>返回 201 Created + 应用详情 JSON 给浏览器</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="5" data-sender="web" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">W</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">Web Service（Next.js）</span>
+                <p>渲染新应用页面，跳转到工作流编辑器。用户现在看到空白画布了！</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-module2-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module2-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条消息</button>
+            <button class="btn chat-all-btn">全部播放</button>
+            <button class="btn chat-reset-btn">重新播放</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Visual file tree -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码住在哪里？</h2>
+        <p>了解文件结构，你就知道该让 AI 把新功能写在哪里：</p>
+
+        <div class="file-tree animate-in">
+          <div class="ft-folder open">
+            <span class="ft-name">api/</span>
+            <span class="ft-desc">后端 Python Flask 应用</span>
+            <div class="ft-children">
+              <div class="ft-folder">
+                <span class="ft-name">controllers/</span>
+                <span class="ft-desc">处理 HTTP 请求的入口函数（路由层）</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">core/</span>
+                <span class="ft-desc">所有核心业务逻辑：工作流、RAG、模型管理</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">models/</span>
+                <span class="ft-desc">数据库表结构定义（每个文件对应几张表）</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">services/</span>
+                <span class="ft-desc">业务服务层（controllers 调用 services，services 调用 core）</span>
+              </div>
+            </div>
+          </div>
+          <div class="ft-folder open">
+            <span class="ft-name">web/</span>
+            <span class="ft-desc">前端 Next.js 应用</span>
+            <div class="ft-children">
+              <div class="ft-folder">
+                <span class="ft-name">app/</span>
+                <span class="ft-desc">页面路由（Next.js 14 App Router 结构）</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">app/components/</span>
+                <span class="ft-desc">可复用 UI 组件：聊天框、节点卡片、工具栏等</span>
+              </div>
+            </div>
+          </div>
+          <div class="ft-folder open">
+            <span class="ft-name">docker/</span>
+            <span class="ft-desc">生产部署配置</span>
+            <div class="ft-children">
+              <div class="ft-file">
+                <span class="ft-name">docker-compose.yaml</span>
+                <span class="ft-desc">一键启动所有服务的配置文件</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info animate-in">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">给 AI 的正确指令</strong>
+            <p>知道文件结构后，你就能说"在 api/controllers/console/app/ 下新增一个处理 XXX 的路由"——而不是模糊地说"加一个 API"。AI 听懂精确指令，代码质量提升 10 倍。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Code translation - docker-compose services -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码翻译：Docker Compose 服务定义</h2>
+        <p>Dify 的 <code>docker/docker-compose.yaml</code> 定义了所有服务。这是 API 服务的配置片段：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-property">x-shared-env</span>: <span class="code-operator">&</span><span class="code-string">shared-api-worker-env</span></span>
+<span class="code-line">  <span class="code-property">CELERY_WORKER_AMOUNT</span>:</span>
+<span class="code-line">    <span class="code-string">${CELERY_WORKER_AMOUNT:-4}</span></span>
+<span class="code-line">  <span class="code-property">APP_MAX_EXECUTION_TIME</span>:</span>
+<span class="code-line">    <span class="code-string">${APP_MAX_EXECUTION_TIME:-1200}</span></span>
+<span class="code-line">  <span class="code-property">DB_HOST</span>:</span>
+<span class="code-line">    <span class="code-string">${DB_HOST:-db_postgres}</span></span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">定义一个"共享配置块"——用 &amp; 标记，API 和 Worker 两个服务都会引用它</p>
+              <p class="tl">后台 Worker 进程数量：从环境变量读取</p>
+              <p class="tl">如果没有设置环境变量，默认启动 4 个 Worker 进程</p>
+              <p class="tl">单个应用最大运行时间（秒）</p>
+              <p class="tl">默认 1200 秒（20 分钟）——防止一个任务跑太久把系统卡死</p>
+              <p class="tl">数据库主机地址：</p>
+              <p class="tl">默认连接名叫 db_postgres 的容器（Docker 内部网络会自动解析这个名字）</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">理解检验</h2>
+
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！Worker Service 专门负责耗时的异步任务。文档处理是典型的后台工作——可能需要几分钟，不适合在 API 请求中同步执行。"
+               data-explanation-wrong="再想想——API Service 负责接收请求和业务逻辑，但处理大文件是很耗时的操作，应该交给专门的后台服务处理。">
+            <h3 class="quiz-question">用户上传了一个 500 页的 PDF 让 Dify 建立知识库。这个处理工作主要由哪个服务执行？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>API Service（Flask 应用直接处理）</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Worker Service（Celery 异步任务处理）</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Web Service（Next.js 前端处理）</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="准确！你想修改工作流画布上某个节点的外观，这是 UI 组件，属于前端 web/app/components/ 目录。"
+               data-explanation-wrong="想想哪个服务负责用户界面。工作流画布是用户直接看到和操作的东西——它住在哪里？">
+            <h3 class="quiz-question">你想让工作流画布上的 LLM 节点显示当前使用的模型名称。你应该让 AI 修改哪里的代码？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>api/controllers/ — 后端控制器</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>api/core/workflow/ — 工作流引擎</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>web/app/components/ — 前端 UI 组件</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">提交答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重新作答</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

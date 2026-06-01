@@ -1,0 +1,306 @@
+    <section class="module" id="module-5" style="background: var(--color-bg-warm)">
+      <div class="module-content">
+        <header class="module-header animate-in">
+          <span class="module-number">05</span>
+          <h1 class="module-title">Claude Agent SDK：从一行代码到 SRE 值班员</h1>
+          <p class="module-subtitle">Anthropic 把 Claude Code 的内核以库的形式开放——同一个 SDK，从入门到生产</p>
+        </header>
+
+        <div class="module-body">
+
+          <!-- Screen 1: Hook + piano metaphor -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">上一模块手写 70 行才能让 Claude 用一个计算器——Anthropic 自己也觉得太麻烦</h2>
+            <p>所以他们把 agentic loop 打包成了 <span class="term" data-definition="Software Development Kit，软件开发包。一组别人帮你写好的工具/函数库，让你不用从零开始。比如 Anthropic 把 agentic loop 封装成 SDK，你 7 行代码就能用，不用写 70 行。">SDK</span>——<strong>从 70 行变 7 行</strong>。但 SDK 真正的厉害不是省代码，而是它把 Claude Code 这个产品里所有的 agent 工程经验都开放给了你。</p>
+
+            <div class="callout callout-accent">
+              <div class="callout-icon">🎹</div>
+              <div class="callout-content">
+                <strong class="callout-title">本课的隐喻：钢琴学习的进阶</strong>
+                <p><strong>Notebook 00 = 第一首练习曲</strong>——右手单音、左手 do-mi-sol，5 分钟弹会。<br><strong>Notebook 01 = 巴赫小品</strong>——左右手协奏，加上踏板（CLAUDE.md / Output Styles / Plan Mode / Hooks / Subagents）。<br><strong>Notebook 03 = 拉赫玛尼诺夫</strong>——八度大跳、复杂踏板、还要现场即兴（MCP 工具 / 安全 hook / 远程修配置）。<br>同一架琴（Claude Agent SDK），同一双手，难度从入门到大师级。</p>
+              </div>
+            </div>
+
+            <div class="step-cards">
+              <div class="step-card">
+                <div class="step-num">1</div>
+                <div class="step-body">
+                  <strong>Research Agent · 一行 query()</strong>
+                  <p>WebSearch + 一句任务订单。能上网做调研。</p>
+                </div>
+              </div>
+              <div class="step-card">
+                <div class="step-num">2</div>
+                <div class="step-body">
+                  <strong>Chief of Staff · 长记忆 + 子 agent</strong>
+                  <p>ClaudeSDKClient + CLAUDE.md + Subagents + Output Styles + Plan Mode + Hooks。能当一家 50 人公司的参谋长。</p>
+                </div>
+              </div>
+              <div class="step-card">
+                <div class="step-num">3</div>
+                <div class="step-body">
+                  <strong>Observability Agent · 接外部系统</strong>
+                  <p>+ <span class="term" data-definition="Model Context Protocol，模型上下文协议。Anthropic 制定的开放标准，让 LLM 能以统一方式接入任何外部系统——Git、GitHub、数据库、监控、自家内部 API。装上 MCP 服务器，Claude 立刻多了几十上百个工具。">MCP</span> 服务器（Git / GitHub）+ 审计 hook。能监控 CI/CD、识别故障。</p>
+                </div>
+              </div>
+              <div class="step-card">
+                <div class="step-num">4</div>
+                <div class="step-body">
+                  <strong>SRE Agent · 写权限 + 安全围栏</strong>
+                  <p>+ 写权限 + PreToolUse 安全钩子 + Prometheus + Docker 控制。能值守生产、自动诊断 + 修复 + 写 post-mortem。</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 2: One-liner research agent -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">第一首练习曲：7 行的 Research Agent</h2>
+            <p>来自 <code>claude_agent_sdk/00_The_one_liner_research_agent.ipynb</code>——把模块 4 手写的 70 行 agentic loop 替换成这个：</p>
+
+            <div class="translation-block animate-in">
+              <div class="translation-code">
+                <span class="translation-label">CODE · Python</span>
+<pre><code><span class="code-line"><span class="code-keyword">from</span> claude_agent_sdk <span class="code-keyword">import</span> ClaudeAgentOptions, query</span>
+<span class="code-line"></span>
+<span class="code-line">messages = []</span>
+<span class="code-line"><span class="code-keyword">async for</span> msg <span class="code-keyword">in</span> <span class="code-function">query</span>(</span>
+<span class="code-line">    <span class="code-property">prompt</span>=<span class="code-string">"Research the latest trends in AI agents and give me a brief summary and relevant citations."</span>,</span>
+<span class="code-line">    <span class="code-property">options</span>=<span class="code-function">ClaudeAgentOptions</span>(<span class="code-property">model</span>=MODEL, <span class="code-property">allowed_tools</span>=[<span class="code-string">"WebSearch"</span>]),</span>
+<span class="code-line">):</span>
+<span class="code-line">    <span class="code-function">print_activity</span>(msg)</span>
+<span class="code-line">    messages.<span class="code-function">append</span>(msg)</span></code></pre>
+              </div>
+              <div class="translation-english">
+                <span class="translation-label">中文逐行翻译</span>
+                <div class="translation-lines">
+                  <p class="tl"><strong>第 1 行：</strong>从官方 SDK 拿"提问"和"配置"两件事。</p>
+                  <p class="tl"><strong>第 4 行：</strong><span class="term" data-definition="async for / async with / await 是 Python 的异步语法。简单理解：让程序在等 LLM 回复时不傻等，可以同时干别的。本课不用深究——见到 async 就当作'流式接收'来理解就够了。">async for</span> 流式接收 agent 的每一条动作和输出——像看直播一样。</p>
+                  <p class="tl"><strong>第 5 行：</strong>任务订单（prompt）。</p>
+                  <p class="tl"><strong>第 6 行（关键）：</strong><code>allowed_tools</code> 是 SDK 的<strong>安全围栏</strong>——你能精确控制 agent 能动什么、不能动什么。</p>
+                  <p class="tl"><strong>第 8-9 行：</strong>把 agent 的所有动作打印 + 存档。</p>
+                  <p class="tl"><strong>对比模块 4 手写 70 行的 agentic loop——</strong>SDK 把 while loop / tool dispatch / 对话历史管理全包圆了。</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 3: Chief of Staff with CLAUDE.md -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">巴赫小品：Chief of Staff + 长期记忆</h2>
+            <p>来自 <code>claude_agent_sdk/01_The_chief_of_staff_agent.ipynb</code>——给 50 人初创公司当 AI 参谋长：</p>
+
+            <div class="translation-block animate-in">
+              <div class="translation-code">
+                <span class="translation-label">CODE · Python</span>
+<pre><code><span class="code-line"><span class="code-keyword">async with</span> <span class="code-function">ClaudeSDKClient</span>(</span>
+<span class="code-line">    options=<span class="code-function">ClaudeAgentOptions</span>(</span>
+<span class="code-line">        model=MODEL,</span>
+<span class="code-line">        cwd=<span class="code-string">"chief_of_staff_agent"</span>,  <span class="code-comment"># Points to subdirectory with our CLAUDE.md</span></span>
+<span class="code-line">        setting_sources=[<span class="code-string">"project"</span>],</span>
+<span class="code-line">    )</span>
+<span class="code-line">) <span class="code-keyword">as</span> agent:</span>
+<span class="code-line">    <span class="code-keyword">await</span> agent.<span class="code-function">query</span>(<span class="code-string">"What's our current runway?"</span>)</span>
+<span class="code-line">    <span class="code-keyword">async for</span> msg <span class="code-keyword">in</span> agent.<span class="code-function">receive_response</span>():</span>
+<span class="code-line">        <span class="code-function">print_activity</span>(msg)</span>
+<span class="code-line">        messages.<span class="code-function">append</span>(msg)</span></code></pre>
+              </div>
+              <div class="translation-english">
+                <span class="translation-label">中文逐行翻译</span>
+                <div class="translation-lines">
+                  <p class="tl"><strong>第 1 行：</strong>用 ClaudeSDKClient——和上一段的 query() 不同，这个是<strong>有状态会话</strong>，能记住一整轮对话。</p>
+                  <p class="tl"><strong>第 4 行（关键）：</strong>cwd 把 agent 的"工作目录"指到一个子文件夹。<strong>关键魔法</strong>：那个文件夹里有一个 <span class="term" data-definition="Claude Code 的项目级长期记忆文件。放在仓库根目录里，Claude 启动时自动读它当背景知识——公司情况、团队规则、历史决策。等于给 agent 一份'入职 onboarding 文档'。Claude Agent SDK 沿用了同一个机制。">CLAUDE.md</span>，agent 启动时会自动读它当背景知识。</p>
+                  <p class="tl"><strong>第 5 行：</strong>告诉 SDK：去那个项目目录里把 .claude/output-styles/、.claude/commands/ 也一起加载。</p>
+                  <p class="tl"><strong>第 8 行：</strong>像跟同事问话一样发问——"<span class="term" data-definition="Runway 是创业公司术语，指现金还能撑多久。比如月烧 $500K、账上 $10M、runway 就是 20 个月。这是 CEO/CFO 每周要看的核心数字。">runway</span> 还有多久？"</p>
+                  <p class="tl"><strong>第 9 行：</strong>流式接收每一句回话。</p>
+                  <p class="tl"><strong>核心洞察</strong>：CLAUDE.md = 项目级长期记忆。把公司财务数据、团队规则、历史决策写进去，agent 每次启动都自带这份"入职 onboarding 文档"——不用每次 prompt 重复。</p>
+                </div>
+              </div>
+            </div>
+
+            <h3 style="margin-top: var(--space-12); font-family: var(--font-display); font-size: var(--text-xl);">看一场 Chief of Staff 内部分工</h3>
+            <p>真实的 CoS 不是一个 agent 干所有事——它派<strong>子 agent (subagent)</strong> 去做专业领域的工作，自己只做汇总。看这场 CEO 让团队重组的对话：</p>
+
+            <div class="chat-window" id="chat-module5">
+              <div class="chat-messages">
+                <div class="chat-message" data-msg="0" data-sender="ceo" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-2)">CEO</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-2)">CEO（用户）</span>
+                    <p>给我一份重组工程团队聚焦 AI 方向的方案——预算 / 招聘节奏 / 风险都要。</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="1" data-sender="cos" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-1)">CoS</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-1)">Chief of Staff（主 agent）</span>
+                    <p>好的，让我协调财务和招聘两个子 agent。</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="2" data-sender="finance" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-3)">财</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-3)">Financial Analyst（子 agent）</span>
+                    <p>当前 burn rate $500K / 月，runway 20 个月。新增 5 名 senior 工程师 → burn 涨到 $580K，runway 压到 17 个月。还在安全区，但要控招聘节奏。</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="3" data-sender="recruiter" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-4)">招</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-4)">Recruiter（子 agent）</span>
+                    <p>$180-220K 区间能找到合格的 senior。优先级排序：① AI infra（最稀缺）② MLOps ③ 前端架构。3 个月内招到位是合理目标。</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="4" data-sender="cos" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-1)">CoS</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-1)">Chief of Staff（汇总）</span>
+                    <p>建议方案：① 先招 2 个 AI infra（Q2）；② 再招 2 个 MLOps（Q3）；③ 第 5 人放到 Q4 看融资进度。Burn 控在 $580K 内，runway 仍保 17 个月。**主要风险**：AI infra 人才抢手，offer 通过率可能只有 30%——建议同时 outreach 8-10 个候选人。</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="chat-typing" id="chat-module5-typing" style="display:none">
+                <div class="chat-avatar" id="chat-module5-typing-avatar">?</div>
+                <div class="chat-typing-dots">
+                  <span class="typing-dot"></span>
+                  <span class="typing-dot"></span>
+                  <span class="typing-dot"></span>
+                </div>
+              </div>
+
+              <div class="chat-controls">
+                <button class="btn chat-next-btn">下一句</button>
+                <button class="btn chat-all-btn">自动播放</button>
+                <button class="btn chat-reset-btn">重播</button>
+                <span class="chat-progress"></span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 4: SDK 6 modules + SRE -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">SDK 的 6 大模块——你的"乐高积木"</h2>
+
+            <div class="pattern-cards stagger-children">
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+                <div class="pattern-icon" style="background: var(--color-actor-1)">⚡</div>
+                <h4 class="pattern-title">query()</h4>
+                <p class="pattern-desc">无状态一次性问答。最简单的入口，研究 agent / one-shot 任务用它。</p>
+              </div>
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+                <div class="pattern-icon" style="background: var(--color-actor-2)">💬</div>
+                <h4 class="pattern-title">ClaudeSDKClient</h4>
+                <p class="pattern-desc">有状态会话——多轮对话、上下文累积。CoS 这种长会话场景必用。</p>
+              </div>
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+                <div class="pattern-icon" style="background: var(--color-actor-3)">⚙️</div>
+                <h4 class="pattern-title">ClaudeAgentOptions</h4>
+                <p class="pattern-desc">配置中枢：model / allowed_tools / cwd / hooks / mcpServers / settings 全在这里。</p>
+              </div>
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+                <div class="pattern-icon" style="background: var(--color-actor-4)">📚</div>
+                <h4 class="pattern-title">CLAUDE.md</h4>
+                <p class="pattern-desc">项目级长期记忆。把公司情况、规则、历史决策写进去——agent 自动加载。</p>
+              </div>
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-5)">
+                <div class="pattern-icon" style="background: var(--color-actor-5)">👥</div>
+                <h4 class="pattern-title">Subagents</h4>
+                <p class="pattern-desc">派生子 agent 处理专业领域。财务分析师、招聘官、法务顾问——每个有自己的 prompt 和工具。</p>
+              </div>
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-accent)">
+                <div class="pattern-icon" style="background: var(--color-accent)">🪝</div>
+                <h4 class="pattern-title">Hooks</h4>
+                <p class="pattern-desc">工具调用前后的拦截器——做审计、安全检查、限流。SRE agent 的"删数据库前必须人工确认"靠它。</p>
+              </div>
+            </div>
+
+            <div class="callout callout-info">
+              <div class="callout-icon">💡</div>
+              <div class="callout-content">
+                <strong class="callout-title">Aha! Claude Agent SDK 不是新发明——是 Claude Code 的内核开放</strong>
+                <p>你每天用 Claude Code 时见到的所有"魔法"——自动用工具、记得对话、规划再执行——其实就是这套 SDK。Anthropic 把内核拿出来开源后，意味着：<strong>你能把 Claude Code 那套"通用 agent 内核"复制到任何领域</strong>——AI 律师、AI 销售、AI 数据分析师……拿 SDK 嫁接，最快 1 天有 demo。</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 5: Quiz -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">小测：从 SDK 选什么</h2>
+
+            <div class="quiz-container" id="quiz-module5">
+
+              <div class="quiz-question-block"
+                   data-correct="option-c"
+                   data-explanation-right="对！Hooks 就是干这个的——PreToolUse hook 在工具调用<em>之前</em>触发，可以让你弹一个确认框、查询安全规则、记审计日志。SRE agent 用这个机制保证'删数据库 / 改 prod 配置'前必须人工 OK。"
+                   data-explanation-wrong="prompt 工程能让模型'尽量小心'，但不能<em>强制</em>暂停——agent 可能在 prompt 工程的边缘溜过去。要的是程序层面的拦截器。">
+                <h3 class="quiz-question">Q1. 你想让 agent 在用一个"删数据库"工具前必须暂停让你确认。SDK 里用什么机制？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>在 prompt 里加"删除前请确认"。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>把删数据库工具从 allowed_tools 里去掉。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>用 PreToolUse Hooks 拦截工具调用。</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block"
+                   data-correct="option-b"
+                   data-explanation-right="对。CLAUDE.md 是项目级长期记忆——把"绝不直接联系客户"这种规则写进去，agent 启动时自动加载。每次 prompt 重复说既浪费 token 又容易漏掉。这是 SDK 的核心设计哲学：<strong>规则归规则文件，任务归 prompt</strong>。"
+                   data-explanation-wrong="想清楚：'每次都忘'是因为 prompt 没传到位？还是因为这种规则本来就该用<em>持久化</em>方式而不是每次重述？">
+                <h3 class="quiz-question">Q2. 你的 agent 经常忘记公司的"绝不直接联系客户"规则。最干净的解法？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>每次 prompt 开头都加一句"绝不直接联系客户"。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>写进 CLAUDE.md，agent 启动时自动加载。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>换更聪明的模型——它就不会忘了。</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block"
+                   data-correct="option-b"
+                   data-explanation-right="对！律师助手主要是'读外部系统 + 给建议'——不是马上去改律所文件库。从 read-only 的 Notebook 02（Observability）起步最安全：先把 RAG / 法规检索 / 工具接入跑通，等业务验证后<em>再</em>考虑给写权限（升级到 Notebook 03 模式）。"
+                   data-explanation-wrong="律师助手最危险的是'直接动律所文件 / 直接发邮件给客户'。从有写权限的 SRE 模板起步等于一上来就给装了枪。要的是先跑 read-only 验证业务再逐步开放权限。">
+                <h3 class="quiz-question">Q3. 你看到 SRE agent demo 后想做"AI 律师助手"——查法规、起草合同、提交客户审批。最适合从哪个 notebook 起步？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Notebook 03 SRE Agent——直接拿能写能改的模板套上去。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Notebook 02 Observability Agent——先 read-only 跑通业务，再考虑写权限。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Notebook 00 One-liner——一行代码就够了。</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">查看答案</button>
+              <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">再做一次</button>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </section>

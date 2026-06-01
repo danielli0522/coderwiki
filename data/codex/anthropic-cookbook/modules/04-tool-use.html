@@ -1,0 +1,302 @@
+    <section class="module" id="module-4" style="background: var(--color-bg)">
+      <div class="module-content">
+        <header class="module-header animate-in">
+          <span class="module-number">04</span>
+          <h1 class="module-title">工具调用：让模型动手</h1>
+          <p class="module-subtitle">Claude 自己不动手——它输出"工单"叫你的程序去做。这是 agent 唯一真的能改变外部世界的方式</p>
+        </header>
+
+        <div class="module-body">
+
+          <!-- Screen 1: Hook + chess metaphor -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">Claude 不能查数据库、不能发邮件——但能"叫别人去做"</h2>
+            <p>到上一模块为止，所有工序都还停留在"LLM 之间互相讲话"。Claude 自己看不见时间、查不了数据库、发不了邮件。但<strong>你可以教它"叫别人去做这些事"</strong>——这就是 tool use 的全部秘密。</p>
+
+            <div class="callout callout-accent">
+              <div class="callout-icon">♟️</div>
+              <div class="callout-content">
+                <strong class="callout-title">本课的隐喻：国际象棋大师 + 棋钟</strong>
+                <p>大师（Claude）只能"想棋"，不能离开桌子去查棋谱。你给他配几张"工具卡"——查开局库、查残局库、问引擎评分。每张卡上写清楚<em>这张牌能干什么、需要什么参数</em>。他想用哪张就抬手按下棋钟、说出工具名和参数。<strong>他不亲自查，他叫你去查</strong>——你查完把结果递回去，他接着想下一步。整盘棋下来按好几次钟——这就是 <span class="term" data-definition="Agentic Loop。LLM 调用 → 工具执行 → 把结果回喂给 LLM → LLM 决定下一步……如此循环直到 LLM 说'我够了'。这是所有 agent 系统的底层心跳。">agentic loop</span>。</p>
+              </div>
+            </div>
+
+            <div class="pattern-cards stagger-children">
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+                <div class="pattern-icon" style="background: var(--color-actor-1)">📋</div>
+                <h4 class="pattern-title">Description 决定生死</h4>
+                <p class="pattern-desc">Claude 看着工具的 description 决定"什么时候用 / 怎么用"。说明书写不清楚，工具就用不对。</p>
+              </div>
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+                <div class="pattern-icon" style="background: var(--color-actor-3)">📐</div>
+                <h4 class="pattern-title">JSON Schema 是合同</h4>
+                <p class="pattern-desc">用 JSON Schema 描述参数形状——必填字段、类型、举例。这是 Claude 和你的程序之间的格式合同。</p>
+              </div>
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+                <div class="pattern-icon" style="background: var(--color-actor-4)">↩️</div>
+                <h4 class="pattern-title">tool_result 必须回喂</h4>
+                <p class="pattern-desc">工具执行完拿到结果后，必须把结果作为 tool_result 角色塞回对话历史，再调一次 Claude——否则 Claude 永远不知道工具结果。</p>
+              </div>
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+                <div class="pattern-icon" style="background: var(--color-actor-2)">🛑</div>
+                <h4 class="pattern-title">max_iterations 是救命稻草</h4>
+                <p class="pattern-desc">agent loop 可能跑飞——加个上限。同时检测"是不是反复调同一个工具"——这往往是死循环征兆。</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 2: Tool definition translation -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">第一步：写一份"工具说明书"</h2>
+            <p>来自 <code>tool_use/calculator_tool.ipynb</code>——给 Claude 配一个简单计算器：</p>
+
+            <div class="translation-block animate-in">
+              <div class="translation-code">
+                <span class="translation-label">CODE · Python</span>
+<pre><code><span class="code-line">tools = [</span>
+<span class="code-line">    {</span>
+<span class="code-line">        <span class="code-property">"name"</span>: <span class="code-string">"calculator"</span>,</span>
+<span class="code-line">        <span class="code-property">"description"</span>: <span class="code-string">"A simple calculator that performs basic arithmetic operations."</span>,</span>
+<span class="code-line">        <span class="code-property">"input_schema"</span>: {</span>
+<span class="code-line">            <span class="code-property">"type"</span>: <span class="code-string">"object"</span>,</span>
+<span class="code-line">            <span class="code-property">"properties"</span>: {</span>
+<span class="code-line">                <span class="code-property">"expression"</span>: {</span>
+<span class="code-line">                    <span class="code-property">"type"</span>: <span class="code-string">"string"</span>,</span>
+<span class="code-line">                    <span class="code-property">"description"</span>: <span class="code-string">"The mathematical expression to evaluate (e.g., '2 + 3 * 4')."</span>,</span>
+<span class="code-line">                }</span>
+<span class="code-line">            },</span>
+<span class="code-line">            <span class="code-property">"required"</span>: [<span class="code-string">"expression"</span>],</span>
+<span class="code-line">        },</span>
+<span class="code-line">    }</span>
+<span class="code-line">]</span></code></pre>
+              </div>
+              <div class="translation-english">
+                <span class="translation-label">中文逐行翻译</span>
+                <div class="translation-lines">
+                  <p class="tl"><strong>第 1 行：</strong>tools 是一个<em>列表</em>——意味着你可以一次给 Claude 配多张卡。</p>
+                  <p class="tl"><strong>"name": "calculator"</strong>——工具的"卡名"，Claude 会用这个名字来召唤它。</p>
+                  <p class="tl"><strong>"description"（关键）：</strong>这是 tool use 里<strong>最重要的一行</strong>——Claude 是看着这句话决定"要不要用这个工具"的。说明书写不清楚，Claude 就会用错或干脆不用。要写得像在跟一个聪明但没上下文的实习生交代任务。</p>
+                  <p class="tl"><strong>"input_schema"</strong>——用 <span class="term" data-definition="一种用 JSON 来描述数据'形状'的标准。比如这个字段必须是字符串、那个字段是数字、再那个是必填。LLM 看 JSON Schema 就知道'我该填什么参数'。是 Claude 和你的程序之间的合同。">JSON Schema</span> 描述参数形状：要一个叫 expression 的字符串。</p>
+                  <p class="tl"><strong>"required": ["expression"]</strong>——强制 Claude 必须填这个参数，不许偷懒。</p>
+                  <p class="tl"><strong>给 vibe coder 的一句话：</strong>tool 的 description 不是写给程序员看的，是写给 Claude 看的。</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 3: Agentic loop with flow animation -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">第二步：跑通 agentic loop</h2>
+            <p>当 Claude 决定要用工具时，它<em>不直接给答案</em>——而是停下来，输出一段"工单"，等你执行。然后你把结果回喂，它再继续。看一遍这个 loop 的 7 步动画：</p>
+
+            <div class="flow-animation" data-steps='[
+              {"highlight":"flow-actor-1","label":"用户问：17 乘 23 等于多少？"},
+              {"highlight":"flow-actor-2","label":"Claude 收到问题 + 工具说明书","packet":true,"from":"actor-1","to":"actor-2"},
+              {"highlight":"flow-actor-3","label":"Claude 不直接答 — 吐出工单：calculator(expression=「17*23」)","packet":true,"from":"actor-2","to":"actor-3"},
+              {"highlight":"flow-actor-4","label":"你的程序按工单调用真正的 calculator 函数","packet":true,"from":"actor-3","to":"actor-4"},
+              {"highlight":"flow-actor-3","label":"Calculator 返回「391」给你的程序","packet":true,"from":"actor-4","to":"actor-3"},
+              {"highlight":"flow-actor-2","label":"你的程序把结果作为 tool_result 塞回对话历史","packet":true,"from":"actor-3","to":"actor-2"},
+              {"highlight":"flow-actor-1","label":"Claude 看到结果，给最终回答：17 × 23 = 391","packet":true,"from":"actor-2","to":"actor-1"}
+            ]'>
+              <div class="flow-actors">
+                <div class="flow-actor" id="flow-actor-1">
+                  <div class="flow-actor-icon">👤</div>
+                  <span>用户</span>
+                </div>
+                <div class="flow-actor" id="flow-actor-2">
+                  <div class="flow-actor-icon">🤖</div>
+                  <span>Claude</span>
+                </div>
+                <div class="flow-actor" id="flow-actor-3">
+                  <div class="flow-actor-icon">⚙️</div>
+                  <span>你的程序</span>
+                </div>
+                <div class="flow-actor" id="flow-actor-4">
+                  <div class="flow-actor-icon">🧮</div>
+                  <span>Calculator</span>
+                </div>
+              </div>
+
+              <div class="flow-packet" id="flow-packet"></div>
+              <div class="flow-step-label" id="flow-label">点"下一步"开始</div>
+
+              <div class="flow-controls">
+                <button class="btn flow-next-btn">下一步</button>
+                <button class="btn flow-reset-btn">重新开始</button>
+                <span class="flow-progress"></span>
+              </div>
+            </div>
+
+            <div class="translation-block animate-in">
+              <div class="translation-code">
+                <span class="translation-label">CODE · Python（agentic loop 简化版）</span>
+<pre><code><span class="code-line">message = client.messages.<span class="code-function">create</span>(</span>
+<span class="code-line">    model=MODEL_NAME,</span>
+<span class="code-line">    messages=[{<span class="code-string">"role"</span>: <span class="code-string">"user"</span>, <span class="code-string">"content"</span>: user_message}],</span>
+<span class="code-line">    tools=tools,</span>
+<span class="code-line">)</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-keyword">if</span> message.stop_reason == <span class="code-string">"tool_use"</span>:</span>
+<span class="code-line">    tool_use = <span class="code-function">next</span>(b <span class="code-keyword">for</span> b <span class="code-keyword">in</span> message.content <span class="code-keyword">if</span> b.type == <span class="code-string">"tool_use"</span>)</span>
+<span class="code-line">    tool_result = <span class="code-function">process_tool_call</span>(tool_use.name, tool_use.input)</span>
+<span class="code-line"></span>
+<span class="code-line">    response = client.messages.<span class="code-function">create</span>(</span>
+<span class="code-line">        model=MODEL_NAME,</span>
+<span class="code-line">        messages=[</span>
+<span class="code-line">            {<span class="code-string">"role"</span>: <span class="code-string">"user"</span>, <span class="code-string">"content"</span>: user_message},</span>
+<span class="code-line">            {<span class="code-string">"role"</span>: <span class="code-string">"assistant"</span>, <span class="code-string">"content"</span>: message.content},</span>
+<span class="code-line">            {<span class="code-string">"role"</span>: <span class="code-string">"user"</span>, <span class="code-string">"content"</span>: [{</span>
+<span class="code-line">                <span class="code-string">"type"</span>: <span class="code-string">"tool_result"</span>,</span>
+<span class="code-line">                <span class="code-string">"tool_use_id"</span>: tool_use.id,</span>
+<span class="code-line">                <span class="code-string">"content"</span>: tool_result,</span>
+<span class="code-line">            }],</span>
+<span class="code-line">        }],</span>
+<span class="code-line">        tools=tools,</span>
+<span class="code-line">    )</span></code></pre>
+              </div>
+              <div class="translation-english">
+                <span class="translation-label">中文逐行翻译</span>
+                <div class="translation-lines">
+                  <p class="tl"><strong>第 1-5 行：</strong>第一次调 Claude，把"工具说明书清单"一起递过去。</p>
+                  <p class="tl"><strong>第 7 行：</strong>Claude 没直接回答，<code>stop_reason == "tool_use"</code> 表示它要用工具——停下来等你执行。</p>
+                  <p class="tl"><strong>第 8 行：</strong>从 Claude 的回复里挑出"要用工具的那块"——拿到工具名和参数。</p>
+                  <p class="tl"><strong>第 9 行（真正干活）：</strong>你的程序按 Claude 给的工具名和参数去执行——拿到结果。</p>
+                  <p class="tl"><strong>第 11-22 行（关键）：</strong>第二次调 Claude——把工具结果用 <code>tool_result</code> 这个特殊角色<strong>塞回对话历史</strong>。这一步是关键——必须保留完整对话上下文，Claude 才知道"刚才让查的结果回来了"。</p>
+                  <p class="tl"><strong>真实场景里这个过程可能循环多次——直到 stop_reason ≠ "tool_use"，才算完。</strong></p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 4: Spot the bug -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">Spot the Bug：找出这段代码哪行写错了</h2>
+            <p>下面是一段<em>错误的</em> agentic loop。Claude 调用了工具但 agent 永远不会给最终答复——找出关键 bug 行：</p>
+
+            <div class="bug-challenge">
+              <div class="bug-code">
+                <div class="bug-line" data-line="1" onclick="checkBugLine(this, false)">
+                  <span class="line-num">1</span>
+                  <code>message = client.messages.create(model=MODEL, messages=msgs, tools=tools)</code>
+                </div>
+                <div class="bug-line" data-line="2" onclick="checkBugLine(this, false)">
+                  <span class="line-num">2</span>
+                  <code>if message.stop_reason == "tool_use":</code>
+                </div>
+                <div class="bug-line" data-line="3" onclick="checkBugLine(this, false)">
+                  <span class="line-num">3</span>
+                  <code>&nbsp;&nbsp;&nbsp;&nbsp;tool_use = next(b for b in message.content if b.type == "tool_use")</code>
+                </div>
+                <div class="bug-line" data-line="4" onclick="checkBugLine(this, false)">
+                  <span class="line-num">4</span>
+                  <code>&nbsp;&nbsp;&nbsp;&nbsp;tool_result = process_tool_call(tool_use.name, tool_use.input)</code>
+                </div>
+                <div class="bug-line bug-target" data-line="5" onclick="checkBugLine(this, true)">
+                  <span class="line-num">5</span>
+                  <code>&nbsp;&nbsp;&nbsp;&nbsp;print(tool_result)&nbsp;&nbsp;# 拿到结果，打印就完事</code>
+                </div>
+                <div class="bug-line" data-line="6" onclick="checkBugLine(this, false)">
+                  <span class="line-num">6</span>
+                  <code>&nbsp;&nbsp;&nbsp;&nbsp;return tool_result</code>
+                </div>
+              </div>
+              <div class="bug-feedback" id="bug-feedback"></div>
+            </div>
+
+            <div class="callout callout-warning" style="margin-top: var(--space-8)">
+              <div class="callout-icon">🐛</div>
+              <div class="callout-content">
+                <strong class="callout-title">这是 vibe coder 用 Cursor / Claude Code 时最常见的 bug 根因</strong>
+                <p>"我让 AI 调一个工具，它好像调了，但最终答复还是没用工具的结果"——99% 是这个 bug：少了第二次 <code>messages.create</code> 把 <code>tool_result</code> 回喂给 Claude。<strong>print 工具结果不是答案——把结果塞回对话历史，再调一次 Claude，才有最终答复。</strong></p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 5: Quiz -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">小测：调试 agent 的真实场景</h2>
+
+            <div class="quiz-container" id="quiz-module4">
+
+              <div class="quiz-question-block"
+                   data-correct="option-b"
+                   data-explanation-right="对！description 是 Claude 决定'用不用 / 何时用'的唯一依据。如果你写'sends an email'但没说明'什么场景该用、参数怎么填、有没有副作用'，Claude 经常会跳过它自己编内容。修法：把 description 写到能让一个'聪明但没上下文的实习生'读懂。"
+                   data-explanation-wrong="想想 Claude 是怎么决定'用哪个工具'的——它看的不是工具的代码实现，是 description 这一行字。">
+                <h3 class="quiz-question">Q1. 你给 Claude 配了一个 send_email 工具，但它从来不用——反而经常自己编邮件内容。最可能的原因？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>JSON Schema 写错了，参数类型不匹配。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>tool 的 description 写得太模糊，Claude 不知道何时该用。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>模型版本太旧，要换成最新的 Sonnet。</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block"
+                   data-correct="option-c"
+                   data-explanation-right="对！两件事必做：① 加最大轮数（通常 10-15）作硬刹车；② 检测'反复调同一个工具'——这往往说明 Claude 拿到结果但没消化好，陷入了循环。光让模型变聪明治不了根本。"
+                   data-explanation-wrong="再想：你的 agent 跑了 30 次还没结束——这是机制问题，不是模型聪明不聪明的问题。要的是<em>机制层面</em>的刹车。">
+                <h3 class="quiz-question">Q2. 你的 agent 跑了 30 多次工具调用还没结束——账单爆了。最该加的两件事？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>把模型从 Haiku 换成 Opus，让它一次就答对。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>在 prompt 里加"请尽快完成"。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>加 max_iterations 上限 + 检测重复工具调用 → 触发就退出。</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block"
+                   data-correct="option-c"
+                   data-explanation-right="对！Claude 拿到错误结果后通常会自我修正——可能换工具（先 get_customer_info 找正确订单号）、也可能直接向用户回问。这就是 tool use 比 chain 强的地方——agent 能看着结果<em>动态调整策略</em>，不是死板执行。"
+                   data-explanation-wrong="想：Claude 拿到'订单不存在'的工具结果后，它有 3 种选择——继续编、放弃、自我修正。最有用的 agent 是哪种？">
+                <h3 class="quiz-question">Q3. 用户问"订单 ABC123 怎么样了"。Claude 调用 get_order_details(order_id="ABC123")，但 ABC123 不存在。Claude 接下来最可能做的合理动作？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>继续编一个看起来合理的订单详情给用户。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>直接报错退出，告诉用户"系统故障"。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>调用别的工具自查（比如先用 get_customer_info 找用户的所有订单），或回问用户"订单号是不是写错了？"</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">查看答案</button>
+              <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">再做一次</button>
+            </div>
+
+            <div class="callout callout-accent" style="margin-top: var(--space-8)">
+              <div class="callout-icon">💡</div>
+              <div class="callout-content">
+                <strong class="callout-title">Aha! 模型动嘴，你动手</strong>
+                <p>Tool use 是 Claude 唯一<strong>真的能改变外部世界</strong>的方式。它写一段文字 ≠ 它发了一封邮件——只有当你真的在 process_tool_call 里调用了发邮件的代码，邮件才会发出去。<strong>你才是动手的那个，Claude 只是动嘴</strong>。这一点理解了，你就理解了为什么所有 agent 框架的核心都是"工具循环"，而不是"模型本身"。</p>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </section>

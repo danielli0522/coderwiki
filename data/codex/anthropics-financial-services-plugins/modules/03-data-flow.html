@@ -1,0 +1,267 @@
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">如何协作</h1>
+      <p class="module-subtitle">数据从用户输入 → Agent → MCP 连接器 → 数据供应商 → 返回结果</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: The user journey metaphor -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">像一个快递物流系统</h2>
+        <p>你在手机上下单买东西，背后发生了什么？订单传到仓库 → 仓库调货 → 快递取件 → 配送到家。每一步都有明确的角色和数据流向。</p>
+        <p>当你输入 <code>/comps 苹果公司</code> 时，一条类似的链路启动了：</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>用户输入命令</strong>
+              <p>你在 Claude 里输入 <code>/comps Apple Inc.</code></p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Command 文件被激活</strong>
+              <p>comps.md 告诉 Claude 该问用户什么信息（目标公司、同行名单、时间范围）</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Skill 文件提供方法论</strong>
+              <p>comps-analysis/SKILL.md 指导 Claude 怎么做分析：先查 MCP 数据源、再建表、再算倍数</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>通过 MCP 连接器取数据</strong>
+              <p>Claude 通过 .mcp.json 配置的通道访问 S&P、FactSet 等数据源</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>输出结果给用户</strong>
+              <p>生成 Excel 表格或 PPT，包含完整的可比公司分析</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Data flow animation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">亲眼看看数据怎么流动</h2>
+        <p>点击「下一步」，看一次 /comps 命令的完整数据流：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"用户输入 /comps Apple Inc."},
+          {"highlight":"flow-actor-2","label":"Command (comps.md) 被激活，指导 Claude 收集信息","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-3","label":"Skill (SKILL.md) 提供分析方法和数据优先级规则","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-4","label":"通过 MCP 连接器查询 S&P Kensho 获取财务数据","packet":true,"from":"actor-3","to":"actor-4"},
+          {"highlight":"flow-actor-4","label":"数据供应商返回 Apple 和同行的财务数据","packet":true,"from":"actor-4","to":"actor-3"},
+          {"highlight":"flow-actor-3","label":"Skill 指导 Claude 计算估值倍数，生成 Excel","packet":true,"from":"actor-3","to":"actor-2"},
+          {"highlight":"flow-actor-1","label":"用户收到完整的可比公司分析表格","packet":true,"from":"actor-2","to":"actor-1"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">👤</div>
+              <span>用户</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">🤖</div>
+              <span>Agent + Command</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">📘</div>
+              <span>Skill</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">🔌</div>
+              <span>MCP 数据源</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击「下一步」开始</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: MCP connectors explained -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">MCP：AI 的「万能数据接口」</h2>
+        <p><span class="term" data-definition="MCP（Model Context Protocol）是一种标准协议，让 AI 模型能连接到外部数据源和工具。就像 USB-C 接口让任何设备都能充电一样，MCP 让 AI 能接入任何数据供应商。">MCP</span> 是 Anthropic 设计的一套开放协议，让 AI 能安全地访问外部数据。看看这个项目接了哪些：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">.mcp.json</span>
+            <pre><code>
+<span class="code-line">{</span>
+<span class="code-line">  <span class="code-property">"mcpServers"</span>: {</span>
+<span class="code-line">    <span class="code-property">"daloopa"</span>: { <span class="code-property">"type"</span>: <span class="code-string">"http"</span>,</span>
+<span class="code-line">      <span class="code-property">"url"</span>: <span class="code-string">"https://mcp.daloopa.com/server/mcp"</span> },</span>
+<span class="code-line">    <span class="code-property">"morningstar"</span>: { <span class="code-property">"type"</span>: <span class="code-string">"http"</span>,</span>
+<span class="code-line">      <span class="code-property">"url"</span>: <span class="code-string">"https://mcp.morningstar.com/mcp"</span> },</span>
+<span class="code-line">    <span class="code-property">"sp-global"</span>: { <span class="code-property">"type"</span>: <span class="code-string">"http"</span>,</span>
+<span class="code-line">      <span class="code-property">"url"</span>: <span class="code-string">"https://kfinance.kensho.com/.../mcp"</span> }</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">这是一个 MCP 配置文件，注册了三个数据通道。</p>
+              <p class="tl">Daloopa — 自动从财报 PDF 提取财务数据的工具。</p>
+              <p class="tl">Morningstar — 基金和投资数据的权威来源。</p>
+              <p class="tl">S&P Global (Kensho) — 市场数据、估值倍数、公司财务信息。</p>
+              <p class="tl">每个连接器都是一个 HTTP 地址，AI 通过它获取数据。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Group chat — Skill data priority -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">听听它们怎么商量</h2>
+        <p>技能文件里有严格的数据优先级规则。当 Claude 需要数据时，Skill 文件会告诉它该先问谁：</p>
+
+        <div class="chat-window" id="chat-module3">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="claude" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">🤖</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">Claude (Agent)</span>
+                <p>用户要 Apple 的可比公司分析，我需要财务数据。先搜一下 Google？</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="skill" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">📘</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">comps-analysis Skill</span>
+                <p>停！别用网络搜索。优先用 MCP 数据源：先查 S&P Kensho，再查 FactSet。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="claude" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">🤖</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">Claude (Agent)</span>
+                <p>为什么不能用搜索？搜索结果不是也能找到数据吗？</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="skill" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">📘</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">comps-analysis Skill</span>
+                <p>搜索结果可能过时、不准确，而且没有审计追踪。MCP 源提供机构级数据，有正确的引用来源。做投资决策不能靠随便搜来的数字。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="claude" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">🤖</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">Claude (Agent)</span>
+                <p>明白了。那如果所有 MCP 都不可用呢？</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="5" data-sender="skill" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">📘</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">comps-analysis Skill</span>
+                <p>那才可以用 Bloomberg Terminal 或 SEC EDGAR 公开文件。网络搜索永远不能作为主要数据源。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-typing" style="display:none">
+            <div class="chat-avatar" id="typing-avatar">💬</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条</button>
+            <button class="btn chat-all-btn">播放全部</button>
+            <button class="btn chat-reset-btn">重播</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Callout + Quiz -->
+      <section class="screen animate-in">
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">核心洞察</strong>
+            <p>技能文件不只是「怎么做的说明书」—— 它还包含<strong>数据质量护栏</strong>。通过在 Skill 里规定数据优先级，即使 AI 本能想走捷径（搜网络），也会被技能规则拉回来。这种「把最佳实践写进规则」的思路，是让 AI 在专业领域可靠工作的关键。</p>
+          </div>
+        </div>
+
+        <h2 class="screen-heading">检验你的理解</h2>
+
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！Skill 文件里明确写了数据优先级：MCP 数据源（S&P Kensho、FactSet）优先于 Bloomberg/EDGAR，网络搜索永远不能作为主要来源。这些规则通过技能文件注入到 AI 的行为中。"
+               data-explanation-wrong="想想谁在决定用什么数据源。不是 Agent 的系统提示词，也不是 MCP 配置文件 —— 是每个技能文件（SKILL.md）里写的数据优先级规则。">
+            <h3 class="quiz-question">在可比公司分析中，是谁决定了 Claude 应该优先从哪里获取数据？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Agent 的系统提示词 (agents/*.md)</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Skill 文件 (SKILL.md) 里的数据优先级规则</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>.mcp.json 里连接器的排列顺序</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="没错！所有 11 个数据连接器（Daloopa、Morningstar、S&P、FactSet、Moody's、MT Newswires、Aiera、LSEG、PitchBook、Chronograph、Egnyte）全部集中在 financial-analysis 这个核心插件的 .mcp.json 里。"
+               data-explanation-wrong="连接器不是分散的。它们全部集中在一个地方：financial-analysis 核心插件的 .mcp.json。这确保了所有 Agent 使用相同的数据通道配置。">
+            <h3 class="quiz-question">如果 Pitch Agent 和 Earnings Reviewer 都需要 S&P 数据，数据连接器配置存在哪里？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>每个 Agent 各自的 .mcp.json</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>managed-agent-cookbooks/ 的 agent.yaml</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>共用的 vertical-plugins/financial-analysis/.mcp.json</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">再试一次</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

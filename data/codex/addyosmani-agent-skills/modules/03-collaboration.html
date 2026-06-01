@@ -1,0 +1,276 @@
+<!-- Module 3: 技能如何协作 -->
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">技能如何协作</h1>
+      <p class="module-subtitle">像工厂流水线一样，每个技能的输出是下一个技能的输入</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- ─── SCREEN 1: 流水线上的技能们 ─── -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">流水线上的技能们</h2>
+
+        <p>想象一个汽车工厂。底盘组搭好车架，发动机组装上动力系统，喷漆组涂上颜色，质检组逐项检查。每一组的成品，就是下一组的原材料。如果底盘歪了，后面的工序全白费。</p>
+
+        <p>在 Agent Skills 里，软件开发也是一条这样的流水线。每个阶段都有一个或多个技能在干活，它们产出的<span class="term" data-definition="Artifact 是每个阶段产出的具体成果物，比如文档、代码、测试报告等。可以理解为&quot;阶段性成果&quot;。">成果物</span>会传递给下一个阶段：</p>
+
+        <div class="step-cards stagger-children">
+
+          <div class="step-card animate-in">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>DEFINE 定义 → 产出 <span class="term" data-definition="Spec 是规格说明书，描述你要做什么、怎么做、边界在哪里。">Spec</span> 需求文档</strong>
+              <p>把"我想做一个登录功能"这种模糊想法，翻译成 AI 能看懂的详细规格：支持哪些登录方式、忘记密码怎么走、输错几次锁定……</p>
+            </div>
+          </div>
+
+          <div class="step-card animate-in">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>PLAN 规划 → 产出任务清单</strong>
+              <p>把需求拆成一个个可以独立完成的小任务：设计数据库表、写注册接口、做前端表单……每个任务都有明确的验收标准。</p>
+            </div>
+          </div>
+
+          <div class="step-card animate-in">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>BUILD 构建 → 产出代码和测试</strong>
+              <p>按照任务清单，一个一个地写代码。每写完一个任务就跑测试，确保没破坏之前的功能。就像工人每装好一个零件就检查一遍。</p>
+            </div>
+          </div>
+
+          <div class="step-card animate-in">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>VERIFY 验证 → 产出问题报告</strong>
+              <p>全面跑测试套件，模拟用户操作，找到隐藏的 bug。这一步就是质检——发现问题不丢人，带着问题上生产线才要命。</p>
+            </div>
+          </div>
+
+          <div class="step-card animate-in">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>REVIEW 审查 → 产出审查通过</strong>
+              <p>检查安全漏洞（比如密码有没有加密）、代码质量（命名是否清晰、逻辑是否简洁）、性能问题。相当于出厂前的终检。</p>
+            </div>
+          </div>
+
+          <div class="step-card animate-in">
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <strong>SHIP 发布 → 产出上线软件</strong>
+              <p>先部署到测试环境确认没问题，再推到生产环境，最后监控运行状态。就像新车先试驾，再交付给客户。</p>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="callout callout-accent animate-in">
+          <span class="callout-icon">&#128161;</span>
+          <div class="callout-content">
+            <span class="callout-title">关键洞察</span>
+            <p>每个阶段的产出都是下一个阶段的"原材料"。如果定义阶段写错了需求，后面的规划、构建、验证都会跟着错——就像底盘歪了，整辆车都是歪的。这就是为什么 Agent Skills 强调<strong>每个阶段都有质量关卡</strong>，问题越早发现越便宜。</p>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ─── SCREEN 2: 技能们在群聊 ─── -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">技能们在群聊</h2>
+
+        <p>下面是一个模拟的群聊窗口，展示六个技能如何像团队成员一样接力完成一个"用户登录"功能。点击"下一条"逐条查看，或点"全部播放"一键看完。</p>
+
+        <div class="chat-window" id="chat-module3">
+          <div class="chat-messages">
+
+            <div class="chat-message" data-msg="0" data-sender="spec-driven-dev" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">定</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">spec-driven-dev</span>
+                <p>嘿，我把需求文档写好了！用户登录功能，支持邮箱+密码，有忘记密码的流程。</p>
+              </div>
+            </div>
+
+            <div class="chat-message" data-msg="1" data-sender="task-breakdown" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">拆</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">task-breakdown</span>
+                <p>收到！我把它拆成 5 个任务：数据库设计、注册接口、登录接口、忘记密码接口、前端表单。</p>
+              </div>
+            </div>
+
+            <div class="chat-message" data-msg="2" data-sender="incremental-impl" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">建</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">incremental-impl</span>
+                <p>我先做第一个任务——数据库设计。写完了，跑一下测试……通过！</p>
+              </div>
+            </div>
+
+            <div class="chat-message" data-msg="3" data-sender="tdd" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">测</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">tdd</span>
+                <p>等等，你先写测试了吗？我来帮你补一个：&quot;注册时邮箱格式不对应该报错&quot;。</p>
+              </div>
+            </div>
+
+            <div class="chat-message" data-msg="4" data-sender="code-review" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">审</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">code-review</span>
+                <p>我看了代码，有个问题——密码没用 <span class="term" data-definition="bcrypt 是一种密码加密方法，把密码变成一串乱码存储。即使数据库被偷，黑客也看不到原始密码。">bcrypt</span> 加密。这个安全漏洞必须修。</p>
+              </div>
+            </div>
+
+            <div class="chat-message" data-msg="5" data-sender="shipping" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-accent)">发</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-accent)">shipping</span>
+                <p>所有检查通过了！我先部署到测试环境，确认没问题再上线。</p>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="chat-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module3-typing-avatar" style="background: var(--color-actor-1)">定</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn btn-primary chat-next-btn">下一条</button>
+            <button class="btn chat-all-btn">全部播放</button>
+            <button class="btn chat-reset-btn">重播</button>
+            <span class="chat-progress">0 / 6 messages</span>
+          </div>
+        </div>
+
+        <div class="callout callout-info animate-in">
+          <span class="callout-icon">&#128218;</span>
+          <div class="callout-content">
+            <span class="callout-title">注意到什么了吗？</span>
+            <p>每条消息都在前一条的基础上推进。需求文档 → 任务清单 → 代码实现 → 测试补充 → 安全审查 → 部署上线。没有人跳步，没有人各自为战——这就是协作流水线的力量。</p>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ─── SCREEN 3: 一个需求走过六个关卡 ─── -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">一个需求走过六个关卡</h2>
+
+        <p>下面这个动画展示了"我想做一个登录功能"这句话是如何走过六个阶段的。点击"下一步"逐步观看，你会看到一个光点从一个阶段飞到下一个阶段——那就是数据在传递。</p>
+
+        <div class="flow-animation" data-steps="[
+          {&quot;highlight&quot;:&quot;flow-actor-1&quot;,&quot;label&quot;:&quot;用户说：我想做一个登录功能&quot;},
+          {&quot;highlight&quot;:&quot;flow-actor-1&quot;,&quot;label&quot;:&quot;定义阶段：写出 Spec 需求文档&quot;,&quot;packet&quot;:true,&quot;from&quot;:&quot;actor-1&quot;,&quot;to&quot;:&quot;actor-2&quot;},
+          {&quot;highlight&quot;:&quot;flow-actor-2&quot;,&quot;label&quot;:&quot;规划阶段：拆成 5 个可执行任务&quot;,&quot;packet&quot;:true,&quot;from&quot;:&quot;actor-2&quot;,&quot;to&quot;:&quot;actor-3&quot;},
+          {&quot;highlight&quot;:&quot;flow-actor-3&quot;,&quot;label&quot;:&quot;构建阶段：一个任务一个任务地写代码&quot;,&quot;packet&quot;:true,&quot;from&quot;:&quot;actor-3&quot;,&quot;to&quot;:&quot;actor-4&quot;},
+          {&quot;highlight&quot;:&quot;flow-actor-4&quot;,&quot;label&quot;:&quot;验证阶段：跑测试、找 bug、修 bug&quot;,&quot;packet&quot;:true,&quot;from&quot;:&quot;actor-4&quot;,&quot;to&quot;:&quot;actor-5&quot;},
+          {&quot;highlight&quot;:&quot;flow-actor-5&quot;,&quot;label&quot;:&quot;审查阶段：检查安全、性能、代码质量&quot;,&quot;packet&quot;:true,&quot;from&quot;:&quot;actor-5&quot;,&quot;to&quot;:&quot;actor-6&quot;},
+          {&quot;highlight&quot;:&quot;flow-actor-6&quot;,&quot;label&quot;:&quot;发布阶段：部署上线，监控运行状态&quot;}
+        ]">
+
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">&#127919;</div>
+              <span>定义</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">&#128203;</div>
+              <span>规划</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">&#128296;</div>
+              <span>构建</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">&#128269;</div>
+              <span>验证</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-5">
+              <div class="flow-actor-icon">&#128737;&#65039;</div>
+              <span>审查</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-6">
+              <div class="flow-actor-icon">&#128640;</div>
+              <span>发布</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label">点击"下一步"开始</div>
+
+          <div class="flow-controls">
+            <button class="btn btn-primary flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress">Step 0 / 7</span>
+          </div>
+
+        </div>
+
+        <div class="callout callout-accent animate-in">
+          <span class="callout-icon">&#128161;</span>
+          <div class="callout-content">
+            <span class="callout-title">光点代表什么？</span>
+            <p>每次光点飞过去，就代表一个阶段的成果物传递到了下一个阶段。Spec 飞给规划 → 任务清单飞给构建 → 代码飞给验证 → 问题报告飞给审查 → 审查通过飞给发布。这就是技能之间的"数据流"。</p>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ─── SCREEN 4: 测验 ─── -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">你会怎么选？</h2>
+
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block" data-correct="option-c"
+            data-explanation-right="完全正确！这就是为什么 Agent Skills 强调每个阶段都有质量关卡——问题越早发现越便宜。"
+            data-explanation-wrong="再想想看。跳过测试直接写代码，就像没有质检的工厂——产品带着隐患出了门。">
+            <p class="quiz-question">如果构建阶段（BUILD）跳过了测试直接写完所有代码，最可能发生什么？</p>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <span class="quiz-option-radio"></span>
+                <span>代码能跑就行，没什么问题</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <span class="quiz-option-radio"></span>
+                <span>后面验证阶段会发现所有问题</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <span class="quiz-option-radio"></span>
+                <span>bug 会像滚雪球一样越积越多，后期修复成本极高</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <div>
+            <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">提交答案</button>
+            <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重新选择</button>
+          </div>
+        </div>
+
+        <div class="callout callout-info animate-in">
+          <span class="callout-icon">&#128218;</span>
+          <div class="callout-content">
+            <span class="callout-title">为什么跳过测试是大忌？</span>
+            <p>没有测试保护，改一行代码就可能悄悄破坏其他功能——而且你还不知道。验证阶段找 bug 的成本是构建阶段的 10 倍以上。早发现早治疗，这个道理在软件开发里一样适用。</p>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+  </div>
+</section>

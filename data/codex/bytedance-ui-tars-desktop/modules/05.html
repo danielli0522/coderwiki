@@ -1,0 +1,140 @@
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">模型与 Prompt：AI 的眼睛和大脑</h1>
+      <p class="module-subtitle">截图给谁看？AI 怎么理解屏幕上的元素？这背后是一套精心设计的 Prompt 模板和多版本适配系统。</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">模型适配层：UITarsModel</h2>
+        <p>UI-TARS 支持多个视觉语言模型。UITarsModel 封装了 OpenAI <span class="term" data-definition="SDK（Software Development Kit）是软件开发工具包——一个包含库、文档和示例的工具箱，让你更容易使用某个服务。就像宜家的组装工具包，让你不用自己找螺丝刀。">SDK</span>，统一了不同模型的调用方式。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-comment">// packages/ui-tars/sdk/src/Model.ts</span>
+<span class="code-line"><span class="code-keyword">export class</span> <span class="code-function">UITarsModel</span> <span class="code-keyword">extends</span> Model {</span>
+<span class="code-line">  <span class="code-keyword">async</span> <span class="code-function">invoke</span>(params: InvokeParams) {</span>
+<span class="code-line">    <span class="code-keyword">const</span> { conversations, images,</span>
+<span class="code-line">      screenContext, uiTarsVersion } = params;</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-comment">// 压缩图片：不超过模型像素上限</span></span>
+<span class="code-line">    <span class="code-keyword">const</span> compressed = <span class="code-keyword">await</span></span>
+<span class="code-line">      Promise.<span class="code-function">all</span>(images.<span class="code-function">map</span>(img =&gt;</span>
+<span class="code-line">        <span class="code-function">preprocessResizeImage</span>(</span>
+<span class="code-line">          img, maxPixels)));</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-comment">// 转换为 OpenAI 消息格式</span></span>
+<span class="code-line">    <span class="code-keyword">const</span> messages =</span>
+<span class="code-line">      <span class="code-function">convertToOpenAIMessages</span>(</span>
+<span class="code-line">        { conversations, images: compressed });</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-comment">// 调用模型并解析操作</span></span>
+<span class="code-line">    <span class="code-keyword">const</span> { prediction } =</span>
+<span class="code-line">      <span class="code-keyword">await</span> <span class="code-keyword">this</span>.<span class="code-function">invokeModelProvider</span>(...);</span>
+<span class="code-line">    <span class="code-keyword">const</span> { parsed } = <span class="code-function">actionParser</span>(</span>
+<span class="code-line">      { prediction, screenContext });</span>
+<span class="code-line">    <span class="code-keyword">return</span> { prediction, parsedPredictions: parsed };</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">UITarsModel 负责和视觉语言模型通信...</p>
+              <p class="tl">接收对话历史、图片、屏幕尺寸和模型版本...</p>
+              <p class="tl">第一步：压缩图片，确保不超过模型的像素上限...</p>
+              <p class="tl">每张图片独立压缩，用 Promise.all 并行处理...</p>
+              <p class="tl">第二步：把对话和图片转成 OpenAI 的消息格式...</p>
+              <p class="tl">截图作为 image_url 消息，文本作为 text 消息...</p>
+              <p class="tl">第三步：调用实际的模型 API...</p>
+              <p class="tl">第四步：用 actionParser 解析模型输出为结构化操作...</p>
+              <p class="tl">返回原始预测文本和解析后的操作列表。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Prompt 模板：教 AI 如何操作 GUI</h2>
+        <p>不同版本的模型有不同的能力，所以 Prompt 也要适配。UI-TARS 为每个模型版本准备了专门的 <span class="term" data-definition="System Prompt 是给 AI 的'角色说明书'——告诉它你是谁、你能做什么、你该怎么回答。就像给新员工一份岗位说明书。">System Prompt</span>。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-comment">// apps/ui-tars/src/main/agent/prompts.ts</span>
+<span class="code-line"><span class="code-keyword">export const</span> getSystemPromptV1_5 = (</span>
+<span class="code-line">  language: <span class="code-string">'zh'</span> | <span class="code-string">'en'</span>,</span>
+<span class="code-line">  useCase: <span class="code-string">'normal'</span> | <span class="code-string">'poki'</span></span>
+<span class="code-line">) =&gt; <span class="code-string">`You are a GUI agent...</span></span>
+<span class="code-line"><span class="code-string">## Action Space</span></span>
+<span class="code-line"><span class="code-string">click(point='&lt;point&gt;x1 y1&lt;/point&gt;')</span></span>
+<span class="code-line"><span class="code-string">drag(start_point=..., end_point=...)</span></span>
+<span class="code-line"><span class="code-string">type(content='xxx')</span></span>
+<span class="code-line"><span class="code-string">scroll(point=..., direction='down')</span></span>
+<span class="code-line"><span class="code-string">## Note</span></span>
+<span class="code-line"><span class="code-string">- Use ${language === 'zh' ? 'Chinese' : 'English'}</span></span>
+<span class="code-line"><span class="code-string">  in Thought part.`</span>;</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">V1.5 版本的 Prompt 生成函数...</p>
+              <p class="tl">接受语言和用途两个参数...</p>
+              <p class="tl">用途分为 normal（普通任务）和 poki（游戏）...</p>
+              <p class="tl">定义动作空间：V1.5 用 point 坐标（更精确）...</p>
+              <p class="tl">click 用单点坐标，不再用框选...</p>
+              <p class="tl">drag 用起点和终点...</p>
+              <p class="tl">type 输入文字，scroll 滚动页面...</p>
+              <p class="tl">指定思考过程使用中文或英文...</p>
+              <p class="tl">根据 useCase 选择不同的思考策略描述。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">模型版本适配</strong>
+            <p>注意 V1.0 用 <code>[x1, y1, x2, y2]</code> 框选坐标，V1.5 用 <code>&lt;point&gt;x y&lt;/point&gt;</code> 单点坐标，Doubao 20B 又回到了框选但增加了 <code>press/release</code> 组合键能力。每个模型的训练数据不同，Prompt 必须匹配模型的"语言"。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">图片压缩：平衡精度与成本</h2>
+        <p>一张 4K 截图可能有 800 万像素，但模型有像素上限。UI-TARS 会智能压缩图片，保留足够的细节让模型理解界面。</p>
+
+        <div class="badge-list">
+          <div class="badge-item"><code class="badge-code">MAX_PIXELS_V1_0 = 1350 * 28 * 28</code><span class="badge-desc">V1.0 模型最大支持约 105 万像素</span></div>
+          <div class="badge-item"><code class="badge-code">MAX_PIXELS_V1_5</code><span class="badge-desc">V1.5 模型支持更多像素，识别更精准</span></div>
+          <div class="badge-item"><code class="badge-code">MAX_IMAGE_LENGTH = 5</code><span class="badge-desc">对话历史中最多保留 5 张图片，超出则滑动窗口裁剪</span></div>
+          <div class="badge-item"><code class="badge-code">JPEG quality = 75</code><span class="badge-desc">截图用 75% 质量的 JPEG，在清晰度和 API 成本间取平衡</span></div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+        <div class="quiz-container" id="quiz-module5">
+          <div class="quiz-question-block" data-correct="option-c" data-explanation-right="UI-TARS 用滑动窗口裁剪历史图片（最多保留 5 张），并压缩图片像素到模型上限以下。这样既能保持上下文连贯，又不会让 API 调用超时或超预算。" data-explanation-wrong="UI-TARS 不是每次都传全量历史，也不是只看当前截图。它保留了最近 5 张图片的历史，让模型能看到操作前后的变化。">
+            <h3 class="quiz-question">如果 GUI Agent 已经执行了 20 步操作（每步一张截图），发给模型时会怎样？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>把 20 张截图全部发给模型，让模型看到完整历史</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>只发最新一张截图，之前的全部丢弃以节省成本</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>保留最近 5 张截图作为上下文，更早的图片被裁剪掉</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">Try Again</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>

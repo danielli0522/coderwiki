@@ -1,0 +1,159 @@
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">GUI Agent 循环：截图 → 思考 → 操作</h1>
+      <p class="module-subtitle">想象一个棋手：看棋盘、思考下一步、落子——然后重复。GUI Agent 就是 AI 版的棋手，只不过棋盘是你的电脑屏幕。</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">核心循环：看 → 想 → 做</h2>
+        <p>GUIAgent 类实现了 UI-TARS 最核心的循环。每一步都是：截取屏幕截图，交给视觉语言模型分析，模型返回"下一步该做什么"，然后执行操作。</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>截图（Screenshot）</strong>
+              <p>用 Electron 的 desktopCapturer 捕获屏幕图像，转为 <span class="term" data-definition="Base64 是一种把二进制数据（如图片）编码成纯文本的方法。就像把一幅画翻译成一串字母，方便在网络上传输。">base64</span> 编码</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>推理（Inference）</strong>
+              <p>多模态 <span class="term" data-definition="LLM（Large Language Model）是大型语言模型，如 GPT-4、Claude。多模态 LLM 不仅能读文字，还能'看'图片——这让 GUI Agent 成为可能。">LLM</span> 理解截图内容，输出 "Thought: ... Action: ..." 格式的指令</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>解析（Parse）</strong>
+              <p>action-parser 把文字指令解析成结构化操作：点击坐标、输入文字、按键组合等</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>执行（Execute）</strong>
+              <p>Operator（NutJS / 浏览器 / ADB）执行实际操作，然后回到第 1 步继续循环</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">GUIAgent 的循环代码</h2>
+        <p>这段代码是 GUIAgent.run() 的核心——一个 while(true) 循环，不断截图、推理、执行，直到任务完成或达到最大循环次数。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-comment">// packages/ui-tars/sdk/src/GUIAgent.ts</span>
+<span class="code-line"><span class="code-keyword">while</span> (<span class="code-keyword">true</span>) {</span>
+<span class="code-line">  <span class="code-keyword">if</span> (loopCnt >= maxLoopCount) {</span>
+<span class="code-line">    data.status = StatusEnum.ERROR;</span>
+<span class="code-line">    <span class="code-keyword">break</span>;</span>
+<span class="code-line">  }</span>
+<span class="code-line">  loopCnt += <span class="code-number">1</span>;</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-comment">// Step 1: 截图</span></span>
+<span class="code-line">  <span class="code-keyword">const</span> snapshot =</span>
+<span class="code-line">    <span class="code-keyword">await</span> operator.<span class="code-function">screenshot</span>();</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-comment">// Step 2: 模型推理</span></span>
+<span class="code-line">  <span class="code-keyword">const</span> { prediction,</span>
+<span class="code-line">    parsedPredictions } =</span>
+<span class="code-line">    <span class="code-keyword">await</span> model.<span class="code-function">invoke</span>(vlmParams);</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-comment">// Step 3: 执行每个操作</span></span>
+<span class="code-line">  <span class="code-keyword">for</span> (<span class="code-keyword">const</span> p <span class="code-keyword">of</span> parsedPredictions) {</span>
+<span class="code-line">    <span class="code-keyword">if</span> (p.action_type === <span class="code-string">'finished'</span>)</span>
+<span class="code-line">      <span class="code-keyword">break</span>;</span>
+<span class="code-line">    <span class="code-keyword">await</span> operator.<span class="code-function">execute</span>({</span>
+<span class="code-line">      parsedPrediction: p });</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">进入无限循环——直到任务完成才会退出...</p>
+              <p class="tl">安全阀：如果循环次数超过 maxLoopCount（默认 25），强制停止...</p>
+              <p class="tl">状态设为 ERROR，跳出循环...</p>
+              <p class="tl">循环计数器加 1...</p>
+              <p class="tl">第一步：调用 operator 截取当前屏幕...</p>
+              <p class="tl">第二步：把截图和历史对话发给视觉语言模型...</p>
+              <p class="tl">模型返回预测结果和解析后的操作列表...</p>
+              <p class="tl">第三步：逐个执行模型建议的操作...</p>
+              <p class="tl">如果模型说 finished，说明任务完成了，跳出循环...</p>
+              <p class="tl">否则执行操作（点击、输入、滚动等），然后回到循环开头继续截图。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">安全保护机制</h2>
+        <p>循环不能无限运行——万一 AI 陷入死循环怎么办？UI-TARS 设计了多重保护。</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"1. GUIAgent 开始执行任务循环"},
+          {"highlight":"flow-actor-1","label":"2. 每次循环检查：loopCnt < maxLoopCount(25)?","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-2","label":"3. 截图成功？检查 snapshotErrCnt < 10"},
+          {"highlight":"flow-actor-2","label":"4. 模型推理成功？带重试机制","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-3","label":"5. 操作执行成功？带重试机制","packet":true,"from":"actor-3","to":"actor-1"},
+          {"highlight":"flow-actor-1","label":"6. 任何保护触发 → 停止循环，报告错误"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">GA</div>
+              <span>GUIAgent<br/>循环控制</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">SC</div>
+              <span>截图 &<br/>推理引擎</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">OP</div>
+              <span>操作执行<br/>Operator</span>
+            </div>
+          </div>
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">Click "Next Step" to begin</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">Next Step</button>
+            <button class="btn flow-reset-btn">Restart</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+
+        <div class="badge-list">
+          <div class="badge-item"><code class="badge-code">MAX_LOOP_COUNT = 25</code><span class="badge-desc">默认最大循环次数，防止 Agent 陷入死循环</span></div>
+          <div class="badge-item"><code class="badge-code">MAX_SNAPSHOT_ERR_CNT = 10</code><span class="badge-desc">连续截图失败上限，超过则终止</span></div>
+          <div class="badge-item"><code class="badge-code">AbortController</code><span class="badge-desc">用户随时可以点击停止，中断当前操作</span></div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block" data-correct="option-c" data-explanation-right="GUIAgent 的核心是一个 while(true) 循环：截图 → 模型推理 → 执行操作，通过 maxLoopCount 和 snapshotErrCnt 做安全保护。" data-explanation-wrong="GUIAgent 不是直接执行固定指令，而是每一步都截图让模型重新分析再决定下一步。">
+            <h3 class="quiz-question">如果 GUIAgent 执行一个复杂任务（比如"帮我在携程订机票"），它的工作方式是？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>一次性生成所有操作步骤，然后批量执行</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>先截图分析界面布局，然后按固定流程操作</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>每次截图后重新分析当前界面，动态决定下一步操作</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">Try Again</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>

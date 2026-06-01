@@ -1,0 +1,91 @@
+<section class="module" id="module-7" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">07</span>
+      <h1 class="module-title">架构选型：UI-TARS 技术决策</h1>
+      <p class="module-subtitle">技术负责人视角——评估 UI-TARS 是否适合你的项目，以及它与竞品的核心差异。</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">核心定位</h2>
+        <div class="badge-list">
+          <div class="badge-item"><code class="badge-code">Multimodal AI Agent</code><span class="badge-desc">视觉+语言的多模态智能体框架——AI 能"看懂"屏幕并操作</span></div>
+          <div class="badge-item"><code class="badge-code">GUI + MCP 双引擎</code><span class="badge-desc">GUI Agent 处理界面操作，MCP Agent 处理工具调用，按需组合</span></div>
+          <div class="badge-item"><code class="badge-code">Tarko Agent Framework</code><span class="badge-desc">底层事件驱动的 Agent 循环框架，支持流式、重放、快照</span></div>
+          <div class="badge-item"><code class="badge-code">Desktop + CLI + Web + Server</code><span class="badge-desc">四种部署形态：桌面应用、命令行、Web UI、HTTP Server</span></div>
+          <div class="badge-item"><code class="badge-code">Apache-2.0 License</code><span class="badge-desc">开源可商用，无限制</span></div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">与同类方案对比</h2>
+        <table style="width:100%;border-collapse:collapse;margin:var(--space-6) 0;font-size:var(--text-sm);box-shadow:var(--shadow-md);border-radius:var(--radius-md);overflow:hidden;">
+          <thead>
+            <tr style="background:var(--color-bg-code);color:#CDD6F4;">
+              <th style="padding:var(--space-3) var(--space-4);text-align:left;">维度</th>
+              <th style="padding:var(--space-3) var(--space-4);text-align:left;">UI-TARS</th>
+              <th style="padding:var(--space-3) var(--space-4);text-align:left;">Playwright</th>
+              <th style="padding:var(--space-3) var(--space-4);text-align:left;">Computer Use (Anthropic)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background:var(--color-surface);"><td style="padding:var(--space-3) var(--space-4);"><strong>操作方式</strong></td><td style="padding:var(--space-3) var(--space-4);"><ul><li>视觉理解 + DOM + 混合模式</li><li>无需预定义选择器</li></ul></td><td style="padding:var(--space-3) var(--space-4);"><ul><li>脚本驱动</li><li>需要精确的 CSS 选择器</li></ul></td><td style="padding:var(--space-3) var(--space-4);"><ul><li>纯视觉理解</li><li>不支持 DOM 混合</li></ul></td></tr>
+            <tr style="background:var(--color-bg-warm);"><td style="padding:var(--space-3) var(--space-4);"><strong>适应性</strong></td><td style="padding:var(--space-3) var(--space-4);"><ul><li>自动适应界面变化</li><li>理解语义而非固定位置</li></ul></td><td style="padding:var(--space-3) var(--space-4);"><ul><li>界面变化可能脚本失效</li><li>依赖固定元素结构</li></ul></td><td style="padding:var(--space-3) var(--space-4);"><ul><li>自动适应界面变化</li><li>仅依赖视觉理解</li></ul></td></tr>
+            <tr style="background:var(--color-surface);"><td style="padding:var(--space-3) var(--space-4);"><strong>覆盖范围</strong></td><td style="padding:var(--space-3) var(--space-4);"><ul><li>桌面 + 浏览器 + 手机 (ADB)</li><li>本地 + 远程 + 沙箱</li></ul></td><td style="padding:var(--space-3) var(--space-4);"><ul><li>仅浏览器</li></ul></td><td style="padding:var(--space-3) var(--space-4);"><ul><li>桌面 + 浏览器</li><li>仅限 Anthropic 模型</li></ul></td></tr>
+            <tr style="background:var(--color-bg-warm);"><td style="padding:var(--space-3) var(--space-4);"><strong>成本</strong></td><td style="padding:var(--space-3) var(--space-4);"><ul><li>需多模态 LLM API</li><li>支持多个模型提供商</li></ul></td><td style="padding:var(--space-3) var(--space-4);"><ul><li>免费，本地运行</li></ul></td><td style="padding:var(--space-3) var(--space-4);"><ul><li>需 Claude API</li><li>仅 Anthropic 定价</li></ul></td></tr>
+            <tr style="background:var(--color-surface);"><td style="padding:var(--space-3) var(--space-4);"><strong>开源</strong></td><td style="padding:var(--space-3) var(--space-4);"><ul><li>Apache-2.0 完全开源</li></ul></td><td style="padding:var(--space-3) var(--space-4);"><ul><li>Apache-2.0 完全开源</li></ul></td><td style="padding:var(--space-3) var(--space-4);"><ul><li>API 闭源，按量计费</li></ul></td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">适合 vs 不适合</h2>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-6);margin:var(--space-6) 0;">
+          <div style="background:var(--color-success-light);padding:var(--space-6);border-radius:var(--radius-md);">
+            <h4 style="color:var(--color-success);margin-bottom:var(--space-4);">&#10003; 适合</h4>
+            <ul style="list-style:none;padding:0;">
+              <li style="margin-bottom:var(--space-2);">&#10003; 自动化操作没有 API 的桌面应用或网站</li>
+              <li style="margin-bottom:var(--space-2);">&#10003; 界面经常变化、难以维护固定选择器的自动化</li>
+              <li style="margin-bottom:var(--space-2);">&#10003; 需要跨平台（桌面+浏览器+手机）混合操作</li>
+              <li style="margin-bottom:var(--space-2);">&#10003; AI 驱动的 RPA 场景——客服、数据录入、流程自动化</li>
+              <li style="margin-bottom:var(--space-2);">&#10003; 快速原型验证——用自然语言描述任务即可执行</li>
+              <li>&#10003; 可接受 LLM API 调用成本的生产环境</li>
+            </ul>
+          </div>
+          <div style="background:var(--color-error-light);padding:var(--space-6);border-radius:var(--radius-md);">
+            <h4 style="color:var(--color-error);margin-bottom:var(--space-4);">&#10007; 不适合</h4>
+            <ul style="list-style:none;padding:0;">
+              <li style="margin-bottom:var(--space-2);">&#10007; 需要毫秒级精确操作的高频交易等场景</li>
+              <li style="margin-bottom:var(--space-2);">&#10007; 大规模批量数据处理（效率不如专用脚本）</li>
+              <li style="margin-bottom:var(--space-2);">&#10007; 预算有限无法承担 LLM API 费用</li>
+              <li style="margin-bottom:var(--space-2);">&#10007; 需要 100% 确定性的回归测试（AI 有随机性）</li>
+              <li style="margin-bottom:var(--space-2);">&#10007; 完全离线/无网络的环境</li>
+              <li>&#10007; 涉及高度敏感操作（金融交易）无人监督的自动化</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">&#9888;&#65039;</div>
+          <div class="callout-content">
+            <strong class="callout-title">成本估算</strong>
+            <p>GUI Agent 每次循环（截图+模型推理）是一次多模态 API 调用。复杂任务需要 10-50 次循环。以 Claude 3.5 Sonnet 为例，单次截图约 1000 tokens 输入 + 200 tokens 输出，一个 30 步任务大约消耗 $0.1-0.5。生产使用前务必评估成本。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">源码中的硬限制</h2>
+        <div class="badge-list">
+          <div class="badge-item"><code class="badge-code">MAX_LOOP_COUNT = 25</code><span class="badge-desc">单次任务最大循环次数，防止 Agent 无限运行（来源：GUIAgent.ts）</span></div>
+          <div class="badge-item"><code class="badge-code">MAX_SNAPSHOT_ERR_CNT = 10</code><span class="badge-desc">连续截图失败上限（来源：constants.ts）</span></div>
+          <div class="badge-item"><code class="badge-code">MAX_IMAGE_LENGTH = 5</code><span class="badge-desc">对话历史最大保留图片数，超出的老图片会被裁剪（来源：utils.ts）</span></div>
+          <div class="badge-item"><code class="badge-code">maxIterations = 1000</code><span class="badge-desc">Tarko Agent 框架默认最大迭代次数（来源：agent.ts）</span></div>
+          <div class="badge-item"><code class="badge-code">maxTokens: V1.0=1000, V1.5=65535</code><span class="badge-desc">不同模型版本的最大输出 token 数（来源：Model.ts）</span></div>
+          <div class="badge-item"><code class="badge-code">Node.js &gt;= 22</code><span class="badge-desc">Agent TARS CLI 要求 Node.js 22 或更高版本（来源：README.md）</span></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>

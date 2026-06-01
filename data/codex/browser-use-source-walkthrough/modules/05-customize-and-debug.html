@@ -1,0 +1,313 @@
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="hero-title module-title">从看懂到会改</h1>
+      <p class="module-subtitle">自定义 Action、System Prompt，以及实际调试技巧——学完这章你就能魔改 browser-use 了。</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">SystemPrompt：AI 的"工作手册"</h2>
+        <p>Agent 给 LLM 的系统提示词不只是一段文字，而是一套精心设计的"工作手册"。看看它怎么加载的：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">SystemPrompt</span>:</span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(</span>
+<span class="code-line">        self,</span>
+<span class="code-line">        max_actions_per_step: int = <span class="code-keyword">3</span>,</span>
+<span class="code-line">        override_system_message: str | <span class="code-keyword">None</span> = <span class="code-keyword">None</span>,</span>
+<span class="code-line">        extend_system_message: str | <span class="code-keyword">None</span> = <span class="code-keyword">None</span>,</span>
+<span class="code-line">        use_thinking: bool = <span class="code-keyword">True</span>,</span>
+<span class="code-line">        flash_mode: bool = <span class="code-keyword">False</span>,</span>
+<span class="code-line">        is_anthropic: bool = <span class="code-keyword">False</span>,</span>
+<span class="code-line">        is_browser_use_model: bool = <span class="code-keyword">False</span>,</span>
+<span class="code-line">        model_name: str | <span class="code-keyword">None</span> = <span class="code-keyword">None</span>,</span>
+<span class="code-line">    ):</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">max_actions_per_step：每步最多执行几个动作（默认 3）。限制数量让 AI 更谨慎。</p>
+              <p class="tl">override_system_message：完全替换系统提示词——你说了算。</p>
+              <p class="tl">extend_system_message：在默认提示词后面追加内容——更安全的方式。</p>
+              <p class="tl">use_thinking：让 AI 在行动前先"想一下"，输出思考过程。</p>
+              <p class="tl">flash_mode：精简模式——去掉思考和评估，追求速度。</p>
+              <p class="tl">is_anthropic / is_browser_use_model：根据模型类型选择不同的提示词模板。</p>
+            </div>
+          </div>
+        </div>
+
+        <p>它内部会根据模型类型选择不同的提示词模板文件：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">if</span> self.is_browser_use_model:</span>
+<span class="code-line">    <span class="code-keyword">if</span> self.flash_mode:</span>
+<span class="code-line">        template_filename = <span class="code-string">'system_prompt_browser_use_flash.md'</span></span>
+<span class="code-line">    <span class="code-keyword">elif</span> self.use_thinking:</span>
+<span class="code-line">        template_filename = <span class="code-string">'system_prompt_browser_use.md'</span></span>
+<span class="code-line"><span class="code-keyword">elif</span> self.flash_mode <span class="code-keyword">and</span> self.is_anthropic:</span>
+<span class="code-line">    template_filename = <span class="code-string">'system_prompt_flash_anthropic.md'</span></span>
+<span class="code-line"><span class="code-keyword">elif</span> self.flash_mode:</span>
+<span class="code-line">    template_filename = <span class="code-string">'system_prompt_flash.md'</span></span>
+<span class="code-line"><span class="code-keyword">elif</span> self.use_thinking:</span>
+<span class="code-line">    template_filename = <span class="code-string">'system_prompt.md'</span></span>
+<span class="code-line"><span class="code-keyword">else</span>:</span>
+<span class="code-line">    template_filename = <span class="code-string">'system_prompt_no_thinking.md'</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">官方微调模型用专属模板（browser_use 后缀），更精简高效。</p>
+              <p class="tl">每种组合（flash/thinking/anthropic）都有对应的 .md 模板文件。</p>
+              <p class="tl">这意味着你可以在不改源码的情况下，替换这些 .md 文件来定制 AI 行为。</p>
+              <p class="tl">最终，模板里的 {max_actions} 占位符会被替换成实际数字。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">自定义 System Prompt：让 AI 更懂你的场景</h2>
+        <p>browser-use 提供两种方式定制系统提示词。最常用的是 <code>extend_system_message</code>——在默认提示词后面加内容：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line">agent = Agent(</span>
+<span class="code-line">    task=<span class="code-string">'Search for AI news and summarize'</span>,</span>
+<span class="code-line">    llm=ChatOpenAI(model=<span class="code-string">'gpt-4o'</span>),</span>
+<span class="code-line">    extend_system_message=<span class="code-string">"""</span></span>
+<span class="code-line"><span class="code-string">Additional rules:</span></span>
+<span class="code-line"><span class="code-string">1. Always click "Accept cookies" if a cookie banner appears</span></span>
+<span class="code-line"><span class="code-string">2. Never sign up or log in to any website</span></span>
+<span class="code-line"><span class="code-string">3. If a CAPTCHA appears, skip that site and move on</span></span>
+<span class="code-line"><span class="code-string">"""</span>,</span>
+<span class="code-line">)</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">extend_system_message 是追加的——默认提示词还在，你只是在后面加了规则。</p>
+              <p class="tl">规则 1：遇到 Cookie 弹窗自动点"接受"——省得 AI 卡在这里。</p>
+              <p class="tl">规则 2：永远不要注册或登录——防止 AI 乱填表单。</p>
+              <p class="tl">规则 3：遇到验证码就跳过——不浪费时间。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">📌</div>
+          <div class="callout-content">
+            <strong class="callout-title">实用技巧</strong>
+            <p><code>override_system_message</code> 是完全替换，适合深度定制。但新手建议用 <code>extend_system_message</code>，因为默认提示词经过大量测试调优，里面有处理各种边界情况的指令。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">AgentMessagePrompt：每次发给 LLM 的完整上下文</h2>
+        <p>每一步，Agent 都会构造一个超长的"用户消息"发给 LLM。这个消息包含了 AI 做决策需要的所有信息：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line">state_description = (</span>
+<span class="code-line">    <span class="code-string">'&lt;agent_history&gt;\n'</span></span>
+<span class="code-line">    + (self.agent_history_description.strip(<span class="code-string">'\n'</span>)</span>
+<span class="code-line">       <span class="code-keyword">if</span> self.agent_history_description <span class="code-keyword">else</span> <span class="code-string">''</span>)</span>
+<span class="code-line">    + <span class="code-string">'\n&lt;/agent_history&gt;\n\n'</span></span>
+<span class="code-line">)</span>
+<span class="code-line">state_description += <span class="code-string">'&lt;agent_state&gt;\n'</span></span>
+<span class="code-line">    + self._get_agent_state_description().strip(<span class="code-string">'\n'</span>)</span>
+<span class="code-line">    + <span class="code-string">'\n&lt;/agent_state&gt;\n'</span></span>
+<span class="code-line">state_description += <span class="code-string">'&lt;browser_state&gt;\n'</span></span>
+<span class="code-line">    + self._get_browser_state_description().strip(<span class="code-string">'\n'</span>)</span>
+<span class="code-line">    + <span class="code-string">'\n&lt;/browser_state&gt;\n'</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">agent_history：之前做了什么——AI 需要知道历史才能避免重复。</p>
+              <p class="tl">agent_state：当前任务描述、文件系统状态、todo 列表、敏感数据等。</p>
+              <p class="tl">browser_state：当前页面的 DOM 元素列表、截图、Tab 信息、滚动位置。</p>
+              <p class="tl">三个 XML 标签把不同类型的信息分块，方便 LLM 区分理解。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">循环检测：防止 AI 在原地打转</h2>
+        <p>AI 有时会陷入死循环——反复点击同一个按钮，或者在两个页面之间来回跳。browser-use 内置了 <span class="term" data-definition="ActionLoopDetector 是一个循环检测器，跟踪最近 N 步的动作哈希值。如果同一个动作重复太多次，就给 LLM 发一条'提醒'，建议它换个策略。">ActionLoopDetector</span> 来应对：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">get_nudge_message</span>(self) -> str | <span class="code-keyword">None</span>:</span>
+<span class="code-line">    <span class="code-keyword">if</span> self.max_repetition_count >= <span class="code-keyword">12</span>:</span>
+<span class="code-line">        messages.append(</span>
+<span class="code-line">            f<span class="code-string">'Heads up: you have repeated a similar action'</span></span>
+<span class="code-line">            f<span class="code-string">' {self.max_repetition_count} times in the last'</span></span>
+<span class="code-line">            f<span class="code-string">' {len(self.recent_action_hashes)} actions.'</span></span>
+<span class="code-line">        )</span>
+<span class="code-line">    <span class="code-keyword">elif</span> self.max_repetition_count >= <span class="code-keyword">5</span>:</span>
+<span class="code-line">        messages.append(</span>
+<span class="code-line">            f<span class="code-string">'Heads up: you have repeated a similar action'</span></span>
+<span class="code-line">            f<span class="code-string">' {self.max_repetition_count} times.'</span></span>
+<span class="code-line">        )</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">循环检测器持续统计最近 20 步中每个动作的哈希值出现次数。</p>
+              <p class="tl">重复 5 次：温和提醒"你重复了，还在进步吗？"</p>
+              <p class="tl">重复 12 次：严肃警告"你可能卡住了，换个方法吧。"</p>
+              <p class="tl">注意：这只是"提醒"，不是"禁止"。AI 可以忽略提醒继续执行——毕竟有时候重复是合理的（比如翻页）。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">工程哲学</strong>
+            <p>browser-use 的循环检测是"软约束"而非"硬约束"——它只给 LLM 提示，不强制阻止动作。这种设计尊重了 AI 的判断力：有时候重复是有意的（比如逐页翻页），硬阻断反而会打断正确行为。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">step() 方法：一次完整执行的四阶段</h2>
+        <p>Agent 的核心方法是 <code>step()</code>，每一步都严格按照四个阶段执行：</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Phase 0: 等待 CAPTCHA（可选）</strong>
+              <p>如果之前在解验证码，先等它解完再继续。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Phase 1: 准备上下文（_prepare_context）</strong>
+              <p>截图 + 获取浏览器状态 + 解析 DOM + 更新动作模型。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Phase 2: 获取 AI 决策并执行（_get_next_action + _execute_actions）</strong>
+              <p>把上下文发给 LLM，拿到 JSON 动作，Tools 翻译成浏览器操作并执行。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>Phase 3: 后处理（_post_process）</strong>
+              <p>更新历史、检查下载、判断是否完成、记录遥测数据。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">调试技巧：看日志、存对话、设超时</h2>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">📝</div>
+            <div>
+              <strong>save_conversation_path</strong>
+              <p>设置这个参数，Agent 会把每一步发给 LLM 的完整对话保存到文件——调试时的第一选择。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">⏱️</div>
+            <div>
+              <strong>llm_timeout / step_timeout</strong>
+              <p>llm_timeout 控制 LLM 调用的超时（默认 60s），step_timeout 控制整步超时（默认 180s）。网络慢时可以调大。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🪞</div>
+            <div>
+              <strong>max_failures</strong>
+              <p>连续失败多少步后停止（默认 5）。调试时建议设成 2，快速发现问题。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line">agent = Agent(</span>
+<span class="code-line">    task=<span class="code-string">'Debug example task'</span>,</span>
+<span class="code-line">    llm=ChatOpenAI(model=<span class="code-string">'gpt-4o'</span>),</span>
+<span class="code-line">    save_conversation_path=<span class="code-string">'./debug_conversation'</span>,</span>
+<span class="code-line">    max_failures=<span class="code-keyword">2</span>,</span>
+<span class="code-line">    llm_timeout=<span class="code-keyword">90</span>,</span>
+<span class="code-line">    step_timeout=<span class="code-keyword">120</span>,</span>
+<span class="code-line">    max_actions_per_step=<span class="code-keyword">1</span>,</span>
+<span class="code-line">)</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">save_conversation_path：把每步对话存到 ./debug_conversation 目录。</p>
+              <p class="tl">max_failures=2：连续失败 2 次就停——快速暴露问题。</p>
+              <p class="tl">llm_timeout=90：给 LLM 90 秒响应时间（默认 60 可能不够）。</p>
+              <p class="tl">step_timeout=120：每步最多执行 120 秒。</p>
+              <p class="tl">max_actions_per_step=1：每步只做一个动作——方便逐步调试。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">测测你理解了多少</h2>
+
+        <div class="quiz-container" id="quiz-module5">
+          <div class="quiz-question-block" data-correct="option-a" data-explanation-right="没错！extend_system_message 是追加模式，默认提示词保留，你的规则加在后面。这是最安全的定制方式。" data-explanation-wrong="extend_system_message 不是替换，而是追加。默认提示词经过大量测试调优，里面有很多处理边界情况的指令，不建议完全丢弃。">
+            <h3 class="quiz-question">想在默认提示词基础上加一条规则"遇到 Cookie 弹窗自动点接受"，该用哪个参数？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div><span>extend_system_message —— 追加规则，保留默认提示词</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div><span>override_system_message —— 完全替换默认提示词</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div><span>直接修改源码中的 system_prompt.md 模板文件</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

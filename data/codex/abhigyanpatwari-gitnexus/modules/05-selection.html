@@ -1,0 +1,164 @@
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">技术选型与对比：为什么是浏览器端？</h1>
+      <p class="module-subtitle">GitNexus 的每一个关键选型背后的思考</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Browser vs Server -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">为什么选择"零服务器"？</h2>
+        <p>大部分代码分析工具都需要服务器：把代码上传到云端解析，返回结果。GitNexus 反其道而行——全部在浏览器或本机完成。为什么？</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#128274;</div>
+            <h4 class="pattern-title">企业代码不出墙</h4>
+            <p class="pattern-desc">企业客户的源代码是核心资产。要求上传到第三方服务器？门都没有。GitNexus 的零服务器架构从根上消除了这个障碍。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">&#9889;</div>
+            <h4 class="pattern-title">零延迟体验</h4>
+            <p class="pattern-desc">本地解析 + 本地查询 = 毫秒级响应。不需要等网络传输、不需要排队等服务器资源。WebGL 渲染数千节点丝滑流畅。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-success-light)">&#128176;</div>
+            <h4 class="pattern-title">零运维成本</h4>
+            <p class="pattern-desc">不需要维护服务器集群、不需要扩缩容、不需要担心宕机。开源项目也没有服务器账单的压力。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Key Technology Choices -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">关键技术选型</h2>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num" style="background: var(--color-accent); color: white;">TS</div>
+            <div class="step-body">
+              <strong>Tree-sitter 而非 LSP</strong>
+              <p><span class="term" data-definition="LSP（Language Server Protocol）是微软定义的语言服务协议。IDE 用它获得代码补全、跳转定义等功能。但它需要每种语言启动一个服务器进程，开销大。">LSP</span> 虽然语义更丰富，但需要为每种语言启动独立的语言服务器进程，不适合浏览器环境。Tree-sitter 是轻量级的 AST 解析器，能编译成 WASM，14 种语言共享同一套处理逻辑。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num" style="background: var(--color-actor-2); color: white;">DB</div>
+            <div class="step-body">
+              <strong>LadybugDB 而非 Neo4j</strong>
+              <p>Neo4j 是重量级图数据库，需要 Java 运行时和独立服务器进程。LadybugDB（原 KuzuDB）是嵌入式图数据库，支持向量搜索，能编译成 WASM 在浏览器里跑。原生模式和 WASM 模式共享同一套查询接口。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num" style="background: var(--color-actor-4); color: white;">EM</div>
+            <div class="step-body">
+              <strong>transformers.js 而非 OpenAI API</strong>
+              <p>用 HuggingFace 的 transformers.js 在本地生成嵌入向量（Snowflake arctic-embed-xs, 384维），不依赖任何外部 API。Web 版用 WebGPU 加速或 WASM 降级，CLI 版支持 Node.js GPU 加速。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num" style="background: var(--color-actor-5); color: white;">MCP</div>
+            <div class="step-body">
+              <strong>MCP 而非自定义插件协议</strong>
+              <p><span class="term" data-definition="MCP（Model Context Protocol）是 Anthropic 发起的开放协议，让 AI 代理通过标准化接口访问外部工具。就像 USB 统一了外设连接，MCP 统一了 AI 访问工具的方式。">MCP</span> 是 AI 工具领域的"USB 接口"。一套 MCP 服务器，Cursor、Claude Code、Codex、Windsurf 全部能用。不需要为每个编辑器写独立插件。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Comparison with Similar Tools -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">横向对比：GitNexus vs 其他工具</h2>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">工具对比</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment">/*       运行方式  代码分析深度  AI集成  多语言 */</span></span>
+<span class="code-line"><span class="code-comment">/* DeepWiki   云端    描述级      有     少量 */</span></span>
+<span class="code-line"><span class="code-comment">/* Sourcegraph 云端   文本搜索    有     通用 */</span></span>
+<span class="code-line"><span class="code-comment">/* CodeGraph  本地    图谱级      MCP    18+  */</span></span>
+<span class="code-line"><span class="code-comment">/* GitNexus   本地/浏览器 图谱级  MCP    14+  */</span></span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment">// GitNexus 独有特性：</span></span>
+<span class="code-line"><span class="code-comment">// - 预计算聚类+执行流+置信度</span></span>
+<span class="code-line"><span class="code-comment">// - 浏览器端全 WASM 运行</span></span>
+<span class="code-line"><span class="code-comment">// - 一个 MCP 服务多仓库</span></span>
+<span class="code-line"><span class="code-comment">// - 影响分析+变更检测+重命名</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">DeepWiki 帮你"理解"代码，生成文档描述。GitNexus 帮你"分析"代码——跟踪每一条依赖关系。</p>
+              <p class="tl">Sourcegraph 是云端文本搜索，基于关键词匹配。GitNexus 是本地图谱查询，基于语义关系。</p>
+              <p class="tl">CodeGraph 和 GitNexus 最接近，都是本地图谱引擎。GitNexus 多了浏览器端运行和预计算智能。</p>
+              <p class="tl">GitNexus 独有的杀手锏：在浏览器里就能跑完整的代码分析，不用装任何东西。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Tech Stack Summary -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">完整技术栈一览</h2>
+        <p>CLI 和 Web 用同一套核心逻辑，不同的运行时适配：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#128421;</div>
+            <h4 class="pattern-title">CLI 运行时</h4>
+            <p class="pattern-desc">Node.js 原生运行。Tree-sitter 原生绑定。LadybugDB 原生。Worker 线程池并行。本地文件系统持久化。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">&#127760;</div>
+            <h4 class="pattern-title">Web 运行时</h4>
+            <p class="pattern-desc">浏览器 + WASM。Tree-sitter WASM 解析。LadybugDB WASM 存储。Web Workers + Comlink 并行。内存会话级存储。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: #FDF5E0">&#127912;</div>
+            <h4 class="pattern-title">Web 前端</h4>
+            <p class="pattern-desc">React 18 + TypeScript + Vite 构建。Tailwind v4 样式。Sigma.js + Graphology (WebGL) 图可视化。i18n 多语言支持。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-success-light)">&#128279;</div>
+            <h4 class="pattern-title">AI 接口</h4>
+            <p class="pattern-desc">CLI 通过 MCP（stdio）暴露工具。Web 通过 LangChain ReAct Agent 提供对话。Bridge 模式让 Web 连接 CLI 后端获得完整能力。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-module5">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！GitNexus 选择 MCP 是因为它是 AI 工具领域的通用协议——一套 MCP 服务器就能被 Cursor、Claude Code、Codex、Windsurf 等所有主流编辑器使用，不需要为每个编辑器写独立插件。"
+               data-explanation-wrong="想想 GitNexus 面临的挑战：要让多种 AI 编辑器都能用它的工具。如果为每个编辑器写独立插件，维护成本爆炸。MCP 解决了什么问题？">
+            <h3 class="quiz-question">GitNexus 为什么选择 MCP 协议而不是为每个编辑器写独立插件？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>MCP 是性能最高的通信协议</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>MCP 是通用协议，一套服务器服务所有编辑器，避免重复开发</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为只有 MCP 支持 stdio 通信方式</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

@@ -1,0 +1,168 @@
+<section class="module" id="module-1">
+  <div class="screen">
+    <h2>Android 逆向工程入门</h2>
+    <p class="module-subtitle">学习如何提取和分析 Android 应用的 API 接口</p>
+    <div class="callout callout-accent">
+      <div class="callout-icon">💡</div>
+      <div class="callout-content">
+        <strong class="callout-title">关键洞察</strong>
+        <p>Android 逆向工程让你能够"窥探"应用内部的工作原理，就像拆开一台机器看看它是如何运转的。</p>
+      </div>
+    </div>
+    <div class="pattern-cards">
+      <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+        <div class="pattern-icon" style="background: var(--color-actor-1)">📱</div>
+        <h4 class="pattern-title">APK 文件</h4>
+        <p class="pattern-desc">Android 应用的打包文件，包含代码、资源和元数据</p>
+      </div>
+      <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+        <div class="pattern-icon" style="background: var(--color-actor-2)">🛠️</div>
+        <h4 class="pattern-title">反编译工具</h4>
+        <p class="pattern-desc">将 APK 中的字节码转换回可读的 Java 代码</p>
+      </div>
+      <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+        <div class="pattern-icon" style="background: var(--color-actor-3)">🌐</div>
+        <h4 class="pattern-title">API 提取</h4>
+        <p class="pattern-desc">识别应用与服务器之间的所有 HTTP 通信</p>
+      </div>
+    </div>
+    <!-- 进阶概念 -->
+    <section class="screen animate-in">
+      <h2>Project Nomad 项目概览</h2>
+      <p>Project Nomad 是一个专注于 Android 逆向工程的解决方案，它提供了一整套工具链来帮助安全研究人员和开发者分析 Android 应用的内部工作机制。让我们深入了解项目的核心组件：</p>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">🔍</div>
+          <h4 class="pattern-title">静态分析</h4>
+          <p class="pattern-desc">不运行应用的情况下，通过反编译和代码审查来理解应用的逻辑和结构</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">⚡</div>
+          <h4 class="pattern-title">动态分析</h4>
+          <p class="pattern-desc">在运行时监控应用的行为，包括网络请求、文件操作和 API 调用</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">📊</div>
+          <h4 class="pattern-title">API 映射</h4>
+          <p class="pattern-desc">自动提取和分类应用使用的所有 API 端点，生成可视化的调用关系图</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 文件结构 -->
+    <section class="screen animate-in">
+      <h2>项目文件结构详解</h2>
+      <p>打开 Project Nomad 的代码库，你会看到以下结构：</p>
+
+      <div class="code-translation">
+        <div class="code">
+          <pre><code>project-nomad/
+├── core/               # 核心分析引擎
+│   ├── decompiler.py   # 反编译模块
+│   ├── analyzer.py     # 代码分析器
+│   └── extractor.py    # API 提取器
+├── plugins/            # 可扩展插件
+│   ├── retrofit.py     # Retrofit 注解解析
+│   ├── okhttp.py       # OkHttp 拦截器
+│   └── websocket.py    # WebSocket 分析
+├── utils/              # 工具函数
+│   ├── logger.py       # 日志模块
+│   └── config.py       # 配置管理
+├── output/             # 输出目录
+│   ├── reports/        # 分析报告
+│   └── graphs/         # 调用关系图
+└── scripts/            # 自动化脚本
+    ├── decompile.sh    # 反编译脚本
+    └── find-api-calls.sh  # API 查找脚本</code></pre>
+        </div>
+        <div class="translation">
+          <p>项目文件结构解读：</p>
+          <div class="translation-lines">
+            <p class="tl">core/ 目录包含核心分析引擎的三个主要模块</p>
+            <p class="tl">plugins/ 目录实现了对不同网络框架的专用解析器</p>
+            <p class="tl">utils/ 目录提供日志和配置等基础功能</p>
+            <p class="tl">output/ 目录保存分析结果和可视化图表</p>
+            <p class="tl">scripts/ 目录包含可以直接执行的命令行工具</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 逆向工程流程 -->
+    <section class="screen animate-in">
+      <h2>完整的逆向工程工作流</h2>
+      <p>让我们跟踪一个完整的 Android 逆向工程流程，从获取 APK 到最终获得 API 调用清单：</p>
+
+      <div class="step-cards">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>获取目标 APK</strong>
+            <p>从设备中提取或从第三方来源获取目标应用的 APK 安装文件</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>反编译代码</strong>
+            <p>使用 jadx 等工具将 DEX 字节码转换为可读的 Java 源代码</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>识别网络框架</strong>
+            <p>判断应用使用的是 Retrofit、OkHttp、Volley 还是原生 HttpURLConnection</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>提取 API 端点</strong>
+            <p>使用对应框架的解析器自动提取所有 API 调用和参数</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <strong>生成分析报告</strong>
+            <p>自动生成包含所有 API 端点的结构化报告和调用关系图</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">💡</div>
+        <div class="callout-content">
+          <strong class="callout-title">工具链选择</strong>
+          <p>Android 逆向工程的工具选择取决于目标应用的保护程度。对于未混淆的应用，jadx 就足够了。对于高度混淆的应用，你可能需要结合使用 Frida（动态插桩）和 Xposed 框架。</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="quiz">
+      <h3>小测试</h3>
+      <p>以下哪项不是 Android 逆向工程的主要目的？</p>
+      <div class="quiz-options">
+        <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+          <div class="quiz-option-radio"></div>
+          <span>理解应用的工作原理</span>
+        </button>
+        <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+          <div class="quiz-option-radio"></div>
+          <span>提取 API 接口</span>
+        </button>
+        <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+          <div class="quiz-option-radio"></div>
+          <span>修改应用的源代码</span>
+        </button>
+      </div>
+      <div class="quiz-feedback"></div>
+      <div class="quiz-controls">
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">重试</button>
+      </div>
+    </div>
+  </div>
+</section>

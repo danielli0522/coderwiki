@@ -1,0 +1,182 @@
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">When Things Break</h1>
+      <p class="module-subtitle">Every Archon failure falls into one of four categories — know the categories and you&apos;ll never be lost for more than 5 minutes.</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The four failure modes</h2>
+        <p>When a workflow stops working, it&apos;s almost always one of these four things. Like a car that won&apos;t start — before calling a mechanic, you check fuel, battery, keys, and neutral. Archon has its own checklist.</p>
+
+        <div class="pattern-cards animate-in stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-error)">
+            <div class="pattern-icon" style="background: var(--color-error)">📄</div>
+            <h4 class="pattern-title">YAML Validation Error</h4>
+            <p class="pattern-desc">The workflow file has a syntax error or uses an unknown field. Archon catches this before running anything — check the error message for the exact line.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-error)">
+            <div class="pattern-icon" style="background: var(--color-error)">🧠</div>
+            <h4 class="pattern-title">AI Node Failure</h4>
+            <p class="pattern-desc">Claude returned an error or timed out. Check API key, rate limits, or whether the prompt is too long. The error will be in the workflow run&apos;s message history in core.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-error)">
+            <div class="pattern-icon" style="background: var(--color-error)">🔧</div>
+            <h4 class="pattern-title">Bash Node Failure</h4>
+            <p class="pattern-desc">A shell command returned a non-zero exit code. This is the most diagnosable failure — run the bash command manually in the worktree to see the exact error.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-error)">
+            <div class="pattern-icon" style="background: var(--color-error)">🔄</div>
+            <h4 class="pattern-title">Loop Never Terminates</h4>
+            <p class="pattern-desc">The AI keeps looping but ALL_TASKS_COMPLETE is never triggered. Usually the AI is stuck — check the last few messages to see what it&apos;s stuck on. Add a max_iterations limit to your loop.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Spot the bug: broken workflow</h2>
+        <p>This workflow YAML has a real bug that would cause a node to run before its dependency is ready. Click the line you think is wrong:</p>
+
+        <div class="bug-challenge animate-in">
+          <h3>Find the bug in this workflow:</h3>
+          <div class="bug-code">
+            <div class="bug-line" data-line="1" onclick="checkBugLine(this, false)" data-hint="The node IDs look fine here.">
+              <span class="line-num">1</span>
+              <code>nodes:</code>
+            </div>
+            <div class="bug-line" data-line="2" onclick="checkBugLine(this, false)" data-hint="The plan node looks correct.">
+              <span class="line-num">2</span>
+              <code>  - id: plan</code>
+            </div>
+            <div class="bug-line" data-line="3" onclick="checkBugLine(this, false)" data-hint="This prompt is fine.">
+              <span class="line-num">3</span>
+              <code>    prompt: "Create a plan"</code>
+            </div>
+            <div class="bug-line" data-line="4" onclick="checkBugLine(this, false)" data-hint="The implement node id is correct.">
+              <span class="line-num">4</span>
+              <code>  - id: implement</code>
+            </div>
+            <div class="bug-line bug-target" data-line="5" onclick="checkBugLine(this, true)" data-explanation="This depends_on references &apos;planning&apos; but the earlier node is named &apos;plan&apos;. The dependency can never be satisfied because Archon can&apos;t find a node named &apos;planning&apos;.">
+              <span class="line-num">5</span>
+              <code>    depends_on: [planning]</code>
+            </div>
+            <div class="bug-line" data-line="6" onclick="checkBugLine(this, false)" data-hint="The prompt content is fine.">
+              <span class="line-num">6</span>
+              <code>    prompt: "Read the plan. Implement."</code>
+            </div>
+            <div class="bug-line" data-line="7" onclick="checkBugLine(this, false)" data-hint="The test node is fine.">
+              <span class="line-num">7</span>
+              <code>  - id: run-tests</code>
+            </div>
+            <div class="bug-line" data-line="8" onclick="checkBugLine(this, false)" data-hint="This dependency is correct — it references &apos;implement&apos; which exists.">
+              <span class="line-num">8</span>
+              <code>    depends_on: [implement]</code>
+            </div>
+          </div>
+          <div class="bug-feedback" id="bug-feedback"></div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Your debugging playbook</h2>
+        <p>When a workflow fails, here&apos;s the exact sequence to follow:</p>
+
+        <div class="step-cards animate-in stagger-children">
+          <div class="step-card animate-in">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Check which node failed</strong>
+              <p>The workflow run shows a status for each node. Find the first <code>FAILED</code> node — that&apos;s your starting point.</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Read the error message</strong>
+              <p>Bash failures have exit codes and stderr output. AI failures have API error codes. YAML failures name the offending line. The message is almost always enough.</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Inspect the worktree</strong>
+              <p>Navigate to the isolated worktree directory. Run the failing command manually. See the exact state the AI left the files in.</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>Review the message history</strong>
+              <p>If an AI node failed, read the conversation history in core. Often you can see exactly where the AI went wrong and add a clarifying instruction to the prompt.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning animate-in">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">The infinite loop trap</strong>
+            <p>If an AI loop is running forever, it&apos;s usually because the AI doesn&apos;t know how to signal completion. The fix: make your until condition explicit in the prompt. Instead of "keep going until done," say "when all tasks are complete, output the exact text ALL_TASKS_COMPLETE." Specificity beats hope.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Final quiz: Debugging Archon</h2>
+
+        <div class="quiz-container animate-in" id="quiz-module5">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="Exactly — if the bash command is available, run it directly in the worktree. This gives you the raw output without any Archon abstraction in the way."
+               data-explanation-wrong="Not quite. The fastest way to debug a bash node failure is to run the command manually in the worktree — you get the unfiltered error output.">
+            <h3 class="quiz-question">Your bash node running &apos;bun run validate&apos; is failing. What&apos;s your fastest debugging move?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Ask an AI to explain why it might fail</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Delete the bash node and run the tests manually later</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Navigate to the isolated worktree directory and run &apos;bun run validate&apos; manually to see the exact error</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Right — max_iterations is your circuit breaker for runaway loops. Once the limit is hit, Archon fails the node with a clear error rather than burning API credits forever."
+               data-explanation-wrong="Not quite. For infinite loops, add max_iterations to the loop configuration — this gives Archon a hard limit to prevent endless API calls.">
+            <h3 class="quiz-question">Your implement loop has been running for 20 iterations and showing no sign of stopping. What would prevent this in the future?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Switch from Claude to a different AI provider</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Add max_iterations to the loop configuration so it fails cleanly after N attempts</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Remove the loop and just run the implement node once</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

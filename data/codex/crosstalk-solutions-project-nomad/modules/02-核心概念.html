@@ -1,0 +1,253 @@
+<section class="module" id="module-2">
+  <div class="screen">
+    <h2>核心概念解析</h2>
+    <div class="code-translation">
+      <div class="translation-code">
+        <pre><code>
+<span class="code-line"><span class="code-keyword">public</span> <span class="code-keyword">class</span> MainActivity <span class="code-keyword">extends</span> AppCompatActivity {</span>
+<span class="code-line">  <span class="code-keyword">@Override</span></span>
+<span class="code-line">  <span class="code-keyword">protected</span> <span class="code-keyword">void</span> onCreate(Bundle savedInstanceState) {</span>
+<span class="code-line">    <span class="code-keyword">super</span>.onCreate(savedInstanceState);</span>
+<span class="code-line">    setContentView(R.layout.activity_main);</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+        </code></pre>
+      </div>
+      <div class="translation-english">
+        <div class="translation-lines">
+          <p class="tl">定义一个名为 MainActivity 的 Android 活动类</p>
+          <p class="tl">继承自 AppCompatActivity，这是 Android 的基础活动类</p>
+          <p class="tl">重写 onCreate 方法，这是活动的入口点</p>
+          <p class="tl">调用父类的 onCreate 方法进行初始化</p>
+          <p class="tl">设置活动的主界面布局</p>
+        </div>
+      </div>
+    </div>
+    <div class="callout callout-info">
+      <div class="callout-icon">ℹ️</div>
+      <div class="callout-content">
+        <strong class="callout-title">活动生命周期</strong>
+        <p>Android 活动有自己的生命周期，从创建到销毁会经历多个状态。理解这些状态对于调试 Android 应用至关重要。</p>
+      </div>
+    </div>
+    <div class="flow-animation" data-steps='[
+      {"highlight":"flow-actor-1","label":"用户启动应用"},
+      {"highlight":"flow-actor-1","label":"系统创建 MainActivity","packet":true,"from":"actor-1","to":"actor-2"},
+      {"highlight":"flow-actor-2","label":"调用 onCreate 方法","packet":true,"from":"actor-2","to":"actor-3"}
+    ]'>
+      <div class="flow-actors">
+        <div class="flow-actor" id="flow-actor-1">
+          <div class="flow-actor-icon">👤</div>
+          <span>用户</span>
+        </div>
+        <div class="flow-actor" id="flow-actor-2">
+          <div class="flow-actor-icon">📱</div>
+          <span>系统</span>
+        </div>
+        <div class="flow-actor" id="flow-actor-3">
+          <div class="flow-actor-icon">🛠️</div>
+          <span>MainActivity</span>
+        </div>
+      </div>
+      <div class="flow-packet" id="flow-packet"></div>
+      <div class="flow-step-label" id="flow-label">点击"下一步"查看活动创建过程</div>
+      <div class="flow-controls">
+        <button class="btn flow-next-btn">下一步</button>
+        <button class="btn flow-reset-btn">重新开始</button>
+      </div>
+    </div>
+
+    <!-- Android 四大组件 -->
+    <section class="screen animate-in">
+      <h2>Android 四大组件详解</h2>
+      <p>理解 Android 应用的架构需要先掌握四大核心组件。每个组件在逆向工程中都有不同的分析重点：</p>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid #3B82F6">
+          <div class="pattern-icon" style="background: #3B82F6">📱</div>
+          <h4 class="pattern-title">Activity</h4>
+          <p class="pattern-desc">用户界面的容器。每个屏幕对应一个 Activity。逆向分析重点关注 Activity 之间的跳转逻辑和 Intent 数据传递。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid #10B981">
+          <div class="pattern-icon" style="background: #10B981">⚡</div>
+          <h4 class="pattern-title">Service</h4>
+          <p class="pattern-desc">后台运行的服务组件，没有用户界面。逆向分析重点关注后台网络请求、数据同步和定时任务。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid #F59E0B">
+          <div class="pattern-icon" style="background: #F59E0B">📡</div>
+          <h4 class="pattern-title">BroadcastReceiver</h4>
+          <p class="pattern-desc">接收系统或应用广播的组件。逆向分析重点关注应用监听了哪些系统事件，以及触发了什么行为。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid #EF4444">
+          <div class="pattern-icon" style="background: #EF4444">💾</div>
+          <h4 class="pattern-title">ContentProvider</h4>
+          <p class="pattern-desc">数据共享接口，允许其他应用访问数据。逆向分析重点关注应用暴露了哪些数据接口和权限控制。</p>
+        </div>
+      </div>
+
+      <div class="code-translation">
+        <div class="code">
+          <pre><code>// AndroidManifest.xml 中的组件声明
+&lt;application android:name=".App"&gt;
+    &lt;activity android:name=".MainActivity"&gt;
+        &lt;intent-filter&gt;
+            &lt;action android:name="android.intent.action.MAIN"/&gt;
+            &lt;category android:name="android.intent.category.LAUNCHER"/&gt;
+        &lt;/intent-filter&gt;
+    &lt;/activity&gt;
+    &lt;service android:name=".SyncService"/&gt;
+    &lt;receiver android:name=".NetworkReceiver"&gt;
+        &lt;intent-filter&gt;
+            &lt;action android:name="android.net.conn.CONNECTIVITY_CHANGE"/&gt;
+        &lt;/intent-filter&gt;
+    &lt;/receiver&gt;
+    &lt;provider android:name=".DataProvider"
+              android:authorities="com.example.provider"/&gt;
+&lt;/application&gt;</code></pre>
+        </div>
+        <div class="translation">
+          <p>AndroidManifest 是逆向工程的地图：</p>
+          <div class="translation-lines">
+            <p class="tl">MAIN/LAUNCHER 标记了应用的入口 Activity</p>
+            <p class="tl">Service 声明揭示了应用的后台行为</p>
+            <p class="tl">Receiver 的 intent-filter 告诉你应用监听了哪些事件</p>
+            <p class="tl">Provider 的 authorities 是数据接口的访问地址</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DEX 字节码 -->
+    <section class="screen animate-in">
+      <h2>DEX 字节码与 Smali</h2>
+      <p>Android 应用编译后生成 DEX（Dalvik Executable）文件。理解 DEX 字节码是深入逆向分析的基础：</p>
+
+      <div class="code-translation">
+        <div class="code">
+          <pre><code>.class public Lcom/example/MainActivity;
+.super Landroidx/appcompat/app/AppCompatActivity;
+
+.method public onCreate(Landroid/os/Bundle;)V
+    .registers 2
+    invoke-super {p0, p1}, \
+        Landroidx/appcompat/app/AppCompatActivity;->onCreate(Landroid/os/Bundle;)V
+
+    const v0, 0x7f0a0001    # R.layout.activity_main
+    invoke-virtual {p0, v0}, \
+        Lcom/example/MainActivity;->setContentView(I)V
+
+    # 调用 API 初始化方法
+    invoke-direct {p0}, \
+        Lcom/example/MainActivity;->initApi()V
+
+    return-void
+.end method</code></pre>
+        </div>
+        <div class="translation">
+          <p>Smali 字节码解读：</p>
+          <div class="translation-lines">
+            <p class="tl">.class 声明了类名和访问修饰符</p>
+            <p class="tl">.super 指明了父类（这里是 AppCompatActivity）</p>
+            <p class="tl">invoke-super 调用父类方法</p>
+            <p class="tl">const 加载常量（这里是布局资源 ID）</p>
+            <p class="tl">invoke-virtual 调用虚方法（多态分发）</p>
+            <p class="tl">invoke-direct 调用私有方法 initApi()</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">💡</div>
+        <div class="callout-content">
+          <strong class="callout-title">为什么要学 Smali？</strong>
+          <p>虽然 jadx 可以把 DEX 反编译为 Java，但有些情况下反编译会失败（如使用了特定的混淆技术）。此时直接阅读 Smali 字节码是唯一的选择。掌握 Smali 能让你在任何情况下都能分析 Android 应用。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Android 安全模型 -->
+    <section class="screen animate-in">
+      <h2>Android 安全模型与逆向挑战</h2>
+      <p>Android 的安全模型为逆向工程设置了多层障碍。了解这些安全机制是有效进行逆向分析的前提：</p>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid #8B5CF6">
+          <div class="pattern-icon" style="background: #8B5CF6">🔐</div>
+          <h4 class="pattern-title">应用沙箱</h4>
+          <p class="pattern-desc">每个应用运行在独立的 Linux 用户空间中，应用间数据隔离。逆向时需要 root 权限才能绕过沙箱限制。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid #EC4899">
+          <div class="pattern-icon" style="background: #EC4899">🔏</div>
+          <h4 class="pattern-title">APK 签名</h4>
+          <p class="pattern-desc">Android 要求所有 APK 都必须签名。修改 APK 后需要重新签名，但可以用自签名证书绕过。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid #14B8A6">
+          <div class="pattern-icon" style="background: #14B8A6">🛡️</div>
+          <h4 class="pattern-title">SELinux</h4>
+          <p class="pattern-desc">强制访问控制策略，限制了进程可以执行的操作。即使 root 也可能被 SELinux 策略阻止。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 网络通信基础 -->
+    <section class="screen animate-in">
+      <h2>Android 网络通信基础</h2>
+      <p>逆向分析的核心目标之一是理解应用如何与后端通信。以下是 Android 网络通信的主要方式：</p>
+
+      <div class="code-translation">
+        <div class="code">
+          <pre><code class="language-java">// 三种常见的 Android 网络请求方式
+
+// 方式1：Retrofit（最常用）
+Retrofit retrofit = new Retrofit.Builder()
+    .baseUrl("https://api.example.com/")
+    .addConverterFactory(GsonConverterFactory.create())
+    .build();
+
+ApiService service = retrofit.create(ApiService.class);
+Call&lt;User&gt; call = service.getUser("123");
+call.enqueue(new Callback&lt;User&gt;() {
+    @Override
+    public void onResponse(Call&lt;User&gt; call, Response&lt;User&gt; response) {
+        User user = response.body();
+    }
+});
+
+// 方式2：OkHttp（底层）
+OkHttpClient client = new OkHttpClient();
+Request request = new Request.Builder()
+    .url("https://api.example.com/users/123")
+    .addHeader("Authorization", "Bearer " + token)
+    .build();
+try (Response response = client.newCall(request).execute()) {
+    String json = response.body().string();
+}
+
+// 方式3：HttpURLConnection（原生）
+URL url = new URL("https://api.example.com/users/123");
+HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+conn.setRequestMethod("GET");
+conn.setRequestProperty("Authorization", "Bearer " + token);
+int code = conn.getResponseCode();</code></pre>
+        </div>
+        <div class="translation">
+          <p>三种网络通信方式对比：</p>
+          <div class="translation-lines">
+            <p class="tl">Retrofit：最流行的高级 HTTP 客户端，注解驱动的 API 定义</p>
+            <p class="tl">OkHttp：Retrofit 的底层引擎，也可以直接使用</p>
+            <p class="tl">HttpURLConnection：Java 标准库自带，最底层的方式</p>
+            <p class="tl">逆向时优先搜索 Retrofit 注解，其次是 OkHttp 构建器</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">💡</div>
+        <div class="callout-content">
+          <strong class="callout-title">SSL Pinning</strong>
+          <p>许多应用实现了 SSL 证书固定（Certificate Pinning），阻止中间人攻击。逆向时需要使用 Frida 绕过 SSL Pinning 才能抓取 HTTPS 流量。常用工具是 frida-multiple-unpinning 脚本。</p>
+        </div>
+      </div>
+    </section>
+  </div>
+</section>

@@ -1,0 +1,259 @@
+
+<!-- ═══════════════════════════════════════════════════════════════
+     Module 03 — 数字沙盘推演：OASIS 模拟引擎
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">数字沙盘推演</h1>
+      <p class="module-subtitle">OASIS 模拟引擎如何让成百上千个 Agent 在 Twitter 和 Reddit 上同时"活"起来</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Metaphor -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">想象一个平行宇宙的微博和 Reddit</h2>
+        <p>MiroFish 的模拟引擎叫 <span class="term" data-definition="OASIS（Open Agent Social Interaction Simulations）是一个开源的社会模拟框架，由 CAMEL-AI 团队开发。它模拟社交媒体平台上的用户互动行为。">OASIS</span>——它创建了两个平行运行的社交媒体平台：一个类似微博/Twitter，一个类似 Reddit。</p>
+        <p>每个 Agent 都在这两个平台上拥有账号，按照自己的人设发帖、评论、点赞、转发。没有人在幕后操控它们的每一步行动——它们的行为完全由自己的性格和 LLM 的推理决定。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">&#x1F426;</div>
+            <h4 class="pattern-title">Twitter 平台</h4>
+            <p class="pattern-desc">短文本、快节奏、病毒式传播。Agent 可以发帖、转发、点赞、关注。信息像鱼群一样快速扩散。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">&#x1F4CC;</div>
+            <h4 class="pattern-title">Reddit 平台</h4>
+            <p class="pattern-desc">长文本、深度讨论、社区投票。Agent 可以发帖、评论、投票。更适合表达复杂观点和立场。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Simulation Config — Agent Activity -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">每条鱼的作息表：模拟配置</h2>
+        <p>MiroFish 使用 LLM 为每个 Agent 智能生成活动配置，包括活跃时段、发言频率、响应速度、情感倾向和影响力权重：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">Python 代码</span>
+            <pre><code><span class="code-line"><span class="code-keyword">@dataclass</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">AgentActivityConfig</span>:</span>
+<span class="code-line">    activity_level: <span class="code-function">float</span> = <span class="code-number">0.5</span></span>
+<span class="code-line">    posts_per_hour: <span class="code-function">float</span> = <span class="code-number">1.0</span></span>
+<span class="code-line">    active_hours: List[<span class="code-function">int</span>] = []</span>
+<span class="code-line">    response_delay_min: <span class="code-function">int</span> = <span class="code-number">5</span></span>
+<span class="code-line">    sentiment_bias: <span class="code-function">float</span> = <span class="code-number">0.0</span></span>
+<span class="code-line">    stance: <span class="code-function">str</span> = <span class="code-string">"neutral"</span></span>
+<span class="code-line">    influence_weight: <span class="code-function">float</span> = <span class="code-number">1.0</span></span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">通俗解释</span>
+            <div class="translation-lines">
+              <p class="tl">定义每个 Agent 的活动参数配置</p>
+              <p class="tl">整体活跃度（0.0-1.0），0.2=官方/0.8=学生</p>
+              <p class="tl">每小时预期发帖数，学生可能 0.6，官方仅 0.1</p>
+              <p class="tl">活跃的时段（24小时制），如学生=[18-23]</p>
+              <p class="tl">对热点事件的最小响应延迟（分钟）</p>
+              <p class="tl">情感倾向（-1.0 负面 到 +1.0 正面）</p>
+              <p class="tl">立场：supportive/opposing/neutral/observer</p>
+              <p class="tl">影响力权重——决定发言被看到的概率</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Time Config — Chinese habits -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">模拟中国人的一天</h2>
+        <p>模拟时间按照中国人的真实作息来推进。以下是系统默认的时间段配置——注意晚间 19-22 点的活跃度是凌晨的 30 倍：</p>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">0-5 点</code>
+            <span class="badge-desc">深夜时段 — 活跃度 0.05（几乎没人发帖，模拟中 95% 的 Agent 在睡觉）</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">6-8 点</code>
+            <span class="badge-desc">早间时段 — 活跃度 0.4（开始刷手机，但还没有太多互动）</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">9-18 点</code>
+            <span class="badge-desc">工作时段 — 活跃度 0.7（媒体和官方活跃，学生上课间隙偷看）</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">19-22 点</code>
+            <span class="badge-desc">晚间高峰 — 活跃度 1.5（所有人都在线，舆论的核爆时刻！）</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">23 点</code>
+            <span class="badge-desc">深夜下降 — 活跃度 0.5（夜猫子还在，但大部队已退场）</span>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">&#x26A0;</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键设计</strong>
+            <p>这些时段不是硬编码的——LLM 会根据事件性质调整。比如突发热点可能导致凌晨仍有大量讨论（off_peak_hours 缩短），而学生群体的晚间高峰可能延后到 21-23 点。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Group Chat — Simulation Running -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">模拟运行时的真实消息流</h2>
+        <p>当模拟开始后，系统通过监控线程实时读取每个 Agent 的动作日志（actions.jsonl），记录发帖、评论、点赞等行为：</p>
+
+        <div class="chat-window" id="chat-module3">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="runner" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">调</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">模拟调度器</span>
+                <p>第 12 轮模拟开始（模拟时间：晚上 20:00）——高峰时段，激活 18 个 Agent</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="agent5" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">学</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Agent #5 · 大三学生</span>
+                <p>[CREATE_POST] 发表微博："看到学校回应了，但完全是官话套话，根本没有实质内容！大家怎么看？"</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="agent12" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">校</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">Agent #12 · 校友</span>
+                <p>[LIKE_POST] 点赞了 Agent #5 的帖子 · [COMMENT] "作为毕业生，我同意。这种回应只会让事情更糟。"</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="agent3" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">媒</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">Agent #3 · 某媒体</span>
+                <p>[CREATE_POST] 发表新闻报道："事件持续发酵，学生情绪激动，校方回应引争议。截至发稿，微博话题阅读量已破千万。"</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="runner2" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">监</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">监控线程</span>
+                <p>第 12 轮结束 — Twitter: 47 个动作，Reddit: 23 个动作。话题热度指数上升 340%。图谱记忆已同步更新。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-module3-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module3-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条消息</button>
+            <button class="btn chat-all-btn">播放全部</button>
+            <button class="btn chat-reset-btn">重新播放</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Drag and Drop -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">拖拽匹配：Agent 配置连连看</h2>
+        <p>将左侧的 Agent 类型拖到右侧对应的最佳活动配置上：</p>
+
+        <div class="dnd-container" id="dnd-module3">
+          <div class="dnd-chips">
+            <div class="dnd-chip" draggable="true" data-answer="official">大学官方</div>
+            <div class="dnd-chip" draggable="true" data-answer="media">媒体机构</div>
+            <div class="dnd-chip" draggable="true" data-answer="student">大学生</div>
+            <div class="dnd-chip" draggable="true" data-answer="expert">教授/专家</div>
+          </div>
+          <div class="dnd-zones">
+            <div class="dnd-zone" data-correct="student">
+              <p class="dnd-zone-label">活跃度 0.8 · 晚间 18-23 点 · 响应 1-15 分钟 · 影响力 0.8</p>
+              <div class="dnd-zone-target">拖到这里</div>
+            </div>
+            <div class="dnd-zone" data-correct="official">
+              <p class="dnd-zone-label">活跃度 0.2 · 工作时间 9-17 点 · 响应 60-240 分钟 · 影响力 3.0</p>
+              <div class="dnd-zone-target">拖到这里</div>
+            </div>
+            <div class="dnd-zone" data-correct="media">
+              <p class="dnd-zone-label">活跃度 0.5 · 全天 7-23 点 · 响应 5-30 分钟 · 影响力 2.5</p>
+              <div class="dnd-zone-target">拖到这里</div>
+            </div>
+            <div class="dnd-zone" data-correct="expert">
+              <p class="dnd-zone-label">活跃度 0.4 · 白天+晚间 8-21 点 · 响应 15-90 分钟 · 影响力 2.0</p>
+              <div class="dnd-zone-target">拖到这里</div>
+            </div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkDnD('dnd-module3')">检查匹配</button>
+          <button class="quiz-reset-btn" onclick="resetDnD('dnd-module3')">重置</button>
+        </div>
+      </section>
+
+      <!-- Screen 6: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">测验：你理解模拟引擎了吗？</h2>
+
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="完全正确！MiroFish 支持双平台并行模拟，Agent 同时在类 Twitter 和类 Reddit 两个平台上活动。这能捕获不同平台上的舆论传播特征——Twitter 适合快速传播，Reddit 适合深度讨论。"
+               data-explanation-wrong="MiroFish 的独特之处在于——它同时运行两个平台！Twitter 模拟快速传播，Reddit 模拟深度讨论。双平台并行让预测更全面。">
+            <h3 class="quiz-question">MiroFish 的模拟是在几个平台上同时进行的？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>只有一个平台（微博）</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>三个平台（微博 + 微信 + 抖音）</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>两个平台（类 Twitter + 类 Reddit），双平台并行</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！晚间高峰的活跃度是 1.5，而凌晨低谷只有 0.05——相差 30 倍！这个巨大的差异模拟了真实中国人"白天上班上学，晚上刷手机"的作息规律。"
+               data-explanation-wrong="回顾一下时间配置：晚间 19-22 点的活跃度系数是 1.5，而凌晨 0-5 点只有 0.05。1.5 / 0.05 = 30 倍的差距！">
+            <h3 class="quiz-question">在默认的时间配置中，晚间高峰（19-22 点）的活跃度是凌晨低谷（0-5 点）的多少倍？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>约 5 倍</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>约 30 倍</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>约 100 倍</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

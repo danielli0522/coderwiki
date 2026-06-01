@@ -1,0 +1,167 @@
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">How Data Flows</h1>
+      <p class="module-subtitle">Follow a prompt from your keyboard to Claude and back — understanding this lets you debug any workflow stuck.</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The message pipeline</h2>
+        <p>When a prompt node runs, your workflow YAML isn&apos;t sent directly to Claude. It goes through several transformations — like a message passed through relay runners in a relay race, each one adding context or translating the format.</p>
+
+        <div class="flow-steps animate-in">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <p>YAML node prompt text</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <p>Preamble + conversation history injected</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <p>Provider adapter formats for Claude API</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">4</div>
+            <p>Claude streams response</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">5</div>
+            <p>Response saved to core DB &amp; returned to executor</p>
+          </div>
+        </div>
+
+        <div class="callout callout-info animate-in">
+          <div class="callout-icon">🔍</div>
+          <div class="callout-content">
+            <strong class="callout-title">Why "preamble" matters</strong>
+            <p>Archon injects a preamble — system-level instructions — before your prompt. This is where it tells Claude about the codebase, the current worktree, and what tools are available. If an AI node seems confused, the preamble is the first place to investigate.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">How the provider adapter works</h2>
+        <p>The <code>packages/providers/src/registry.ts</code> file is where Archon figures out <em>which</em> AI service to call. It&apos;s like a phone switchboard — the same message can be routed to different destinations based on configuration.</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">export</span> <span class="code-keyword">const</span> PROVIDER_CATALOG: Record&lt;<span class="code-keyword">string</span>, ProviderDescriptor&gt; = {</span>
+<span class="code-line">  <span class="code-string">'claude'</span>: { name: <span class="code-string">'Claude'</span>, factory: createClaude },</span>
+<span class="code-line">  <span class="code-string">'codex'</span>:  { name: <span class="code-string">'OpenAI Codex'</span>, factory: createCodex },</span>
+<span class="code-line">};</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-keyword">function</span> <span class="code-function">getProvider</span>(id: <span class="code-keyword">string</span>): BaseProvider {</span>
+<span class="code-line">  <span class="code-keyword">const</span> descriptor = PROVIDER_CATALOG[id];</span>
+<span class="code-line">  <span class="code-keyword">if</span> (!descriptor) <span class="code-keyword">throw new</span> <span class="code-function">Error</span>(<span class="code-string">`Unknown provider: ${id}`</span>);</span>
+<span class="code-line">  <span class="code-keyword">return</span> descriptor.<span class="code-function">factory</span>();</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">This is a lookup table: string name → how to create that AI provider.</p>
+              <p class="tl">We know about two providers: Claude and Codex. Adding a new AI would mean adding a line here.</p>
+              <p class="tl">When a workflow needs an AI, it calls getProvider with a string like "claude".</p>
+              <p class="tl">If the provider name isn&apos;t recognized, throw an error immediately — fail fast, clear message.</p>
+              <p class="tl">Otherwise, call the factory function to create and return a configured provider instance.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Where data lives</h2>
+        <p>Archon stores everything in a database managed by <code>@archon/core</code>. Think of it as a filing cabinet with different drawers for different things:</p>
+
+        <div class="arch-diagram animate-in">
+          <div class="arch-zone">
+            <h4 class="arch-zone-label">Core Database (SQLite or PostgreSQL)</h4>
+            <div class="arch-component" data-desc="A Session tracks a single workflow run — when it started, which workflow, which worktree, and its current status (running/done/failed)." onclick="showArchDesc(this)">
+              <div class="arch-icon">📋</div>
+              <span>Sessions</span>
+            </div>
+            <div class="arch-component" data-desc="Every message exchanged with an AI is stored here — the prompt you sent and the response received. Used to reconstruct conversation history for loops." onclick="showArchDesc(this)">
+              <div class="arch-icon">💬</div>
+              <span>Messages</span>
+            </div>
+            <div class="arch-component" data-desc="Workflows tracks which YAML workflow definitions have been run and their execution history — useful for auditing what happened in past runs." onclick="showArchDesc(this)">
+              <div class="arch-icon">📊</div>
+              <span>Workflow Runs</span>
+            </div>
+            <div class="arch-component" data-desc="Codebases tracks the repos Archon knows about — their paths, git remotes, and any project-specific configuration." onclick="showArchDesc(this)">
+              <div class="arch-icon">📁</div>
+              <span>Codebases</span>
+            </div>
+          </div>
+          <div class="arch-description" id="arch-desc">Click any component to learn what it stores</div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Quiz: Tracing data through Archon</h2>
+
+        <div class="quiz-container animate-in" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Right — the providers package is the layer that translates between Archon internals and the specific AI API format. Swapping providers means changing only this package."
+               data-explanation-wrong="Not quite. The providers package handles AI model communication and translation. The core package handles database storage, not AI calls.">
+            <h3 class="quiz-question">Your company wants to add support for Gemini AI. Which package would you primarily change?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>@archon/core — because it manages all data</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>@archon/providers — it&apos;s the AI translator layer</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>@archon/workflows — it sends the prompts</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="Correct — conversation history from previous loop iterations is retrieved from the Messages table in core and injected into the next prompt."
+               data-explanation-wrong="Not quite. The conversation history lives in core&apos;s Messages table, which is the key thing that lets loops maintain context across iterations.">
+            <h3 class="quiz-question">A loop node is on iteration 3. How does Claude know what happened in iterations 1 and 2?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Claude remembers automatically across API calls</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>The YAML file is updated after each iteration</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Messages from previous iterations are loaded from core&apos;s database and included in the next prompt</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

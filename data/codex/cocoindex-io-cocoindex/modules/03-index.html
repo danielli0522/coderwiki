@@ -1,0 +1,303 @@
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 3: 索引构建
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">索引构建</h1>
+      <p class="module-subtitle">构建向量索引和知识图谱——从文本嵌入到图数据库的完整实战</p>
+    </header>
+
+    <!-- ── Screen 1: 向量嵌入索引 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">向量嵌入索引：让 AI 理解文本语义</h2>
+
+      <p><span class="term" data-definition="向量嵌入（Embedding）是将文本转换为高维数值向量的过程。语义相似的文本产生相似的向量，通过计算向量距离（如余弦相似度）可以实现'按含义搜索'而非'按关键词搜索'。">向量嵌入</span>是 RAG（检索增强生成）系统的核心。CocoIndex 支持多种嵌入方式，最常用的是 Sentence Transformers。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE — 完整的文档嵌入管道</span>
+          <pre><code><span class="code-line"><span class="code-keyword">from</span> dataclasses <span class="code-keyword">import</span> dataclass</span>
+<span class="code-line"><span class="code-keyword">from</span> typing <span class="code-keyword">import</span> Annotated</span>
+<span class="code-line"><span class="code-keyword">from</span> numpy.typing <span class="code-keyword">import</span> NDArray</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 定义目标表的数据结构</span></span>
+<span class="code-line"><span class="code-keyword">@dataclass</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">DocEmbedding</span>:</span>
+<span class="code-line">    id: int</span>
+<span class="code-line">    filename: str</span>
+<span class="code-line">    text: str</span>
+<span class="code-line">    embedding: Annotated[NDArray, EMBEDDER]</span>
+<span class="code-line">    chunk_start: int</span>
+<span class="code-line">    chunk_end: int</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># Annotated[NDArray, EMBEDDER] 告诉 CocoIndex：</span></span>
+<span class="code-line"><span class="code-comment"># embedding 字段由 EMBEDDER ContextKey 自动生成</span></span>
+<span class="code-line"><span class="code-comment"># 当模型变化时 (detect_change=True)，自动重新计算</span></span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">导入 dataclass 和类型注解工具</p>
+            <p class="tl">NDArray 是 NumPy 数组类型——向量就是多维浮点数组</p>
+            <p class="tl">用 @dataclass 定义目标表的数据行结构</p>
+            <p class="tl">id：主键（由 IdGenerator 生成）</p>
+            <p class="tl">filename：源文件名</p>
+            <p class="tl">text：分块后的文本内容</p>
+            <p class="tl">embedding：向量嵌入（关键！）</p>
+            <p class="tl">Annotated[NDArray, EMBEDDER] 是类型注解魔法</p>
+            <p class="tl">它告诉 CocoIndex：这个字段由 EMBEDDER 自动生成</p>
+            <p class="tl">当 EMBEDDER 模型变化时，所有依赖的行自动重新计算</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 2: Postgres + pgvector 目标 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">Postgres + pgvector：向量存储与检索</h2>
+
+      <p>CocoIndex 的 <span class="term" data-definition="Postgres 目标连接器将数据写入 PostgreSQL 数据库，配合 pgvector 扩展可以存储和检索向量嵌入。支持声明式表管理——自动创建表、插入/更新/删除行，全部由引擎自动完成。">Postgres 目标连接器</span>是最常用的目标存储。配合 pgvector 扩展，可以实现高效的向量相似度搜索。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE — 挂载 Postgres 目标表</span>
+          <pre><code><span class="code-line"><span class="code-keyword">from</span> cocoindex.connectors <span class="code-keyword">import</span> postgres</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 挂载目标表</span></span>
+<span class="code-line">target_table = <span class="code-keyword">await</span> postgres.<span class="code-function">mount_table_target</span>(</span>
+<span class="code-line">    PG_DB,  <span class="code-comment"># ContextKey 绑定的连接池</span></span>
+<span class="code-line">    <span class="code-property">table_name</span>=<span class="code-string">"doc_embeddings"</span>,</span>
+<span class="code-line">    <span class="code-property">table_schema</span>=<span class="code-keyword">await</span> postgres.TableSchema.<span class="code-function">from_class</span>(</span>
+<span class="code-line">        DocEmbedding,</span>
+<span class="code-line">        <span class="code-property">primary_key</span>=[<span class="code-string">"id"</span>],</span>
+<span class="code-line">    ),</span>
+<span class="code-line">    <span class="code-property">pg_schema_name</span>=<span class="code-string">"coco_examples"</span>,</span>
+<span class="code-line">)</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># 声明向量索引</span></span>
+<span class="code-line">target_table.<span class="code-function">declare_vector_index</span>(</span>
+<span class="code-line">    <span class="code-property">column</span>=<span class="code-string">"embedding"</span></span>
+<span class="code-line">)</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">导入 Postgres 目标连接器</p>
+            <p class="tl">mount_table_target 挂载一个 Postgres 表作为目标</p>
+            <p class="tl">PG_DB 是 ContextKey，绑定到 asyncpg 连接池</p>
+            <p class="tl">table_name 指定表名</p>
+            <p class="tl">table_schema 从 DocEmbedding dataclass 自动推导表结构</p>
+            <p class="tl">primary_key=["id"] 设置主键列</p>
+            <p class="tl">pg_schema_name 指定 PostgreSQL schema</p>
+            <p class="tl">declare_vector_index 在 embedding 列上创建向量索引</p>
+            <p class="tl">引擎会自动管理 pgvector 扩展和索引创建</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">🎯</div>
+        <div class="callout-content">
+          <strong class="callout-title">TargetState 的魔法</strong>
+          <p>你不需要写 INSERT/UPDATE/DELETE 语句。<code>table.declare_row()</code> 声明"这一行应该存在"，引擎自动计算差异：新文件 = INSERT，文件变化 = UPDATE，文件删除 = DELETE。这就是声明式编程的威力。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 3: 代码嵌入实战 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">代码嵌入实战：为代码仓库构建语义搜索</h2>
+
+      <p>这是 CocoIndex 最经典的应用场景——遍历代码仓库，AST 感知分块，生成嵌入向量，存入 pgvector。之后可以用自然语言搜索代码。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE — 代码嵌入管道</span>
+          <pre><code><span class="code-line"><span class="code-keyword">from</span> cocoindex.ops.text <span class="code-keyword">import</span> RecursiveSplitter, detect_code_language</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-keyword">@coco.fn</span>(<span class="code-property">memo</span>=<span class="code-keyword">True</span>)</span>
+<span class="code-line"><span class="code-keyword">async def</span> <span class="code-function">process_file</span>(file: FileLike, table):</span>
+<span class="code-line">    text = <span class="code-keyword">await</span> file.<span class="code-function">read_text</span>()</span>
+<span class="code-line">    </span>
+<span class="code-line">    <span class="code-comment"># 自动检测编程语言</span></span>
+<span class="code-line">    language = <span class="code-function">detect_code_language</span>(</span>
+<span class="code-line">        <span class="code-property">filename</span>=str(file.file_path.path.name)</span>
+<span class="code-line">    )</span>
+<span class="code-line">    </span>
+<span class="code-line">    <span class="code-comment"># 语法感知分块——不会在函数中间切断</span></span>
+<span class="code-line">    chunks = _splitter.<span class="code-function">split</span>(</span>
+<span class="code-line">        text,</span>
+<span class="code-line">        <span class="code-property">chunk_size</span>=<span class="code-number">1000</span>,</span>
+<span class="code-line">        <span class="code-property">min_chunk_size</span>=<span class="code-number">300</span>,</span>
+<span class="code-line">        <span class="code-property">chunk_overlap</span>=<span class="code-number">300</span>,</span>
+<span class="code-line">        <span class="code-property">language</span>=language,  <span class="code-comment"># Python → AST 感知</span></span>
+<span class="code-line">    )</span>
+<span class="code-line">    </span>
+<span class="code-line">    id_gen = IdGenerator()</span>
+<span class="code-line">    <span class="code-keyword">await</span> coco.<span class="code-function">map</span>(process_chunk, chunks,</span>
+<span class="code-line">              file.file_path.path, id_gen, table)</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">导入分块器和代码语言检测函数</p>
+            <p class="tl">memo=True 启用记忆化缓存</p>
+            <p class="tl">异步读取文件内容</p>
+            <p class="tl">detect_code_language 根据文件扩展名检测语言</p>
+            <p class="tl">例如 .py → "python"，.rs → "rust"</p>
+            <p class="tl">语法感知分块的核心</p>
+            <p class="tl">chunk_size=1000 字节目标块大小</p>
+            <p class="tl">min_chunk_size=300 最小块大小</p>
+            <p class="tl">chunk_overlap=300 块间重叠</p>
+            <p class="tl">language 参数启用 AST 感知——不会在函数中间切分</p>
+            <p class="tl">为每个 chunk 生成确定性 ID</p>
+            <p class="tl">coco.map 并发处理所有 chunks</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 4: 知识图谱构建 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">知识图谱构建：从非结构化文本到结构化图谱</h2>
+
+      <p>除了向量索引，CocoIndex 还可以构建 <span class="term" data-definition="知识图谱（Knowledge Graph）将非结构化文本中的实体（人、组织、主题）和关系提取为图结构，存储在 Neo4j 或 FalkorDB 等图数据库中。适合构建会议智能、社区分析等应用。">知识图谱</span>。使用 Neo4j 或 FalkorDB 作为目标存储，用 LLM 提取实体和关系。</p>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">📝</div>
+          <h4 class="pattern-title">会议纪要 → 知识图谱</h4>
+          <p class="pattern-desc">从会议转录中提取人物、议题、决策、行动项，存入 Neo4j。支持增量——只有变化的会议重新提取。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">🎧</div>
+          <h4 class="pattern-title">播客 → 知识图谱</h4>
+          <p class="pattern-desc">从 YouTube 播客转录中提取说话人、观点、主题，跨集去重后存入 SurrealDB 或 Neo4j。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">💬</div>
+          <h4 class="pattern-title">Slack 对话 → 知识图谱</h4>
+          <p class="pattern-desc">从 Slack 消息流中提取话题、决策、负责人，构建组织知识网络。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+          <div class="pattern-icon" style="background: var(--color-actor-4)">📊</div>
+          <h4 class="pattern-title">结构化提取</h4>
+          <p class="pattern-desc">用 BAML 或 DSPy 从表单、发票、简历中提取结构化字段，写入 Postgres。支持增量——只处理变化的文档。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 5: 增量机制深入 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">增量机制深入：引擎如何判断哪些需要重算？</h2>
+
+      <p>CocoIndex 的增量引擎有两个维度的变化追踪：<strong>数据变化</strong>（源文件内容变了）和<strong>代码变化</strong>（变换逻辑改了）。两者的重算策略不同。</p>
+
+      <div class="arch-diagram">
+        <div class="arch-zone">
+          <h4 class="arch-zone-label">数据变化 — 源文件被编辑</h4>
+          <div class="arch-component" data-desc="当源文件内容变化时（如 markdown_files/readme.md 被编辑），CocoIndex 计算文件的 fingerprint（哈希值），发现哈希不同，触发对应的处理组件重新执行。其他文件的组件不受影响。">
+            <div class="arch-icon">📝</div>
+            <span>Fingerprint 哈希比对</span>
+          </div>
+          <div class="arch-component" data-desc="只有变化文件对应的处理组件重新运行。如果 10,000 个文件中只有 1 个被修改，9999 个文件命中 Memo 缓存直接跳过——省下 99.99% 的计算和嵌入费用。">
+            <div class="arch-icon">⚡</div>
+            <span>只重算受影响的组件</span>
+          </div>
+        </div>
+        <div class="arch-zone">
+          <h4 class="arch-zone-label">代码变化 — 变换逻辑被修改</h4>
+          <div class="arch-component" data-desc="当你修改了 @coco.fn 函数的代码（如换了分块策略），CocoIndex 计算代码的 fingerprint，发现代码哈希变化，触发使用了这个函数的所有组件重新执行。">
+            <div class="arch-icon">🔧</div>
+            <span>代码 Fingerprint 追踪</span>
+          </div>
+          <div class="arch-component" data-desc="ContextKey 的 detect_change=True 模式下，如果 Embedding 模型被更换，所有使用该模型的组件都会重新执行——因为模型的输出会完全不同。">
+            <div class="arch-icon">🔄</div>
+            <span>模型变化触发全量重算</span>
+          </div>
+        </div>
+        <div class="arch-description">点击任意组件，了解增量追踪的具体机制</div>
+      </div>
+    </section>
+
+    <!-- ── Screen 6: 测验 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">检验你的理解</h2>
+
+      <div class="quiz-container" id="quiz-module3">
+        <div class="quiz-question-block"
+             data-correct="option-b"
+             data-explanation-right="正确！Annotated[NDArray, EMBEDDER] 告诉 CocoIndex 两件事：1) 这个字段是 NumPy 数组类型（NDArray）；2) 它由 EMBEDDER ContextKey 生成。当 EMBEDDER 的 detect_change=True 且模型发生变化时，这个字段自动重新计算。"
+             data-explanation-wrong="回忆一下 Annotated 类型注解的作用。它不仅仅是一个类型标记，还绑定了生成逻辑。">
+          <h3 class="quiz-question">DocEmbedding 中 embedding 字段使用 Annotated[NDArray, EMBEDDER] 的作用是什么？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>只是类型注解，没有实际作用</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>绑定 EMBEDDER 生成逻辑，模型变化时自动重新计算</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>指定向量的维度大小</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-a"
+             data-explanation-right="正确！detect_code_language 根据文件扩展名检测语言（如 .py → python），然后 RecursiveSplitter 使用 tree-sitter 的 AST 感知分块——不会在函数/类定义中间切断，保持代码结构完整。"
+             data-explanation-wrong="想一想代码嵌入管道中 language 参数是怎么来的。它来自文件扩展名检测，然后传给分块器。">
+          <h3 class="quiz-question">代码嵌入管道中 detect_code_language 函数的作用是什么？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>根据文件扩展名检测语言，使 RecursiveSplitter 进行 AST 感知分块</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>自动翻译代码注释为目标语言</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>统计代码行数</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-c"
+             data-explanation-right="正确！CocoIndex 追踪两个维度的变化：1) 数据变化——通过 fingerprint 哈希比对检测源文件内容是否变化；2) 代码变化——通过代码指纹检测变换函数是否被修改。两者都会触发组件重算，但影响范围不同。"
+             data-explanation-wrong="增量引擎不仅要检测'数据变了'，还要检测'代码变了'。有两种维度的变化追踪。">
+          <h3 class="quiz-question">CocoIndex 增量引擎追踪哪两个维度的变化？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>文件大小变化和文件数量变化</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>网络延迟变化和内存使用变化</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>源数据变化（fingerprint）和代码逻辑变化（代码指纹）</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重新作答</button>
+      </div>
+    </section>
+
+  </div>
+</section>

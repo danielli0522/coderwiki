@@ -1,0 +1,178 @@
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="hero-title module-title">认识核心角色</h1>
+      <p class="module-subtitle">Agent、Browser、DOM Service、Tools 四大角色各司其职——搞清谁干什么，源码就通了。</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">四个角色，一张图看明白</h2>
+        <p>browser-use 的架构像一家小公司：老板下达任务，四个人各干各的活。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🤖</div>
+            <h4 class="pattern-title">Agent</h4>
+            <p class="pattern-desc">总指挥。接收用户任务，循环"观察→思考→行动"，协调其他三个角色完成目标。源码在 <code>agent/service.py</code>。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🌐</div>
+            <h4 class="pattern-title">Browser / BrowserSession</h4>
+            <p class="pattern-desc">浏览器管家。通过 <span class="term" data-definition="CDP 全称 Chrome DevTools Protocol，是 Chrome/Chromium 浏览器的调试协议。browser-use 通过它远程控制浏览器——打开页面、点击元素、输入文字。">CDP 协议</span> 控制真实的 Chromium 浏览器：开页面、截图、管理 Tab。源码在 <code>browser/session.py</code>。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">👁️</div>
+            <h4 class="pattern-title">DomService</h4>
+            <p class="pattern-desc">AI 的眼睛。把网页 DOM 树解析成 LLM 能理解的文本格式——哪些元素可以点击、输入框在哪、按钮叫什么。源码在 <code>dom/service.py</code>。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🔧</div>
+            <h4 class="pattern-title">Tools</h4>
+            <p class="pattern-desc">AI 的手。把 LLM 输出的"动作意图"翻译成真实浏览器操作——点击、输入、滚动、导航。源码在 <code>tools/service.py</code>。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">角色对话：一次完整执行长什么样？</h2>
+        <p>下面模拟一次"查 GitHub 星数"任务中四个角色之间的对话，帮你感受数据在它们之间怎么流动的：</p>
+
+        <div class="chat-window" id="chat-module2">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="agent" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🤖</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Agent</span>
+                <p>用户让我查 browser-use 仓库的星数。我先看看当前浏览器状态。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="browser" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">🌐</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">BrowserSession</span>
+                <p>好的，我截了个图，当前是新标签页。页面 URL 是 about:blank。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="dom" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">👁️</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">DomService</span>
+                <p>DOM 解析完毕。当前页面是空白页，没有任何可交互元素。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="agent" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🤖</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Agent</span>
+                <p>好的，我把截图和 DOM 信息打包发给 LLM，让它决定下一步干什么。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="llm" style="display:none">
+              <div class="chat-avatar" style="background: #7C3AED">🧠</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: #7C3AED">LLM</span>
+                <p>当前是空白页，需要先导航到 GitHub 搜索页。我决定执行 navigate 动作，URL 设为 github.com/browser-use/browser-use。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="5" data-sender="tools" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">🔧</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">Tools</span>
+                <p>收到 navigate 动作！我用 CDP 协议让浏览器打开这个 URL。页面加载中...</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="6" data-sender="agent" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🤖</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Agent</span>
+                <p>导航完成，进入下一轮循环——重新截图、解析 DOM、发给 LLM，直到找到星数为止。</p>
+              </div>
+            </div>
+          </div>
+          <div class="chat-typing" id="chat-module2-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module2-typing-avatar">?</div>
+            <div class="chat-typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>
+          </div>
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条</button>
+            <button class="btn chat-all-btn">播放全部</button>
+            <button class="btn chat-reset-btn">重放</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Agent 的 __init__：像搭积木一样组装</h2>
+        <p>Agent 的构造函数接收大量参数，但核心就是"把四个角色绑在一起"。看看源码中最关键的几行：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">Agent</span>(Generic[Context, AgentStructuredOutput]):</span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(</span>
+<span class="code-line">        self,</span>
+<span class="code-line">        task: str,</span>
+<span class="code-line">        llm: BaseChatModel | <span class="code-keyword">None</span> = <span class="code-keyword">None</span>,</span>
+<span class="code-line">        browser_session: BrowserSession | <span class="code-keyword">None</span> = <span class="code-keyword">None</span>,</span>
+<span class="code-line">        browser: Browser | <span class="code-keyword">None</span> = <span class="code-keyword">None</span>,</span>
+<span class="code-line">        tools: Tools[Context] | <span class="code-keyword">None</span> = <span class="code-keyword">None</span>,</span>
+<span class="code-line">        controller: Tools[Context] | <span class="code-keyword">None</span> = <span class="code-keyword">None</span>,</span>
+<span class="code-line">        ...</span>
+<span class="code-line">    ):</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">Agent 是一个泛型类，支持自定义上下文和结构化输出类型。</p>
+              <p class="tl">task 是必填参数——你要 AI 干什么。</p>
+              <p class="tl">llm 是 AI 大脑，不传就用默认的 ChatBrowserUse。</p>
+              <p class="tl">browser_session 和 browser 是同一个东西（别名），传一个就行。</p>
+              <p class="tl">tools 和 controller 也是别名——是"手"，不传就用默认的 Tools()。</p>
+              <p class="tl">省略号代表还有几十个可选参数，比如超时、截图、敏感数据等。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">📌</div>
+          <div class="callout-content">
+            <strong class="callout-title">设计模式</strong>
+            <p>browser-use 大量使用"别名参数"模式：<code>browser</code> 和 <code>browser_session</code> 是同一个东西，<code>tools</code> 和 <code>controller</code> 也是。这让 API 对新手更友好——不管你叫哪个名字都能用。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">测测你理解了多少</h2>
+
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block" data-correct="option-c" data-explanation-right="没错！DomService 负责解析网页结构并生成 LLM 可读的文本描述——这就是 AI 能'看见'网页的关键。" data-explanation-wrong="想一想：LLM 是怎么知道页面上有哪些按钮、输入框的？是有人帮它把 HTML 翻译成了它能理解的文本格式。">
+            <h3 class="quiz-question">browser-use 中，哪个角色负责把网页 HTML 翻译成 LLM 能理解的文本？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div><span>Agent —— 它是总指挥，什么都管</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div><span>BrowserSession —— 它直接跟浏览器通信</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div><span>DomService —— 专门解析 DOM 树并生成文本描述</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

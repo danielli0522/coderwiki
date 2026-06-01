@@ -1,0 +1,255 @@
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">信息如何流动：从搜索到报告的数据管道</h1>
+      <p class="module-subtitle">数据在组件之间是如何传递的？像追踪快递一样追踪一条信息的旅程。</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Data flow overview -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">一条信息的旅程</h2>
+        <p>想象你在快递公司工作。用户寄出一个包裹（研究问题），这个包裹要经过分拣中心（拆解子问题）、配送站（搜索爬取）、质检部（筛选排序）、包装车间（写报告），最后送达目的地。GPT Researcher 的数据流也是如此：</p>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <p>用户提问</p>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <p>选择 Agent</p>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <p>初始搜索</p>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">4</div>
+            <p>规划子问题</p>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">5</div>
+            <p>并行搜索</p>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">6</div>
+            <p>爬取网页</p>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">7</div>
+            <p>写报告</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Data flow animation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">数据流动画：一步步追踪</h2>
+        <p>点击「Next Step」看看数据是如何在组件之间流动的：</p>
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"用户输入研究问题，传递给 GPTResearcher 主控"},
+          {"highlight":"flow-actor-2","label":"Agent Selector 调用 LLM，分析问题类型，返回 Agent 角色和策略","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-3","label":"Retriever 用初始问题做第一次搜索，返回搜索结果列表","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-4","label":"LLM 根据搜索结果，规划出 3-5 个子问题","packet":true,"from":"actor-3","to":"actor-4"},
+          {"highlight":"flow-actor-3","label":"对每个子问题并行搜索，Retriever 返回更多搜索结果","packet":true,"from":"actor-4","to":"actor-3"},
+          {"highlight":"flow-actor-5","label":"Scraper 爬取搜索结果中的 URL，提取网页正文","packet":true,"from":"actor-3","to":"actor-5"},
+          {"highlight":"flow-actor-6","label":"ContextManager 对爬取内容做向量嵌入，筛选最相关的段落","packet":true,"from":"actor-5","to":"actor-6"},
+          {"highlight":"flow-actor-7","label":"ReportGenerator 用筛选后的上下文，生成完整研究报告","packet":true,"from":"actor-6","to":"actor-7"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">👤</div>
+              <span>用户</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">🤖</div>
+              <span>Agent Selector</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">🔍</div>
+              <span>Retriever</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">🧠</div>
+              <span>LLM 规划</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-5">
+              <div class="flow-actor-icon">🕷️</div>
+              <span>Scraper</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-6">
+              <div class="flow-actor-icon">📊</div>
+              <span>ContextManager</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-7">
+              <div class="flow-actor-icon">📝</div>
+              <span>Reporter</span>
+            </div>
+          </div>
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击「Next Step」开始追踪</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">Next Step</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Code translation - conduct_research -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">核心方法：conduct_research()</h2>
+        <p>整个数据管道的入口是 <code>conduct_research()</code>。看看它怎么协调搜索流程：</p>
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># skills/researcher.py</span></span>
+<span class="code-line"><span class="code-keyword">async def</span> <span class="code-function">conduct_research</span>(self):</span>
+<span class="code-line">    <span class="code-comment"># Step 1: Choose agent type</span></span>
+<span class="code-line">    self.researcher.agent, self.researcher.role = \</span>
+<span class="code-line">        <span class="code-keyword">await</span> choose_agent(</span>
+<span class="code-line">            query=self.researcher.query,</span>
+<span class="code-line">            cfg=self.researcher.cfg)</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-comment"># Step 2: Search based on source type</span></span>
+<span class="code-line">    <span class="code-keyword">if</span> self.researcher.report_source == ReportSource.Web.value:</span>
+<span class="code-line">        research_data = <span class="code-keyword">await</span> \</span>
+<span class="code-line">            self._get_context_by_web_search(</span>
+<span class="code-line">                self.researcher.query, [],</span>
+<span class="code-line">                self.researcher.query_domains)</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">研究执行器的核心方法</p>
+              <p class="tl">第 1 步：让 LLM 根据问题选择合适的研究 Agent 类型</p>
+              <p class="tl">把问题类型和配置传给选择器</p>
+              <p class="tl"></p>
+              <p class="tl">第 2 步：根据数据来源类型选择搜索策略</p>
+              <p class="tl">如果是 Web 搜索模式...</p>
+              <p class="tl">就通过网络搜索获取上下文</p>
+              <p class="tl">传入查询词、已有的文档数据、限定搜索的域名</p>
+              <p class="tl"></p>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键洞察：上下文累积</strong>
+            <p>注意 <code>self.researcher.context</code> 这个变量——它就像一个不断增长的文件夹。每一步搜索爬取的内容都会追加进去。最后报告生成器就是从这个「文件夹」里提取素材来写报告的。这种「逐步累积上下文」的模式在 AI Agent 中非常常见。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: How sub-queries work -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">子问题是怎么生成的？</h2>
+        <p>一个研究问题往往太大了，需要拆成几个角度来搜索。比如「Nvidia 为什么涨」可能被拆成「GPU 市场份额」「AI 芯片需求」「最新财报」等。看看代码怎么做：</p>
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># actions/query_processing.py</span></span>
+<span class="code-line">gen_queries_prompt = \</span>
+<span class="code-line">    prompt_family.generate_search_queries_prompt(</span>
+<span class="code-line">        query,</span>
+<span class="code-line">        parent_query,</span>
+<span class="code-line">        report_type,</span>
+<span class="code-line">        max_iterations=cfg.max_iterations <span class="code-keyword">or</span> <span class="code-number">3</span>,</span>
+<span class="code-line">        context=context,</span>
+<span class="code-line">    )</span>
+<span class="code-line">response = <span class="code-keyword">await</span> create_chat_completion(</span>
+<span class="code-line">    model=cfg.strategic_llm_model,</span>
+<span class="code-line">    messages=[{<span class="code-string">"role"</span>: <span class="code-string">"user"</span>,</span>
+<span class="code-line">              <span class="code-string">"content"</span>: gen_queries_prompt}]</span>
+<span class="code-line">)</span>
+<span class="code-line"><span class="code-keyword">return</span> json_repair.loads(response)</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">用 Prompt 模板生成一个「子问题生成指令」</p>
+              <p class="tl">传入：原始问题、父问题（如果有）、报告类型</p>
+              <p class="tl">最多搜索 3 轮</p>
+              <p class="tl">附带初始搜索结果作为上下文参考</p>
+              <p class="tl"></p>
+              <p class="tl">把这个指令发给 LLM（大语言模型）</p>
+              <p class="tl">LLM 会返回一组子问题（JSON 格式）</p>
+              <p class="tl">用 json_repair 解析可能格式不规范的 JSON</p>
+              <p class="tl">返回子问题列表，比如 ["市场份额","AI需求","财报"]</p>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">实用提示：LLM 输出不稳定怎么办？</strong>
+            <p>LLM 返回的 JSON 经常格式不规范。GPT Researcher 用 <code>json_repair</code> 库来修复——这是一个专门处理「LLM 返回的半合法 JSON」的工具。当你在构建 Agent 时，永远要考虑 LLM 输出的不稳定性。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验你的理解</h2>
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！self.researcher.context 是一个列表，每轮搜索爬取的内容都会追加进去。最终 ReportGenerator 从这个列表中提取素材来写报告。"
+               data-explanation-wrong="提示：在 conduct_research() 方法的末尾，你会看到 self.researcher.context = research_data。这就是所有搜索结果的累积容器。">
+            <h3 class="quiz-question">搜索爬取到的所有内容，最终存放在哪里？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>数据库中——每次搜索结果都写入 SQLite</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>文件系统中——每个搜索结果保存为一个文件</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>内存变量中——self.researcher.context 列表逐步累积</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！代码里用 json_repair.loads(response) 来解析 LLM 返回的 JSON。这是因为 LLM 经常返回格式不规范的 JSON，普通 json.loads 会报错。"
+               data-explanation-wrong="看看代码里的 json_repair.loads(response)——这是专门用来修复 LLM 输出的工具。它比普通的 json.loads 更容错。">
+            <h3 class="quiz-question">子问题的生成结果是怎么解析的？为什么不用普通的 json.loads？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>用正则表达式提取——因为 LLM 输出的是纯文本</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>用 json_repair.loads——因为 LLM 经常返回格式不规范的 JSON</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>用 ast.literal_eval——因为 LLM 输出的是 Python 字典</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

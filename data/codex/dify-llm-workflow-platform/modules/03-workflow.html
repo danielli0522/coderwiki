@@ -1,0 +1,214 @@
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">工作流：可视化流程引擎</h1>
+      <p class="module-subtitle">那些节点和连线背后，藏着什么样的执行引擎？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Metaphor - sheet music -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">工作流是一张乐谱</h2>
+        <p>你在画布上拖出来的工作流，本质上是一张"乐谱"——它描述了"应该发生什么、以什么顺序、在什么条件下"。但它本身不执行任何事情。</p>
+        <p>真正的演奏者，是 <code>api/core/workflow/</code> 里的执行引擎——它读取乐谱（<span class="term" data-definition="DSL（Domain-Specific Language，领域专用语言）：专门为某个用途设计的语言，比 Python 更简单，只描述这个领域的概念。工作流 DSL 就是描述"节点、连接、条件"的专用语言。">DSL</span>），然后驱动每一个节点按顺序"演奏"。</p>
+
+        <div class="step-cards animate-in stagger-children">
+          <div class="step-card animate-in">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>你在画布上设计</strong>
+              <p>拖入节点（LLM / 代码 / 工具 / 知识库），用箭头连接，设定条件分支</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Dify 序列化成 JSON DSL</strong>
+              <p>保存时，整个画布被转成一个 JSON 对象存进数据库——节点列表 + 边的列表</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>执行引擎读取并运行</strong>
+              <p>每次触发时，引擎从数据库加载 JSON，构建有向图，按 <span class="term" data-definition="拓扑排序（Topological Sort）：对有依赖关系的任务排序——比如"先烧水再泡茶"，不能颠倒顺序。工作流引擎用它决定节点执行顺序。">拓扑顺序</span>逐节点执行</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>结果通过 SSE 实时推送</strong>
+              <p>每个节点完成都触发一个事件，流式推送给前端——你看到节点一个个变绿</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Node types -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">节点类型：工作流的词汇表</h2>
+        <p>工作流里的每种节点类型对应 <code>api/core/workflow/nodes/</code> 下的一个目录。了解它们，你才能知道该组合哪些"词汇"来描述你的业务流程：</p>
+
+        <div class="pattern-cards animate-in stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🤖</div>
+            <h4 class="pattern-title">LLM 节点</h4>
+            <p class="pattern-desc">调用大语言模型生成文本，支持 Prompt 模板和上下文变量注入</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🔍</div>
+            <h4 class="pattern-title">知识检索节点</h4>
+            <p class="pattern-desc">从知识库里搜索相关段落，把结果注入到后续 LLM 节点的上下文</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)"></div>
+            <h4 class="pattern-title">代码节点</h4>
+            <p class="pattern-desc">在沙箱里执行 Python 或 JavaScript 代码——处理数据、格式化输出</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🔀</div>
+            <h4 class="pattern-title">条件分支节点</h4>
+            <p class="pattern-desc">If/Else 逻辑——根据前一步的结果走不同的路径</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">🔧</div>
+            <h4 class="pattern-title">工具节点</h4>
+            <p class="pattern-desc">调用内置或自定义工具：Google Search、DALL-E、HTTP 请求等</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid #9E9790">
+            <div class="pattern-icon" style="background: #9E9790">🔁</div>
+            <h4 class="pattern-title">循环节点</h4>
+            <p class="pattern-desc">对列表中的每个元素重复执行一段子流程（类似 for 循环）</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Code translation - WorkflowAppGenerator -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码翻译：工作流触发入口</h2>
+        <p>当你点击"运行"，请求到达 <code>api/core/app/apps/workflow/app_generator.py</code> 的 <code>WorkflowAppGenerator</code>。这里是真正"发动引擎"的地方：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-keyword">class</span> <span class="code-function">WorkflowAppGenerator</span>(BaseAppGenerator):</span>
+<span class="code-line">  <span class="code-keyword">def</span> <span class="code-function">generate</span>(</span>
+<span class="code-line">    <span class="code-keyword">self</span>,</span>
+<span class="code-line">    app_model: App,</span>
+<span class="code-line">    workflow: Workflow,</span>
+<span class="code-line">    invoke_from: InvokeFrom,</span>
+<span class="code-line">    inputs: <span class="code-function">Mapping</span>[str, <span class="code-keyword">Any</span>],</span>
+<span class="code-line">    stream: bool,</span>
+<span class="code-line">  ) -> <span class="code-string">...</span>:</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">定义一个"工作流应用生成器"类，继承自基础生成器</p>
+              <p class="tl">核心方法：generate，负责触发一次工作流执行</p>
+              <p class="tl">（self 表示这是类的实例方法）</p>
+              <p class="tl">要运行哪个应用（数据库里的 App 记录）</p>
+              <p class="tl">要运行哪个工作流版本（草稿 or 已发布版本）</p>
+              <p class="tl">谁触发的：用户通过界面、API 调用还是自动化触发</p>
+              <p class="tl">用户传入的变量（比如 {article: "我要总结的文章内容"}）</p>
+              <p class="tl">是否流式返回——true 时用 SSE 推送，false 时等全部完成后返回</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: How workflow state flows -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">变量是怎么在节点之间传递的？</h2>
+        <p>工作流最神奇的地方是：前一个节点的输出可以作为后一个节点的输入。Dify 用"变量池"来实现这一点：</p>
+
+        <div class="callout callout-accent animate-in">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">变量池的工作原理</strong>
+            <p>每次工作流运行，Dify 维护一个"共享变量池"。每个节点执行完毕后，把自己的输出写入池子。下一个节点从池子里读取它需要的变量，用 <code>{{节点名.输出字段}}</code> 语法引用。</p>
+          </div>
+        </div>
+
+        <div class="flow-steps animate-in">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <p>用户输入：<code>topic = "AI 发展"</code></p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <p>LLM 节点读取 <code>{{sys.query}}</code>，输出 <code>outline</code></p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <p>第二个 LLM 节点读取 <code>{{llm1.outline}}</code>，生成正文</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">4</div>
+            <p>代码节点格式化 <code>{{llm2.text}}</code> 输出 Markdown</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">理解检验</h2>
+
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！工作流被保存为 JSON DSL 存进数据库。这意味着你可以导出、版本控制、甚至手动编辑工作流配置——就像代码一样。"
+               data-explanation-wrong="不完全对。想想 Dify 怎么做到「保存」工作流的——你画的那些节点和连线最终以什么形式存储在服务器上？">
+            <h3 class="quiz-question">你设计了一个有 8 个节点的复杂工作流并保存了。下次再打开时，Dify 是怎么恢复这个工作流的？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Dify 截图保存了工作流画布的图片</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>从数据库加载 JSON DSL，前端重新渲染成可视化画布</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>浏览器本地缓存了画布状态</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="对！条件分支节点（If/Else）正是为这种情况设计的——根据前一个节点的输出值，决定走哪条路径。这是工作流处理业务逻辑的标准方式。"
+               data-explanation-wrong="再想想——你需要根据情况走不同的路径，工作流里哪种节点专门处理这种分支逻辑？">
+            <h3 class="quiz-question">你想搭一个工作流：如果 LLM 判断用户意图是"投诉"，就走投诉处理流程；否则走普通客服流程。你需要用哪种节点类型？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>条件分支节点（If/Else）</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>循环节点（Iteration）</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>代码节点（Code）</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">提交答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重新作答</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

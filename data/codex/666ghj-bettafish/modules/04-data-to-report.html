@@ -1,0 +1,443 @@
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 4: 从数据到报告 — 追踪一条分析的全生命周期
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">从数据到报告</h1>
+      <p class="module-subtitle">追踪一条用户提问从输入到最终 HTML 报告生成的完整旅程，深入理解 Agent 内部节点如何协同工作。</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Each Agent's internal pipeline -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Agent 内部的"节点流水线"</h2>
+        <p>三个分析 Agent（Insight、Media、Query）虽然工具集不同，但共享同一套内部处理架构——一套由"节点"组成的流水线。就像工厂的流水线一样，原材料（搜索结果）经过多个工位（节点）加工，最终变成成品（分析报告）。</p>
+
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <p>首次搜索</p>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <p>首次总结</p>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <p>反思搜索</p>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">4</div>
+            <p>反思总结</p>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step">
+            <div class="flow-step-num">5</div>
+            <p>格式化输出</p>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># 三个 Agent 共享的节点初始化模式</span></span>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">_initialize_nodes</span>(self):</span>
+<span class="code-line">    self.first_search_node = FirstSearchNode(</span>
+<span class="code-line">        self.llm_client)</span>
+<span class="code-line">    self.reflection_node = ReflectionNode(</span>
+<span class="code-line">        self.llm_client)</span>
+<span class="code-line">    self.first_summary_node = FirstSummaryNode(</span>
+<span class="code-line">        self.llm_client)</span>
+<span class="code-line">    self.reflection_summary_node = (</span>
+<span class="code-line">        ReflectionSummaryNode(self.llm_client))</span>
+<span class="code-line">    self.report_formatting_node = (</span>
+<span class="code-line">        ReportFormattingNode(self.llm_client))</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">三个 Agent 都用这个方法初始化处理管线</p>
+              <p class="tl">节点 1：首次搜索——用工具集搜索相关信息</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">节点 2：反思——基于初步结果，思考还需要搜什么</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">节点 3：首次总结——把搜索结果总结成段落</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">节点 4：反思总结——结合论坛讨论，更新总结</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">节点 5：格式化——输出最终 Markdown 报告</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: The "reflection" pattern -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">"反思"机制：让 Agent 越来越聪明</h2>
+        <p>BettaFish 的 Agent 不是搜索一次就完事。它们遵循一个<strong>"搜索→总结→反思→再搜索→再总结"</strong>的循环模式。就像写论文一样——初稿之后要反复修改、补充资料、完善论点。</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">&#x1F4A1;</div>
+          <div class="callout-content">
+            <strong class="callout-title">反思模式</strong>
+            <p>Agent 的反思节点会审视之前的搜索结果，判断是否还有需要补充的信息。如果发现不足，它会生成新的搜索策略，进行下一轮搜索。这个过程可以重复多轮（由 <code>max_reflections</code> 参数控制），确保分析足够深入。</p>
+          </div>
+        </div>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">max_reflections = 2</code>
+            <span class="badge-desc">Query Agent 最多反思 2 轮——平衡深度与速度</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">max_search_results = 15</code>
+            <span class="badge-desc">每次搜索最多返回 15 条结果</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">max_content_length = 8000</code>
+            <span class="badge-desc">每条结果最大内容长度 8000 字符</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Summary Node — where forum interaction happens -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">总结节点：Agent 与论坛的交汇点</h2>
+        <p>总结节点（SummaryNode）是 Agent 内部与论坛系统的接口。在生成总结之前，它会先读取主持人的最新引导发言，把引导内容融入自己的分析中。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># InsightEngine/nodes/summary_node.py</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">FirstSummaryNode</span>(StateMutationNode):</span>
+<span class="code-line">    <span class="code-string">"""根据搜索结果生成段落首次总结"""</span></span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, llm_client):</span>
+<span class="code-line">        <span class="code-keyword">super</span>().__init__(llm_client,</span>
+<span class="code-line">            <span class="code-string">"FirstSummaryNode"</span>)</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">validate_input</span>(self, input_data):</span>
+<span class="code-line">        <span class="code-string">"""验证输入数据"""</span></span>
+<span class="code-line">        <span class="code-keyword">if</span> isinstance(input_data, str):</span>
+<span class="code-line">            data = json.loads(input_data)</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">首次总结节点——流水线的第 2 站</p>
+              <p class="tl">负责把搜索结果总结成分析段落</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">继承 StateMutationNode（能修改 Agent 状态）</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">验证输入——把 JSON 字符串解析为对象</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Report Agent's multi-stage pipeline -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Report Agent 的六步生成流程</h2>
+        <p>Report Agent 有自己独特的六步流程。它不是简单地"拼接文本"，而是一个精心设计的多阶段生成管线：</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>TemplateSelectionNode — 模板选择</strong>
+              <p>从模板库中收集候选模板，让 LLM 根据分析主题选择最合适的报告模板（如"企业品牌声誉分析报告"）</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>DocumentLayoutNode — 文档布局</strong>
+              <p>设计报告的标题、目录、主题风格——就像装修房子前先画设计图</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>WordBudgetNode — 篇幅规划</strong>
+              <p>根据模板和内容量，为每个章节分配字数预算，确保报告结构均衡</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>ChapterGenerationNode — 章节生成</strong>
+              <p>逐章节生成 JSON 格式的内容，经过校验后存入章节存储</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>Stitcher — IR 装订</strong>
+              <p>把所有章节 JSON 装订成一份完整的 <span class="term" data-definition="Document IR（文档中间表示）：一份标准化的 JSON 数据结构，包含报告的所有内容和元数据。它是渲染前的"蓝图"，可以被不同的渲染器翻译成 HTML、PDF 或 Markdown。">Document IR</span></p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <strong>HTMLRenderer — HTML 渲染</strong>
+              <p>把 Document IR 渲染成精美的交互式 HTML 报告，包含图表、动画等丰富的可视化元素</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: IR schema and validator -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">IR 中间表示——报告的"蓝图"</h2>
+        <p>Report Agent 的独创设计是 IR（Intermediate Representation）中间表示。它定义了一套标准的 JSON Schema，所有章节内容都遵循这个格式，然后由装订器（Stitcher）组合成完整文档。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># ReportEngine/core/stitcher.py</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">DocumentComposer</span>:</span>
+<span class="code-line">    <span class="code-string">"""Document IR 装订器"""</span></span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">compose</span>(self, chapters, meta):</span>
+<span class="code-line">        doc_ir = {</span>
+<span class="code-line">            <span class="code-string">"meta"</span>: meta,</span>
+<span class="code-line">            <span class="code-string">"chapters"</span>: chapters,</span>
+<span class="code-line">            <span class="code-string">"anchors"</span>: self._build_anchors(),</span>
+<span class="code-line">            <span class="code-string">"toc"</span>: self._build_toc(chapters)</span>
+<span class="code-line">        }</span>
+<span class="code-line">        <span class="code-keyword">return</span> doc_ir</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">文档装订器——把章节组合成完整文档</p>
+              <p class="tl">装订方法：把各部分组装成 IR</p>
+              <p class="tl">meta：报告元数据（标题、日期、主题等）</p>
+              <p class="tl">chapters：所有章节内容</p>
+              <p class="tl">anchors：锚点链接（用于目录跳转）</p>
+              <p class="tl">toc：自动生成的目录结构</p>
+              <p class="tl">返回完整的 IR 文档蓝图</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#x1F527;</div>
+          <div class="callout-content">
+            <strong class="callout-title">IR 的校验机制</strong>
+            <p>每个章节在生成后都会经过 <span class="term" data-definition="IRValidator：一个 JSON 结构校验器，检查每个章节是否符合预定义的 Schema（数据格式规范）。就像质检员检查产品是否符合标准。">IRValidator</span> 的校验，确保 JSON 结构符合规范。如果校验失败，会触发重试——保证最终输出的质量。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 6: File count baseline — knowing when to start -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">怎么知道三个 Agent 都分析完了？</h2>
+        <p>Report Agent 需要等三个 Agent 全部完成后才能开始。它使用 <span class="term" data-definition="FileCountBaseline（文件数量基准管理器）：一个工具，在任务启动时记录三个引擎目录中的文件数量，后续轮询时检查是否有新文件生成，以此判断 Agent 是否已完成工作。">FileCountBaseline</span> 来判断输入是否准备完毕。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment"># ReportEngine/agent.py</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">FileCountBaseline</span>:</span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">initialize_baseline</span>(</span>
+<span class="code-line">            self, directories) -> Dict[str, int]:</span>
+<span class="code-line">        <span class="code-keyword">for</span> name, path <span class="code-keyword">in</span> directories.items():</span>
+<span class="code-line">            md_files = [f <span class="code-keyword">for</span> f <span class="code-keyword">in</span> Path(path)</span>
+<span class="code-line">                .glob(<span class="code-string">"*.md"</span>)]</span>
+<span class="code-line">            self.baseline_data[name] = len(</span>
+<span class="code-line">                md_files)</span>
+<span class="code-line">        self._save_baseline()</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解读</span>
+            <div class="translation-lines">
+              <p class="tl">文件数量基准管理器</p>
+              <p class="tl">初始化基准：记录当前文件数量</p>
+              <p class="tl">遍历三个引擎的输出目录</p>
+              <p class="tl">统计每个目录中的 Markdown 文件</p>
+              <p class="tl">&nbsp;</p>
+              <p class="tl">记录当前数量作为基准</p>
+              <p class="tl">保存基准数据到磁盘</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 7: The Flask SSE interface -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">实时进度推送——SSE 流式传输</h2>
+        <p>Report Agent 使用 <span class="term" data-definition="SSE（Server-Sent Events）：一种让服务器主动向浏览器推送消息的技术。和 WebSocket 不同，SSE 是单向的（服务器→浏览器），但实现更简单，非常适合"进度更新"这种场景。">SSE</span>（Server-Sent Events）来实时推送报告生成进度，让用户在浏览器中看到报告逐步生成的过程。</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-accent-light)">&#x1F310;</div>
+            <div>
+              <strong>Flask + SSE 入口</strong>
+              <p>Report Agent 的 flask_interface.py 管理任务排队和流式事件分发</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-info-light)">&#x1F4E1;</div>
+            <div>
+              <strong>实时事件推送</strong>
+              <p>每个阶段完成时推送事件：模板已选→布局完成→章节生成中→渲染完成</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: #EDE8F5">&#x1F4BE;</div>
+            <div>
+              <strong>多格式输出</strong>
+              <p>HTML 交互式报告 + PDF 导出（WeasyPrint）+ Markdown 纯文本</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 8: Full data flow animation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">端到端数据流追踪</h2>
+        <p>点击"下一步"，追踪一条用户提问从输入到最终报告的完整数据流：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"用户输入：分析武汉大学舆情"},
+          {"highlight":"flow-actor-2","label":"MindSpider 数据库中已有的历史数据被 Insight Agent 读取","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-3","label":"Query Agent 通过 Tavily 搜索国内外新闻","packet":true,"from":"actor-1","to":"actor-3"},
+          {"highlight":"flow-actor-4","label":"Media Agent 通过博查搜索多模态内容","packet":true,"from":"actor-1","to":"actor-4"},
+          {"highlight":"flow-actor-5","label":"三个 Agent 各自生成 Markdown 分析报告"},
+          {"highlight":"flow-actor-6","label":"ForumEngine 收集发言，主持人引导讨论","packet":true,"from":"actor-5","to":"actor-6"},
+          {"highlight":"flow-actor-5","label":"Agent 根据论坛引导进行反思和补充搜索"},
+          {"highlight":"flow-actor-7","label":"Report Agent 读取三份报告 + 论坛日志，生成 IR","packet":true,"from":"actor-6","to":"actor-7"},
+          {"highlight":"flow-actor-8","label":"渲染器将 IR 翻译成精美的 HTML 报告呈现给用户","packet":true,"from":"actor-7","to":"actor-8"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">&#x1F464;</div>
+              <span>用户</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">&#x1F4CA;</div>
+              <span>Insight</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">&#x1F310;</div>
+              <span>Query</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">&#x1F3AC;</div>
+              <span>Media</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-5">
+              <div class="flow-actor-icon">&#x1F916;</div>
+              <span>Agent 输出</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-6">
+              <div class="flow-actor-icon">&#x1F3DB;&#xFE0F;</div>
+              <span>论坛</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-7">
+              <div class="flow-actor-icon">&#x1F4DD;</div>
+              <span>Report</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-8">
+              <div class="flow-actor-icon">&#x1F4C4;</div>
+              <span>HTML</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label">点击"下一步"追踪完整数据流</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 9: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验你的理解</h2>
+
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！Agent 遵循"搜索→总结→反思→再搜索→再总结"的循环模式，由 max_reflections 参数控制反思轮次。"
+               data-explanation-wrong="Agent 不会只搜索一次就结束。回想一下"反思"机制是如何工作的。">
+            <h3 class="quiz-question">Agent 内部的"反思"机制是如何工作的？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>搜索一次就输出最终结果，不做迭代</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>搜索→总结→反思不足→再搜索→再总结，可多轮循环</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>只在论坛讨论中做反思，Agent 内部不做迭代</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="正确！FileCountBaseline 会记录三个引擎目录中的 Markdown 文件数量作为基准，后续通过轮询检查是否有新文件生成来判断完成状态。"
+               data-explanation-wrong="Report Agent 是怎么知道三个 Agent 都分析完了的？它使用了什么机制来检测？">
+            <h3 class="quiz-question">Report Agent 如何判断三个分析 Agent 都已完成工作？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>通过 FileCountBaseline 监控输出目录中新增的 Markdown 文件数量</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>通过 ForumEngine 的日志来判断所有讨论已结束</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>三个 Agent 完成后会主动调用 Report Agent 的 API 通知</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="没错！IR 装订器（Stitcher）把各章节 JSON 组合成完整的 Document IR，包含 meta、chapters、anchors 和 toc。然后渲染器才能把 IR 翻译成最终格式。"
+               data-explanation-wrong="IR 不是直接生成的 HTML。想想 Stitcher（装订器）的职责——它在章节生成和最终渲染之间扮演什么角色？">
+            <h3 class="quiz-question">Report Agent 的 IR 中间表示包含哪些核心部分？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>只有章节内容和图片</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>HTML 模板和 CSS 样式表</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>meta 元数据 + chapters 章节 + anchors 锚点 + toc 目录</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重新作答</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

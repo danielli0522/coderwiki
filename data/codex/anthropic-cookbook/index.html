@@ -1,0 +1,1950 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anthropic Cookbook 解剖课：从 Augmented LLM 到完整 Agentic 架构</title>
+
+  <!-- Google Fonts: Bricolage Grotesque · DM Sans · JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Course palette: teal (warm-tinted, distinct from earlier courses' vermillion) -->
+  <style>
+    :root {
+      --color-accent:       #2A7B9B;
+      --color-accent-hover: #1F6280;
+      --color-accent-light: #E4F2F7;
+      --color-accent-muted: #5A9DB8;
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">Anthropic Cookbook 解剖课</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <button class="nav-dot" data-target="module-1" data-tooltip="食谱开张：Augmented LLM" role="tab" aria-label="模块 1：食谱开张"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="三种基础工序：链式 / 路由 / 并行" role="tab" aria-label="模块 2：基础工序"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="高阶工序：调度官 与 评审官" role="tab" aria-label="模块 3：高阶工序"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="工具调用：让模型动手" role="tab" aria-label="模块 4：工具调用"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="Claude Agent SDK：从一行到 SRE" role="tab" aria-label="模块 5：Agent SDK"></button>
+        <button class="nav-dot" data-target="module-6" data-tooltip="进阶火候：思考、缓存、Skills" role="tab" aria-label="模块 6：进阶火候"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh -->
+    <section class="module" id="module-1" style="background: var(--color-bg-warm)">
+      <div class="module-content">
+        <header class="module-header animate-in">
+          <span class="module-number">01</span>
+          <h1 class="module-title">食谱开张：从一道"加强版 LLM"开始</h1>
+          <p class="module-subtitle">Anthropic Cookbook 整本书在教什么 · 以及全书的最小可用单元——Augmented LLM</p>
+        </header>
+
+        <div class="module-body">
+
+          <!-- Screen 1: Welcome / Hook -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">先回答一个问题：你打开 ChatGPT 问"今天上海下雨吗"——会发生什么？</h2>
+            <p>它会说："抱歉，我没有访问实时数据的能力。" 这一秒，你就触碰到了"裸 <span class="term" data-definition="Large Language Model，大语言模型。可以理解为一个被海量文本训练出来的、特别会接话、但被冻结在训练截止日的'文字大脑'。它本身不能上网、不能查数据库、不能记住你昨天说过什么。">LLM</span>" 的边界——它是一颗会说话的大脑，但被困在一个没有窗户、没有电话、没有日历的房间里。</p>
+            <p><strong>Anthropic Cookbook 这本食谱整本书在教的，就是怎么给这颗大脑配上窗户、电话、日历、还有一个能干活的助手。</strong></p>
+            <div class="callout callout-accent">
+              <div class="callout-icon">🧗</div>
+              <div class="callout-content">
+                <strong class="callout-title">本课的隐喻：户外攀岩者与登山套件</strong>
+                <p>赤手空拳的攀岩者只能爬最简单的路线。给他/她加上四件套——绳索、保护塞、对讲机、教练——他/她突然就能去挑战更难的山壁。一个普通 LLM 调用就是"赤手攀岩"，本课要教的 <em>Augmented LLM</em>（加强版 LLM）就是"装备齐全的攀岩"。</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 2: The four-piece kit -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">Augmented LLM 的"四件套"</h2>
+            <p>Anthropic 工程师在论文 <span class="term" data-definition="Anthropic 2024 年发表的工程论文，提出'Augmented LLM' 这个最小可用单元，并给出 5 种基础编排模式。整本 cookbook 的理论框架。"><em>Building Effective Agents</em></span> 里把"加强版 LLM"定义成基础单元——一个 LLM 配上以下四种装备的某些子集：</p>
+
+            <div class="pattern-cards stagger-children">
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+                <div class="pattern-icon" style="background: var(--color-actor-1)">🔍</div>
+                <h4 class="pattern-title">检索（Retrieval）</h4>
+                <p class="pattern-desc">让 LLM 能从你自己的知识库里"翻书"——产品文档、客服 FAQ、内部 wiki。背后机制是 <span class="term" data-definition="Retrieval-Augmented Generation，先用关键词或向量检索找到相关文档片段，再把片段塞进 prompt 让模型基于它回答。是企业 AI 应用最常见的范式。">RAG</span>。</p>
+              </div>
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+                <div class="pattern-icon" style="background: var(--color-actor-3)">🛠️</div>
+                <h4 class="pattern-title">工具（Tools）</h4>
+                <p class="pattern-desc">让 LLM 能"叫别人去做事"——查天气、发邮件、调用计算器。LLM 自己不动手，它输出一个"请求工单"，你的程序去执行。</p>
+              </div>
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+                <div class="pattern-icon" style="background: var(--color-actor-4)">💾</div>
+                <h4 class="pattern-title">记忆（Memory）</h4>
+                <p class="pattern-desc">让 LLM 能"记住你昨天说过什么"——历史对话、用户偏好、长期事实。否则它每次都像初次见面。</p>
+              </div>
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+                <div class="pattern-icon" style="background: var(--color-actor-2)">📜</div>
+                <h4 class="pattern-title">系统提示（System Prompt）</h4>
+                <p class="pattern-desc">给 LLM 一份"岗位说明书"——你是谁、说什么风格、不能碰哪些话题。本质上是把训练好的通用模型"角色化"成你的专属助手。</p>
+              </div>
+            </div>
+
+            <div class="callout callout-info">
+              <div class="callout-icon">💡</div>
+              <div class="callout-content">
+                <strong class="callout-title">关键洞察</strong>
+                <p>整本 cookbook 之后所有的复杂模式（链式、路由、Orchestrator、Agent SDK、SRE 自动修复），归根结底都是<strong>多个 Augmented LLM 之间的不同接线方式</strong>。先把这个最小单元吃透，整本书就是同一个乐高积木的不同组合。</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 3: Code translation - one-liner research agent -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">看一段真实代码：7 行做一个能上网的研究员</h2>
+            <p>这段代码来自 <code>claude_agent_sdk/00_The_one_liner_research_agent.ipynb</code>——整本 cookbook 的 "Hello World"。它是<strong>最小可用的 Augmented LLM</strong>：LLM + 一件工具（网页搜索）。</p>
+
+            <div class="translation-block animate-in">
+              <div class="translation-code">
+                <span class="translation-label">CODE · Python</span>
+<pre><code><span class="code-line"><span class="code-keyword">from</span> claude_agent_sdk <span class="code-keyword">import</span> ClaudeAgentOptions, query</span>
+<span class="code-line"></span>
+<span class="code-line">messages = []</span>
+<span class="code-line"><span class="code-keyword">async for</span> msg <span class="code-keyword">in</span> <span class="code-function">query</span>(</span>
+<span class="code-line">    <span class="code-property">prompt</span>=<span class="code-string">"Research the latest trends in AI agents and give me a brief summary and relevant citations."</span>,</span>
+<span class="code-line">    <span class="code-property">options</span>=<span class="code-function">ClaudeAgentOptions</span>(<span class="code-property">model</span>=MODEL, <span class="code-property">allowed_tools</span>=[<span class="code-string">"WebSearch"</span>]),</span>
+<span class="code-line">):</span>
+<span class="code-line">    <span class="code-function">print_activity</span>(msg)</span>
+<span class="code-line">    messages.<span class="code-function">append</span>(msg)</span></code></pre>
+              </div>
+              <div class="translation-english">
+                <span class="translation-label">中文逐行翻译</span>
+                <div class="translation-lines">
+                  <p class="tl"><strong>第 1 行：</strong>从 Anthropic 官方 SDK 里把"提问"函数和"配置"工具拿进来。</p>
+                  <p class="tl"><strong>第 3 行：</strong>准备一个空列表，待会儿 agent 跟我们说的每一句话都收进去。</p>
+                  <p class="tl"><strong>第 4 行：</strong>开启异步流式接收——像看直播一样，agent 每说一句、做一步，你都能立刻看到。</p>
+                  <p class="tl"><strong>第 5 行：</strong>我们的"任务订单"——研究 AI agent 最新趋势，给我摘要和引用链接。</p>
+                  <p class="tl"><strong>第 6 行：</strong>关键配置——选用哪个模型，并且 <strong>只</strong> 允许它使用一个工具：网页搜索。这就是"Augmented LLM"：一个 LLM + 一件工具。</p>
+                  <p class="tl"><strong>第 8-9 行：</strong>把 agent 的每一条思考、每一次搜索、每一段答复都打印出来并存档。</p>
+                  <p class="tl"><strong>整段共 7 行有效代码——一个能上网做调研的研究员。</strong>这就是 cookbook 的 Hello World。</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 4: Group Chat — bare LLM vs augmented -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">看场对话：裸 LLM vs 加强版 LLM</h2>
+            <p>同一个用户、同一个问题，两次对话——区别是有没有装备。</p>
+
+            <div class="chat-window" id="chat-module1">
+              <div class="chat-messages">
+                <div class="chat-message" data-msg="0" data-sender="user" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-2)">用</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-2)">用户</span>
+                    <p>今天上海下雨吗？</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="1" data-sender="bare" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-text-muted)">L</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-text-muted)">裸 LLM</span>
+                    <p>抱歉，我没有访问实时天气数据的能力。建议你查询气象网站。</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="2" data-sender="user" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-2)">用</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-2)">用户</span>
+                    <p>（叹气，关掉应用）</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="3" data-sender="narrator" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-accent)">★</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-accent)">旁白</span>
+                    <p>—— 现在我们给同一个 LLM 装上"工具 + 记忆"两件套 ——</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="4" data-sender="user" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-2)">用</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-2)">用户</span>
+                    <p>今天上海下雨吗？</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="5" data-sender="claude" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-1)">C</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-1)">Augmented LLM</span>
+                    <p>让我查一下…（调用 WebSearch 工具：上海 天气 今天）</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="6" data-sender="claude" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-1)">C</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-1)">Augmented LLM</span>
+                    <p>上海现在小雨，气温 18°C。建议带伞，傍晚有阵雨。</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="7" data-sender="user" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-2)">用</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-2)">用户</span>
+                    <p>太好了！顺便记一下——我喜欢冷一点的天气。</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="8" data-sender="claude" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-1)">C</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-1)">Augmented LLM</span>
+                    <p>已写入记忆 ✓（user_preference: prefers_cold_weather=true）。下次推荐穿搭时我会记得。</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="chat-typing" id="chat-module1-typing" style="display:none">
+                <div class="chat-avatar" id="chat-module1-typing-avatar">?</div>
+                <div class="chat-typing-dots">
+                  <span class="typing-dot"></span>
+                  <span class="typing-dot"></span>
+                  <span class="typing-dot"></span>
+                </div>
+              </div>
+
+              <div class="chat-controls">
+                <button class="btn chat-next-btn">下一句</button>
+                <button class="btn chat-all-btn">自动播放</button>
+                <button class="btn chat-reset-btn">重播</button>
+                <span class="chat-progress"></span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 5: Cookbook map -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">这本食谱里有什么——给你一张全景地图</h2>
+            <p>整个 cookbook 仓库按"教学价值"重排后是这样的——后续 5 个模块，会按这张地图带你走完最重要的章节：</p>
+
+            <div class="file-tree">
+              <div class="ft-folder open">
+                <span class="ft-name">anthropic-cookbook/</span>
+                <span class="ft-desc">本食谱根目录</span>
+                <div class="ft-children">
+                  <div class="ft-folder">
+                    <span class="ft-name">patterns/agents/</span>
+                    <span class="ft-desc">5 大基础编排模式（模块 2、3 主讲）</span>
+                  </div>
+                  <div class="ft-folder">
+                    <span class="ft-name">tool_use/</span>
+                    <span class="ft-desc">让模型动手——function calling 全套（模块 4 主讲）</span>
+                  </div>
+                  <div class="ft-folder">
+                    <span class="ft-name">claude_agent_sdk/</span>
+                    <span class="ft-desc">7 个 notebook 从 one-liner 到 SRE（模块 5 主讲）</span>
+                  </div>
+                  <div class="ft-folder">
+                    <span class="ft-name">capabilities/</span>
+                    <span class="ft-desc">RAG / 知识图谱 / 文本转 SQL / 分类 / 摘要</span>
+                  </div>
+                  <div class="ft-folder">
+                    <span class="ft-name">skills/</span>
+                    <span class="ft-desc">Claude Skills——可复用的"本领包"（模块 6 涉及）</span>
+                  </div>
+                  <div class="ft-folder">
+                    <span class="ft-name">multimodal/</span>
+                    <span class="ft-desc">视觉 / PDF / 图表理解</span>
+                  </div>
+                  <div class="ft-folder">
+                    <span class="ft-name">extended_thinking/</span>
+                    <span class="ft-desc">让模型有"思考预算"（模块 6 主讲）</span>
+                  </div>
+                  <div class="ft-folder">
+                    <span class="ft-name">misc/</span>
+                    <span class="ft-desc">prompt_caching / JSON 模式 / PDF 上传等实用配方</span>
+                  </div>
+                  <div class="ft-folder">
+                    <span class="ft-name">managed_agents/ · observability/ · finetuning/ · tool_evaluation/</span>
+                    <span class="ft-desc">进阶或特定领域配方（本课不展开，你已有钥匙自己读）</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 6: Quiz -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">小测：你能认出哪一颗 LLM 装备齐了吗？</h2>
+
+            <div class="quiz-container" id="quiz-module1">
+
+              <div class="quiz-question-block"
+                   data-correct="option-c"
+                   data-explanation-right="对！纯文本生成（写诗、改文案）不需要外部信息。Augmented 的四件套是为'需要查、需要做、需要记'的任务设计的——给一个写诗任务装上 WebSearch，反而是浪费。"
+                   data-explanation-wrong="再想想——写一首诗这个任务，模型需要'查实时数据'吗？需要'调用计算器'吗？需要'记得你昨天的对话'吗？">
+                <h3 class="quiz-question">Q1. 你想让 Claude 写一首关于秋天的现代诗。最合理的做法是？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>给它配上 WebSearch 工具，让它先查一下当下流行的诗体。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>开 RAG 接入一个唐诗数据库做检索增强。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>就用裸 LLM——不需要 Augmented 四件套，纯生成任务用不上。</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block"
+                   data-correct="option-b"
+                   data-explanation-right="正解。'我没有实时数据'是模型在告诉你它缺'检索 / 工具'这一件——给它接 WebSearch 或者一个能查你数据库的工具就解决。"
+                   data-explanation-wrong="这是模型在告诉你它缺访问实时世界的能力——加'记忆'或'更换模型'都解决不了根本问题。它需要的是能伸出去拿信息的'手'。">
+                <h3 class="quiz-question">Q2. 你的 AI 助手反复说"抱歉我没有实时数据 / 我不知道现在几点 / 我访问不了你公司的内部 wiki"。你应该给它加什么？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>加更长的对话记忆。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>加工具或检索（让它能上网搜 / 能查内部 wiki）。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>换一个更大的模型（比如从 Sonnet 换成 Opus）。</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block"
+                   data-correct="option-a"
+                   data-explanation-right="对。每次对话开头都要重新自我介绍，说明它没有跨对话的'记忆'装备。给它加上长期记忆/会话存储，下次开聊它就知道'哦你是 Daniel，喜欢茶不喜欢咖啡'。"
+                   data-explanation-wrong="再想想——'每次都得重新介绍自己'这个症状指向哪一件装备的缺失？是工具？检索？还是记忆？">
+                <h3 class="quiz-question">Q3. 你公司的客服机器人每次新会话都要让用户重新报姓名、订单号、产品型号——同一个用户上次刚说过这些。最缺的是哪一件装备？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>记忆（Memory）——跨会话持久化用户信息。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>工具——多接几个 API。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>系统提示——重写 prompt 让它别忘事。</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">查看答案</button>
+              <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">再做一次</button>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </section>
+    <section class="module" id="module-2" style="background: var(--color-bg)">
+      <div class="module-content">
+        <header class="module-header animate-in">
+          <span class="module-number">02</span>
+          <h1 class="module-title">三种最基础的工序：链式 · 路由 · 并行</h1>
+          <p class="module-subtitle">当一个 LLM 一次答不完，你怎么把多个调用编排起来——agentic 架构的第一道分水岭</p>
+        </header>
+
+        <div class="module-body">
+
+          <!-- Screen 1: Hook + bar metaphor -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">把多个 LLM 编排起来——形状决定工序</h2>
+            <p>上一模块我们看到 Augmented LLM 是基础单元。但一个单元能干的事有限。现在的问题是：<strong>当任务复杂到一个 LLM 一次答不完，你怎么把多个调用编排起来？</strong></p>
+            <p>Anthropic 工程师在论文里给出了三种最基础的编排方式——本课用一家"现代化奶茶吧台"作贯穿隐喻：</p>
+
+            <div class="callout callout-accent">
+              <div class="callout-icon">🧋</div>
+              <div class="callout-content">
+                <strong class="callout-title">本课的隐喻：奶茶吧台的三种工序</strong>
+                <p><strong>链式 = 流水线</strong>：5 个工位前后接力，前一步的产物喂给下一步。<br>
+                <strong>路由 = 分流员</strong>：店员看你点什么，把订单送到对应的专业工位。<br>
+                <strong>并行 = 多窗口同时出杯</strong>：4 个工位同时开工，最后一起打包。</p>
+              </div>
+            </div>
+
+            <div class="pattern-cards stagger-children">
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+                <div class="pattern-icon" style="background: var(--color-actor-1)">⛓️</div>
+                <h4 class="pattern-title">链式 Chain</h4>
+                <p class="pattern-desc"><strong>何时用</strong>：任务能拆成"先 A 再 B 再 C" 的固定步骤。<br><strong>例子</strong>：抽数据 → 转格式 → 排序 → 渲染表格。<br><strong>不要用</strong>：任务步骤会随输入变化。</p>
+              </div>
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+                <div class="pattern-icon" style="background: var(--color-actor-3)">🚦</div>
+                <h4 class="pattern-title">路由 Route</h4>
+                <p class="pattern-desc"><strong>何时用</strong>：输入分多种类型，每种要不同的专门处理。<br><strong>例子</strong>：客服工单分到账单 / 技术 / 安全三个专员。<br><strong>不要用</strong>：所有输入处理逻辑都一样。</p>
+              </div>
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+                <div class="pattern-icon" style="background: var(--color-actor-4)">⚡</div>
+                <h4 class="pattern-title">并行 Parallel</h4>
+                <p class="pattern-desc"><strong>何时用</strong>：多个独立子任务可以同时进行。<br><strong>例子</strong>：对 100 条评论同时打分；对一篇文章同时做"摘要 / 翻译 / 关键词"。<br><strong>不要用</strong>：后一步依赖前一步结果。</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 2: Chain — code translation + flow animation -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">工序一：链式 Chain——前一步的输出喂给下一步</h2>
+            <p>来自 <code>patterns/agents/basic_workflows.ipynb</code>——整个 chain 函数 5 行有效代码：</p>
+
+            <div class="translation-block animate-in">
+              <div class="translation-code">
+                <span class="translation-label">CODE · Python</span>
+<pre><code><span class="code-line"><span class="code-keyword">def</span> <span class="code-function">chain</span>(input: str, prompts: list[str]) -&gt; str:</span>
+<span class="code-line">    <span class="code-string">"""Chain multiple LLM calls sequentially, passing results between steps."""</span></span>
+<span class="code-line">    result = input</span>
+<span class="code-line">    <span class="code-keyword">for</span> i, prompt <span class="code-keyword">in</span> <span class="code-function">enumerate</span>(prompts, 1):</span>
+<span class="code-line">        <span class="code-function">print</span>(<span class="code-string">f"\nStep {i}:"</span>)</span>
+<span class="code-line">        result = <span class="code-function">llm_call</span>(<span class="code-string">f"{prompt}\nInput: {result}"</span>)</span>
+<span class="code-line">        <span class="code-function">print</span>(result)</span>
+<span class="code-line">    <span class="code-keyword">return</span> result</span></code></pre>
+              </div>
+              <div class="translation-english">
+                <span class="translation-label">中文逐行翻译</span>
+                <div class="translation-lines">
+                  <p class="tl"><strong>第 1 行：</strong>定义一个叫 chain 的"组装机"——吃进一段输入和一串 <span class="term" data-definition="给 LLM 的指令文本，告诉它要做什么、怎么做。一个 prompt 可以是一句话也可以是几千字。">prompt</span> 清单。</p>
+                  <p class="tl"><strong>第 3 行：</strong>把"当前结果"初始化为最初的用户输入。</p>
+                  <p class="tl"><strong>第 4 行：</strong>按顺序拿每一个 prompt——步骤 1、步骤 2、步骤 3……</p>
+                  <p class="tl"><strong>第 6 行（关键）：</strong>把"当前结果"塞给下一个 prompt 当输入，再调 LLM。<strong>前一步的输出 = 后一步的输入</strong>——这就是链式的全部魔法。</p>
+                  <p class="tl"><strong>第 8 行：</strong>所有步骤跑完，把最终产物返回。</p>
+                  <p class="tl"><strong>整个 chain 函数 5 行有效代码——这就是链式工作流的全部。</strong></p>
+                </div>
+              </div>
+            </div>
+
+            <h3 style="margin-top: var(--space-12); font-family: var(--font-display); font-size: var(--text-xl);">看一遍真实的链式跑一份业绩报告</h3>
+            <p>cookbook 里给的实际例子：把一段杂乱业绩报告加工成 Markdown 表格，4 步流水线。点"下一步"逐步看：</p>
+
+            <div class="flow-animation" data-steps='[
+              {"highlight":"flow-actor-1","label":"用户提交一段含数字的业绩报告"},
+              {"highlight":"flow-actor-2","label":"步骤 1：抽出所有「数值 + 指标」对","packet":true,"from":"actor-1","to":"actor-2"},
+              {"highlight":"flow-actor-3","label":"步骤 2：把所有数值统一成百分比","packet":true,"from":"actor-2","to":"actor-3"},
+              {"highlight":"flow-actor-4","label":"步骤 3：按数值降序排","packet":true,"from":"actor-3","to":"actor-4"},
+              {"highlight":"flow-actor-5","label":"步骤 4：渲染成 Markdown 表","packet":true,"from":"actor-4","to":"actor-5"},
+              {"highlight":"flow-actor-5","label":"完成！返回最终表格给用户"}
+            ]'>
+              <div class="flow-actors">
+                <div class="flow-actor" id="flow-actor-1">
+                  <div class="flow-actor-icon">📥</div>
+                  <span>用户输入</span>
+                </div>
+                <div class="flow-actor" id="flow-actor-2">
+                  <div class="flow-actor-icon">1</div>
+                  <span>抽数字</span>
+                </div>
+                <div class="flow-actor" id="flow-actor-3">
+                  <div class="flow-actor-icon">2</div>
+                  <span>转百分比</span>
+                </div>
+                <div class="flow-actor" id="flow-actor-4">
+                  <div class="flow-actor-icon">3</div>
+                  <span>排序</span>
+                </div>
+                <div class="flow-actor" id="flow-actor-5">
+                  <div class="flow-actor-icon">4</div>
+                  <span>渲染表格</span>
+                </div>
+              </div>
+
+              <div class="flow-packet" id="flow-packet"></div>
+              <div class="flow-step-label" id="flow-label">点"下一步"开始</div>
+
+              <div class="flow-controls">
+                <button class="btn flow-next-btn">下一步</button>
+                <button class="btn flow-reset-btn">重新开始</button>
+                <span class="flow-progress"></span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 3: Parallel — code translation -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">工序二：并行 Parallel——同一份指令，N 份输入同时跑</h2>
+
+            <div class="translation-block animate-in">
+              <div class="translation-code">
+                <span class="translation-label">CODE · Python</span>
+<pre><code><span class="code-line"><span class="code-keyword">def</span> <span class="code-function">parallel</span>(prompt: str, inputs: list[str], n_workers: int = 3) -&gt; list[str]:</span>
+<span class="code-line">    <span class="code-string">"""Process multiple inputs concurrently with the same prompt."""</span></span>
+<span class="code-line">    <span class="code-keyword">with</span> <span class="code-function">ThreadPoolExecutor</span>(max_workers=n_workers) <span class="code-keyword">as</span> executor:</span>
+<span class="code-line">        futures = [executor.<span class="code-function">submit</span>(llm_call, <span class="code-string">f"{prompt}\nInput: {x}"</span>) <span class="code-keyword">for</span> x <span class="code-keyword">in</span> inputs]</span>
+<span class="code-line">        <span class="code-keyword">return</span> [f.<span class="code-function">result</span>() <span class="code-keyword">for</span> f <span class="code-keyword">in</span> futures]</span></code></pre>
+              </div>
+              <div class="translation-english">
+                <span class="translation-label">中文逐行翻译</span>
+                <div class="translation-lines">
+                  <p class="tl"><strong>第 1 行：</strong>定义"并发分工机"——吃进 1 个共用 prompt 和 N 个待处理输入。</p>
+                  <p class="tl"><strong>第 3 行：</strong>开 3 个并发工位（<span class="term" data-definition="一组可以同时干活的工人。Python 里用线程池能让 N 个网络请求同时进行，而不是排队一个接一个。等待 LLM 回复时尤其有用。">线程池</span>）。</p>
+                  <p class="tl"><strong>第 4 行（关键）：</strong>把 N 个任务一次性丢给工位——每位工人都拿到<strong>同一份 prompt</strong>但处理<strong>不同的输入</strong>。这是并行模式的核心约束。</p>
+                  <p class="tl"><strong>第 5 行：</strong>等所有工位完工，结果按顺序收齐返回。</p>
+                  <p class="tl"><strong>关键洞察</strong>：prompt 不变，input 变。适合"同样的指令处理一堆不同对象"——比如对 100 条评论同时打分、给一篇文章同时生成摘要 / 翻译 / 关键词三种产物。</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="callout callout-info">
+              <div class="callout-icon">⚡</div>
+              <div class="callout-content">
+                <strong class="callout-title">为什么"并行"快</strong>
+                <p>顺序调 100 次 LLM，每次 2 秒 → 200 秒。开 10 个并发工位 → 约 20 秒。<strong>等待 LLM 回复的时间是浪费的</strong>，并行就是把这些等待时间叠在一起。账单不变，但用户感觉快了 10 倍。</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 4: Routing — group chat -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">工序三：路由 Route——分诊台 + 专科医生</h2>
+            <p>路由的核心是<strong>两次 LLM 调用</strong>：第一次 LLM 当"分诊台"判断输入类型，第二次用对应的"专科 prompt"处理实际工作。</p>
+
+            <div class="translation-block animate-in">
+              <div class="translation-code">
+                <span class="translation-label">CODE · Python</span>
+<pre><code><span class="code-line"><span class="code-keyword">def</span> <span class="code-function">route</span>(input: str, routes: dict[str, str]) -&gt; str:</span>
+<span class="code-line">    selector_prompt = <span class="code-string">f"""</span></span>
+<span class="code-line"><span class="code-string">    Analyze the input and select the most appropriate support team</span></span>
+<span class="code-line"><span class="code-string">    from these options: {list(routes.keys())}</span></span>
+<span class="code-line"><span class="code-string">    First explain your reasoning, then provide your selection in this XML format:</span></span>
+<span class="code-line"><span class="code-string">    &lt;reasoning&gt;...&lt;/reasoning&gt;</span></span>
+<span class="code-line"><span class="code-string">    &lt;selection&gt;The chosen team name&lt;/selection&gt;</span></span>
+<span class="code-line"><span class="code-string">    Input: {input}"""</span>.<span class="code-function">strip</span>()</span>
+<span class="code-line"></span>
+<span class="code-line">    route_response = <span class="code-function">llm_call</span>(selector_prompt)</span>
+<span class="code-line">    route_key = <span class="code-function">extract_xml</span>(route_response, <span class="code-string">"selection"</span>).<span class="code-function">strip</span>().<span class="code-function">lower</span>()</span>
+<span class="code-line"></span>
+<span class="code-line">    selected_prompt = routes[route_key]</span>
+<span class="code-line">    <span class="code-keyword">return</span> <span class="code-function">llm_call</span>(<span class="code-string">f"{selected_prompt}\nInput: {input}"</span>)</span></code></pre>
+              </div>
+              <div class="translation-english">
+                <span class="translation-label">中文逐行翻译</span>
+                <div class="translation-lines">
+                  <p class="tl"><strong>第 2-8 行：</strong>构造"分诊 prompt"——告诉 LLM 有哪些可选窗口、要先讲推理、再用 <span class="term" data-definition="可扩展标记语言。在这里只是用 &lt;tag&gt;...&lt;/tag&gt; 这种成对的标签把模型输出的不同部分分开，方便程序解析。Anthropic 工程师推荐用 XML 标签而不是 JSON，因为模型对它格式服从度更高。">XML 标签</span> 给出最终选择。</p>
+                  <p class="tl"><strong>第 10 行：</strong>第一次 LLM 调用——分诊台开工。</p>
+                  <p class="tl"><strong>第 11 行：</strong>用 extract_xml 把 &lt;selection&gt;标签里的内容拎出来，作为路由 key。</p>
+                  <p class="tl"><strong>第 13-14 行：</strong>用 key 取出对应的"专科 prompt"，第二次 LLM 调用——专员处理。</p>
+                  <p class="tl"><strong>核心：两次 LLM 调用，第一次决定"去哪"，第二次干活。</strong></p>
+                </div>
+              </div>
+            </div>
+
+            <h3 style="margin-top: var(--space-12); font-family: var(--font-display); font-size: var(--text-xl);">看一场真实的路由：客户报修工单</h3>
+
+            <div class="chat-window" id="chat-module2">
+              <div class="chat-messages">
+                <div class="chat-message" data-msg="0" data-sender="user" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-2)">客</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-2)">客户</span>
+                    <p>你们的卡上周自动续费了两次，请帮我退一次。</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="1" data-sender="router" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-1)">分</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-1)">分诊员（Claude）</span>
+                    <p>分析中……关键词「自动续费 / 退款 / 卡」→ 这是账单类问题。路由到「账单专员」。</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="2" data-sender="billing" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-3)">账</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-3)">账单专员</span>
+                    <p>Billing Support Response: 已查到您 5 月 1 日的重复扣款记录（订单 #A2418）。3 个工作日内退至原卡。如需加速，可拨打热线 400-XXXX。</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="3" data-sender="user" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-2)">客</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-2)">客户（新会话）</span>
+                    <p>我登录不上了，提示密码错误，但我密码没改过。</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="4" data-sender="router" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-1)">分</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-1)">分诊员（Claude）</span>
+                    <p>关键词「登录不上 / 密码错误」+ 涉及账户安全 → 路由到「账户安全专员」。</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="5" data-sender="security" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-4)">安</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-4)">账户安全专员</span>
+                    <p>Account Support Response: 为保账户安全，请先验证身份。① 我们已发送验证码到您注册邮箱；② 暂时关闭可疑设备登录；③ 收到验证码后通过密码重置流程。预计 5 分钟内完成。</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="chat-typing" id="chat-module2-typing" style="display:none">
+                <div class="chat-avatar" id="chat-module2-typing-avatar">?</div>
+                <div class="chat-typing-dots">
+                  <span class="typing-dot"></span>
+                  <span class="typing-dot"></span>
+                  <span class="typing-dot"></span>
+                </div>
+              </div>
+
+              <div class="chat-controls">
+                <button class="btn chat-next-btn">下一句</button>
+                <button class="btn chat-all-btn">自动播放</button>
+                <button class="btn chat-reset-btn">重播</button>
+                <span class="chat-progress"></span>
+              </div>
+            </div>
+
+            <div class="callout callout-accent">
+              <div class="callout-icon">💡</div>
+              <div class="callout-content">
+                <strong class="callout-title">关键洞察：三种工序可以嵌套</strong>
+                <p>真实生产系统经常是 <strong>route → chain → parallel</strong> 的嵌套——先按工单类型路由，进了"账单专员"窗口后再走 "查订单 → 算金额 → 出退款单" 的链式，每个客户的退款邮件还可以并行批量发。<strong>先按形状判断，再按需要叠在一起。</strong></p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 5: Quiz -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">小测：判断任务的形状</h2>
+
+            <div class="quiz-container" id="quiz-module2">
+
+              <div class="quiz-question-block"
+                   data-correct="option-a"
+                   data-explanation-right="对！这三步存在严格顺序依赖——必须先有摘要才能抽关键词、必须先有原文（或摘要）才能翻译。每一步的输入是上一步的输出。这就是 chain 的标准形状。"
+                   data-explanation-wrong="再分析一下：'摘要 → 关键词 → 翻译' 这三步的顺序能换吗？后一步要不要等前一步的结果？">
+                <h3 class="quiz-question">Q1. 你要做一个程序：客户上传 PDF 后自动生成"摘要 → 关键词 → 翻译成英文"。最适合的工序？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Chain（链式）——三步前后依赖</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Route（路由）——三种 PDF 类型分流</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Parallel（并行）——三件事同时干</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block"
+                   data-correct="option-c"
+                   data-explanation-right="对。5 个标签维度彼此独立——情绪不依赖话题、风险不依赖国家——5 件事可以同时跑。Parallel 把延迟从 5×T 压到 1×T。"
+                   data-explanation-wrong="再想：5 个标签彼此独立，A 标签的判断不依赖 B 标签的结果。如果你串成 chain，会浪费时间——它们其实可以同时进行。">
+                <h3 class="quiz-question">Q2. 你要给一条推文同时打 5 个独立维度的标签：情绪 / 话题 / 国家 / 是否广告 / 风险等级。最佳模式？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Chain——5 步顺序</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Route——按推文类型分流</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Parallel——5 个标签维度同时跑</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block"
+                   data-correct="option-b"
+                   data-explanation-right="对。先要分类（这是发票还是身份证还是收据？），再用对应专门 prompt 处理。这就是路由的标准形状——分诊台 + 专员。"
+                   data-explanation-wrong="再想：用户上传一张图，处理逻辑取决于'这张图属于哪一类'。这是 chain（顺序）、parallel（并发）还是 route（按类型分流）？">
+                <h3 class="quiz-question">Q3. 用户上传一张图，可能是发票、可能是身份证、可能是收据——你要先判断类型，再用对应模板提取信息。最佳模式？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Chain——固定 3 步流水线</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Route——分类后分流到专门 prompt</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Parallel——三种模板并发跑，看哪个置信度高</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">查看答案</button>
+              <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">再做一次</button>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </section>
+    <section class="module" id="module-3" style="background: var(--color-bg-warm)">
+      <div class="module-content">
+        <header class="module-header animate-in">
+          <span class="module-number">03</span>
+          <h1 class="module-title">高阶工序：调度官 与 评审官</h1>
+          <p class="module-subtitle">当任务的形状要看到才知道——动态拆解 与 互相博弈打磨的两种模式</p>
+        </header>
+
+        <div class="module-body">
+
+          <!-- Screen 1: Hook + film crew metaphor -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">现实里，有时候你看到任务的瞬间才知道该怎么拆</h2>
+            <p>上一模块的三种工序都有一个共同假设——你提前知道任务的形状。但 chain 的步骤、parallel 的子任务清单、route 的窗口列表，<strong>都是在写代码时就敲死了的</strong>（俗称<span class="term" data-definition="Hardcode/hardcoded。指把规则、数值、清单写死在代码里，运行时不能改。和它对应的是'动态/dynamic' —— 程序运行时才决定。'写死'易出 bug 也难维护，但简单场景里写死最快。">写死</span>）。</p>
+            <p>现实世界里，<em>很多任务一来你才知道要怎么拆</em>。这一模块教两种处理"未知形状"任务的最重要工序——它们都比基础工序多了一层"元认知"。</p>
+
+            <div class="callout callout-accent">
+              <div class="callout-icon">🎬</div>
+              <div class="callout-content">
+                <strong class="callout-title">本课的隐喻：纪录片摄制组</strong>
+                <p><strong>Orchestrator-Workers（调度官 + 工人）= 总导演 + 摄影组</strong>：导演拿到选题后<em>不预先写好剧本</em>——看现场情况决定这场戏值得拍特写、空镜还是延时，再分别派摄影 A、B、C 去拍各自的镜头，最后剪辑成片。<br><strong>Evaluator-Optimizer（评审官 + 优化器）= 编剧 + 责编</strong>：编剧写一稿初稿交给责编。责编不动笔，只给反馈："角色动机不清楚 / 第二幕太拖"。编剧拿反馈再改一稿，再交。来回三五次直到 PASS。</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 2: Orchestrator prompt design -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">调度官的核心 = 一个会现场拆任务的 prompt</h2>
+            <p>看 cookbook 里的 <span class="term" data-definition="Orchestrator——调度官、协调者。在 agent 系统里指那个'看任务后决定怎么拆 + 派工人'的中枢 LLM。它自己不直接干活，只做规划和分发。">orchestrator</span> prompt——它的精髓是把"导演的元认知"用 XML 结构强约束出来：</p>
+
+            <div class="translation-block animate-in">
+              <div class="translation-code">
+                <span class="translation-label">PROMPT · 给 Orchestrator</span>
+<pre><code><span class="code-line">ORCHESTRATOR_PROMPT = <span class="code-string">"""</span></span>
+<span class="code-line"><span class="code-string">Analyze this task and break it down into 2-3 distinct approaches:</span></span>
+<span class="code-line"><span class="code-string"></span></span>
+<span class="code-line"><span class="code-string">Task: {task}</span></span>
+<span class="code-line"><span class="code-string"></span></span>
+<span class="code-line"><span class="code-string">Return your response in this format:</span></span>
+<span class="code-line"><span class="code-string"></span></span>
+<span class="code-line"><span class="code-string">&lt;analysis&gt;</span></span>
+<span class="code-line"><span class="code-string">Explain your understanding of the task and which variations would be valuable.</span></span>
+<span class="code-line"><span class="code-string">&lt;/analysis&gt;</span></span>
+<span class="code-line"><span class="code-string"></span></span>
+<span class="code-line"><span class="code-string">&lt;tasks&gt;</span></span>
+<span class="code-line"><span class="code-string">    &lt;task&gt;</span></span>
+<span class="code-line"><span class="code-string">    &lt;type&gt;formal&lt;/type&gt;</span></span>
+<span class="code-line"><span class="code-string">    &lt;description&gt;Write a precise, technical version that emphasizes specifications&lt;/description&gt;</span></span>
+<span class="code-line"><span class="code-string">    &lt;/task&gt;</span></span>
+<span class="code-line"><span class="code-string">    &lt;task&gt;</span></span>
+<span class="code-line"><span class="code-string">    &lt;type&gt;conversational&lt;/type&gt;</span></span>
+<span class="code-line"><span class="code-string">    &lt;description&gt;Write an engaging, friendly version that connects with readers&lt;/description&gt;</span></span>
+<span class="code-line"><span class="code-string">    &lt;/task&gt;</span></span>
+<span class="code-line"><span class="code-string">&lt;/tasks&gt;</span></span>
+<span class="code-line"><span class="code-string">"""</span></span></code></pre>
+              </div>
+              <div class="translation-english">
+                <span class="translation-label">中文逐句解读</span>
+                <div class="translation-lines">
+                  <p class="tl"><strong>"Analyze this task and break it down into 2-3 distinct approaches"</strong>——让 Claude 当导演：<em>看完任务后给我列 2-3 种切入角度</em>。"distinct" 是关键词——必须有差异。</p>
+                  <p class="tl"><strong>&lt;analysis&gt; 标签</strong>——强制导演先讲"为什么这么拆"，避免它跳过思考直接出方案。这是 <span class="term" data-definition="Chain of Thought 的缩写。让模型把推理过程写下来再给结论，通常能显著提高复杂任务的准确性。这里通过强制 &lt;analysis&gt; 标签实现。">CoT</span> 的一种实现。</p>
+                  <p class="tl"><strong>&lt;tasks&gt; / &lt;task&gt; / &lt;type&gt; / &lt;description&gt;</strong> 嵌套——用 XML 强约束输出结构，方便程序解析成"工单清单"。</p>
+                  <p class="tl"><strong>{task}</strong> 占位符——运行时把实际任务（"为环保水壶写产品文案"）填进去。</p>
+                  <p class="tl"><strong>核心：具体拆几个 task、每个 task 是什么风格，全由 Claude 看到 task 那一刻自己决定</strong>——不是程序员写死的。这就是"动态拆任务"。</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 3: Orchestrator main loop -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">调度官的主循环：1 次导演 + N 次工人</h2>
+
+            <div class="step-cards">
+              <div class="step-card">
+                <div class="step-num">1</div>
+                <div class="step-body">
+                  <strong>导演看任务</strong>
+                  <p>第 1 次 LLM 调用——orchestrator 读 task，输出 &lt;analysis&gt; + &lt;tasks&gt; 工单清单。</p>
+                </div>
+              </div>
+              <div class="step-card">
+                <div class="step-num">2</div>
+                <div class="step-body">
+                  <strong>解析工单</strong>
+                  <p>用 extract_xml + parse_tasks 把 LLM 吐出来的 XML 转成程序能用的结构化清单。</p>
+                </div>
+              </div>
+              <div class="step-card">
+                <div class="step-num">3</div>
+                <div class="step-body">
+                  <strong>派工人</strong>
+                  <p>对每张工单调一次 worker LLM——每个工人独立完成自己那一份。</p>
+                </div>
+              </div>
+              <div class="step-card">
+                <div class="step-num">4</div>
+                <div class="step-body">
+                  <strong>汇总产物</strong>
+                  <p>把 N 个 worker 的结果收齐，作为最终产出返回。<strong>整个流程 = 1 次导演 + N 次工人 = N+1 次 LLM 调用</strong>。</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="translation-block animate-in">
+              <div class="translation-code">
+                <span class="translation-label">CODE · Python（节选）</span>
+<pre><code><span class="code-line"><span class="code-keyword">class</span> <span class="code-function">FlexibleOrchestrator</span>:</span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">process</span>(self, task: str, context: dict | <span class="code-keyword">None</span> = <span class="code-keyword">None</span>) -&gt; dict:</span>
+<span class="code-line">        <span class="code-comment"># Step 1: Get orchestrator response</span></span>
+<span class="code-line">        orchestrator_input = self._format_prompt(self.orchestrator_prompt, task=task, **context)</span>
+<span class="code-line">        orchestrator_response = <span class="code-function">llm_call</span>(orchestrator_input, model=self.model)</span>
+<span class="code-line"></span>
+<span class="code-line">        <span class="code-comment"># Parse orchestrator response</span></span>
+<span class="code-line">        analysis = <span class="code-function">extract_xml</span>(orchestrator_response, <span class="code-string">"analysis"</span>)</span>
+<span class="code-line">        tasks_xml = <span class="code-function">extract_xml</span>(orchestrator_response, <span class="code-string">"tasks"</span>)</span>
+<span class="code-line">        tasks = <span class="code-function">parse_tasks</span>(tasks_xml)</span>
+<span class="code-line"></span>
+<span class="code-line">        <span class="code-comment"># Step 2: Process each task</span></span>
+<span class="code-line">        worker_results = []</span>
+<span class="code-line">        <span class="code-keyword">for</span> i, task_info <span class="code-keyword">in</span> <span class="code-function">enumerate</span>(tasks, 1):</span>
+<span class="code-line">            worker_input = self._format_prompt(self.worker_prompt, original_task=task,</span>
+<span class="code-line">                task_type=task_info[<span class="code-string">"type"</span>], task_description=task_info[<span class="code-string">"description"</span>])</span>
+<span class="code-line">            worker_response = <span class="code-function">llm_call</span>(worker_input, model=self.model)</span>
+<span class="code-line">            worker_results.<span class="code-function">append</span>({<span class="code-string">"type"</span>: task_info[<span class="code-string">"type"</span>], <span class="code-string">"result"</span>: worker_response})</span>
+<span class="code-line"></span>
+<span class="code-line">        <span class="code-keyword">return</span> {<span class="code-string">"analysis"</span>: analysis, <span class="code-string">"worker_results"</span>: worker_results}</span></code></pre>
+              </div>
+              <div class="translation-english">
+                <span class="translation-label">中文逐行翻译</span>
+                <div class="translation-lines">
+                  <p class="tl"><strong>第 5 行：</strong>第 1 次 LLM 调用——导演看任务、决定怎么拆。</p>
+                  <p class="tl"><strong>第 8-10 行：</strong>把导演吐出来的 XML 解析成程序能用的"工单清单"。</p>
+                  <p class="tl"><strong>第 13 行：</strong>对每张工单派一个工人。</p>
+                  <p class="tl"><strong>第 16 行：</strong>第 N 次 LLM 调用（N = 工单数）——每个工人独立完成自己那一份。</p>
+                  <p class="tl"><strong>第 19 行：</strong>把所有产物加上 analysis（导演的解读）一起返回。</p>
+                  <p class="tl"><strong>关键对比</strong>：parallel 的工人清单<em>程序员写死</em>。orchestrator 的工人清单<em>导演现场决定</em>。这一字之差，让系统从"流水线"变成了"团队"。</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="callout callout-info">
+              <div class="callout-icon">💡</div>
+              <div class="callout-content">
+                <strong class="callout-title">Aha! Orchestrator vs Parallel——一字之差</strong>
+                <p>两个模式都是"同时跑多个 LLM"。差别在哪？<strong>parallel 的工人任务清单是写死的，orchestrator 的工人任务清单是导演现场决定的</strong>。如果你能提前列清楚要做哪几件事 → 用 parallel 省一次 LLM 调用；如果要做哪几件事得看具体输入 → 用 orchestrator。</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 4: Evaluator-Optimizer with chat -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">评审官的循环：两个 LLM 互相博弈</h2>
+            <p>这个模式叫 <span class="term" data-definition="Evaluator-Optimizer 的核心：generator（生成器）写、evaluator（评审器）评，两个 LLM 互相博弈直到达标。比 chain 多了'反复打磨'的能力。">evaluator-optimizer</span>——一个 LLM 写，一个 LLM 评，循环直到 PASS。</p>
+
+            <div class="translation-block animate-in">
+              <div class="translation-code">
+                <span class="translation-label">CODE · Python</span>
+<pre><code><span class="code-line"><span class="code-keyword">def</span> <span class="code-function">loop</span>(task, evaluator_prompt, generator_prompt):</span>
+<span class="code-line">    memory = []</span>
+<span class="code-line">    chain_of_thought = []</span>
+<span class="code-line"></span>
+<span class="code-line">    thoughts, result = <span class="code-function">generate</span>(generator_prompt, task)</span>
+<span class="code-line">    memory.<span class="code-function">append</span>(result)</span>
+<span class="code-line">    chain_of_thought.<span class="code-function">append</span>({<span class="code-string">"thoughts"</span>: thoughts, <span class="code-string">"result"</span>: result})</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">while</span> <span class="code-keyword">True</span>:</span>
+<span class="code-line">        evaluation, feedback = <span class="code-function">evaluate</span>(evaluator_prompt, result, task)</span>
+<span class="code-line">        <span class="code-keyword">if</span> evaluation == <span class="code-string">"PASS"</span>:</span>
+<span class="code-line">            <span class="code-keyword">return</span> result, chain_of_thought</span>
+<span class="code-line"></span>
+<span class="code-line">        context = <span class="code-string">"\n"</span>.<span class="code-function">join</span>([<span class="code-string">"Previous attempts:"</span>,</span>
+<span class="code-line">            *[<span class="code-string">f"- {m}"</span> <span class="code-keyword">for</span> m <span class="code-keyword">in</span> memory], <span class="code-string">f"\nFeedback: {feedback}"</span>])</span>
+<span class="code-line"></span>
+<span class="code-line">        thoughts, result = <span class="code-function">generate</span>(generator_prompt, task, context)</span>
+<span class="code-line">        memory.<span class="code-function">append</span>(result)</span></code></pre>
+              </div>
+              <div class="translation-english">
+                <span class="translation-label">中文逐行翻译</span>
+                <div class="translation-lines">
+                  <p class="tl"><strong>第 2 行：</strong>准备一本"草稿本"——记下每一稿。</p>
+                  <p class="tl"><strong>第 5 行：</strong>编剧（generator）先写第一稿。</p>
+                  <p class="tl"><strong>第 9 行：</strong>进入打磨循环。</p>
+                  <p class="tl"><strong>第 10 行：</strong>责编（evaluator）看稿，吐出"通过 / 还要改"以及具体反馈。</p>
+                  <p class="tl"><strong>第 11-12 行：</strong>责编满意了就交付，整个循环结束。</p>
+                  <p class="tl"><strong>第 14-15 行：</strong>把所有历史草稿和最新反馈打包——告诉编剧"这些你已经写过了，现在按这个反馈改"。<strong>注意 memory 的累积</strong>——避免编剧在原地打转。</p>
+                  <p class="tl"><strong>第 17 行：</strong>编剧带着批注再写一稿。循环直到 PASS。<strong>两个 LLM 互相博弈，自动改稿。</strong></p>
+                </div>
+              </div>
+            </div>
+
+            <h3 style="margin-top: var(--space-12); font-family: var(--font-display); font-size: var(--text-xl);">看一场真实的博弈：写一个 Min-Stack</h3>
+            <p>cookbook 里给的实际例子——编剧（generator）和责编（evaluator）在写一个所有操作 O(1) 的栈：</p>
+
+            <div class="chat-window" id="chat-module3">
+              <div class="chat-messages">
+                <div class="chat-message" data-msg="0" data-sender="user" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-2)">用</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-2)">用户</span>
+                    <p>实现一个 Stack：push(x) / pop() / getMin()，三个操作都要 O(1)。</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="1" data-sender="generator" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-1)">编</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-1)">编剧（Generator）· 第 1 稿</span>
+                    <p>用一个普通栈存数据。push 和 pop 显然 O(1)。getMin 时遍历整个栈找最小值。</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="2" data-sender="evaluator" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-3)">责</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-3)">责编（Evaluator）</span>
+                    <p>NEEDS_IMPROVEMENT。getMin 是 O(n)，不达标。Feedback：考虑用辅助数据结构同步追踪当前最小值。</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="3" data-sender="generator" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-1)">编</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-1)">编剧（Generator）· 第 2 稿</span>
+                    <p>引入一个 minStack——push 时把"当前最小值"也 push 进去；pop 时同步 pop。getMin 直接 peek minStack 顶。三个操作都是 O(1)。</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="4" data-sender="evaluator" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-3)">责</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-3)">责编（Evaluator）</span>
+                    <p>PASS ✓ 三个操作都是 O(1)，代码风格清晰，边界处理正确。可以交付。</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="chat-typing" id="chat-module3-typing" style="display:none">
+                <div class="chat-avatar" id="chat-module3-typing-avatar">?</div>
+                <div class="chat-typing-dots">
+                  <span class="typing-dot"></span>
+                  <span class="typing-dot"></span>
+                  <span class="typing-dot"></span>
+                </div>
+              </div>
+
+              <div class="chat-controls">
+                <button class="btn chat-next-btn">下一句</button>
+                <button class="btn chat-all-btn">自动播放</button>
+                <button class="btn chat-reset-btn">重播</button>
+                <span class="chat-progress"></span>
+              </div>
+            </div>
+
+            <div class="callout callout-warning">
+              <div class="callout-icon">⚠️</div>
+              <div class="callout-content">
+                <strong class="callout-title">生产坑：循环不收敛</strong>
+                <p>真实生产里这个循环最大的危险是——evaluator 一直说 "NEEDS_IMPROVEMENT" 跑了 20 次还没 PASS，账单爆炸。<strong>必须设最大轮数</strong>，并且检测"反馈是否在重复"——如果第 5 次和第 3 次反馈几乎一样，说明陷入死循环，应该 break 出去交人工。</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 5: Quiz -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">小测：架构决策题</h2>
+
+            <div class="quiz-container" id="quiz-module3">
+
+              <div class="quiz-question-block"
+                   data-correct="option-b"
+                   data-explanation-right="对！3 种风格是产品经理写死的——'技术控 / 文艺 / 网红'。这是 parallel 的标准形状。除非你要让 LLM 自己决定'这个产品适合哪 3 种风格'——那才用 orchestrator。"
+                   data-explanation-wrong="想清楚：3 种风格的清单是写代码时定的（写死），还是看到产品后让 LLM 现场决定的？前者用 parallel 就够，后者才用 orchestrator。">
+                <h3 class="quiz-question">Q1. 你要给同一个产品生成 3 种固定风格的营销文案：技术控版、文艺版、网红版。三种风格清单是产品经理写死的。最佳模式？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Orchestrator——让 LLM 决定要拆几个</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Parallel——3 个风格写死，3 路并发</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Evaluator-Optimizer——一稿一稿打磨</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block"
+                   data-correct="option-c"
+                   data-explanation-right="对。长文 + 严格语调控制——一次性写很难达标。让一个 LLM 写、另一个 LLM 按"语调清单"评审，循环到 PASS。这就是 evaluator-optimizer 的标准用法。"
+                   data-explanation-wrong="再分析：'高质量长文' + '严格控制语调' 这两个词指向哪个模式？是顺序步骤（chain）、动态拆解（orchestrator）、还是反复打磨（evaluator）？">
+                <h3 class="quiz-question">Q2. 你要让 AI 写一篇高质量的长文，并且严格控制语调（"专业但不冷淡"）。最适合的模式？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Chain——开头 / 主体 / 结尾分三步</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Orchestrator——拆成多个段落并行写</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Evaluator-Optimizer——一稿一稿按语调清单打磨</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block"
+                   data-correct="option-c"
+                   data-explanation-right="对！这正是真实生产 bug。两件事必做：① 设最大轮数（比如 5 轮）作为硬刹车；② 检测反馈是否在重复——如果是说明 generator 进入死循环，应该 break 出去转人工。光"换 evaluator prompt"是治标不治本——根本是机制要有刹车。"
+                   data-explanation-wrong="想想真实生产里你会怎么处理：这是个无限循环风险。你要的是<em>机制层面</em>的刹车——不只是改 prompt。">
+                <h3 class="quiz-question">Q3. 你的 evaluator-optimizer 跑了 20 多轮还没 PASS，账单爆炸。最该做的两件事？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>把 evaluator 换成更宽松的 prompt，让它快点 PASS。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>把 generator 换成 Opus，更强的模型一次就过。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>设最大轮数 + 检测反馈是否在重复 → 触发就交人工。</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">查看答案</button>
+              <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">再做一次</button>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </section>
+    <section class="module" id="module-4" style="background: var(--color-bg)">
+      <div class="module-content">
+        <header class="module-header animate-in">
+          <span class="module-number">04</span>
+          <h1 class="module-title">工具调用：让模型动手</h1>
+          <p class="module-subtitle">Claude 自己不动手——它输出"工单"叫你的程序去做。这是 agent 唯一真的能改变外部世界的方式</p>
+        </header>
+
+        <div class="module-body">
+
+          <!-- Screen 1: Hook + chess metaphor -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">Claude 不能查数据库、不能发邮件——但能"叫别人去做"</h2>
+            <p>到上一模块为止，所有工序都还停留在"LLM 之间互相讲话"。Claude 自己看不见时间、查不了数据库、发不了邮件。但<strong>你可以教它"叫别人去做这些事"</strong>——这就是 tool use 的全部秘密。</p>
+
+            <div class="callout callout-accent">
+              <div class="callout-icon">♟️</div>
+              <div class="callout-content">
+                <strong class="callout-title">本课的隐喻：国际象棋大师 + 棋钟</strong>
+                <p>大师（Claude）只能"想棋"，不能离开桌子去查棋谱。你给他配几张"工具卡"——查开局库、查残局库、问引擎评分。每张卡上写清楚<em>这张牌能干什么、需要什么参数</em>。他想用哪张就抬手按下棋钟、说出工具名和参数。<strong>他不亲自查，他叫你去查</strong>——你查完把结果递回去，他接着想下一步。整盘棋下来按好几次钟——这就是 <span class="term" data-definition="Agentic Loop。LLM 调用 → 工具执行 → 把结果回喂给 LLM → LLM 决定下一步……如此循环直到 LLM 说'我够了'。这是所有 agent 系统的底层心跳。">agentic loop</span>。</p>
+              </div>
+            </div>
+
+            <div class="pattern-cards stagger-children">
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+                <div class="pattern-icon" style="background: var(--color-actor-1)">📋</div>
+                <h4 class="pattern-title">Description 决定生死</h4>
+                <p class="pattern-desc">Claude 看着工具的 description 决定"什么时候用 / 怎么用"。说明书写不清楚，工具就用不对。</p>
+              </div>
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+                <div class="pattern-icon" style="background: var(--color-actor-3)">📐</div>
+                <h4 class="pattern-title">JSON Schema 是合同</h4>
+                <p class="pattern-desc">用 JSON Schema 描述参数形状——必填字段、类型、举例。这是 Claude 和你的程序之间的格式合同。</p>
+              </div>
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+                <div class="pattern-icon" style="background: var(--color-actor-4)">↩️</div>
+                <h4 class="pattern-title">tool_result 必须回喂</h4>
+                <p class="pattern-desc">工具执行完拿到结果后，必须把结果作为 tool_result 角色塞回对话历史，再调一次 Claude——否则 Claude 永远不知道工具结果。</p>
+              </div>
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+                <div class="pattern-icon" style="background: var(--color-actor-2)">🛑</div>
+                <h4 class="pattern-title">max_iterations 是救命稻草</h4>
+                <p class="pattern-desc">agent loop 可能跑飞——加个上限。同时检测"是不是反复调同一个工具"——这往往是死循环征兆。</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 2: Tool definition translation -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">第一步：写一份"工具说明书"</h2>
+            <p>来自 <code>tool_use/calculator_tool.ipynb</code>——给 Claude 配一个简单计算器：</p>
+
+            <div class="translation-block animate-in">
+              <div class="translation-code">
+                <span class="translation-label">CODE · Python</span>
+<pre><code><span class="code-line">tools = [</span>
+<span class="code-line">    {</span>
+<span class="code-line">        <span class="code-property">"name"</span>: <span class="code-string">"calculator"</span>,</span>
+<span class="code-line">        <span class="code-property">"description"</span>: <span class="code-string">"A simple calculator that performs basic arithmetic operations."</span>,</span>
+<span class="code-line">        <span class="code-property">"input_schema"</span>: {</span>
+<span class="code-line">            <span class="code-property">"type"</span>: <span class="code-string">"object"</span>,</span>
+<span class="code-line">            <span class="code-property">"properties"</span>: {</span>
+<span class="code-line">                <span class="code-property">"expression"</span>: {</span>
+<span class="code-line">                    <span class="code-property">"type"</span>: <span class="code-string">"string"</span>,</span>
+<span class="code-line">                    <span class="code-property">"description"</span>: <span class="code-string">"The mathematical expression to evaluate (e.g., '2 + 3 * 4')."</span>,</span>
+<span class="code-line">                }</span>
+<span class="code-line">            },</span>
+<span class="code-line">            <span class="code-property">"required"</span>: [<span class="code-string">"expression"</span>],</span>
+<span class="code-line">        },</span>
+<span class="code-line">    }</span>
+<span class="code-line">]</span></code></pre>
+              </div>
+              <div class="translation-english">
+                <span class="translation-label">中文逐行翻译</span>
+                <div class="translation-lines">
+                  <p class="tl"><strong>第 1 行：</strong>tools 是一个<em>列表</em>——意味着你可以一次给 Claude 配多张卡。</p>
+                  <p class="tl"><strong>"name": "calculator"</strong>——工具的"卡名"，Claude 会用这个名字来召唤它。</p>
+                  <p class="tl"><strong>"description"（关键）：</strong>这是 tool use 里<strong>最重要的一行</strong>——Claude 是看着这句话决定"要不要用这个工具"的。说明书写不清楚，Claude 就会用错或干脆不用。要写得像在跟一个聪明但没上下文的实习生交代任务。</p>
+                  <p class="tl"><strong>"input_schema"</strong>——用 <span class="term" data-definition="一种用 JSON 来描述数据'形状'的标准。比如这个字段必须是字符串、那个字段是数字、再那个是必填。LLM 看 JSON Schema 就知道'我该填什么参数'。是 Claude 和你的程序之间的合同。">JSON Schema</span> 描述参数形状：要一个叫 expression 的字符串。</p>
+                  <p class="tl"><strong>"required": ["expression"]</strong>——强制 Claude 必须填这个参数，不许偷懒。</p>
+                  <p class="tl"><strong>给 vibe coder 的一句话：</strong>tool 的 description 不是写给程序员看的，是写给 Claude 看的。</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 3: Agentic loop with flow animation -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">第二步：跑通 agentic loop</h2>
+            <p>当 Claude 决定要用工具时，它<em>不直接给答案</em>——而是停下来，输出一段"工单"，等你执行。然后你把结果回喂，它再继续。看一遍这个 loop 的 7 步动画：</p>
+
+            <div class="flow-animation" data-steps='[
+              {"highlight":"flow-actor-1","label":"用户问：17 乘 23 等于多少？"},
+              {"highlight":"flow-actor-2","label":"Claude 收到问题 + 工具说明书","packet":true,"from":"actor-1","to":"actor-2"},
+              {"highlight":"flow-actor-3","label":"Claude 不直接答 — 吐出工单：calculator(expression=「17*23」)","packet":true,"from":"actor-2","to":"actor-3"},
+              {"highlight":"flow-actor-4","label":"你的程序按工单调用真正的 calculator 函数","packet":true,"from":"actor-3","to":"actor-4"},
+              {"highlight":"flow-actor-3","label":"Calculator 返回「391」给你的程序","packet":true,"from":"actor-4","to":"actor-3"},
+              {"highlight":"flow-actor-2","label":"你的程序把结果作为 tool_result 塞回对话历史","packet":true,"from":"actor-3","to":"actor-2"},
+              {"highlight":"flow-actor-1","label":"Claude 看到结果，给最终回答：17 × 23 = 391","packet":true,"from":"actor-2","to":"actor-1"}
+            ]'>
+              <div class="flow-actors">
+                <div class="flow-actor" id="flow-actor-1">
+                  <div class="flow-actor-icon">👤</div>
+                  <span>用户</span>
+                </div>
+                <div class="flow-actor" id="flow-actor-2">
+                  <div class="flow-actor-icon">🤖</div>
+                  <span>Claude</span>
+                </div>
+                <div class="flow-actor" id="flow-actor-3">
+                  <div class="flow-actor-icon">⚙️</div>
+                  <span>你的程序</span>
+                </div>
+                <div class="flow-actor" id="flow-actor-4">
+                  <div class="flow-actor-icon">🧮</div>
+                  <span>Calculator</span>
+                </div>
+              </div>
+
+              <div class="flow-packet" id="flow-packet"></div>
+              <div class="flow-step-label" id="flow-label">点"下一步"开始</div>
+
+              <div class="flow-controls">
+                <button class="btn flow-next-btn">下一步</button>
+                <button class="btn flow-reset-btn">重新开始</button>
+                <span class="flow-progress"></span>
+              </div>
+            </div>
+
+            <div class="translation-block animate-in">
+              <div class="translation-code">
+                <span class="translation-label">CODE · Python（agentic loop 简化版）</span>
+<pre><code><span class="code-line">message = client.messages.<span class="code-function">create</span>(</span>
+<span class="code-line">    model=MODEL_NAME,</span>
+<span class="code-line">    messages=[{<span class="code-string">"role"</span>: <span class="code-string">"user"</span>, <span class="code-string">"content"</span>: user_message}],</span>
+<span class="code-line">    tools=tools,</span>
+<span class="code-line">)</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-keyword">if</span> message.stop_reason == <span class="code-string">"tool_use"</span>:</span>
+<span class="code-line">    tool_use = <span class="code-function">next</span>(b <span class="code-keyword">for</span> b <span class="code-keyword">in</span> message.content <span class="code-keyword">if</span> b.type == <span class="code-string">"tool_use"</span>)</span>
+<span class="code-line">    tool_result = <span class="code-function">process_tool_call</span>(tool_use.name, tool_use.input)</span>
+<span class="code-line"></span>
+<span class="code-line">    response = client.messages.<span class="code-function">create</span>(</span>
+<span class="code-line">        model=MODEL_NAME,</span>
+<span class="code-line">        messages=[</span>
+<span class="code-line">            {<span class="code-string">"role"</span>: <span class="code-string">"user"</span>, <span class="code-string">"content"</span>: user_message},</span>
+<span class="code-line">            {<span class="code-string">"role"</span>: <span class="code-string">"assistant"</span>, <span class="code-string">"content"</span>: message.content},</span>
+<span class="code-line">            {<span class="code-string">"role"</span>: <span class="code-string">"user"</span>, <span class="code-string">"content"</span>: [{</span>
+<span class="code-line">                <span class="code-string">"type"</span>: <span class="code-string">"tool_result"</span>,</span>
+<span class="code-line">                <span class="code-string">"tool_use_id"</span>: tool_use.id,</span>
+<span class="code-line">                <span class="code-string">"content"</span>: tool_result,</span>
+<span class="code-line">            }],</span>
+<span class="code-line">        }],</span>
+<span class="code-line">        tools=tools,</span>
+<span class="code-line">    )</span></code></pre>
+              </div>
+              <div class="translation-english">
+                <span class="translation-label">中文逐行翻译</span>
+                <div class="translation-lines">
+                  <p class="tl"><strong>第 1-5 行：</strong>第一次调 Claude，把"工具说明书清单"一起递过去。</p>
+                  <p class="tl"><strong>第 7 行：</strong>Claude 没直接回答，<code>stop_reason == "tool_use"</code> 表示它要用工具——停下来等你执行。</p>
+                  <p class="tl"><strong>第 8 行：</strong>从 Claude 的回复里挑出"要用工具的那块"——拿到工具名和参数。</p>
+                  <p class="tl"><strong>第 9 行（真正干活）：</strong>你的程序按 Claude 给的工具名和参数去执行——拿到结果。</p>
+                  <p class="tl"><strong>第 11-22 行（关键）：</strong>第二次调 Claude——把工具结果用 <code>tool_result</code> 这个特殊角色<strong>塞回对话历史</strong>。这一步是关键——必须保留完整对话上下文，Claude 才知道"刚才让查的结果回来了"。</p>
+                  <p class="tl"><strong>真实场景里这个过程可能循环多次——直到 stop_reason ≠ "tool_use"，才算完。</strong></p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 4: Spot the bug -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">Spot the Bug：找出这段代码哪行写错了</h2>
+            <p>下面是一段<em>错误的</em> agentic loop。Claude 调用了工具但 agent 永远不会给最终答复——找出关键 bug 行：</p>
+
+            <div class="bug-challenge">
+              <div class="bug-code">
+                <div class="bug-line" data-line="1" onclick="checkBugLine(this, false)">
+                  <span class="line-num">1</span>
+                  <code>message = client.messages.create(model=MODEL, messages=msgs, tools=tools)</code>
+                </div>
+                <div class="bug-line" data-line="2" onclick="checkBugLine(this, false)">
+                  <span class="line-num">2</span>
+                  <code>if message.stop_reason == "tool_use":</code>
+                </div>
+                <div class="bug-line" data-line="3" onclick="checkBugLine(this, false)">
+                  <span class="line-num">3</span>
+                  <code>&nbsp;&nbsp;&nbsp;&nbsp;tool_use = next(b for b in message.content if b.type == "tool_use")</code>
+                </div>
+                <div class="bug-line" data-line="4" onclick="checkBugLine(this, false)">
+                  <span class="line-num">4</span>
+                  <code>&nbsp;&nbsp;&nbsp;&nbsp;tool_result = process_tool_call(tool_use.name, tool_use.input)</code>
+                </div>
+                <div class="bug-line bug-target" data-line="5" onclick="checkBugLine(this, true)">
+                  <span class="line-num">5</span>
+                  <code>&nbsp;&nbsp;&nbsp;&nbsp;print(tool_result)&nbsp;&nbsp;# 拿到结果，打印就完事</code>
+                </div>
+                <div class="bug-line" data-line="6" onclick="checkBugLine(this, false)">
+                  <span class="line-num">6</span>
+                  <code>&nbsp;&nbsp;&nbsp;&nbsp;return tool_result</code>
+                </div>
+              </div>
+              <div class="bug-feedback" id="bug-feedback"></div>
+            </div>
+
+            <div class="callout callout-warning" style="margin-top: var(--space-8)">
+              <div class="callout-icon">🐛</div>
+              <div class="callout-content">
+                <strong class="callout-title">这是 vibe coder 用 Cursor / Claude Code 时最常见的 bug 根因</strong>
+                <p>"我让 AI 调一个工具，它好像调了，但最终答复还是没用工具的结果"——99% 是这个 bug：少了第二次 <code>messages.create</code> 把 <code>tool_result</code> 回喂给 Claude。<strong>print 工具结果不是答案——把结果塞回对话历史，再调一次 Claude，才有最终答复。</strong></p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 5: Quiz -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">小测：调试 agent 的真实场景</h2>
+
+            <div class="quiz-container" id="quiz-module4">
+
+              <div class="quiz-question-block"
+                   data-correct="option-b"
+                   data-explanation-right="对！description 是 Claude 决定'用不用 / 何时用'的唯一依据。如果你写'sends an email'但没说明'什么场景该用、参数怎么填、有没有副作用'，Claude 经常会跳过它自己编内容。修法：把 description 写到能让一个'聪明但没上下文的实习生'读懂。"
+                   data-explanation-wrong="想想 Claude 是怎么决定'用哪个工具'的——它看的不是工具的代码实现，是 description 这一行字。">
+                <h3 class="quiz-question">Q1. 你给 Claude 配了一个 send_email 工具，但它从来不用——反而经常自己编邮件内容。最可能的原因？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>JSON Schema 写错了，参数类型不匹配。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>tool 的 description 写得太模糊，Claude 不知道何时该用。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>模型版本太旧，要换成最新的 Sonnet。</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block"
+                   data-correct="option-c"
+                   data-explanation-right="对！两件事必做：① 加最大轮数（通常 10-15）作硬刹车；② 检测'反复调同一个工具'——这往往说明 Claude 拿到结果但没消化好，陷入了循环。光让模型变聪明治不了根本。"
+                   data-explanation-wrong="再想：你的 agent 跑了 30 次还没结束——这是机制问题，不是模型聪明不聪明的问题。要的是<em>机制层面</em>的刹车。">
+                <h3 class="quiz-question">Q2. 你的 agent 跑了 30 多次工具调用还没结束——账单爆了。最该加的两件事？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>把模型从 Haiku 换成 Opus，让它一次就答对。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>在 prompt 里加"请尽快完成"。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>加 max_iterations 上限 + 检测重复工具调用 → 触发就退出。</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block"
+                   data-correct="option-c"
+                   data-explanation-right="对！Claude 拿到错误结果后通常会自我修正——可能换工具（先 get_customer_info 找正确订单号）、也可能直接向用户回问。这就是 tool use 比 chain 强的地方——agent 能看着结果<em>动态调整策略</em>，不是死板执行。"
+                   data-explanation-wrong="想：Claude 拿到'订单不存在'的工具结果后，它有 3 种选择——继续编、放弃、自我修正。最有用的 agent 是哪种？">
+                <h3 class="quiz-question">Q3. 用户问"订单 ABC123 怎么样了"。Claude 调用 get_order_details(order_id="ABC123")，但 ABC123 不存在。Claude 接下来最可能做的合理动作？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>继续编一个看起来合理的订单详情给用户。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>直接报错退出，告诉用户"系统故障"。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>调用别的工具自查（比如先用 get_customer_info 找用户的所有订单），或回问用户"订单号是不是写错了？"</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">查看答案</button>
+              <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">再做一次</button>
+            </div>
+
+            <div class="callout callout-accent" style="margin-top: var(--space-8)">
+              <div class="callout-icon">💡</div>
+              <div class="callout-content">
+                <strong class="callout-title">Aha! 模型动嘴，你动手</strong>
+                <p>Tool use 是 Claude 唯一<strong>真的能改变外部世界</strong>的方式。它写一段文字 ≠ 它发了一封邮件——只有当你真的在 process_tool_call 里调用了发邮件的代码，邮件才会发出去。<strong>你才是动手的那个，Claude 只是动嘴</strong>。这一点理解了，你就理解了为什么所有 agent 框架的核心都是"工具循环"，而不是"模型本身"。</p>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </section>
+    <section class="module" id="module-5" style="background: var(--color-bg-warm)">
+      <div class="module-content">
+        <header class="module-header animate-in">
+          <span class="module-number">05</span>
+          <h1 class="module-title">Claude Agent SDK：从一行代码到 SRE 值班员</h1>
+          <p class="module-subtitle">Anthropic 把 Claude Code 的内核以库的形式开放——同一个 SDK，从入门到生产</p>
+        </header>
+
+        <div class="module-body">
+
+          <!-- Screen 1: Hook + piano metaphor -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">上一模块手写 70 行才能让 Claude 用一个计算器——Anthropic 自己也觉得太麻烦</h2>
+            <p>所以他们把 agentic loop 打包成了 <span class="term" data-definition="Software Development Kit，软件开发包。一组别人帮你写好的工具/函数库，让你不用从零开始。比如 Anthropic 把 agentic loop 封装成 SDK，你 7 行代码就能用，不用写 70 行。">SDK</span>——<strong>从 70 行变 7 行</strong>。但 SDK 真正的厉害不是省代码，而是它把 Claude Code 这个产品里所有的 agent 工程经验都开放给了你。</p>
+
+            <div class="callout callout-accent">
+              <div class="callout-icon">🎹</div>
+              <div class="callout-content">
+                <strong class="callout-title">本课的隐喻：钢琴学习的进阶</strong>
+                <p><strong>Notebook 00 = 第一首练习曲</strong>——右手单音、左手 do-mi-sol，5 分钟弹会。<br><strong>Notebook 01 = 巴赫小品</strong>——左右手协奏，加上踏板（CLAUDE.md / Output Styles / Plan Mode / Hooks / Subagents）。<br><strong>Notebook 03 = 拉赫玛尼诺夫</strong>——八度大跳、复杂踏板、还要现场即兴（MCP 工具 / 安全 hook / 远程修配置）。<br>同一架琴（Claude Agent SDK），同一双手，难度从入门到大师级。</p>
+              </div>
+            </div>
+
+            <div class="step-cards">
+              <div class="step-card">
+                <div class="step-num">1</div>
+                <div class="step-body">
+                  <strong>Research Agent · 一行 query()</strong>
+                  <p>WebSearch + 一句任务订单。能上网做调研。</p>
+                </div>
+              </div>
+              <div class="step-card">
+                <div class="step-num">2</div>
+                <div class="step-body">
+                  <strong>Chief of Staff · 长记忆 + 子 agent</strong>
+                  <p>ClaudeSDKClient + CLAUDE.md + Subagents + Output Styles + Plan Mode + Hooks。能当一家 50 人公司的参谋长。</p>
+                </div>
+              </div>
+              <div class="step-card">
+                <div class="step-num">3</div>
+                <div class="step-body">
+                  <strong>Observability Agent · 接外部系统</strong>
+                  <p>+ <span class="term" data-definition="Model Context Protocol，模型上下文协议。Anthropic 制定的开放标准，让 LLM 能以统一方式接入任何外部系统——Git、GitHub、数据库、监控、自家内部 API。装上 MCP 服务器，Claude 立刻多了几十上百个工具。">MCP</span> 服务器（Git / GitHub）+ 审计 hook。能监控 CI/CD、识别故障。</p>
+                </div>
+              </div>
+              <div class="step-card">
+                <div class="step-num">4</div>
+                <div class="step-body">
+                  <strong>SRE Agent · 写权限 + 安全围栏</strong>
+                  <p>+ 写权限 + PreToolUse 安全钩子 + Prometheus + Docker 控制。能值守生产、自动诊断 + 修复 + 写 post-mortem。</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 2: One-liner research agent -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">第一首练习曲：7 行的 Research Agent</h2>
+            <p>来自 <code>claude_agent_sdk/00_The_one_liner_research_agent.ipynb</code>——把模块 4 手写的 70 行 agentic loop 替换成这个：</p>
+
+            <div class="translation-block animate-in">
+              <div class="translation-code">
+                <span class="translation-label">CODE · Python</span>
+<pre><code><span class="code-line"><span class="code-keyword">from</span> claude_agent_sdk <span class="code-keyword">import</span> ClaudeAgentOptions, query</span>
+<span class="code-line"></span>
+<span class="code-line">messages = []</span>
+<span class="code-line"><span class="code-keyword">async for</span> msg <span class="code-keyword">in</span> <span class="code-function">query</span>(</span>
+<span class="code-line">    <span class="code-property">prompt</span>=<span class="code-string">"Research the latest trends in AI agents and give me a brief summary and relevant citations."</span>,</span>
+<span class="code-line">    <span class="code-property">options</span>=<span class="code-function">ClaudeAgentOptions</span>(<span class="code-property">model</span>=MODEL, <span class="code-property">allowed_tools</span>=[<span class="code-string">"WebSearch"</span>]),</span>
+<span class="code-line">):</span>
+<span class="code-line">    <span class="code-function">print_activity</span>(msg)</span>
+<span class="code-line">    messages.<span class="code-function">append</span>(msg)</span></code></pre>
+              </div>
+              <div class="translation-english">
+                <span class="translation-label">中文逐行翻译</span>
+                <div class="translation-lines">
+                  <p class="tl"><strong>第 1 行：</strong>从官方 SDK 拿"提问"和"配置"两件事。</p>
+                  <p class="tl"><strong>第 4 行：</strong><span class="term" data-definition="async for / async with / await 是 Python 的异步语法。简单理解：让程序在等 LLM 回复时不傻等，可以同时干别的。本课不用深究——见到 async 就当作'流式接收'来理解就够了。">async for</span> 流式接收 agent 的每一条动作和输出——像看直播一样。</p>
+                  <p class="tl"><strong>第 5 行：</strong>任务订单（prompt）。</p>
+                  <p class="tl"><strong>第 6 行（关键）：</strong><code>allowed_tools</code> 是 SDK 的<strong>安全围栏</strong>——你能精确控制 agent 能动什么、不能动什么。</p>
+                  <p class="tl"><strong>第 8-9 行：</strong>把 agent 的所有动作打印 + 存档。</p>
+                  <p class="tl"><strong>对比模块 4 手写 70 行的 agentic loop——</strong>SDK 把 while loop / tool dispatch / 对话历史管理全包圆了。</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 3: Chief of Staff with CLAUDE.md -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">巴赫小品：Chief of Staff + 长期记忆</h2>
+            <p>来自 <code>claude_agent_sdk/01_The_chief_of_staff_agent.ipynb</code>——给 50 人初创公司当 AI 参谋长：</p>
+
+            <div class="translation-block animate-in">
+              <div class="translation-code">
+                <span class="translation-label">CODE · Python</span>
+<pre><code><span class="code-line"><span class="code-keyword">async with</span> <span class="code-function">ClaudeSDKClient</span>(</span>
+<span class="code-line">    options=<span class="code-function">ClaudeAgentOptions</span>(</span>
+<span class="code-line">        model=MODEL,</span>
+<span class="code-line">        cwd=<span class="code-string">"chief_of_staff_agent"</span>,  <span class="code-comment"># Points to subdirectory with our CLAUDE.md</span></span>
+<span class="code-line">        setting_sources=[<span class="code-string">"project"</span>],</span>
+<span class="code-line">    )</span>
+<span class="code-line">) <span class="code-keyword">as</span> agent:</span>
+<span class="code-line">    <span class="code-keyword">await</span> agent.<span class="code-function">query</span>(<span class="code-string">"What's our current runway?"</span>)</span>
+<span class="code-line">    <span class="code-keyword">async for</span> msg <span class="code-keyword">in</span> agent.<span class="code-function">receive_response</span>():</span>
+<span class="code-line">        <span class="code-function">print_activity</span>(msg)</span>
+<span class="code-line">        messages.<span class="code-function">append</span>(msg)</span></code></pre>
+              </div>
+              <div class="translation-english">
+                <span class="translation-label">中文逐行翻译</span>
+                <div class="translation-lines">
+                  <p class="tl"><strong>第 1 行：</strong>用 ClaudeSDKClient——和上一段的 query() 不同，这个是<strong>有状态会话</strong>，能记住一整轮对话。</p>
+                  <p class="tl"><strong>第 4 行（关键）：</strong>cwd 把 agent 的"工作目录"指到一个子文件夹。<strong>关键魔法</strong>：那个文件夹里有一个 <span class="term" data-definition="Claude Code 的项目级长期记忆文件。放在仓库根目录里，Claude 启动时自动读它当背景知识——公司情况、团队规则、历史决策。等于给 agent 一份'入职 onboarding 文档'。Claude Agent SDK 沿用了同一个机制。">CLAUDE.md</span>，agent 启动时会自动读它当背景知识。</p>
+                  <p class="tl"><strong>第 5 行：</strong>告诉 SDK：去那个项目目录里把 .claude/output-styles/、.claude/commands/ 也一起加载。</p>
+                  <p class="tl"><strong>第 8 行：</strong>像跟同事问话一样发问——"<span class="term" data-definition="Runway 是创业公司术语，指现金还能撑多久。比如月烧 $500K、账上 $10M、runway 就是 20 个月。这是 CEO/CFO 每周要看的核心数字。">runway</span> 还有多久？"</p>
+                  <p class="tl"><strong>第 9 行：</strong>流式接收每一句回话。</p>
+                  <p class="tl"><strong>核心洞察</strong>：CLAUDE.md = 项目级长期记忆。把公司财务数据、团队规则、历史决策写进去，agent 每次启动都自带这份"入职 onboarding 文档"——不用每次 prompt 重复。</p>
+                </div>
+              </div>
+            </div>
+
+            <h3 style="margin-top: var(--space-12); font-family: var(--font-display); font-size: var(--text-xl);">看一场 Chief of Staff 内部分工</h3>
+            <p>真实的 CoS 不是一个 agent 干所有事——它派<strong>子 agent (subagent)</strong> 去做专业领域的工作，自己只做汇总。看这场 CEO 让团队重组的对话：</p>
+
+            <div class="chat-window" id="chat-module5">
+              <div class="chat-messages">
+                <div class="chat-message" data-msg="0" data-sender="ceo" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-2)">CEO</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-2)">CEO（用户）</span>
+                    <p>给我一份重组工程团队聚焦 AI 方向的方案——预算 / 招聘节奏 / 风险都要。</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="1" data-sender="cos" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-1)">CoS</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-1)">Chief of Staff（主 agent）</span>
+                    <p>好的，让我协调财务和招聘两个子 agent。</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="2" data-sender="finance" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-3)">财</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-3)">Financial Analyst（子 agent）</span>
+                    <p>当前 burn rate $500K / 月，runway 20 个月。新增 5 名 senior 工程师 → burn 涨到 $580K，runway 压到 17 个月。还在安全区，但要控招聘节奏。</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="3" data-sender="recruiter" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-4)">招</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-4)">Recruiter（子 agent）</span>
+                    <p>$180-220K 区间能找到合格的 senior。优先级排序：① AI infra（最稀缺）② MLOps ③ 前端架构。3 个月内招到位是合理目标。</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="4" data-sender="cos" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-1)">CoS</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-1)">Chief of Staff（汇总）</span>
+                    <p>建议方案：① 先招 2 个 AI infra（Q2）；② 再招 2 个 MLOps（Q3）；③ 第 5 人放到 Q4 看融资进度。Burn 控在 $580K 内，runway 仍保 17 个月。**主要风险**：AI infra 人才抢手，offer 通过率可能只有 30%——建议同时 outreach 8-10 个候选人。</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="chat-typing" id="chat-module5-typing" style="display:none">
+                <div class="chat-avatar" id="chat-module5-typing-avatar">?</div>
+                <div class="chat-typing-dots">
+                  <span class="typing-dot"></span>
+                  <span class="typing-dot"></span>
+                  <span class="typing-dot"></span>
+                </div>
+              </div>
+
+              <div class="chat-controls">
+                <button class="btn chat-next-btn">下一句</button>
+                <button class="btn chat-all-btn">自动播放</button>
+                <button class="btn chat-reset-btn">重播</button>
+                <span class="chat-progress"></span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 4: SDK 6 modules + SRE -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">SDK 的 6 大模块——你的"乐高积木"</h2>
+
+            <div class="pattern-cards stagger-children">
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+                <div class="pattern-icon" style="background: var(--color-actor-1)">⚡</div>
+                <h4 class="pattern-title">query()</h4>
+                <p class="pattern-desc">无状态一次性问答。最简单的入口，研究 agent / one-shot 任务用它。</p>
+              </div>
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+                <div class="pattern-icon" style="background: var(--color-actor-2)">💬</div>
+                <h4 class="pattern-title">ClaudeSDKClient</h4>
+                <p class="pattern-desc">有状态会话——多轮对话、上下文累积。CoS 这种长会话场景必用。</p>
+              </div>
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+                <div class="pattern-icon" style="background: var(--color-actor-3)">⚙️</div>
+                <h4 class="pattern-title">ClaudeAgentOptions</h4>
+                <p class="pattern-desc">配置中枢：model / allowed_tools / cwd / hooks / mcpServers / settings 全在这里。</p>
+              </div>
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+                <div class="pattern-icon" style="background: var(--color-actor-4)">📚</div>
+                <h4 class="pattern-title">CLAUDE.md</h4>
+                <p class="pattern-desc">项目级长期记忆。把公司情况、规则、历史决策写进去——agent 自动加载。</p>
+              </div>
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-5)">
+                <div class="pattern-icon" style="background: var(--color-actor-5)">👥</div>
+                <h4 class="pattern-title">Subagents</h4>
+                <p class="pattern-desc">派生子 agent 处理专业领域。财务分析师、招聘官、法务顾问——每个有自己的 prompt 和工具。</p>
+              </div>
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-accent)">
+                <div class="pattern-icon" style="background: var(--color-accent)">🪝</div>
+                <h4 class="pattern-title">Hooks</h4>
+                <p class="pattern-desc">工具调用前后的拦截器——做审计、安全检查、限流。SRE agent 的"删数据库前必须人工确认"靠它。</p>
+              </div>
+            </div>
+
+            <div class="callout callout-info">
+              <div class="callout-icon">💡</div>
+              <div class="callout-content">
+                <strong class="callout-title">Aha! Claude Agent SDK 不是新发明——是 Claude Code 的内核开放</strong>
+                <p>你每天用 Claude Code 时见到的所有"魔法"——自动用工具、记得对话、规划再执行——其实就是这套 SDK。Anthropic 把内核拿出来开源后，意味着：<strong>你能把 Claude Code 那套"通用 agent 内核"复制到任何领域</strong>——AI 律师、AI 销售、AI 数据分析师……拿 SDK 嫁接，最快 1 天有 demo。</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 5: Quiz -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">小测：从 SDK 选什么</h2>
+
+            <div class="quiz-container" id="quiz-module5">
+
+              <div class="quiz-question-block"
+                   data-correct="option-c"
+                   data-explanation-right="对！Hooks 就是干这个的——PreToolUse hook 在工具调用<em>之前</em>触发，可以让你弹一个确认框、查询安全规则、记审计日志。SRE agent 用这个机制保证'删数据库 / 改 prod 配置'前必须人工 OK。"
+                   data-explanation-wrong="prompt 工程能让模型'尽量小心'，但不能<em>强制</em>暂停——agent 可能在 prompt 工程的边缘溜过去。要的是程序层面的拦截器。">
+                <h3 class="quiz-question">Q1. 你想让 agent 在用一个"删数据库"工具前必须暂停让你确认。SDK 里用什么机制？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>在 prompt 里加"删除前请确认"。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>把删数据库工具从 allowed_tools 里去掉。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>用 PreToolUse Hooks 拦截工具调用。</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block"
+                   data-correct="option-b"
+                   data-explanation-right="对。CLAUDE.md 是项目级长期记忆——把"绝不直接联系客户"这种规则写进去，agent 启动时自动加载。每次 prompt 重复说既浪费 token 又容易漏掉。这是 SDK 的核心设计哲学：<strong>规则归规则文件，任务归 prompt</strong>。"
+                   data-explanation-wrong="想清楚：'每次都忘'是因为 prompt 没传到位？还是因为这种规则本来就该用<em>持久化</em>方式而不是每次重述？">
+                <h3 class="quiz-question">Q2. 你的 agent 经常忘记公司的"绝不直接联系客户"规则。最干净的解法？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>每次 prompt 开头都加一句"绝不直接联系客户"。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>写进 CLAUDE.md，agent 启动时自动加载。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>换更聪明的模型——它就不会忘了。</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block"
+                   data-correct="option-b"
+                   data-explanation-right="对！律师助手主要是'读外部系统 + 给建议'——不是马上去改律所文件库。从 read-only 的 Notebook 02（Observability）起步最安全：先把 RAG / 法规检索 / 工具接入跑通，等业务验证后<em>再</em>考虑给写权限（升级到 Notebook 03 模式）。"
+                   data-explanation-wrong="律师助手最危险的是'直接动律所文件 / 直接发邮件给客户'。从有写权限的 SRE 模板起步等于一上来就给装了枪。要的是先跑 read-only 验证业务再逐步开放权限。">
+                <h3 class="quiz-question">Q3. 你看到 SRE agent demo 后想做"AI 律师助手"——查法规、起草合同、提交客户审批。最适合从哪个 notebook 起步？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Notebook 03 SRE Agent——直接拿能写能改的模板套上去。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Notebook 02 Observability Agent——先 read-only 跑通业务，再考虑写权限。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Notebook 00 One-liner——一行代码就够了。</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">查看答案</button>
+              <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">再做一次</button>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </section>
+    <section class="module" id="module-6" style="background: var(--color-bg)">
+      <div class="module-content">
+        <header class="module-header animate-in">
+          <span class="module-number">06</span>
+          <h1 class="module-title">进阶火候：思考 · 缓存 · Skills</h1>
+          <p class="module-subtitle">三件训练外挂——把同一个 agent 从"能用"推到"生产可用"</p>
+        </header>
+
+        <div class="module-body">
+
+          <!-- Screen 1: Hook + runner metaphor -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">前 5 个模块教的是 agent 的骨架——这一模块是训练外挂</h2>
+            <p>到这里你已经能理解 cookbook 大部分章节。但实战里同一个 agent 经常被三个问题卡住：<strong>推理太浅 / 调用太贵 / 本领太散</strong>。这一模块的三件外挂分别治这三个症。</p>
+
+            <div class="callout callout-accent">
+              <div class="callout-icon">🏃</div>
+              <div class="callout-content">
+                <strong class="callout-title">本课的隐喻：长跑选手的三件训练外挂</strong>
+                <p><strong>Extended Thinking = 起跑前的呼吸调整</strong>——赛前那 30 秒深呼吸，让大脑先预热再开跑。<br><strong>Prompt Caching = 训练后的肌肉记忆</strong>——同一段路跑过 100 次，肌肉自动反应，不用再思考动作。<br><strong>Skills = 教练给的训练计划包</strong>——一份现成的、能直接套用的 SOP（"全马备赛 16 周计划"）。<br>三件外挂对应三种"提速"：思考更深、重复更快、本领更广。每一件都是任何 agent 都能加挂的。</p>
+              </div>
+            </div>
+
+            <div class="pattern-cards stagger-children">
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+                <div class="pattern-icon" style="background: var(--color-actor-1)">🧠</div>
+                <h4 class="pattern-title">Extended Thinking</h4>
+                <p class="pattern-desc"><strong>治什么病</strong>：复杂推理一次想不清。<br><strong>怎么打开</strong>：API 调用加一个 thinking 参数。<br><strong>适合场景</strong>：数学 / 多步规划 / 风险分析。<br><strong>注意</strong>：会增加输出 token 消耗。</p>
+              </div>
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+                <div class="pattern-icon" style="background: var(--color-actor-3)">💾</div>
+                <h4 class="pattern-title">Prompt Caching</h4>
+                <p class="pattern-desc"><strong>治什么病</strong>：长前缀重复花钱。<br><strong>怎么打开</strong>：API 调用加一个 cache_control 参数。<br><strong>适合场景</strong>：固定 system prompt / 长文档反复问 / 工具列表。<br><strong>效果</strong>：第二次起 input token 价格降到 1/10、延迟降一半。</p>
+              </div>
+              <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+                <div class="pattern-icon" style="background: var(--color-actor-4)">📦</div>
+                <h4 class="pattern-title">Skills</h4>
+                <p class="pattern-desc"><strong>治什么病</strong>：本领太散，复用难。<br><strong>怎么打开</strong>：把"代码 + 提示词 + 资源"打包成 Skill。<br><strong>适合场景</strong>：做 PPT / Excel / PDF 等专业产物。<br><strong>意义</strong>：本领能跨项目、跨客户端复用。</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 2: Extended Thinking with chat -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">第一件外挂：Extended Thinking——给模型一段不被打扰的草稿纸</h2>
+            <p>Extended Thinking 不是模型变聪明了，是<strong>给它一段独立的草稿空间</strong>——它把推理过程写在 thinking 块里，最后才给结论。复杂推理任务直接受益。</p>
+
+            <div class="translation-block animate-in">
+              <div class="translation-code">
+                <span class="translation-label">CODE · Python</span>
+<pre><code><span class="code-line">response = client.messages.<span class="code-function">create</span>(</span>
+<span class="code-line">    model=<span class="code-string">"claude-sonnet-4-6"</span>,</span>
+<span class="code-line">    max_tokens=4000,</span>
+<span class="code-line">    thinking={</span>
+<span class="code-line">        <span class="code-string">"type"</span>: <span class="code-string">"enabled"</span>,</span>
+<span class="code-line">        <span class="code-string">"budget_tokens"</span>: 2000</span>
+<span class="code-line">    },</span>
+<span class="code-line">    messages=[{</span>
+<span class="code-line">        <span class="code-string">"role"</span>: <span class="code-string">"user"</span>,</span>
+<span class="code-line">        <span class="code-string">"content"</span>: <span class="code-string">"Solve this puzzle: Three people check into a hotel..."</span></span>
+<span class="code-line">    }]</span>
+<span class="code-line">)</span></code></pre>
+              </div>
+              <div class="translation-english">
+                <span class="translation-label">中文逐行翻译</span>
+                <div class="translation-lines">
+                  <p class="tl"><strong>第 1-3 行：</strong>普通的 API 调用——Sonnet 模型，最终输出最多 4000 <span class="term" data-definition="LLM 处理文本的最小单位。一个英文单词通常是 1-2 个 token，一个中文字大约 1-2 个 token。API 计费按 token 数量算——所以'省 token'就是'省钱'。">token</span>。</p>
+                  <p class="tl"><strong>第 4-7 行（关键开关）：</strong>打开扩展思考，并给它 2000 token 的<strong>"草稿纸预算"</strong>。模型会把推理过程写进一个独立的 thinking 块，再写最终答案。</p>
+                  <p class="tl"><strong>第 8-11 行：</strong>你的实际问题。</p>
+                  <p class="tl"><strong>调用回来后</strong>，<code>response.content</code> 里会有<strong>两类块</strong>：thinking 块（推理过程）和 text 块（最终答案）。</p>
+                  <p class="tl"><strong>对调试 agent 行为价值巨大</strong>——你能看到模型的"内心独白"，立刻知道它哪里想错了，是 prompt 没写好还是模型推理偏了。</p>
+                </div>
+              </div>
+            </div>
+
+            <h3 style="margin-top: var(--space-12); font-family: var(--font-display); font-size: var(--text-xl);">看一遍模型的"内心独白"</h3>
+            <p>cookbook 里给的经典例题——旅馆账单悖论。看 Claude 怎么用 thinking 块把推理过程摊开：</p>
+
+            <div class="chat-window" id="chat-module6">
+              <div class="chat-messages">
+                <div class="chat-message" data-msg="0" data-sender="user" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-2)">用</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-2)">用户</span>
+                    <p>三个人住旅馆付了 $30。经理发现实际只要 $25，让服务员退 $5。服务员私吞 $2，每人退 $1。现在每人付 $9，共 $27，加服务员 $2 = $29。剩下的 $1 去哪了？</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="1" data-sender="thinking" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-text-muted)">💭</div>
+                  <div class="chat-bubble" style="background: var(--color-bg-warm); border: 1px dashed var(--color-text-muted);">
+                    <span class="chat-sender" style="color: var(--color-text-muted)">Claude · thinking 内心独白</span>
+                    <p>让我仔细拆账。$30 总付 = $25 房费 + $3 退还 + $2 服务员私吞 = $30 ✓。客人实际付 = $30 − $3 退还 = $27。这 $27 = $25 房费 + $2 服务员私吞 ✓。所以"$27 + $2 = $29" 是错误的相加方式——$2 已经在 $27 里了，又被加了一次。这是把"客人付出"和"店方+服务员收入"两类账混了……</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="2" data-sender="claude" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-1)">C</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-1)">Claude · text 正式回答</span>
+                    <p>这是一个经典的语言陷阱。客人付的 $27 已经<strong>包含了</strong>服务员私吞的 $2，不应该再加 $2。正确算法：客人付 $27 = 房费 $25 + 服务员 $2。退还的 $3 不在这边账里——所以 $30 = $27（客人最终付）+ $3（退还）。没有"消失的 $1"。</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="chat-typing" id="chat-module6-typing" style="display:none">
+                <div class="chat-avatar" id="chat-module6-typing-avatar">?</div>
+                <div class="chat-typing-dots">
+                  <span class="typing-dot"></span>
+                  <span class="typing-dot"></span>
+                  <span class="typing-dot"></span>
+                </div>
+              </div>
+
+              <div class="chat-controls">
+                <button class="btn chat-next-btn">下一句</button>
+                <button class="btn chat-all-btn">自动播放</button>
+                <button class="btn chat-reset-btn">重播</button>
+                <span class="chat-progress"></span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 3: Prompt Caching -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">第二件外挂：Prompt Caching——一行参数省 90% 的输入 token</h2>
+            <p>Prompt Caching 不是新模型，是 API 的一个 flag——把长的、不变的前缀（一本书、一份代码库、一份 system prompt）<strong>缓存住</strong>。第二次调用同一前缀时，输入 token 价格降到 1/10、延迟降一半。</p>
+
+            <div class="translation-block animate-in">
+              <div class="translation-code">
+                <span class="translation-label">CODE · Python</span>
+<pre><code><span class="code-line">write_response = client.messages.<span class="code-function">create</span>(</span>
+<span class="code-line">    model=MODEL_NAME,</span>
+<span class="code-line">    max_tokens=300,</span>
+<span class="code-line">    cache_control={<span class="code-string">"type"</span>: <span class="code-string">"ephemeral"</span>},  <span class="code-comment"># &lt;-- one-line change</span></span>
+<span class="code-line">    messages=[</span>
+<span class="code-line">        {</span>
+<span class="code-line">            <span class="code-string">"role"</span>: <span class="code-string">"user"</span>,</span>
+<span class="code-line">            <span class="code-string">"content"</span>: <span class="code-function">str</span>(TIMESTAMP)</span>
+<span class="code-line">            + <span class="code-string">"&lt;book&gt;"</span></span>
+<span class="code-line">            + book_content   <span class="code-comment"># 整本《傲慢与偏见》约 187k token</span></span>
+<span class="code-line">            + <span class="code-string">"&lt;/book&gt;"</span></span>
+<span class="code-line">            + <span class="code-string">"\n\nWhat is the title of this book? Only output the title."</span>,</span>
+<span class="code-line">        }</span>
+<span class="code-line">    ],</span>
+<span class="code-line">)</span></code></pre>
+              </div>
+              <div class="translation-english">
+                <span class="translation-label">中文逐行翻译</span>
+                <div class="translation-lines">
+                  <p class="tl"><strong>第 4 行（关键）：</strong>就这一行！<code>cache_control={"type": "ephemeral"}</code>。意思是"我允许系统把这次输入的可缓存部分缓存起来"。<span class="term" data-definition="ephemeral 在英文里指'短暂的'。在 prompt caching 里这是一种缓存类型——存几分钟到几小时（具体看 Anthropic 当时的规则），后续命中时复用。够覆盖一次会话里的多轮调用。">ephemeral</span> 表示短期缓存。</p>
+                  <p class="tl"><strong>第 9-11 行：</strong>把整本《傲慢与偏见》（约 187k token）塞进 prompt 里。如果不缓存，每次问问题都要重新输入这 187k token——账单会爆炸。</p>
+                  <p class="tl"><strong>第 12 行：</strong>实际问题——只占几十 token。</p>
+                  <p class="tl"><strong>第一次调用</strong>：缓存被写入，时间和不缓存差不多（baseline）。</p>
+                  <p class="tl"><strong>第二次调用相同前缀</strong>：API 直接从缓存读，<strong>输入 token 价格降到 1/10、延迟降一半以上</strong>。</p>
+                  <p class="tl"><strong>真实生产场景</strong>：你的 agent 每次都带相同的 system prompt（几千 token）和工具列表？打开 caching，立刻省钱。</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="callout callout-info">
+              <div class="callout-icon">📉</div>
+              <div class="callout-content">
+                <strong class="callout-title">数字感受一下</strong>
+                <p>假设你的 agent 系统每次带 10000 token 的 system prompt，每天 100 万次调用。<br>
+                <strong>不开 caching</strong>：每次按全价付 10000 token 输入费 → 一天烧掉 100 亿 token 输入费。<br>
+                <strong>开 caching</strong>：第一次写入按全价，之后命中按 1/10 → 一天烧掉约 10 亿 token 输入费。<strong>账单立省 90%</strong>。这是 CTO 级别的对话词汇——产品经理说"AI 太贵"，你能立刻问"接 prompt caching 了吗？"</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 4: Drag-and-drop matching -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">练习：把场景拖到对应的外挂上</h2>
+            <p>把左边的"外挂方案"拖到右边对应的"真实场景"。</p>
+
+            <div class="dnd-container" id="dnd-module6">
+              <div class="dnd-chips">
+                <div class="dnd-chip" draggable="true" data-answer="thinking">Extended Thinking</div>
+                <div class="dnd-chip" draggable="true" data-answer="caching">Prompt Caching</div>
+                <div class="dnd-chip" draggable="true" data-answer="both">两个一起开</div>
+                <div class="dnd-chip" draggable="true" data-answer="none">两个都不需要</div>
+              </div>
+              <div class="dnd-zones">
+                <div class="dnd-zone" data-correct="thinking">
+                  <p class="dnd-zone-label">复杂数学推理 / 多步规划任务（一次答不准，需要深度思考）</p>
+                  <div class="dnd-zone-target">把外挂拖到这里</div>
+                </div>
+                <div class="dnd-zone" data-correct="caching">
+                  <p class="dnd-zone-label">客服 agent，每次对话开头都贴 5000 token 的产品 KB 当 system prompt</p>
+                  <div class="dnd-zone-target">把外挂拖到这里</div>
+                </div>
+                <div class="dnd-zone" data-correct="both">
+                  <p class="dnd-zone-label">RAG agent：长文档（缓存友好）+ 复杂多跳问答（推理重）</p>
+                  <div class="dnd-zone-target">把外挂拖到这里</div>
+                </div>
+                <div class="dnd-zone" data-correct="none">
+                  <p class="dnd-zone-label">一个超简单的"今天星期几" 一次性问答</p>
+                  <div class="dnd-zone-target">把外挂拖到这里</div>
+                </div>
+              </div>
+              <div style="display: flex; gap: var(--space-3); margin-top: var(--space-6); flex-wrap: wrap;">
+                <button class="btn" onclick="checkDnD('dnd-module6')">检查匹配</button>
+                <button class="btn" onclick="resetDnD('dnd-module6')">重新开始</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 5: Quiz + closing -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">小测：给真实场景挑外挂</h2>
+
+            <div class="quiz-container" id="quiz-module6">
+
+              <div class="quiz-question-block"
+                   data-correct="option-b"
+                   data-explanation-right="对！这是 caching 的教科书场景——长前缀（8000 token）每次重复，对话本身只有几百 token。开 cache_control 后第二次起 input 费降到 1/10，账单立刻砍掉一大半。Extended Thinking 解决不了'前缀重复'问题。"
+                   data-explanation-wrong="想：账单贵在哪？是输入太多？还是输出太多？或者推理太复杂？8000 token 的 system prompt 每次重复——对应的外挂是哪一件？">
+                <h3 class="quiz-question">Q1. 你的 agent 每次对话开头都要贴一份 8000 token 的 system prompt + 工具说明，对话本身只有几百 token。账单很贵。最优一招？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>开 Extended Thinking——让模型想清楚就少调几次。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>开 Prompt Caching——缓存那 8000 token 的前缀。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>换便宜的 Haiku 模型。</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block"
+                   data-correct="option-a"
+                   data-explanation-right="对！'分析三季度财报识别 5 个潜在风险'是典型的多步推理任务——一次性看完 + 推理 + 排序往往浅尝辄止。给 thinking budget，模型在草稿纸上拆开来想，质量会显著提升。"
+                   data-explanation-wrong="caching 解决的是'前缀重复花钱'，不是'推理深度不够'。switching model 可能有用，但 thinking 是直接对症下药的开关。">
+                <h3 class="quiz-question">Q2. 你的 agent 在做"分析三季度财务报告，识别 5 个潜在风险"。回答经常浅尝辄止——只点 1-2 个明显的风险。最该试的开关？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Extended Thinking——给它草稿空间做深度推理。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Prompt Caching——把财报缓存下来。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>换更大的 Opus 模型。</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block"
+                   data-correct="option-c"
+                   data-explanation-right="对！这正是 Skills 的设计目标——把'做 PPT / Excel / PDF'这种本领以可复用包形式提供给 Claude，并且这本领能在 Claude.ai、API、各种客户端复用。tool use 也能做但你要重写一切；Skills 是 Anthropic 替你打包好的本领。"
+                   data-explanation-wrong="想：做 PPT 这种'专业产物生成'是 Skills 的核心场景。tool use 也能搭，但你要重写整个 PPT 引擎。Skills 已经把这事打包好了。">
+                <h3 class="quiz-question">Q3. 你想让 Claude 在网页应用里直接生成 PowerPoint 文件。最适合的机制？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>用 tool use 自己写一个 generate_pptx 工具。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>开 Extended Thinking 让它"想清楚再做"。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>用 Anthropic 的 Skills——做 PPT/Excel/PDF 是 Skills 的标配本领。</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <button class="quiz-check-btn" onclick="checkQuiz('quiz-module6')">查看答案</button>
+              <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module6')">再做一次</button>
+            </div>
+
+            <div class="callout callout-accent" style="margin-top: var(--space-12)">
+              <div class="callout-icon">🎯</div>
+              <div class="callout-content">
+                <strong class="callout-title">这门课结束了——但 Cookbook 还在更新</strong>
+                <p>整本食谱的脉络其实很简单——先认识 Augmented LLM 这个最小单元（模块 1），学会三种基础工序（模块 2）和两种高阶工序（模块 3），把"动手"机制（模块 4）打通后，用 SDK 把所有这些封装成产品级 agent（模块 5），最后用三件训练外挂（模块 6）把 agent 推到生产可用。<br><br>
+                <strong>回到 cookbook 仓库后，你不再是看 random 一堆 notebook——你能认出每个 notebook 在这张地图上的坐标</strong>。看到 customer_service_agent → 这是 tool use 的实战。看到 contextual-embeddings → 这是 RAG 的优化变体。看到 sub-agents → 这是 orchestrator 的具体实现。<br><br>
+                作为 vibe coder，你拿到的不只是知识——是和工程师对话的<strong>词汇</strong>：你能说出"这部分用 evaluator-optimizer 太重了，改成 chain 加 spot-check"或者"这个 agent 应该把规则放 CLAUDE.md 不要每次塞 prompt"。这就是这门课最大的价值。</p>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+</body>
+</html>

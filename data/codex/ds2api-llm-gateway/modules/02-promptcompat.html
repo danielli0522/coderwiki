@@ -1,0 +1,284 @@
+    <section class="module" id="module-2">
+      <div class="module-inner">
+
+        <header class="module-header">
+          <span class="module-number">02</span>
+          <h1 class="module-title">三种协议形状如何归一</h1>
+          <p class="module-tagline">联合国同传亭：三国大使各讲各的语言，最后都翻译成一种"大堂语"递交。</p>
+        </header>
+
+        <section class="screen">
+          <h2>问题：上游只懂一种语言</h2>
+          <p>DeepSeek 网页对话的输入是<strong>一段纯文本上下文</strong> —— 像你在网页框里贴了一长串"用户问、助手答、用户又问"的剧本。它不认识 OpenAI 的 <code>messages: [{role, content}]</code>、不认识 Claude 的 <code>system + messages</code>、更不认识 Gemini 的 <code>contents: [{parts: [{text}]}]</code>。</p>
+
+          <div class="callout callout-accent">
+            <div class="callout-icon">🌐</div>
+            <div class="callout-content">
+              <strong class="callout-title">同传亭比喻</strong>
+              <p>三位大使分别讲法语、阿拉伯语、日语。上游领导只听一种"大堂语"。<strong>同传亭就是 PromptCompat：把任何一种入境语言翻译成大堂语，再把领导的回话翻译回各自原语递回去。</strong> 三种 API 的协议差异，全部在这里被吃掉。</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>三个大使，三种"形状"</h2>
+          <div class="icon-rows">
+            <div class="icon-row">
+              <div class="icon-circle" style="background: var(--color-actor-1)">🅾️</div>
+              <div>
+                <strong>OpenAI 形状</strong>
+                <p>扁平的 <code>messages: [{role: "user"|"assistant"|"system"|"tool", content}]</code>。工具描述放在顶层 <code>tools</code> 字段。</p>
+              </div>
+            </div>
+            <div class="icon-row">
+              <div class="icon-circle" style="background: var(--color-actor-2)">🅰️</div>
+              <div>
+                <strong>Claude 形状</strong>
+                <p>system 单独一个顶层字段；messages 里 user/assistant 严格交替；工具描述放 <code>tools</code>，工具结果以 <code>tool_result</code> 块嵌入 user 消息。</p>
+              </div>
+            </div>
+            <div class="icon-row">
+              <div class="icon-circle" style="background: var(--color-actor-3)">🅶</div>
+              <div>
+                <strong>Gemini 形状</strong>
+                <p><code>contents: [{role, parts: [{text}|{inlineData}|{functionCall}]}]</code>，多模态切片更细，role 只有 user/model。</p>
+              </div>
+            </div>
+            <div class="icon-row">
+              <div class="icon-circle" style="background: var(--color-accent)">🏛️</div>
+              <div>
+                <strong>大堂语：DeepSeek 网页上下文</strong>
+                <p>纯文本剧本，像 <code>System: ...\n\nUser: ...\n\nAssistant: ...\n\nUser: ...</code>。没有结构化字段，只有顺序和角色标记。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>核心代码：归一的入口</h2>
+          <p>不论你来自哪种协议，最终都会调到 <code>BuildOpenAIPrompt</code> 或它的兄弟函数。Claude 和 Gemini 适配器在前面做格式转换，把消息改造成 OpenAI 风格的 <code>messages</code>，然后复用同一条管道。</p>
+
+          <div class="translation-block animate-in">
+            <div class="translation-code">
+              <span class="translation-label">CODE · internal/promptcompat/prompt_build.go</span>
+              <pre><code><span class="code-line"><span class="code-keyword">func</span> <span class="code-function">BuildOpenAIPrompt</span>(messagesRaw []any, toolsRaw any,</span>
+<span class="code-line">    traceID string, toolPolicy ToolChoicePolicy,</span>
+<span class="code-line">    thinkingEnabled bool) (string, []string) {</span>
+<span class="code-line">  messages := <span class="code-function">NormalizeOpenAIMessagesForPrompt</span>(messagesRaw, traceID)</span>
+<span class="code-line">  toolNames := []string{}</span>
+<span class="code-line">  <span class="code-keyword">if</span> tools, ok := toolsRaw.([]any); ok && <span class="code-function">len</span>(tools) > 0 {</span>
+<span class="code-line">    messages, toolNames = <span class="code-function">injectToolPrompt</span>(messages, tools, toolPolicy)</span>
+<span class="code-line">  }</span>
+<span class="code-line">  <span class="code-keyword">return</span> prompt.<span class="code-function">MessagesPrepareWithThinking</span>(messages, thinkingEnabled), toolNames</span>
+<span class="code-line">}</span></code></pre>
+            </div>
+            <div class="translation-english">
+              <span class="translation-label">中文翻译</span>
+              <div class="translation-lines">
+                <p class="tl">这个函数接两件大件：原始消息列表、原始工具描述列表。</p>
+                <p class="tl">还有 traceID（追踪同一个请求的标签）和"是否开启思考链"的开关。</p>
+                <p class="tl">第一步：把消息归一化 —— 同样的 user/assistant/tool 角色都按 OpenAI 形状摆好，缺字段补默认值。</p>
+                <p class="tl">第二步：如果客户端传了工具，就把每个工具的名字和参数 schema 注入到 system 提示里。</p>
+                <p class="tl">DeepSeek 网页根本不懂"工具调用"，所以工具说明只能用人话写进 prompt 里告诉模型："你可以这样调用工具，输出按这个格式"。</p>
+                <p class="tl">最后一步：把所有消息按角色标签拼成纯文本剧本，可选地包一层 <span class="term" data-definition="思考链 = 模型在给出最终答案前，先在脑子里推演一遍中间过程。开启后输出会包含"先想再说"的段落。">思考链</span> 包装。</p>
+                <p class="tl">返回两件东西：拼好的纯文本上下文，以及这次允许调用的工具名清单（用于后面流式防泄漏）。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>看一眼归一前后的对比</h2>
+          <p>同一个"用户问太阳系有几大行星"的请求，OpenAI 形状进来后，最终递给 DeepSeek 网页的样子是一段纯文本：</p>
+
+          <div class="translation-block animate-in">
+            <div class="translation-code">
+              <span class="translation-label">客户端原始请求（OpenAI 形状）</span>
+              <pre><code><span class="code-line">{</span>
+<span class="code-line">  <span class="code-property">"model"</span>: <span class="code-string">"gpt-4.1"</span>,</span>
+<span class="code-line">  <span class="code-property">"messages"</span>: [</span>
+<span class="code-line">    {<span class="code-property">"role"</span>: <span class="code-string">"system"</span>, <span class="code-property">"content"</span>: <span class="code-string">"你是天文学助手"</span>},</span>
+<span class="code-line">    {<span class="code-property">"role"</span>: <span class="code-string">"user"</span>, <span class="code-property">"content"</span>: <span class="code-string">"太阳系有几大行星？"</span>}</span>
+<span class="code-line">  ],</span>
+<span class="code-line">  <span class="code-property">"stream"</span>: <span class="code-keyword">true</span></span>
+<span class="code-line">}</span></code></pre>
+            </div>
+            <div class="translation-english">
+              <span class="translation-label">PromptCompat 拼好后递给 DeepSeek 网页的"剧本"</span>
+              <div class="translation-lines">
+                <p class="tl"><strong>System:</strong> 你是天文学助手</p>
+                <p class="tl"><strong>User:</strong> 太阳系有几大行星？</p>
+                <p class="tl"><strong>Assistant:</strong> <em>（等待网页流式吐字）</em></p>
+                <p class="tl">这一段才是 DeepSeek 网页真正认识的输入。从这里之后，三种协议彻底无差别。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>不同适配器怎么"对话"</h2>
+          <p>三种协议适配器和归一层的实际对话长这样：</p>
+
+          <div class="chat-window" id="chat-promptcompat">
+            <div class="chat-messages">
+              <div class="chat-message" data-msg="0" data-sender="claude" style="display:none">
+                <div class="chat-avatar" style="background: var(--color-actor-2)">CA</div>
+                <div class="chat-bubble">
+                  <span class="chat-sender" style="color: var(--color-actor-2)">Claude 适配器</span>
+                  <p>来活了！客户端发来一个 <code>POST /v1/messages</code>，body 里 system 是顶层字段，messages 严格 user/assistant 交替。</p>
+                </div>
+              </div>
+              <div class="chat-message" data-msg="1" data-sender="claude" style="display:none">
+                <div class="chat-avatar" style="background: var(--color-actor-2)">CA</div>
+                <div class="chat-bubble">
+                  <span class="chat-sender" style="color: var(--color-actor-2)">Claude 适配器</span>
+                  <p>我先把 system 拆出来塞回 messages 头部、把 tool_result 块拆成 tool 角色消息 —— 让它看起来像 OpenAI 形状。</p>
+                </div>
+              </div>
+              <div class="chat-message" data-msg="2" data-sender="pc" style="display:none">
+                <div class="chat-avatar" style="background: var(--color-accent)">PC</div>
+                <div class="chat-bubble">
+                  <span class="chat-sender" style="color: var(--color-accent)">PromptCompat</span>
+                  <p>收到 OpenAI 形状的 messages 数组。我做归一化、注入工具描述、按角色拼成纯文本剧本。</p>
+                </div>
+              </div>
+              <div class="chat-message" data-msg="3" data-sender="gemini" style="display:none">
+                <div class="chat-avatar" style="background: var(--color-actor-3)">GA</div>
+                <div class="chat-bubble">
+                  <span class="chat-sender" style="color: var(--color-actor-3)">Gemini 适配器</span>
+                  <p>同时另一头我也来了！我把 contents.parts 里的 text/inlineData/functionCall 摊平成 OpenAI 风格 messages，丢给 PromptCompat。</p>
+                </div>
+              </div>
+              <div class="chat-message" data-msg="4" data-sender="pc" style="display:none">
+                <div class="chat-avatar" style="background: var(--color-accent)">PC</div>
+                <div class="chat-bubble">
+                  <span class="chat-sender" style="color: var(--color-accent)">PromptCompat</span>
+                  <p>都一样处理。我吐回去的也是同一种纯文本上下文 + 工具名清单。三家适配器再各自包装回原协议格式给客户端。</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="chat-typing" id="chat-promptcompat-typing" style="display:none">
+              <div class="chat-avatar" id="chat-promptcompat-typing-avatar">?</div>
+              <div class="chat-typing-dots">
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+              </div>
+            </div>
+
+            <div class="chat-controls">
+              <button class="btn chat-next-btn">下一条消息</button>
+              <button class="btn chat-all-btn">一次播完</button>
+              <button class="btn chat-reset-btn">重播</button>
+              <span class="chat-progress"></span>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>为什么这样设计</h2>
+          <div class="pattern-cards">
+            <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+              <div class="pattern-icon" style="background: var(--color-actor-1)">🎯</div>
+              <h4 class="pattern-title">单一收敛点</h4>
+              <p class="pattern-desc">所有协议都走同一条管道。新增 Mistral 兼容？只需要加一个适配器把它"翻成 OpenAI 形状"。</p>
+            </div>
+            <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+              <div class="pattern-icon" style="background: var(--color-actor-2)">🧱</div>
+              <h4 class="pattern-title">最小公倍数</h4>
+              <p class="pattern-desc">挑了 OpenAI 风格当中转格式 —— 因为它最接近"扁平消息列表"，转成纯文本最便宜。</p>
+            </div>
+            <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+              <div class="pattern-icon" style="background: var(--color-actor-3)">🔧</div>
+              <h4 class="pattern-title">工具用 prompt 模拟</h4>
+              <p class="pattern-desc">DeepSeek 网页没有结构化 tool call 接口。用一段精心写的 system 提示告诉模型"按 DSML 格式输出工具调用"，再在流上拦截解析。</p>
+            </div>
+          </div>
+
+          <div class="callout callout-accent">
+            <div class="callout-icon">💡</div>
+            <div class="callout-content">
+              <strong class="callout-title">普适设计教训</strong>
+              <p>当你要兼容 N 种输入格式 + M 种输出格式，不要写 N×M 个适配器。<strong>选一种"中转格式"，让所有输入归一到它，所有输出从它分发。</strong> 工程师叫这个 hub-and-spoke 架构。</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen">
+          <h2>检查理解</h2>
+          <div class="quiz-container" id="quiz-module2">
+
+            <div class="quiz-question-block"
+                 data-correct="b"
+                 data-explanation-right="对。DeepSeek 网页只能消费一段纯文本剧本，所以归一后的"中转格式"就是按角色拼起来的字符串。结构化字段在这一步全部被压扁。"
+                 data-explanation-wrong="再想想。上游 DeepSeek 是网页对话，它没有结构化 messages 接口，PromptCompat 输出必须能直接贴进网页对话框。">
+              <h3 class="quiz-question">PromptCompat 最终递给 DeepSeek 上游的是什么？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>OpenAI 形状的 messages 数组（JSON）。</span>
+                </button>
+                <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>按角色顺序拼接的纯文本剧本。</span>
+                </button>
+                <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>Claude 形状的 system + messages。</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <div class="quiz-question-block"
+                 data-correct="c"
+                 data-explanation-right="对。OpenAI 形状最接近"扁平的角色 + 内容"列表，转纯文本剧本几乎是一对一映射；选它当中转格式，三家适配器写起来都最省事。"
+                 data-explanation-wrong="再想想。中转格式是为了"易于转纯文本"挑的，不是因为它流行或者更标准。">
+              <h3 class="quiz-question">为什么 ds2api 选 OpenAI 形状当所有协议归一的中转格式？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>因为 OpenAI 是最早的 API，最权威。</span>
+                </button>
+                <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>因为客户都用 OpenAI SDK，省得重写。</span>
+                </button>
+                <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>因为它最接近"角色 + 内容"扁平列表，最容易拍扁成纯文本。</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <div class="quiz-question-block"
+                 data-correct="b"
+                 data-explanation-right="对。DeepSeek 网页没有结构化工具调用接口。ds2api 把工具描述写进 system prompt，让模型按约定的 DSML 标记输出"我想调用 X 工具"，然后在流式输出上识别这些标记。"
+                 data-explanation-wrong="再想想：上游网页根本不认识 functionCall 字段，工具调用必须靠 prompt + 流上识别来模拟。">
+              <h3 class="quiz-question">客户端发来一个带 <code>tools</code> 的请求，PromptCompat 怎么处理？</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>把 tools 转发给 DeepSeek 网页，它会自己识别。</span>
+                </button>
+                <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>把工具描述用人话写进 system prompt，并约定模型按 DSML 标记输出工具调用。</span>
+                </button>
+                <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>报错，因为 DeepSeek 不支持工具调用。</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">检查答案</button>
+            <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重做</button>
+          </div>
+        </section>
+
+      </div>
+    </section>

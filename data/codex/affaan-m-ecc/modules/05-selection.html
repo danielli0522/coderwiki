@@ -1,0 +1,192 @@
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">架构选型 -- ECC vs 其他方案</h1>
+      <p class="module-subtitle">技术决策者的参考：ECC 解决什么问题、适合什么场景、边界在哪里。</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Problem + Philosophy -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">ECC 解决什么问题</h2>
+        <p>核心问题：<strong>AI 编程工具是通用的，但软件开发需要专业能力。</strong></p>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">问题</code>
+            <span class="badge-desc">裸 AI 编程工具缺乏专业能力 -- 不会自动做 TDD、不会自动安全审计、不会自动生成测试</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">哲学</code>
+            <span class="badge-desc">Agent-First -- 把工作尽早路由给最合适的专家，而不是让通用 AI 硬扛所有事</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">本质</code>
+            <span class="badge-desc">ECC 是 AI 编程工具的"操作系统" -- 管理资源（Agent）、调度任务（Command）、维护规则（Rule）</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">规模</code>
+            <span class="badge-desc">30 个 Agent、135 个 Skill、60 个 Command、多平台支持（Claude Code / Cursor / Codex / Gemini）</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">许可</code>
+            <span class="badge-desc">MIT 开源协议 -- 可自由使用、修改和商用</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Comparison Table -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">与替代方案对比</h2>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">📊</div>
+          <div class="callout-content">
+            <strong class="callout-title">一句话区分</strong>
+            <p>ECC 是"插件系统"，Copilot 是"助手"，Cursor Rules 是"配置文件"，自制方案是"从零造轮子"。</p>
+          </div>
+        </div>
+
+        <div style="overflow-x:auto; margin-top: var(--space-6)">
+          <table style="width:100%; border-collapse:collapse; font-size:var(--text-sm); background:var(--color-surface); border-radius:var(--radius-md); box-shadow:var(--shadow-sm);">
+            <thead>
+              <tr style="background:var(--color-bg-warm)">
+                <th style="padding:var(--space-3) var(--space-4); text-align:left; border-bottom:2px solid var(--color-border);">维度</th>
+                <th style="padding:var(--space-3) var(--space-4); text-align:left; border-bottom:2px solid var(--color-accent); color:var(--color-accent); font-weight:700;">ECC</th>
+                <th style="padding:var(--space-3) var(--space-4); text-align:left; border-bottom:2px solid var(--color-border);">GitHub Copilot</th>
+                <th style="padding:var(--space-3) var(--space-4); text-align:left; border-bottom:2px solid var(--color-border);">Cursor Rules</th>
+                <th style="padding:var(--space-3) var(--space-4); text-align:left; border-bottom:2px solid var(--color-border);">自制 Agent</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding:var(--space-3) var(--space-4); border-bottom:1px solid var(--color-border-light); font-weight:600;">Agent 调度</td>
+                <td style="padding:var(--space-3) var(--space-4); border-bottom:1px solid var(--color-border-light);"><ul><li>30 个专业 Agent 自动路由</li></ul></td>
+                <td style="padding:var(--space-3) var(--space-4); border-bottom:1px solid var(--color-border-light);"><ul><li>单一通用模型</li></ul></td>
+                <td style="padding:var(--space-3) var(--space-4); border-bottom:1px solid var(--color-border-light);"><ul><li>无 Agent 概念</li></ul></td>
+                <td style="padding:var(--space-3) var(--space-4); border-bottom:1px solid var(--color-border-light);"><ul><li>需要自己实现调度</li></ul></td>
+              </tr>
+              <tr>
+                <td style="padding:var(--space-3) var(--space-4); border-bottom:1px solid var(--color-border-light); font-weight:600;">跨工具支持</td>
+                <td style="padding:var(--space-3) var(--space-4); border-bottom:1px solid var(--color-border-light);"><ul><li>支持 10+ 工具</li></ul></td>
+                <td style="padding:var(--space-3) var(--space-4); border-bottom:1px solid var(--color-border-light);"><ul><li>VS Code 生态</li></ul></td>
+                <td style="padding:var(--space-3) var(--space-4); border-bottom:1px solid var(--color-border-light);"><ul><li>仅 Cursor IDE</li></ul></td>
+                <td style="padding:var(--space-3) var(--space-4); border-bottom:1px solid var(--color-border-light);"><ul><li>仅限你的工具</li></ul></td>
+              </tr>
+              <tr>
+                <td style="padding:var(--space-3) var(--space-4); border-bottom:1px solid var(--color-border-light); font-weight:600;">安全防御</td>
+                <td style="padding:var(--space-3) var(--space-4); border-bottom:1px solid var(--color-border-light);"><ul><li>内置 Prompt Defense</li></ul></td>
+                <td style="padding:var(--space-3) var(--space-4); border-bottom:1px solid var(--color-border-light);"><ul><li>平台级安全</li></ul></td>
+                <td style="padding:var(--space-3) var(--space-4); border-bottom:1px solid var(--color-border-light);"><ul><li>无内置防御</li></ul></td>
+                <td style="padding:var(--space-3) var(--space-4); border-bottom:1px solid var(--color-border-light);"><ul><li>需要自己加</li></ul></td>
+              </tr>
+              <tr>
+                <td style="padding:var(--space-3) var(--space-4); font-weight:600;">成本</td>
+                <td style="padding:var(--space-3) var(--space-4);"><ul><li>免费开源（MIT）</li></ul></td>
+                <td style="padding:var(--space-3) var(--space-4);"><ul><li>$10-39/月订阅</li></ul></td>
+                <td style="padding:var(--space-3) var(--space-4);"><ul><li>免费（IDE 内）</li></ul></td>
+                <td style="padding:var(--space-3) var(--space-4);"><ul><li>开发时间成本高</li></ul></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Screen 3: Suitable vs Not-suitable -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">适用场景分析</h2>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin-top: var(--space-6);">
+          <div style="background: var(--color-success-light); border-radius: var(--radius-md); padding: var(--space-6);">
+            <h4 style="color: var(--color-success); margin-bottom: var(--space-4); font-family: var(--font-display);">✅ 适合</h4>
+            <ul style="list-style: none; font-size: var(--text-sm); line-height: var(--leading-loose);">
+              <li>- 使用 Claude Code / Cursor / Codex 的开发者</li>
+              <li>- 需要团队统一 AI 编程规范的团队</li>
+              <li>- 希望自动执行 TDD、安全审计的工程团队</li>
+              <li>- 管理多个项目、需要跨项目复用配置</li>
+              <li>- 想了解 AI Agent 最佳实践的架构师</li>
+            </ul>
+          </div>
+          <div style="background: var(--color-error-light); border-radius: var(--radius-md); padding: var(--space-6);">
+            <h4 style="color: var(--color-error); margin-bottom: var(--space-4); font-family: var(--font-display);">❌ 不适合</h4>
+            <ul style="list-style: none; font-size: var(--text-sm); line-height: var(--leading-loose);">
+              <li>- 不使用 AI 编程工具的传统开发者</li>
+              <li>- 只需要简单代码补全的场景</li>
+              <li>- 对 AI 安全有极高合规要求的金融/医疗（需额外审计）</li>
+              <li>- 需要完全离线环境的场景（依赖 npm 下载）</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Hard Limits -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">硬性限制</h2>
+        <p>从源码中提取的实际限制：</p>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">Node >= 18</code>
+            <span class="badge-desc">运行环境要求 Node.js 18 或更高版本</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">SQLite</code>
+            <span class="badge-desc">状态存储依赖 SQLite（通过 sql.js 在纯 JS 中运行，无需系统安装）</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">35MB 仓库</code>
+            <span class="badge-desc">完整仓库约 35MB，安装后占用约 5-10MB（按需选择组件）</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">135 Skills</code>
+            <span class="badge-desc">全部安装所有 Skill 不一定最优，建议按 profile 选择性安装</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">Model Cost</code>
+            <span class="badge-desc">Agent 调用 AI 模型产生费用；Planner 用 Opus（贵），简单任务用 Haiku（便宜）</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Costs + Conclusion -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">成本与结论</h2>
+
+        <div class="step-cards">
+          <div class="step-card animate-in">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>直接成本</strong>
+              <p>MIT 开源免费。AI 模型调用费按 Agent 使用量计算 -- Planner 用 Opus 较贵，但只在复杂任务时触发</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>间接成本</strong>
+              <p>学习曲线：需要理解 Agent/Skill/Command 概念。定制化配置需要阅读 Markdown 格式的 Agent 定义</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>维护成本</strong>
+              <p>ecc auto-update 一键升级；ecc doctor 检测漂移；整体维护负担较低</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">🎯</div>
+          <div class="callout-content">
+            <strong class="callout-title">一句话结论</strong>
+            <p>如果你的团队已经在用 AI 编程工具，ECC 是目前最成熟的"能力增强"方案 -- 它不是替代你的工具，而是让你的工具拥有 30 位专家的能力。</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

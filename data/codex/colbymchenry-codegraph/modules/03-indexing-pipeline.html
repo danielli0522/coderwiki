@@ -1,0 +1,153 @@
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">从源码到知识图谱：索引管道</h1>
+      <p class="module-subtitle">一个文件变成图谱数据，要经历四道工序</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: The Pipeline Metaphor -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码索引就像石油炼化</h2>
+        <p>原油（源文件）进厂后，先蒸馏（解析语法树），再裂化（提取符号），然后调和（关联引用），最后入库（写入数据库）。每一道工序都依赖上一道的结果。</p>
+      </section>
+
+      <!-- Screen 2: Four Steps -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">四道工序详解</h2>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>ExtractionOrchestrator — 用 Tree-sitter 解析语法树</strong>
+              <p>读取每个源文件，用 <span class="term" data-definition="Tree-sitter 是一种增量式代码解析器，能在代码变化时快速更新语法树，不需要从头重新解析整个文件。">tree-sitter</span> 构建 <span class="term" data-definition="AST（抽象语法树）是源代码的结构化表示。每个函数、变量、表达式都变成树上的一个节点，可以被程序读取和分析。">AST</span>，从中提取函数、类、方法等符号作为节点（Node），同时提取包含、导入等初步关系作为边（Edge）。支持 18+ 种语言。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>ReferenceResolver — 解析未关联的引用</strong>
+              <p>提取阶段留下了一批"我知道这个名字但不知道它指向谁"的引用。Resolver 通过三种策略匹配：框架模式识别（Express/Laravel 路由）、import 路径追踪、名称模糊匹配。还能识别 React 组件渲染、Vue 模板事件等动态分派。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Database — 写入 SQLite</strong>
+              <p>所有节点和边存入本地 SQLite 文件（.codegraph/ 目录下），用 <span class="term" data-definition="FTS5 是 SQLite 的全文搜索引擎扩展，能对文本内容做高效的关键词匹配，支持 BM25 排名算法。">FTS5</span> 建全文搜索索引。用 <span class="term" data-definition="WAL（Write-Ahead Logging）是 SQLite 的一种日志模式，允许读和写同时进行，不会互相阻塞。">WAL 模式</span>实现并发安全。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>FileSync — 监控变化自动更新</strong>
+              <p>启动 FileWatcher 监控文件变化（macOS 用 FSEvents，Linux 用 inotify），文件一改就触发增量同步——只重新解析变化的文件，不重建整个图谱。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Code Translation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码长什么样？</h2>
+        <p>下面是 CodeGraph 主类中索引流程的核心代码：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">async</span> <span class="code-function">indexAll</span>(options?: IndexOptions) {</span>
+<span class="code-line">  <span class="code-keyword">return</span> <span class="code-keyword">this</span>.indexMutex.<span class="code-function">withLock</span>(<span class="code-keyword">async</span> () => {</span>
+<span class="code-line">    <span class="code-keyword">this</span>.fileLock.<span class="code-function">acquire</span>();</span>
+<span class="code-line">    <span class="code-keyword">const</span> result = <span class="code-keyword">await</span> <span class="code-keyword">this</span>.orchestrator</span>
+<span class="code-line">      .<span class="code-function">indexAll</span>(options.onProgress);</span>
+<span class="code-line">    <span class="code-keyword">if</span> (result.filesIndexed > <span class="code-number">0</span>) {</span>
+<span class="code-line">      <span class="code-keyword">await</span> <span class="code-keyword">this</span>.<span class="code-function">resolveReferencesBatched</span>();</span>
+<span class="code-line">    }</span>
+<span class="code-line">    <span class="code-keyword">this</span>.db.<span class="code-function">runMaintenance</span>();</span>
+<span class="code-line">    <span class="code-keyword">return</span> result;</span>
+<span class="code-line">  });</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">indexAll 是"全部重新索引"的入口。</p>
+              <p class="tl">先加一把进程内的互斥锁，防止两个索引任务同时跑。</p>
+              <p class="tl">再获取一个跨进程的文件锁，防止 CLI 和 MCP 同时写数据库。</p>
+              <p class="tl">让 Orchestrator 去解析所有文件，提取符号和初步关系。</p>
+              <p class="tl">如果确实有新文件被索引了……</p>
+              <p class="tl">……就启动引用解析，把未关联的引用匹配到实际符号。</p>
+              <p class="tl">最后做一些数据库维护（刷新统计信息、压缩日志）。</p>
+              <p class="tl">返回索引结果（多少文件、多少节点、多少边）。</p>
+              <p class="tl">锁在函数结束时自动释放。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Framework Detection -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">不只是语法——还有框架智慧</h2>
+        <p>CodeGraph 不只看语法结构，还能识别 <span class="term" data-definition="Web 框架是帮助开发者快速构建网站的工具集。Express（Node.js）、Laravel（PHP）、Django（Python）、Spring（Java）等都是框架。">Web 框架</span> 的路由模式。比如它知道 Express 的 <code>app.get('/users', handler)</code> 意味着有一个路由端点。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">&#9881;</div>
+            <h4 class="pattern-title">Express / NestJS</h4>
+            <p class="pattern-desc">识别 app.get/post/put/delete 路由注册，建立 route 节点和 handler 引用边。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">&#128640;</div>
+            <h4 class="pattern-title">React / Svelte / Vue</h4>
+            <p class="pattern-desc">识别组件渲染关系、JSX 子组件引用、Vue 模板事件绑定等动态分派。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: #F3E8FF">&#9749;</div>
+            <h4 class="pattern-title">Spring / Laravel / Django</h4>
+            <p class="pattern-desc">识别注解路由（@GetMapping）、控制器映射、Django URL 配置等。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-success-light)">&#128230;</div>
+            <h4 class="pattern-title">Cargo Workspace</h4>
+            <p class="pattern-desc">解析 Rust workspace 成员和模块依赖关系，跨 crate 引用追踪。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="完全正确！FileWatcher 监控文件变化后触发 sync()，sync 只处理变化的文件——这是增量更新，不是全量重建。这样代码库再大也能快速响应变化。"
+               data-explanation-wrong="想想 FileWatcher 的作用：它是在文件变化时触发更新，还是定时全量重建？答案和 Git 的增量提交类似——只处理有变化的部分。">
+            <h3 class="quiz-question">如果你在项目中修改了一个文件，CodeGraph 会怎么更新图谱？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>删除整个数据库，从头重新索引所有文件</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>只重新解析变化的文件，增量更新图谱</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>不自动更新，需要手动运行 codegraph index</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

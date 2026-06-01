@@ -1,0 +1,188 @@
+<section class="module" id="module-2">
+  <div class="module-inner">
+
+    <div class="screen">
+      <div class="screen-content">
+        <div class="eyebrow">Module 2</div>
+        <h1 class="display">Skills 与 Hooks：<br>给 AI 装上肌肉记忆</h1>
+        <p class="lead">熟练的运动员不需要每次都思考如何跑步——动作已经成为肌肉记忆。Skills 和 Hooks 就是 Claude Code 的肌肉记忆：把你最好的工作方式固化下来，让它自动发生。</p>
+      </div>
+    </div>
+
+    <div class="screen">
+      <div class="screen-content">
+        <h2>Skills：把专家知识装进瓶子</h2>
+        <p>想象你有一位经验丰富的高级工程师，每次你遇到测试、代码审查、架构决策时，他都能立刻给你最佳实践。Skills 就是这位"瓶中工程师"。</p>
+
+        <div class="code-translation">
+          <div class="code-panel">
+            <div class="code-panel-label">真实代码 <span class="code-file">contexts/dev.md</span></div>
+            <pre><code class="language-bash"># Daily development
+alias claude-dev='claude \
+  --system-prompt \
+  "$(cat ~/.claude/contexts/dev.md)"'
+
+# PR review mode
+alias claude-review='claude \
+  --system-prompt \
+  "$(cat ~/.claude/contexts/review.md)"'</code></pre>
+          </div>
+          <div class="translation-panel">
+            <div class="translation-panel-label">这段代码在说什么</div>
+            <div class="translation-lines">
+              <div class="translation-line">
+                <span class="tl-code">alias claude-dev='...'</span>
+                <span class="tl-text">创建一个快捷命令：输入 claude-dev 就启动带着开发上下文的 Claude</span>
+              </div>
+              <div class="translation-line">
+                <span class="tl-code">--system-prompt</span>
+                <span class="tl-text">在 Claude 启动前注入额外的"背景知识"——就像先给新员工做入职培训再让他开始工作</span>
+              </div>
+              <div class="translation-line">
+                <span class="tl-code">"$(cat ~/.claude/contexts/dev.md)"</span>
+                <span class="tl-text">从文件里读取具体的开发规范内容，注入到 Claude 的工作记忆中</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <div class="screen-content">
+        <h2>Hooks：事件发生时，自动做正确的事</h2>
+        <p>Hooks 是<span class="tooltip-term" data-tooltip="触发器（Trigger）：当特定事件发生时自动执行的代码。就像手机的"静音模式"——进入会议室，手机自动静音，不需要你记得手动操作。">触发器</span>机制。6 种事件类型覆盖 Claude 的完整生命周期：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card">
+            <div class="pattern-card-icon">🔍</div>
+            <div class="pattern-card-name">PreToolUse</div>
+            <div class="pattern-card-desc">工具执行<strong>前</strong>拦截。用途：安全检查、提醒用 tmux、验证危险命令。</div>
+          </div>
+          <div class="pattern-card">
+            <div class="pattern-card-icon">📝</div>
+            <div class="pattern-card-name">PostToolUse</div>
+            <div class="pattern-card-desc">工具执行<strong>后</strong>处理。用途：自动格式化、触发测试、同步文档。</div>
+          </div>
+          <div class="pattern-card">
+            <div class="pattern-card-icon">💬</div>
+            <div class="pattern-card-name">UserPromptSubmit</div>
+            <div class="pattern-card-desc">你发送消息<strong>时</strong>执行。用途：自动添加项目上下文、注入规范提醒。</div>
+          </div>
+          <div class="pattern-card">
+            <div class="pattern-card-icon">🏁</div>
+            <div class="pattern-card-name">Stop</div>
+            <div class="pattern-card-desc">Claude 回复<strong>完成后</strong>执行。用途：保存会话摘要、发送通知。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <div class="screen-content">
+        <h2>对话：Hook 的工作日</h2>
+        <p>一个真实的 tmux 提醒 Hook 是如何在幕后工作的：</p>
+
+        <div class="chat-container" id="hooks-chat">
+          <div class="chat-bubble chat-bubble-a" data-actor="你">
+            运行 npm install，帮我装一下依赖
+          </div>
+          <div class="chat-bubble chat-bubble-b" data-actor="PreToolUse Hook">
+            ⚡ 检测到长时间运行命令(npm install)...
+          </div>
+          <div class="chat-bubble chat-bubble-b" data-actor="PreToolUse Hook">
+            [Hook] 建议在 tmux 会话中运行，防止终端断连丢失进度。是否继续？
+          </div>
+          <div class="chat-bubble chat-bubble-a" data-actor="你">
+            好，继续
+          </div>
+          <div class="chat-bubble chat-bubble-c" data-actor="Claude">
+            正在执行 npm install... [在受保护的 tmux 会话中运行]
+          </div>
+          <div class="chat-bubble chat-bubble-d" data-actor="Stop Hook">
+            ✅ 会话完成，正在保存进度摘要到 .claude/sessions/2026-05-01.md...
+          </div>
+        </div>
+
+        <div class="callout callout-aha">
+          <strong>💡 关键洞察：</strong> Hook 不需要 Claude "记住"什么规则。它们在 Claude 思考之外运行，像操作系统级别的安全网——无论 Claude 的注意力在哪里，该发生的事情都会发生。
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <div class="screen-content">
+        <h2>Hook 的真实 JSON 配置</h2>
+
+        <div class="code-translation">
+          <div class="code-panel">
+            <div class="code-panel-label">真实代码 <span class="code-file">settings.json → hooks</span></div>
+            <pre><code class="language-json">{
+  "PreToolUse": [
+    {
+      "matcher": "tool == \"Bash\" &&
+        tool_input.command
+        matches \"(npm|pnpm|yarn)\"",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "if [ -z \"$TMUX\" ];
+            then echo '[Hook]
+            Consider tmux' >&2;
+            fi"
+        }
+      ]
+    }
+  ]
+}</code></pre>
+          </div>
+          <div class="translation-panel">
+            <div class="translation-panel-label">这段代码在说什么</div>
+            <div class="translation-lines">
+              <div class="translation-line">
+                <span class="tl-code">"matcher": "tool == \"Bash\""</span>
+                <span class="tl-text">只在 Claude 要用 Bash 工具时触发这个 Hook</span>
+              </div>
+              <div class="translation-line">
+                <span class="tl-code">matches \"(npm|pnpm|yarn)\"</span>
+                <span class="tl-text">进一步过滤：命令必须包含 npm、pnpm 或 yarn 之一</span>
+              </div>
+              <div class="translation-line">
+                <span class="tl-code">if [ -z "$TMUX" ]</span>
+                <span class="tl-text">检查当前是否在 tmux 里。如果不在（-z 表示"为空"），就发出提醒</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <div class="screen-content">
+        <h2>模块测验</h2>
+        <div class="quiz" data-quiz-id="q3">
+          <div class="quiz-question">你在一个团队项目里工作，希望每次 Claude 修改了数据库相关文件后，自动运行一次数据库迁移检查。应该用哪种 Hook 类型？</div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-correct="false">PreToolUse — 在写文件前检查</button>
+            <button class="quiz-option" data-correct="true">PostToolUse — 在文件写入后自动触发迁移检查</button>
+            <button class="quiz-option" data-correct="false">Stop — 在整个会话结束后检查</button>
+            <button class="quiz-option" data-correct="false">UserPromptSubmit — 在你提问时就检查</button>
+          </div>
+          <div class="quiz-feedback" style="display:none"></div>
+        </div>
+
+        <div class="quiz" data-quiz-id="q4">
+          <div class="quiz-question">你的团队有一套代码审查规范，但 Claude 有时会跳过某些检查点。最有效的解决方案是？</div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-correct="false">在每次对话开始时粘贴规范列表</button>
+            <button class="quiz-option" data-correct="true">把规范写成 Skill，在 CLAUDE.md 里引用，让它成为 Claude 的默认行为</button>
+            <button class="quiz-option" data-correct="false">使用更高权限的模型（Opus）</button>
+            <button class="quiz-option" data-correct="false">手动检查 Claude 的每次输出</button>
+          </div>
+          <div class="quiz-feedback" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>

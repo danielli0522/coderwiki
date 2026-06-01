@@ -1,0 +1,194 @@
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">这是什么？</h1>
+      <p class="module-subtitle">一个让 AI 帮金融从业者干活的插件系统</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Hook — What problem does this solve? -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">想象一下这个场景</h2>
+        <p>你是一家投行的分析师，早上 9 点收到任务：要对一家公司做<span class="term" data-definition="可比公司分析（Comps）是投行最基础的估值方法 — 找几家类似的上市公司，比较它们的财务指标和估值倍数，用来给目标公司定价。就像买房前先看看同小区类似户型的成交价。">可比公司分析</span>，下午 2 点前要交。</p>
+        <p>传统流程：打开 Bloomberg 终端 → 手动抄数据 → 建 Excel → 算倍数 → 做 PPT → 反复检查。至少 4 小时。</p>
+        <p>有了这个项目，你只需要输入 <code>/comps 目标公司名</code>，AI 就会自动完成整个流程。</p>
+      </section>
+
+      <!-- Screen 2: What is this project? -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Anthropic 金融服务插件</h2>
+        <p>这是 Anthropic 官方开源的一套 <span class="term" data-definition="插件（Plugin）是一种可安装的扩展包，给 AI 助手增加新能力。就像给手机装 App 一样，装了翻译插件，AI 就能翻译；装了金融插件，AI 就能做估值模型。">插件</span>集合，专门为金融行业设计。它让 Claude 能像金融分析师一样工作 —— 建估值模型、写研究报告、做<span class="term" data-definition="尽职调查（DD）是投资前的全面审查，类似买二手房前的验房：查财务、查法务、查团队、查技术，确认没有隐藏风险。">尽职调查</span>、对账等等。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🏦</div>
+            <h4 class="pattern-title">投资银行</h4>
+            <p class="pattern-desc">Pitch deck、CIM、并购模型、买家名单</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">📊</div>
+            <h4 class="pattern-title">股票研究</h4>
+            <p class="pattern-desc">财报分析、研报撰写、模型更新</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🔍</div>
+            <h4 class="pattern-title">私募股权</h4>
+            <p class="pattern-desc">项目筛选、尽调清单、IC 备忘录</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">💰</div>
+            <h4 class="pattern-title">财富管理</h4>
+            <p class="pattern-desc">客户报告、组合再平衡、税务亏损收割</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Two deployment paths -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">两种使用方式，同一套代码</h2>
+        <p>这个项目最巧妙的设计：所有内容<strong>写一次，两种方式都能用</strong>。</p>
+
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">A</div>
+            <p><strong>Cowork 插件</strong><br/>在 Claude 对话界面直接安装，像装浏览器扩展一样简单</p>
+          </div>
+          <div class="flow-arrow">⇔</div>
+          <div class="flow-step">
+            <div class="flow-step-num">B</div>
+            <p><strong><span class="term" data-definition="Managed Agent（托管代理）是 Anthropic 提供的一种部署方式：AI 不在对话界面里运行，而是在后台自动执行任务，像一个不需要你盯着看的实习生。">Managed Agent</span></strong><br/>通过 API 部署到企业后台，适合大规模自动化</p>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键设计理念</strong>
+            <p>同一个 <span class="term" data-definition="系统提示词（System Prompt）是你给 AI 的角色说明书，告诉它「你是谁、怎么工作、遵守什么规则」。就像给新员工发的工作手册。">系统提示词</span>、同一套技能文件 —— 不管是个人用还是企业部署，AI 的行为完全一致。这种「一份源码，两种包装」的模式，在软件工程里叫「Single Source of Truth（单一事实来源）」。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Code ↔ English — The README structure -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">看看它的目录结构</h2>
+        <p>整个项目的文件组织长这样：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">目录结构</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">plugins/</span></span>
+<span class="code-line">  <span class="code-function">agent-plugins/</span>    <span class="code-comment"># 10 个命名 Agent</span></span>
+<span class="code-line">  <span class="code-function">vertical-plugins/</span> <span class="code-comment"># 7 个行业技能包</span></span>
+<span class="code-line">  <span class="code-function">partner-built/</span>    <span class="code-comment"># 合作方插件 (LSEG, S&amp;P)</span></span>
+<span class="code-line"><span class="code-keyword">managed-agent-cookbooks/</span>  <span class="code-comment"># API 部署模板</span></span>
+<span class="code-line"><span class="code-keyword">scripts/</span>          <span class="code-comment"># 部署 &amp; 校验脚本</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>plugins/</strong> — 所有可安装的插件都住这里</p>
+              <p class="tl"><strong>agent-plugins/</strong> — 完整的「AI 员工」，每个负责一条业务线</p>
+              <p class="tl"><strong>vertical-plugins/</strong> — 按行业拆分的「技能手册」</p>
+              <p class="tl"><strong>partner-built/</strong> — 数据供应商自己写的对接插件</p>
+              <p class="tl"><strong>cookbooks/</strong> — 用来把 Agent 部署到企业后台的配置文件</p>
+              <p class="tl"><strong>scripts/</strong> — 自动化部署和代码质量检查工具</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: The agents table as visual cards -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">10 个「AI 员工」，各管一条线</h2>
+        <p>每个 Agent 就像一个专门训练过的金融分析师，只负责一种工作流：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <h4 class="pattern-title">🎯 Pitch Agent</h4>
+            <p class="pattern-desc">可比公司 → LBO → 品牌 PPT，一条龙</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <h4 class="pattern-title">📈 Market Researcher</h4>
+            <p class="pattern-desc">行业概览、竞争格局、同类对比</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <h4 class="pattern-title">📋 GL Reconciler</h4>
+            <p class="pattern-desc">自动对账，找差异，追根因</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <h4 class="pattern-title">🔍 KYC Screener</h4>
+            <p class="pattern-desc">解析开户文件，跑规则引擎，标红旗</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <h4 class="pattern-title">📉 Earnings Reviewer</h4>
+            <p class="pattern-desc">财报 + 电话会纪要 → 模型更新 → 研报草稿</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <h4 class="pattern-title">🗓️ Meeting Prep</h4>
+            <p class="pattern-desc">客户会议前的简报包</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 6: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验你的理解</h2>
+
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！这个项目的核心设计就是「同一份技能文件，两种部署方式」，个人用户用 Cowork，企业用 Managed Agent API。"
+               data-explanation-wrong="再想想 —— 这个项目不是 SaaS 平台，也不是 Python 库。它是一套可安装的 AI 插件，有两种使用方式。">
+            <h3 class="quiz-question">如果你想在公司内部大规模使用这些金融 AI Agent，你会选择哪种方式？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>在 Claude 网页版手动安装每个插件</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>通过 Managed Agent API 部署到企业后台</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>把代码复制到公司服务器上手动运行</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="没错！这些 Agent 都是「分析助手」—— 生成草稿和模型供人类审核，不会自己做投资决策或执行交易。这是金融行业用 AI 的基本安全原则。"
+               data-explanation-wrong="注意 README 的免责声明：这些 Agent 不会做投资决策、不会执行交易、不会过账。它们只生成草稿，由人类审核签字。">
+            <h3 class="quiz-question">这些 AI Agent 的输出可以直接用于什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>直接发投资建议给客户</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>自动执行交易指令</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>生成分析草稿供人类审核</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">查看答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">再试一次</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

@@ -1,0 +1,339 @@
+    <section class="module" id="module-3" style="background: var(--color-bg-warm)">
+      <div class="module-content">
+        <header class="module-header animate-in">
+          <span class="module-number">03</span>
+          <h1 class="module-title">高阶工序：调度官 与 评审官</h1>
+          <p class="module-subtitle">当任务的形状要看到才知道——动态拆解 与 互相博弈打磨的两种模式</p>
+        </header>
+
+        <div class="module-body">
+
+          <!-- Screen 1: Hook + film crew metaphor -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">现实里，有时候你看到任务的瞬间才知道该怎么拆</h2>
+            <p>上一模块的三种工序都有一个共同假设——你提前知道任务的形状。但 chain 的步骤、parallel 的子任务清单、route 的窗口列表，<strong>都是在写代码时就敲死了的</strong>（俗称<span class="term" data-definition="Hardcode/hardcoded。指把规则、数值、清单写死在代码里，运行时不能改。和它对应的是'动态/dynamic' —— 程序运行时才决定。'写死'易出 bug 也难维护，但简单场景里写死最快。">写死</span>）。</p>
+            <p>现实世界里，<em>很多任务一来你才知道要怎么拆</em>。这一模块教两种处理"未知形状"任务的最重要工序——它们都比基础工序多了一层"元认知"。</p>
+
+            <div class="callout callout-accent">
+              <div class="callout-icon">🎬</div>
+              <div class="callout-content">
+                <strong class="callout-title">本课的隐喻：纪录片摄制组</strong>
+                <p><strong>Orchestrator-Workers（调度官 + 工人）= 总导演 + 摄影组</strong>：导演拿到选题后<em>不预先写好剧本</em>——看现场情况决定这场戏值得拍特写、空镜还是延时，再分别派摄影 A、B、C 去拍各自的镜头，最后剪辑成片。<br><strong>Evaluator-Optimizer（评审官 + 优化器）= 编剧 + 责编</strong>：编剧写一稿初稿交给责编。责编不动笔，只给反馈："角色动机不清楚 / 第二幕太拖"。编剧拿反馈再改一稿，再交。来回三五次直到 PASS。</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 2: Orchestrator prompt design -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">调度官的核心 = 一个会现场拆任务的 prompt</h2>
+            <p>看 cookbook 里的 <span class="term" data-definition="Orchestrator——调度官、协调者。在 agent 系统里指那个'看任务后决定怎么拆 + 派工人'的中枢 LLM。它自己不直接干活，只做规划和分发。">orchestrator</span> prompt——它的精髓是把"导演的元认知"用 XML 结构强约束出来：</p>
+
+            <div class="translation-block animate-in">
+              <div class="translation-code">
+                <span class="translation-label">PROMPT · 给 Orchestrator</span>
+<pre><code><span class="code-line">ORCHESTRATOR_PROMPT = <span class="code-string">"""</span></span>
+<span class="code-line"><span class="code-string">Analyze this task and break it down into 2-3 distinct approaches:</span></span>
+<span class="code-line"><span class="code-string"></span></span>
+<span class="code-line"><span class="code-string">Task: {task}</span></span>
+<span class="code-line"><span class="code-string"></span></span>
+<span class="code-line"><span class="code-string">Return your response in this format:</span></span>
+<span class="code-line"><span class="code-string"></span></span>
+<span class="code-line"><span class="code-string">&lt;analysis&gt;</span></span>
+<span class="code-line"><span class="code-string">Explain your understanding of the task and which variations would be valuable.</span></span>
+<span class="code-line"><span class="code-string">&lt;/analysis&gt;</span></span>
+<span class="code-line"><span class="code-string"></span></span>
+<span class="code-line"><span class="code-string">&lt;tasks&gt;</span></span>
+<span class="code-line"><span class="code-string">    &lt;task&gt;</span></span>
+<span class="code-line"><span class="code-string">    &lt;type&gt;formal&lt;/type&gt;</span></span>
+<span class="code-line"><span class="code-string">    &lt;description&gt;Write a precise, technical version that emphasizes specifications&lt;/description&gt;</span></span>
+<span class="code-line"><span class="code-string">    &lt;/task&gt;</span></span>
+<span class="code-line"><span class="code-string">    &lt;task&gt;</span></span>
+<span class="code-line"><span class="code-string">    &lt;type&gt;conversational&lt;/type&gt;</span></span>
+<span class="code-line"><span class="code-string">    &lt;description&gt;Write an engaging, friendly version that connects with readers&lt;/description&gt;</span></span>
+<span class="code-line"><span class="code-string">    &lt;/task&gt;</span></span>
+<span class="code-line"><span class="code-string">&lt;/tasks&gt;</span></span>
+<span class="code-line"><span class="code-string">"""</span></span></code></pre>
+              </div>
+              <div class="translation-english">
+                <span class="translation-label">中文逐句解读</span>
+                <div class="translation-lines">
+                  <p class="tl"><strong>"Analyze this task and break it down into 2-3 distinct approaches"</strong>——让 Claude 当导演：<em>看完任务后给我列 2-3 种切入角度</em>。"distinct" 是关键词——必须有差异。</p>
+                  <p class="tl"><strong>&lt;analysis&gt; 标签</strong>——强制导演先讲"为什么这么拆"，避免它跳过思考直接出方案。这是 <span class="term" data-definition="Chain of Thought 的缩写。让模型把推理过程写下来再给结论，通常能显著提高复杂任务的准确性。这里通过强制 &lt;analysis&gt; 标签实现。">CoT</span> 的一种实现。</p>
+                  <p class="tl"><strong>&lt;tasks&gt; / &lt;task&gt; / &lt;type&gt; / &lt;description&gt;</strong> 嵌套——用 XML 强约束输出结构，方便程序解析成"工单清单"。</p>
+                  <p class="tl"><strong>{task}</strong> 占位符——运行时把实际任务（"为环保水壶写产品文案"）填进去。</p>
+                  <p class="tl"><strong>核心：具体拆几个 task、每个 task 是什么风格，全由 Claude 看到 task 那一刻自己决定</strong>——不是程序员写死的。这就是"动态拆任务"。</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 3: Orchestrator main loop -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">调度官的主循环：1 次导演 + N 次工人</h2>
+
+            <div class="step-cards">
+              <div class="step-card">
+                <div class="step-num">1</div>
+                <div class="step-body">
+                  <strong>导演看任务</strong>
+                  <p>第 1 次 LLM 调用——orchestrator 读 task，输出 &lt;analysis&gt; + &lt;tasks&gt; 工单清单。</p>
+                </div>
+              </div>
+              <div class="step-card">
+                <div class="step-num">2</div>
+                <div class="step-body">
+                  <strong>解析工单</strong>
+                  <p>用 extract_xml + parse_tasks 把 LLM 吐出来的 XML 转成程序能用的结构化清单。</p>
+                </div>
+              </div>
+              <div class="step-card">
+                <div class="step-num">3</div>
+                <div class="step-body">
+                  <strong>派工人</strong>
+                  <p>对每张工单调一次 worker LLM——每个工人独立完成自己那一份。</p>
+                </div>
+              </div>
+              <div class="step-card">
+                <div class="step-num">4</div>
+                <div class="step-body">
+                  <strong>汇总产物</strong>
+                  <p>把 N 个 worker 的结果收齐，作为最终产出返回。<strong>整个流程 = 1 次导演 + N 次工人 = N+1 次 LLM 调用</strong>。</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="translation-block animate-in">
+              <div class="translation-code">
+                <span class="translation-label">CODE · Python（节选）</span>
+<pre><code><span class="code-line"><span class="code-keyword">class</span> <span class="code-function">FlexibleOrchestrator</span>:</span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">process</span>(self, task: str, context: dict | <span class="code-keyword">None</span> = <span class="code-keyword">None</span>) -&gt; dict:</span>
+<span class="code-line">        <span class="code-comment"># Step 1: Get orchestrator response</span></span>
+<span class="code-line">        orchestrator_input = self._format_prompt(self.orchestrator_prompt, task=task, **context)</span>
+<span class="code-line">        orchestrator_response = <span class="code-function">llm_call</span>(orchestrator_input, model=self.model)</span>
+<span class="code-line"></span>
+<span class="code-line">        <span class="code-comment"># Parse orchestrator response</span></span>
+<span class="code-line">        analysis = <span class="code-function">extract_xml</span>(orchestrator_response, <span class="code-string">"analysis"</span>)</span>
+<span class="code-line">        tasks_xml = <span class="code-function">extract_xml</span>(orchestrator_response, <span class="code-string">"tasks"</span>)</span>
+<span class="code-line">        tasks = <span class="code-function">parse_tasks</span>(tasks_xml)</span>
+<span class="code-line"></span>
+<span class="code-line">        <span class="code-comment"># Step 2: Process each task</span></span>
+<span class="code-line">        worker_results = []</span>
+<span class="code-line">        <span class="code-keyword">for</span> i, task_info <span class="code-keyword">in</span> <span class="code-function">enumerate</span>(tasks, 1):</span>
+<span class="code-line">            worker_input = self._format_prompt(self.worker_prompt, original_task=task,</span>
+<span class="code-line">                task_type=task_info[<span class="code-string">"type"</span>], task_description=task_info[<span class="code-string">"description"</span>])</span>
+<span class="code-line">            worker_response = <span class="code-function">llm_call</span>(worker_input, model=self.model)</span>
+<span class="code-line">            worker_results.<span class="code-function">append</span>({<span class="code-string">"type"</span>: task_info[<span class="code-string">"type"</span>], <span class="code-string">"result"</span>: worker_response})</span>
+<span class="code-line"></span>
+<span class="code-line">        <span class="code-keyword">return</span> {<span class="code-string">"analysis"</span>: analysis, <span class="code-string">"worker_results"</span>: worker_results}</span></code></pre>
+              </div>
+              <div class="translation-english">
+                <span class="translation-label">中文逐行翻译</span>
+                <div class="translation-lines">
+                  <p class="tl"><strong>第 5 行：</strong>第 1 次 LLM 调用——导演看任务、决定怎么拆。</p>
+                  <p class="tl"><strong>第 8-10 行：</strong>把导演吐出来的 XML 解析成程序能用的"工单清单"。</p>
+                  <p class="tl"><strong>第 13 行：</strong>对每张工单派一个工人。</p>
+                  <p class="tl"><strong>第 16 行：</strong>第 N 次 LLM 调用（N = 工单数）——每个工人独立完成自己那一份。</p>
+                  <p class="tl"><strong>第 19 行：</strong>把所有产物加上 analysis（导演的解读）一起返回。</p>
+                  <p class="tl"><strong>关键对比</strong>：parallel 的工人清单<em>程序员写死</em>。orchestrator 的工人清单<em>导演现场决定</em>。这一字之差，让系统从"流水线"变成了"团队"。</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="callout callout-info">
+              <div class="callout-icon">💡</div>
+              <div class="callout-content">
+                <strong class="callout-title">Aha! Orchestrator vs Parallel——一字之差</strong>
+                <p>两个模式都是"同时跑多个 LLM"。差别在哪？<strong>parallel 的工人任务清单是写死的，orchestrator 的工人任务清单是导演现场决定的</strong>。如果你能提前列清楚要做哪几件事 → 用 parallel 省一次 LLM 调用；如果要做哪几件事得看具体输入 → 用 orchestrator。</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 4: Evaluator-Optimizer with chat -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">评审官的循环：两个 LLM 互相博弈</h2>
+            <p>这个模式叫 <span class="term" data-definition="Evaluator-Optimizer 的核心：generator（生成器）写、evaluator（评审器）评，两个 LLM 互相博弈直到达标。比 chain 多了'反复打磨'的能力。">evaluator-optimizer</span>——一个 LLM 写，一个 LLM 评，循环直到 PASS。</p>
+
+            <div class="translation-block animate-in">
+              <div class="translation-code">
+                <span class="translation-label">CODE · Python</span>
+<pre><code><span class="code-line"><span class="code-keyword">def</span> <span class="code-function">loop</span>(task, evaluator_prompt, generator_prompt):</span>
+<span class="code-line">    memory = []</span>
+<span class="code-line">    chain_of_thought = []</span>
+<span class="code-line"></span>
+<span class="code-line">    thoughts, result = <span class="code-function">generate</span>(generator_prompt, task)</span>
+<span class="code-line">    memory.<span class="code-function">append</span>(result)</span>
+<span class="code-line">    chain_of_thought.<span class="code-function">append</span>({<span class="code-string">"thoughts"</span>: thoughts, <span class="code-string">"result"</span>: result})</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-keyword">while</span> <span class="code-keyword">True</span>:</span>
+<span class="code-line">        evaluation, feedback = <span class="code-function">evaluate</span>(evaluator_prompt, result, task)</span>
+<span class="code-line">        <span class="code-keyword">if</span> evaluation == <span class="code-string">"PASS"</span>:</span>
+<span class="code-line">            <span class="code-keyword">return</span> result, chain_of_thought</span>
+<span class="code-line"></span>
+<span class="code-line">        context = <span class="code-string">"\n"</span>.<span class="code-function">join</span>([<span class="code-string">"Previous attempts:"</span>,</span>
+<span class="code-line">            *[<span class="code-string">f"- {m}"</span> <span class="code-keyword">for</span> m <span class="code-keyword">in</span> memory], <span class="code-string">f"\nFeedback: {feedback}"</span>])</span>
+<span class="code-line"></span>
+<span class="code-line">        thoughts, result = <span class="code-function">generate</span>(generator_prompt, task, context)</span>
+<span class="code-line">        memory.<span class="code-function">append</span>(result)</span></code></pre>
+              </div>
+              <div class="translation-english">
+                <span class="translation-label">中文逐行翻译</span>
+                <div class="translation-lines">
+                  <p class="tl"><strong>第 2 行：</strong>准备一本"草稿本"——记下每一稿。</p>
+                  <p class="tl"><strong>第 5 行：</strong>编剧（generator）先写第一稿。</p>
+                  <p class="tl"><strong>第 9 行：</strong>进入打磨循环。</p>
+                  <p class="tl"><strong>第 10 行：</strong>责编（evaluator）看稿，吐出"通过 / 还要改"以及具体反馈。</p>
+                  <p class="tl"><strong>第 11-12 行：</strong>责编满意了就交付，整个循环结束。</p>
+                  <p class="tl"><strong>第 14-15 行：</strong>把所有历史草稿和最新反馈打包——告诉编剧"这些你已经写过了，现在按这个反馈改"。<strong>注意 memory 的累积</strong>——避免编剧在原地打转。</p>
+                  <p class="tl"><strong>第 17 行：</strong>编剧带着批注再写一稿。循环直到 PASS。<strong>两个 LLM 互相博弈，自动改稿。</strong></p>
+                </div>
+              </div>
+            </div>
+
+            <h3 style="margin-top: var(--space-12); font-family: var(--font-display); font-size: var(--text-xl);">看一场真实的博弈：写一个 Min-Stack</h3>
+            <p>cookbook 里给的实际例子——编剧（generator）和责编（evaluator）在写一个所有操作 O(1) 的栈：</p>
+
+            <div class="chat-window" id="chat-module3">
+              <div class="chat-messages">
+                <div class="chat-message" data-msg="0" data-sender="user" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-2)">用</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-2)">用户</span>
+                    <p>实现一个 Stack：push(x) / pop() / getMin()，三个操作都要 O(1)。</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="1" data-sender="generator" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-1)">编</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-1)">编剧（Generator）· 第 1 稿</span>
+                    <p>用一个普通栈存数据。push 和 pop 显然 O(1)。getMin 时遍历整个栈找最小值。</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="2" data-sender="evaluator" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-3)">责</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-3)">责编（Evaluator）</span>
+                    <p>NEEDS_IMPROVEMENT。getMin 是 O(n)，不达标。Feedback：考虑用辅助数据结构同步追踪当前最小值。</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="3" data-sender="generator" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-1)">编</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-1)">编剧（Generator）· 第 2 稿</span>
+                    <p>引入一个 minStack——push 时把"当前最小值"也 push 进去；pop 时同步 pop。getMin 直接 peek minStack 顶。三个操作都是 O(1)。</p>
+                  </div>
+                </div>
+                <div class="chat-message" data-msg="4" data-sender="evaluator" style="display:none">
+                  <div class="chat-avatar" style="background: var(--color-actor-3)">责</div>
+                  <div class="chat-bubble">
+                    <span class="chat-sender" style="color: var(--color-actor-3)">责编（Evaluator）</span>
+                    <p>PASS ✓ 三个操作都是 O(1)，代码风格清晰，边界处理正确。可以交付。</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="chat-typing" id="chat-module3-typing" style="display:none">
+                <div class="chat-avatar" id="chat-module3-typing-avatar">?</div>
+                <div class="chat-typing-dots">
+                  <span class="typing-dot"></span>
+                  <span class="typing-dot"></span>
+                  <span class="typing-dot"></span>
+                </div>
+              </div>
+
+              <div class="chat-controls">
+                <button class="btn chat-next-btn">下一句</button>
+                <button class="btn chat-all-btn">自动播放</button>
+                <button class="btn chat-reset-btn">重播</button>
+                <span class="chat-progress"></span>
+              </div>
+            </div>
+
+            <div class="callout callout-warning">
+              <div class="callout-icon">⚠️</div>
+              <div class="callout-content">
+                <strong class="callout-title">生产坑：循环不收敛</strong>
+                <p>真实生产里这个循环最大的危险是——evaluator 一直说 "NEEDS_IMPROVEMENT" 跑了 20 次还没 PASS，账单爆炸。<strong>必须设最大轮数</strong>，并且检测"反馈是否在重复"——如果第 5 次和第 3 次反馈几乎一样，说明陷入死循环，应该 break 出去交人工。</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Screen 5: Quiz -->
+          <section class="screen animate-in">
+            <h2 class="screen-heading">小测：架构决策题</h2>
+
+            <div class="quiz-container" id="quiz-module3">
+
+              <div class="quiz-question-block"
+                   data-correct="option-b"
+                   data-explanation-right="对！3 种风格是产品经理写死的——'技术控 / 文艺 / 网红'。这是 parallel 的标准形状。除非你要让 LLM 自己决定'这个产品适合哪 3 种风格'——那才用 orchestrator。"
+                   data-explanation-wrong="想清楚：3 种风格的清单是写代码时定的（写死），还是看到产品后让 LLM 现场决定的？前者用 parallel 就够，后者才用 orchestrator。">
+                <h3 class="quiz-question">Q1. 你要给同一个产品生成 3 种固定风格的营销文案：技术控版、文艺版、网红版。三种风格清单是产品经理写死的。最佳模式？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Orchestrator——让 LLM 决定要拆几个</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Parallel——3 个风格写死，3 路并发</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Evaluator-Optimizer——一稿一稿打磨</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block"
+                   data-correct="option-c"
+                   data-explanation-right="对。长文 + 严格语调控制——一次性写很难达标。让一个 LLM 写、另一个 LLM 按"语调清单"评审，循环到 PASS。这就是 evaluator-optimizer 的标准用法。"
+                   data-explanation-wrong="再分析：'高质量长文' + '严格控制语调' 这两个词指向哪个模式？是顺序步骤（chain）、动态拆解（orchestrator）、还是反复打磨（evaluator）？">
+                <h3 class="quiz-question">Q2. 你要让 AI 写一篇高质量的长文，并且严格控制语调（"专业但不冷淡"）。最适合的模式？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Chain——开头 / 主体 / 结尾分三步</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Orchestrator——拆成多个段落并行写</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>Evaluator-Optimizer——一稿一稿按语调清单打磨</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <div class="quiz-question-block"
+                   data-correct="option-c"
+                   data-explanation-right="对！这正是真实生产 bug。两件事必做：① 设最大轮数（比如 5 轮）作为硬刹车；② 检测反馈是否在重复——如果是说明 generator 进入死循环，应该 break 出去转人工。光"换 evaluator prompt"是治标不治本——根本是机制要有刹车。"
+                   data-explanation-wrong="想想真实生产里你会怎么处理：这是个无限循环风险。你要的是<em>机制层面</em>的刹车——不只是改 prompt。">
+                <h3 class="quiz-question">Q3. 你的 evaluator-optimizer 跑了 20 多轮还没 PASS，账单爆炸。最该做的两件事？</h3>
+                <div class="quiz-options">
+                  <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>把 evaluator 换成更宽松的 prompt，让它快点 PASS。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>把 generator 换成 Opus，更强的模型一次就过。</span>
+                  </button>
+                  <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                    <div class="quiz-option-radio"></div>
+                    <span>设最大轮数 + 检测反馈是否在重复 → 触发就交人工。</span>
+                  </button>
+                </div>
+                <div class="quiz-feedback"></div>
+              </div>
+
+              <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">查看答案</button>
+              <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">再做一次</button>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </section>

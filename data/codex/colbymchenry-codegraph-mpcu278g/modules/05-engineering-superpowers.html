@@ -1,0 +1,220 @@
+<section class="module" id="module-5">
+  <div class="module-content">
+
+    <div class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">Engineering Superpowers</h1>
+      <p class="module-subtitle">The clever patterns inside CodeGraph that make it fast, portable, and reliable at scale</p>
+    </div>
+
+    <!-- Screen 1: Worker Threads + WASM Heap Recycling -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">The Parallel Brain: Worker Threads</h2>
+      <p>Parsing 25,000 files is slow. If CodeGraph did that work on the main thread, your terminal would freeze for minutes while the progress bar crept along. Instead, CodeGraph offloads all heavy parsing to a <span class="term" data-definition="A separate execution context in Node.js that runs in parallel with the main thread. Think of it like a separate tab in your browser — it can do CPU-intensive work without freezing the page you're looking at.">worker thread</span>.</p>
+      <p>But there's a subtle problem: <span class="term" data-definition="WebAssembly — the binary format used to run tree-sitter grammars. The WASM runtime in V8 (Node.js's JavaScript engine) has a quirk: once memory is allocated in the WASM heap, it is never given back to the OS, even after all objects are freed.">WASM</span> heaps never shrink. Every file parsed consumes a little more heap memory — and that memory is never released. Parse enough files and the worker runs out of memory and crashes.</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">src/extraction/parse-worker.ts (key logic)</span>
+          <span class="code-line"><span class="code-keyword">const</span> FILE_RECYCLE_LIMIT = <span class="code-number">250</span>;</span>
+          <span class="code-line"><span class="code-keyword">let</span> filesProcessed = <span class="code-number">0</span>;</span>
+          <span class="code-line"> </span>
+          <span class="code-line"><span class="code-keyword">async function</span> <span class="code-function">processFile</span>(filePath: <span class="code-function">string</span>) {</span>
+          <span class="code-line">  filesProcessed++;</span>
+          <span class="code-line">  <span class="code-keyword">if</span> (filesProcessed >= FILE_RECYCLE_LIMIT) {</span>
+          <span class="code-line">    <span class="code-comment">// WASM heap never shrinks — recycle the worker</span></span>
+          <span class="code-line">    <span class="code-keyword">await</span> <span class="code-function">restartWorker</span>();</span>
+          <span class="code-line">    filesProcessed = <span class="code-number">0</span>;</span>
+          <span class="code-line">  }</span>
+          <span class="code-line">  <span class="code-keyword">return</span> <span class="code-function">extractFromFile</span>(filePath);</span>
+          <span class="code-line">}</span>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">Plain English</span>
+          <div class="translation-lines">
+            <div class="tl">After 250 files, kill and restart the worker process</div>
+            <div class="tl">How many files this worker has parsed so far</div>
+            <div class="tl"> </div>
+            <div class="tl">Parse one file…</div>
+            <div class="tl">Count it</div>
+            <div class="tl">Have we hit 250 files?</div>
+            <div class="tl">Yes — the WASM heap is filling up</div>
+            <div class="tl">Start a fresh worker process (empty WASM heap)</div>
+            <div class="tl">Reset the counter</div>
+            <div class="tl"> </div>
+            <div class="tl">Actually parse this file and return the results</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-info animate-in">
+        <span class="callout-icon">🧠</span>
+        <div class="callout-content">
+          <span class="callout-title">Why 250 Files Specifically?</span>
+          <p>This is based on empirical testing. At 250 files, the WASM heap is large enough to matter but small enough that recycling overhead is negligible. The fix is a workaround for a fundamental V8 engine limitation — not a CodeGraph bug, but a quirk of the runtime it runs on.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 2: Native vs WASM Fallback -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">The Backup Generator: Native vs WASM SQLite</h2>
+      <p>CodeGraph needs SQLite for its database. The fastest way to use SQLite in Node.js is via a <span class="term" data-definition="A native addon is code compiled from C/C++ for a specific OS and CPU architecture. It's ~5x faster than pure JavaScript alternatives, but it requires a C compiler to install — which not every machine has.">native addon</span> (better-sqlite3). But native addons require a C compiler to build — which fails in some Docker containers, CI environments, and Windows setups without build tools.</p>
+      <p>So CodeGraph uses an auto-detection pattern: try the fast native version first; if it fails, silently fall back to the pure-JavaScript WASM version. Same API, different speed.</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">src/db/sqlite-adapter.ts (simplified)</span>
+          <span class="code-line"><span class="code-keyword">async function</span> <span class="code-function">createDatabase</span>(path: <span class="code-function">string</span>) {</span>
+          <span class="code-line">  <span class="code-keyword">try</span> {</span>
+          <span class="code-line">    <span class="code-keyword">const</span> { Database } =</span>
+          <span class="code-line">      <span class="code-keyword">await import</span>(<span class="code-string">'better-sqlite3'</span>);</span>
+          <span class="code-line">    <span class="code-keyword">return new</span> <span class="code-function">Database</span>(path); <span class="code-comment">// fast</span></span>
+          <span class="code-line">  } <span class="code-keyword">catch</span> {</span>
+          <span class="code-line">    <span class="code-keyword">const</span> { Database } =</span>
+          <span class="code-line">      <span class="code-keyword">await import</span>(<span class="code-string">'node-sqlite3-wasm'</span>);</span>
+          <span class="code-line">    <span class="code-keyword">return new</span> <span class="code-function">Database</span>(path); <span class="code-comment">// portable</span></span>
+          <span class="code-line">  }</span>
+          <span class="code-line">}</span>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">Plain English</span>
+          <div class="translation-lines">
+            <div class="tl">Create a database connection — figure out which engine to use</div>
+            <div class="tl">Try first…</div>
+            <div class="tl"> </div>
+            <div class="tl">Load the native C++ SQLite binding</div>
+            <div class="tl">Open the database using native code (~5x faster)</div>
+            <div class="tl">If that fails (no build tools, wrong platform)…</div>
+            <div class="tl"> </div>
+            <div class="tl">Load the pure-JavaScript WASM version instead</div>
+            <div class="tl">Open the database — slower but works everywhere</div>
+            <div class="tl"> </div>
+            <div class="tl">Caller gets a database — doesn't need to know which engine</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent animate-in">
+        <span class="callout-icon">🔋</span>
+        <div class="callout-content">
+          <span class="callout-title">The "Try Native, Fall Back to WASM" Pattern</span>
+          <p>This pattern — attempt the fast native path, silently fall back to portable — appears all over production Node.js libraries (sharp, canvas, argon2). It's how you ship software that works on a developer's MacBook, a teammate's Windows machine, and a Linux Docker container all at once.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 3: Impact Radius + Pattern Cards -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">The Ripple Calculator: Impact Radius BFS</h2>
+      <p>One of CodeGraph's most powerful features is <strong>impact analysis</strong>: "If I change this function, what else breaks?" It uses a <span class="term" data-definition="Breadth-First Search — a graph traversal algorithm that explores all neighbors of the current node before moving deeper. Imagine ripples spreading from a pebble dropped in water — BFS explores level by level outward.">BFS</span> traversal starting from the changed symbol, following edges outward to find everything in the dependency chain.</p>
+
+      <div class="pattern-cards animate-in stagger-children">
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-accent-light)">🕸️</div>
+          <div class="pattern-title">getCallers(name)</div>
+          <p class="pattern-desc">BFS traversal following inbound "calls" edges. Who calls this function? All callers, up to maxDepth=3 levels up the call tree.</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-info-light)">🌊</div>
+          <div class="pattern-title">getCallees(name)</div>
+          <p class="pattern-desc">BFS traversal following outbound "calls" edges. What does this function call? All dependencies, down into the call tree.</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-success-light)">💥</div>
+          <div class="pattern-title">getImpactRadius(name)</div>
+          <p class="pattern-desc">Multi-level BFS in both directions. The full blast radius of a change — everything that could break if this symbol changes.</p>
+        </div>
+      </div>
+
+      <div class="callout callout-info animate-in">
+        <span class="callout-icon">🎯</span>
+        <div class="callout-content">
+          <span class="callout-title">Why BFS and Not DFS?</span>
+          <p><span class="term" data-definition="Depth-First Search — explores as far as possible along one branch before backtracking. Goes deep before going wide.">DFS</span> could explore infinitely deep call chains (recursive functions, circular references). BFS with a depth limit (maxDepth=3) naturally stops at a useful boundary — close enough to be relevant, not so far that you get every function in the codebase.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 4: Spot the Bug Challenge -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">Spot the Bug: Worker Recycling</h2>
+      <p>Below is a simplified version of the worker recycling logic. One line contains a bug that would cause the worker to be recycled too aggressively — recycling after almost every file instead of every 250 files. Click the buggy line.</p>
+
+      <div class="bug-challenge">
+        <h3>Find the bug in this worker recycling code</h3>
+        <div class="bug-code">
+          <div class="bug-line" onclick="checkBugLine(this, false)" data-hint="This is fine — 250 is the correct batch size limit.">
+            <span class="line-num">1</span>
+            <code><span class="code-keyword">const</span> FILE_RECYCLE_LIMIT = <span class="code-number">250</span>;</code>
+          </div>
+          <div class="bug-line" onclick="checkBugLine(this, false)" data-hint="Initializing to 0 is correct — the counter starts at zero.">
+            <span class="line-num">2</span>
+            <code><span class="code-keyword">let</span> filesProcessed = <span class="code-number">0</span>;</code>
+          </div>
+          <div class="bug-line" onclick="checkBugLine(this, false)" data-hint="Incrementing filesProcessed is correct — we want to count processed files.">
+            <span class="line-num">3</span>
+            <code>filesProcessed++;</code>
+          </div>
+          <div class="bug-line" onclick="checkBugLine(this, true)"
+            data-explanation="The condition should be >= (greater-than-or-equal), not > (strictly greater-than). With >, the worker would only recycle after processing file #251 — missing the 250-file boundary. But more critically, after restartWorker() resets filesProcessed to 0, it increments again before the check, so the logic would be off-by-one throughout. A subtle fence-post error."
+            data-hint="Look at the comparison operator — is it checking the right boundary?">
+            <span class="line-num">4</span>
+            <code><span class="code-keyword">if</span> (filesProcessed <span style="color: #F38BA8; font-weight: bold;">&gt;</span> FILE_RECYCLE_LIMIT) {</code>
+          </div>
+          <div class="bug-line" onclick="checkBugLine(this, false)" data-hint="Restarting the worker is the correct action to free WASM heap memory.">
+            <span class="line-num">5</span>
+            <code>  <span class="code-keyword">await</span> <span class="code-function">restartWorker</span>();</code>
+          </div>
+          <div class="bug-line" onclick="checkBugLine(this, false)" data-hint="Resetting the counter to 0 after restart is correct.">
+            <span class="line-num">6</span>
+            <code>  filesProcessed = <span class="code-number">0</span>;</code>
+          </div>
+        </div>
+        <div class="bug-feedback"></div>
+      </div>
+
+      <div class="callout callout-accent animate-in" style="margin-top: var(--space-8);">
+        <span class="callout-icon">🚀</span>
+        <div class="callout-content">
+          <span class="callout-title">You Now Understand CodeGraph</span>
+          <p>You've traced the full journey: problem → solution → architecture → indexing pipeline → query answering → clever engineering patterns. You can now tell an AI coding tool exactly <em>how</em> to use CodeGraph, what to expect from it, and where its limits are. That's the real superpower.</p>
+        </div>
+      </div>
+
+      <!-- Final Quiz -->
+      <div class="quiz-container" id="quiz-m5" style="margin-top: var(--space-8);">
+
+        <div class="quiz-question-block" data-correct="b"
+          data-explanation-right="Exactly! The WASM heap is the constraint — V8 never frees WASM-allocated memory. Recycling the worker process is the only way to reclaim that heap space."
+          data-explanation-wrong="The 250-file limit isn't about CPU or file count preferences — it's about the WASM heap that tree-sitter uses. WASM memory grows but never shrinks, so the worker must be recycled periodically.">
+          <p class="quiz-question">Why does CodeGraph restart the parse worker every 250 files?</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)"><span class="quiz-option-radio"></span>To prevent the TypeScript compiler from consuming too much CPU</button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)"><span class="quiz-option-radio"></span>Because WASM heap memory (used by tree-sitter) grows but never shrinks — recycling frees it</button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)"><span class="quiz-option-radio"></span>To comply with Node.js file descriptor limits</button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block" data-correct="c"
+          data-explanation-right="Right! The caller of createDatabase() gets back a Database object and never needs to know whether it's powered by native C++ or WASM JavaScript. That's the beauty of the facade pattern."
+          data-explanation-wrong="The pattern hides the implementation detail from callers. Whatever code calls createDatabase() just gets a working database — the adapter handles the native vs. WASM decision internally.">
+          <p class="quiz-question">What design benefit does the native-vs-WASM SQLite adapter provide?</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)"><span class="quiz-option-radio"></span>It forces all developers to install native build tools for the best performance</button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)"><span class="quiz-option-radio"></span>It lets users choose which database engine they prefer at runtime</button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)"><span class="quiz-option-radio"></span>It makes CodeGraph work on any machine — the caller never needs to know which engine is running</button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div style="margin-top: var(--space-6); display: flex; gap: var(--space-3);">
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m5')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m5')">Reset</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>

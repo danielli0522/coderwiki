@@ -1,0 +1,366 @@
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 4: API 与 Webhook 集成
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">API 与 Webhook 集成</h1>
+      <p class="module-subtitle">掌握 DocuSeal 的 RESTful API、认证机制和 Webhook 事件系统——把签署功能嵌入你的业务</p>
+    </header>
+
+    <!-- ── Screen 1: API 概览 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">API 概览：所有路径都在 /api/ 命名空间下</h2>
+
+      <p>DocuSeal 的 <span class="term" data-definition="REST API（表述性状态转移 API）是一种 Web 服务接口设计风格。DocuSeal 的 API 路径都在 /api/ 命名空间下，返回 JSON 格式数据。使用 HTTP 方法表示操作：GET 查询、POST 创建、PUT/PATCH 更新、DELETE 删除。">REST API</span> 路径集中在 <code>/api/</code> 命名空间下。从 routes.rb 中可以看到，API 分为以下几个核心资源：</p>
+
+      <div class="badge-list">
+        <div class="badge-item">
+          <code class="badge-code">GET /api/templates</code>
+          <span class="badge-desc">列出所有模板（支持分页、搜索、文件夹过滤）</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">GET /api/templates/:id</code>
+          <span class="badge-desc">获取模板详情（包含字段定义、签署人角色、文档 URL）</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">PATCH /api/templates/:id</code>
+          <span class="badge-desc">更新模板（修改字段、角色、偏好设置）</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">POST /api/submissions</code>
+          <span class="badge-desc">创建签署提交（核心接口——发起一次签署流程）</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">GET /api/submissions/:id</code>
+          <span class="badge-desc">获取提交详情（包含签署人状态、签署后文档 URL）</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">POST /api/submissions/init</code>
+          <span class="badge-desc">创建并初始化提交（返回结构化数据，适合嵌入式场景）</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">GET /api/submitters/:id</code>
+          <span class="badge-desc">获取签署人详情（包含签署链接、填写值、状态）</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">POST /api/tools/merge</code>
+          <span class="badge-desc">合并多个 PDF 文件（Base64 编码输入输出）</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">POST /api/tools/verify</code>
+          <span class="badge-desc">验证 PDF 签名（检查签名有效性和文档完整性）</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 2: 认证机制 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">认证机制：Access Token</h2>
+
+      <p>API 认证使用 <span class="term" data-definition="Access Token（访问令牌）是 DocuSeal API 的认证凭证。每个用户可以生成一个唯一的 token，通过 HTTP Header X-Auth-Token 传递。Token 与用户权限绑定，支持 CanCanCan 权限控制。">Access Token</span>（访问令牌）。每个用户可以在设置页面生成一个 token，所有 API 请求都需要在 HTTP Header 中携带它：</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-comment"># 创建签署提交的 API 调用示例</span></span>
+<span class="code-line">curl -X POST \</span>
+<span class="code-line">  https://sign.example.com/api/submissions \</span>
+<span class="code-line">  -H <span class="code-string">"X-Auth-Token: YOUR_TOKEN"</span> \</span>
+<span class="code-line">  -H <span class="code-string">"Content-Type: application/json"</span> \</span>
+<span class="code-line">  -d <span class="code-string">'{</span></span>
+<span class="code-line"><span class="code-string">    "template_id": 42,</span></span>
+<span class="code-line"><span class="code-string">    "send_email": true,</span></span>
+<span class="code-line"><span class="code-string">    "submitters": [{</span></span>
+<span class="code-line"><span class="code-string">      "email": "alice@example.com",</span></span>
+<span class="code-line"><span class="code-string">      "name": "Alice Chen",</span></span>
+<span class="code-line"><span class="code-string">      "uuid": "sub-001",</span></span>
+<span class="code-line"><span class="code-string">      "values": {</span></span>
+<span class="code-line"><span class="code-string">        "company_name": "Acme Corp"</span></span>
+<span class="code-line"><span class="code-string">      }</span></span>
+<span class="code-line"><span class="code-string">    }]</span></span>
+<span class="code-line"><span class="code-string">  }'</span></span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">使用 curl 命令调用创建签署提交的 API</p>
+            <p class="tl">POST 请求到 /api/submissions 端点</p>
+            <p class="tl">请求地址——你的 DocuSeal 实例域名</p>
+            <p class="tl">认证 Header：X-Auth-Token 携带你的 API 访问令牌</p>
+            <p class="tl">内容类型：JSON 格式的请求体</p>
+            <p class="tl">JSON 请求体开始</p>
+            <p class="tl">template_id：使用哪个模板创建签署——这里用 ID 42 的模板</p>
+            <p class="tl">send_email: true——创建后自动发送邀请邮件给签署人</p>
+            <p class="tl">submitters 数组：定义实际的签署人</p>
+            <p class="tl">签署人邮箱——邀请邮件会发到这个地址</p>
+            <p class="tl">签署人姓名——显示在邮件和文档中</p>
+            <p class="tl">uuid：对应模板中的签署人角色（绑定到此角色的字段）</p>
+            <p class="tl">values：预填值——自动填充 "company_name" 字段</p>
+            <p class="tl">这里预填了公司名称为 "Acme Corp"</p>
+            <p class="tl">预填值结束</p>
+            <p class="tl">签署人数组结束</p>
+            <p class="tl">JSON 请求体结束</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">&#128218;</div>
+        <div class="callout-content">
+          <strong class="callout-title">API 权限控制</strong>
+          <p>DocuSeal 使用 CanCanCan（ability.rb）进行权限控制。API 控制器通过 load_and_authorize_resource 宏自动加载资源并检查权限。AccessToken 模型关联到 User，User 又属于 Account，确保多租户数据隔离。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 3: 创建签署的 API 源码 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">代码翻译：API 创建签署的核心逻辑</h2>
+
+      <p>看 Api::SubmissionsController#create 的源码——这个方法是 API 集成的核心入口：</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-comment"># app/controllers/api/submissions_controller.rb</span></span>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">create</span></span>
+<span class="code-line">  Params::SubmissionCreateValidator</span>
+<span class="code-line">    .call(params)</span>
+<span class="code-line"></span>
+<span class="code-line">  submissions = <span class="code-keyword">if</span> emails?</span>
+<span class="code-line">    Submissions.create_from_emails(</span>
+<span class="code-line">      template:, user:,</span>
+<span class="code-line">      source: <span class="code-symbol">:api</span>,</span>
+<span class="code-line">      emails:, params:</span>
+<span class="code-line">    )</span>
+<span class="code-line">  <span class="code-keyword">else</span></span>
+<span class="code-line">    Submissions.create_from_submitters(</span>
+<span class="code-line">      template:, user:,</span>
+<span class="code-line">      source: <span class="code-symbol">:api</span>,</span>
+<span class="code-line">      submitters_order:,</span>
+<span class="code-line">      submissions_attrs:</span>
+<span class="code-line">    )</span>
+<span class="code-line">  <span class="code-keyword">end</span></span>
+<span class="code-line"></span>
+<span class="code-line">  WebhookUrls.enqueue_events(</span>
+<span class="code-line">    submissions,</span>
+<span class="code-line">    <span class="code-string">'submission.created'</span></span>
+<span class="code-line">  )</span>
+<span class="code-line"><span class="code-keyword">end</span></span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">create 方法：创建签署提交的核心入口</p>
+            <p class="tl">第一步：参数验证——检查必填参数、邮箱格式、字段合法性等</p>
+            <p class="tl">SubmissionCreateValidator 是自定义验证器</p>
+            <p class="tl">空行</p>
+            <p class="tl">根据参数类型选择不同的创建方式</p>
+            <p class="tl">如果传了 emails 参数（简单模式）——一行一个邮箱，自动创建签署人</p>
+            <p class="tl">create_from_emails：为每个邮箱创建 Submission + Submitter</p>
+            <p class="tl">template 是模板对象，user 是当前 API 调用者</p>
+            <p class="tl">source: :api 标记来源为 API 调用（用于统计和审计）</p>
+            <p class="tl">emails 是签署人邮箱列表，params 是额外配置</p>
+            <p class="tl">否则使用详细模式——传入完整的 submitters 配置</p>
+            <p class="tl">create_from_submitters：支持预填值、自定义字段、元数据等</p>
+            <p class="tl">submitters_order：签署顺序（random 随机 / preserved 按顺序）</p>
+            <p class="tl">submissions_attrs：签署人属性数组（邮箱、姓名、预填值、元数据等）</p>
+            <p class="tl">条件分支结束</p>
+            <p class="tl">空行</p>
+            <p class="tl">创建完成后，触发 submission.created Webhook 事件</p>
+            <p class="tl">传入创建的 submissions 数组和事件名称</p>
+            <p class="tl">Webhook 事件会异步推送到所有配置了此事件的 Webhook URL</p>
+            <p class="tl">create 方法结束</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 4: Webhook 事件系统 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">Webhook 事件系统：11 种实时通知</h2>
+
+      <p>Webhook 是 DocuSeal 与外部系统集成的关键桥梁。当特定事件发生时，系统会向配置的 URL 发送 HTTP POST 请求，携带事件数据。</p>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">&#128065;</div>
+          <h4 class="pattern-title">form.viewed</h4>
+          <p class="pattern-desc">签署人打开了签署链接。触发时机：SubmitFormController#show 被调用。数据包含 submitter 信息和时间戳。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">&#9999;</div>
+          <h4 class="pattern-title">form.started</h4>
+          <p class="pattern-desc">签署人开始填写表单（第一个字段被修改时触发）。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">&#9989;</div>
+          <h4 class="pattern-title">form.completed</h4>
+          <p class="pattern-desc">签署人完成签署。最常用的 Webhook 事件——用于触发后续业务流程（如更新订单状态、发送确认邮件等）。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+          <div class="pattern-icon" style="background: var(--color-actor-4)">&#10060;</div>
+          <h4 class="pattern-title">form.declined</h4>
+          <p class="pattern-desc">签署人拒绝签署。可用于通知销售团队跟进、记录拒绝原因。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+          <div class="pattern-icon" style="background: var(--color-actor-5)">&#128230;</div>
+          <h4 class="pattern-title">submission.created / completed / expired / archived</h4>
+          <p class="pattern-desc">提交级别事件：创建、全部完成、已过期、已归档。适合整体流程追踪。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-accent)">
+          <div class="pattern-icon" style="background: var(--color-accent)">&#128203;</div>
+          <h4 class="pattern-title">template.created / updated / archived</h4>
+          <p class="pattern-desc">模板级别事件：模板被创建、更新或归档时触发。用于同步模板变更到外部系统。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 5: Webhook HMAC 签名验证 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">代码翻译：Webhook HMAC 签名验证</h2>
+
+      <p>安全是 Webhook 的核心问题——你怎么确认收到的请求真的来自 DocuSeal？DocuSeal 使用 <span class="term" data-definition="HMAC（Hash-based Message Authentication Code）是一种使用密钥的哈希签名算法。DocuSeal 为每个 Webhook URL 生成一个 hmac_secret，用 SHA256 对请求体签名。接收方用相同的密钥验证签名，确保请求未被篡改。">HMAC-SHA256</span> 签名来保证请求的完整性和真实性：</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-comment"># WebhookUrl 模型中的签名配置</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">WebhookUrl</span> &lt; ApplicationRecord</span>
+<span class="code-line">  EVENTS = <span class="code-string">%w[</span></span>
+<span class="code-line">    <span class="code-string">form.viewed</span></span>
+<span class="code-line">    <span class="code-string">form.started</span></span>
+<span class="code-line">    <span class="code-string">form.completed</span></span>
+<span class="code-line">    <span class="code-string">form.declined</span></span>
+<span class="code-line">    <span class="code-string">submission.created</span></span>
+<span class="code-line">    <span class="code-string">submission.completed</span></span>
+<span class="code-line">    <span class="code-string">submission.expired</span></span>
+<span class="code-line">    <span class="code-string">submission.archived</span></span>
+<span class="code-line">    <span class="code-string">template.created</span></span>
+<span class="code-line">    <span class="code-string">template.updated</span></span>
+<span class="code-line">    <span class="code-string">template.archived</span></span>
+<span class="code-line">  <span class="code-string">]</span></span>
+<span class="code-line"></span>
+<span class="code-line">  encrypts <span class="code-symbol">:url</span>,</span>
+<span class="code-line">    <span class="code-symbol">:secret</span>,</span>
+<span class="code-line">    <span class="code-symbol">:hmac_secret</span></span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">def</span> <span class="code-function">set_hmac_secret</span></span>
+<span class="code-line">    self.hmac_secret ||=</span>
+<span class="code-line">      WebhookUrls::Signatures</span>
+<span class="code-line">        .generate_secret</span>
+<span class="code-line">  <span class="code-keyword">end</span></span>
+<span class="code-line"><span class="code-keyword">end</span></span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">WebhookUrl 模型——管理 Webhook 端点配置</p>
+            <p class="tl">EVENTS 常量：定义所有支持的 Webhook 事件类型</p>
+            <p class="tl">表单级事件：签署人查看、开始填写、完成签署、拒绝</p>
+            <p class="tl">提交级事件：创建、全部完成、已过期、已归档</p>
+            <p class="tl">模板级事件：创建、更新、归档</p>
+            <p class="tl">总共 11 种事件类型</p>
+            <p class="tl">空行</p>
+            <p class="tl">加密存储：url、secret、hmac_secret 使用 ActiveRecord 加密</p>
+            <p class="tl">这些敏感字段在数据库中是加密存储的，即使数据库泄露也无法直接读取</p>
+            <p class="tl">hmac_secret 是签名密钥，用于生成请求签名</p>
+            <p class="tl">空行</p>
+            <p class="tl">自动生成 HMAC 密钥（如果未设置）</p>
+            <p class="tl">使用 WebhookUrls::Signatures 服务生成安全的随机密钥</p>
+            <p class="tl">方法结束</p>
+            <p class="tl">模型结束</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">&#128274;</div>
+        <div class="callout-content">
+          <strong class="callout-title">Webhook 安全最佳实践</strong>
+          <p>验证 Webhook 请求的步骤：1) 从 HTTP Header 中取出 X-Webhook-Signature；2) 用 hmac_secret 对请求体做 HMAC-SHA256 签名；3) 比较两个签名是否一致。DocuSeal 还支持 Webhook 事件重发（resend）和事件日志查看，方便调试和故障排查。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 6: 测验 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">检验你的理解</h2>
+
+      <div class="quiz-container" id="quiz-module4">
+        <div class="quiz-question-block"
+             data-correct="option-b"
+             data-explanation-right="正确！API 认证使用 X-Auth-Token HTTP Header，携带用户的 Access Token。每个用户可以在设置页面生成自己的 token，token 与用户权限绑定。"
+             data-explanation-wrong="回忆一下 API 调用示例中的认证方式。Token 放在 HTTP Header 的哪个字段里？">
+          <h3 class="quiz-question">调用 DocuSeal API 时，认证 Token 应该放在哪里？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>URL 查询参数 ?token=YOUR_TOKEN</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>HTTP Header X-Auth-Token: YOUR_TOKEN</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>HTTP Header Authorization: Bearer YOUR_TOKEN</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-c"
+             data-explanation-right="正确！POST /api/submissions 是发起签署的核心接口。它接受 template_id（使用哪个模板）和 submitters（签署人配置），创建 Submission 和 Submitter 记录，发送邀请邮件，触发 Webhook 事件。"
+             data-explanation-wrong="想想"发起一次签署"对应哪个 API 操作。你是在创建什么资源？">
+          <h3 class="quiz-question">发起一次签署流程，应该调用哪个 API 端点？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>POST /api/templates/:id/submitters</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>POST /api/submitters</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>POST /api/submissions</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-a"
+             data-explanation-right="正确！Webhook 使用 HMAC-SHA256 签名验证。每个 Webhook URL 有一个 hmac_secret，发送请求时用这个密钥对请求体签名，接收方用相同的密钥验证。确保请求未被篡改且确实来自 DocuSeal。"
+             data-explanation-wrong="想想 Webhook 的安全验证机制。它是如何确保请求确实来自你的 DocuSeal 实例，而不是恶意伪造的？">
+          <h3 class="quiz-question">Webhook 如何保证请求的真实性和完整性？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>HMAC-SHA256 签名——用密钥对请求体签名，接收方验证签名</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>HTTPS 加密——所有 Webhook 请求都通过 HTTPS 发送</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>IP 白名单——只接受来自 DocuSeal 服务器 IP 的请求</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重新作答</button>
+      </div>
+    </section>
+
+  </div>
+</section>

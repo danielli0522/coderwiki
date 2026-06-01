@@ -1,0 +1,287 @@
+<section class="module" id="module-6" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">06</span>
+      <h1 class="module-title">调试生产：当事情出错时</h1>
+      <p class="module-subtitle">学会读懂错误信号，从 AI 的 bug 循环中脱身</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Bug taxonomy -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Dify 应用的三类故障</h2>
+        <p>大多数 Dify 应用故障都可以归入三个大类。知道类型，就知道去哪里查：</p>
+
+        <div class="icon-rows animate-in stagger-children">
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-error)">🤖</div>
+            <div>
+              <strong>AI 质量问题</strong>
+              <p>回答跑题、不遵循格式、产生幻觉——根源是 Prompt 设计或上下文不足</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-4)">⚡</div>
+            <div>
+              <strong>基础设施问题</strong>
+              <p>超时、503、429 限流——根源是配置、并发或 API 配额问题</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🔗</div>
+            <div>
+              <strong>工作流逻辑问题</strong>
+              <p>节点卡住、变量为空、循环不终止——根源是流程设计或数据格式不匹配</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info animate-in">
+          <div class="callout-icon">🔍</div>
+          <div class="callout-content">
+            <strong class="callout-title">第一步永远是：看日志</strong>
+            <p>Dify 在 <code>api/logs/</code> 下记录了所有请求。Docker 部署时用 <code>docker logs dify-api</code> 实时查看。日志里有 <span class="term" data-definition="Stack Trace（堆栈跟踪）：错误发生时的代码调用路径——就像犯罪现场的脚印，从头一路追到出问题的那一行代码。">stack trace</span>，能精确定位出错位置。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Common error patterns chat -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">排查对话：一个真实的调试流程</h2>
+        <p>你的工作流突然开始返回 500 错误。跟着这个排查流程走：</p>
+
+        <div class="chat-window" id="chat-module6">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="user" style="display:none">
+              <div class="chat-avatar" style="background: #6B6560">D</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: #6B6560">开发者</span>
+                <p>完了，工作流一直返回 500 Internal Server Error！</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="api" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">S</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">调试思路</span>
+                <p>先查 API 日志：<code>docker logs dify-api --tail 50</code>，看具体报错</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="user" style="display:none">
+              <div class="chat-avatar" style="background: #6B6560">D</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: #6B6560">开发者</span>
+                <p>日志显示：InvokeAuthorizationError: Incorrect API key provided</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="api" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">S</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">调试思路</span>
+                <p>找到了！API Key 验证失败。去 Dify 设置 → 模型提供商，重新检查 OpenAI Key 是否过期或被删除</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="user" style="display:none">
+              <div class="chat-avatar" style="background: #6B6560">D</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: #6B6560">开发者</span>
+                <p>Key 没问题……换了一下，还是报错。看更多日志，发现还有 QuotaExceededError</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="5" data-sender="api" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">S</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">调试思路</span>
+                <p>配额超限！去 OpenAI 账户检查账单——要么充值，要么在 Dify 配置多个 Key 做负载均衡分散请求</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-module6-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module6-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条</button>
+            <button class="btn chat-all-btn">全部播放</button>
+            <button class="btn chat-reset-btn">重新播放</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Error handling code translation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码翻译：错误处理架构</h2>
+        <p><code>api/core/app/task_pipeline/based_generate_task_pipeline.py</code> 里的错误处理展示了 Dify 如何把底层错误转成对用户友好的信息：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-keyword">def</span> <span class="code-function">handle_error</span>(<span class="code-keyword">self</span>, *, event, ...):</span>
+<span class="code-line">  e = event.error</span>
+<span class="code-line">  <span class="code-keyword">if</span> <span class="code-function">isinstance</span>(</span>
+<span class="code-line">    e, InvokeAuthorizationError</span>
+<span class="code-line">  ):</span>
+<span class="code-line">    err = InvokeAuthorizationError(</span>
+<span class="code-line">      <span class="code-string">"Incorrect API key provided"</span></span>
+<span class="code-line">    )</span>
+<span class="code-line">  <span class="code-keyword">elif</span> <span class="code-function">isinstance</span>(e, InvokeError):</span>
+<span class="code-line">    err = e</span>
+<span class="code-line">  <span class="code-keyword">else</span>:</span>
+<span class="code-line">    description = <span class="code-function">getattr</span>(</span>
+<span class="code-line">      e, <span class="code-string">"description"</span>, <span class="code-keyword">None</span>)</span>
+<span class="code-line">    err = Exception(description)</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">定义处理错误的方法，* 表示后面的参数必须用名字传入</p>
+              <p class="tl">从事件对象里取出原始错误</p>
+              <p class="tl">判断错误类型——isinstance 检查"这个错误是不是某种类型"</p>
+              <p class="tl">如果是 API 密钥认证失败</p>
+              <p class="tl"></p>
+              <p class="tl">包装成统一的认证错误，附上用户能看懂的提示语</p>
+              <p class="tl">如果是其他 LLM 调用错误（超时、限流等）</p>
+              <p class="tl">直接把原始错误往上传——保留完整信息给日志</p>
+              <p class="tl">如果是未知类型的错误</p>
+              <p class="tl">尝试读取 description 字段（如果有的话）</p>
+              <p class="tl">用 description 包装成通用 Exception 传给上层</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Spot the bug -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">找 Bug 挑战</h2>
+        <p>下面这段工作流配置有一个常见问题——导致 LLM 节点总是返回空内容。你能找出来吗？</p>
+
+        <div class="bug-challenge">
+          <h3>找出问题：这个工作流为什么总输出空字符串？</h3>
+          <div class="bug-code">
+            <div class="bug-line" data-line="1" onclick="checkBugLine(this, false)">
+              <span class="line-num">1</span>
+              <code>nodes:</code>
+            </div>
+            <div class="bug-line" data-line="2" onclick="checkBugLine(this, false)">
+              <span class="line-num">2</span>
+              <code>  - type: llm</code>
+            </div>
+            <div class="bug-line" data-line="3" onclick="checkBugLine(this, false)">
+              <span class="line-num">3</span>
+              <code>    model: gpt-4o</code>
+            </div>
+            <div class="bug-line bug-target" data-line="4" onclick="checkBugLine(this, true)">
+              <span class="line-num">4</span>
+              <code>    prompt: "请总结以下内容：{{user_input}}"</code>
+            </div>
+            <div class="bug-line" data-line="5" onclick="checkBugLine(this, false)">
+              <span class="line-num">5</span>
+              <code>    output_var: result</code>
+            </div>
+            <div class="bug-line" data-line="6" onclick="checkBugLine(this, false)">
+              <span class="line-num">6</span>
+              <code>  - type: answer</code>
+            </div>
+            <div class="bug-line" data-line="7" onclick="checkBugLine(this, false)">
+              <span class="line-num">7</span>
+              <code>    content: "{{result}}"</code>
+            </div>
+          </div>
+          <div class="bug-feedback" id="bug-feedback"></div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Debugging strategies -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">三条调试黄金法则</h2>
+        <p>这三条法则能帮你系统性地解决 90% 的 Dify 应用问题：</p>
+
+        <div class="step-cards animate-in stagger-children">
+          <div class="step-card animate-in">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>单步运行，逐节点验证</strong>
+              <p>工作流复杂时，用 Dify 的"单步调试"模式——每个节点执行后暂停，查看输入输出是否符合预期，再继续</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>变量为空时，往上查</strong>
+              <p>LLM 输出为空？先检查输入变量有没有值。输入变量为空？再往上查是哪个节点没有正确输出——沿着数据流回溯</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>AI 质量差时，先加 System Prompt</strong>
+              <p>AI 乱答？90% 的情况是 System Prompt 不够明确。先在 Prompt 里加上"你是…你只能回答…你必须按以下格式输出"</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 6: Final quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">综合检验</h2>
+
+        <div class="quiz-container" id="quiz-module6">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="对！从数据流末端往源头回溯——输出空 → 查 answer 节点的输入 → 查上游 LLM 输出 → 查 LLM 的输入变量。系统性回溯比随机猜测省 80% 的时间。"
+               data-explanation-wrong="想想我们刚才说的「往上查」原则——如果最终输出为空，问题可能在数据流的任意一个环节，应该从哪里开始排查最有效率？">
+            <h3 class="quiz-question">你的工作流最终输出节点总是显示空白。从哪里开始排查最有效率？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>直接换一个 LLM 模型试试</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>从输出节点开始，沿数据流往上查每个节点的输入输出</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>删掉整个工作流重新搭一个</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="准确！InvokeAuthorizationError 明确指向 API 密钥问题。Dify 的错误处理代码（你刚才看过）会把认证失败包装成这个特定错误类型，直接去检查 Key 配置即可。"
+               data-explanation-wrong="再想想——InvokeAuthorizationError 这个错误名字本身就在告诉你问题所在：Authorization = 授权认证。这指向哪里的问题？">
+            <h3 class="quiz-question">日志里出现了 InvokeAuthorizationError。最可能是什么原因？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>PostgreSQL 数据库连接失败</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>工作流 JSON 格式有语法错误</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>模型 API Key 无效或已过期</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module6')">提交答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module6')">重新作答</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

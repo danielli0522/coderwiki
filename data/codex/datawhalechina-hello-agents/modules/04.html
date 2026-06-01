@@ -1,0 +1,132 @@
+
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">多智能体协作模式</h1>
+      <p class="module-subtitle">一个人做不了所有事。当任务变复杂，你需要多个 Agent 分工合作——就像公司里有不同部门各司其职。</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Three classic paradigms -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">三种经典的"思考方式"</h2>
+        <p>Hello-Agents 教你实现三种智能体范式，每种解决不同类型的问题：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-accent-light); color: var(--color-accent)">🔄</div>
+            <h4 class="pattern-title">ReAct</h4>
+            <p class="pattern-desc">边想边做。每一步都先思考再行动，观察结果后继续。像侦探破案：发现线索 → 顺着线索查 → 发现新线索 → 继续追查。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-info-light); color: var(--color-info)">📋</div>
+            <h4 class="pattern-title">Plan-and-Solve</h4>
+            <p class="pattern-desc">先做计划再执行。把大任务拆成小步骤，然后逐步完成。像旅行攻略：先列清单（订票→找房→打包），再逐项执行。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: #EDE9FE; color: #7B6DAA">🪞</div>
+            <h4 class="pattern-title">Reflection</h4>
+            <p class="pattern-desc">做完之后自我检查。生成一个答案，然后让 AI 审视自己的答案，找出问题并改进。像学生写完作文后自己检查一遍。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: ReAct code walkthrough -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">ReAct 循环的核心代码</h2>
+        <p>ReAct Agent 的核心是一个 <code>while</code> 循环——每一步都把 Prompt 发给 LLM，解析输出，执行工具，把观察结果追加到历史里，再循环。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">run</span>(<span class="code-keyword">self</span>, question: <span class="code-keyword">str</span>):</span>
+<span class="code-line">    current_step = <span class="code-number">0</span></span>
+<span class="code-line">    <span class="code-keyword">while</span> current_step &lt; <span class="code-keyword">self</span>.max_steps:</span>
+<span class="code-line">        prompt = TEMPLATE.<span class="code-function">format</span>(</span>
+<span class="code-line">            tools=tools_desc,</span>
+<span class="code-line">            question=question,</span>
+<span class="code-line">            history=history_str)</span>
+<span class="code-line">        response = llm.<span class="code-function">think</span>(messages)</span>
+<span class="code-line">        thought, action = <span class="code-function">_parse</span>(response)</span>
+<span class="code-line">        <span class="code-keyword">if</span> action.<span class="code-function">startswith</span>(<span class="code-string">"Finish"</span>):</span>
+<span class="code-line">            <span class="code-keyword">return</span> final_answer</span>
+<span class="code-line">        observation = tool_func(tool_input)</span>
+<span class="code-line">        history.<span class="code-function">append</span>(f<span class="code-string">"Observation: {observation}"</span>)</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN CHINESE</span>
+            <div class="translation-lines">
+              <p class="tl">Agent 的运行方法，接收用户的问题作为输入。</p>
+              <p class="tl">用一个计数器跟踪当前执行到第几步，防止无限循环。</p>
+              <p class="tl">把工具描述、问题、历史拼装成完整的 Prompt 发给 LLM。</p>
+              <p class="tl">从 LLM 的回复中解析出 thought 和 action 两个字段。</p>
+              <p class="tl">如果 LLM 觉得信息够了（action 以 Finish 开头），直接返回最终答案。</p>
+              <p class="tl">否则执行工具，把观察结果追加到对话历史中，下一轮继续。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Multi-agent architectures -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">当多个 Agent 组成团队</h2>
+        <p>Hello-Agents 的后半部分展示了真实的
+          <span class="term" data-definition="多智能体系统（Multi-Agent System）是由多个 Agent 协作完成任务的系统。每个 Agent 有自己的角色和职责，通过通信协议协调工作。">多智能体系统</span>：
+          旅行助手里有"搜索 Agent"和"规划 Agent"；赛博小镇里有多个"居民 Agent"互相社交。
+        </p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: #FDF5E0; color: #D4A843">🗺️</div>
+            <h4 class="pattern-title">智能旅行助手（Ch.13）</h4>
+            <p class="pattern-desc">用 MCP 协议连接地图服务、景点搜索等多个工具，Agent 自动规划旅行路线。后端 Python + 前端 Vue。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: #E8F5EE; color: #2D8B55">🏘️</div>
+            <h4 class="pattern-title">赛博小镇（Ch.15）</h4>
+            <p class="pattern-desc">多个 AI 角色住在同一个虚拟小镇里，各自有记忆系统、关系网络，能自主移动和对话。后端 Python + 前端 Godot 游戏引擎。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-accent-light); color: var(--color-accent)">🔬</div>
+            <h4 class="pattern-title">深度研究 Agent（Ch.14）</h4>
+            <p class="pattern-desc">自动化的研究助手：搜索论文、总结内容、生成报告。展示了 Planner → Searcher → Reporter 的流水线分工。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Quiz -->
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="正确！ReAct 用 while 循环不断"思考→行动→观察"，Plan-and-Solve 先做计划再逐步执行，Reflection 生成答案后自我审查。三者解决的是不同类型的问题。"
+               data-explanation-wrong="三种范式的区别在于"思考方式"不同：ReAct 是边想边做（循环），Plan-and-Solve 是先想后做（计划→执行），Reflection 是做完再想（自我审查）。">
+            <h3 class="quiz-question">你要做一个"自动写代码并调试"的 Agent。哪种范式最合适？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>ReAct + Reflection 结合：先用 ReAct 循环写代码和测试，再用 Reflection 审查结果</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>只用 Plan-and-Solve：先列出所有代码文件，然后逐个生成</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>只用 Reflection：生成一次代码，然后让 AI 自己找出所有 bug</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

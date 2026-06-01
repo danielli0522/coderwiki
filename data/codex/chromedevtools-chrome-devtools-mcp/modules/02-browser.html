@@ -1,0 +1,154 @@
+<!-- Module 2: 浏览器连接与生命周期 -->
+<section class="module" id="module-2">
+  <div class="module-content">
+
+    <div class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">浏览器连接与生命周期</h1>
+      <p class="module-subtitle">MCP Server 如何启动、连接和管理 Chrome 实例？两种模式的区别是什么？</p>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">两种连接模式</h2>
+      <p><code>browser.ts</code> 提供了两种浏览器连接方式，通过配置参数自动选择：</p>
+
+      <div class="pattern-cards stagger-children">
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-accent-light); color: var(--color-accent);">&#x1F680;</div>
+          <h3 class="pattern-title">Launch 模式（默认）</h3>
+          <p class="pattern-desc">MCP Server 自己启动一个 Chrome 实例。使用 pipe 通信，拥有完整控制权。支持 headless、isolated、自定义 viewport 等配置。</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-info-light); color: var(--color-info);">&#x1F517;</div>
+          <h3 class="pattern-title">Connect 模式</h3>
+          <p class="pattern-desc">连接到已运行的 Chrome 实例（通过 browserUrl、wsEndpoint 或 autoConnect）。适合共享状态、沙箱环境或远程调试场景。</p>
+        </div>
+      </div>
+
+      <div class="callout callout-info animate-in">
+        <span class="callout-icon">&#x2139;</span>
+        <div class="callout-content">
+          <span class="callout-title">关键设计</span>
+          <p>Launch 模式关闭时会 <code>browser.close()</code>（杀掉子进程），Connect 模式关闭时只 <code>browser.disconnect()</code>（保留用户的 Chrome）。这确保了连接到用户日常浏览器时不会意外关掉它。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">McpContext：全局上下文管理器</h2>
+      <p><code>McpContext</code> 是整个系统的核心状态管理器，通过 <code>McpContext.from()</code> 工厂方法创建。它管理着五大子系统：</p>
+
+      <div class="arch-diagram animate-in">
+        <div class="arch-zone">
+          <div class="arch-zone-label">McpContext 管理的子系统</div>
+          <div class="arch-component" data-desc="NetworkCollector：监听所有页面的 HTTP 请求，按页隔离存储，支持跨导航保留">&x1F310; <span>NetworkCollector</span></div>
+          <div class="arch-component" data-desc="ConsoleCollector：收集 console.log/error/warn 和未捕获异常，支持 DevTools AggregatedIssue">&x1F4CB; <span>ConsoleCollector</span></div>
+          <div class="arch-component" data-desc="UniverseManager：管理 DevTools 前端的 CDP Session，支持性能追踪和 Heap Snapshot">&x1F50D; <span>UniverseManager</span></div>
+          <div class="arch-component" data-desc="McpPage 映射：每个 Puppeteer Page 对应一个 McpPage，封装快照、模拟设置、对话状态">&x1F4C1; <span>Page Map</span></div>
+          <div class="arch-component" data-desc="HeapSnapshotManager：分析 V8 堆快照，提供类聚合、保留链、节点查询">&x1F4BE; <span>HeapSnapshotManager</span></div>
+        </div>
+        <div class="arch-description">点击组件查看详细说明</div>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">McpPage：单页状态封装</h2>
+      <p>每个浏览器标签页都有一个对应的 <code>McpPage</code> 实例，它封装了：</p>
+
+      <div class="translation-block">
+        <div class="translation-code">
+          <span class="translation-label">TypeScript</span>
+          <span class="code-line"><span class="code-keyword">export class</span> <span class="code-function">McpPage</span> <span class="code-keyword">implements</span> ContextPage {</span>
+          <span class="code-line">  <span class="code-keyword">readonly</span> pptrPage: Page;      <span class="code-comment">// Puppeteer Page 对象</span></span>
+          <span class="code-line">  <span class="code-keyword">readonly</span> id: <span class="code-number">number</span>;          <span class="code-comment">// 自增 ID，供工具引用</span></span>
+          <span class="code-line">  textSnapshot: TextSnapshot;    <span class="code-comment">// 当前页面的 a11y 树快照</span></span>
+          <span class="code-line">  emulationSettings: EmulationSettings; <span class="code-comment">// 模拟配置</span></span>
+          <span class="code-line">  #dialog?: Dialog;              <span class="code-comment">// 未处理的浏览器对话框</span></span>
+          <span class="code-line">  devToolsPage?: Page;           <span class="code-comment">// 关联的 DevTools 窗口</span></span>
+          <span class="code-line"></span>
+          <span class="code-line">  <span class="code-comment">// 关键方法</span></span>
+          <span class="code-line">  <span class="code-function">getElementByUid</span>(uid): Promise&lt;ElementHandle&gt;;</span>
+          <span class="code-line">  <span class="code-function">waitForEventsAfterAction</span>(action): Promise&lt;Result&gt;;</span>
+          <span class="code-line">  <span class="code-function">throwIfDialogOpen</span>(): <span class="code-number">void</span>;</span>
+          <span class="code-line">}</span>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文解读</span>
+          <div class="translation-lines">
+            <div class="tl">McpPage 是单页面的状态容器，每个标签页一个实例。</div>
+            <div class="tl">pptrPage 持有 Puppeteer 的 Page 引用，id 是自增编号供工具调用时引用。</div>
+            <div class="tl">textSnapshot 存储无障碍树快照，工具通过 uid 定位 DOM 元素。</div>
+            <div class="tl">emulationSettings 保存网络节流、CPU 节流、地理位置等模拟配置。</div>
+            <div class="tl">dialog 字段跟踪弹窗状态，某些工具执行前必须先处理弹窗。</div>
+            <div class="tl">getElementByUid 将快照中的 uid 解析为真实的 DOM 元素句柄。</div>
+            <div class="tl">waitForEventsAfterAction 是核心等待机制，确保操作后 DOM 稳定再返回。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">组件协作模拟</h2>
+      <p>下面的群聊模拟展示了当 AI 助手发送一个 "click" 请求时，各组件如何协作：</p>
+
+      <div class="chat-window" id="chat-browser-lifecycle">
+        <div class="chat-messages">
+          <div class="chat-message" data-sender="ai" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-1)">AI</div>
+            <div class="chat-bubble"><span class="chat-sender" style="color: var(--color-actor-1)">AI 助手</span><p>请点击页面上 uid 为 "E5" 的按钮。</p></div>
+          </div>
+          <div class="chat-message" data-sender="handler" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-2)">TH</div>
+            <div class="chat-bubble"><span class="chat-sender" style="color: var(--color-actor-2)">ToolHandler</span><p>收到 click 请求。获取 McpContext，检查参数格式... 参数合法，获取互斥锁。</p></div>
+          </div>
+          <div class="chat-message" data-sender="context" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-3)">CX</div>
+            <div class="chat-bubble"><span class="chat-sender" style="color: var(--color-actor-3)">McpContext</span><p>返回当前选中的 McpPage（id=1），检测 DevTools 窗口状态。</p></div>
+          </div>
+          <div class="chat-message" data-sender="page" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-5)">PG</div>
+            <div class="chat-bubble"><span class="chat-sender" style="color: var(--color-actor-5)">McpPage</span><p>通过 uid "E5" 在 textSnapshot 中查找节点，解析为 ElementHandle。检查是否有弹窗... 没有弹窗。开始执行 click。</p></div>
+          </div>
+          <div class="chat-message" data-sender="wait" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-4)">WH</div>
+            <div class="chat-bubble"><span class="chat-sender" style="color: var(--color-actor-4)">WaitForHelper</span><p>监听导航和 DOM 变化... DOM 已稳定 100ms，未检测到导航。操作完成。</p></div>
+          </div>
+          <div class="chat-message" data-sender="handler" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-2)">TH</div>
+            <div class="chat-bubble"><span class="chat-sender" style="color: var(--color-actor-2)">ToolHandler</span><p>格式化响应，记录遥测数据，释放互斥锁。返回 "Successfully clicked on the element"。</p></div>
+          </div>
+        </div>
+        <div class="chat-typing" style="display:none">
+          <div class="chat-avatar" id="chat-browser-lifecycle-typing-avatar">?</div>
+          <div class="chat-typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>
+        </div>
+        <div class="chat-controls">
+          <button class="btn chat-next-btn">Next</button>
+          <button class="btn chat-all-btn">Play All</button>
+          <button class="btn chat-reset-btn">Reset</button>
+          <span class="chat-progress"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen animate-in">
+      <h2 class="screen-heading">知识检测</h2>
+      <div class="quiz-container" id="quiz-2">
+        <div class="quiz-question-block" data-correct="b" data-explanation-right="Connect 模式使用 disconnect() 保持用户的 Chrome 不被关闭，Launch 模式使用 close() 杀掉子进程。" data-explanationwrong="回顾 browser.ts 中 closeBrowser 函数对两种模式的处理差异。">
+          <p class="quiz-question">为什么 Connect 模式关闭时用 disconnect() 而不是 close()？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)"><span class="quiz-option-radio"></span>disconnect() 性能更好</button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)"><span class="quiz-option-radio"></span>避免关掉用户正在使用的 Chrome 实例</button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)"><span class="quiz-option-radio"></span>close() 会造成内存泄漏</button>
+            <button class="quiz-option" data-value="d" onclick="selectOption(this)"><span class="quiz-option-radio"></span>disconnect() 可以重连而 close() 不能</button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-2')">Check Answers</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-2')">Reset</button>
+      </div>
+    </div>
+
+  </div>
+</section>

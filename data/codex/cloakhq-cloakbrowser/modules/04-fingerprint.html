@@ -1,0 +1,211 @@
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">指纹系统详解</h1>
+      <p class="module-subtitle">一个随机种子如何编织出完美的假身份？</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: The Identity Fabric -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">用种子编织一个"虚拟人"</h2>
+        <p>想象你有一个"角色生成器"——输入一个数字（种子），它就能自动生成一个完整的人物档案：身高、体重、发色、声音特征、行走姿态...所有属性都从这一个数字推导出来，而且同一个数字永远生成同一个角色。</p>
+        <p>CloakBrowser 的种子就是这么工作的。种子 <code>42871</code> 生成的是：</p>
+
+        <div class="arch-diagram">
+          <div class="arch-zone" style="background: var(--color-accent-light); border: 1px solid var(--color-accent-muted); border-radius: var(--radius-lg); padding: var(--space-6);">
+            <h4 class="arch-zone-label" style="color: var(--color-accent)">种子 42871 生成的虚拟身份</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-3);">
+              <div class="arch-component" data-desc="GPU 型号：NVIDIA GeForce RTX 3060——从种子推导出的显卡型号，和平台类型匹配" onclick="showArchDesc(this)" style="background: var(--color-surface); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); cursor: pointer; transition: transform 0.2s;">
+                <div class="arch-icon">🖥️</div>
+                <span style="font-size: var(--text-sm); font-weight: 600;">GPU: RTX 3060</span>
+              </div>
+              <div class="arch-component" data-desc="屏幕分辨率：1920x1080，设备像素比 1.0——标准的 Windows 桌面显示配置" onclick="showArchDesc(this)" style="background: var(--color-surface); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); cursor: pointer; transition: transform 0.2s;">
+                <div class="arch-icon">📐</div>
+                <span style="font-size: var(--text-sm); font-weight: 600;">屏幕: 1920x1080</span>
+              </div>
+              <div class="arch-component" data-desc="Canvas 噪点：每次画图时在像素中添加微小的、基于种子的随机偏移——不同种子产生不同的噪点" onclick="showArchDesc(this)" style="background: var(--color-surface); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); cursor: pointer; transition: transform 0.2s;">
+                <div class="arch-icon">🎨</div>
+                <span style="font-size: var(--text-sm); font-weight: 600;">Canvas 噪点</span>
+              </div>
+              <div class="arch-component" data-desc="Audio 指纹：通过种子控制音频处理结果的微小差异，使每台"虚拟电脑"的声音指纹都不同" onclick="showArchDesc(this)" style="background: var(--color-surface); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); cursor: pointer; transition: transform 0.2s;">
+                <div class="arch-icon">🔊</div>
+                <span style="font-size: var(--text-sm); font-weight: 600;">Audio 指纹</span>
+              </div>
+              <div class="arch-component" data-desc="CPU 核心数：8 核——从种子推导的合理硬件参数，和 GPU/屏幕/内存组合起来像一个真实的系统" onclick="showArchDesc(this)" style="background: var(--color-surface); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); cursor: pointer; transition: transform 0.2s;">
+                <div class="arch-icon">🧠</div>
+                <span style="font-size: var(--text-sm); font-weight: 600;">CPU: 8 核</span>
+              </div>
+              <div class="arch-component" data-desc="字体列表：根据伪装的操作系统返回对应的系统字体——Windows 字体在 Linux 上不可能出现，所以需要精确模拟" onclick="showArchDesc(this)" style="background: var(--color-surface); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); cursor: pointer; transition: transform 0.2s;">
+                <div class="arch-icon">🔤</div>
+                <span style="font-size: var(--text-sm); font-weight: 600;">字体列表</span>
+              </div>
+            </div>
+          </div>
+          <div class="arch-description" id="arch-desc" style="margin-top: var(--space-4); padding: var(--space-4); background: var(--color-surface); border-radius: var(--radius-sm); color: var(--color-text-secondary); text-align: center; min-height: 60px;">点击任意组件，查看它的伪装细节</div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Platform Spoofing -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">平台伪装：Linux 变 Windows</h2>
+        <p>这是指纹系统最巧妙的部分之一。大多数自动化程序运行在 Linux 服务器上，但普通用户很少用 Linux 浏览网页。所以 CloakBrowser 会把 Linux 伪装成 Windows：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE · config.py</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">if</span> sys.platform == <span class="code-string">"darwin"</span>:</span>
+<span class="code-line">    platform = <span class="code-string">"macos"</span></span>
+<span class="code-line"><span class="code-keyword">else</span>:</span>
+<span class="code-line">    platform = <span class="code-string">"windows"</span></span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment"># macOS 保留真实平台</span></span>
+<span class="code-line"><span class="code-comment"># Linux/Windows 都伪装成 Windows</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">如果系统是 macOS（苹果电脑）...</p>
+              <p class="tl">平台参数设为 "macos"</p>
+              <p class="tl">否则（Linux 或 Windows）...</p>
+              <p class="tl">统一伪装成 "windows"</p>
+              <p class="tl"></p>
+              <p class="tl">macOS 用户很常见，不需要伪装</p>
+              <p class="tl">Linux 太显眼——网站会怀疑为什么一个"普通用户"在用 Linux</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">ℹ️</div>
+          <div class="callout-content">
+            <strong class="callout-title">为什么不是所有平台都伪装？</strong>
+            <p>macOS 用户很常见，伪装反而可能引入不一致。Windows 用户占了绝大部分市场份额（~73%），是最安全的伪装目标。这就是"融入人群"的策略——把自己变成最不起眼的那一个。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Coherent Identity -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">一致性是关键</h2>
+        <p>伪装最怕的不是某个指纹不对，而是指纹之间互相矛盾。想象一个人说他来自海南，但口音像东北的、身份证号是北京的——矛盾太多了。</p>
+        <p>CloakBrowser 的种子系统确保所有指纹参数来自同一个"世界"：</p>
+
+        <div class="chat-window" id="chat-module4">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="seed" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-accent)">种</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-accent)">种子 42871</span>
+                <p>我来生成一个一致的虚拟身份。平台：Windows，GPU：NVIDIA RTX 3060...</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="canvas" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">🎨</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">Canvas 模块</span>
+                <p>收到种子。我会添加基于种子的像素噪点，确保画布指纹和这台"RTX 3060 显卡"的渲染特征一致。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="fonts" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">🔤</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">字体模块</span>
+                <p>平台是 Windows，所以我返回 Windows 系统字体列表。Arial、Calibri、Segoe UI... 这些在 Linux 上是不存在的。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="webgl" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">🖥️</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">WebGL 模块</span>
+                <p>GPU 设为 RTX 3060。我的渲染器报告也要返回 NVIDIA 的 WebGL 扩展列表，和 Canvas 的渲染结果匹配。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="seed" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-accent)">种</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-accent)">种子 42871</span>
+                <p>所有模块的指纹都来自同一个种子，互相印证。网站无论检查哪个维度，看到的都是同一个"Windows + RTX 3060"用户。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module4-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条消息</button>
+            <button class="btn chat-all-btn">播放全部</button>
+            <button class="btn chat-reset-btn">重播</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+
+        <div class="quiz-container" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！种子是一致性的保证。同一个种子生成完全相同的所有指纹参数，所以你可以"重现"同一个身份。"
+               data-explanation-wrong="想一想：如果每次启动都用不同的种子，会发生什么？指纹会每次都变。但如果需要维持登录状态呢？">
+            <h3 class="quiz-question">为什么 CloakBrowser 用种子（而不是完全随机的值）来生成指纹？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>种子可以让指纹更难被检测到</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>种子保证所有指纹参数之间一致，而且可以重现同一个身份</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>种子是为了加速启动过程，避免重复计算</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="没错！如果 GPU 报告是 NVIDIA，但字体列表里有 Linux 专有字体（如 Noto Sans CJK），这种矛盾会立刻暴露伪装。所有指纹必须来自"同一个世界"。"
+               data-explanation-wrong="想象你是一个安检员，你会怎么判断一个人的身份证是假的？你不会只看一个信息——你会看所有信息是否互相矛盾。">
+            <h3 class="quiz-question">如果指纹系统把 GPU 伪装成 NVIDIA RTX 3060，但字体列表包含了 Linux 专有字体，会发生什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>不会有影响，网站通常不会交叉检查指纹</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>字体列表和 GPU 是独立的检测维度，互不影响</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>这会造成指纹矛盾——NVIDIA GPU 的电脑不可能有 Linux 专有字体，会立刻暴露伪装</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
