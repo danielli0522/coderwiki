@@ -1,0 +1,332 @@
+<section class="module" id="module-3">
+  <div class="module-content">
+    <h1>实践应用：nanoGPT 与 GPT 架构</h1>
+    <p>本节将展示 Karpathy 如何从零构建 GPT（Generative Pre-trained Transformer），这是他最著名的教学项目 nanoGPT 的核心内容。</p>
+
+    <section class="screen animate-in">
+      <h3>Self-Attention 机制详解</h3>
+      <p>Transformer 的核心是自注意力机制。Karpathy 坚持先用纯 NumPy/PyTorch 手动实现，再使用框架的高级 API。</p>
+      <div class="code-translation">
+        <div class="code-block">
+          <pre><code># Self-Attention 的 Karpathy 式实现
+# 从数学公式到代码，每一步都清晰可见
+
+import torch
+import torch.nn as nn
+import math
+
+class Head(nn.Module):
+    """单头自注意力"""
+
+    def __init__(self, head_size, n_embd, block_size, dropout=0.1):
+        super().__init__()
+        self.key = nn.Linear(n_embd, head_size, bias=False)
+        self.query = nn.Linear(n_embd, head_size, bias=False)
+        self.value = nn.Linear(n_embd, head_size, bias=False)
+        # 因果掩码：防止看到未来的 token
+        self.register_buffer('tril', torch.tril(
+            torch.ones(block_size, block_size)
+        ))
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, x):
+        B, T, C = x.shape
+
+        # 计算 Key 和 Query
+        k = self.key(x)    # (B, T, head_size)
+        q = self.query(x)  # (B, T, head_size)
+
+        # 计算注意力分数（缩放点积）
+        wei = q @ k.transpose(-2, -1) * (C ** -0.5)
+        # wei shape: (B, T, T)
+
+        # 应用因果掩码（未来位置设为 -inf）
+        wei = wei.masked_fill(self.tril[:T, :T] == 0, float('-inf'))
+
+        # Softmax 归一化
+        wei = torch.nn.functional.softmax(wei, dim=-1)
+        wei = self.dropout(wei)
+
+        # 加权聚合 Value
+        v = self.value(x)  # (B, T, head_size)
+        out = wei @ v      # (B, T, head_size)
+        return out
+
+class MultiHeadAttention(nn.Module):
+    """多头自注意力"""
+
+    def __init__(self, num_heads, head_size, n_embd, block_size, dropout=0.1):
+        super().__init__()
+        self.heads = nn.ModuleList([
+            Head(head_size, n_embd, block_size, dropout)
+            for _ in range(num_heads)
+        ])
+        self.proj = nn.Linear(num_heads * head_size, n_embd)
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, x):
+        # 拼接所有头的输出
+        out = torch.cat([h(x) for h in self.heads], dim=-1)
+        out = self.dropout(self.proj(out))
+        return out
+
+# 关键理解点：
+# 1. Key = "我有什么信息"    → 每个位置的信息摘要
+# 2. Query = "我在找什么"    → 当前位置想关注什么
+# 3. Value = "我的实际内容"  → 传递给下游的实际信息
+# 4. Attention = softmax(Q·K^T / sqrt(d)) · V
+# 5. 缩放因子 sqrt(d) 防止点积过大导致 softmax 饱和</code></pre>
+        </div>
+        <div class="translation">
+          <p>Karpathy 将 Self-Attention 分解为四个直观组件：<strong>Key</strong>（每个位置的信息摘要）、<strong>Query</strong>（当前位置想关注什么）、<strong>Value</strong>（传递的实际内容）、<strong>注意力分数</strong>（Query 和 Key 的点积，决定关注程度）。因果掩码确保只能看到之前的 token，这对语言模型至关重要。缩放因子 sqrt(d) 防止 softmax 饱和。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>完整的 GPT 模型</h3>
+      <div class="code-translation">
+        <div class="code-block">
+          <pre><code># nanoGPT 核心 — Karpathy 的最小 GPT 实现
+# 约 200 行代码，训练即可生成文本
+
+class FeedForward(nn.Module):
+    """位置级前馈网络"""
+    def __init__(self, n_embd, dropout=0.1):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(n_embd, 4 * n_embd),  # 内部维度是 4 倍
+            nn.GELU(),                        # GPT 使用 GELU 激活
+            nn.Linear(4 * n_embd, n_embd),
+            nn.Dropout(dropout),
+        )
+
+    def forward(self, x):
+        return self.net(x)
+
+class Block(nn.Module):
+    """Transformer Block：Attention + FFN"""
+    def __init__(self, n_embd, n_head, block_size, dropout=0.1):
+        super().__init__()
+        head_size = n_embd // n_head
+        self.sa = MultiHeadAttention(n_head, head_size, n_embd, block_size, dropout)
+        self.ffwd = FeedForward(n_embd, dropout)
+        self.ln1 = nn.LayerNorm(n_embd)  # Pre-LN（GPT-2 风格）
+        self.ln2 = nn.LayerNorm(n_embd)
+
+    def forward(self, x):
+        # 残差连接 + Layer Norm
+        x = x + self.sa(self.ln1(x))
+        x = x + self.ffwd(self.ln2(x))
+        return x
+
+class GPT(nn.Module):
+    """完整的 GPT 模型"""
+    def __init__(self, vocab_size, n_embd=384, block_size=256,
+                 n_head=6, n_layer=6, dropout=0.2):
+        super().__init__()
+        self.block_size = block_size
+
+        # Token 嵌入 + 位置嵌入
+        self.token_embedding = nn.Embedding(vocab_size, n_embd)
+        self.position_embedding = nn.Embedding(block_size, n_embd)
+
+        # Transformer Blocks
+        self.blocks = nn.Sequential(*[
+            Block(n_embd, n_head, block_size, dropout)
+            for _ in range(n_layer)
+        ])
+
+        self.ln_f = nn.LayerNorm(n_embd)
+        self.lm_head = nn.Linear(n_embd, vocab_size)
+
+    def forward(self, idx, targets=None):
+        B, T = idx.shape
+
+        # 嵌入
+        tok_emb = self.token_embedding(idx)        # (B, T, n_embd)
+        pos_emb = self.position_embedding(
+            torch.arange(T, device=idx.device)
+        )                                            # (T, n_embd)
+        x = tok_emb + pos_emb                        # (B, T, n_embd)
+
+        # Transformer
+        x = self.blocks(x)
+        x = self.ln_f(x)
+
+        # 输出 logits
+        logits = self.lm_head(x)                     # (B, T, vocab_size)
+
+        # 计算损失
+        if targets is not None:
+            loss = nn.functional.cross_entropy(
+                logits.view(-1, logits.size(-1)),
+                targets.view(-1)
+            )
+            return logits, loss
+        return logits, None
+
+    def generate(self, idx, max_new_tokens):
+        """自回归生成文本"""
+        for _ in range(max_new_tokens):
+            # 裁剪到 block_size
+            idx_cond = idx[:, -self.block_size:]
+            logits, _ = self(idx_cond)
+            # 只取最后一个位置的 logits
+            logits = logits[:, -1, :]
+            # 采样
+            probs = torch.nn.functional.softmax(logits, dim=-1)
+            idx_next = torch.multinomial(probs, num_samples=1)
+            idx = torch.cat((idx, idx_next), dim=1)
+        return idx
+
+# 使用：训练一个字符级 GPT
+model = GPT(vocab_size=65, n_embd=128, block_size=64, n_head=4, n_layer=4)
+print(f"参数量: {sum(p.numel() for p in model.parameters()):,}")  # ~400K</code></pre>
+        </div>
+        <div class="translation">
+          <p>nanoGPT 的三层架构：<strong>Block</strong> 包含 Self-Attention + FFN + 残差连接 + LayerNorm；<strong>GPT</strong> 将 Token/Position 嵌入 + N 个 Block + 输出层组合。Karpathy 的关键教学点：1) Pre-LN 比 Post-LN 更稳定；2) FFN 内部维度是嵌入维度的 4 倍；3) 生成时裁剪输入到 block_size。<code>generate()</code> 方法展示了自回归生成的完整流程。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>优化器与学习率调度</h3>
+      <div class="code-translation">
+        <div class="code-block">
+          <pre><code># Karpathy 推荐的训练配置
+
+# AdamW 优化器（权重衰减的 Adam）
+optimizer = torch.optim.AdamW(
+    model.parameters(),
+    lr=3e-4,           # 学习率（最敏感的超参数）
+    betas=(0.9, 0.999),
+    weight_decay=0.1,  # L2 正则化
+)
+
+# 学习率预热 + 余弦衰减
+from torch.optim.lr_scheduler import CosineAnnealingLR
+
+warmup_steps = 100
+total_steps = 10000
+
+def get_lr(step):
+    """带预热的余弦学习率调度"""
+    if step < warmup_steps:
+        return step / warmup_steps * 3e-4  # 线性预热
+    decay_ratio = (step - warmup_steps) / (total_steps - warmup_steps)
+    return 3e-4 * 0.5 * (1 + math.cos(math.pi * decay_ratio))
+
+# 训练循环
+for step in range(total_steps):
+    # 采样 mini-batch
+    ix = torch.randint(0, len(data) - block_size, (batch_size,))
+    x = torch.stack([data[i:i+block_size] for i in ix])
+    y = torch.stack([data[i+1:i+block_size+1] for i in ix])
+
+    # 前向 + 反向
+    logits, loss = model(x, y)
+    optimizer.zero_grad(set_to_none=True)  # 更高效的梯度清零
+    loss.backward()
+
+    # 梯度裁剪（防止梯度爆炸）
+    torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+
+    # 更新学习率并步进
+    lr = get_lr(step)
+    for param_group in optimizer.param_groups:
+        param_group['lr'] = lr
+    optimizer.step()
+
+    if step % 100 == 0:
+        print(f"Step {step}: loss={loss.item():.4f}, lr={lr:.6f}")
+
+# Karpathy 的超参数调优建议：
+# 1. 先用小模型确认 loss 能下降
+# 2. 逐步增大模型规模
+# 3. 监控训练/验证 loss 曲线
+# 4. 过拟合 → 增加正则化/减少模型大小
+# 5. 欠拟合 → 增大模型/训练更久/降低学习率</code></pre>
+        </div>
+        <div class="translation">
+          <p>Karpathy 的训练配方：AdamW 优化器（lr=3e-4 是 Transformer 的"默认值"）、余弦学习率调度带线性预热、梯度裁剪（max_norm=1.0）防止爆炸。关键调试策略：先在小模型上验证 loss 能正常下降，再逐步扩大规模。观察训练/验证 loss 曲线是判断过拟合/欠拟合的最佳方式。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>可视化理解 Attention</h3>
+      <p>Karpathy 强调可视化是理解 Attention 的最佳方式。通过观察注意力热力图，你可以直观地看到模型在关注什么。</p>
+      <div class="code-translation">
+        <div class="code-block">
+          <pre><code># 可视化 Attention 权重（Karpathy 风格）
+import torch
+import matplotlib.pyplot as plt
+
+def visualize_attention(attention_weights, tokens, head=0):
+    """
+    可视化注意力权重矩阵
+
+    参数:
+    - attention_weights: (B, n_head, T, T) 注意力分数
+    - tokens: 当前输入的 token 列表
+    - head: 要可视化的注意力头
+    """
+    # 取第一个样本的指定头
+    attn = attention_weights[0, head].detach().cpu().numpy()
+    T = attn.shape[0]
+
+    fig, ax = plt.subplots(figsize=(8, 8))
+    im = ax.imshow(attn[:T, :T], cmap='Blues', vmin=0, vmax=1)
+
+    # 标签
+    tick_labels = tokens[:T]
+    ax.set_xticks(range(T))
+    ax.set_yticks(range(T))
+    ax.set_xticklabels(tick_labels, rotation=90, fontsize=8)
+    ax.set_yticklabels(tick_labels, fontsize=8)
+    ax.set_xlabel("Key 位置")
+    ax.set_ylabel("Query 位置")
+    ax.set_title(f"Attention Head {head}")
+
+    plt.colorbar(im, ax=ax, label="注意力权重")
+    plt.tight_layout()
+    plt.savefig("attention_viz.png", dpi=150)
+    plt.show()
+
+# 使用示例
+tokens = list("Attention is all you need")
+T = len(tokens)
+# 模拟注意力权重
+attn = torch.zeros(1, 4, T, T)
+for i in range(T):
+    for j in range(i+1):
+        attn[0, 0, i, j] = 1.0 / (i - j + 1)
+# 归一化
+attn = torch.softmax(attn, dim=-1)
+
+visualize_attention(attn, tokens, head=0)
+
+# Karpathy 的可视化建议：
+# 1. 观察对角线附近是否权重最高（局部关注）
+# 2. 查看特殊 token（如标点）是否获得全局关注
+# 3. 不同头的关注模式是否互补
+# 4. 训练过程中注意力如何演化</code></pre>
+        </div>
+        <div class="translation">
+          <p>Attention 可视化是 Karpathy 调试 Transformer 的核心工具。注意力热力图展示每个位置对其他位置的关注程度：颜色越深表示关注越强。好的模型通常展现局部关注（对角线附近）+ 特殊位置的全局关注模式。可视化不同头可以发现互补的关注策略——有的关注语法，有的关注语义。</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="quiz">
+      <p class="quiz-question">Self-Attention 机制中的 Key、Query、Value 分别代表什么？</p>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="true">Key=信息摘要，Query=关注目标，Value=实际内容</button>
+        <button class="quiz-option" data-correct="false">Key=加密密钥，Query=查询语句，Value=返回值</button>
+        <button class="quiz-option" data-correct="false">它们是相同的东西，只是名字不同</button>
+        <button class="quiz-option" data-correct="false">Key=输入，Query=输出，Value=中间结果</button>
+      </div>
+    </div>
+  </div>
+</section>

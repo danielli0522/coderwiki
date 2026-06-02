@@ -1,0 +1,328 @@
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 5 — Making It Last: Storage & Smart Tricks
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-5" style="background: var(--color-bg);">
+  <div class="module-content">
+
+    <!-- ── HEADER ──────────────────────────────────────────────── -->
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h2 class="module-title">Making It Last: Storage &amp; Smart Tricks</h2>
+      <p class="module-subtitle">A photographer's workflow — polaroids that fade by morning, prints stored in a box, digital photos that auto-sync, and film negatives developed immediately in a fireproof safe. Four ways to remember, each with a different trade-off.</p>
+    </header>
+
+    <!-- ── SCREEN 1: Four Ways to Remember ──────────────────────── -->
+    <div class="screen animate-in" id="s1-four-ways">
+      <h3 class="screen-heading">Four Ways to Remember</h3>
+
+      <p>
+        Floci has <strong>4 <span class="term" data-definition="How Floci stores your data — controlled by the FLOCI_STORAGE_MODE environment variable. Each mode trades off speed vs. durability differently.">storage modes</span></strong>,
+        controlled by the <code>FLOCI_STORAGE_MODE</code> <span class="term" data-definition="A configuration value set in your shell or docker-compose.yml that changes how a program behaves. Like a preference setting that programs read when they start.">env var</span>.
+        Each one balances speed and safety differently.
+      </p>
+
+      <!-- Pattern cards — 4 storage modes -->
+      <div class="pattern-cards stagger-children">
+
+        <div class="pattern-card animate-in" style="border-top-color: var(--color-actor-4);">
+          <div class="pattern-icon" style="background: #FDF3E7;">
+            <span style="color: var(--color-actor-4);">&#127912;</span>
+          </div>
+          <div class="pattern-title">Memory <span style="font-weight: 400; color: var(--color-text-muted); font-size: var(--text-xs);">(default)</span></div>
+          <p class="pattern-desc">
+            Entirely in <span class="term" data-definition="Random Access Memory — the fast, temporary storage your computer uses while running. Everything in RAM disappears when the program stops or the machine restarts.">RAM</span>. Data lost on stop. Like polaroids that fade by morning.
+          </p>
+          <p class="pattern-desc" style="margin-top: var(--space-2);"><strong>Best for:</strong> <span class="term" data-definition="A continuous integration pipeline — an automated system that runs your tests every time you push code. CI environments start fresh each run, so data persistence is unnecessary.">CI pipelines</span>, quick tests.</p>
+        </div>
+
+        <div class="pattern-card animate-in" style="border-top-color: var(--color-success);">
+          <div class="pattern-icon" style="background: var(--color-success-light);">
+            <span style="color: var(--color-success);">&#128230;</span>
+          </div>
+          <div class="pattern-title">Persistent</div>
+          <p class="pattern-desc">
+            Loaded at startup, flushed on <span class="term" data-definition="When a program stops cleanly (e.g., you press Ctrl+C or send a stop signal) rather than crashing. Floci uses this moment to save data to disk in persistent mode.">graceful shutdown</span>. Like prints stored in a box.
+          </p>
+          <p class="pattern-desc" style="margin-top: var(--space-2);"><strong>Best for:</strong> local dev with state preservation.</p>
+        </div>
+
+        <div class="pattern-card animate-in" style="border-top-color: var(--color-info);">
+          <div class="pattern-icon" style="background: var(--color-info-light);">
+            <span style="color: var(--color-info);">&#9729;&#65039;</span>
+          </div>
+          <div class="pattern-title">Hybrid</div>
+          <p class="pattern-desc">
+            In-memory speed + <span class="term" data-definition="Short for asynchronous — the operation happens in the background without blocking your code. Your request returns immediately while the save happens behind the scenes.">async</span> <span class="term" data-definition="Writing data from memory to permanent disk storage. Floci periodically flushes in-memory state to disk so data survives crashes.">flush</span> every 5s. Like digital photos that auto-sync.
+          </p>
+          <p class="pattern-desc" style="margin-top: var(--space-2);"><strong>Best for:</strong> best balance of speed and safety.</p>
+        </div>
+
+        <div class="pattern-card animate-in" style="border-top-color: var(--color-accent);">
+          <div class="pattern-icon" style="background: var(--color-accent-light);">
+            <span style="color: var(--color-accent);">&#128293;</span>
+          </div>
+          <div class="pattern-title">WAL</div>
+          <p class="pattern-desc">
+            <span class="term" data-definition="Write-Ahead Log — a technique where every change is written to a log file on disk BEFORE the operation is confirmed. If the program crashes, the log is replayed to restore the lost changes.">Write-Ahead Log</span> — every mutation logged to disk before responding. Like film negatives in a fireproof safe.
+          </p>
+          <p class="pattern-desc" style="margin-top: var(--space-2);"><strong>Best for:</strong> maximum <span class="term" data-definition="The guarantee that once data is saved, it will not be lost — even if the power goes out or the program crashes. Higher durability usually means slower writes.">durability</span>.</p>
+        </div>
+
+      </div>
+
+      <!-- Env var badge list -->
+      <div class="badge-list animate-in">
+        <div class="badge-item">
+          <code class="badge-code">FLOCI_STORAGE_MODE</code>
+          <span class="badge-desc">memory | persistent | hybrid | wal</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">FLOCI_STORAGE_PERSISTENT_PATH</code>
+          <span class="badge-desc">where data lives on disk (default: ./data)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SCREEN 2: Multi-Account Isolation ────────────────────── -->
+    <div class="screen animate-in" id="s2-isolation">
+      <h3 class="screen-heading">Multi-Account <span class="term" data-definition="Keeping things separate so they can't see or affect each other. Floci gives each AWS access key its own private namespace — resources from one account are invisible to another.">Isolation</span></h3>
+
+      <p>
+        If your <span class="term" data-definition="Amazon Web Services — the world's largest cloud computing platform, providing on-demand servers, databases, storage, and more over the internet.">AWS</span> access key ID is exactly 12 digits, Floci uses it as the account ID.
+        Resources from one account are <strong>invisible</strong> to another — full isolation, zero config.
+      </p>
+
+      <!-- Code ↔ English translation block -->
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">bash</span>
+          <span class="code-line"><span class="code-comment"># Account 1111 creates a queue</span></span>
+          <span class="code-line"><span class="code-property">AWS_ACCESS_KEY_ID</span>=<span class="code-string">111111111111</span> \</span>
+          <span class="code-line">  aws sqs create-queue \</span>
+          <span class="code-line">    --queue-name <span class="code-string">orders</span></span>
+          <span class="code-line"></span>
+          <span class="code-line"><span class="code-comment"># Account 2222 creates a queue</span></span>
+          <span class="code-line"><span class="code-property">AWS_ACCESS_KEY_ID</span>=<span class="code-string">222222222222</span> \</span>
+          <span class="code-line">  aws sqs create-queue \</span>
+          <span class="code-line">    --queue-name <span class="code-string">orders</span></span>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">In plain English</span>
+          <div class="translation-lines">
+            <div class="tl">Account 1111 creates a queue called <strong>orders</strong>.</div>
+            <div class="tl">Account 2222 creates a queue <em>also</em> called <strong>orders</strong>.</div>
+            <div class="tl">These are <strong>TWO SEPARATE queues</strong> — full isolation!</div>
+            <div class="tl">Each account sees only its own resources. Same names, different worlds.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent animate-in">
+        <span class="callout-icon">&#128161;</span>
+        <div class="callout-content">
+          <span class="callout-title">Why this matters</span>
+          <p>
+            You can run multiple test suites in parallel, each with its own account ID,
+            and they'll never interfere with each other. No need for separate containers or complex namespacing.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SCREEN 3: LocalStack Drop-In Replacement ─────────────── -->
+    <div class="screen animate-in" id="s3-drop-in">
+      <h3 class="screen-heading">LocalStack <span class="term" data-definition="A software that works identically to another one — you can swap it in without changing any code. Floci speaks the same AWS protocol as LocalStack, on the same port, with the same credentials.">Drop-In</span> Replacement</h3>
+
+      <p>
+        Already using LocalStack? Floci is a <strong>drop-in replacement</strong> — same port (4566),
+        same credentials, same SDK calls. Just swap the image name.
+      </p>
+
+      <!-- Env var translation badge list -->
+      <div class="badge-list animate-in">
+        <div class="badge-item">
+          <code class="badge-code">LOCALSTACK_HOST</code>
+          <span class="badge-desc" style="color: var(--color-text-muted);">&#8594;</span>
+          <code class="badge-code" style="background: var(--color-accent-light); color: var(--color-accent);">FLOCI_HOSTNAME</code>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">PERSISTENCE=1</code>
+          <span class="badge-desc" style="color: var(--color-text-muted);">&#8594;</span>
+          <code class="badge-code" style="background: var(--color-accent-light); color: var(--color-accent);">FLOCI_STORAGE_MODE=persistent</code>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">DEBUG=1</code>
+          <span class="badge-desc" style="color: var(--color-text-muted);">&#8594;</span>
+          <code class="badge-code" style="background: var(--color-accent-light); color: var(--color-accent);">QUARKUS_LOG_LEVEL=DEBUG</code>
+        </div>
+      </div>
+
+      <p>
+        Init scripts mounted at <code>/etc/localstack/init/</code> run unchanged —
+        your existing setup scripts keep working without modification.
+      </p>
+
+      <div class="callout callout-info animate-in">
+        <span class="callout-icon">&#128218;</span>
+        <div class="callout-content">
+          <span class="callout-title">Good to know</span>
+          <p>
+            The <code>-compat</code> image variant includes Python 3, AWS CLI, and boto3 pre-configured.
+            Use it if your init scripts call the AWS CLI.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SCREEN 4: Testcontainers ──────────────────────────────── -->
+    <div class="screen animate-in" id="s4-testcontainers">
+      <h3 class="screen-heading"><span class="term" data-definition="A testing library that automatically starts real services (databases, message queues, emulators) inside Docker containers for your tests. Each test gets its own fresh instance, isolated from everything else.">Testcontainers</span> — Testing Made Easy</h3>
+
+      <p>
+        Floci has <strong>first-class Testcontainers support</strong> in 4 languages.
+        Each test starts a fresh, isolated Floci instance — no shared state, no port conflicts.
+      </p>
+
+      <div class="icon-rows stagger-children">
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: #FDF3E7; color: var(--color-actor-4);">&#9749;</div>
+          <div>
+            <strong>Java</strong>
+            <p><code>io.floci:testcontainers-floci</code> — <span class="term" data-definition="The most popular testing framework for Java. It lets you write repeatable tests with annotations like @Test, assertions, and lifecycle management.">JUnit 5</span> + Spring Boot integration</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-success-light); color: var(--color-success);">&#128994;</div>
+          <div>
+            <strong>Node.js</strong>
+            <p><code>@floci/testcontainers</code> — <span class="term" data-definition="Popular JavaScript testing frameworks. Jest is batteries-included by Facebook; Vitest is a faster, Vite-native alternative. Both run tests in parallel and provide rich assertion libraries.">Jest/Vitest</span> integration</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-info-light); color: var(--color-info);">&#128013;</div>
+          <div>
+            <strong>Python</strong>
+            <p><code>testcontainers-floci</code> — <span class="term" data-definition="Python's most popular testing framework. Fixtures are reusable test setup objects (like a database connection) that pytest automatically creates and cleans up for each test.">pytest</span> fixture style</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: #E5DFD6; color: var(--color-text-muted);">&#128640;</div>
+          <div>
+            <strong>Go</strong>
+            <p>In progress — check the GitHub repo for the latest status.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SCREEN 5: The Big Picture ─────────────────────────────── -->
+    <div class="screen animate-in" id="s5-big-picture">
+      <h3 class="screen-heading">The Big Picture</h3>
+
+      <p>
+        Let's zoom out and see everything you've learned, organized as the architecture it really is:
+      </p>
+
+      <div class="file-tree animate-in" style="background: var(--color-surface); border-radius: var(--radius-md); padding: var(--space-6); box-shadow: var(--shadow-sm); border: 1px solid var(--color-border-light);">
+        <div class="ft-folder">
+          <span class="ft-name">floci/</span>
+          <div class="ft-children">
+            <div class="ft-file">
+              <span class="ft-name">HTTP Router</span>
+              <span class="ft-desc">(<span class="term" data-definition="Java API for RESTful Web Services — a standard Java framework for building HTTP APIs. Floci uses it to route incoming AWS API calls to the right handler.">JAX-RS</span> / <span class="term" data-definition="A high-performance, non-blocking networking toolkit for Java. Floci uses it alongside JAX-RS to handle many concurrent HTTP connections efficiently with minimal threads.">Vert.x</span>)</span>
+              <span class="ft-desc">— routes all incoming AWS API calls</span>
+            </div>
+            <div class="ft-file">
+              <span class="ft-name">Stateless Services</span>
+              <span class="ft-desc">— SSM, SQS, SNS, IAM, STS, KMS, EventBridge...</span>
+            </div>
+            <div class="ft-file">
+              <span class="ft-name">Stateful Services</span>
+              <span class="ft-desc">— S3, DynamoDB, DynamoDB Streams</span>
+            </div>
+            <div class="ft-file">
+              <span class="ft-name">Container Services</span>
+              <span class="ft-desc">— Lambda, RDS, ElastiCache, ECS, EC2, EKS...</span>
+            </div>
+            <div class="ft-file">
+              <span class="ft-name">Storage Backend</span>
+              <span class="ft-desc">— memory | persistent | hybrid | wal</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent animate-in">
+        <span class="callout-icon">&#128161;</span>
+        <div class="callout-content">
+          <span class="callout-title">Aha!</span>
+          <p>
+            Floci is written in Java and compiled to a <span class="term" data-definition="An executable file that runs directly on the operating system without needing a separate runtime or virtual machine. It starts instantly because there's no warmup phase.">native binary</span> using <span class="term" data-definition="GraalVM — a special Java tool that can compile Java code into a native binary ahead of time. The result starts in milliseconds instead of seconds, because there's no JVM warmup or runtime compilation.">GraalVM</span>.
+            This is why it starts in <strong>24ms</strong>, uses only <strong>13 MiB</strong> of memory,
+            and ships as a ~40 MB native executable.
+            No <span class="term" data-definition="Java Virtual Machine — the runtime that normally executes Java programs. It needs time to warm up and compile code as it runs, which is why traditional Java apps start slower.">JVM</span>,
+            no runtime overhead — just a lean, fast AWS emulator.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SCREEN 6: Final Quiz ──────────────────────────────────── -->
+    <div class="screen animate-in" id="s6-quiz">
+      <h3 class="screen-heading">Final Quiz</h3>
+
+      <div class="quiz-container animate-in" id="quiz-m5">
+        <div class="scenario-block">
+          <span class="scenario-label">Scenario</span>
+          <p class="scenario-context">
+            Your team runs integration tests in <span class="term" data-definition="A continuous integration pipeline — an automated system that runs your tests every time you push code. CI environments start fresh each run, so data persistence is unnecessary.">CI</span>.
+            Tests need a clean AWS environment each run, and they must finish fast.
+            Which storage mode and image tag should you use?
+          </p>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="B"
+             data-explanation-right="Perfect! Memory mode is fastest (no disk I/O), the standard image is smallest (~90 MB), and CI does not need persistence — each run starts fresh."
+             data-explanation-wrong="Not quite. Memory mode is the fastest because it has zero disk I/O overhead, and the standard (not compat) image is smallest. In CI, each test run gets a brand new instance — you don't need persistence at all.">
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="A" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              WAL mode + <code>latest-compat</code> image
+            </button>
+            <button class="quiz-option" data-value="B" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              Memory mode + <code>latest</code> (standard) image
+            </button>
+            <button class="quiz-option" data-value="C" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              Hybrid mode + <code>nightly</code> image
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m5')">Check Answer</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m5')">Try Again</button>
+        </div>
+      </div>
+
+      <!-- Answer explanations -->
+      <div class="callout callout-info animate-in" style="margin-top: var(--space-8);">
+        <span class="callout-icon">&#128218;</span>
+        <div class="callout-content">
+          <span class="callout-title">Why each answer matters</span>
+          <p>
+            <strong>Option A (WAL + compat)</strong> — <span class="term" data-definition="Write-Ahead Log — a technique where every change is written to a log file on disk BEFORE the operation is confirmed. If the program crashes, the log is replayed to restore the lost changes.">WAL</span> adds disk I/O overhead and the compat image is larger. You do not need persistence in CI — each test gets a fresh instance.
+          </p>
+          <p>
+            <strong>Option C (Hybrid + nightly)</strong> — Hybrid mode adds unnecessary overhead in CI. And nightly images may include unstable changes that break your tests unpredictably.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>

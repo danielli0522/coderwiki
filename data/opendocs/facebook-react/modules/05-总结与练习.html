@@ -1,0 +1,228 @@
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 5: 总结与练习
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">总结与练习</h1>
+      <p class="module-subtitle">回顾 React 核心知识，通过综合练习巩固技能，探索 React 生态系统</p>
+    </header>
+
+    <!-- ── Screen 1: 核心知识回顾 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">核心知识回顾</h2>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">&#129513;</div>
+          <h4 class="pattern-title">组件化架构</h4>
+          <p class="pattern-desc">UI = f(state)。函数组件返回 JSX，Props 传递数据，State 管理内部状态。组件是独立、可复用的 UI 构建单元。遵循单一职责，每个组件不超过 100 行。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">&#9889;</div>
+          <h4 class="pattern-title">Hooks 体系</h4>
+          <p class="pattern-desc">useState（状态）、useEffect（副作用）、useRef（引用）、useMemo（缓存计算）、useCallback（缓存函数）。Hooks 让函数组件拥有完整的 React 能力。遵循 Hooks 规则：只在顶层调用，不在条件语句中使用。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">&#128200;</div>
+          <h4 class="pattern-title">性能优化</h4>
+          <p class="pattern-desc">React.memo + useMemo + useCallback 三件套。虚拟列表处理长列表。代码分割按需加载。不可变状态更新确保变化检测。先测量（React DevTools Profiler），再优化。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+          <div class="pattern-icon" style="background: var(--color-actor-4)">&#127760;</div>
+          <h4 class="pattern-title">生态系统</h4>
+          <p class="pattern-desc">Next.js（全栈框架）、React Router（路由）、Zustand（状态管理）、SWR（数据获取）、React Query（服务端状态）、React Native（移动开发）。按需选择，不要过度引入依赖。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 2: 最佳实践 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">React 开发最佳实践</h2>
+
+      <div class="file-tree animate-in">
+        <div class="ft-folder open">
+          <div class="ft-name">&#128196; 最佳实践清单</div>
+          <div class="ft-children">
+            <div class="ft-folder">
+              <div class="ft-name">&#129513; 组件设计</div>
+              <div class="ft-children">
+                <div class="ft-desc">1. 单一职责——每个组件只做一件事</div>
+                <div class="ft-desc">2. 组件名用 PascalCase，props 名用 camelCase</div>
+                <div class="ft-desc">3. 超过 100 行就考虑拆分</div>
+                <div class="ft-desc">4. 提取可复用逻辑为自定义 Hook</div>
+              </div>
+            </div>
+            <div class="ft-folder">
+              <div class="ft-name">&#128260; 状态管理</div>
+              <div class="ft-children">
+                <div class="ft-desc">5. 状态尽量下沉到使用它的最低层级组件</div>
+                <div class="ft-desc">6. 永远使用不可变方式更新状态</div>
+                <div class="ft-desc">7. useState 用于局部状态，Context 用于跨组件共享</div>
+                <div class="ft-desc">8. 复杂状态考虑 useReducer</div>
+              </div>
+            </div>
+            <div class="ft-folder">
+              <div class="ft-name">&#128200; 性能优化</div>
+              <div class="ft-children">
+                <div class="ft-desc">9. 先用 React DevTools Profiler 测量，再优化</div>
+                <div class="ft-desc">10. 虚拟列表处理超过 100 项的长列表</div>
+                <div class="ft-desc">11. 路由级代码分割是标配</div>
+                <div class="ft-desc">12. 不要过早优化——大多数组件不需要 memo</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 3: 综合练习 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">综合练习：构建任务管理应用</h2>
+
+      <p>设计一个功能完整的任务管理应用，综合运用组件化、状态管理、性能优化和 API 集成。</p>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">&#127919;</div>
+        <div class="callout-content">
+          <strong class="callout-title">练习目标</strong>
+          <p>构建一个任务管理应用，具备以下功能：1) 添加、编辑、删除任务；2) 任务筛选（全部/进行中/已完成）；3) 搜索功能；4) 数据持久化（localStorage）；5) 性能优化（memo + useMemo）。</p>
+        </div>
+      </div>
+
+      <div class="code-translation">
+        <div class="translation-code">
+          <div class="translation-label">JSX — 练习模板</div>
+          <pre class="translation-lines"><code><span class="code-line"><span class="code-keyword">function</span> <span class="code-comment">TaskManager</span>() {</span>
+<span class="code-line">  <span class="code-comment">// TODO 1: 定义任务列表状态</span></span>
+<span class="code-line">  <span class="code-comment">// TODO 2: 定义筛选条件状态</span></span>
+<span class="code-line">  <span class="code-comment">// TODO 3: 定义搜索关键词状态</span></span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-comment">// TODO 4: 实现添加任务</span></span>
+<span class="code-line">  <span class="code-keyword">const</span> addTask = (text) => { <span class="code-comment">/* ??? */</span> };</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-comment">// TODO 5: 实现切换完成状态</span></span>
+<span class="code-line">  <span class="code-keyword">const</span> toggleTask = (id) => { <span class="code-comment">/* ??? */</span> };</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-comment">// TODO 6: 用 useMemo 缓存筛选结果</span></span>
+<span class="code-line">  <span class="code-keyword">const</span> filteredTasks = <span class="code-comment">/* useMemo(...) */</span>;</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">return</span> (</span>
+<span class="code-line">    &lt;div&gt;</span>
+<span class="code-line">      &lt;TaskInput onAdd={addTask} /&gt;</span>
+<span class="code-line">      &lt;TaskFilter value={filter} onChange={setFilter} /&gt;</span>
+<span class="code-line">      &lt;TaskList tasks={filteredTasks} onToggle={toggleTask} /&gt;</span>
+<span class="code-line">    &lt;/div&gt;</span>
+<span class="code-line">  );</span>
+<span class="code-line">}</span></code></pre>
+        </div>
+        <div class="translation-block animate-in">
+          <div class="translation-english">
+            <div class="translation-label">练习提示</div>
+            <p>完成这个练习的建议：</p>
+            <ul>
+              <li><strong>TODO 1-3</strong>：三个 useState 分别管理任务列表、筛选和搜索</li>
+              <li><strong>TODO 4</strong>：setTasks(prev => [...prev, newTask])</li>
+              <li><strong>TODO 5</strong>：map + 展开运算符更新单个任务</li>
+              <li><strong>TODO 6</strong>：useMemo 缓存 filter + search 的组合筛选结果</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 4: 扩展方向 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">下一步学习方向</h2>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">&#128640;</div>
+          <h4 class="pattern-title">Next.js 全栈框架</h4>
+          <p class="pattern-desc">React 的官方推荐框架。Server Components、App Router、API Routes、SSR/SSG 一体化。学习 Next.js 是 React 开发者的自然下一步。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">&#128241;</div>
+          <h4 class="pattern-title">React Native</h4>
+          <p class="pattern-desc">使用 React 语法开发原生 iOS 和 Android 应用。一次学习，全平台开发。Expo 框架让 React Native 开发更加简单。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">&#129302;</div>
+          <h4 class="pattern-title">React + AI</h4>
+          <p class="pattern-desc">将 AI 能力集成到 React 应用中：流式输出（SSE）、AI 对话界面、智能表单、内容生成。Vercel AI SDK 是目前最流行的 React AI 集成方案。</p>
+        </div>
+      </div>
+
+      <div class="quiz-container">
+        <div class="quiz-question-block">
+          <p class="quiz-question">React 的主要特点包括哪些？</p>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q5a" class="quiz-option-radio" data-correct="true">
+              <span>声明式、组件化、虚拟 DOM</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q5a" class="quiz-option-radio" data-correct="false">
+              <span>面向对象、命令式、双向绑定</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q5a" class="quiz-option-radio" data-correct="false">
+              <span>模板语法、依赖注入、AOP</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q5a" class="quiz-option-radio" data-correct="false">
+              <span>函数式编程、不可变性、惰性求值</span>
+            </label>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <div class="quiz-question-block">
+          <p class="quiz-question">React 性能优化的正确顺序是什么？</p>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q5b" class="quiz-option-radio" data-correct="false">
+              <span>先全面添加 React.memo，再测量</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q5b" class="quiz-option-radio" data-correct="true">
+              <span>先用 Profiler 测量瓶颈，再针对性优化</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q5b" class="quiz-option-radio" data-correct="false">
+              <span>性能优化不重要，React 本身足够快</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q5b" class="quiz-option-radio" data-correct="false">
+              <span>只优化网络请求就够了</span>
+            </label>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <div class="quiz-question-block">
+          <p class="quiz-question">React 中处理副作用的 Hook 是什么？</p>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q5c" class="quiz-option-radio" data-correct="true">
+              <span>useEffect</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q5c" class="quiz-option-radio" data-correct="false">
+              <span>useState</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q5c" class="quiz-option-radio" data-correct="false">
+              <span>useContext</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q5c" class="quiz-option-radio" data-correct="false">
+              <span>useRef</span>
+            </label>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</section>

@@ -1,0 +1,212 @@
+<section class="module" id="module-5">
+  <h2>模块 5：总结与综合练习</h2>
+  <div class="module-content">
+    <p>本模块将总结 Figma MCP Server 的关键知识并提供综合练习巩固所学。</p>
+
+    <section class="screen animate-in">
+      <h3>课程知识回顾</h3>
+      <div class="callout callout-accent">
+        <p><strong>核心知识图谱：</strong></p>
+        <ul>
+          <li><strong>模块 1</strong>：MCP 协议概念、Figma MCP Server 能力、安装配置</li>
+          <li><strong>模块 2</strong>：Figma API 数据结构、MCP 工具机制、Auto Layout 映射</li>
+          <li><strong>模块 3</strong>：设计转代码、设计系统提取、AI 工作流集成</li>
+          <li><strong>模块 4</strong>：自定义 MCP Server 开发、性能优化、错误处理</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>综合练习：构建完整的设计到代码流水线</h3>
+      <div class="code-translation">
+        <div class="code-block">
+          <pre><code>"""综合练习：完整的 Figma → 代码流水线"""
+import json
+import os
+
+class DesignToCodePipeline:
+    """端到端设计转代码流水线"""
+
+    def __init__(self, figma_token: str):
+        self.token = figma_token
+        self.design_tokens = {}
+        self.components = []
+
+    def step1_read_design(self, file_key: str, frame_id: str) -> dict:
+        """步骤 1：读取 Figma 设计数据"""
+        print(f"[Step 1] Reading Figma design: {file_key}/{frame_id}")
+        # 在实际实现中，这里调用 Figma MCP Server
+        return {
+            "name": "DashboardPage",
+            "type": "FRAME",
+            "layout": {
+                "mode": "VERTICAL",
+                "padding": {"top": 24, "right": 24, "bottom": 24, "left": 24},
+                "gap": 16,
+                "width": 1440,
+                "height": 900,
+            },
+            "children": [
+                {
+                    "name": "Header",
+                    "type": "FRAME",
+                    "layout": {"mode": "HORIZONTAL", "gap": 12},
+                    "children": [
+                        {"name": "Logo", "type": "IMAGE", "width": 32, "height": 32},
+                        {"name": "NavLinks", "type": "TEXT", "characters": "Home About Contact"},
+                    ]
+                },
+                {
+                    "name": "Content",
+                    "type": "FRAME",
+                    "layout": {"mode": "HORIZONTAL", "gap": 24},
+                    "children": [
+                        {"name": "Sidebar", "type": "FRAME", "width": 240, "height": 800},
+                        {"name": "MainArea", "type": "FRAME", "width": 1152, "height": 800},
+                    ]
+                }
+            ]
+        }
+
+    def step2_extract_tokens(self, design_data: dict) -> dict:
+        """步骤 2：提取设计 Token"""
+        print("[Step 2] Extracting design tokens...")
+        tokens = {
+            "colors": {
+                "primary": "#6366F1",
+                "background": "#F9FAFB",
+                "surface": "#FFFFFF",
+                "text": "#111827",
+                "textSecondary": "#6B7280",
+                "border": "#E5E7EB",
+            },
+            "spacing": {
+                "xs": "4px", "sm": "8px", "md": "16px",
+                "lg": "24px", "xl": "32px", "2xl": "48px",
+            },
+            "borderRadius": {"sm": "6px", "md": "8px", "lg": "12px"},
+            "fontSize": {
+                "xs": "12px", "sm": "14px", "base": "16px",
+                "lg": "18px", "xl": "20px", "2xl": "24px",
+            },
+        }
+        self.design_tokens = tokens
+        return tokens
+
+    def step3_generate_component(self, node: dict, framework: str = "react") -> str:
+        """步骤 3：生成组件代码"""
+        print(f"[Step 3] Generating {framework} component for: {node['name']}")
+
+        if framework == "react":
+            return self._generate_react(node)
+        elif framework == "vue":
+            return self._generate_vue(node)
+        elif framework == "html":
+            return self._generate_html(node)
+        return ""
+
+    def _generate_react(self, node: dict, indent: int = 2) -> str:
+        """递归生成 React 组件"""
+        space = " " * indent
+        name = node["name"].replace(" ", "")
+
+        if node["type"] == "TEXT":
+            return f'{space}&lt;span&gt;{node.get("characters", "")}&lt;/span&gt;'
+
+        layout = node.get("layout", {})
+        css_props = []
+        css_props.append("display: flex")
+        if layout.get("mode") == "VERTICAL":
+            css_props.append("flex-direction: column")
+        if layout.get("gap"):
+            css_props.append(f'gap: {layout["gap"]}px')
+
+        children_code = ""
+        for child in node.get("children", []):
+            children_code += "\n" + self._generate_react(child, indent + 2)
+
+        return f'{space}&lt;div style={{{ {"; ".join(css_props)} }}}&gt;{children_code}\n{space}&lt;/div&gt;'
+
+    def step4_generate_styles(self) -> str:
+        """步骤 4：生成样式文件"""
+        print("[Step 4] Generating CSS variables...")
+        css = ":root {\n"
+        for category, values in self.design_tokens.items():
+            css += f"  /* {category} */\n"
+            for name, value in values.items():
+                css += f"  --{category}-{name}: {value};\n"
+            css += "\n"
+        css += "}\n"
+        return css
+
+    def run(self, file_key: str, frame_id: str):
+        """执行完整流水线"""
+        # Step 1: 读取设计
+        design = self.step1_read_design(file_key, frame_id)
+
+        # Step 2: 提取 Token
+        tokens = self.step2_extract_tokens(design)
+
+        # Step 3: 生成组件
+        component_code = self.step3_generate_component(design, "react")
+
+        # Step 4: 生成样式
+        styles = self.step4_generate_styles()
+
+        # 输出结果
+        output = {
+            "component.tsx": component_code,
+            "tokens.css": styles,
+            "tokens.json": json.dumps(tokens, indent=2),
+        }
+
+        print("\n=== Generated Files ===")
+        for filename, content in output.items():
+            print(f"\n--- {filename} ---")
+            print(content[:500])
+
+        return output
+
+# 运行流水线
+pipeline = DesignToCodePipeline("figd_your_token")
+pipeline.run("FILE_KEY", "1:2")</code></pre>
+        </div>
+        <div class="translation">
+          <p>这个综合练习展示了完整的设计到代码流水线：Step 1 通过 MCP 读取 Figma 设计数据；Step 2 提取设计 Token（颜色、间距、字号）；Step 3 递归遍历节点树生成 React 组件代码；Step 4 生成 CSS 变量文件。这是 Figma MCP Server 最核心的应用场景，理解这个流水线就掌握了设计转代码的精髓。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>进阶学习资源</h3>
+      <div class="pattern-cards">
+        <div class="pattern-card">
+          <h4>MCP 协议规范</h4>
+          <p>modelcontextprotocol.io — 学习 MCP 协议的完整规范、SDK 使用和最佳实践。</p>
+        </div>
+        <div class="pattern-card">
+          <h4>Figma Plugin API</h4>
+          <p>了解 Figma 插件开发，可以扩展 MCP Server 的能力，如实时监听设计变更。</p>
+        </div>
+        <div class="pattern-card">
+          <h4>Design Tokens 规范</h4>
+          <p>W3C Design Tokens Community Group 制定的设计 Token 标准格式，实现跨工具互操作。</p>
+        </div>
+        <div class="pattern-card">
+          <h4>CI/CD 集成</h4>
+          <p>将 Figma MCP Server 集成到 CI/CD 管道中，实现设计变更自动同步代码。</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="quiz">
+      <p class="quiz-question">Figma MCP Server 的学习要点有哪些？</p>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="true">MCP 协议和工具注册机制</button>
+        <button class="quiz-option" data-correct="true">Figma API 数据结构和认证</button>
+        <button class="quiz-option" data-correct="true">Auto Layout 到 CSS Flexbox 的映射</button>
+        <button class="quiz-option" data-correct="true">自定义 MCP Server 开发和性能优化</button>
+      </div>
+    </div>
+  </div>
+</section>

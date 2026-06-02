@@ -1,0 +1,258 @@
+
+<!-- ==================== MODULE 2: Dual-AR 双自回归架构 ==================== -->
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">Dual-AR 双自回归架构</h1>
+      <p class="module-subtitle">两个 Transformer 如何像指挥家和乐队一样协作，把文字变成声音蓝图</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: 类比引入 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">比喻：指挥家与交响乐团</h2>
+
+        <p>想象一场交响乐演出。
+          <span class="term" data-definition="自回归（Autoregressive）是指模型一步一步生成内容，每一步都依赖前面已经生成的内容。就像你写字，每个字都基于前面已经写的字来决定——不可能跳着写。">自回归模型</span>
+          就像一个只能一步一步做事的音乐家。Fish Speech 的创新在于：它有两个自回归模型，分工不同。
+        </p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🎼</div>
+            <div>
+              <strong>慢速 Transformer（指挥家）</strong>
+              <p>负责「大局观」——理解文本语义，决定什么时候该说什么。就像指挥家决定乐曲的节奏和情感走向。32 层深的神经网络，视野广阔但速度较慢。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🎻</div>
+            <div>
+              <strong>快速 Transformer（首席演奏家）</strong>
+              <p>负责「细节执行」——根据指挥的意图，快速生成每一帧音频的精细参数。4 层轻量网络，速度飞快，但只关注眼前这一帧。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">i</div>
+          <div class="callout-content">
+            <strong class="callout-title">为什么需要两个？</strong>
+            <p>传统方案用一个模型同时理解语义和生成音频，结果两头都做不好。Dual-AR 把这两个任务拆开：慢模型专注「理解文字要表达什么」，快模型专注「这些语义对应什么声音细节」。分工明确，效果倍增。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Group Chat - 两个 Transformer 对话 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">对话动画：指挥家与演奏家的协作</h2>
+
+        <p>点击「下一条消息」，看两个模型如何配合完成一次语音生成：</p>
+
+        <div class="chat-window" id="chat-module2">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="slow" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">慢</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">慢速 Transformer</span>
+                <p>收到文本：「今天天气真好」。我开始理解语义……</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="slow" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">慢</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">慢速 Transformer</span>
+                <p>第一个语义 Token 生成完毕：语义 ID #2156（对应「今」的声学特征）。我把它交给你了，快速 Transformer！</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="fast" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">快</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">快速 Transformer</span>
+                <p>收到语义 Token！我根据它生成 4 层码本细节：码本0=32, 码本1=87, 码本2=15, 码本3=91。完成！</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="slow" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">慢</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">慢速 Transformer</span>
+                <p>下一个 Token：语义 ID #892（「天」的声学特征）。注意音调要上扬——这是一个疑问前的铺垫。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="fast" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">快</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">快速 Transformer</span>
+                <p>码本生成完毕！我来检查一下有没有重复……用 RAS（重复感知采样）算法确认没有异常，继续下一轮！</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="5" data-sender="slow" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">慢</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">慢速 Transformer</span>
+                <p>遇到 &lt;|im_end|&gt; 标记，文本已经全部处理完。输出完整码本序列交给 DAC 编解码器！</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-typing-m2" style="display:none">
+            <div class="chat-avatar" id="chat-module2-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条消息</button>
+            <button class="btn chat-all-btn">播放全部</button>
+            <button class="btn chat-reset-btn">重播</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: 代码翻译 - DualAR 模型初始化 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码直译：Dual-AR 模型结构</h2>
+
+        <p>来看看两个 Transformer 是如何在代码中被定义的。注意看「慢速」和「快速」部分是如何分工的：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">Python</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">DualARTransformer</span>(BaseTransformer):</span>
+<span class="code-line">  <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, config):</span>
+<span class="code-line">    <span class="code-comment"># 继承：慢速 Transformer（32 层）</span></span>
+<span class="code-line">    <span class="code-function">super</span>().<span class="code-function">__init__</span>(config)</span>
+<span class="code-line">    <span class="code-comment"># 快速 Transformer（4 层）</span></span>
+<span class="code-line">    self.fast_embeddings = nn.<span class="code-function">Embedding</span>(</span>
+<span class="code-line">      config.codebook_size, config.fast_dim)</span>
+<span class="code-line">    self.fast_layers = nn.<span class="code-function">ModuleList</span>(</span>
+<span class="code-line">      TransformerBlock(config_fast)</span>
+<span class="code-line">      <span class="code-keyword">for</span> _ <span class="code-keyword">in</span> <span class="code-function">range</span>(config.n_fast_layer))</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">定义双自回归 Transformer 类，继承基础模型。</p>
+              <p class="tl">构造函数接收配置参数。</p>
+              <p class="tl">调用父类构造——创建 32 层「慢速」Transformer。</p>
+              <p class="tl">这行是注释，说明下面是快速部分。</p>
+              <p class="tl">创建快速部分的词嵌入层。</p>
+              <p class="tl">嵌入维度等于码本大小（如 160）映射到快速模型的维度。</p>
+              <p class="tl">创建快速 Transformer 的层列表。</p>
+              <p class="tl">每一层都是独立的 TransformerBlock，使用精简配置。</p>
+              <p class="tl">共创建 n_fast_layer 层（默认 4 层）。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: 交互式架构图 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">交互式架构图</h2>
+
+        <p>点击任意组件，查看它在系统中的角色：</p>
+
+        <div class="arch-diagram">
+          <div class="arch-zone arch-zone-browser">
+            <h4 class="arch-zone-label">慢速 Transformer（理解语义）</h4>
+            <div class="arch-component" data-desc="把文字 ID 转成高维向量——就像把单字翻译成含义丰富的「思维向量」。">
+              <div class="arch-icon">T</div>
+              <span>文本嵌入层</span>
+            </div>
+            <div class="arch-component" data-desc="把音频码本 ID 转成向量——让模型「看懂」参考音频的声音特征。">
+              <div class="arch-icon">VQ</div>
+              <span>码本嵌入层</span>
+            </div>
+            <div class="arch-component" data-desc="32 层自注意力网络——逐层提取文本的深层语义，从字面意思到情感色彩。这是模型最重的部分。">
+              <div class="arch-icon">32x</div>
+              <span>Transformer 层</span>
+            </div>
+            <div class="arch-component" data-desc="输出一个语义 Token——告诉快速模型「这个位置应该发什么音」。">
+              <div class="arch-icon">O</div>
+              <span>语义 Token 输出</span>
+            </div>
+          </div>
+          <div class="arch-zone arch-zone-external">
+            <h4 class="arch-zone-label">快速 Transformer（生成音频细节）</h4>
+            <div class="arch-component" data-desc="接收慢速模型输出的语义 Token，准备精细解码。">
+              <div class="arch-icon">E</div>
+              <span>快速嵌入层</span>
+            </div>
+            <div class="arch-component" data-desc="4 层轻量注意力网络——根据语义 Token 快速预测 4 层码本的精确值。">
+              <div class="arch-icon">4x</div>
+              <span>快速 Transformer 层</span>
+            </div>
+            <div class="arch-component" data-desc="输出 4 层码本值（每层 0-159）——这就是音频的「数字蓝图」，DAC 编解码器会把它还原成真实声音。">
+              <div class="arch-icon">C</div>
+              <span>码本输出（4 层）</span>
+            </div>
+          </div>
+          <div class="arch-description" id="arch-desc">点击上方任意组件查看详细说明</div>
+        </div>
+      </section>
+
+      <!-- Screen 5: 测验 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！慢速 Transformer 有 32 层，负责全局语义理解；快速 Transformer 只有 4 层，负责根据语义快速生成音频细节码本。"
+               data-explanation-wrong="记住这个比喻：慢速 Transformer 是「指挥家」，有 32 层，负责全局理解；快速 Transformer 是「演奏家」，只有 4 层，负责快速执行。">
+            <h3 class="quiz-question">慢速 Transformer 和快速 Transformer 分别有多少层？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>都是 16 层，但参数量不同</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>慢速 32 层（全局语义），快速 4 层（精细生成）</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>慢速 4 层，快速 32 层——快模型承担主要工作</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！RAS（Repetition Aware Sampling，重复感知采样）是一个滑动窗口机制，检测模型是否陷入了重复循环。如果发现重复，就用高温采样打破循环。"
+               data-explanation-wrong="在对话动画中，快速 Transformer 提到了「RAS 算法检查重复」。RAS 是 Repetition Aware Sampling（重复感知采样），它用一个滑动窗口检测重复。">
+            <h3 class="quiz-question">在推理过程中，什么机制防止模型陷入重复循环？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>随机打乱输出顺序</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>强制每隔 10 个 Token 就切换音调</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>RAS 重复感知采样——检测到重复时自动用高温采样打破循环</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重新作答</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>React 源码深度解析：从设计哲学到核心实现</title>
+
+  <!-- Google Fonts: Bricolage Grotesque · DM Sans · JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <!--
+    CUSTOMIZE PER COURSE — change only the three accent variables below.
+    Options:
+      vermillion  #D94F30 / #C4432A / #FDEEE9 / #E8836C  (default)
+      coral       #E06B56 / #C85A47 / #FDECEA / #E89585
+      teal        #2A7B9B / #1F6280 / #E4F2F7 / #5A9DB8
+      amber       #D4A843 / #BF9530 / #FDF5E0 / #E0C070
+      forest      #2D8B55 / #226B41 / #E8F5EE / #5AAD7A
+  -->
+  <style>
+    :root {
+      --color-accent:       #D94F30;
+      --color-accent-hover: #C4432A;
+      --color-accent-light: #FDEEE9;
+      --color-accent-muted: #E8836C;
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">React 源码深度解析</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <button class="nav-dot" data-target="module-1" data-tooltip="React 是什么？" role="tab" aria-label="Module 1: React 是什么？"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="React 的核心概念" role="tab" aria-label="Module 2: React 的核心概念"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="React 的实践应用" role="tab" aria-label="Module 3: React 的实践应用"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="React 的进阶主题" role="tab" aria-label="Module 4: React 的进阶主题"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="总结与练习" role="tab" aria-label="Module 5: 总结与练习"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh -->
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 1: React 是什么？
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">React 是什么？</h1>
+      <p class="module-subtitle">理解 React 的设计哲学、核心定位和为什么它改变了前端开发的格局</p>
+    </header>
+
+    <!-- ── Screen 1: React 的诞生与定位 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">React 的诞生与定位</h2>
+
+      <p>2013 年，Facebook（现 Meta）在 JSConf 上开源了一个名为 React 的 JavaScript 库。它的核心理念非常简单：<span class="term" data-definition="UI = f(state) 是 React 的核心理念。它将用户界面视为状态的函数映射：给定相同的状态，总是渲染出相同的 UI。这种声明式编程范式让开发者专注于「描述 UI 应该是什么样子」，而不是「如何一步步操作 DOM」。">UI = f(state)</span>——将用户界面视为状态的函数映射。</p>
+
+      <p>这个看似简单的理念，彻底改变了前端开发的范式。在 React 之前，开发者需要手动操作 DOM 来更新界面（命令式编程）；React 之后，开发者只需描述界面应该呈现什么样子，React 负责高效地更新 DOM（声明式编程）。</p>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">&#128161;</div>
+        <div class="callout-content">
+          <strong class="callout-title">为什么选择 React？</strong>
+          <p>React 并不是第一个前端框架，但它引入了三个革命性的概念：<strong>组件化</strong>（将 UI 拆分为独立、可复用的组件）、<strong>虚拟 DOM</strong>（通过 diff 算法最小化 DOM 操作）、<strong>单向数据流</strong>（数据从父组件流向子组件，可预测、可调试）。这三个概念至今仍是现代前端框架的设计基础。</p>
+        </div>
+      </div>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">&#128230;</div>
+          <h4 class="pattern-title">声明式编程</h4>
+          <p class="pattern-desc">你只需描述「UI 应该长什么样」，React 负责高效更新 DOM。当数据变化时，React 自动重新渲染组件，你不需要手动操作 DOM 节点。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">&#129513;</div>
+          <h4 class="pattern-title">组件化架构</h4>
+          <p class="pattern-desc">将复杂的 UI 拆分为独立、可复用的组件。每个组件管理自己的状态和渲染逻辑。组件可以嵌套组合，像乐高积木一样构建完整的界面。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">&#9889;</div>
+          <h4 class="pattern-title">虚拟 DOM</h4>
+          <p class="pattern-desc">React 在内存中维护一个虚拟 DOM 树。状态变化时，React 先在虚拟 DOM 上计算差异（diff），然后只更新真实 DOM 中变化的部分，避免昂贵的全量 DOM 操作。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+          <div class="pattern-icon" style="background: var(--color-actor-4)">&#127760;</div>
+          <h4 class="pattern-title">生态丰富</h4>
+          <p class="pattern-desc">React 拥有全球最大的前端生态系统：Next.js（全栈框架）、React Native（移动开发）、Redux/Zustand（状态管理）、React Router（路由）。一次学习，全栈受益。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 2: 第一个 React 组件 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">第一个 React 组件</h2>
+
+      <p>让我们从一个简单的 HelloMessage 组件开始，理解 React 组件的基本结构。</p>
+
+      <div class="code-translation">
+        <div class="translation-code">
+          <div class="translation-label">JSX</div>
+          <pre class="translation-lines"><code><span class="code-line"><span class="code-comment">// 最简单的 React 函数组件</span></span>
+<span class="code-line"><span class="code-keyword">function</span> <span class="code-comment">HelloMessage</span>({ name }) {</span>
+<span class="code-line">  <span class="code-keyword">return</span> (</span>
+<span class="code-line">    &lt;div className=<span class="code-string">"greeting"</span>&gt;</span>
+<span class="code-line">      &lt;h1&gt;Hello, {name}!&lt;/h1&gt;</span>
+<span class="code-line">      &lt;p&gt;Welcome to React&lt;/p&gt;</span>
+<span class="code-line">    &lt;/div&gt;</span>
+<span class="code-line">  );</span>
+<span class="code-line">}</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment">// 使用组件</span></span>
+<span class="code-line"><span class="code-keyword">const</span> root = ReactDOM.createRoot(</span>
+<span class="code-line">  document.getElementById(<span class="code-string">'root'</span>)</span>
+<span class="code-line">);</span>
+<span class="code-line">root.render(&lt;HelloMessage name=<span class="code-string">"Alice"</span> /&gt;);</span></code></pre>
+        </div>
+        <div class="translation-block animate-in">
+          <div class="translation-english">
+            <div class="translation-label">解读</div>
+            <p>React 组件的核心概念：</p>
+            <ul>
+              <li><strong>函数组件</strong>：一个返回 JSX 的普通 JavaScript 函数</li>
+              <li><strong>Props（{ name }）</strong>：组件的输入参数，父组件传入的数据</li>
+              <li><strong>JSX</strong>：JavaScript 的语法扩展，可以在 JS 中写类 HTML 结构</li>
+              <li><strong>className</strong>：React 中用 className 替代 class（class 是 JS 保留字）</li>
+              <li><strong>createRoot</strong>：React 18 的新 API，创建渲染根节点</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 3: React 渲染流程 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">React 渲染流程：从状态到界面</h2>
+
+      <p>理解 React 的渲染流程，是掌握 React 性能优化的基础。以下是 React 从状态变化到 DOM 更新的完整流程。</p>
+
+      <div class="flow-animation" data-steps='[
+        {"from": "状态变化", "to": "触发渲染", "label": "setState 或 props 变更", "packet": "TRIGGER"},
+        {"from": "触发渲染", "to": "虚拟DOM计算", "label": "调用组件函数生成新 VNode", "packet": "RENDER"},
+        {"from": "虚拟DOM计算", "to": "Diff算法", "label": "对比新旧虚拟 DOM 树", "packet": "DIFF"},
+        {"from": "Diff算法", "to": "最小更新", "label": "计算最小 DOM 操作集", "packet": "PATCH"},
+        {"from": "最小更新", "to": "真实DOM", "label": "批量执行 DOM 更新", "packet": "COMMIT"},
+        {"from": "真实DOM", "to": "useEffect", "label": "执行副作用回调", "packet": "EFFECT"}
+      ]'>
+        <div class="flow-actors">
+          <div class="flow-actor">
+            <div class="flow-actor-icon">&#128260;</div>
+            <span>状态变化</span>
+          </div>
+          <div class="flow-actor">
+            <div class="flow-actor-icon">&#9889;</div>
+            <span>触发渲染</span>
+          </div>
+          <div class="flow-actor">
+            <div class="flow-actor-icon">&#129513;</div>
+            <span>虚拟DOM计算</span>
+          </div>
+          <div class="flow-actor">
+            <div class="flow-actor-icon">&#128270;</div>
+            <span>Diff算法</span>
+          </div>
+          <div class="flow-actor">
+            <div class="flow-actor-icon">&#128295;</div>
+            <span>最小更新</span>
+          </div>
+          <div class="flow-actor">
+            <div class="flow-actor-icon">&#128187;</div>
+            <span>真实DOM</span>
+          </div>
+        </div>
+        <div class="flow-progress"></div>
+        <div class="flow-step-label"></div>
+        <div class="flow-controls">
+          <button class="btn flow-next-btn">下一步 &#8594;</button>
+          <button class="btn flow-reset-btn">重置</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 4: 课程路线图 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">课程路线图</h2>
+
+      <div class="file-tree animate-in">
+        <div class="ft-folder open">
+          <div class="ft-name">&#128193; 课程路线图</div>
+          <div class="ft-children">
+            <div class="ft-folder">
+              <div class="ft-name">&#128218; 模块 1：React 是什么（当前位置）</div>
+              <div class="ft-children">
+                <div class="ft-desc">设计哲学、第一个组件、渲染流程</div>
+              </div>
+            </div>
+            <div class="ft-folder">
+              <div class="ft-name">&#129504; 模块 2：核心概念</div>
+              <div class="ft-children">
+                <div class="ft-desc">组件、Props、State、Hooks、生命周期</div>
+              </div>
+            </div>
+            <div class="ft-folder">
+              <div class="ft-name">&#128736; 模块 3：实践应用</div>
+              <div class="ft-children">
+                <div class="ft-desc">状态管理、表单处理、API 集成、路由</div>
+              </div>
+            </div>
+            <div class="ft-folder">
+              <div class="ft-name">&#128640; 模块 4：进阶主题</div>
+              <div class="ft-children">
+                <div class="ft-desc">Context、性能优化、自定义 Hook、Server Components</div>
+              </div>
+            </div>
+            <div class="ft-folder">
+              <div class="ft-name">&#9989; 模块 5：总结与练习</div>
+              <div class="ft-children">
+                <div class="ft-desc">最佳实践、综合练习、React 生态</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="quiz-container">
+        <div class="quiz-question-block">
+          <p class="quiz-question">React 的核心理念 "UI = f(state)" 是什么意思？</p>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q1" class="quiz-option-radio" data-correct="false">
+              <span>UI 是一个函数，state 是函数名</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" class="quiz-option-radio" data-correct="true">
+              <span>用户界面是状态的函数映射——给定状态，渲染对应的 UI</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" class="quiz-option-radio" data-correct="false">
+              <span>状态是函数的输出</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" class="quiz-option-radio" data-correct="false">
+              <span>函数和状态是两个独立的概念</span>
+            </label>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</section>
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 2: React 的核心概念
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-2" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">React 的核心概念</h1>
+      <p class="module-subtitle">深入理解组件、Props、State、Hooks 和生命周期——React 开发的五大基石</p>
+    </header>
+
+    <!-- ── Screen 1: 组件与 Props ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">组件与 Props</h2>
+
+      <p>组件是 React 的基本构建单元。它是一个返回 UI 元素的 JavaScript 函数（或类）。<span class="term" data-definition="Props（Properties 的缩写）是 React 组件的输入参数。Props 是只读的——子组件不能修改接收到的 props。这种单向数据流设计让组件行为可预测、可调试。">Props</span> 是父组件传递给子组件的数据，实现组件间的通信。</p>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">&#129513;</div>
+        <div class="callout-content">
+          <strong class="callout-title">组件设计原则</strong>
+          <p>好的组件遵循<strong>单一职责原则</strong>——每个组件只做一件事。如果组件变得复杂，就应该拆分为更小的子组件。理想情况下，一个组件的代码不超过 100 行。组件名使用 PascalCase（如 UserCard、ShoppingCart），与 HTML 元素区分。</p>
+        </div>
+      </div>
+
+      <div class="code-translation">
+        <div class="translation-code">
+          <div class="translation-label">JSX</div>
+          <pre class="translation-lines"><code><span class="code-line"><span class="code-comment">// 父组件：组合多个子组件</span></span>
+<span class="code-line"><span class="code-keyword">function</span> <span class="code-comment">UserDashboard</span>() {</span>
+<span class="code-line">  <span class="code-keyword">const</span> user = { name: <span class="code-string">"Alice"</span>, role: <span class="code-string">"admin"</span> };</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">return</span> (</span>
+<span class="code-line">    &lt;div className=<span class="code-string">"dashboard"</span>&gt;</span>
+<span class="code-line">      <span class="code-comment">{/* 数据通过 props 向下流动 */}</span></span>
+<span class="code-line">      &lt;UserHeader user={user} /&gt;</span>
+<span class="code-line">      &lt;UserStats userId={user.id} /&gt;</span>
+<span class="code-line">      &lt;UserActivity userId={user.id} /&gt;</span>
+<span class="code-line">    &lt;/div&gt;</span>
+<span class="code-line">  );</span>
+<span class="code-line">}</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment">// 子组件：接收 props 并渲染</span></span>
+<span class="code-line"><span class="code-keyword">function</span> <span class="code-comment">UserHeader</span>({ user }) {</span>
+<span class="code-line">  <span class="code-keyword">return</span> (</span>
+<span class="code-line">    &lt;header&gt;</span>
+<span class="code-line">      &lt;h1&gt;{user.name}&lt;/h1&gt;</span>
+<span class="code-line">      &lt;span className=<span class="code-string">"badge"</span>&gt;{user.role}&lt;/span&gt;</span>
+<span class="code-line">    &lt;/header&gt;</span>
+<span class="code-line">  );</span>
+<span class="code-line">}</span></code></pre>
+        </div>
+        <div class="translation-block animate-in">
+          <div class="translation-english">
+            <div class="translation-label">解读</div>
+            <p>组件与 Props 的核心模式：</p>
+            <ul>
+              <li><strong>组合模式</strong>：父组件包含子组件，形成组件树</li>
+              <li><strong>Props 传递</strong>：数据通过 props 从父组件流向子组件</li>
+              <li><strong>解构赋值</strong>：({ user }) 直接从 props 中提取参数</li>
+              <li><strong>单向数据流</strong>：子组件只读取 props，不修改</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 2: State 与 Hooks ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">State 与 Hooks</h2>
+
+      <p>如果说 Props 是组件的输入，那么 <span class="term" data-definition="State（状态）是组件内部的动态数据。与 Props 不同，State 由组件自己管理，可以通过 setState 修改。State 变化会触发组件重新渲染。React 18 中，状态更新会被自动批处理以优化性能。">State</span> 就是组件的内部记忆。Hooks 是 React 16.8 引入的 API，让函数组件也能使用状态和副作用等功能。</p>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">&#128260;</div>
+          <h4 class="pattern-title">useState</h4>
+          <p class="pattern-desc">最基础的 Hook。声明一个状态变量和更新函数。const [count, setCount] = useState(0)。状态更新触发重新渲染。支持函数式更新：setCount(prev => prev + 1)。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">&#9889;</div>
+          <h4 class="pattern-title">useEffect</h4>
+          <p class="pattern-desc">处理副作用：API 调用、DOM 操作、事件监听、定时器。第二个参数是依赖数组，控制何时重新执行。空数组 [] 表示只在挂载时执行一次。返回清理函数处理资源释放。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">&#128218;</div>
+          <h4 class="pattern-title">useRef</h4>
+          <p class="pattern-desc">持有可变引用，不触发重新渲染。常见用途：引用 DOM 元素（focus 管理）、存储上一次的值、存储不需要触发渲染的定时器 ID。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+          <div class="pattern-icon" style="background: var(--color-actor-4)">&#128200;</div>
+          <h4 class="pattern-title">useMemo / useCallback</h4>
+          <p class="pattern-desc">性能优化 Hook。useMemo 缓存计算结果，useCallback 缓存函数引用。避免不必要的重新计算和子组件重新渲染。但不要过度使用——缓存本身也有开销。</p>
+        </div>
+      </div>
+
+      <div class="code-translation">
+        <div class="translation-code">
+          <div class="translation-label">JSX</div>
+          <pre class="translation-lines"><code><span class="code-line"><span class="code-keyword">function</span> <span class="code-comment">Counter</span>() {</span>
+<span class="code-line">  <span class="code-keyword">const</span> [count, setCount] = useState(<span class="code-number">0</span>);</span>
+<span class="code-line">  <span class="code-keyword">const</span> [step, setStep] = useState(<span class="code-number">1</span>);</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-comment">// 副作用：每次 count 变化时更新标题</span></span>
+<span class="code-line">  useEffect(() => {</span>
+<span class="code-line">    document.title = <span class="code-string">`Count: ${count}`</span>;</span>
+<span class="code-line">    <span class="code-keyword">return</span> () => { document.title = <span class="code-string">"React App"</span>; };</span>
+<span class="code-line">  }, [count]); <span class="code-comment">// 依赖：只在 count 变化时执行</span></span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-comment">// 计算属性：缓存计算结果</span></span>
+<span class="code-line">  <span class="code-keyword">const</span> doubled = useMemo(() => count * <span class="code-number">2</span>, [count]);</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">return</span> (</span>
+<span class="code-line">    &lt;div&gt;</span>
+<span class="code-line">      &lt;p&gt;Count: {count} | Doubled: {doubled}&lt;/p&gt;</span>
+<span class="code-line">      &lt;button onClick={() => setCount(c => c + step)}&gt;</span>
+<span class="code-line">        Increment by {step}</span>
+<span class="code-line">      &lt;/button&gt;</span>
+<span class="code-line">    &lt;/div&gt;</span>
+<span class="code-line">  );</span>
+<span class="code-line">}</span></code></pre>
+        </div>
+        <div class="translation-block animate-in">
+          <div class="translation-english">
+            <div class="translation-label">解读</div>
+            <p>Hooks 的使用模式：</p>
+            <ul>
+              <li><strong>useState</strong>：声明状态，[value, setter] 解构</li>
+              <li><strong>useEffect</strong>：副作用处理，[count] 是依赖数组</li>
+              <li><strong>清理函数</strong>：return 的函数在组件卸载或依赖变化前执行</li>
+              <li><strong>useMemo</strong>：只有 count 变化时才重新计算 doubled</li>
+              <li><strong>函数式更新</strong>：setCount(c => c + step) 确保基于最新值更新</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 3: 组件生命周期 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">组件生命周期与 useEffect</h2>
+
+      <p>理解组件的生命周期——从挂载到更新到卸载——是写出正确 React 代码的关键。在函数组件中，生命周期通过 useEffect 实现。</p>
+
+      <div class="arch-diagram">
+        <div class="arch-zone">
+          <h4 class="arch-zone-label">挂载（Mount）— 组件首次渲染</h4>
+          <div class="arch-component" data-desc="useEffect(() => { ... }, [])：空依赖数组意味着只在组件首次渲染后执行一次。适合初始化操作：获取数据、设置事件监听、启动定时器。">
+            <div class="arch-icon">&#9889;</div>
+            <span>初始化副作用</span>
+          </div>
+          <div class="arch-component" data-desc="useEffect 返回的函数在组件卸载时执行。用于清理资源：取消网络请求、移除事件监听、清除定时器。防止内存泄漏。">
+            <div class="arch-icon">&#128465;</div>
+            <span>清理函数注册</span>
+          </div>
+        </div>
+        <div class="arch-zone">
+          <h4 class="arch-zone-label">更新（Update）— 状态或 Props 变化</h4>
+          <div class="arch-component" data-desc="useEffect(() => { ... }, [dep1, dep2])：当依赖数组中的值变化时重新执行。适合响应特定数据变化的操作，如根据筛选条件重新获取数据。">
+            <div class="arch-icon">&#128260;</div>
+            <span>响应数据变化</span>
+          </div>
+          <div class="arch-component" data-desc="React 18 自动批处理多个状态更新，只触发一次重新渲染。这比 React 17 的行为更高效。使用 flushSync 可以强制同步更新（谨慎使用）。">
+            <div class="arch-icon">&#128230;</div>
+            <span>自动批处理</span>
+          </div>
+        </div>
+        <div class="arch-zone">
+          <h4 class="arch-zone-label">卸载（Unmount）— 组件销毁</h4>
+          <div class="arch-component" data-desc="组件从 DOM 中移除时触发。所有 useEffect 的清理函数在此时执行。这是释放资源的最后机会——忘记清理是 React 内存泄漏的最常见原因。">
+            <div class="arch-icon">&#128683;</div>
+            <span>资源释放</span>
+          </div>
+        </div>
+        <div class="arch-description">点击组件了解生命周期的每个阶段</div>
+      </div>
+
+      <div class="quiz-container">
+        <div class="quiz-question-block">
+          <p class="quiz-question">React 中 Props 和 State 的关键区别是什么？</p>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q2a" class="quiz-option-radio" data-correct="false">
+              <span>Props 可以修改，State 不能</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2a" class="quiz-option-radio" data-correct="true">
+              <span>Props 是父组件传入的只读数据，State 是组件内部可变的状态</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2a" class="quiz-option-radio" data-correct="false">
+              <span>Props 和 State 完全相同</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2a" class="quiz-option-radio" data-correct="false">
+              <span>State 只能在类组件中使用</span>
+            </label>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <div class="quiz-question-block">
+          <p class="quiz-question">useEffect 的依赖数组为空 [] 时，副作用何时执行？</p>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q2b" class="quiz-option-radio" data-correct="false">
+              <span>每次渲染都执行</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2b" class="quiz-option-radio" data-correct="false">
+              <span>永远不会执行</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2b" class="quiz-option-radio" data-correct="true">
+              <span>只在组件首次挂载时执行一次</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2b" class="quiz-option-radio" data-correct="false">
+              <span>只在组件卸载时执行</span>
+            </label>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</section>
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 3: React 的实践应用
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">React 的实践应用</h1>
+      <p class="module-subtitle">状态管理、表单处理、API 集成和路由——构建真实 React 应用的核心技能</p>
+    </header>
+
+    <!-- ── Screen 1: 状态管理 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">状态管理：从本地到全局</h2>
+
+      <p>React 应用的状态管理分为三个层次：组件本地状态（useState）、跨组件共享状态（Context）、全局状态管理（Zustand/Redux）。选择合适的层次，是 React 开发的重要决策。</p>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">&#129504;</div>
+        <div class="callout-content">
+          <strong class="callout-title">状态管理的选型原则</strong>
+          <p>不要过度工程化。大多数应用只需要 useState + Context。只有当状态逻辑非常复杂（如购物车、协作编辑、实时仪表盘）时，才需要引入 Zustand 或 Redux。 Zustand 是 2024 年最推荐的轻量级状态管理库。</p>
+        </div>
+      </div>
+
+      <div class="code-translation">
+        <div class="translation-code">
+          <div class="translation-label">JSX</div>
+          <pre class="translation-lines"><code><span class="code-line"><span class="code-comment">// 简单的待办事项应用</span></span>
+<span class="code-line"><span class="code-keyword">function</span> <span class="code-comment">TodoApp</span>() {</span>
+<span class="code-line">  <span class="code-keyword">const</span> [todos, setTodos] = useState([]);</span>
+<span class="code-line">  <span class="code-keyword">const</span> [input, setInput] = useState(<span class="code-string">""</span>);</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">const</span> addTodo = useCallback(() => {</span>
+<span class="code-line">    <span class="code-keyword">if</span> (!input.trim()) <span class="code-keyword">return</span>;</span>
+<span class="code-line">    setTodos(prev => [...prev, {</span>
+<span class="code-line">      id: Date.now(),</span>
+<span class="code-line">      text: input,</span>
+<span class="code-line">      completed: <span class="code-keyword">false</span></span>
+<span class="code-line">    }]);</span>
+<span class="code-line">    setInput(<span class="code-string">""</span>);</span>
+<span class="code-line">  }, [input]);</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">const</span> toggleTodo = useCallback((id) => {</span>
+<span class="code-line">    setTodos(prev => prev.map(todo =></span>
+<span class="code-line">      todo.id === id</span>
+<span class="code-line">        ? { ...todo, completed: !todo.completed }</span>
+<span class="code-line">        : todo</span>
+<span class="code-line">    ));</span>
+<span class="code-line">  }, []);</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">return</span> (</span>
+<span class="code-line">    &lt;div&gt;</span>
+<span class="code-line">      &lt;input value={input}</span>
+<span class="code-line">        onChange={e => setInput(e.target.value)}</span>
+<span class="code-line">        onKeyDown={e => e.key === <span class="code-string">'Enter'</span> && addTodo()}</span>
+<span class="code-line">      /&gt;</span>
+<span class="code-line">      &lt;TodoList todos={todos} onToggle={toggleTodo} /&gt;</span>
+<span class="code-line">    &lt;/div&gt;</span>
+<span class="code-line">  );</span>
+<span class="code-line">}</span></code></pre>
+        </div>
+        <div class="translation-block animate-in">
+          <div class="translation-english">
+            <div class="translation-label">解读</div>
+            <p>状态管理的核心模式：</p>
+            <ul>
+              <li><strong>不可变更新</strong>：[...prev, newItem] 创建新数组，不修改原数组</li>
+              <li><strong>useCallback</strong>：缓存函数引用，避免子组件不必要的重新渲染</li>
+              <li><strong>展开运算符</strong>：{ ...todo, completed: !todo.completed } 更新单个属性</li>
+              <li><strong>受控组件</strong>：input 的值由 state 控制，onChange 更新 state</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 2: 表单处理 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">表单处理与数据获取</h2>
+
+      <p>表单是 Web 应用最常见的交互元素。React 的受控组件模式让表单状态管理变得清晰可预测。</p>
+
+      <div class="code-translation">
+        <div class="translation-code">
+          <div class="translation-label">JSX</div>
+          <pre class="translation-lines"><code><span class="code-line"><span class="code-keyword">function</span> <span class="code-comment">UserProfile</span>() {</span>
+<span class="code-line">  <span class="code-keyword">const</span> [formData, setFormData] = useState({</span>
+<span class="code-line">    name: <span class="code-string">""</span>, email: <span class="code-string">""</span>, bio: <span class="code-string">""</span></span>
+<span class="code-line">  });</span>
+<span class="code-line">  <span class="code-keyword">const</span> [status, setStatus] = useState(<span class="code-string">"idle"</span>);</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">const</span> handleChange = (e) => {</span>
+<span class="code-line">    <span class="code-keyword">const</span> { name, value } = e.target;</span>
+<span class="code-line">    setFormData(prev => ({ ...prev, [name]: value }));</span>
+<span class="code-line">  };</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">const</span> handleSubmit = <span class="code-keyword">async</span> (e) => {</span>
+<span class="code-line">    e.preventDefault();</span>
+<span class="code-line">    setStatus(<span class="code-string">"submitting"</span>);</span>
+<span class="code-line">    <span class="code-keyword">try</span> {</span>
+<span class="code-line">      <span class="code-keyword">await</span> fetch(<span class="code-string">'/api/profile'</span>, {</span>
+<span class="code-line">        method: <span class="code-string">'POST'</span>,</span>
+<span class="code-line">        headers: { <span class="code-string">'Content-Type'</span>: <span class="code-string">'application/json'</span> },</span>
+<span class="code-line">        body: JSON.stringify(formData)</span>
+<span class="code-line">      });</span>
+<span class="code-line">      setStatus(<span class="code-string">"success"</span>);</span>
+<span class="code-line">    } <span class="code-keyword">catch</span> (err) {</span>
+<span class="code-line">      setStatus(<span class="code-string">"error"</span>);</span>
+<span class="code-line">    }</span>
+<span class="code-line">  };</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">return</span> (</span>
+<span class="code-line">    &lt;form onSubmit={handleSubmit}&gt;</span>
+<span class="code-line">      &lt;input name=<span class="code-string">"name"</span> value={formData.name}</span>
+<span class="code-line">        onChange={handleChange} /&gt;</span>
+<span class="code-line">      &lt;button disabled={status === <span class="code-string">"submitting"</span>}&gt;</span>
+<span class="code-line">        {status === <span class="code-string">"submitting"</span> ? <span class="code-string">"Saving..."</span> : <span class="code-string">"Save"</span>}</span>
+<span class="code-line">      &lt;/button&gt;</span>
+<span class="code-line">    &lt;/form&gt;</span>
+<span class="code-line">  );</span>
+<span class="code-line">}</span></code></pre>
+        </div>
+        <div class="translation-block animate-in">
+          <div class="translation-english">
+            <div class="translation-label">解读</div>
+            <p>表单处理的关键模式：</p>
+            <ul>
+              <li><strong>统一状态对象</strong>：所有表单字段存储在一个对象中</li>
+              <li><strong>动态属性名</strong>：[name]: value 根据字段名动态更新</li>
+              <li><strong>提交状态管理</strong>：idle/submitting/success/error 四种状态</li>
+              <li><strong>防重复提交</strong>：disabled={status === "submitting"}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 3: API 集成 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">API 数据获取模式</h2>
+
+      <p>React 组件获取 API 数据是一个常见但需要正确处理的场景。自定义 Hook 是封装数据获取逻辑的最佳方式。</p>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">&#128269;</div>
+          <h4 class="pattern-title">自定义 Hook：useFetch</h4>
+          <p class="pattern-desc">封装 fetch 调用，返回 { data, loading, error }。支持自动重试、缓存和取消请求。将重复的数据获取逻辑抽象为可复用的 Hook。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">&#128230;</div>
+          <h4 class="pattern-title">SWR / React Query</h4>
+          <p class="pattern-desc">生产级数据获取库。自动缓存、重新验证、乐观更新、分页、无限滚动。SWR 更轻量，React Query 功能更丰富。推荐新项目使用 SWR。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">&#128683;</div>
+          <h4 class="pattern-title">请求取消</h4>
+          <p class="pattern-desc">使用 AbortController 在组件卸载时取消未完成的请求。避免"无法对已卸载的组件执行状态更新"的警告和内存泄漏。</p>
+        </div>
+      </div>
+
+      <div class="quiz-container">
+        <div class="quiz-question-block">
+          <p class="quiz-question">在 React 中，为什么状态更新必须使用不可变方式（如展开运算符）？</p>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q3" class="quiz-option-radio" data-correct="false">
+              <span>因为 React 不支持直接修改</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" class="quiz-option-radio" data-correct="true">
+              <span>React 通过引用比较检测变化，直接修改不会触发重新渲染</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" class="quiz-option-radio" data-correct="false">
+              <span>为了代码看起来更高级</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" class="quiz-option-radio" data-correct="false">
+              <span>只有数组需要不可变更新</span>
+            </label>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</section>
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 4: React 的进阶主题
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-4" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">React 的进阶主题</h1>
+      <p class="module-subtitle">Context API、性能优化、自定义 Hook 和 React Server Components——高级开发者的必备技能</p>
+    </header>
+
+    <!-- ── Screen 1: Context API ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">Context API：跨组件数据共享</h2>
+
+      <p>当多个层级的组件需要共享同一份数据时（如主题、用户信息、语言设置），逐层传递 Props 会变得非常繁琐。<span class="term" data-definition="Context API 是 React 内置的跨组件数据共享机制。它通过 Provider 包裹子组件树，任何深层组件都可以通过 useContext 直接访问共享数据，无需逐层传递 Props。但 Context 的变化会导致所有消费者重新渲染，不适合高频更新的数据。">Context API</span> 解决了这个问题——让数据跨越组件层级直接传递。</p>
+
+      <div class="code-translation">
+        <div class="translation-code">
+          <div class="translation-label">JSX</div>
+          <pre class="translation-lines"><code><span class="code-line"><span class="code-comment">// 1. 创建 Context</span></span>
+<span class="code-line"><span class="code-keyword">const</span> ThemeContext = createContext(<span class="code-string">'light'</span>);</span>
+<span class="code-line"><span class="code-keyword">const</span> UserContext = createContext(<span class="code-keyword">null</span>);</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment">// 2. 在顶层组件提供数据</span></span>
+<span class="code-line"><span class="code-keyword">function</span> <span class="code-comment">App</span>() {</span>
+<span class="code-line">  <span class="code-keyword">return</span> (</span>
+<span class="code-line">    &lt;ThemeContext.Provider value=<span class="code-string">"dark"</span>&gt;</span>
+<span class="code-line">      &lt;UserContext.Provider value={{ name: <span class="code-string">"Alice"</span> }}&gt;</span>
+<span class="code-line">        &lt;Layout /&gt;</span>
+<span class="code-line">      &lt;/UserContext.Provider&gt;</span>
+<span class="code-line">    &lt;/ThemeContext.Provider&gt;</span>
+<span class="code-line">  );</span>
+<span class="code-line">}</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment">// 3. 在任意深层组件中使用</span></span>
+<span class="code-line"><span class="code-keyword">function</span> <span class="code-comment">ThemedButton</span>() {</span>
+<span class="code-line">  <span class="code-keyword">const</span> theme = useContext(ThemeContext);</span>
+<span class="code-line">  <span class="code-keyword">const</span> user = useContext(UserContext);</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">return</span> (</span>
+<span class="code-line">    &lt;button className={`btn btn-${theme}`}&gt;</span>
+<span class="code-line">      {user.name}'s Button</span>
+<span class="code-line">    &lt;/button&gt;</span>
+<span class="code-line">  );</span>
+<span class="code-line">}</span></code></pre>
+        </div>
+        <div class="translation-block animate-in">
+          <div class="translation-english">
+            <div class="translation-label">解读</div>
+            <p>Context API 的三步使用模式：</p>
+            <ul>
+              <li><strong>createContext</strong>：创建 Context 对象，参数是默认值</li>
+              <li><strong>Provider</strong>：在顶层包裹子组件树，提供共享数据</li>
+              <li><strong>useContext</strong>：在任意深层组件中直接访问数据，无需 Props 传递</li>
+              <li><strong>多 Context</strong>：可以嵌套多个 Provider，管理不同的共享数据</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 2: 性能优化 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">React 性能优化</h2>
+
+      <p>React 默认已经很高效，但在复杂应用中仍然需要针对性的优化。以下是 React 性能优化的核心策略。</p>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">&#128202;</div>
+          <h4 class="pattern-title">React.memo</h4>
+          <p class="pattern-desc">浅比较 Props，如果没变就跳过重新渲染。适合渲染开销大、Props 不经常变化的组件。const MemoComp = React.memo(ExpensiveComponent)。配合 useCallback 使用效果更好。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">&#128230;</div>
+          <h4 class="pattern-title">useMemo</h4>
+          <p class="pattern-desc">缓存计算结果，避免每次渲染都重新计算。const sorted = useMemo(() => heavySort(data), [data])。适合排序、过滤等计算密集型操作。只在依赖变化时重新计算。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">&#128295;</div>
+          <h4 class="pattern-title">虚拟列表</h4>
+          <p class="pattern-desc">渲染长列表时，只渲染可见区域的项目。使用 react-window 或 @tanstack/virtual。10000 条数据只渲染 20 条 DOM 节点，内存和性能都大幅优化。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+          <div class="pattern-icon" style="background: var(--color-actor-4)">&#9889;</div>
+          <h4 class="pattern-title">代码分割</h4>
+          <p class="pattern-desc">使用 React.lazy + Suspense 实现路由级代码分割。每个页面独立打包，按需加载。首屏加载体积减少 50%+，显著提升 FCP 和 LCP 指标。</p>
+        </div>
+      </div>
+
+      <div class="code-translation">
+        <div class="translation-code">
+          <div class="translation-label">JSX</div>
+          <pre class="translation-lines"><code><span class="code-line"><span class="code-comment">// 优化示例：综合运用 memo + useMemo + useCallback</span></span>
+<span class="code-line"><span class="code-keyword">const</span> ExpensiveList = React.memo(({ items, onSelect }) => {</span>
+<span class="code-line">  <span class="code-comment">// 只在 items 变化时重新排序</span></span>
+<span class="code-line">  <span class="code-keyword">const</span> sorted = useMemo(</span>
+<span class="code-line">    () => [...items].sort((a, b) => a.name.localeCompare(b.name)),</span>
+<span class="code-line">    [items]</span>
+<span class="code-line">  );</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">return</span> (</span>
+<span class="code-line">    &lt;ul&gt;</span>
+<span class="code-line">      {sorted.map(item => (</span>
+<span class="code-line">        &lt;li key={item.id} onClick={() => onSelect(item.id)}&gt;</span>
+<span class="code-line">          {item.name}</span>
+<span class="code-line">        &lt;/li&gt;</span>
+<span class="code-line">      ))}</span>
+<span class="code-line">    &lt;/ul&gt;</span>
+<span class="code-line">  );</span>
+<span class="code-line">});</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment">// 父组件中缓存回调</span></span>
+<span class="code-line"><span class="code-keyword">function</span> <span class="code-comment">Parent</span>() {</span>
+<span class="code-line">  <span class="code-keyword">const</span> [items, setItems] = useState([...]);</span>
+<span class="code-line">  <span class="code-keyword">const</span> handleSelect = useCallback((id) => {</span>
+<span class="code-line">    console.log(<span class="code-string">'Selected:'</span>, id);</span>
+<span class="code-line">  }, []); <span class="code-comment">// 空依赖 → 函数引用不变</span></span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">return</span> &lt;ExpensiveList items={items} onSelect={handleSelect} /&gt;;</span>
+<span class="code-line">}</span></code></pre>
+        </div>
+        <div class="translation-block animate-in">
+          <div class="translation-english">
+            <div class="translation-label">解读</div>
+            <p>性能优化的组合使用：</p>
+            <ul>
+              <li><strong>React.memo</strong>：浅比较 Props，跳过不必要的重新渲染</li>
+              <li><strong>useMemo</strong>：缓存排序结果，只在 items 变化时重新计算</li>
+              <li><strong>useCallback</strong>：缓存函数引用，配合 memo 使用</li>
+              <li><strong>三者配合</strong>：memo 检测 Props 变化 + useMemo 缓存数据 + useCallback 缓存函数</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 3: React Server Components ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">React Server Components</h2>
+
+      <p>React Server Components（RSC）是 React 架构的重大演进。它允许组件在服务端运行，直接访问数据库和文件系统，同时保持 React 的组件化开发体验。</p>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">&#128640;</div>
+        <div class="callout-content">
+          <strong class="callout-title">Server Components vs Client Components</strong>
+          <p><strong>Server Components</strong>：在服务端渲染，可以直连数据库、读取文件，不发送 JS 到客户端。<strong>Client Components</strong>：在客户端运行，可以使用 useState、useEffect、事件处理。通过 'use client' 指令标记。两者可以混合使用，Server Components 可以渲染 Client Components。</p>
+        </div>
+      </div>
+
+      <div class="quiz-container">
+        <div class="quiz-question-block">
+          <p class="quiz-question">React.memo 的作用是什么？</p>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q4a" class="quiz-option-radio" data-correct="false">
+              <span>让组件在服务端渲染</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4a" class="quiz-option-radio" data-correct="true">
+              <span>浅比较 Props，如果没变就跳过重新渲染</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4a" class="quiz-option-radio" data-correct="false">
+              <span>缓存函数引用</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4a" class="quiz-option-radio" data-correct="false">
+              <span>将组件转换为类组件</span>
+            </label>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <div class="quiz-question-block">
+          <p class="quiz-question">React Server Components 的主要优势是什么？</p>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q4b" class="quiz-option-radio" data-correct="false">
+              <span>完全替代 Client Components</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4b" class="quiz-option-radio" data-correct="true">
+              <span>减少客户端 JS 体积，可直接访问服务端资源</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4b" class="quiz-option-radio" data-correct="false">
+              <span>让 React 运行更快</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4b" class="quiz-option-radio" data-correct="false">
+              <span>替代所有状态管理方案</span>
+            </label>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</section>
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 5: 总结与练习
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">总结与练习</h1>
+      <p class="module-subtitle">回顾 React 核心知识，通过综合练习巩固技能，探索 React 生态系统</p>
+    </header>
+
+    <!-- ── Screen 1: 核心知识回顾 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">核心知识回顾</h2>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">&#129513;</div>
+          <h4 class="pattern-title">组件化架构</h4>
+          <p class="pattern-desc">UI = f(state)。函数组件返回 JSX，Props 传递数据，State 管理内部状态。组件是独立、可复用的 UI 构建单元。遵循单一职责，每个组件不超过 100 行。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">&#9889;</div>
+          <h4 class="pattern-title">Hooks 体系</h4>
+          <p class="pattern-desc">useState（状态）、useEffect（副作用）、useRef（引用）、useMemo（缓存计算）、useCallback（缓存函数）。Hooks 让函数组件拥有完整的 React 能力。遵循 Hooks 规则：只在顶层调用，不在条件语句中使用。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">&#128200;</div>
+          <h4 class="pattern-title">性能优化</h4>
+          <p class="pattern-desc">React.memo + useMemo + useCallback 三件套。虚拟列表处理长列表。代码分割按需加载。不可变状态更新确保变化检测。先测量（React DevTools Profiler），再优化。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+          <div class="pattern-icon" style="background: var(--color-actor-4)">&#127760;</div>
+          <h4 class="pattern-title">生态系统</h4>
+          <p class="pattern-desc">Next.js（全栈框架）、React Router（路由）、Zustand（状态管理）、SWR（数据获取）、React Query（服务端状态）、React Native（移动开发）。按需选择，不要过度引入依赖。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 2: 最佳实践 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">React 开发最佳实践</h2>
+
+      <div class="file-tree animate-in">
+        <div class="ft-folder open">
+          <div class="ft-name">&#128196; 最佳实践清单</div>
+          <div class="ft-children">
+            <div class="ft-folder">
+              <div class="ft-name">&#129513; 组件设计</div>
+              <div class="ft-children">
+                <div class="ft-desc">1. 单一职责——每个组件只做一件事</div>
+                <div class="ft-desc">2. 组件名用 PascalCase，props 名用 camelCase</div>
+                <div class="ft-desc">3. 超过 100 行就考虑拆分</div>
+                <div class="ft-desc">4. 提取可复用逻辑为自定义 Hook</div>
+              </div>
+            </div>
+            <div class="ft-folder">
+              <div class="ft-name">&#128260; 状态管理</div>
+              <div class="ft-children">
+                <div class="ft-desc">5. 状态尽量下沉到使用它的最低层级组件</div>
+                <div class="ft-desc">6. 永远使用不可变方式更新状态</div>
+                <div class="ft-desc">7. useState 用于局部状态，Context 用于跨组件共享</div>
+                <div class="ft-desc">8. 复杂状态考虑 useReducer</div>
+              </div>
+            </div>
+            <div class="ft-folder">
+              <div class="ft-name">&#128200; 性能优化</div>
+              <div class="ft-children">
+                <div class="ft-desc">9. 先用 React DevTools Profiler 测量，再优化</div>
+                <div class="ft-desc">10. 虚拟列表处理超过 100 项的长列表</div>
+                <div class="ft-desc">11. 路由级代码分割是标配</div>
+                <div class="ft-desc">12. 不要过早优化——大多数组件不需要 memo</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 3: 综合练习 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">综合练习：构建任务管理应用</h2>
+
+      <p>设计一个功能完整的任务管理应用，综合运用组件化、状态管理、性能优化和 API 集成。</p>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">&#127919;</div>
+        <div class="callout-content">
+          <strong class="callout-title">练习目标</strong>
+          <p>构建一个任务管理应用，具备以下功能：1) 添加、编辑、删除任务；2) 任务筛选（全部/进行中/已完成）；3) 搜索功能；4) 数据持久化（localStorage）；5) 性能优化（memo + useMemo）。</p>
+        </div>
+      </div>
+
+      <div class="code-translation">
+        <div class="translation-code">
+          <div class="translation-label">JSX — 练习模板</div>
+          <pre class="translation-lines"><code><span class="code-line"><span class="code-keyword">function</span> <span class="code-comment">TaskManager</span>() {</span>
+<span class="code-line">  <span class="code-comment">// TODO 1: 定义任务列表状态</span></span>
+<span class="code-line">  <span class="code-comment">// TODO 2: 定义筛选条件状态</span></span>
+<span class="code-line">  <span class="code-comment">// TODO 3: 定义搜索关键词状态</span></span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-comment">// TODO 4: 实现添加任务</span></span>
+<span class="code-line">  <span class="code-keyword">const</span> addTask = (text) => { <span class="code-comment">/* ??? */</span> };</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-comment">// TODO 5: 实现切换完成状态</span></span>
+<span class="code-line">  <span class="code-keyword">const</span> toggleTask = (id) => { <span class="code-comment">/* ??? */</span> };</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-comment">// TODO 6: 用 useMemo 缓存筛选结果</span></span>
+<span class="code-line">  <span class="code-keyword">const</span> filteredTasks = <span class="code-comment">/* useMemo(...) */</span>;</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">return</span> (</span>
+<span class="code-line">    &lt;div&gt;</span>
+<span class="code-line">      &lt;TaskInput onAdd={addTask} /&gt;</span>
+<span class="code-line">      &lt;TaskFilter value={filter} onChange={setFilter} /&gt;</span>
+<span class="code-line">      &lt;TaskList tasks={filteredTasks} onToggle={toggleTask} /&gt;</span>
+<span class="code-line">    &lt;/div&gt;</span>
+<span class="code-line">  );</span>
+<span class="code-line">}</span></code></pre>
+        </div>
+        <div class="translation-block animate-in">
+          <div class="translation-english">
+            <div class="translation-label">练习提示</div>
+            <p>完成这个练习的建议：</p>
+            <ul>
+              <li><strong>TODO 1-3</strong>：三个 useState 分别管理任务列表、筛选和搜索</li>
+              <li><strong>TODO 4</strong>：setTasks(prev => [...prev, newTask])</li>
+              <li><strong>TODO 5</strong>：map + 展开运算符更新单个任务</li>
+              <li><strong>TODO 6</strong>：useMemo 缓存 filter + search 的组合筛选结果</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 4: 扩展方向 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">下一步学习方向</h2>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">&#128640;</div>
+          <h4 class="pattern-title">Next.js 全栈框架</h4>
+          <p class="pattern-desc">React 的官方推荐框架。Server Components、App Router、API Routes、SSR/SSG 一体化。学习 Next.js 是 React 开发者的自然下一步。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">&#128241;</div>
+          <h4 class="pattern-title">React Native</h4>
+          <p class="pattern-desc">使用 React 语法开发原生 iOS 和 Android 应用。一次学习，全平台开发。Expo 框架让 React Native 开发更加简单。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">&#129302;</div>
+          <h4 class="pattern-title">React + AI</h4>
+          <p class="pattern-desc">将 AI 能力集成到 React 应用中：流式输出（SSE）、AI 对话界面、智能表单、内容生成。Vercel AI SDK 是目前最流行的 React AI 集成方案。</p>
+        </div>
+      </div>
+
+      <div class="quiz-container">
+        <div class="quiz-question-block">
+          <p class="quiz-question">React 的主要特点包括哪些？</p>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q5a" class="quiz-option-radio" data-correct="true">
+              <span>声明式、组件化、虚拟 DOM</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q5a" class="quiz-option-radio" data-correct="false">
+              <span>面向对象、命令式、双向绑定</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q5a" class="quiz-option-radio" data-correct="false">
+              <span>模板语法、依赖注入、AOP</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q5a" class="quiz-option-radio" data-correct="false">
+              <span>函数式编程、不可变性、惰性求值</span>
+            </label>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <div class="quiz-question-block">
+          <p class="quiz-question">React 性能优化的正确顺序是什么？</p>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q5b" class="quiz-option-radio" data-correct="false">
+              <span>先全面添加 React.memo，再测量</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q5b" class="quiz-option-radio" data-correct="true">
+              <span>先用 Profiler 测量瓶颈，再针对性优化</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q5b" class="quiz-option-radio" data-correct="false">
+              <span>性能优化不重要，React 本身足够快</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q5b" class="quiz-option-radio" data-correct="false">
+              <span>只优化网络请求就够了</span>
+            </label>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <div class="quiz-question-block">
+          <p class="quiz-question">React 中处理副作用的 Hook 是什么？</p>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q5c" class="quiz-option-radio" data-correct="true">
+              <span>useEffect</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q5c" class="quiz-option-radio" data-correct="false">
+              <span>useState</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q5c" class="quiz-option-radio" data-correct="false">
+              <span>useContext</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q5c" class="quiz-option-radio" data-correct="false">
+              <span>useRef</span>
+            </label>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</section>  </main>
+
+</body>
+</html>

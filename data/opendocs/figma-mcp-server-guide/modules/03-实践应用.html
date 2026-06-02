@@ -1,0 +1,364 @@
+<section class="module" id="module-3">
+  <h2>模块 3：实践应用 — 设计转代码</h2>
+  <div class="module-content">
+    <p>本模块将演示如何使用 Figma MCP Server 在实际项目中实现设计转代码、设计系统提取和自动化工作流。</p>
+
+    <section class="screen animate-in">
+      <h3>实战 1：Figma 设计稿转 React 组件</h3>
+      <div class="code-translation">
+        <div class="code-block">
+          <pre><code>// AI 助手通过 MCP 读取 Figma 后生成的 React 组件
+// 基于自动提取的设计参数
+
+import React from 'react';
+import styled from 'styled-components';
+
+// 设计 Token（从 Figma 样式自动提取）
+const tokens = {
+  colors: {
+    primary: '#6366F1',      // figma fill color
+    primaryHover: '#4F46E5',
+    background: '#FFFFFF',
+    textPrimary: '#1A1A2E',
+    textSecondary: '#6B7280',
+    border: '#E5E7EB',
+  },
+  typography: {
+    heading: {
+      fontFamily: 'Inter',       // figma font
+      fontSize: '24px',          // figma fontSize
+      fontWeight: 600,
+      lineHeight: '32px',
+    },
+    body: {
+      fontFamily: 'Inter',
+      fontSize: '14px',
+      fontWeight: 400,
+      lineHeight: '20px',
+    },
+  },
+  spacing: {
+    xs: '4px',     // figma padding/gap
+    sm: '8px',
+    md: '16px',
+    lg: '24px',
+    xl: '32px',
+  },
+  borderRadius: {
+    sm: '6px',     // figma cornerRadius
+    md: '8px',
+    lg: '12px',
+    full: '9999px',
+  },
+};
+
+// LoginScreen 组件（直接从 Figma FRAME 转换）
+const LoginScreen = () => {
+  return (
+    &lt;Container&gt;
+      &lt;Header&gt;
+        &lt;Logo src="/logo.svg" alt="Logo" /&gt;
+        &lt;Title>Welcome Back&lt;/Title&gt;
+        &lt;Subtitle&gt;Sign in to continue&lt;/Subtitle&gt;
+      &lt;/Header&gt;
+
+      &lt;Form&gt;
+        &lt;InputField label="Email" type="email" placeholder="your@email.com" /&gt;
+        &lt;InputField label="Password" type="password" placeholder="Enter password" /&gt;
+        &lt;RememberRow&gt;
+          &lt;Checkbox label="Remember me" /&gt;
+          &lt;ForgotLink&gt;Forgot password?&lt;/ForgotLink&gt;
+        &lt;/RememberRow&gt;
+        &lt;Button&gt;Sign In&lt;/Button&gt;
+      &lt;/Form&gt;
+
+      &lt;Footer&gt;
+        &lt;span&gt;Don&apos;t have an account?&lt;/span&gt;
+        &lt;SignUpLink&gt;Sign Up&lt;/SignUpLink&gt;
+      &lt;/Footer&gt;
+    &lt;/Container&gt;
+  );
+};
+
+// 样式组件（从 Figma Auto Layout 映射）
+const Container = styled.div`
+  display: flex;                    /* layoutMode: VERTICAL */
+  flex-direction: column;
+  align-items: center;              /* counterAxisAlignItems: CENTER */
+  justify-content: space-between;   /* primaryAxisAlignItems: SPACE_BETWEEN */
+  padding: 48px 24px;               /* paddingTop/Bottom/Left/Right */
+  gap: 32px;                        /* itemSpacing */
+  width: 375px;                     /* absoluteBoundingBox.width */
+  height: 812px;                    /* absoluteBoundingBox.height */
+  background: ${tokens.colors.background};
+`;</code></pre>
+        </div>
+        <div class="translation">
+          <p>设计转代码的关键步骤：1) 从 Figma 提取设计 Token（颜色、字体、间距）作为 CSS 变量；2) 识别 Figma 的 FRAME 层次结构，映射为 React 组件树；3) 将 Auto Layout 属性转换为 Flexbox CSS；4) 保持命名与 Figma 图层名一致。这样生成的代码高度还原设计稿，且易于维护。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>实战 2：设计系统自动提取</h3>
+      <div class="code-translation">
+        <div class="code-block">
+          <pre><code>"""从 Figma 自动提取设计系统"""
+import requests
+import json
+
+class FigmaDesignSystemExtractor:
+    def __init__(self, token: str, file_key: str):
+        self.token = token
+        self.file_key = file_key
+        self.headers = {"X-Figma-Token": token}
+        self.base_url = "https://api.figma.com/v1"
+
+    def extract_all(self) -> dict:
+        """提取完整设计系统"""
+        return {
+            "colors": self.extract_colors(),
+            "typography": self.extract_typography(),
+            "spacing": self.extract_spacing(),
+            "effects": self.extract_effects(),
+            "components": self.extract_components(),
+        }
+
+    def extract_colors(self) -> list:
+        """提取颜色 Token"""
+        url = f"{self.base_url}/files/{self.file_key}/styles"
+        resp = requests.get(url, headers=self.headers)
+        styles = resp.json().get("meta", {}).get("styles", [])
+
+        colors = []
+        for style in styles:
+            if style.get("style_type") == "FILL":
+                # 获取样式的具体节点信息
+                node_url = f"{self.base_url}/files/{self.file_key}/nodes"
+                node_url += f"?ids={style['node_id']}"
+                node_resp = requests.get(node_url, headers=self.headers)
+                node_data = node_resp.json()["nodes"][style["node_id"]]
+
+                fills = node_data["document"].get("fills", [])
+                for fill in fills:
+                    if fill["type"] == "SOLID":
+                        c = fill["color"]
+                        hex_color = "#{:02X}{:02X}{:02X}".format(
+                            int(c["r"] * 255),
+                            int(c["g"] * 255),
+                            int(c["b"] * 255),
+                        )
+                        colors.append({
+                            "name": style["name"],
+                            "hex": hex_color,
+                            "rgba": f"rgba({int(c['r']*255)}, {int(c['g']*255)}, {int(c['b']*255)}, {fill.get('opacity', 1)})",
+                        })
+        return colors
+
+    def extract_typography(self) -> list:
+        """提取排版 Token"""
+        url = f"{self.base_url}/files/{self.file_key}/styles"
+        resp = requests.get(url, headers=self.headers)
+        styles = resp.json().get("meta", {}).get("styles", [])
+
+        typography = []
+        for style in styles:
+            if style.get("style_type") == "TEXT":
+                node_url = f"{self.base_url}/files/{self.file_key}/nodes"
+                node_url += f"?ids={style['node_id']}"
+                node_resp = requests.get(node_url, headers=self.headers)
+                node_data = node_resp.json()["nodes"][style["node_id"]]
+
+                text_style = node_data["document"].get("style", {})
+                typography.append({
+                    "name": style["name"],
+                    "fontFamily": text_style.get("fontFamily", "Inter"),
+                    "fontSize": text_style.get("fontSize", 14),
+                    "fontWeight": text_style.get("fontWeight", 400),
+                    "lineHeight": f"{text_style.get('lineHeightPx', 20)}px",
+                    "letterSpacing": f"{text_style.get('letterSpacing', 0)}px",
+                })
+        return typography
+
+    def generate_css_variables(self, design_system: dict) -> str:
+        """生成 CSS 变量文件"""
+        css = ":root {\n"
+
+        for color in design_system.get("colors", []):
+            name = color["name"].lower().replace(" ", "-")
+            css += f"  --color-{name}: {color['hex']};\n"
+
+        for typo in design_system.get("typography", []):
+            name = typo["name"].lower().replace(" ", "-")
+            css += f"  --font-{name}-size: {typo['fontSize']}px;\n"
+            css += f"  --font-{name}-weight: {typo['fontWeight']};\n"
+            css += f"  --font-{name}-family: '{typo['fontFamily']}';\n"
+
+        css += "}\n"
+        return css
+
+# 使用示例
+extractor = FigmaDesignSystemExtractor(
+    token="figd_your_token",
+    file_key="XXXXXX"
+)
+design_system = extractor.extract_all()
+css = extractor.generate_css_variables(design_system)
+print(css)</code></pre>
+        </div>
+        <div class="translation">
+          <p>设计系统提取流程：1) 通过 Figma API 获取文件中的所有样式定义；2) 按类型分类（FILL 颜色、TEXT 排版、EFFECT 效果）；3) 从节点详情中提取具体属性值；4) 将 Figma 的 RGB（0-1）范围转换为十六进制颜色；5) 生成标准的 CSS 变量文件。这样可以将设计变更自动同步到代码中。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>实战 3：与 AI 工作流集成</h3>
+      <div class="callout callout-accent">
+        <p><strong>实际使用场景：</strong>在 Cursor 或 Claude Desktop 中，直接粘贴 Figma 文件链接，AI 会自动调用 MCP Server 读取设计，然后根据你的要求生成代码、提取样式或分析设计规范。</p>
+      </div>
+      <div class="code-translation">
+        <div class="code-block">
+          <pre><code># 典型 AI 对话工作流
+
+# === 场景 1：生成组件代码 ===
+# 用户输入：
+# "读取这个 Figma 文件 https://figma.com/design/XXX/Button
+#  并生成对应的 React 组件，使用 Tailwind CSS"
+
+# AI 执行步骤：
+# 1. 调用 figma_get_file(fileKey="XXX") 获取文件结构
+# 2. 调用 figma_get_node(fileKey="XXX", nodeId="1:5") 获取按钮节点
+# 3. 解析 Auto Layout、填充、圆角等属性
+# 4. 生成 React + Tailwind 代码
+
+# === 场景 2：设计审查 ===
+# 用户输入：
+# "检查这个页面的无障碍性，对比度是否达标"
+
+# AI 执行步骤：
+# 1. 读取页面所有 TEXT 节点
+# 2. 提取文字颜色和背景颜色
+# 3. 计算 WCAG 对比度比率
+# 4. 报告不达标的文字组合
+
+# === 场景 3：响应式设计生成 ===
+# 用户输入：
+# "将这个移动端设计转为响应式布局，支持平板和桌面"
+
+# AI 执行步骤：
+# 1. 读取移动端 FRAME（375x812）
+# 2. 识别布局结构（导航、内容区、底部栏）
+# 3. 生成 Tailwind 响应式断点代码
+# 4. sm/md/lg/xl 各断点的布局适配
+
+# === 场景 4：设计规范文档 ===
+# 用户输入：
+# "为这个设计文件生成设计规范文档"
+
+# AI 执行步骤：
+# 1. 调用 figma_get_styles 获取所有样式
+# 2. 调用 figma_get_components 获取所有组件
+# 3. 整理为 Markdown 格式的规范文档
+# 4. 包含颜色调色板、字体规范、间距系统、组件列表</code></pre>
+        </div>
+        <div class="translation">
+          <p>AI 工作流的核心优势是自然语言交互：你只需描述需求（中文或英文），AI 会自动选择合适的 MCP 工具、解析 Figma 数据、生成代码或文档。四种高频场景：组件代码生成、设计审查（无障碍/对比度）、响应式适配、设计规范文档。MCP 让这些操作无需手动导出或复制。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>批量导出与资源管理</h3>
+      <div class="code-translation">
+        <div class="code-block">
+          <pre><code>"""批量导出 Figma 资源"""
+import requests
+import os
+import base64
+
+class FigmaExporter:
+    def __init__(self, token: str):
+        self.token = token
+        self.headers = {"X-Figma-Token": token}
+
+    def export_all_icons(self, file_key: str, output_dir: str = "icons"):
+        """导出文件中所有图标为 SVG"""
+        os.makedirs(output_dir, exist_ok=True)
+
+        # 获取文件中所有组件
+        url = f"https://api.figma.com/v1/files/{file_key}/components"
+        resp = requests.get(url, headers=self.headers)
+        components = resp.json().get("meta", {}).get("components", [])
+
+        icon_ids = []
+        icon_names = {}
+        for comp in components:
+            if "icon" in comp["name"].lower() or "Icon" in comp["name"]:
+                icon_ids.append(comp["node_id"])
+                icon_names[comp["node_id"]] = comp["name"]
+
+        # 批量导出为 SVG
+        if icon_ids:
+            ids_param = ",".join(icon_ids)
+            export_url = f"https://api.figma.com/v1/images/{file_key}"
+            export_url += f"?ids={ids_param}&format=svg"
+
+            export_resp = requests.get(export_url, headers=self.headers)
+            images = export_resp.json().get("images", {})
+
+            for node_id, image_url in images.items():
+                if image_url:
+                    svg_resp = requests.get(image_url)
+                    name = icon_names.get(node_id, node_id.replace(":", "-"))
+                    safe_name = name.replace("/", "-").replace(" ", "-")
+                    filepath = os.path.join(output_dir, f"{safe_name}.svg")
+                    with open(filepath, "w") as f:
+                        f.write(svg_resp.text)
+                    print(f"Exported: {filepath}")
+
+    def export_design_tokens(self, file_key: str, output_path: str = "tokens.json"):
+        """导出设计 Token 为 JSON"""
+        url = f"https://api.figma.com/v1/files/{file_key}/styles"
+        resp = requests.get(url, headers=self.headers)
+        styles = resp.json().get("meta", {}).get("styles", [])
+
+        tokens = {"colors": {}, "typography": {}, "effects": {}}
+        for style in styles:
+            category = {
+                "FILL": "colors",
+                "TEXT": "typography",
+                "EFFECT": "effects",
+            }.get(style.get("style_type"), "other")
+
+            tokens[category][style["name"]] = {
+                "id": style["node_id"],
+                "description": style.get("description", ""),
+            }
+
+        with open(output_path, "w") as f:
+            json.dump(tokens, f, indent=2)
+        print(f"Tokens exported to {output_path}")
+
+# 使用
+exporter = FigmaExporter("figd_your_token")
+exporter.export_all_icons("FILE_KEY", "src/assets/icons")
+exporter.export_design_tokens("FILE_KEY", "design-tokens.json")</code></pre>
+        </div>
+        <div class="translation">
+          <p>批量导出流程：1) 通过 Components API 获取所有组件列表；2) 过滤出图标类组件（按名称匹配）；3) 使用 Images API 批量导出为 SVG；4) 保存到项目的资源目录。设计 Token 导出则是将 Figma 样式转换为 JSON 格式，方便在代码中引用。这种自动化导出避免了手动逐一导出的低效操作。</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="quiz">
+      <p class="quiz-question">Figma MCP Server 在设计转代码中的核心价值是什么？</p>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="true">AI 自动读取 Figma 设计数据并生成代码</button>
+        <button class="quiz-option" data-correct="true">自动提取设计 Token（颜色、字体、间距）</button>
+        <button class="quiz-option" data-correct="true">将 Auto Layout 映射为 CSS Flexbox</button>
+        <button class="quiz-option" data-correct="false">替代前端开发工作</button>
+      </div>
+    </div>
+  </div>
+</section>

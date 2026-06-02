@@ -1,0 +1,202 @@
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 4: React 的进阶主题
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-4" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">React 的进阶主题</h1>
+      <p class="module-subtitle">Context API、性能优化、自定义 Hook 和 React Server Components——高级开发者的必备技能</p>
+    </header>
+
+    <!-- ── Screen 1: Context API ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">Context API：跨组件数据共享</h2>
+
+      <p>当多个层级的组件需要共享同一份数据时（如主题、用户信息、语言设置），逐层传递 Props 会变得非常繁琐。<span class="term" data-definition="Context API 是 React 内置的跨组件数据共享机制。它通过 Provider 包裹子组件树，任何深层组件都可以通过 useContext 直接访问共享数据，无需逐层传递 Props。但 Context 的变化会导致所有消费者重新渲染，不适合高频更新的数据。">Context API</span> 解决了这个问题——让数据跨越组件层级直接传递。</p>
+
+      <div class="code-translation">
+        <div class="translation-code">
+          <div class="translation-label">JSX</div>
+          <pre class="translation-lines"><code><span class="code-line"><span class="code-comment">// 1. 创建 Context</span></span>
+<span class="code-line"><span class="code-keyword">const</span> ThemeContext = createContext(<span class="code-string">'light'</span>);</span>
+<span class="code-line"><span class="code-keyword">const</span> UserContext = createContext(<span class="code-keyword">null</span>);</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment">// 2. 在顶层组件提供数据</span></span>
+<span class="code-line"><span class="code-keyword">function</span> <span class="code-comment">App</span>() {</span>
+<span class="code-line">  <span class="code-keyword">return</span> (</span>
+<span class="code-line">    &lt;ThemeContext.Provider value=<span class="code-string">"dark"</span>&gt;</span>
+<span class="code-line">      &lt;UserContext.Provider value={{ name: <span class="code-string">"Alice"</span> }}&gt;</span>
+<span class="code-line">        &lt;Layout /&gt;</span>
+<span class="code-line">      &lt;/UserContext.Provider&gt;</span>
+<span class="code-line">    &lt;/ThemeContext.Provider&gt;</span>
+<span class="code-line">  );</span>
+<span class="code-line">}</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment">// 3. 在任意深层组件中使用</span></span>
+<span class="code-line"><span class="code-keyword">function</span> <span class="code-comment">ThemedButton</span>() {</span>
+<span class="code-line">  <span class="code-keyword">const</span> theme = useContext(ThemeContext);</span>
+<span class="code-line">  <span class="code-keyword">const</span> user = useContext(UserContext);</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">return</span> (</span>
+<span class="code-line">    &lt;button className={`btn btn-${theme}`}&gt;</span>
+<span class="code-line">      {user.name}'s Button</span>
+<span class="code-line">    &lt;/button&gt;</span>
+<span class="code-line">  );</span>
+<span class="code-line">}</span></code></pre>
+        </div>
+        <div class="translation-block animate-in">
+          <div class="translation-english">
+            <div class="translation-label">解读</div>
+            <p>Context API 的三步使用模式：</p>
+            <ul>
+              <li><strong>createContext</strong>：创建 Context 对象，参数是默认值</li>
+              <li><strong>Provider</strong>：在顶层包裹子组件树，提供共享数据</li>
+              <li><strong>useContext</strong>：在任意深层组件中直接访问数据，无需 Props 传递</li>
+              <li><strong>多 Context</strong>：可以嵌套多个 Provider，管理不同的共享数据</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 2: 性能优化 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">React 性能优化</h2>
+
+      <p>React 默认已经很高效，但在复杂应用中仍然需要针对性的优化。以下是 React 性能优化的核心策略。</p>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">&#128202;</div>
+          <h4 class="pattern-title">React.memo</h4>
+          <p class="pattern-desc">浅比较 Props，如果没变就跳过重新渲染。适合渲染开销大、Props 不经常变化的组件。const MemoComp = React.memo(ExpensiveComponent)。配合 useCallback 使用效果更好。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">&#128230;</div>
+          <h4 class="pattern-title">useMemo</h4>
+          <p class="pattern-desc">缓存计算结果，避免每次渲染都重新计算。const sorted = useMemo(() => heavySort(data), [data])。适合排序、过滤等计算密集型操作。只在依赖变化时重新计算。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">&#128295;</div>
+          <h4 class="pattern-title">虚拟列表</h4>
+          <p class="pattern-desc">渲染长列表时，只渲染可见区域的项目。使用 react-window 或 @tanstack/virtual。10000 条数据只渲染 20 条 DOM 节点，内存和性能都大幅优化。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+          <div class="pattern-icon" style="background: var(--color-actor-4)">&#9889;</div>
+          <h4 class="pattern-title">代码分割</h4>
+          <p class="pattern-desc">使用 React.lazy + Suspense 实现路由级代码分割。每个页面独立打包，按需加载。首屏加载体积减少 50%+，显著提升 FCP 和 LCP 指标。</p>
+        </div>
+      </div>
+
+      <div class="code-translation">
+        <div class="translation-code">
+          <div class="translation-label">JSX</div>
+          <pre class="translation-lines"><code><span class="code-line"><span class="code-comment">// 优化示例：综合运用 memo + useMemo + useCallback</span></span>
+<span class="code-line"><span class="code-keyword">const</span> ExpensiveList = React.memo(({ items, onSelect }) => {</span>
+<span class="code-line">  <span class="code-comment">// 只在 items 变化时重新排序</span></span>
+<span class="code-line">  <span class="code-keyword">const</span> sorted = useMemo(</span>
+<span class="code-line">    () => [...items].sort((a, b) => a.name.localeCompare(b.name)),</span>
+<span class="code-line">    [items]</span>
+<span class="code-line">  );</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">return</span> (</span>
+<span class="code-line">    &lt;ul&gt;</span>
+<span class="code-line">      {sorted.map(item => (</span>
+<span class="code-line">        &lt;li key={item.id} onClick={() => onSelect(item.id)}&gt;</span>
+<span class="code-line">          {item.name}</span>
+<span class="code-line">        &lt;/li&gt;</span>
+<span class="code-line">      ))}</span>
+<span class="code-line">    &lt;/ul&gt;</span>
+<span class="code-line">  );</span>
+<span class="code-line">});</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment">// 父组件中缓存回调</span></span>
+<span class="code-line"><span class="code-keyword">function</span> <span class="code-comment">Parent</span>() {</span>
+<span class="code-line">  <span class="code-keyword">const</span> [items, setItems] = useState([...]);</span>
+<span class="code-line">  <span class="code-keyword">const</span> handleSelect = useCallback((id) => {</span>
+<span class="code-line">    console.log(<span class="code-string">'Selected:'</span>, id);</span>
+<span class="code-line">  }, []); <span class="code-comment">// 空依赖 → 函数引用不变</span></span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">return</span> &lt;ExpensiveList items={items} onSelect={handleSelect} /&gt;;</span>
+<span class="code-line">}</span></code></pre>
+        </div>
+        <div class="translation-block animate-in">
+          <div class="translation-english">
+            <div class="translation-label">解读</div>
+            <p>性能优化的组合使用：</p>
+            <ul>
+              <li><strong>React.memo</strong>：浅比较 Props，跳过不必要的重新渲染</li>
+              <li><strong>useMemo</strong>：缓存排序结果，只在 items 变化时重新计算</li>
+              <li><strong>useCallback</strong>：缓存函数引用，配合 memo 使用</li>
+              <li><strong>三者配合</strong>：memo 检测 Props 变化 + useMemo 缓存数据 + useCallback 缓存函数</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 3: React Server Components ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">React Server Components</h2>
+
+      <p>React Server Components（RSC）是 React 架构的重大演进。它允许组件在服务端运行，直接访问数据库和文件系统，同时保持 React 的组件化开发体验。</p>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">&#128640;</div>
+        <div class="callout-content">
+          <strong class="callout-title">Server Components vs Client Components</strong>
+          <p><strong>Server Components</strong>：在服务端渲染，可以直连数据库、读取文件，不发送 JS 到客户端。<strong>Client Components</strong>：在客户端运行，可以使用 useState、useEffect、事件处理。通过 'use client' 指令标记。两者可以混合使用，Server Components 可以渲染 Client Components。</p>
+        </div>
+      </div>
+
+      <div class="quiz-container">
+        <div class="quiz-question-block">
+          <p class="quiz-question">React.memo 的作用是什么？</p>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q4a" class="quiz-option-radio" data-correct="false">
+              <span>让组件在服务端渲染</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4a" class="quiz-option-radio" data-correct="true">
+              <span>浅比较 Props，如果没变就跳过重新渲染</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4a" class="quiz-option-radio" data-correct="false">
+              <span>缓存函数引用</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4a" class="quiz-option-radio" data-correct="false">
+              <span>将组件转换为类组件</span>
+            </label>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <div class="quiz-question-block">
+          <p class="quiz-question">React Server Components 的主要优势是什么？</p>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q4b" class="quiz-option-radio" data-correct="false">
+              <span>完全替代 Client Components</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4b" class="quiz-option-radio" data-correct="true">
+              <span>减少客户端 JS 体积，可直接访问服务端资源</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4b" class="quiz-option-radio" data-correct="false">
+              <span>让 React 运行更快</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4b" class="quiz-option-radio" data-correct="false">
+              <span>替代所有状态管理方案</span>
+            </label>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</section>

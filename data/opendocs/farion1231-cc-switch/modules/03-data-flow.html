@@ -1,0 +1,19 @@
+<section class="module" id="module-3" style="background: var(--color-bg)"><div class="module-content"><header class="module-header animate-in"><span class="module-number">03</span><h1 class="module-title">数据流：请求怎样穿过 cc-switch</h1><p class="module-subtitle">看懂流向，就能定位“为什么没返回”“为什么没保存”“为什么模型答偏了”。</p></header><div class="module-body">
+    <section class="screen animate-in"><h2 class="screen-heading">一次请求的四步路</h2><p>AI 系统的 bug 常出现在边界处：输入格式、工具返回、模型参数、缓存状态。把路径画出来，调试就从猜测变成排查。</p><div class="flow-animation" data-steps='[{"highlight":"flow-actor-1","label":"用户提交目标或数据"},{"highlight":"flow-actor-2","label":"入口层校验输入并组装请求","packet":true,"from":"actor-1","to":"actor-2"},{"highlight":"flow-actor-3","label":"核心层选择模型、工具或索引","packet":true,"from":"actor-2","to":"actor-3"},{"highlight":"flow-actor-4","label":"输出层返回答案、文件或状态","packet":true,"from":"actor-3","to":"actor-4"}]'><div class="flow-actors"><div class="flow-actor" id="flow-actor-1"><div class="flow-actor-icon">1</div><span>用户任务</span></div><div class="flow-actor" id="flow-actor-2"><div class="flow-actor-icon">2</div><span>Agent 编排器</span></div><div class="flow-actor" id="flow-actor-3"><div class="flow-actor-icon">3</div><span>工具/MCP</span></div><div class="flow-actor" id="flow-actor-4"><div class="flow-actor-icon">4</div><span>结果校验</span></div></div><div class="flow-packet" id="flow-packet"></div><div class="flow-step-label" id="flow-label">点击下一步追踪数据</div><div class="flow-controls"><button class="btn flow-next-btn">下一步</button><button class="btn flow-reset-btn">重置</button><span class="flow-progress"></span></div></div></section>
+    <section class="screen animate-in"><h2 class="screen-heading">代码翻译：把输入变成可执行步骤</h2><div class="translation-block animate-in"><div class="translation-code"><span class="translation-label">CODE</span><pre><code>request = normalize(raw_input)
+context = load_context(request.session_id)
+plan = planner.create(request, context)
+response = executor.run(plan)</code></pre></div><div class="translation-english"><span class="translation-label">中文解释</span><div class="translation-lines"><p class="tl">normalize 负责把混乱输入变成系统认识的格式。</p><p class="tl">load_context 取出会话、配置或索引等上下文。</p><p class="tl">planner 生成可执行计划，executor 才真正执行。</p><p class="tl">如果结果不对，就沿这四行逐层打印中间值。</p></div></div></div></section>
+    <section class="screen animate-in"><h2 class="screen-heading">小测：定位问题</h2><div class="quiz-container" id="quiz-farion1231-cc-switch-3">
+    <div class="quiz-question-block" data-correct="option-b" data-explanation-right="答对了。沿输入、上下文、计划、执行结果逐段检查，能最快定位断点。" data-explanation-wrong="再想想：这个项目的核心价值通常藏在输入、编排、模型调用、状态保存这几层之间。">
+      <h3 class="quiz-question">如果 cc-switch 返回空结果，最有效的排查顺序是什么？</h3>
+      <div class="quiz-options">
+        <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>直接换一个更大的模型</span></button>
+        <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>沿数据流逐段检查输入、上下文、计划和执行输出</span></button>
+        <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>把错误吞掉，让用户重试</span></button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+    <button class="quiz-check-btn" onclick="checkQuiz('quiz-farion1231-cc-switch-3')">检查答案</button>
+    <button class="quiz-reset-btn" onclick="resetQuiz('quiz-farion1231-cc-switch-3')">再试一次</button>
+  </div></section></div></div></section>

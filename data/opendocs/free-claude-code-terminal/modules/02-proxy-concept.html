@@ -1,0 +1,167 @@
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">代理是什么？</h1>
+      <p class="module-subtitle">Free Claude Code 的核心就是一个代理服务器——一个站在你和 AI 提供商之间的"翻译官"。</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">翻译官比喻</h2>
+        <p>想象一个国际会议：你只会中文，对方只说英文。你们中间坐着一个<span class="term" data-definition="代理（Proxy）就是一个中间人程序，接收一方的请求，按照规则转发给另一方，再把对方的响应翻译回来。">翻译官</span>——你说话，翻译官听懂后翻译给对方；对方回答，翻译官再翻译给你。</p>
+        <p>Free Claude Code 就是这个翻译官：</p>
+
+        <div class="step-cards animate-in stagger-children">
+          <div class="step-card animate-in">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Claude Code 发请求到 localhost:8080</strong>
+              <p>正常情况下 Claude Code 会连接 <code>api.anthropic.com</code>，但你通过环境变量把它指向本地代理。Claude Code 完全不知道自己不是在和 Anthropic 通信。</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Free Claude Code 接收并解析请求</strong>
+              <p>代理读到请求中的模型名（如 <code>claude-sonnet-4-5</code>）和消息内容，根据配置文件中的路由规则，决定把这个请求转发给哪个提供商。</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>转发到真实提供商</strong>
+              <p>代理把 Anthropic 格式的请求翻译成目标提供商的格式（如 OpenRouter 或 DeepSeek 的 API 格式），发送出去并等待响应。</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>响应转换后原路返回</strong>
+              <p>提供商返回结果后，代理将其翻译回 Anthropic 的响应格式，返回给 Claude Code。全程无感知。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">消息流动画</h2>
+        <p>点击"下一步"按钮，观察一个 API 请求从 Claude Code 发出到收到响应的完整旅程：</p>
+
+        <div class="flow-animation animate-in"
+             data-steps='[
+               {"label":"Claude Code 发出 Anthropic 格式的 API 请求", "highlight":"f-cc", "packet":true, "from":"f-cc", "to":"f-proxy"},
+               {"label":"Free CC Proxy 解析请求，查找路由规则", "highlight":"f-proxy"},
+               {"label":"Proxy 将请求翻译为目标格式，转发给提供商", "highlight":"f-proxy", "packet":true, "from":"f-proxy", "to":"f-provider"},
+               {"label":"提供商处理请求，返回响应", "highlight":"f-provider"},
+               {"label":"Proxy 将响应翻译回 Anthropic 格式", "highlight":"f-proxy", "packet":true, "from":"f-provider", "to":"f-proxy"},
+               {"label":"Claude Code 收到响应，以为来自 Anthropic", "highlight":"f-cc", "packet":true, "from":"f-proxy", "to":"f-cc"}
+             ]'>
+          <div class="flow-step-label">点击"下一步"开始演示</div>
+          <div class="flow-actors">
+            <div class="flow-actor" id="f-cc">
+              <div class="flow-actor-icon" style="background: var(--color-accent-light); border-color: var(--color-accent);">CC</div>
+              <span>Claude Code</span>
+            </div>
+            <div class="flow-actor" id="f-proxy">
+              <div class="flow-actor-icon" style="background: var(--color-info-light); border-color: var(--color-info);">PX</div>
+              <span>Free CC Proxy</span>
+            </div>
+            <div class="flow-actor" id="f-provider">
+              <div class="flow-actor-icon" style="background: var(--color-success-light); border-color: var(--color-success);">AI</div>
+              <span>提供商</span>
+            </div>
+          </div>
+          <div class="flow-packet"></div>
+          <div class="flow-controls">
+            <button class="btn btn-primary flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重置</button>
+            <span class="flow-progress">0 / 6</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">核心路由逻辑：代码 vs 人话</h2>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">config.js</span>
+            <span class="code-line"><span class="code-keyword">const</span> routes = {</span>
+            <span class="code-line">  <span class="code-string">"claude-opus-*"</span>: {</span>
+            <span class="code-line">    provider: <span class="code-string">"openrouter"</span>,</span>
+            <span class="code-line">    model:    <span class="code-string">"anthropic/claude-opus-4"</span></span>
+            <span class="code-line">  },</span>
+            <span class="code-line">  <span class="code-string">"claude-sonnet-*"</span>: {</span>
+            <span class="code-line">    provider: <span class="code-string">"deepseek"</span>,</span>
+            <span class="code-line">    model:    <span class="code-string">"deepseek-chat"</span></span>
+            <span class="code-line">  },</span>
+            <span class="code-line">  <span class="code-string">"claude-haiku-*"</span>: {</span>
+            <span class="code-line">    provider: <span class="code-string">"ollama"</span>,</span>
+            <span class="code-line">    model:    <span class="code-string">"llama3"</span></span>
+            <span class="code-line">  }</span>
+            <span class="code-line">};</span>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解释</span>
+            <div class="translation-lines">
+              <div class="tl"><strong>Opus 级别</strong>的请求（复杂推理）→ 发给 OpenRouter，用真正的 Claude Opus</div>
+              <div class="tl"><strong>Sonnet 级别</strong>的请求（日常编码）→ 发给 DeepSeek，用便宜但同样强大的模型</div>
+              <div class="tl"><strong>Haiku 级别</strong>的请求（快速问答）→ 发给本地 Ollama，零成本</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代理的工作流详解</h2>
+        <p>让我们一步步看代理在处理一个请求时发生了什么：</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">🔄</div>
+          <div class="callout-content">
+            <strong class="callout-title">请求处理五步走</strong>
+            <p><strong>Step 1: 接收</strong>——Claude Code 发送 POST /v1/messages 请求到代理服务器（而不是 api.anthropic.com）。<br>
+            <strong>Step 2: 解析</strong>——代理读取请求中的 model 字段（如 claude-sonnet-4-20250514），匹配路由规则。<br>
+            <strong>Step 3: 转换</strong>——将 Anthropic 格式的请求体转换为目标提供商的格式（如 OpenAI Chat Completions）。<br>
+            <strong>Step 4: 转发</strong>——向目标提供商的 API 发送转换后的请求。<br>
+            <strong>Step 5: 回译</strong>——将目标提供商的响应转换回 Anthropic 格式，返回给 Claude Code。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+
+        <div class="quiz-container animate-in" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！代理的核心价值就是协议翻译——接收一种格式，转发时用另一种格式，再把响应翻译回来。Claude Code 完全不需要改动。"
+               data-explanation-wrong="不完全对。代理的关键不是加速或缓存，而是格式转换——让 Claude Code 以为在跟 Anthropic 通信，实际请求被静默转发到了其他提供商。">
+            <h3 class="quiz-question">Free Claude Code 作为代理的核心能力是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>加速 API 响应，通过缓存减少重复请求</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>接收 Anthropic 格式请求，翻译后转发到其他提供商，再把响应翻译回来</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>直接破解 Anthropic API 让你免费用</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

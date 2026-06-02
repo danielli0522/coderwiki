@@ -1,0 +1,190 @@
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 3: React 的实践应用
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">React 的实践应用</h1>
+      <p class="module-subtitle">状态管理、表单处理、API 集成和路由——构建真实 React 应用的核心技能</p>
+    </header>
+
+    <!-- ── Screen 1: 状态管理 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">状态管理：从本地到全局</h2>
+
+      <p>React 应用的状态管理分为三个层次：组件本地状态（useState）、跨组件共享状态（Context）、全局状态管理（Zustand/Redux）。选择合适的层次，是 React 开发的重要决策。</p>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">&#129504;</div>
+        <div class="callout-content">
+          <strong class="callout-title">状态管理的选型原则</strong>
+          <p>不要过度工程化。大多数应用只需要 useState + Context。只有当状态逻辑非常复杂（如购物车、协作编辑、实时仪表盘）时，才需要引入 Zustand 或 Redux。 Zustand 是 2024 年最推荐的轻量级状态管理库。</p>
+        </div>
+      </div>
+
+      <div class="code-translation">
+        <div class="translation-code">
+          <div class="translation-label">JSX</div>
+          <pre class="translation-lines"><code><span class="code-line"><span class="code-comment">// 简单的待办事项应用</span></span>
+<span class="code-line"><span class="code-keyword">function</span> <span class="code-comment">TodoApp</span>() {</span>
+<span class="code-line">  <span class="code-keyword">const</span> [todos, setTodos] = useState([]);</span>
+<span class="code-line">  <span class="code-keyword">const</span> [input, setInput] = useState(<span class="code-string">""</span>);</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">const</span> addTodo = useCallback(() => {</span>
+<span class="code-line">    <span class="code-keyword">if</span> (!input.trim()) <span class="code-keyword">return</span>;</span>
+<span class="code-line">    setTodos(prev => [...prev, {</span>
+<span class="code-line">      id: Date.now(),</span>
+<span class="code-line">      text: input,</span>
+<span class="code-line">      completed: <span class="code-keyword">false</span></span>
+<span class="code-line">    }]);</span>
+<span class="code-line">    setInput(<span class="code-string">""</span>);</span>
+<span class="code-line">  }, [input]);</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">const</span> toggleTodo = useCallback((id) => {</span>
+<span class="code-line">    setTodos(prev => prev.map(todo =></span>
+<span class="code-line">      todo.id === id</span>
+<span class="code-line">        ? { ...todo, completed: !todo.completed }</span>
+<span class="code-line">        : todo</span>
+<span class="code-line">    ));</span>
+<span class="code-line">  }, []);</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">return</span> (</span>
+<span class="code-line">    &lt;div&gt;</span>
+<span class="code-line">      &lt;input value={input}</span>
+<span class="code-line">        onChange={e => setInput(e.target.value)}</span>
+<span class="code-line">        onKeyDown={e => e.key === <span class="code-string">'Enter'</span> && addTodo()}</span>
+<span class="code-line">      /&gt;</span>
+<span class="code-line">      &lt;TodoList todos={todos} onToggle={toggleTodo} /&gt;</span>
+<span class="code-line">    &lt;/div&gt;</span>
+<span class="code-line">  );</span>
+<span class="code-line">}</span></code></pre>
+        </div>
+        <div class="translation-block animate-in">
+          <div class="translation-english">
+            <div class="translation-label">解读</div>
+            <p>状态管理的核心模式：</p>
+            <ul>
+              <li><strong>不可变更新</strong>：[...prev, newItem] 创建新数组，不修改原数组</li>
+              <li><strong>useCallback</strong>：缓存函数引用，避免子组件不必要的重新渲染</li>
+              <li><strong>展开运算符</strong>：{ ...todo, completed: !todo.completed } 更新单个属性</li>
+              <li><strong>受控组件</strong>：input 的值由 state 控制，onChange 更新 state</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 2: 表单处理 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">表单处理与数据获取</h2>
+
+      <p>表单是 Web 应用最常见的交互元素。React 的受控组件模式让表单状态管理变得清晰可预测。</p>
+
+      <div class="code-translation">
+        <div class="translation-code">
+          <div class="translation-label">JSX</div>
+          <pre class="translation-lines"><code><span class="code-line"><span class="code-keyword">function</span> <span class="code-comment">UserProfile</span>() {</span>
+<span class="code-line">  <span class="code-keyword">const</span> [formData, setFormData] = useState({</span>
+<span class="code-line">    name: <span class="code-string">""</span>, email: <span class="code-string">""</span>, bio: <span class="code-string">""</span></span>
+<span class="code-line">  });</span>
+<span class="code-line">  <span class="code-keyword">const</span> [status, setStatus] = useState(<span class="code-string">"idle"</span>);</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">const</span> handleChange = (e) => {</span>
+<span class="code-line">    <span class="code-keyword">const</span> { name, value } = e.target;</span>
+<span class="code-line">    setFormData(prev => ({ ...prev, [name]: value }));</span>
+<span class="code-line">  };</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">const</span> handleSubmit = <span class="code-keyword">async</span> (e) => {</span>
+<span class="code-line">    e.preventDefault();</span>
+<span class="code-line">    setStatus(<span class="code-string">"submitting"</span>);</span>
+<span class="code-line">    <span class="code-keyword">try</span> {</span>
+<span class="code-line">      <span class="code-keyword">await</span> fetch(<span class="code-string">'/api/profile'</span>, {</span>
+<span class="code-line">        method: <span class="code-string">'POST'</span>,</span>
+<span class="code-line">        headers: { <span class="code-string">'Content-Type'</span>: <span class="code-string">'application/json'</span> },</span>
+<span class="code-line">        body: JSON.stringify(formData)</span>
+<span class="code-line">      });</span>
+<span class="code-line">      setStatus(<span class="code-string">"success"</span>);</span>
+<span class="code-line">    } <span class="code-keyword">catch</span> (err) {</span>
+<span class="code-line">      setStatus(<span class="code-string">"error"</span>);</span>
+<span class="code-line">    }</span>
+<span class="code-line">  };</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">return</span> (</span>
+<span class="code-line">    &lt;form onSubmit={handleSubmit}&gt;</span>
+<span class="code-line">      &lt;input name=<span class="code-string">"name"</span> value={formData.name}</span>
+<span class="code-line">        onChange={handleChange} /&gt;</span>
+<span class="code-line">      &lt;button disabled={status === <span class="code-string">"submitting"</span>}&gt;</span>
+<span class="code-line">        {status === <span class="code-string">"submitting"</span> ? <span class="code-string">"Saving..."</span> : <span class="code-string">"Save"</span>}</span>
+<span class="code-line">      &lt;/button&gt;</span>
+<span class="code-line">    &lt;/form&gt;</span>
+<span class="code-line">  );</span>
+<span class="code-line">}</span></code></pre>
+        </div>
+        <div class="translation-block animate-in">
+          <div class="translation-english">
+            <div class="translation-label">解读</div>
+            <p>表单处理的关键模式：</p>
+            <ul>
+              <li><strong>统一状态对象</strong>：所有表单字段存储在一个对象中</li>
+              <li><strong>动态属性名</strong>：[name]: value 根据字段名动态更新</li>
+              <li><strong>提交状态管理</strong>：idle/submitting/success/error 四种状态</li>
+              <li><strong>防重复提交</strong>：disabled={status === "submitting"}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 3: API 集成 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">API 数据获取模式</h2>
+
+      <p>React 组件获取 API 数据是一个常见但需要正确处理的场景。自定义 Hook 是封装数据获取逻辑的最佳方式。</p>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">&#128269;</div>
+          <h4 class="pattern-title">自定义 Hook：useFetch</h4>
+          <p class="pattern-desc">封装 fetch 调用，返回 { data, loading, error }。支持自动重试、缓存和取消请求。将重复的数据获取逻辑抽象为可复用的 Hook。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">&#128230;</div>
+          <h4 class="pattern-title">SWR / React Query</h4>
+          <p class="pattern-desc">生产级数据获取库。自动缓存、重新验证、乐观更新、分页、无限滚动。SWR 更轻量，React Query 功能更丰富。推荐新项目使用 SWR。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">&#128683;</div>
+          <h4 class="pattern-title">请求取消</h4>
+          <p class="pattern-desc">使用 AbortController 在组件卸载时取消未完成的请求。避免"无法对已卸载的组件执行状态更新"的警告和内存泄漏。</p>
+        </div>
+      </div>
+
+      <div class="quiz-container">
+        <div class="quiz-question-block">
+          <p class="quiz-question">在 React 中，为什么状态更新必须使用不可变方式（如展开运算符）？</p>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q3" class="quiz-option-radio" data-correct="false">
+              <span>因为 React 不支持直接修改</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" class="quiz-option-radio" data-correct="true">
+              <span>React 通过引用比较检测变化，直接修改不会触发重新渲染</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" class="quiz-option-radio" data-correct="false">
+              <span>为了代码看起来更高级</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" class="quiz-option-radio" data-correct="false">
+              <span>只有数组需要不可变更新</span>
+            </label>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</section>

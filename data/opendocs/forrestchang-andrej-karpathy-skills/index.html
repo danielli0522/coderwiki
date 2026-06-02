@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Andrej Karpathy 技能库：顶级研究员的工作流复刻</title>
+
+  <!-- Google Fonts: Bricolage Grotesque · DM Sans · JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <!--
+    CUSTOMIZE PER COURSE — change only the three accent variables below.
+    Options:
+      vermillion  #D94F30 / #C4432A / #FDEEE9 / #E8836C  (default)
+      coral       #E06B56 / #C85A47 / #FDECEA / #E89585
+      teal        #2A7B9B / #1F6280 / #E4F2F7 / #5A9DB8
+      amber       #D4A843 / #BF9530 / #FDF5E0 / #E0C070
+      forest      #2D8B55 / #226B41 / #E8F5EE / #5AAD7A
+  -->
+  <style>
+    :root {
+      --color-accent:       #D94F30;
+      --color-accent-hover: #C4432A;
+      --color-accent-light: #FDEEE9;
+      --color-accent-muted: #E8836C;
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">Andrej Karpathy 技能库</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <button class="nav-dot" data-target="module-1" data-tooltip="介绍：Andrej Karpathy 技能库" role="tab" aria-label="Module 1: 介绍：Andrej Karpathy 技能库"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="核心概念：从零构建神经网络" role="tab" aria-label="Module 2: 核心概念：从零构建神经网络"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="实践应用：nanoGPT 与 GPT 架构" role="tab" aria-label="Module 3: 实践应用：nanoGPT 与 GPT 架构"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="进阶主题：LLM 训练与工程实践" role="tab" aria-label="Module 4: 进阶主题：LLM 训练与工程实践"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="总结与综合练习" role="tab" aria-label="Module 5: 总结与综合练习"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh -->
+<section class="module" id="module-1">
+  <div class="module-content">
+    <h1>介绍：Andrej Karpathy 技能库</h1>
+    <p>本课程将带你深入了解 Andrej Karpathy 的编程技能和工程哲学。Karpathy 是前 Tesla AI 总监、OpenAI 联合创始人，他的"从零开始"教学风格影响了无数开发者。通过本课程，你将学习如何将这些技能应用于实际开发中。</p>
+
+    <section class="screen animate-in">
+      <h3>Andrej Karpathy 是谁？</h3>
+      <p>Andrej Karpathy 是深度学习领域最有影响力的教育者之一。他的核心贡献包括：在 Stanford 讲授 CS231n（计算机视觉课程）、担任 Tesla AI 总监领导 Autopilot 团队、创建 YouTube 频道分享"从零开始构建"系列教程。</p>
+      <div class="callout callout-accent">
+        <p><strong>Karpathy 的核心理念：</strong></p>
+        <ul>
+          <li><strong>从零开始构建</strong> — 不依赖高级框架，手动实现每一个组件，真正理解底层原理</li>
+          <li><strong>教学即学习</strong> — 通过教授他人来深化自己的理解（费曼学习法）</li>
+          <li><strong>简洁至上</strong> — 用最少的代码实现最核心的功能，拒绝不必要的复杂性</li>
+          <li><strong>工程实践导向</strong> — 理论结合实践，每个概念都配有可运行的代码</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>Karpathy 技能体系</h3>
+      <div class="pattern-cards">
+        <div class="pattern-card">
+          <h4>神经网络从零构建</h4>
+          <p>micrograd 项目：用 150 行 Python 实现自动微分引擎，理解反向传播的数学本质。</p>
+        </div>
+        <div class="pattern-card">
+          <h4>大语言模型构建</h4>
+          <p>makemore / nanoGPT：从字符级语言模型到 GPT 架构，逐步构建完整的语言模型。</p>
+        </div>
+        <div class="pattern-card">
+          <h4>视频处理工程</h4>
+          <p>video2x / vid2denseflow：视频超分辨率和光流估计的工程实现方法。</p>
+        </div>
+        <div class="pattern-card">
+          <h4>AI 工具开发</h4>
+          <p>pic2card / arxiv-sanity：实用的 AI 应用开发，涵盖图像处理和信息检索。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>micrograd：理解自动微分</h3>
+      <div class="code-translation">
+        <div class="code-block">
+          <pre><code># micrograd — Karpathy 的自动微分引擎
+# 完整实现不到 150 行代码
+
+class Value:
+    """存储标量值及其梯度"""
+    def __init__(self, data, _children=(), _op=''):
+        self.data = data
+        self.grad = 0.0
+        self._backward = lambda: None
+        self._prev = set(_children)
+        self._op = _op
+
+    def __add__(self, other):
+        other = other if isinstance(other, Value) else Value(other)
+        out = Value(self.data + other.data, (self, other), '+')
+
+        def _backward():
+            self.grad += 1.0 * out.grad
+            other.grad += 1.0 * out.grad
+        out._backward = _backward
+        return out
+
+    def __mul__(self, other):
+        other = other if isinstance(other, Value) else Value(other)
+        out = Value(self.data * other.data, (self, other), '*')
+
+        def _backward():
+            self.grad += other.data * out.grad
+            other.grad += self.data * out.grad
+        out._backward = _backward
+        return out
+
+    def relu(self):
+        out = Value(max(0, self.data), (self,), 'ReLU')
+
+        def _backward():
+            self.grad += (out.data > 0) * out.grad
+        out._backward = _backward
+        return out
+
+    def backward(self):
+        """反向传播：计算所有参数的梯度"""
+        topo = []
+        visited = set()
+
+        def build_topo(v):
+            if v not in visited:
+                visited.add(v)
+                for child in v._prev:
+                    build_topo(child)
+                topo.append(v)
+        build_topo(self)
+
+        self.grad = 1.0
+        for v in reversed(topo):
+            v._backward()
+
+    def __repr__(self):
+        return f"Value(data={self.data}, grad={self.grad})"
+
+# 使用示例：构建简单的计算图
+a = Value(2.0)
+b = Value(-3.0)
+c = Value(10.0)
+d = a * b + c       # d = 2 * (-3) + 10 = 4
+d.backward()
+print(f"a.grad = {a.grad}")  # -3.0 (dd/da = b)
+print(f"b.grad = {b.grad}")  # 2.0 (dd/db = a)
+print(f"c.grad = {c.grad}")  # 1.0 (dd/dc = 1)</code></pre>
+        </div>
+        <div class="translation">
+          <p>micrograd 是 Karpathy 教学方法的完美体现：用不到 150 行代码实现完整的自动微分引擎。核心思想是构建计算图（DAG），每个 Value 节点存储数据和梯度。<code>backward()</code> 通过拓扑排序实现反向传播。这个实现让你从根本上理解 PyTorch 的 autograd 是如何工作的。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>Karpathy 的学习方法论</h3>
+      <div class="callout callout-accent">
+        <p><strong>四步学习法：</strong></p>
+        <ol>
+          <li><strong>阅读论文</strong> — 原始论文是最权威的知识来源，不要只看博客摘要</li>
+          <li><strong>手动实现</strong> — 用纯 Python/NumPy 实现，不用框架，理解每一行</li>
+          <li><strong>可视化调试</strong> — 用 Jupyter Notebook 可视化中间结果，建立直觉</li>
+          <li><strong>教授他人</strong> — 写博客、录视频，用自己的话解释，发现理解盲区</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>Karpathy 的代表作品</h3>
+      <div class="code-translation">
+        <div class="code-block">
+          <pre><code># Karpathy 的 GitHub 开源项目（按学习难度排序）
+
+# 1. micrograd — 自动微分引擎（入门级）
+# github.com/karpathy/micrograd
+# 约 150 行 Python，理解反向传播
+# pip install micrograd
+
+# 2. nn-zero-to-hero — 神经网络零到英雄系列（初级）
+# YouTube 播放列表，从 micrograd 到 GPT
+# 包含 6 个独立项目，逐步进阶
+
+# 3. makemore — 字符级语言模型（中级）
+# github.com/karpathy/makemore
+# Bigram → MLP → RNN → WaveNet → Transformer 逐步构建
+
+# 4. nanoGPT — 最简 GPT 训练框架（中高级）
+# github.com/karpathy/nanoGPT
+# 可以在单 GPU 上训练 GPT-2 规模模型
+# 训练 Shakespeare 文本只需要几分钟
+
+# 5. minbpe — 最简 BPE tokenizer（中级）
+# github.com/karpathy/minbpe
+# 约 100 行代码实现 Byte Pair Encoding
+
+# 6. arxiv-sanity — 论文推荐系统（高级）
+# github.com/karpathy/arxiv-sanity-lite
+# 检索增强的论文推荐，完整的 Web 应用
+
+# 使用 nanoGPT 快速训练
+# git clone https://github.com/karpathy/nanoGPT
+# cd nanoGPT
+# python data/shakespeare_char/prepare.py
+# python train.py config/train_shakespeare_char.txt
+# python sample.py --out_dir=out-shakespeare-char</code></pre>
+        </div>
+        <div class="translation">
+          <p>Karpathy 的项目按难度递进：micrograd 是最简单的起点，理解自动微分；nn-zero-to-hero 系列覆盖完整知识体系；makemore 展示语言模型的演进；nanoGPT 是实战训练工具；minbte 深入 tokenizer。建议按照这个顺序学习，每个项目都有配套的 YouTube 视频讲解。</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="quiz">
+      <p class="quiz-question">Karpathy 的核心教学理念是什么？</p>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="true">从零开始构建，手动实现每个组件</button>
+        <button class="quiz-option" data-correct="true">教学即学习，通过教授他人深化理解</button>
+        <button class="quiz-option" data-correct="true">简洁至上，用最少代码实现核心功能</button>
+        <button class="quiz-option" data-correct="false">直接使用高级框架，不需要理解底层</button>
+      </div>
+    </div>
+  </div>
+</section><section class="module" id="module-2">
+  <div class="module-content">
+    <h1>核心概念：从零构建神经网络</h1>
+    <p>本节将深入探讨 Karpathy 的核心教学项目——如何从零构建一个多层感知机（MLP），这是理解深度学习的基础。</p>
+
+    <section class="screen animate-in">
+      <h3>从 micrograd 到神经网络</h3>
+      <p>基于 micrograd 的自动微分引擎，我们可以构建完整的神经网络。Karpathy 展示了如何用最少的代码实现一个可以训练的 MLP。</p>
+      <div class="code-translation">
+        <div class="code-block">
+          <pre><code># 基于 micrograd 构建神经网络
+# Karpathy 风格：简洁、自包含、可运行
+
+import random
+from micrograd import Value
+
+class Module:
+    """神经网络模块基类"""
+    def parameters(self):
+        return []
+
+    def zero_grad(self):
+        for p in self.parameters():
+            p.grad = 0.0
+
+class Neuron(Module):
+    """单个神经元：w * x + b"""
+    def __init__(self, nin, nonlin=True):
+        # Xavier 初始化
+        self.w = [Value(random.uniform(-1, 1) * (6/nin)**0.5)
+                  for _ in range(nin)]
+        self.b = Value(0.0)
+        self.nonlin = nonlin
+
+    def __call__(self, x):
+        act = sum((wi * xi for wi, xi in zip(self.w, x)), self.b)
+        return act.relu() if self.nonlin else act
+
+    def parameters(self):
+        return self.w + [self.b]
+
+class Layer(Module):
+    """全连接层"""
+    def __init__(self, nin, nout, **kwargs):
+        self.neurons = [Neuron(nin, **kwargs) for _ in range(nout)]
+
+    def __call__(self, x):
+        out = [n(x) for n in self.neurons]
+        return out[0] if len(out) == 1 else out
+
+    def parameters(self):
+        return [p for n in self.neurons for p in n.parameters()]
+
+class MLP(Module):
+    """多层感知机"""
+    def __init__(self, nin, nouts):
+        sz = [nin] + nouts
+        self.layers = [Layer(sz[i], sz[i+1], nonlin=i!=len(nouts)-1)
+                       for i in range(len(nouts))]
+
+    def __call__(self, x):
+        for layer in self.layers:
+            x = layer(x)
+        return x
+
+    def parameters(self):
+        return [p for l in self.layers for p in l.parameters()]
+
+# 使用：构建一个简单的分类器
+model = MLP(3, [4, 4, 1])  # 3输入 → 4隐藏 → 4隐藏 → 1输出
+print(f"参数数量: {len(model.parameters())}")  # 3*4+4 + 4*4+4 + 4*1+1 = 33</code></pre>
+        </div>
+        <div class="translation">
+          <p>三层架构设计：<code>Neuron</code> 封装单个神经元的计算（wx + b + 激活函数）；<code>Layer</code> 管理一组神经元；<code>MLP</code> 将多个层串联。所有类继承 <code>Module</code> 基类，统一参数管理和梯度清零。这种设计模仿了 PyTorch 的 nn.Module 体系，但实现极其简洁。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>训练循环：梯度下降</h3>
+      <div class="code-translation">
+        <div class="code-block">
+          <pre><code># Karpathy 风格的训练循环
+# 没有框架依赖，只有纯 Python + micrograd
+
+# 准备训练数据（简单的二分类）
+xs = [
+    [2.0, 3.0, -1.0],
+    [3.0, -1.0, 0.5],
+    [0.5, 1.0, 1.0],
+    [1.0, 1.0, -1.0],
+]
+ys = [1.0, -1.0, -1.0, 1.0]  # 目标标签
+
+# 训练循环
+model = MLP(3, [4, 4, 1])
+
+for k in range(100):
+    # 前向传播
+    ypred = [model(x) for x in xs]
+
+    # 计算损失（MSE）
+    loss = sum((ypred_i - ys_i)**2 for ypred_i, ys_i in zip(ypred, ys))
+
+    # 反向传播
+    model.zero_grad()  # 关键：清零梯度
+    loss.backward()
+
+    # 参数更新（梯度下降）
+    learning_rate = 0.05
+    for p in model.parameters():
+        p.data -= learning_rate * p.grad
+
+    if k % 10 == 0:
+        print(f"Step {k}: loss = {loss.data:.4f}")
+
+# 最终预测
+print("\n预测结果:")
+for x, y_true in zip(xs, ys):
+    y_pred = model(x)
+    print(f"  输入: {x} → 预测: {y_pred.data:.4f} (实际: {y_true})")
+
+# 学习率调度策略（Karpathy 推荐）
+# 1. 开始用较大的 lr（0.1），观察 loss 下降
+# 2. 当 loss 下降变慢时，降低 lr（0.01）
+# 3. 最后用很小的 lr（0.001）精细调整
+# 4. 如果 loss 爆炸（NaN），降低 lr 重新开始</code></pre>
+        </div>
+        <div class="translation">
+          <p>Karpathy 的训练循环四步法：1) 前向传播计算预测值；2) 计算损失函数（MSE 用于回归，交叉熵用于分类）；3) 反向传播计算梯度；4) 梯度下降更新参数。关键细节：每轮必须 <code>zero_grad()</code> 清零梯度，否则梯度会累积。学习率是最重要的超参数，需要耐心调试。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>makemore：构建语言模型</h3>
+      <p>Karpathy 的 makemore 系列是学习语言模型的绝佳教程，从字符级 bigram 模型逐步演进到 Transformer。</p>
+      <div class="code-translation">
+        <div class="code-block">
+          <pre><code># makemore 系列第一步：Bigram 语言模型
+# 用纯 Python 实现，理解语言模型的本质
+
+# 准备数据
+words = ["emma", "olivia", "ava", "sophia", "isabella"]
+
+# 统计 bigram 频率
+bigram_counts = {}
+for word in words:
+    chs = ['.'] + list(word) + ['.']  # . 表示开始/结束
+    for ch1, ch2 in zip(chs, chs[1:]):
+        bigram = (ch1, ch2)
+        bigram_counts[bigram] = bigram_counts.get(bigram, 0) + 1
+
+# 构建概率矩阵
+import torch
+chars = sorted(list(set(''.join(words) + '.')))
+stoi = {s: i for i, s in enumerate(chars)}
+itos = {i: s for s, i in stoi.items()}
+N = torch.zeros((len(chars), len(chars)), dtype=torch.int32)
+
+for (ch1, ch2), count in bigram_counts.items():
+    N[stoi[ch1], stoi[ch2]] = count
+
+# 转换为概率（行归一化）
+P = (N + 1).float()  # +1 平滑（拉普拉斯平滑）
+P /= P.sum(dim=1, keepdim=True)
+
+# 采样生成新名字
+g = torch.Generator().manual_seed(42)
+for _ in range(5):
+    out = []
+    ix = 0  # 从 . 开始
+    while True:
+        # 按概率采样下一个字符
+        p = P[ix]
+        ix = torch.multinomial(p, num_samples=1, generator=g).item()
+        if ix == 0:  # 遇到 . 则结束
+            break
+        out.append(itos[ix])
+    print(''.join(out))
+
+# 计算损失（负对数似然）
+log_likelihood = 0.0
+n = 0
+for word in words:
+    chs = ['.'] + list(word) + ['.']
+    for ch1, ch2 in zip(chs, chs[1:]):
+        prob = P[stoi[ch1], stoi[ch2]]
+        log_likelihood += torch.log(prob)
+        n += 1
+nll = -log_likelihood / n
+print(f"\n平均负对数似然: {nll:.4f}")  # 越小越好</code></pre>
+        </div>
+        <div class="translation">
+          <p>makemore 的第一步是 bigram 模型：统计相邻字符的共现频率，构建概率矩阵，然后按概率采样生成新文本。关键概念：拉普拉斯平滑（+1 避免零概率）、负对数似然（NLL）作为损失函数。这个简单模型是理解更复杂语言模型的基础。后续教程会将其扩展为 MLP、RNN、WaveNet 和 Transformer。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>Karpathy 的调试技巧</h3>
+      <div class="callout callout-accent">
+        <p><strong>"Shape 是深度学习的一半"</strong> — Karpathy 强调，理解张量维度是调试神经网络最重要的技能。以下是他的调试检查清单：</p>
+        <ul>
+          <li>打印每层的输出 shape，确认维度传递正确</li>
+          <li>检查梯度的 shape 是否与参数一致</li>
+          <li>可视化 loss 曲线，确认在下降</li>
+          <li>用极小的数据集测试，确保能过拟合（overfit a single batch）</li>
+          <li>检查初始 loss 是否接近 -ln(1/num_classes)（随机猜测的 loss）</li>
+          <li>使用 torch.autograd.gradcheck 验证自定义梯度计算</li>
+        </ul>
+      </div>
+    </section>
+
+    <div class="quiz">
+      <p class="quiz-question">Karpathy 的训练循环包含哪四个步骤？</p>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="true">前向传播 → 计算损失 → 反向传播 → 参数更新</button>
+        <button class="quiz-option" data-correct="false">数据加载 → 模型构建 → 训练 → 导出</button>
+        <button class="quiz-option" data-correct="false">初始化 → 计算 → 输出 → 保存</button>
+        <button class="quiz-option" data-correct="false">编译 → 链接 → 执行 → 调试</button>
+      </div>
+    </div>
+  </div>
+</section><section class="module" id="module-3">
+  <div class="module-content">
+    <h1>实践应用：nanoGPT 与 GPT 架构</h1>
+    <p>本节将展示 Karpathy 如何从零构建 GPT（Generative Pre-trained Transformer），这是他最著名的教学项目 nanoGPT 的核心内容。</p>
+
+    <section class="screen animate-in">
+      <h3>Self-Attention 机制详解</h3>
+      <p>Transformer 的核心是自注意力机制。Karpathy 坚持先用纯 NumPy/PyTorch 手动实现，再使用框架的高级 API。</p>
+      <div class="code-translation">
+        <div class="code-block">
+          <pre><code># Self-Attention 的 Karpathy 式实现
+# 从数学公式到代码，每一步都清晰可见
+
+import torch
+import torch.nn as nn
+import math
+
+class Head(nn.Module):
+    """单头自注意力"""
+
+    def __init__(self, head_size, n_embd, block_size, dropout=0.1):
+        super().__init__()
+        self.key = nn.Linear(n_embd, head_size, bias=False)
+        self.query = nn.Linear(n_embd, head_size, bias=False)
+        self.value = nn.Linear(n_embd, head_size, bias=False)
+        # 因果掩码：防止看到未来的 token
+        self.register_buffer('tril', torch.tril(
+            torch.ones(block_size, block_size)
+        ))
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, x):
+        B, T, C = x.shape
+
+        # 计算 Key 和 Query
+        k = self.key(x)    # (B, T, head_size)
+        q = self.query(x)  # (B, T, head_size)
+
+        # 计算注意力分数（缩放点积）
+        wei = q @ k.transpose(-2, -1) * (C ** -0.5)
+        # wei shape: (B, T, T)
+
+        # 应用因果掩码（未来位置设为 -inf）
+        wei = wei.masked_fill(self.tril[:T, :T] == 0, float('-inf'))
+
+        # Softmax 归一化
+        wei = torch.nn.functional.softmax(wei, dim=-1)
+        wei = self.dropout(wei)
+
+        # 加权聚合 Value
+        v = self.value(x)  # (B, T, head_size)
+        out = wei @ v      # (B, T, head_size)
+        return out
+
+class MultiHeadAttention(nn.Module):
+    """多头自注意力"""
+
+    def __init__(self, num_heads, head_size, n_embd, block_size, dropout=0.1):
+        super().__init__()
+        self.heads = nn.ModuleList([
+            Head(head_size, n_embd, block_size, dropout)
+            for _ in range(num_heads)
+        ])
+        self.proj = nn.Linear(num_heads * head_size, n_embd)
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, x):
+        # 拼接所有头的输出
+        out = torch.cat([h(x) for h in self.heads], dim=-1)
+        out = self.dropout(self.proj(out))
+        return out
+
+# 关键理解点：
+# 1. Key = "我有什么信息"    → 每个位置的信息摘要
+# 2. Query = "我在找什么"    → 当前位置想关注什么
+# 3. Value = "我的实际内容"  → 传递给下游的实际信息
+# 4. Attention = softmax(Q·K^T / sqrt(d)) · V
+# 5. 缩放因子 sqrt(d) 防止点积过大导致 softmax 饱和</code></pre>
+        </div>
+        <div class="translation">
+          <p>Karpathy 将 Self-Attention 分解为四个直观组件：<strong>Key</strong>（每个位置的信息摘要）、<strong>Query</strong>（当前位置想关注什么）、<strong>Value</strong>（传递的实际内容）、<strong>注意力分数</strong>（Query 和 Key 的点积，决定关注程度）。因果掩码确保只能看到之前的 token，这对语言模型至关重要。缩放因子 sqrt(d) 防止 softmax 饱和。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>完整的 GPT 模型</h3>
+      <div class="code-translation">
+        <div class="code-block">
+          <pre><code># nanoGPT 核心 — Karpathy 的最小 GPT 实现
+# 约 200 行代码，训练即可生成文本
+
+class FeedForward(nn.Module):
+    """位置级前馈网络"""
+    def __init__(self, n_embd, dropout=0.1):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(n_embd, 4 * n_embd),  # 内部维度是 4 倍
+            nn.GELU(),                        # GPT 使用 GELU 激活
+            nn.Linear(4 * n_embd, n_embd),
+            nn.Dropout(dropout),
+        )
+
+    def forward(self, x):
+        return self.net(x)
+
+class Block(nn.Module):
+    """Transformer Block：Attention + FFN"""
+    def __init__(self, n_embd, n_head, block_size, dropout=0.1):
+        super().__init__()
+        head_size = n_embd // n_head
+        self.sa = MultiHeadAttention(n_head, head_size, n_embd, block_size, dropout)
+        self.ffwd = FeedForward(n_embd, dropout)
+        self.ln1 = nn.LayerNorm(n_embd)  # Pre-LN（GPT-2 风格）
+        self.ln2 = nn.LayerNorm(n_embd)
+
+    def forward(self, x):
+        # 残差连接 + Layer Norm
+        x = x + self.sa(self.ln1(x))
+        x = x + self.ffwd(self.ln2(x))
+        return x
+
+class GPT(nn.Module):
+    """完整的 GPT 模型"""
+    def __init__(self, vocab_size, n_embd=384, block_size=256,
+                 n_head=6, n_layer=6, dropout=0.2):
+        super().__init__()
+        self.block_size = block_size
+
+        # Token 嵌入 + 位置嵌入
+        self.token_embedding = nn.Embedding(vocab_size, n_embd)
+        self.position_embedding = nn.Embedding(block_size, n_embd)
+
+        # Transformer Blocks
+        self.blocks = nn.Sequential(*[
+            Block(n_embd, n_head, block_size, dropout)
+            for _ in range(n_layer)
+        ])
+
+        self.ln_f = nn.LayerNorm(n_embd)
+        self.lm_head = nn.Linear(n_embd, vocab_size)
+
+    def forward(self, idx, targets=None):
+        B, T = idx.shape
+
+        # 嵌入
+        tok_emb = self.token_embedding(idx)        # (B, T, n_embd)
+        pos_emb = self.position_embedding(
+            torch.arange(T, device=idx.device)
+        )                                            # (T, n_embd)
+        x = tok_emb + pos_emb                        # (B, T, n_embd)
+
+        # Transformer
+        x = self.blocks(x)
+        x = self.ln_f(x)
+
+        # 输出 logits
+        logits = self.lm_head(x)                     # (B, T, vocab_size)
+
+        # 计算损失
+        if targets is not None:
+            loss = nn.functional.cross_entropy(
+                logits.view(-1, logits.size(-1)),
+                targets.view(-1)
+            )
+            return logits, loss
+        return logits, None
+
+    def generate(self, idx, max_new_tokens):
+        """自回归生成文本"""
+        for _ in range(max_new_tokens):
+            # 裁剪到 block_size
+            idx_cond = idx[:, -self.block_size:]
+            logits, _ = self(idx_cond)
+            # 只取最后一个位置的 logits
+            logits = logits[:, -1, :]
+            # 采样
+            probs = torch.nn.functional.softmax(logits, dim=-1)
+            idx_next = torch.multinomial(probs, num_samples=1)
+            idx = torch.cat((idx, idx_next), dim=1)
+        return idx
+
+# 使用：训练一个字符级 GPT
+model = GPT(vocab_size=65, n_embd=128, block_size=64, n_head=4, n_layer=4)
+print(f"参数量: {sum(p.numel() for p in model.parameters()):,}")  # ~400K</code></pre>
+        </div>
+        <div class="translation">
+          <p>nanoGPT 的三层架构：<strong>Block</strong> 包含 Self-Attention + FFN + 残差连接 + LayerNorm；<strong>GPT</strong> 将 Token/Position 嵌入 + N 个 Block + 输出层组合。Karpathy 的关键教学点：1) Pre-LN 比 Post-LN 更稳定；2) FFN 内部维度是嵌入维度的 4 倍；3) 生成时裁剪输入到 block_size。<code>generate()</code> 方法展示了自回归生成的完整流程。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>优化器与学习率调度</h3>
+      <div class="code-translation">
+        <div class="code-block">
+          <pre><code># Karpathy 推荐的训练配置
+
+# AdamW 优化器（权重衰减的 Adam）
+optimizer = torch.optim.AdamW(
+    model.parameters(),
+    lr=3e-4,           # 学习率（最敏感的超参数）
+    betas=(0.9, 0.999),
+    weight_decay=0.1,  # L2 正则化
+)
+
+# 学习率预热 + 余弦衰减
+from torch.optim.lr_scheduler import CosineAnnealingLR
+
+warmup_steps = 100
+total_steps = 10000
+
+def get_lr(step):
+    """带预热的余弦学习率调度"""
+    if step < warmup_steps:
+        return step / warmup_steps * 3e-4  # 线性预热
+    decay_ratio = (step - warmup_steps) / (total_steps - warmup_steps)
+    return 3e-4 * 0.5 * (1 + math.cos(math.pi * decay_ratio))
+
+# 训练循环
+for step in range(total_steps):
+    # 采样 mini-batch
+    ix = torch.randint(0, len(data) - block_size, (batch_size,))
+    x = torch.stack([data[i:i+block_size] for i in ix])
+    y = torch.stack([data[i+1:i+block_size+1] for i in ix])
+
+    # 前向 + 反向
+    logits, loss = model(x, y)
+    optimizer.zero_grad(set_to_none=True)  # 更高效的梯度清零
+    loss.backward()
+
+    # 梯度裁剪（防止梯度爆炸）
+    torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+
+    # 更新学习率并步进
+    lr = get_lr(step)
+    for param_group in optimizer.param_groups:
+        param_group['lr'] = lr
+    optimizer.step()
+
+    if step % 100 == 0:
+        print(f"Step {step}: loss={loss.item():.4f}, lr={lr:.6f}")
+
+# Karpathy 的超参数调优建议：
+# 1. 先用小模型确认 loss 能下降
+# 2. 逐步增大模型规模
+# 3. 监控训练/验证 loss 曲线
+# 4. 过拟合 → 增加正则化/减少模型大小
+# 5. 欠拟合 → 增大模型/训练更久/降低学习率</code></pre>
+        </div>
+        <div class="translation">
+          <p>Karpathy 的训练配方：AdamW 优化器（lr=3e-4 是 Transformer 的"默认值"）、余弦学习率调度带线性预热、梯度裁剪（max_norm=1.0）防止爆炸。关键调试策略：先在小模型上验证 loss 能正常下降，再逐步扩大规模。观察训练/验证 loss 曲线是判断过拟合/欠拟合的最佳方式。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>可视化理解 Attention</h3>
+      <p>Karpathy 强调可视化是理解 Attention 的最佳方式。通过观察注意力热力图，你可以直观地看到模型在关注什么。</p>
+      <div class="code-translation">
+        <div class="code-block">
+          <pre><code># 可视化 Attention 权重（Karpathy 风格）
+import torch
+import matplotlib.pyplot as plt
+
+def visualize_attention(attention_weights, tokens, head=0):
+    """
+    可视化注意力权重矩阵
+
+    参数:
+    - attention_weights: (B, n_head, T, T) 注意力分数
+    - tokens: 当前输入的 token 列表
+    - head: 要可视化的注意力头
+    """
+    # 取第一个样本的指定头
+    attn = attention_weights[0, head].detach().cpu().numpy()
+    T = attn.shape[0]
+
+    fig, ax = plt.subplots(figsize=(8, 8))
+    im = ax.imshow(attn[:T, :T], cmap='Blues', vmin=0, vmax=1)
+
+    # 标签
+    tick_labels = tokens[:T]
+    ax.set_xticks(range(T))
+    ax.set_yticks(range(T))
+    ax.set_xticklabels(tick_labels, rotation=90, fontsize=8)
+    ax.set_yticklabels(tick_labels, fontsize=8)
+    ax.set_xlabel("Key 位置")
+    ax.set_ylabel("Query 位置")
+    ax.set_title(f"Attention Head {head}")
+
+    plt.colorbar(im, ax=ax, label="注意力权重")
+    plt.tight_layout()
+    plt.savefig("attention_viz.png", dpi=150)
+    plt.show()
+
+# 使用示例
+tokens = list("Attention is all you need")
+T = len(tokens)
+# 模拟注意力权重
+attn = torch.zeros(1, 4, T, T)
+for i in range(T):
+    for j in range(i+1):
+        attn[0, 0, i, j] = 1.0 / (i - j + 1)
+# 归一化
+attn = torch.softmax(attn, dim=-1)
+
+visualize_attention(attn, tokens, head=0)
+
+# Karpathy 的可视化建议：
+# 1. 观察对角线附近是否权重最高（局部关注）
+# 2. 查看特殊 token（如标点）是否获得全局关注
+# 3. 不同头的关注模式是否互补
+# 4. 训练过程中注意力如何演化</code></pre>
+        </div>
+        <div class="translation">
+          <p>Attention 可视化是 Karpathy 调试 Transformer 的核心工具。注意力热力图展示每个位置对其他位置的关注程度：颜色越深表示关注越强。好的模型通常展现局部关注（对角线附近）+ 特殊位置的全局关注模式。可视化不同头可以发现互补的关注策略——有的关注语法，有的关注语义。</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="quiz">
+      <p class="quiz-question">Self-Attention 机制中的 Key、Query、Value 分别代表什么？</p>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="true">Key=信息摘要，Query=关注目标，Value=实际内容</button>
+        <button class="quiz-option" data-correct="false">Key=加密密钥，Query=查询语句，Value=返回值</button>
+        <button class="quiz-option" data-correct="false">它们是相同的东西，只是名字不同</button>
+        <button class="quiz-option" data-correct="false">Key=输入，Query=输出，Value=中间结果</button>
+      </div>
+    </div>
+  </div>
+</section><section class="module" id="module-4">
+  <div class="module-content">
+    <h1>进阶主题：LLM 训练与工程实践</h1>
+    <p>本节将探讨 Karpathy 在大语言模型训练和 AI 工程方面的进阶经验，包括数据准备、分布式训练和模型评估。</p>
+
+    <section class="screen animate-in">
+      <h3>数据准备的最佳实践</h3>
+      <div class="code-translation">
+        <div class="code-block">
+          <pre><code># Karpathy 的数据准备流程
+# 以训练 Shakespeare 文本生成器为例
+
+# 1. 读取原始数据
+with open('input.txt', 'r', encoding='utf-8') as f:
+    text = f.read()
+
+# 2. 构建词汇表
+chars = sorted(list(set(text)))
+vocab_size = len(chars)
+print(f"词汇量: {vocab_size}")
+print(f"数据长度: {len(text)} 字符")
+
+# 3. 字符级编码器
+stoi = {ch: i for i, ch in enumerate(chars)}
+itos = {i: ch for i, ch in enumerate(chars)}
+
+encode = lambda s: [stoi[c] for c in s]
+decode = lambda l: ''.join([itos[i] for i in l])
+
+# 4. 编码为张量
+import torch
+data = torch.tensor(encode(text), dtype=torch.long)
+
+# 5. 划分训练/验证集（90/10）
+n = int(0.9 * len(data))
+train_data = data[:n]
+val_data = data[n:]
+
+# 6. 批量采样函数
+def get_batch(split, block_size=256, batch_size=32, device='cuda'):
+    data = train_data if split == 'train' else val_data
+    ix = torch.randint(len(data) - block_size, (batch_size,))
+    x = torch.stack([data[i:i+block_size] for i in ix]).to(device)
+    y = torch.stack([data[i+1:i+block_size+1] for i in ix]).to(device)
+    return x, y
+
+# 7. 评估函数
+@torch.no_grad()
+def estimate_loss(model, eval_iters=200):
+    model.eval()
+    losses = {}
+    for split in ['train', 'val']:
+        losses[split] = 0
+        for _ in range(eval_iters):
+            x, y = get_batch(split)
+            _, loss = model(x, y)
+            losses[split] += loss.item()
+        losses[split] /= eval_iters
+    model.train()
+    return losses
+
+# BPE Tokenizer（更高级的方案）
+# Karpathy 在 minbpe 项目中从零实现了 BPE
+class BasicTokenizer:
+    """最简 BPE 实现"""
+    def __init__(self):
+        self.merges = {}  # 合并规则
+        self.vocab = {}   # 词汇表
+
+    def train(self, text, vocab_size=256):
+        tokens = list(text.encode('utf-8'))
+        num_merges = vocab_size - 256
+
+        for i in range(num_merges):
+            # 统计相邻 token 对的频率
+            counts = {}
+            for pair in zip(tokens, tokens[1:]):
+                counts[pair] = counts.get(pair, 0) + 1
+
+            # 找到最高频的对
+            top_pair = max(counts, key=counts.get)
+
+            # 合并：用新 token 替换
+            new_token = 256 + i
+            tokens = self._merge(tokens, top_pair, new_token)
+            self.merges[top_pair] = new_token
+
+        self.vocab = {i: bytes([i]) for i in range(256)}
+        for (p0, p1), new in self.merges.items():
+            self.vocab[new] = self.vocab[p0] + self.vocab[p1]
+
+    def _merge(self, tokens, pair, new_token):
+        merged = []
+        i = 0
+        while i < len(tokens):
+            if i < len(tokens) - 1 and (tokens[i], tokens[i+1]) == pair:
+                merged.append(new_token)
+                i += 2
+            else:
+                merged.append(tokens[i])
+                i += 1
+        return merged</code></pre>
+        </div>
+        <div class="translation">
+          <p>数据准备七步法：读取 → 构建词汇表 → 编码器 → 转张量 → 划分数据集 → 批量采样 → 评估函数。Karpathy 还从零实现了 BPE（Byte Pair Encoding），这是 GPT 使用的 tokenizer。BPE 的核心思想是合并高频的 token 对，逐步构建更长的子词单元，平衡词汇量和序列长度。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>LLM 训练的三阶段</h3>
+      <div class="callout callout-accent">
+        <p><strong>Karpathy 总结的 LLM 训练三阶段：</strong></p>
+        <ul>
+          <li><strong>Pre-training（预训练）</strong> — 在大规模文本上训练 next-token prediction，模型学习语言知识和世界知识。需要大量 GPU（数千 A100），成本最高。</li>
+          <li><strong>SFT（监督微调）</strong> — 在高质量的指令-回答数据上微调，模型学会遵循指令、回答问题。数据量小但质量要求高。</li>
+          <li><strong>RLHF（人类反馈强化学习）</strong> — 通过人类偏好数据训练奖励模型，用 PPO 算法优化主模型，使输出更符合人类偏好。</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>Karpathy 的 AI 工程哲学</h3>
+      <div class="pattern-cards">
+        <div class="pattern-card">
+          <h4>简洁性优于复杂性</h4>
+          <p>一个好的实现应该让人一眼就能看懂。如果需要大量注释才能解释，说明设计有问题。nanoGPT 的代码比任何框架文档都更有教育意义。</p>
+        </div>
+        <div class="pattern-card">
+          <h4>先理解再使用</h4>
+          <p>不要急于使用 PyTorch/TF 的高级 API。先手动实现一遍，理解每个组件的作用，再用框架提高效率。知道"为什么"比知道"怎么做"更重要。</p>
+        </div>
+        <div class="pattern-card">
+          <h4>过度工程是敌人</h4>
+          <p>不需要的东西不要加：不必要的抽象、过早优化、过度配置。150 行的 micrograd 比数百万行的框架更适合学习。</p>
+        </div>
+        <div class="pattern-card">
+          <h4>动手胜过阅读</h4>
+          <p>看 100 遍论文不如自己实现一遍。每个概念都应该有可运行的代码。调试的过程就是学习的过程。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>实用工具与脚本</h3>
+      <div class="code-translation">
+        <div class="code-block">
+          <pre><code># Karpathy 风格的模型检查点保存
+import os
+
+def save_checkpoint(model, optimizer, step, path='checkpoint.pt'):
+    checkpoint = {
+        'model_state_dict': model.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+        'step': step,
+    }
+    # 原子写入：先写临时文件，再重命名
+    tmp_path = path + '.tmp'
+    torch.save(checkpoint, tmp_path)
+    os.replace(tmp_path, path)
+    print(f"Checkpoint saved at step {step}")
+
+def load_checkpoint(model, optimizer, path='checkpoint.pt'):
+    if os.path.exists(path):
+        checkpoint = torch.load(path)
+        model.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        return checkpoint['step']
+    return 0
+
+# 模型参数统计
+def count_parameters(model):
+    total = sum(p.numel() for p in model.parameters())
+    trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print(f"总参数量: {total:,}")
+    print(f"可训练参数: {trainable:,}")
+    print(f"模型大小: {total * 4 / 1024**2:.1f} MB (FP32)")
+    return total
+
+# GPU 利用率监控
+def gpu_status():
+    if torch.cuda.is_available():
+        print(f"GPU: {torch.cuda.get_device_name(0)}")
+        print(f"VRAM: {torch.cuda.memory_allocated()/1024**3:.1f}/"
+              f"{torch.cuda.get_device_properties(0).total_memory/1024**3:.1f} GB")
+        print(f"Utilization: {torch.cuda.utilization()}%")
+
+# 快速推理测试
+def quick_test(model, tokenizer, prompt="The meaning of life is", max_tokens=50):
+    model.eval()
+    tokens = tokenizer.encode(prompt)
+    x = torch.tensor([tokens], dtype=torch.long)
+
+    with torch.no_grad():
+        for _ in range(max_tokens):
+            logits, _ = model(x)
+            next_token = logits[0, -1].argmax()
+            x = torch.cat([x, next_token.unsqueeze(0).unsqueeze(0)], dim=1)
+
+    return tokenizer.decode(x[0].tolist())</code></pre>
+        </div>
+        <div class="translation">
+          <p>工程实践工具集：原子写入的检查点保存（避免写入中断导致文件损坏）、参数统计（快速了解模型规模）、GPU 监控（确保资源不超载）、快速推理测试（验证模型生成质量）。这些工具简洁实用，是 Karpathy "用最少的代码解决问题"哲学的体现。</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="quiz">
+      <p class="quiz-question">LLM 训练的三个阶段是什么？</p>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="true">Pre-training → SFT → RLHF</button>
+        <button class="quiz-option" data-correct="false">训练 → 测试 → 部署</button>
+        <button class="quiz-option" data-correct="false">编码 → 解码 → 评估</button>
+        <button class="quiz-option" data-correct="false">数据准备 → 模型构建 → 推理生成</button>
+      </div>
+    </div>
+  </div>
+</section><section class="module" id="module-5">
+  <div class="module-content">
+    <h1>总结与综合练习</h1>
+    <p>本节将对整个 Karpathy 技能课程进行总结，并提供综合练习帮助巩固所学。</p>
+
+    <section class="screen animate-in">
+      <h3>课程知识图谱</h3>
+      <div class="callout callout-accent">
+        <p><strong>Karpathy 技能体系回顾：</strong></p>
+        <ul>
+          <li><strong>模块 1</strong>：Karpathy 的背景和教学理念 — 从零开始、教学即学习、简洁至上</li>
+          <li><strong>模块 2</strong>：核心概念 — micrograd 自动微分、MLP 构建、makemore 语言模型</li>
+          <li><strong>模块 3</strong>：实践应用 — Self-Attention、nanoGPT、训练循环和超参数调优</li>
+          <li><strong>模块 4</strong>：进阶主题 — 数据准备、BPE Tokenizer、LLM 三阶段训练、工程哲学</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>综合练习：从零构建一个完整的字符级 GPT</h3>
+      <div class="code-translation">
+        <div class="code-block">
+          <pre><code>"""综合练习：Karpathy 风格的字符级 GPT 完整实现
+参考 nanoGPT，但用最简洁的代码实现
+"""
+import torch
+import torch.nn as nn
+import math
+
+# ===== 超参数 =====
+config = {
+    "block_size": 128,     # 上下文窗口
+    "n_embd": 128,         # 嵌入维度
+    "n_head": 4,           # 注意力头数
+    "n_layer": 4,          # Transformer 层数
+    "dropout": 0.1,        # Dropout 比率
+    "batch_size": 64,      # 批大小
+    "learning_rate": 3e-4, # 学习率
+    "max_steps": 5000,     # 训练步数
+    "eval_interval": 500,  # 评估间隔
+}
+
+# ===== 数据准备 =====
+text = open('input.txt', 'r').read()
+chars = sorted(set(text))
+vocab_size = len(chars)
+stoi = {c: i for i, c in enumerate(chars)}
+itos = {i: c for c, i in stoi.items()}
+
+data = torch.tensor([stoi[c] for c in text], dtype=torch.long)
+n = int(0.9 * len(data))
+train_data, val_data = data[:n], data[n:]
+
+def get_batch(split):
+    d = train_data if split == 'train' else val_data
+    ix = torch.randint(len(d) - config["block_size"], (config["batch_size"],))
+    x = torch.stack([d[i:i+config["block_size"]] for i in ix])
+    y = torch.stack([d[i+1:i+config["block_size"]+1] for i in ix])
+    return x, y
+
+# ===== 模型定义 =====
+class TinyGPT(nn.Module):
+    def __init__(self):
+        super().__init__()
+        bs = config["block_size"]
+        ne = config["n_embd"]
+        nh = config["n_head"]
+        nl = config["n_layer"]
+        head_size = ne // nh
+
+        self.tok_emb = nn.Embedding(vocab_size, ne)
+        self.pos_emb = nn.Embedding(bs, ne)
+        self.blocks = nn.Sequential(*[
+            self._make_block(ne, nh, head_size, bs) for _ in range(nl)
+        ])
+        self.ln_f = nn.LayerNorm(ne)
+        self.head = nn.Linear(ne, vocab_size)
+
+    def _make_block(self, ne, nh, hs, bs):
+        class Block(nn.Module):
+            def __init__(self):
+                super().__init__()
+                self.ln1 = nn.LayerNorm(ne)
+                self.ln2 = nn.LayerNorm(ne)
+                self.attn = nn.MultiheadAttention(ne, nh, dropout=config["dropout"], batch_first=True)
+                self.ff = nn.Sequential(
+                    nn.Linear(ne, 4*ne), nn.GELU(), nn.Linear(4*ne, ne), nn.Dropout(config["dropout"])
+                )
+                mask = torch.triu(torch.ones(bs, bs), diagonal=1).bool()
+                self.register_buffer('mask', mask)
+
+            def forward(self, x):
+                B, T, C = x.shape
+                attn_out, _ = self.attn(
+                    self.ln1(x), self.ln1(x), self.ln1(x),
+                    attn_mask=self.mask[:T,:T], is_causal=False
+                )
+                x = x + attn_out
+                x = x + self.ff(self.ln2(x))
+                return x
+        return Block()
+
+    def forward(self, idx, targets=None):
+        B, T = idx.shape
+        x = self.tok_emb(idx) + self.pos_emb(torch.arange(T))
+        x = self.blocks(x)
+        x = self.ln_f(x)
+        logits = self.head(x)
+        loss = None
+        if targets is not None:
+            loss = nn.functional.cross_entropy(
+                logits.view(-1, vocab_size), targets.view(-1)
+            )
+        return logits, loss
+
+    def generate(self, idx, max_tokens=500):
+        for _ in range(max_tokens):
+            idx_cond = idx[:, -config["block_size"]:]
+            logits, _ = self(idx_cond)
+            probs = torch.softmax(logits[:, -1, :], dim=-1)
+            idx = torch.cat([idx, torch.multinomial(probs, 1)], dim=1)
+        return idx
+
+# ===== 训练 =====
+model = TinyGPT()
+optimizer = torch.optim.AdamW(model.parameters(), lr=config["learning_rate"])
+
+print(f"模型参数量: {sum(p.numel() for p in model.parameters()):,}")
+print(f"词汇量: {vocab_size}")
+print(f"训练数据: {len(train_data):,} 字符")
+
+for step in range(config["max_steps"]):
+    x, y = get_batch('train')
+    logits, loss = model(x, y)
+    optimizer.zero_grad(set_to_none=True)
+    loss.backward()
+    torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+    optimizer.step()
+
+    if step % config["eval_interval"] == 0:
+        model.eval()
+        val_loss = sum(model(*get_batch('val'))[1].item()
+                       for _ in range(20)) / 20
+        model.train()
+        print(f"Step {step:5d} | Train Loss: {loss.item():.4f} | Val Loss: {val_loss:.4f}")
+
+# ===== 生成示例 =====
+context = torch.zeros((1, 1), dtype=torch.long)
+output = model.generate(context, max_tokens=200)
+print("\n生成文本:")
+print(''.join([itos[i] for i in output[0].tolist()]))</code></pre>
+        </div>
+        <div class="translation">
+          <p>这个综合练习将课程所有知识点串联成一个完整的字符级 GPT：数据准备（字符级编码）、模型定义（嵌入 + Transformer Blocks + 输出层）、训练循环（AdamW + 梯度裁剪）、评估（训练/验证 loss 监控）、生成（自回归采样）。约 100 行代码实现了一个可以训练和生成文本的 GPT，完美体现了 Karpathy "简洁至上"的工程哲学。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>推荐学习路径</h3>
+      <div class="pattern-cards">
+        <div class="pattern-card">
+          <h4>micrograd</h4>
+          <p>从 150 行的自动微分引擎开始，理解反向传播的本质。github.com/karpathy/micrograd</p>
+        </div>
+        <div class="pattern-card">
+          <h4>makemore</h4>
+          <p>从 bigram 到 MLP 到 RNN 到 Transformer，逐步构建语言模型。YouTube 系列教程。</p>
+        </div>
+        <div class="pattern-card">
+          <h4>nanoGPT</h4>
+          <p>最简单最快的 GPT 训练框架，用于训练和推理中等规模的 GPT。github.com/karpathy/nanoGPT</p>
+        </div>
+        <div class="pattern-card">
+          <h4>minbpe</h4>
+          <p>从零实现 BPE tokenizer，理解 GPT 的文本编码过程。github.com/karpathy/minbpe</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>Karpathy 名言</h3>
+      <div class="callout callout-accent">
+        <p><strong>关于学习：</strong>"I've always found that the best way to learn something is to try to build it from scratch."</p>
+        <p><strong>关于简洁：</strong>"If you can't explain it simply, you don't understand it well enough."</p>
+        <p><strong>关于实践：</strong>"The best way to learn is to build. Don't just read papers, implement them."</p>
+        <p><strong>关于 AI：</strong>"We're all building on the shoulders of giants, but sometimes you need to climb down and look at the foundations."</p>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>延伸阅读与社区</h3>
+      <div class="callout callout-accent">
+        <p><strong>Karpathy 的内容渠道：</strong></p>
+        <ul>
+          <li><strong>YouTube</strong> — youtube.com/@AndrejKarpathy（从零构建系列、GPT 训练教程）</li>
+          <li><strong>GitHub</strong> — github.com/karpathy（所有开源项目，代码即文档）</li>
+          <li><strong>Twitter/X</strong> — @karpathy（AI 见解、项目更新、行业评论）</li>
+          <li><strong>博客</strong> — karpathy.ai（经典文章：Software 2.0、Yes you should understand backprop）</li>
+        </ul>
+        <p><strong>推荐阅读：</strong></p>
+        <ul>
+          <li>"Software 2.0" — 为什么神经网络是一种新的编程范式</li>
+          <li>"Yes, you should understand backprop" — 每个工程师都应该理解反向传播</li>
+          <li>"A Recipe for Training Neural Networks" — 神经网络训练的系统方法论</li>
+          <li>"State of GPT" — GPT 模型的现状与未来（Microsoft Build 演讲）</li>
+        </ul>
+      </div>
+    </section>
+
+    <div class="callout callout-accent">
+      <strong>学习路线建议</strong>：Karpathy 的教学哲学是"从零构建，理解本质"。建议按照 micrograd → nanoGPT → BPE Tokenizer 的顺序学习，每个项目都用 Jupyter Notebook 边读边跑。不要跳过手动实现反向传播这一步——它是理解所有深度学习框架的基础。完成课程后，尝试用自己的语言复述每个模块的核心概念，这是检验理解深度的最佳方式。坚持下来，你会发现对深度学习的理解远超预期！加油，享受学习的过程吧！
+    </div>
+
+    <div class="quiz">
+      <p class="quiz-question">Karpathy 技能体系的核心学习要点是什么？</p>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="true">从零构建，手动实现每个组件以理解底层原理</button>
+        <button class="quiz-option" data-correct="true">简洁至上，用最少代码解决核心问题</button>
+        <button class="quiz-option" data-correct="true">动手实践，每个概念配可运行代码</button>
+        <button class="quiz-option" data-correct="false">只关注理论，不需要写代码</button>
+      </div>
+    </div>
+  </div>
+</section>  </main>
+
+</body>
+</html>

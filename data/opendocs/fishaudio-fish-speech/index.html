@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fish Speech：开源语音合成的最前沿</title>
+
+  <!-- Google Fonts: Bricolage Grotesque · DM Sans · JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    :root {
+      --color-accent:       #E06B56;
+      --color-accent-hover: #C85A47;
+      --color-accent-light: #FDECEA;
+      --color-accent-muted: #E89585;
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">Fish Speech：开源语音合成的最前沿</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <button class="nav-dot" data-target="module-1" data-tooltip="语音合成的革命" role="tab" aria-label="Module 1: 语音合成的革命"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="Dual-AR 双自回归架构" role="tab" aria-label="Module 2: Dual-AR 双自回归架构"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="从文本到声波：推理流水线" role="tab" aria-label="Module 3: 从文本到声波：推理流水线"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="音频编解码：VQ 码本世界" role="tab" aria-label="Module 4: 音频编解码：VQ 码本世界"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="对话式 TTS 与工程实战" role="tab" aria-label="Module 5: 对话式 TTS 与工程实战"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh -->
+<!-- ==================== MODULE 1: 语音合成的革命 ==================== -->
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">语音合成的革命</h1>
+      <p class="module-subtitle">Fish Speech 如何用 1000 万小时音频、80+ 语言重新定义开源语音合成</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Hero - 什么是 TTS -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">想象一下：把文字变成声音</h2>
+
+        <p>你有没有用过手机的「朗读」功能？或者听过导航软件说「前方路口左转」？这些声音背后就是
+          <span class="term" data-definition="TTS 是 Text-to-Speech 的缩写，即「文本转语音」技术。它把书面文字转换成听起来像真人说话的声音。就像一个永不疲倦的播音员，给它任何文字，它就能读出来。">TTS（文本转语音）</span>
+          技术。传统 TTS 听起来像机器人，而 Fish Speech 的目标只有一个：让合成的声音跟真人一模一样。
+        </p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">!</div>
+          <div class="callout-content">
+            <strong class="callout-title">核心洞察</strong>
+            <p>Fish Speech S2 Pro 用超过 1000 万小时的音频训练，覆盖 80 多种语言。它不只是「读字」，而是理解语气、情感、节奏——就像一个真正的演员在朗读剧本。</p>
+          </div>
+        </div>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🌐</div>
+            <h4 class="pattern-title">80+ 语言</h4>
+            <p class="pattern-desc">中文、英文、日文、韩文……一个模型搞定全球主要语言，不需要切换引擎。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🎭</div>
+            <h4 class="pattern-title">情感控制</h4>
+            <p class="pattern-desc">用自然语言标签控制语气：<code>[whisper]</code> 耳语、<code>[excited]</code> 激动、<code>[angry]</code> 愤怒——不需要调参数。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🎙️</div>
+            <h4 class="pattern-title">声音克隆</h4>
+            <p class="pattern-desc">只需几秒钟的参考音频，就能复制任何人的音色和说话风格。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">👥</div>
+            <h4 class="pattern-title">多角色对话</h4>
+            <p class="pattern-desc">原生支持多说话者、多轮对话——生成一整段播客或电台节目。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: 项目目录结构 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">源码地图：项目长什么样</h2>
+
+        <p>打开 Fish Speech 的代码仓库，你会看到这样的目录结构。每个文件夹负责不同的工作，就像一家录音棚的不同部门：</p>
+
+        <div class="file-tree">
+          <div class="ft-folder open">
+            <span class="ft-name">fish_speech/</span>
+            <span class="ft-desc">核心代码——语音合成的「大脑」</span>
+            <div class="ft-children">
+              <div class="ft-folder">
+                <span class="ft-name">models/</span>
+                <span class="ft-desc">AI 模型定义——最核心的神经网络</span>
+                <div class="ft-children">
+                  <div class="ft-file">
+                    <span class="ft-name">text2semantic/</span>
+                    <span class="ft-desc">文本→语义 Token 转换（大模型）</span>
+                  </div>
+                  <div class="ft-file">
+                    <span class="ft-name">dac/</span>
+                    <span class="ft-desc">音频编解码器（DAC Codec）</span>
+                  </div>
+                </div>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">inference_engine/</span>
+                <span class="ft-desc">推理引擎——把模型变成可用服务</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">conversation.py</span>
+                <span class="ft-desc">对话管理——组织多轮对话结构</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">tokenizer.py</span>
+                <span class="ft-desc">分词器——定义特殊标记和语义空间</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">text/clean.py</span>
+                <span class="ft-desc">文本清洗——去表情符号、规范化标点</span>
+              </div>
+            </div>
+          </div>
+          <div class="ft-folder">
+            <span class="ft-name">tools/</span>
+            <span class="ft-desc">工具箱——API 服务器、WebUI、客户端</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: 端到端流程动画 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">一张图看懂 Fish Speech 工作原理</h2>
+
+        <p>当你输入一段文字让 Fish Speech 朗读时，数据经历了这样一段旅程：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"用户输入文字（如：今天天气真好）"},
+          {"highlight":"flow-actor-1","label":"文本清洗：去掉表情符号、规范标点","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-2","label":"分词器将文字转成数字 ID 序列"},
+          {"highlight":"flow-actor-3","label":"Dual-AR 大模型生成语义 Token（音频的数字蓝图）","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-4","label":"DAC 编解码器把 Token 还原成真实声波","packet":true,"from":"actor-3","to":"actor-4"},
+          {"highlight":"flow-actor-5","label":"输出 WAV 音频文件——听起来就像真人说话","packet":true,"from":"actor-4","to":"actor-5"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">T</div>
+              <span>文本输入</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">Tk</div>
+              <span>分词器</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">AR</div>
+              <span>Dual-AR</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">DAC</div>
+              <span>音频解码</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-5">
+              <div class="flow-actor-icon">W</div>
+              <span>音频输出</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击「下一步」开始动画</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重播</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: 代码翻译 - 文本清洗 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码直译：文本清洗</h2>
+
+        <p>一切从清洗用户输入开始。这段代码负责把杂乱的文字变得干净整齐——就像广播主持人拿到手稿后先「扫一眼」去掉不合适的符号：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">Python</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">clean_text</span>(text):</span>
+<span class="code-line">    text = text.strip()</span>
+<span class="code-line">    text = REPLACE_SYMBOL_REGEX.<span class="code-function">sub</span>(</span>
+<span class="code-line">        <span class="code-keyword">lambda</span> x: SYMBOLS_MAPPING[x.<span class="code-function">group</span>()], text)</span>
+<span class="code-line">    text = EMOJI_REGEX.<span class="code-function">sub</span>(<span class="code-string">r""</span>, text)</span>
+<span class="code-line">    text = re.<span class="code-function">sub</span>(<span class="code-string">r"[,]{2,}"</span>,</span>
+<span class="code-line">        <span class="code-keyword">lambda</span> m: m.<span class="code-function">group</span>()[<span class="code-number">0</span>], text)</span>
+<span class="code-line">    <span class="code-keyword">return</span> text</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">定义一个函数，接收原始文本作为输入。</p>
+              <p class="tl">先去掉文字首尾多余的空格。</p>
+              <p class="tl">把中文标点（如全角引号）替换成英文标点。</p>
+              <p class="tl">这一行是「参数和函数匹配」的细节，跳过也行。</p>
+              <p class="tl">删掉所有表情符号（emoji）——机器不需要表情。</p>
+              <p class="tl">把连续的逗号压缩成一个，避免合成时停顿太多。</p>
+              <p class="tl">返回清洗后的干净文本。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: 测验 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！TTS（Text-to-Speech）就是把文字变成语音的技术。Fish Speech 是目前最先进的开源 TTS 系统之一。"
+               data-explanation-wrong="想一想：TTS 的全称是 Text-to-Speech，也就是「文本转语音」。哪个选项描述了这个功能？">
+            <h3 class="quiz-question">Fish Speech 是一个什么类型的系统？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>语音识别系统（把声音转成文字）</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>文本转语音系统（把文字转成声音）</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>音乐生成系统（自动创作音乐）</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！clean_text 函数会把文本中的表情符号（emoji）全部删掉，因为语音合成不需要这些视觉元素。"
+               data-explanation-wrong="仔细看 clean_text 函数：它用 EMOJI_REGEX 把表情符号替换成了空字符串。也就是说，表情符号会被删除，而不是保留或转换。">
+            <h3 class="quiz-question">在 clean_text 函数中，表情符号（emoji）会被怎么处理？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>转换成文字描述（如 😄 变成「笑脸」）</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>保留原样传给语音模型</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>直接删除，语音合成不需要</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="完全正确！Fish Speech 的核心架构叫 Dual-AR（双自回归），它用两个 Transformer 协同工作：一个负责理解文本语义，一个负责生成音频细节。"
+               data-explanation-wrong="回顾一下架构概览：Fish Speech 的关键创新是「双自回归」（Dual-AR）架构。这个词描述的是它有两个协同工作的自回归模型。">
+            <h3 class="quiz-question">如果你要向朋友解释 Fish Speech 的核心创新，你会说它的架构叫什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Dual-AR（双自回归）——两个 Transformer 协同工作</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>GAN（生成对抗网络）——两个网络互相竞争</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>VAE（变分自编码器）——编码再解码</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">重新作答</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<!-- ==================== MODULE 2: Dual-AR 双自回归架构 ==================== -->
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">Dual-AR 双自回归架构</h1>
+      <p class="module-subtitle">两个 Transformer 如何像指挥家和乐队一样协作，把文字变成声音蓝图</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: 类比引入 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">比喻：指挥家与交响乐团</h2>
+
+        <p>想象一场交响乐演出。
+          <span class="term" data-definition="自回归（Autoregressive）是指模型一步一步生成内容，每一步都依赖前面已经生成的内容。就像你写字，每个字都基于前面已经写的字来决定——不可能跳着写。">自回归模型</span>
+          就像一个只能一步一步做事的音乐家。Fish Speech 的创新在于：它有两个自回归模型，分工不同。
+        </p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🎼</div>
+            <div>
+              <strong>慢速 Transformer（指挥家）</strong>
+              <p>负责「大局观」——理解文本语义，决定什么时候该说什么。就像指挥家决定乐曲的节奏和情感走向。32 层深的神经网络，视野广阔但速度较慢。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🎻</div>
+            <div>
+              <strong>快速 Transformer（首席演奏家）</strong>
+              <p>负责「细节执行」——根据指挥的意图，快速生成每一帧音频的精细参数。4 层轻量网络，速度飞快，但只关注眼前这一帧。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">i</div>
+          <div class="callout-content">
+            <strong class="callout-title">为什么需要两个？</strong>
+            <p>传统方案用一个模型同时理解语义和生成音频，结果两头都做不好。Dual-AR 把这两个任务拆开：慢模型专注「理解文字要表达什么」，快模型专注「这些语义对应什么声音细节」。分工明确，效果倍增。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Group Chat - 两个 Transformer 对话 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">对话动画：指挥家与演奏家的协作</h2>
+
+        <p>点击「下一条消息」，看两个模型如何配合完成一次语音生成：</p>
+
+        <div class="chat-window" id="chat-module2">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="slow" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">慢</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">慢速 Transformer</span>
+                <p>收到文本：「今天天气真好」。我开始理解语义……</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="slow" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">慢</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">慢速 Transformer</span>
+                <p>第一个语义 Token 生成完毕：语义 ID #2156（对应「今」的声学特征）。我把它交给你了，快速 Transformer！</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="fast" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">快</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">快速 Transformer</span>
+                <p>收到语义 Token！我根据它生成 4 层码本细节：码本0=32, 码本1=87, 码本2=15, 码本3=91。完成！</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="slow" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">慢</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">慢速 Transformer</span>
+                <p>下一个 Token：语义 ID #892（「天」的声学特征）。注意音调要上扬——这是一个疑问前的铺垫。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="fast" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">快</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">快速 Transformer</span>
+                <p>码本生成完毕！我来检查一下有没有重复……用 RAS（重复感知采样）算法确认没有异常，继续下一轮！</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="5" data-sender="slow" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">慢</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">慢速 Transformer</span>
+                <p>遇到 &lt;|im_end|&gt; 标记，文本已经全部处理完。输出完整码本序列交给 DAC 编解码器！</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-typing-m2" style="display:none">
+            <div class="chat-avatar" id="chat-module2-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条消息</button>
+            <button class="btn chat-all-btn">播放全部</button>
+            <button class="btn chat-reset-btn">重播</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: 代码翻译 - DualAR 模型初始化 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码直译：Dual-AR 模型结构</h2>
+
+        <p>来看看两个 Transformer 是如何在代码中被定义的。注意看「慢速」和「快速」部分是如何分工的：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">Python</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">DualARTransformer</span>(BaseTransformer):</span>
+<span class="code-line">  <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, config):</span>
+<span class="code-line">    <span class="code-comment"># 继承：慢速 Transformer（32 层）</span></span>
+<span class="code-line">    <span class="code-function">super</span>().<span class="code-function">__init__</span>(config)</span>
+<span class="code-line">    <span class="code-comment"># 快速 Transformer（4 层）</span></span>
+<span class="code-line">    self.fast_embeddings = nn.<span class="code-function">Embedding</span>(</span>
+<span class="code-line">      config.codebook_size, config.fast_dim)</span>
+<span class="code-line">    self.fast_layers = nn.<span class="code-function">ModuleList</span>(</span>
+<span class="code-line">      TransformerBlock(config_fast)</span>
+<span class="code-line">      <span class="code-keyword">for</span> _ <span class="code-keyword">in</span> <span class="code-function">range</span>(config.n_fast_layer))</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">定义双自回归 Transformer 类，继承基础模型。</p>
+              <p class="tl">构造函数接收配置参数。</p>
+              <p class="tl">调用父类构造——创建 32 层「慢速」Transformer。</p>
+              <p class="tl">这行是注释，说明下面是快速部分。</p>
+              <p class="tl">创建快速部分的词嵌入层。</p>
+              <p class="tl">嵌入维度等于码本大小（如 160）映射到快速模型的维度。</p>
+              <p class="tl">创建快速 Transformer 的层列表。</p>
+              <p class="tl">每一层都是独立的 TransformerBlock，使用精简配置。</p>
+              <p class="tl">共创建 n_fast_layer 层（默认 4 层）。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: 交互式架构图 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">交互式架构图</h2>
+
+        <p>点击任意组件，查看它在系统中的角色：</p>
+
+        <div class="arch-diagram">
+          <div class="arch-zone arch-zone-browser">
+            <h4 class="arch-zone-label">慢速 Transformer（理解语义）</h4>
+            <div class="arch-component" data-desc="把文字 ID 转成高维向量——就像把单字翻译成含义丰富的「思维向量」。">
+              <div class="arch-icon">T</div>
+              <span>文本嵌入层</span>
+            </div>
+            <div class="arch-component" data-desc="把音频码本 ID 转成向量——让模型「看懂」参考音频的声音特征。">
+              <div class="arch-icon">VQ</div>
+              <span>码本嵌入层</span>
+            </div>
+            <div class="arch-component" data-desc="32 层自注意力网络——逐层提取文本的深层语义，从字面意思到情感色彩。这是模型最重的部分。">
+              <div class="arch-icon">32x</div>
+              <span>Transformer 层</span>
+            </div>
+            <div class="arch-component" data-desc="输出一个语义 Token——告诉快速模型「这个位置应该发什么音」。">
+              <div class="arch-icon">O</div>
+              <span>语义 Token 输出</span>
+            </div>
+          </div>
+          <div class="arch-zone arch-zone-external">
+            <h4 class="arch-zone-label">快速 Transformer（生成音频细节）</h4>
+            <div class="arch-component" data-desc="接收慢速模型输出的语义 Token，准备精细解码。">
+              <div class="arch-icon">E</div>
+              <span>快速嵌入层</span>
+            </div>
+            <div class="arch-component" data-desc="4 层轻量注意力网络——根据语义 Token 快速预测 4 层码本的精确值。">
+              <div class="arch-icon">4x</div>
+              <span>快速 Transformer 层</span>
+            </div>
+            <div class="arch-component" data-desc="输出 4 层码本值（每层 0-159）——这就是音频的「数字蓝图」，DAC 编解码器会把它还原成真实声音。">
+              <div class="arch-icon">C</div>
+              <span>码本输出（4 层）</span>
+            </div>
+          </div>
+          <div class="arch-description" id="arch-desc">点击上方任意组件查看详细说明</div>
+        </div>
+      </section>
+
+      <!-- Screen 5: 测验 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！慢速 Transformer 有 32 层，负责全局语义理解；快速 Transformer 只有 4 层，负责根据语义快速生成音频细节码本。"
+               data-explanation-wrong="记住这个比喻：慢速 Transformer 是「指挥家」，有 32 层，负责全局理解；快速 Transformer 是「演奏家」，只有 4 层，负责快速执行。">
+            <h3 class="quiz-question">慢速 Transformer 和快速 Transformer 分别有多少层？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>都是 16 层，但参数量不同</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>慢速 32 层（全局语义），快速 4 层（精细生成）</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>慢速 4 层，快速 32 层——快模型承担主要工作</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！RAS（Repetition Aware Sampling，重复感知采样）是一个滑动窗口机制，检测模型是否陷入了重复循环。如果发现重复，就用高温采样打破循环。"
+               data-explanation-wrong="在对话动画中，快速 Transformer 提到了「RAS 算法检查重复」。RAS 是 Repetition Aware Sampling（重复感知采样），它用一个滑动窗口检测重复。">
+            <h3 class="quiz-question">在推理过程中，什么机制防止模型陷入重复循环？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>随机打乱输出顺序</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>强制每隔 10 个 Token 就切换音调</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>RAS 重复感知采样——检测到重复时自动用高温采样打破循环</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重新作答</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<!-- ==================== MODULE 3: 从文本到声波——推理流水线 ==================== -->
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">从文本到声波：推理流水线</h1>
+      <p class="module-subtitle">追踪一段文字从输入到变成声音的完整旅程</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: 推理概览 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">比喻：一条汽车生产线</h2>
+
+        <p>把 Fish Speech 的推理过程想象成一条汽车生产线。原材料（文字）从一端进去，成品（音频）从另一端出来。中间经过多个工位，每个工位负责一道工序：</p>
+
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>铸造原料：对话构建（Conversation）</strong>
+              <p>把用户输入的文字包装成「对话消息」格式——加上 system 指令、user 消息标记。就像给原材料贴上工序标签。</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>冲压成型：分词编码（Tokenize）</strong>
+              <p>把对话文本用
+                <span class="term" data-definition="分词器（Tokenizer）负责把连续的文字切成一个个小单元（Token），每个 Token 对应一个数字 ID。就像把一段话切成一个个词语，然后给每个词语编号。">分词器</span>
+                转成数字 ID 序列。每个汉字或标点变成一个数字。
+              </p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>核心加工：模型生成（Generate）</strong>
+              <p>Dual-AR 模型逐个生成
+                <span class="term" data-definition="语义 Token 是模型内部用来表示「这个位置应该发什么音」的数字。每个语义 Token 包含音素、音调、时长等信息。可以理解为「音频的数字蓝图」。">语义 Token</span>
+                ，每个 Token 经快速模型扩展成 4 层码本。直到遇到结束标记。
+              </p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>组装出厂：音频解码（DAC Decode）</strong>
+              <p>4 层码本交给 DAC 编解码器，还原成真实的声波数据，保存为 WAV 文件。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: 代码翻译 - generate 函数核心 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码直译：生成循环的核心</h2>
+
+        <p>这是推理过程中最关键的循环。它一步步生成 Token，直到文本全部转为音频蓝图：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">Python</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">for</span> i <span class="code-keyword">in</span> <span class="code-function">range</span>(num_new_tokens):</span>
+<span class="code-line">  next_token = <span class="code-function">decode_one_token</span>(</span>
+<span class="code-line">    model=model,</span>
+<span class="code-line">    x=cur_token,</span>
+<span class="code-line">    input_pos=input_pos,</span>
+<span class="code-line">    temperature=temperature,</span>
+<span class="code-line">    top_p=top_p,</span>
+<span class="code-line">  ).<span class="code-function">clone</span>()</span>
+<span class="code-line">  input_pos += <span class="code-number">1</span></span>
+<span class="code-line">  previous_tokens = previous_tokens.<span class="code-function">roll</span>(<span class="code-number">-1</span>)</span>
+<span class="code-line">  new_tokens.<span class="code-function">append</span>(next_token)</span>
+<span class="code-line">  <span class="code-keyword">if</span> cur_token == im_end_id:</span>
+<span class="code-line">    <span class="code-keyword">break</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">循环最多 num_new_tokens 次（设置上限防死循环）。</p>
+              <p class="tl">调用核心函数，用模型生成下一个 Token。</p>
+              <p class="tl">传入当前模型和当前 Token。</p>
+              <p class="tl">传入当前位置（告诉模型「我们走到第几步了」）。</p>
+              <p class="tl">温度参数控制随机性——越高越有创意，越低越保守。</p>
+              <p class="tl">Top-P 参数控制采样范围——只考虑概率前 90% 的候选。</p>
+              <p class="tl">克隆结果，避免引用问题。</p>
+              <p class="tl">位置指针前进一位——准备生成下一个。</p>
+              <p class="tl">滑动窗口左移一位——为 RAS 重复检测做准备。</p>
+              <p class="tl">收集所有生成的 Token。</p>
+              <p class="tl">如果遇到「结束」标记……</p>
+              <p class="tl">跳出循环，生成完毕！</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Message Flow 动画 - 推理流程 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">消息流动画：一次完整的推理过程</h2>
+
+        <p>点击「下一步」，跟着数据走完从文字到声音的全过程：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-m-actor-1","label":"用户输入：今天天气真好"},
+          {"highlight":"flow-m-actor-1","label":"构造 Conversation：添加 system 指令 + user 消息","packet":true,"from":"m-actor-1","to":"m-actor-2"},
+          {"highlight":"flow-m-actor-2","label":"分词器编码：每个字转成数字 ID（如 [8721, 3456, ...]）"},
+          {"highlight":"flow-m-actor-2","label":"构建 semantic_logit_bias：只允许输出语义 Token 或结束符"},
+          {"highlight":"flow-m-actor-3","label":"Dual-AR 模型开始逐 Token 生成——慢速模型输出语义 ID","packet":true,"from":"m-actor-2","to":"m-actor-3"},
+          {"highlight":"flow-m-actor-3","label":"快速模型将每个语义 ID 扩展为 4 层码本值"},
+          {"highlight":"flow-m-actor-3","label":"RAS 检测重复，遇到 <|im_end|> 停止生成"},
+          {"highlight":"flow-m-actor-4","label":"DAC 编解码器将码本序列还原为声波","packet":true,"from":"m-actor-3","to":"m-actor-4"},
+          {"highlight":"flow-m-actor-4","label":"保存为 WAV 文件——用户听到了合成语音！"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-m-actor-1">
+              <div class="flow-actor-icon">U</div>
+              <span>用户输入</span>
+            </div>
+            <div class="flow-actor" id="flow-m-actor-2">
+              <div class="flow-actor-icon">Tk</div>
+              <span>分词编码</span>
+            </div>
+            <div class="flow-actor" id="flow-m-actor-3">
+              <div class="flow-actor-icon">AR</div>
+              <span>Dual-AR</span>
+            </div>
+            <div class="flow-actor" id="flow-m-actor-4">
+              <div class="flow-actor-icon">DAC</div>
+              <span>音频输出</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-m-packet"></div>
+          <div class="flow-step-label" id="flow-m-label">点击「下一步」开始动画</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重播</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: 采样参数讲解 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">三大调音旋钮：Temperature / Top-P / Top-K</h2>
+
+        <p>生成过程中有三个关键参数控制输出质量。它们就像调音台上的旋钮：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🌡️</div>
+            <h4 class="pattern-title">Temperature（温度）</h4>
+            <p class="pattern-desc">默认 1.0。值越高，输出越「有创意」（随机性强）；值越低，越「保守」（倾向高概率选择）。类比：温度高了水会沸腾（混乱），低了会结冰（固定）。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">📊</div>
+            <h4 class="pattern-title">Top-P（核采样）</h4>
+            <p class="pattern-desc">默认 0.9。只从概率累计前 90% 的候选中选——自动过滤掉「不太可能」的选项。类比：考试只从前 90% 常考题里出题。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🎯</div>
+            <h4 class="pattern-title">Top-K</h4>
+            <p class="pattern-desc">默认 30。只考虑概率最高的前 30 个候选。类比：菜单上有 100 道菜，你只从前 30 道最热门的里选。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: 代码翻译 - logits_to_probs -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码直译：采样算法</h2>
+
+        <p>这三个参数在代码中是如何协同工作的？看看核心采样函数：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">Python</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">logits_to_probs</span>(logits, temperature, top_p, top_k):</span>
+<span class="code-line">  sorted_logits, sorted_indices = torch.<span class="code-function">sort</span>(</span>
+<span class="code-line">    logits, descending=<span class="code-keyword">True</span>)</span>
+<span class="code-line">  cum_probs = torch.<span class="code-function">cumsum</span>(</span>
+<span class="code-line">    F.<span class="code-function">softmax</span>(sorted_logits, dim=<span class="code-number">-1</span>), dim=<span class="code-number">-1</span>)</span>
+<span class="code-line">  top_k_mask = indices >= top_k</span>
+<span class="code-line">  sorted_to_remove = (cum_probs > top_p) | top_k_mask</span>
+<span class="code-line">  logits = logits / torch.<span class="code-function">clip</span>(</span>
+<span class="code-line">    temperature, min=<span class="code-number">1e-5</span>)</span>
+<span class="code-line">  probs = F.<span class="code-function">softmax</span>(logits, dim=<span class="code-number">-1</span>)</span>
+<span class="code-line">  <span class="code-keyword">return</span> probs</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">定义采样函数，接收原始预测分数和三个参数。</p>
+              <p class="tl">把所有候选按概率从高到低排序。</p>
+              <p class="tl">排序的具体实现。</p>
+              <p class="tl">计算累计概率——从最高到最低逐步累加。</p>
+              <p class="tl">Softmax 把原始分数转成 0-1 的概率值。</p>
+              <p class="tl">标记排在 Top-K 之外的候选。</p>
+              <p class="tl">标记累计概率超过 Top-P 的候选——它们被排除。</p>
+              <p class="tl">除以温度——温度越高，概率分布越平坦（更随机）。</p>
+              <p class="tl">防止温度为 0 导致除零错误。</p>
+              <p class="tl">最终转换为概率分布（所有值加起来等于 1）。</p>
+              <p class="tl">返回概率——模型将从中随机选一个 Token。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 6: 测验 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+
+        <div class="quiz-container" id="quiz-module3">
+
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">场景题</span>
+              <p>你正在用 Fish Speech 合成一段有声读物。合成出来的声音太「跳跃」，经常在句子中间突然变调。你会怎么调整参数？</p>
+            </div>
+            <div class="quiz-question-block"
+                 data-correct="option-b"
+                 data-explanation-right="正确！降低 temperature 可以让输出更稳定和保守，减少「创意」带来的不连贯。从 1.0 降到 0.7 是常见的稳定化手段。"
+                 data-explanation-wrong="想一想：声音「跳跃」意味着模型太随机了。要减少随机性，应该降低哪个参数？Temperature 控制随机性——降低它可以让输出更稳定。">
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>提高 temperature 到 1.5，让模型更大胆</span>
+                </button>
+                <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>降低 temperature 到 0.7，让输出更稳定</span>
+                </button>
+                <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>把 top_k 设为 5，减少候选数量</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="没错！semantic_logit_bias 把所有非语义 Token 的概率设为负无穷（-inf），只保留语义 Token 和 <|im_end|> 的概率为 0。这样模型就不会输出无意义的 Token。"
+               data-explanation-wrong="回顾代码中的 generate 函数：它创建了一个全为 -inf 的 bias 向量，只在语义 Token 和 <|im_end|> 的位置设为 0。这是一种「强制约束」技巧。">
+            <h3 class="quiz-question">semantic_logit_bias 的作用是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>强制模型只输出语义 Token 或结束标记，其他全部屏蔽</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>给语义 Token 增加额外权重，提高它们被选中的概率</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>检测并修正输出中的语义错误</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重新作答</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<!-- ==================== MODULE 4: 音频编解码——VQ 码本世界 ==================== -->
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">音频编解码：VQ 码本世界</h1>
+      <p class="module-subtitle">声音如何被压缩成数字，又如何从数字还原成声音</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: 类比引入 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">比喻：调色板与画作</h2>
+
+        <p>想象一位画家有一套特殊的调色板。这个调色板不是无限的——它只有 160 种颜色，每种颜色有一个编号（0-159）。画家的画作（声音）需要被「翻译」成这些编号的组合。</p>
+
+        <p>这就是
+          <span class="term" data-definition="VQ 是 Vector Quantization（向量量化）的缩写。它把连续的数据（如声波）映射到有限的离散码本中。就像把无限多的颜色映射到 160 种标准色——虽然不完美，但足够实用。">向量量化（VQ）</span>
+          的核心思想。Fish Speech 用 4 层码本（4 个调色板叠加），每层 160 个「颜色」，来表示音频的方方面面：
+        </p>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">码本 0</code>
+            <span class="badge-desc">基础音色——声音的「底色」，区分不同人的嗓音</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">码本 1</code>
+            <span class="badge-desc">音高变化——声音的「旋律」，语句中的抑扬顿挫</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">码本 2</code>
+            <span class="badge-desc">时长节奏——声音的「节拍」，决定每个音拉多长</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">码本 3</code>
+            <span class="badge-desc">细节修饰——声音的「质感」，呼吸声、唇齿音等微妙特征</span>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">!</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键洞察</strong>
+            <p>4 层码本形成了一种「残差编码」——每层编码上一层没能表达的信息。就像你先画大致轮廓（码本 0），再添加阴影（码本 1），然后是细节（码本 2），最后是高光（码本 3）。层层递进，越来越精细。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: 代码翻译 - VQManager -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码直译：VQ 编码与解码</h2>
+
+        <p>VQManager 是管理「编码→解码」全过程的管家。看看它如何把参考音频压缩成码本，又如何从码本还原声音：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">Python</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">VQManager</span>:</span>
+<span class="code-line">  <span class="code-keyword">def</span> <span class="code-function">encode_reference</span>(self, audio, enable_ref):</span>
+<span class="code-line">    audios = torch.<span class="code-function">from_numpy</span>(audio)</span>
+<span class="code-line">    audio_lengths = torch.<span class="code-function">tensor</span>([audios.shape[<span class="code-number">2</span>]])</span>
+<span class="code-line">    prompt_tokens = self.decoder_model.<span class="code-function">encode</span>(</span>
+<span class="code-line">      audios, audio_lengths)[<span class="code-number">0</span>][<span class="code-number">0</span>]</span>
+<span class="code-line">    <span class="code-keyword">return</span> prompt_tokens</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">def</span> <span class="code-function">decode_vq_tokens</span>(self, codes):</span>
+<span class="code-line">    <span class="code-keyword">return</span> self.decoder_model.<span class="code-function">from_indices</span>(</span>
+<span class="code-line">      codes[<span class="code-keyword">None</span>])[<span class="code-number">0</span>].<span class="code-function">squeeze</span>()</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">VQManager 类——音频编解码的「大管家」。</p>
+              <p class="tl">encode_reference：把参考音频压缩成码本。</p>
+              <p class="tl">把 NumPy 音频数据转成 PyTorch 张量。</p>
+              <p class="tl">记录音频长度信息。</p>
+              <p class="tl">调用 DAC 模型的 encode 方法——核心压缩！</p>
+              <p class="tl">取出第一个 batch 的第一个码本结果。</p>
+              <p class="tl">返回压缩后的码本 Token（4 层，每层是 0-159 的数字）。</p>
+              <p class="tl">空行分隔两个方法。</p>
+              <p class="tl">decode_vq_tokens：把码本还原成声音。</p>
+              <p class="tl">调用 from_indices——把码本数字映射回声波。</p>
+              <p class="tl">去掉 batch 维度，返回单条音频。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: 拖拽匹配 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">互动匹配：码本层次与功能</h2>
+
+        <p>把右侧的码本层次拖到对应的功能描述上：</p>
+
+        <div class="dnd-container">
+          <div class="dnd-chips">
+            <div class="dnd-chip" draggable="true" data-answer="codebook-0">码本 0（基础音色）</div>
+            <div class="dnd-chip" draggable="true" data-answer="codebook-1">码本 1（音高变化）</div>
+            <div class="dnd-chip" draggable="true" data-answer="codebook-2">码本 2（时长节奏）</div>
+            <div class="dnd-chip" draggable="true" data-answer="codebook-3">码本 3（细节修饰）</div>
+          </div>
+          <div class="dnd-zones">
+            <div class="dnd-zone" data-correct="codebook-3">
+              <p class="dnd-zone-label">呼吸声、唇齿音、气流声等微妙特征——「声音质感」</p>
+              <div class="dnd-zone-target">拖放到这里</div>
+            </div>
+            <div class="dnd-zone" data-correct="codebook-0">
+              <p class="dnd-zone-label">区分不同人的嗓音——张三和李四的「底色」不同</p>
+              <div class="dnd-zone-target">拖放到这里</div>
+            </div>
+            <div class="dnd-zone" data-correct="codebook-2">
+              <p class="dnd-zone-label">每个音节拉多长、停顿多短——「说话节奏」</p>
+              <div class="dnd-zone-target">拖放到这里</div>
+            </div>
+            <div class="dnd-zone" data-correct="codebook-1">
+              <p class="dnd-zone-label">语句中的抑扬顿挫——疑问句升调、陈述句降调</p>
+              <div class="dnd-zone-target">拖放到这里</div>
+            </div>
+          </div>
+          <button class="btn" onclick="checkDnD(this.closest('.dnd-container').id || '')">检查匹配</button>
+          <button class="btn" onclick="resetDnD(this.closest('.dnd-container').id || '')">重试</button>
+        </div>
+      </section>
+
+      <!-- Screen 4: DAC 架构讲解 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">DAC 编解码器：声音的压缩与还原</h2>
+
+        <p>
+          <span class="term" data-definition="DAC 是 Descript Audio Codec 的缩写，一种先进的音频压缩模型。它把原始声波压缩成离散的数字码本，保留了人类听觉最重要的特征，同时去掉了冗余信息。可以理解为一个「超级音频压缩器」。">DAC（Descript Audio Codec）</span>
+          是 Fish Speech 使用的音频编解码器。它的工作就像 JPEG 压缩图片——有损但足够好：
+        </p>
+
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <p>原始声波（连续信号）</p>
+          </div>
+          <div class="flow-arrow">-></div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <p>编码器提取特征</p>
+          </div>
+          <div class="flow-arrow">-></div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <p>RVQ 量化为 4 层码本</p>
+          </div>
+          <div class="flow-arrow">-></div>
+          <div class="flow-step">
+            <div class="flow-step-num">4</div>
+            <p>解码器还原声波</p>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">Python</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">decode_to_audio</span>(codes, codec):</span>
+<span class="code-line">  <span class="code-comment"># codes: (4, T) 4 层码本，每层 T 个时间步</span></span>
+<span class="code-line">  audio = codec.<span class="code-function">from_indices</span>(</span>
+<span class="code-line">    codes[<span class="code-keyword">None</span>])  <span class="code-comment"># 加 batch 维度</span></span>
+<span class="code-line">  <span class="code-keyword">return</span> audio[<span class="code-number">0</span>, <span class="code-number">0</span>]  <span class="code-comment"># 取出单声道</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">定义解码函数：从码本还原音频。</p>
+              <p class="tl">输入是 4 层码本，每层 T 个时间步的数字序列。</p>
+              <p class="tl">调用 codec 的 from_indices 方法开始还原。</p>
+              <p class="tl">加上 batch 维度（模型需要这种格式）。</p>
+              <p class="tl">取出第一条、第一个声道——返回纯净的单声道音频。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: 测验 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+
+        <div class="quiz-container" id="quiz-module4">
+
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">场景题</span>
+              <p>你想用 Fish Speech 克隆自己的声音。你提供了一段 5 秒的参考音频。VQManager 会怎么处理这段音频？</p>
+            </div>
+            <div class="quiz-question-block"
+                 data-correct="option-b"
+                 data-explanation-right="完全正确！encode_reference 方法会把你的 5 秒音频通过 DAC 编码器压缩成 4 层码本（4 个数字序列），每个时间步 4 个 0-159 的数字。这些数字完整记录了你的音色特征。"
+                 data-explanation-wrong="回顾 VQManager 的 encode_reference 方法：它调用 decoder_model.encode 把音频压缩成 prompt_tokens——一个 4 层的码本矩阵。这是「编码」过程，不是直接存储原始数据。">
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>直接存储原始音频的波形数据</span>
+                </button>
+                <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>通过 DAC 编码器压缩成 4 层码本（4 个数字序列）</span>
+                </button>
+                <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>提取 MFCC 特征向量作为声音指纹</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="没错！残差编码意味着每层码本编码上一层没能表达的信息。第一层记录基础音色，第二层在基础上补充音高变化，第三层再补充时长，第四层添加细节。层层递进。"
+               data-explanation-wrong="理解残差编码的关键：每层不是独立编码不同特征，而是在前一层的基础上补充缺失的细节。就像画画——先画轮廓，再加阴影，再添细节。">
+            <h3 class="quiz-question">「残差编码」是什么意思？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>每层码本独立编码不同的声音特征，互不影响</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>只保留最后一层码本，前面的都是冗余</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>每层编码上一层没能表达的剩余信息——层层递进</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重新作答</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<!-- ==================== MODULE 5: 对话式 TTS 与工程实战 ==================== -->
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">对话式 TTS 与工程实战</h1>
+      <p class="module-subtitle">多角色对话、声音克隆、API 部署——从实验室到产品</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: 对话系统 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">比喻：一部广播剧的制作</h2>
+
+        <p>想象你是一位广播剧导演。剧本上有多个角色，每个角色有自己的台词和声音。Fish Speech 的对话系统（Conversation）就像你的剧本管理系统：</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">S</div>
+            <div>
+              <strong>System 消息（导演指示）</strong>
+              <p>告诉模型全局规则——「把下面的文字转成语音」或「参考这个声音来生成」。这是给 AI 的「导演注释」。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">U</div>
+            <div>
+              <strong>User 消息（演员台词）</strong>
+              <p>要被合成的实际文字内容。可以是单个说话者的台词，也可以用 <code>&lt;|speaker:0|&gt;</code> 标签标注多个说话者。</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">A</div>
+            <div>
+              <strong>Assistant 消息（生成的声音）</strong>
+              <p>模型生成的音频码本。上一轮生成的音频会成为下一轮的「记忆」，保持声音连贯性。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: 代码翻译 - Conversation 构建 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码直译：多角色对话构建</h2>
+
+        <p>这段代码展示了如何构建一个带声音克隆的多轮对话。注意 system 消息如何包含参考音频：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">Python</span>
+            <pre><code>
+<span class="code-line">base_conversation = Conversation()</span>
+<span class="code-line">system_parts = [</span>
+<span class="code-line">  TextPart(text=<span class="code-string">"convert text to speech"</span>),</span>
+<span class="code-line">  TextPart(text=reference_text),</span>
+<span class="code-line">  VQPart(codes=all_reference_codes),</span>
+<span class="code-line">]</span>
+<span class="code-line">base_conversation.<span class="code-function">append</span>(</span>
+<span class="code-line">  Message(role=<span class="code-string">"system"</span>,</span>
+<span class="code-line">    parts=system_parts,</span>
+<span class="code-line">    modality=<span class="code-string">"voice"</span>))</span>
+<span class="code-line">base_conversation.<span class="code-function">append</span>(</span>
+<span class="code-line">  Message(role=<span class="code-string">"user"</span>,</span>
+<span class="code-line">    parts=[TextPart(text=batch_text)]))</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">创建一个空对话——就像拿了一张空白剧本。</p>
+              <p class="tl">准备 system 消息的各个部分。</p>
+              <p class="tl">文字指令：「把文字转成语音」。</p>
+              <p class="tl">参考文本：你要克隆的声音说过的话。</p>
+              <p class="tl">参考音频码本：从你的声音中提取的数字指纹。</p>
+              <p class="tl">把 system 消息添加到对话中。</p>
+              <p class="tl">角色是 system（导演指示）。</p>
+              <p class="tl">包含上面准备的三部分内容。</p>
+              <p class="tl">模式设为 voice（语音生成模式）。</p>
+              <p class="tl">添加用户消息——要合成的文字。</p>
+              <p class="tl">角色是 user（演员台词）。</p>
+              <p class="tl">内容就是这一批要转成声音的文字。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: 多说话者标签 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">多角色标记系统</h2>
+
+        <p>Fish Speech 用特殊标签实现多角色对话。看看文本中如何标注不同说话者：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">输入文本</span>
+            <pre><code>
+<span class="code-line">&lt;|speaker:0|&gt;你好，欢迎收听今天的节目。</span>
+<span class="code-line">&lt;|speaker:1|&gt;谢谢！今天我们要聊的话题很有趣。</span>
+<span class="code-line">&lt;|speaker:0|&gt;没错，让我们开始吧！</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">说话者 0（如主持人）：说欢迎语。</p>
+              <p class="tl">说话者 1（如嘉宾）：回应并引出话题。</p>
+              <p class="tl">说话者 0：回应并推进对话。</p>
+            </div>
+          </div>
+        </div>
+
+        <p>代码中的 <code>split_text_by_speaker</code> 函数自动识别这些标签，把长文本拆成多个角色轮次：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">Python</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">split_text_by_speaker</span>(text):</span>
+<span class="code-line">  pattern = <span class="code-string">r"(&lt;\|speaker:\d+\|&gt;)"</span></span>
+<span class="code-line">  parts = re.<span class="code-function">split</span>(pattern, text)</span>
+<span class="code-line">  turns = []</span>
+<span class="code-line">  <span class="code-keyword">while</span> i &lt; <span class="code-function">len</span>(parts):</span>
+<span class="code-line">    <span class="code-keyword">if</span> re.<span class="code-function">match</span>(pattern, part):</span>
+<span class="code-line">      turn = part + parts[i+<span class="code-number">1</span>]</span>
+<span class="code-line">      turns.<span class="code-function">append</span>(turn)</span>
+<span class="code-line">  <span class="code-keyword">return</span> turns</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">定义函数：按说话者标签拆分文本。</p>
+              <p class="tl">正则表达式匹配 &lt;|speaker:数字|&gt; 格式的标签。</p>
+              <p class="tl">用正则把文本按标签切开。</p>
+              <p class="tl">准备收集各轮对话。</p>
+              <p class="tl">遍历切好的片段。</p>
+              <p class="tl">如果当前片段是说话者标签……</p>
+              <p class="tl">把标签和后面的文字拼成一条完整台词。</p>
+              <p class="tl">添加到轮次列表。</p>
+              <p class="tl">返回所有说话者的轮次列表。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Tokenizer 特殊标记 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Tokenizer：语音世界的「字典」</h2>
+
+        <p>
+          <span class="term" data-definition="分词器（Tokenizer）是 NLP 系统的基础组件。它定义了「文字如何变成数字」的映射规则。Fish Speech 的 FishTokenizer 除了处理普通文字，还定义了大量语音相关的特殊标记。">FishTokenizer</span>
+          定义了整个系统使用的特殊标记。这些标记是模型内部沟通的「暗号」：
+        </p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">&lt;|&gt;</div>
+            <h4 class="pattern-title">消息边界标记</h4>
+            <p class="pattern-desc"><code>&lt;|im_start|&gt;</code> 和 <code>&lt;|im_end|&gt;</code> 标记每条消息的开始和结束——像信封的封口。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">S</div>
+            <h4 class="pattern-title">语义 Token 空间</h4>
+            <p class="pattern-desc"><code>&lt;|semantic:0|&gt;</code> 到 <code>&lt;|semantic:4095|&gt;</code> 共 4096 个标记——这是慢速 Transformer 的输出空间。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">M</div>
+            <h4 class="pattern-title">模态标记</h4>
+            <p class="pattern-desc"><code>&lt;|text|&gt;</code> 纯文字模式、<code>&lt;|voice|&gt;</code> 语音模式、<code>&lt;|interleave|&gt;</code> 交错模式——告诉模型用什么方式工作。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">A</div>
+            <h4 class="pattern-title">音频标记</h4>
+            <p class="pattern-desc"><code>&lt;|audio_start|&gt;</code> 和 <code>&lt;|audio_end|&gt;</code> 标记音频区域的边界——像书签标记哪一页有插图。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Group Chat - 部署场景 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">对话动画：API 服务器如何工作</h2>
+
+        <p>在真实部署中，多个组件协同工作。点击「下一条消息」看完整的服务流程：</p>
+
+        <div class="chat-window" id="chat-module5">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="client" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">C</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">客户端</span>
+                <p>POST /v1/tts — 发送文本「今天天气真好」+ 参考音频文件</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="server" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">S</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">API 服务器</span>
+                <p>收到请求。正在解析参数：text="今天天气真好", reference_audio=voice_ref.wav</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="vq" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">V</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">VQ 编码器</span>
+                <p>参考音频已编码为 VQ 码本：shape=(4, 86)，共 86 帧参考数据。音色指纹已提取！</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="model" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">M</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">Dual-AR 模型</span>
+                <p>开始生成……温度 0.7，Top-P 0.9。已生成 512 个语义 Token，解码为 4 层码本。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="dac" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">D</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">DAC 解码器</span>
+                <p>码本已还原为声波数据，采样率 44100Hz。生成 3.2 秒音频。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="5" data-sender="server" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">S</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">API 服务器</span>
+                <p>200 OK — 返回 WAV 音频数据。总耗时 1.8 秒。Content-Type: audio/wav</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-typing-m5" style="display:none">
+            <div class="chat-avatar" id="chat-module5-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条消息</button>
+            <button class="btn chat-all-btn">播放全部</button>
+            <button class="btn chat-reset-btn">重播</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 6: Bug Challenge -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">找 Bug 挑战</h2>
+
+        <p>下面这段代码有一个会导致生成结果严重重复的 Bug。点击你认为有问题的那一行：</p>
+
+        <div class="bug-challenge">
+          <h3>找出这段推理代码中的 Bug：</h3>
+          <div class="bug-code">
+            <div class="bug-line" data-line="1" onclick="checkBugLine(this, false)">
+              <span class="line-num">1</span>
+              <code><span class="code-keyword">for</span> i <span class="code-keyword">in</span> <span class="code-function">range</span>(num_new_tokens):</code>
+            </div>
+            <div class="bug-line" data-line="2" onclick="checkBugLine(this, false)">
+              <span class="line-num">2</span>
+              <code>  next_token = <span class="code-function">decode_one_token</span>(model, cur_token, input_pos)</code>
+            </div>
+            <div class="bug-line bug-target" data-line="3" onclick="checkBugLine(this, true)" data-explanation="找到了！这里没有把 next_token 传给 previous_tokens 进行重复检测。没有 RAS（重复感知采样）的保护，模型很容易陷入重复循环——不断输出同一个 Token。正确做法是更新滑动窗口：previous_tokens = previous_tokens.roll(-1); previous_tokens[:, -1] = next_token" data-hint="想想什么机制可以防止重复生成……看看上一轮生成的 Token 有没有被记录下来？">
+              <span class="line-num">3</span>
+              <code>  new_tokens.<span class="code-function">append</span>(next_token)</code>
+            </div>
+            <div class="bug-line" data-line="4" onclick="checkBugLine(this, false)">
+              <span class="line-num">4</span>
+              <code>  input_pos += <span class="code-number">1</span></code>
+            </div>
+            <div class="bug-line" data-line="5" onclick="checkBugLine(this, false)">
+              <span class="line-num">5</span>
+              <code>  <span class="code-keyword">if</span> cur_token == im_end_id: <span class="code-keyword">break</span></code>
+            </div>
+          </div>
+          <div class="bug-feedback" id="bug-feedback-m5"></div>
+        </div>
+      </section>
+
+      <!-- Screen 7: 长文本分块 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">工程技巧：长文本分块生成</h2>
+
+        <p>真实场景中，文本可能很长（如一整篇文章）。Fish Speech 用智能分块策略处理：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">Python</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">group_turns_into_batches</span>(</span>
+<span class="code-line">    turns, max_speakers=<span class="code-number">3</span>, max_bytes=<span class="code-number">300</span>):</span>
+<span class="code-line">  <span class="code-keyword">for</span> turn <span class="code-keyword">in</span> turns:</span>
+<span class="code-line">    would_exceed = (</span>
+<span class="code-line">      len(batch) >= max_speakers</span>
+<span class="code-line">      <span class="code-keyword">or</span> cur_bytes + turn_bytes > max_bytes)</span>
+<span class="code-line">    <span class="code-keyword">if</span> would_exceed <span class="code-keyword">and</span> current_batch:</span>
+<span class="code-line">      batches.<span class="code-function">append</span>(current_batch)</span>
+<span class="code-line">      current_batch = [turn]</span>
+<span class="code-line">  <span class="code-keyword">return</span> batches</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">定义分块函数：把长对话拆成小块。</p>
+              <p class="tl">限制：每块最多 3 个说话者，最多 300 字节。</p>
+              <p class="tl">遍历每一轮对话。</p>
+              <p class="tl">检查是否超过限制：</p>
+              <p class="tl">说话者数量是否已达上限？</p>
+              <p class="tl">或者字节数是否超过限制？</p>
+              <p class="tl">如果超了，当前块结束。</p>
+              <p class="tl">保存当前块，开始新的一块。</p>
+              <p class="tl">新块从当前轮次开始。</p>
+              <p class="tl">返回所有分好块的结果。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">i</div>
+          <div class="callout-content">
+            <strong class="callout-title">为什么分块很重要？</strong>
+            <p>模型有最大序列长度限制（如 2048 Token）。超过限制就生成不了。分块策略保证了每一块都在模型能处理的范围内。同时，每块生成完后，结果会作为「历史记忆」加入下一块的输入——保持声音的连贯性。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 8: 最终测验 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">最终检验</h2>
+
+        <div class="quiz-container" id="quiz-module5">
+
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">场景题</span>
+              <p>你需要为一个播客应用生成一段 10 分钟的对话音频，包含 3 个说话者。你会如何设计调用方案？</p>
+            </div>
+            <div class="quiz-question-block"
+                 data-correct="option-b"
+                 data-explanation-right="完美方案！用 speaker 标签标注 3 个说话者，让 group_turns_into_batches 自动分块，每块生成完把结果加入下一轮的上下文，保持声音连贯。这正是 generate_long 函数的实现方式。"
+                 data-explanation-wrong="考虑 Fish Speech 的实际能力：它原生支持多说话者（speaker 标签）和自动分块（group_turns_into_batches）。最合理的方式是利用这些内置功能，而不是手动拆分或逐字生成。">
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>逐字生成，每个字单独调用一次 API</span>
+                </button>
+                <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>用 speaker 标签标注角色，让系统自动分块生成，每块保留上下文</span>
+                </button>
+                <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>把全文一次性发送，让模型自己决定怎么处理</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="没错！VQPart（码本部分）携带参考音频的数字指纹。模型看到这些码本数字，就知道「这个声音应该听起来像谁」——这就是声音克隆的原理。"
+               data-explanation-wrong="思考一下 system 消息中三个部分的区别：TextPart 是文字指令和参考文本，VQPart 是音频的数字码本。哪个部分包含了声音特征？">
+            <h3 class="quiz-question">声音克隆时，参考音频通过什么方式传递给模型？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>通过 VQPart（码本部分）——把音频压缩成 4 层数字码本作为参考</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>通过 TextPart 描述音色特征（如「低沉、磁性」）</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>直接把原始 WAV 文件拼接在文字后面</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！<|semantic:0|> 到 <|semantic:4095|> 定义了 4096 个语义 Token。慢速 Transformer 的输出就是这个范围内的数字 ID，代表「这个位置应该发什么音」的语义信息。"
+               data-explanation-wrong="回顾 tokenizer.py 中的定义：SEMANTIC_TOKENS 是从 <|semantic:0|> 到 <|semantic:4095|> 的标记列表。这些不是文字 Token，而是语音语义空间的 Token。">
+            <h3 class="quiz-question">Fish Speech 的语义 Token 空间有多大？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>160 个——跟码本大小一致</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>32000 个——跟文字词表大小一致</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>4096 个——独立的语音语义空间</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">重新作答</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>  </main>
+
+</body>
+</html>

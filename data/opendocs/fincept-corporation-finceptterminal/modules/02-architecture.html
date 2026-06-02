@@ -1,0 +1,347 @@
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 2: C++20 + Qt6 核心架构
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">C++20 + Qt6 核心架构</h1>
+      <p class="module-subtitle">深入理解 Screen/Service 分离、事件总线、Result&lt;T&gt; 和 Qt 信号/槽</p>
+    </header>
+
+    <!-- ── Screen 1: Screen/Service 分离模式 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">Screen/Service 分离：金融终端的"前后端"</h2>
+
+      <p>FinceptTerminal 中每个功能都遵循一个铁律：<strong>Screen 只管 UI，Service 只管数据</strong>。就像 Web 开发中的前后端分离——但它们跑在同一个 C++ 进程里，通过 Qt 的 <span class="term" data-definition="信号/槽（Signals/Slots）是 Qt 的核心通信机制。当一个事件发生时（如数据到达），对象 emit（发射）一个 signal；连接到这个 signal 的 slot（槽函数）会被自动调用。这是类型安全的观察者模式。">信号/槽</span> 机制通信。</p>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">🖥️</div>
+          <h4 class="pattern-title">Screen（屏幕）</h4>
+          <p class="pattern-desc">QWidget 子类，只负责渲染 UI。监听用户操作，发射 signal 请求服务；接收 service 的 signal 更新界面。零 HTTP 调用，零数据库访问。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">⚙️</div>
+          <h4 class="pattern-title">Service（服务）</h4>
+          <p class="pattern-desc">业务逻辑核心。接收 Screen 的请求 signal，调用 HttpClient/PythonRunner/Database 获取数据，处理完毕后发射 dataReady signal。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">🔌</div>
+          <h4 class="pattern-title">Signal/Slot 桥梁</h4>
+          <p class="pattern-desc">connect(screen, &Screen::requestQuote, service, &Service::onRequestQuote) —— 类型安全的连接，编译期检查参数匹配。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 2: 核心基础设施 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">核心基础设施：四个工具让代码更安全</h2>
+
+      <p>FinceptTerminal 的 <code>src/core/</code> 目录提供了四个关键工具——它们是整个项目的"基础设施层"，被所有 Screen 和 Service 使用：</p>
+
+      <div class="icon-rows animate-in">
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-accent-light); color: var(--color-accent);">R</div>
+          <div>
+            <strong>Result&lt;T&gt; 错误处理</strong>
+            <p>替代异常和错误码。函数返回 <code>Result&lt;Quote&gt;</code>——要么是成功的 Quote 数据，要么是错误信息。调用者必须处理两种情况，不会遗漏错误。</p>
+          </div>
+        </div>
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-info-light); color: var(--color-info);">E</div>
+          <div>
+            <strong>EventBus 事件总线</strong>
+            <p>跨模块通信的"广播站"。任何地方 <code>EventBus::publish("market_data_updated", data)</code> 发消息，所有订阅者自动收到。解耦模块依赖。</p>
+          </div>
+        </div>
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-success-light); color: var(--color-success);">L</div>
+          <div>
+            <strong>Logger 结构化日志</strong>
+            <p><code>LOG_INFO("markets", "Fetched " + count + " quotes")</code> ——统一格式、带标签、写入文件。调试生产问题时的第一工具。</p>
+          </div>
+        </div>
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-error-light); color: var(--color-error);">C</div>
+          <div>
+            <strong>AppConfig 配置管理</strong>
+            <p><code>AppConfig::api_base_url()</code> 获取 API 地址——没有魔法字符串（硬编码的 URL），所有常量集中管理。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 3: 代码翻译 — Result<T> 错误处理 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">代码翻译：Result&lt;T&gt; 让错误无处藏身</h2>
+
+      <p>传统 C++ 用返回码（-1 表示错误）或异常处理错误。FinceptTerminal 用 <span class="term" data-definition="Result&lt;T&gt; 是一种函数式错误处理模式。函数返回一个 Result 对象，它要么包含成功的值（T 类型），要么包含错误信息。调用者必须显式检查是成功还是失败，编译器会帮助确保不会遗漏错误处理。">Result&lt;T&gt;</span>——灵感来自 Rust 的 Result 类型。来看看它怎么工作：</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-comment">// Service 层返回 Result</span></span>
+<span class="code-line">Result&lt;Quote&gt; <span class="code-function">fetchQuote</span>(</span>
+<span class="code-line">  <span class="code-keyword">const</span> QString&amp; symbol) {</span>
+<span class="code-line">  <span class="code-keyword">auto</span> reply = http.<span class="code-function">get</span>(</span>
+<span class="code-line">    <span class="code-string">"/api/quote/"</span> + symbol);</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">if</span> (!reply.<span class="code-function">ok</span>) {</span>
+<span class="code-line">    <span class="code-keyword">return</span> Result&lt;Quote&gt;::<span class="code-function">err</span>(</span>
+<span class="code-line">      <span class="code-string">"HTTP "</span> + reply.status);</span>
+<span class="code-line">  }</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">auto</span> quote = Quote::<span class="code-function">fromJson</span>(</span>
+<span class="code-line">    reply.body);</span>
+<span class="code-line">  <span class="code-keyword">return</span> Result&lt;Quote&gt;::<span class="code-function">ok</span>(</span>
+<span class="code-line">    std::<span class="code-function">move</span>(quote));</span>
+<span class="code-line">}</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">注释：Service 层返回 Result 类型</p>
+            <p class="tl">函数签名：fetchQuote 接受股票代码，返回 Result&lt;Quote&gt;</p>
+            <p class="tl">通过 HttpClient 发送 GET 请求获取报价数据</p>
+            <p class="tl">如果 HTTP 请求失败（如网络错误、404）</p>
+            <p class="tl">返回错误 Result——包含错误描述，不包含 Quote 数据</p>
+            <p class="tl">如果请求成功，解析 JSON 为 Quote 对象</p>
+            <p class="tl">返回成功 Result——包含 Quote 数据，调用者可以安全使用</p>
+            <p class="tl">std::move 避免 Quote 数据的额外拷贝——零成本抽象</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">📖</div>
+        <div class="callout-content">
+          <strong class="callout-title">为什么不用 try/catch？</strong>
+          <p>C++ 异常在嵌入式和高性能场景中有性能争议。更重要的是，异常可以在任何地方被抛出、在任何地方被捕获——控制流不透明。Result&lt;T&gt; 让错误处理显式化：你看函数签名就知道它可能失败，必须处理错误才能拿到数据。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 4: 对话还原 — Screen 和 Service 如何协作 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">对话还原：MarketsScreen 和 MarketDataService 的协作</h2>
+
+      <p>当你点击 Markets 标签页时，Screen 和 Service 之间的"对话"如下。就像餐厅里顾客（Screen）和服务员（Service）的配合：</p>
+
+      <div class="chat-window" id="chat-module2">
+        <div class="chat-messages">
+          <div class="chat-message" data-msg="0" data-sender="screen" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-4)">屏</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-4)">MarketsScreen</span>
+              <p>用户点击了 Markets 标签！我发射信号 requestMarketData("AAPL", "NASDAQ")</p>
+            </div>
+          </div>
+          <div class="chat-message" data-msg="1" data-sender="service" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-2)">服</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-2)">MarketDataService</span>
+              <p>收到请求！先检查 SQLite 缓存——缓存未过期，直接返回。缓存过期了？走 HttpClient 获取新数据。</p>
+            </div>
+          </div>
+          <div class="chat-message" data-msg="2" data-sender="http" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-3)">网</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-3)">HttpClient</span>
+              <p>GET https://api.example.com/quote/AAPL —— 收到 200 OK，JSON 数据：{"price": 198.45, "change": +2.3%}</p>
+            </div>
+          </div>
+          <div class="chat-message" data-msg="3" data-sender="service" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-2)">服</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-2)">MarketDataService</span>
+              <p>JSON 解析成功！写入 SQLite 缓存（下次直接命中），发射 dataReady(Quote{symbol: "AAPL", price: 198.45})</p>
+            </div>
+          </div>
+          <div class="chat-message" data-msg="4" data-sender="screen" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-4)">屏</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-4)">MarketsScreen</span>
+              <p>收到 dataReady 信号！更新表格显示价格 $198.45，图表绘制走势线，状态栏显示"数据已更新"。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-typing" id="chat-module2-typing" style="display:none">
+          <div class="chat-avatar" id="chat-module2-typing-avatar">?</div>
+          <div class="chat-typing-dots">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+          </div>
+        </div>
+
+        <div class="chat-controls">
+          <button class="btn chat-next-btn">下一条消息</button>
+          <button class="btn chat-all-btn">播放全部</button>
+          <button class="btn chat-reset-btn">重新播放</button>
+          <span class="chat-progress"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 5: 线程模型 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">线程模型：UI 线程只有一个</h2>
+
+      <p>Qt 有一个严格的规则：<strong>UI 操作只能在主线程</strong>。FinceptTerminal 如何在保持 UI 流畅的同时做耗时操作？</p>
+
+      <div class="layer-demo">
+        <div class="layer-tabs">
+          <button class="layer-tab active" onclick="showLayer('layer-main', this)">主线程</button>
+          <button class="layer-tab" onclick="showLayer('layer-bg', this)">后台线程</button>
+          <button class="layer-tab" onclick="showLayer('layer-sync', this)">线程同步</button>
+        </div>
+        <div class="layer-viewport">
+          <div class="layer" id="layer-main" style="display:block; padding: var(--space-6); font-size: var(--text-sm); line-height: var(--leading-normal);">
+            <strong>主线程（UI 线程）</strong>
+            <ul style="margin-top: var(--space-2); padding-left: var(--space-5);">
+              <li>处理用户输入（鼠标点击、键盘）</li>
+              <li>渲染所有 QWidget 和图表</li>
+              <li>处理 Qt 事件循环（QApplication::exec）</li>
+              <li>响应 signal/slot 回调</li>
+            </ul>
+            <p style="margin-top: var(--space-3); color: var(--color-text-secondary);">如果主线程被阻塞（比如做 HTTP 请求），整个界面就会卡死——这就是为什么耗时操作必须放到后台。</p>
+          </div>
+          <div class="layer" id="layer-bg" style="display:none; padding: var(--space-6); font-size: var(--text-sm); line-height: var(--leading-normal);">
+            <strong>后台线程</strong>
+            <ul style="margin-top: var(--space-2); padding-left: var(--space-5);">
+              <li><code>QThread</code> —— 创建独立的工作线程</li>
+              <li><code>QtConcurrent</code> —— 简化的线程池（自动管理）</li>
+              <li><code>QProcess</code> —— Python 子进程在独立进程中运行</li>
+              <li>网络请求（HttpClient）—— Qt 内部自动异步处理</li>
+            </ul>
+            <p style="margin-top: var(--space-3); color: var(--color-text-secondary);">HttpClient 基于 QNetworkAccessManager——它内部用线程池做网络 I/O，通过 signal 通知主线程，不需要手动管理线程。</p>
+          </div>
+          <div class="layer" id="layer-sync" style="display:none; padding: var(--space-6); font-size: var(--text-sm); line-height: var(--leading-normal);">
+            <strong>线程同步</strong>
+            <ul style="margin-top: var(--space-2); padding-left: var(--space-5);">
+              <li><code>QMetaObject::invokeMethod</code> —— 安全地从后台线程调用主线程函数</li>
+              <li><code>Signal/Slot 跨线程</code> —— Qt 自动使用队列连接（QueuedConnection），确保 slot 在正确的线程执行</li>
+              <li><code>QMutex</code> —— 保护共享数据（如缓存），防止并发读写冲突</li>
+            </ul>
+            <p style="margin-top: var(--space-3); color: var(--color-text-secondary);">核心原则：永远不要在后台线程直接操作 QWidget。用 signal 把数据"邮递"到主线程再更新。</p>
+          </div>
+        </div>
+        <div class="layer-description">点击标签切换查看不同线程层的工作方式</div>
+      </div>
+    </section>
+
+    <!-- ── Screen 6: Bug 挑战 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">Bug 挑战：找出代码中的错误</h2>
+
+      <p>下面这段代码试图在后台线程更新 UI，但它违反了 Qt 的线程规则。找出哪一行有 Bug：</p>
+
+      <div class="bug-challenge">
+        <h3>这段代码会导致什么问题？</h3>
+        <div class="bug-code">
+          <div class="bug-line" onclick="checkBugLine(this, false)" data-hint="这行没问题——创建 QThread 是安全的">
+            <span class="line-num">1</span>
+            <code>QThread* thread = QThread::create([]() {</code>
+          </div>
+          <div class="bug-line" onclick="checkBugLine(this, false)" data-hint="这行也没问题——HTTP 请求在后台线程执行是正确的">
+            <span class="line-num">2</span>
+            <code>  auto data = httpClient.get("/api/quotes");</code>
+          </div>
+          <div class="bug-line" onclick="checkBugLine(this, true)" data-explanation="找到了！在后台线程直接操作 UI 控件（tableWidget）会导致未定义行为——可能崩溃、可能绘制异常、可能看起来正常但随时爆炸。正确做法是通过 signal 发射数据到主线程，在主线程的 slot 中更新 UI。">
+            <span class="line-num">3</span>
+            <code>  tableWidget->setItem(0, 0, new QTableWidgetItem(data));</code>
+          </div>
+          <div class="bug-line" onclick="checkBugLine(this, false)" data-hint="这行没问题——thread->start() 启动后台线程">
+            <span class="line-num">4</span>
+            <code>});</code>
+          </div>
+          <div class="bug-line" onclick="checkBugLine(this, false)" data-hint="这行也没问题">
+            <span class="line-num">5</span>
+            <code>thread->start();</code>
+          </div>
+        </div>
+        <div class="bug-feedback"></div>
+      </div>
+    </section>
+
+    <!-- ── Screen 7: 测验 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">检验你的理解</h2>
+
+      <div class="quiz-container" id="quiz-module2">
+        <div class="quiz-question-block"
+             data-correct="option-b"
+             data-explanation-right="正确！EventBus 是全局发布/订阅系统——任何模块都可以发布事件，任何模块都可以订阅。它就像公司里的邮件列表——发一封邮件，所有订阅者都收到。这比 A 直接引用 B 的函数更松耦合。"
+             data-explanation-wrong="想想哪种机制可以让两个互不引用的模块通信。提示：它是广播模式，不是点对点。">
+          <h3 class="quiz-question">如果交易引擎需要通知仪表盘"订单已成交"，但它们不在同一个 Screen 里，应该用什么机制？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>在仪表盘里直接调用交易引擎的方法</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>通过 EventBus 发布 "order_filled" 事件</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>在全局变量里存储订单状态</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-c"
+             data-explanation-right="正确！HttpClient 基于 QNetworkAccessManager，它在 Qt 内部使用线程池处理网络 I/O。请求发出后立即返回，当响应到达时通过 signal 通知调用者。这和浏览器中的 fetch() 类似——异步非阻塞。"
+             data-explanation-wrong="回忆一下 HttpClient 的实现。它是 QNetworkAccessManager 的封装——网络请求本身就是异步的。">
+          <h3 class="quiz-question">在 FinceptTerminal 中，HTTP 请求是同步阻塞还是异步非阻塞的？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>同步阻塞——必须等 HTTP 响应返回才能继续</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>半同步——在主线程阻塞，但只阻塞 2 秒</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>异步非阻塞——请求发出后立即返回，通过 signal 通知结果</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-a"
+             data-explanation-right="正确！Screen 不应该直接调用 HttpClient。所有数据请求必须通过 Service 层——Screen 发射 signal，Service 接收并处理。这保证了职责分离和可测试性。"
+             data-explanation-wrong="Screen 的职责是什么？想想"只管 UI"这个铁律。">
+          <h3 class="quiz-question">以下哪个操作在 Screen 类中是允许的？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>发射 signal 请求数据，在 slot 中更新 UI 控件</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>直接调用 HttpClient 获取实时行情</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>直接读写 SQLite 数据库缓存</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重新作答</button>
+      </div>
+    </section>
+
+  </div>
+</section>

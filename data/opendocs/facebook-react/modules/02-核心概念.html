@@ -1,0 +1,227 @@
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 2: React 的核心概念
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-2" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">React 的核心概念</h1>
+      <p class="module-subtitle">深入理解组件、Props、State、Hooks 和生命周期——React 开发的五大基石</p>
+    </header>
+
+    <!-- ── Screen 1: 组件与 Props ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">组件与 Props</h2>
+
+      <p>组件是 React 的基本构建单元。它是一个返回 UI 元素的 JavaScript 函数（或类）。<span class="term" data-definition="Props（Properties 的缩写）是 React 组件的输入参数。Props 是只读的——子组件不能修改接收到的 props。这种单向数据流设计让组件行为可预测、可调试。">Props</span> 是父组件传递给子组件的数据，实现组件间的通信。</p>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">&#129513;</div>
+        <div class="callout-content">
+          <strong class="callout-title">组件设计原则</strong>
+          <p>好的组件遵循<strong>单一职责原则</strong>——每个组件只做一件事。如果组件变得复杂，就应该拆分为更小的子组件。理想情况下，一个组件的代码不超过 100 行。组件名使用 PascalCase（如 UserCard、ShoppingCart），与 HTML 元素区分。</p>
+        </div>
+      </div>
+
+      <div class="code-translation">
+        <div class="translation-code">
+          <div class="translation-label">JSX</div>
+          <pre class="translation-lines"><code><span class="code-line"><span class="code-comment">// 父组件：组合多个子组件</span></span>
+<span class="code-line"><span class="code-keyword">function</span> <span class="code-comment">UserDashboard</span>() {</span>
+<span class="code-line">  <span class="code-keyword">const</span> user = { name: <span class="code-string">"Alice"</span>, role: <span class="code-string">"admin"</span> };</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">return</span> (</span>
+<span class="code-line">    &lt;div className=<span class="code-string">"dashboard"</span>&gt;</span>
+<span class="code-line">      <span class="code-comment">{/* 数据通过 props 向下流动 */}</span></span>
+<span class="code-line">      &lt;UserHeader user={user} /&gt;</span>
+<span class="code-line">      &lt;UserStats userId={user.id} /&gt;</span>
+<span class="code-line">      &lt;UserActivity userId={user.id} /&gt;</span>
+<span class="code-line">    &lt;/div&gt;</span>
+<span class="code-line">  );</span>
+<span class="code-line">}</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment">// 子组件：接收 props 并渲染</span></span>
+<span class="code-line"><span class="code-keyword">function</span> <span class="code-comment">UserHeader</span>({ user }) {</span>
+<span class="code-line">  <span class="code-keyword">return</span> (</span>
+<span class="code-line">    &lt;header&gt;</span>
+<span class="code-line">      &lt;h1&gt;{user.name}&lt;/h1&gt;</span>
+<span class="code-line">      &lt;span className=<span class="code-string">"badge"</span>&gt;{user.role}&lt;/span&gt;</span>
+<span class="code-line">    &lt;/header&gt;</span>
+<span class="code-line">  );</span>
+<span class="code-line">}</span></code></pre>
+        </div>
+        <div class="translation-block animate-in">
+          <div class="translation-english">
+            <div class="translation-label">解读</div>
+            <p>组件与 Props 的核心模式：</p>
+            <ul>
+              <li><strong>组合模式</strong>：父组件包含子组件，形成组件树</li>
+              <li><strong>Props 传递</strong>：数据通过 props 从父组件流向子组件</li>
+              <li><strong>解构赋值</strong>：({ user }) 直接从 props 中提取参数</li>
+              <li><strong>单向数据流</strong>：子组件只读取 props，不修改</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 2: State 与 Hooks ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">State 与 Hooks</h2>
+
+      <p>如果说 Props 是组件的输入，那么 <span class="term" data-definition="State（状态）是组件内部的动态数据。与 Props 不同，State 由组件自己管理，可以通过 setState 修改。State 变化会触发组件重新渲染。React 18 中，状态更新会被自动批处理以优化性能。">State</span> 就是组件的内部记忆。Hooks 是 React 16.8 引入的 API，让函数组件也能使用状态和副作用等功能。</p>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">&#128260;</div>
+          <h4 class="pattern-title">useState</h4>
+          <p class="pattern-desc">最基础的 Hook。声明一个状态变量和更新函数。const [count, setCount] = useState(0)。状态更新触发重新渲染。支持函数式更新：setCount(prev => prev + 1)。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">&#9889;</div>
+          <h4 class="pattern-title">useEffect</h4>
+          <p class="pattern-desc">处理副作用：API 调用、DOM 操作、事件监听、定时器。第二个参数是依赖数组，控制何时重新执行。空数组 [] 表示只在挂载时执行一次。返回清理函数处理资源释放。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">&#128218;</div>
+          <h4 class="pattern-title">useRef</h4>
+          <p class="pattern-desc">持有可变引用，不触发重新渲染。常见用途：引用 DOM 元素（focus 管理）、存储上一次的值、存储不需要触发渲染的定时器 ID。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+          <div class="pattern-icon" style="background: var(--color-actor-4)">&#128200;</div>
+          <h4 class="pattern-title">useMemo / useCallback</h4>
+          <p class="pattern-desc">性能优化 Hook。useMemo 缓存计算结果，useCallback 缓存函数引用。避免不必要的重新计算和子组件重新渲染。但不要过度使用——缓存本身也有开销。</p>
+        </div>
+      </div>
+
+      <div class="code-translation">
+        <div class="translation-code">
+          <div class="translation-label">JSX</div>
+          <pre class="translation-lines"><code><span class="code-line"><span class="code-keyword">function</span> <span class="code-comment">Counter</span>() {</span>
+<span class="code-line">  <span class="code-keyword">const</span> [count, setCount] = useState(<span class="code-number">0</span>);</span>
+<span class="code-line">  <span class="code-keyword">const</span> [step, setStep] = useState(<span class="code-number">1</span>);</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-comment">// 副作用：每次 count 变化时更新标题</span></span>
+<span class="code-line">  useEffect(() => {</span>
+<span class="code-line">    document.title = <span class="code-string">`Count: ${count}`</span>;</span>
+<span class="code-line">    <span class="code-keyword">return</span> () => { document.title = <span class="code-string">"React App"</span>; };</span>
+<span class="code-line">  }, [count]); <span class="code-comment">// 依赖：只在 count 变化时执行</span></span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-comment">// 计算属性：缓存计算结果</span></span>
+<span class="code-line">  <span class="code-keyword">const</span> doubled = useMemo(() => count * <span class="code-number">2</span>, [count]);</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">return</span> (</span>
+<span class="code-line">    &lt;div&gt;</span>
+<span class="code-line">      &lt;p&gt;Count: {count} | Doubled: {doubled}&lt;/p&gt;</span>
+<span class="code-line">      &lt;button onClick={() => setCount(c => c + step)}&gt;</span>
+<span class="code-line">        Increment by {step}</span>
+<span class="code-line">      &lt;/button&gt;</span>
+<span class="code-line">    &lt;/div&gt;</span>
+<span class="code-line">  );</span>
+<span class="code-line">}</span></code></pre>
+        </div>
+        <div class="translation-block animate-in">
+          <div class="translation-english">
+            <div class="translation-label">解读</div>
+            <p>Hooks 的使用模式：</p>
+            <ul>
+              <li><strong>useState</strong>：声明状态，[value, setter] 解构</li>
+              <li><strong>useEffect</strong>：副作用处理，[count] 是依赖数组</li>
+              <li><strong>清理函数</strong>：return 的函数在组件卸载或依赖变化前执行</li>
+              <li><strong>useMemo</strong>：只有 count 变化时才重新计算 doubled</li>
+              <li><strong>函数式更新</strong>：setCount(c => c + step) 确保基于最新值更新</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 3: 组件生命周期 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">组件生命周期与 useEffect</h2>
+
+      <p>理解组件的生命周期——从挂载到更新到卸载——是写出正确 React 代码的关键。在函数组件中，生命周期通过 useEffect 实现。</p>
+
+      <div class="arch-diagram">
+        <div class="arch-zone">
+          <h4 class="arch-zone-label">挂载（Mount）— 组件首次渲染</h4>
+          <div class="arch-component" data-desc="useEffect(() => { ... }, [])：空依赖数组意味着只在组件首次渲染后执行一次。适合初始化操作：获取数据、设置事件监听、启动定时器。">
+            <div class="arch-icon">&#9889;</div>
+            <span>初始化副作用</span>
+          </div>
+          <div class="arch-component" data-desc="useEffect 返回的函数在组件卸载时执行。用于清理资源：取消网络请求、移除事件监听、清除定时器。防止内存泄漏。">
+            <div class="arch-icon">&#128465;</div>
+            <span>清理函数注册</span>
+          </div>
+        </div>
+        <div class="arch-zone">
+          <h4 class="arch-zone-label">更新（Update）— 状态或 Props 变化</h4>
+          <div class="arch-component" data-desc="useEffect(() => { ... }, [dep1, dep2])：当依赖数组中的值变化时重新执行。适合响应特定数据变化的操作，如根据筛选条件重新获取数据。">
+            <div class="arch-icon">&#128260;</div>
+            <span>响应数据变化</span>
+          </div>
+          <div class="arch-component" data-desc="React 18 自动批处理多个状态更新，只触发一次重新渲染。这比 React 17 的行为更高效。使用 flushSync 可以强制同步更新（谨慎使用）。">
+            <div class="arch-icon">&#128230;</div>
+            <span>自动批处理</span>
+          </div>
+        </div>
+        <div class="arch-zone">
+          <h4 class="arch-zone-label">卸载（Unmount）— 组件销毁</h4>
+          <div class="arch-component" data-desc="组件从 DOM 中移除时触发。所有 useEffect 的清理函数在此时执行。这是释放资源的最后机会——忘记清理是 React 内存泄漏的最常见原因。">
+            <div class="arch-icon">&#128683;</div>
+            <span>资源释放</span>
+          </div>
+        </div>
+        <div class="arch-description">点击组件了解生命周期的每个阶段</div>
+      </div>
+
+      <div class="quiz-container">
+        <div class="quiz-question-block">
+          <p class="quiz-question">React 中 Props 和 State 的关键区别是什么？</p>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q2a" class="quiz-option-radio" data-correct="false">
+              <span>Props 可以修改，State 不能</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2a" class="quiz-option-radio" data-correct="true">
+              <span>Props 是父组件传入的只读数据，State 是组件内部可变的状态</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2a" class="quiz-option-radio" data-correct="false">
+              <span>Props 和 State 完全相同</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2a" class="quiz-option-radio" data-correct="false">
+              <span>State 只能在类组件中使用</span>
+            </label>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <div class="quiz-question-block">
+          <p class="quiz-question">useEffect 的依赖数组为空 [] 时，副作用何时执行？</p>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q2b" class="quiz-option-radio" data-correct="false">
+              <span>每次渲染都执行</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2b" class="quiz-option-radio" data-correct="false">
+              <span>永远不会执行</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2b" class="quiz-option-radio" data-correct="true">
+              <span>只在组件首次挂载时执行一次</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2b" class="quiz-option-radio" data-correct="false">
+              <span>只在组件卸载时执行</span>
+            </label>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</section>

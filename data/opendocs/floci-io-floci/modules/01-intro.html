@@ -1,0 +1,232 @@
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 1 — What Happens When You Type `docker compose up`
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-1" style="background: var(--color-bg);">
+  <div class="module-content">
+
+    <!-- ── HEADER ──────────────────────────────────────────────── -->
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h2 class="module-title">What Happens When You Type <code>docker compose up</code></h2>
+      <p class="module-subtitle">A rehearsal studio for musicians — you get a fully equipped stage with every instrument (all <span class="term" data-definition="Amazon Web Services — the world's largest cloud computing platform, providing on-demand servers, databases, storage, and more over the internet.">AWS</span> services) to practice on before the real concert (production AWS). No tickets needed, no security guards checking IDs.</p>
+    </header>
+
+    <!-- ── SCREEN 1: Meet Floci ─────────────────────────────────── -->
+    <div class="screen animate-in" id="s1-meet-floci">
+      <h3 class="screen-heading">Meet Floci</h3>
+
+      <p>
+        <span class="term" data-definition="A free, open-source local AWS emulator — software that runs on your machine and pretends to be AWS, so you can develop and test without an AWS account or internet connection.">Floci</span>
+        is a local <span class="term" data-definition="Software that imitates another system so you can develop and test against it locally, without needing the real service or an internet connection.">emulator</span> that runs all of AWS on your machine.
+        No <span class="term" data-definition="Amazon Web Services — the world's largest cloud computing platform, providing on-demand servers, databases, storage, and more over the internet.">AWS</span> account needed, no credit card, no internet required.
+      </p>
+      <p>
+        The name comes from <em>floccus</em> — the cloud formation that looks like popcorn. Light, fluffy, everywhere you need it. That's exactly what Floci is: your own personal cloud, wherever you are.
+      </p>
+
+      <!-- Quick-start step cards -->
+      <div class="step-cards stagger-children">
+        <div class="step-card animate-in">
+          <span class="step-num">1</span>
+          <div class="step-body">
+            <strong>Start the container</strong>
+            <p>Run <code>docker compose up</code> in your terminal. One command, zero configuration.</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <span class="step-num">2</span>
+          <div class="step-body">
+            <strong>Point your <span class="term" data-definition="Software Development Kit — a library that lets your code talk to a specific service. The AWS SDK lets your app call S3, DynamoDB, Lambda, etc. using normal function calls.">SDK</span> to localhost:4566</strong>
+            <p>That's the local <span class="term" data-definition="A numbered endpoint on your computer that programs use to communicate. Port 4566 is Floci's default — your AWS SDK sends requests there instead of the real AWS.">port</span> Floci listens on. Same API, same protocol, different address.</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <span class="step-num">3</span>
+          <div class="step-body">
+            <strong>Develop freely</strong>
+            <p>Create buckets, write items, invoke functions — everything works as if it were real AWS.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Code ↔ English translation block -->
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">docker-compose.yml</span>
+          <span class="code-line"><span class="code-keyword">services</span>:</span>
+          <span class="code-line">  <span class="code-function">floci</span>:</span>
+          <span class="code-line">    <span class="code-property">image</span>: <span class="code-string">floci/floci:latest</span></span>
+          <span class="code-line">    <span class="code-property">ports</span>:</span>
+          <span class="code-line">      - <span class="code-string">"4566:4566"</span></span>
+          <span class="code-line">    <span class="code-property">volumes</span>:</span>
+          <span class="code-line">      - <span class="code-string">./data:/app/data</span></span>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">In plain English</span>
+          <div class="translation-lines">
+            <div class="tl">Define a service called <strong>floci</strong></div>
+            <div class="tl">Pull the latest Floci image from <span class="term" data-definition="A lightweight, standalone package that contains everything needed to run a piece of software, including the code, libraries, and settings. Docker containers run identically on any machine.">Docker</span> Hub</div>
+            <div class="tl">Expose <span class="term" data-definition="A numbered endpoint on your computer that programs use to communicate. Port 4566 is Floci's default — your AWS SDK sends requests there instead of the real AWS.">port</span> 4566 so your code can reach Floci at localhost</div>
+            <div class="tl">Mount a local <span class="term" data-definition="A shared folder between your computer and a Docker container. Data written inside the container to /app/data appears on your machine at ./data, and survives container restarts.">volume</span> so your data survives restarts</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SCREEN 2: Why Floci Exists ───────────────────────────── -->
+    <div class="screen animate-in" id="s2-why-floci">
+      <h3 class="screen-heading">Why Floci Exists</h3>
+
+      <p>
+        LocalStack Community sunset in March 2026 — it now requires <span class="term" data-definition="A secret string that proves you are allowed to use a service. LocalStack now requires one, meaning you must create an account and manage credentials.">auth tokens</span>, and only receives frozen security updates.
+      </p>
+      <p>
+        Floci is the <strong>no-strings-attached</strong> alternative. Free, open-source, no account, no token, no limits.
+      </p>
+
+      <!-- Comparison pattern cards -->
+      <div class="pattern-cards stagger-children">
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-accent-light);">
+            <span style="color: var(--color-accent);">&#9889;</span>
+          </div>
+          <div class="pattern-title">Speed</div>
+          <p class="pattern-desc">~24 ms startup<br><span style="color: var(--color-text-muted); font-size: var(--text-xs);">vs 3.3 s for LocalStack</span></p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-success-light);">
+            <span style="color: var(--color-success);">&#128230;</span>
+          </div>
+          <div class="pattern-title">Memory</div>
+          <p class="pattern-desc">~13 MiB idle<br><span style="color: var(--color-text-muted); font-size: var(--text-xs);">vs 143 MiB for LocalStack</span></p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-info-light);">
+            <span style="color: var(--color-info);">&#128190;</span>
+          </div>
+          <div class="pattern-title">Size</div>
+          <p class="pattern-desc">~90 MB <span class="term" data-definition="A lightweight, standalone package that contains everything needed to run a piece of software, including the code, libraries, and settings. Docker containers run identically on any machine.">Docker</span> image<br><span style="color: var(--color-text-muted); font-size: var(--text-xs);">vs 1.0 GB for LocalStack</span></p>
+        </div>
+      </div>
+
+      <!-- Aha! callout -->
+      <div class="callout callout-accent animate-in">
+        <span class="callout-icon">&#128161;</span>
+        <div class="callout-content">
+          <span class="callout-title">Aha! Moment</span>
+          <p>
+            Floci is compiled to a <span class="term" data-definition="An executable file that runs directly on the operating system without needing a separate runtime or virtual machine. It starts instantly because there's no warmup phase.">native binary</span> using <span class="term" data-definition="GraalVM — a special Java tool that can compile Java code into a native binary ahead of time. The result starts in milliseconds instead of seconds, because there's no <span class="term" data-definition="Java Virtual Machine — the runtime that normally executes Java programs. It needs time to warm up and compile code as it runs, which is why traditional Java apps start slower.">JVM</span> warmup or runtime compilation.">GraalVM</span>.
+            That's why it starts in 24 ms — there's no <span class="term" data-definition="Java Virtual Machine — the runtime that normally executes Java programs. It needs time to warm up and compile code as it runs, which is why traditional Java apps start slower.">JVM</span> warmup, no runtime compilation.
+            It's like the difference between <strong>opening a book</strong> (native binary) vs <strong>assembling a book from loose pages every time</strong> (JVM).
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SCREEN 3: 47 Services, One Container ─────────────────── -->
+    <div class="screen animate-in" id="s3-47-services">
+      <h3 class="screen-heading">47 Services, One Container</h3>
+
+      <p>
+        Floci supports <strong>47 <span class="term" data-definition="Amazon Web Services — the world's largest cloud computing platform, providing on-demand servers, databases, storage, and more over the internet.">AWS</span> services</strong> in a single <span class="term" data-definition="A lightweight, standalone package that contains everything needed to run a piece of software, including the code, libraries, and settings. Docker containers run identically on any machine.">Docker container</span>.
+        Here are the six you'll use most often:
+      </p>
+
+      <div class="icon-rows stagger-children">
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-accent-light); color: var(--color-accent);">&#128193;</div>
+          <div>
+            <strong><span class="term" data-definition="Simple Storage Service — AWS's file storage. You upload files (called objects) to buckets, and retrieve them later via HTTP. Think of it as an infinite hard drive in the cloud.">S3</span></strong>
+            <p>File storage — upload and download files to buckets, like an infinite hard drive in the cloud.</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-success-light); color: var(--color-success);">&#128451;</div>
+          <div>
+            <strong><span class="term" data-definition="A fast, flexible NoSQL database from AWS. You store data as JSON-like items in tables, and can retrieve them in single-digit milliseconds. No schema required.">DynamoDB</span></strong>
+            <p>Database — store and query JSON-like data in tables, single-digit millisecond responses, no schema required.</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-info-light); color: var(--color-info);">&#9889;</div>
+          <div>
+            <strong><span class="term" data-definition="AWS's serverless compute service. You write a function, upload it, and AWS runs it automatically when triggered — you never manage a server. Pay only for the milliseconds your code runs.">Lambda</span></strong>
+            <p>Functions — run code on demand without managing servers. Upload your function, trigger it, get results.</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: #F3EEF8; color: var(--color-actor-3);">&#128233;</div>
+          <div>
+            <strong><span class="term" data-definition="Simple Queue Service — a managed message queue. One part of your app sends messages to the queue, another part reads and processes them. Decouples producers from consumers.">SQS</span></strong>
+            <p>Queues — send messages between parts of your app reliably. One service writes, another reads, no direct coupling.</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: #FDF3E7; color: var(--color-actor-4);">&#128274;</div>
+          <div>
+            <strong><span class="term" data-definition="Identity and Access Management — AWS's security service. It controls who (users, roles) can do what (actions) on which resources. Think of it as the bouncer at the door of every AWS service.">IAM</span></strong>
+            <p>Auth — control who can do what. Create users, roles, and policies to lock down access.</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: #E7F3ED; color: var(--color-actor-5);">&#128279;</div>
+          <div>
+            <strong>API Gateway</strong>
+            <p>Routing — give your Lambda functions HTTP endpoints. REST APIs, WebSocket connections, all managed for you.</p>
+          </div>
+        </div>
+      </div>
+
+      <p style="color: var(--color-text-muted); font-size: var(--text-sm);">
+        Plus 41 more: Step Functions, SES, SNS, Kinesis, EventBridge, CloudFormation, and many others — all running locally.
+      </p>
+    </div>
+
+    <!-- ── SCREEN 4: Quiz ────────────────────────────────────────── -->
+    <div class="screen animate-in" id="s4-quiz">
+      <h3 class="screen-heading">Check Your Understanding</h3>
+
+      <div class="quiz-container" id="quiz-m1">
+        <div class="quiz-question-block" data-correct="B" data-explanation-right="That's it — one line in docker-compose.yml, one endpoint in your SDK config, and you're running all of AWS locally." data-explanation-wrong="Not quite. The fastest path is to add Floci to your docker-compose and point your SDK to localhost:4566 — no account, no mocks, just real AWS protocol locally.">
+          <p class="quiz-question">
+            You want to test your app that uses <span class="term" data-definition="Simple Storage Service — AWS's file storage. You upload files (called objects) to buckets, and retrieve them later via HTTP. Think of it as an infinite hard drive in the cloud.">S3</span>, <span class="term" data-definition="A fast, flexible NoSQL database from AWS. You store data as JSON-like items in tables, and can retrieve them in single-digit milliseconds. No schema required.">DynamoDB</span>, and <span class="term" data-definition="AWS's serverless compute service. You write a function, upload it, and AWS runs it automatically when triggered — you never manage a server. Pay only for the milliseconds your code runs.">Lambda</span> before deploying to real AWS. What's the fastest way?
+          </p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="A" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              Create a free <span class="term" data-definition="Amazon Web Services — the world's largest cloud computing platform, providing on-demand servers, databases, storage, and more over the internet.">AWS</span> account and use the <span class="term" data-definition="The free usage level AWS offers to new accounts — limited amounts of each service per month. Exceeding it incurs real charges, and setting it up requires a credit card.">free tier</span>
+            </button>
+            <button class="quiz-option" data-value="B" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              Add <code>floci/floci:latest</code> to your docker-compose.yml and point your <span class="term" data-definition="Software Development Kit — a library that lets your code talk to a specific service. The AWS SDK lets your app call S3, DynamoDB, Lambda, etc. using normal function calls.">SDK</span> to localhost:4566
+            </button>
+            <button class="quiz-option" data-value="C" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              Write <span class="term" data-definition="Fake implementations of real services used in automated tests. They return canned responses, but don't actually behave like the real service — so bugs that only appear with real AWS behavior slip through.">mock</span> implementations of each service
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m1')">Check Answer</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m1')">Try Again</button>
+        </div>
+      </div>
+
+      <!-- Answer explanations (shown after quiz check) -->
+      <div class="callout callout-info animate-in" style="margin-top: var(--space-8);">
+        <span class="callout-icon">&#128218;</span>
+        <div class="callout-content">
+          <span class="callout-title">Why each answer matters</span>
+          <p>
+            <strong>Option A</strong> works, but requires a credit card, takes time to set up IAM users, and real AWS can charge you if you exceed <span class="term" data-definition="The free usage level AWS offers to new accounts — limited amounts of each service per month. Exceeding it incurs real charges, and setting it up requires a credit card.">free tier</span> limits.
+            <strong>Option C</strong> only simulates what you <em>think</em> the service does. Floci actually speaks the real <span class="term" data-definition="The exact format and rules AWS uses to communicate — HTTP methods, headers, authentication signatures, error codes. Floci implements the same protocol, so your code can't tell the difference.">AWS protocol</span>, so you catch real bugs.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>

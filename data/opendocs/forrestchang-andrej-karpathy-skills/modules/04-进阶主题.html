@@ -1,0 +1,218 @@
+<section class="module" id="module-4">
+  <div class="module-content">
+    <h1>进阶主题：LLM 训练与工程实践</h1>
+    <p>本节将探讨 Karpathy 在大语言模型训练和 AI 工程方面的进阶经验，包括数据准备、分布式训练和模型评估。</p>
+
+    <section class="screen animate-in">
+      <h3>数据准备的最佳实践</h3>
+      <div class="code-translation">
+        <div class="code-block">
+          <pre><code># Karpathy 的数据准备流程
+# 以训练 Shakespeare 文本生成器为例
+
+# 1. 读取原始数据
+with open('input.txt', 'r', encoding='utf-8') as f:
+    text = f.read()
+
+# 2. 构建词汇表
+chars = sorted(list(set(text)))
+vocab_size = len(chars)
+print(f"词汇量: {vocab_size}")
+print(f"数据长度: {len(text)} 字符")
+
+# 3. 字符级编码器
+stoi = {ch: i for i, ch in enumerate(chars)}
+itos = {i: ch for i, ch in enumerate(chars)}
+
+encode = lambda s: [stoi[c] for c in s]
+decode = lambda l: ''.join([itos[i] for i in l])
+
+# 4. 编码为张量
+import torch
+data = torch.tensor(encode(text), dtype=torch.long)
+
+# 5. 划分训练/验证集（90/10）
+n = int(0.9 * len(data))
+train_data = data[:n]
+val_data = data[n:]
+
+# 6. 批量采样函数
+def get_batch(split, block_size=256, batch_size=32, device='cuda'):
+    data = train_data if split == 'train' else val_data
+    ix = torch.randint(len(data) - block_size, (batch_size,))
+    x = torch.stack([data[i:i+block_size] for i in ix]).to(device)
+    y = torch.stack([data[i+1:i+block_size+1] for i in ix]).to(device)
+    return x, y
+
+# 7. 评估函数
+@torch.no_grad()
+def estimate_loss(model, eval_iters=200):
+    model.eval()
+    losses = {}
+    for split in ['train', 'val']:
+        losses[split] = 0
+        for _ in range(eval_iters):
+            x, y = get_batch(split)
+            _, loss = model(x, y)
+            losses[split] += loss.item()
+        losses[split] /= eval_iters
+    model.train()
+    return losses
+
+# BPE Tokenizer（更高级的方案）
+# Karpathy 在 minbpe 项目中从零实现了 BPE
+class BasicTokenizer:
+    """最简 BPE 实现"""
+    def __init__(self):
+        self.merges = {}  # 合并规则
+        self.vocab = {}   # 词汇表
+
+    def train(self, text, vocab_size=256):
+        tokens = list(text.encode('utf-8'))
+        num_merges = vocab_size - 256
+
+        for i in range(num_merges):
+            # 统计相邻 token 对的频率
+            counts = {}
+            for pair in zip(tokens, tokens[1:]):
+                counts[pair] = counts.get(pair, 0) + 1
+
+            # 找到最高频的对
+            top_pair = max(counts, key=counts.get)
+
+            # 合并：用新 token 替换
+            new_token = 256 + i
+            tokens = self._merge(tokens, top_pair, new_token)
+            self.merges[top_pair] = new_token
+
+        self.vocab = {i: bytes([i]) for i in range(256)}
+        for (p0, p1), new in self.merges.items():
+            self.vocab[new] = self.vocab[p0] + self.vocab[p1]
+
+    def _merge(self, tokens, pair, new_token):
+        merged = []
+        i = 0
+        while i < len(tokens):
+            if i < len(tokens) - 1 and (tokens[i], tokens[i+1]) == pair:
+                merged.append(new_token)
+                i += 2
+            else:
+                merged.append(tokens[i])
+                i += 1
+        return merged</code></pre>
+        </div>
+        <div class="translation">
+          <p>数据准备七步法：读取 → 构建词汇表 → 编码器 → 转张量 → 划分数据集 → 批量采样 → 评估函数。Karpathy 还从零实现了 BPE（Byte Pair Encoding），这是 GPT 使用的 tokenizer。BPE 的核心思想是合并高频的 token 对，逐步构建更长的子词单元，平衡词汇量和序列长度。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>LLM 训练的三阶段</h3>
+      <div class="callout callout-accent">
+        <p><strong>Karpathy 总结的 LLM 训练三阶段：</strong></p>
+        <ul>
+          <li><strong>Pre-training（预训练）</strong> — 在大规模文本上训练 next-token prediction，模型学习语言知识和世界知识。需要大量 GPU（数千 A100），成本最高。</li>
+          <li><strong>SFT（监督微调）</strong> — 在高质量的指令-回答数据上微调，模型学会遵循指令、回答问题。数据量小但质量要求高。</li>
+          <li><strong>RLHF（人类反馈强化学习）</strong> — 通过人类偏好数据训练奖励模型，用 PPO 算法优化主模型，使输出更符合人类偏好。</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>Karpathy 的 AI 工程哲学</h3>
+      <div class="pattern-cards">
+        <div class="pattern-card">
+          <h4>简洁性优于复杂性</h4>
+          <p>一个好的实现应该让人一眼就能看懂。如果需要大量注释才能解释，说明设计有问题。nanoGPT 的代码比任何框架文档都更有教育意义。</p>
+        </div>
+        <div class="pattern-card">
+          <h4>先理解再使用</h4>
+          <p>不要急于使用 PyTorch/TF 的高级 API。先手动实现一遍，理解每个组件的作用，再用框架提高效率。知道"为什么"比知道"怎么做"更重要。</p>
+        </div>
+        <div class="pattern-card">
+          <h4>过度工程是敌人</h4>
+          <p>不需要的东西不要加：不必要的抽象、过早优化、过度配置。150 行的 micrograd 比数百万行的框架更适合学习。</p>
+        </div>
+        <div class="pattern-card">
+          <h4>动手胜过阅读</h4>
+          <p>看 100 遍论文不如自己实现一遍。每个概念都应该有可运行的代码。调试的过程就是学习的过程。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>实用工具与脚本</h3>
+      <div class="code-translation">
+        <div class="code-block">
+          <pre><code># Karpathy 风格的模型检查点保存
+import os
+
+def save_checkpoint(model, optimizer, step, path='checkpoint.pt'):
+    checkpoint = {
+        'model_state_dict': model.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+        'step': step,
+    }
+    # 原子写入：先写临时文件，再重命名
+    tmp_path = path + '.tmp'
+    torch.save(checkpoint, tmp_path)
+    os.replace(tmp_path, path)
+    print(f"Checkpoint saved at step {step}")
+
+def load_checkpoint(model, optimizer, path='checkpoint.pt'):
+    if os.path.exists(path):
+        checkpoint = torch.load(path)
+        model.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        return checkpoint['step']
+    return 0
+
+# 模型参数统计
+def count_parameters(model):
+    total = sum(p.numel() for p in model.parameters())
+    trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print(f"总参数量: {total:,}")
+    print(f"可训练参数: {trainable:,}")
+    print(f"模型大小: {total * 4 / 1024**2:.1f} MB (FP32)")
+    return total
+
+# GPU 利用率监控
+def gpu_status():
+    if torch.cuda.is_available():
+        print(f"GPU: {torch.cuda.get_device_name(0)}")
+        print(f"VRAM: {torch.cuda.memory_allocated()/1024**3:.1f}/"
+              f"{torch.cuda.get_device_properties(0).total_memory/1024**3:.1f} GB")
+        print(f"Utilization: {torch.cuda.utilization()}%")
+
+# 快速推理测试
+def quick_test(model, tokenizer, prompt="The meaning of life is", max_tokens=50):
+    model.eval()
+    tokens = tokenizer.encode(prompt)
+    x = torch.tensor([tokens], dtype=torch.long)
+
+    with torch.no_grad():
+        for _ in range(max_tokens):
+            logits, _ = model(x)
+            next_token = logits[0, -1].argmax()
+            x = torch.cat([x, next_token.unsqueeze(0).unsqueeze(0)], dim=1)
+
+    return tokenizer.decode(x[0].tolist())</code></pre>
+        </div>
+        <div class="translation">
+          <p>工程实践工具集：原子写入的检查点保存（避免写入中断导致文件损坏）、参数统计（快速了解模型规模）、GPU 监控（确保资源不超载）、快速推理测试（验证模型生成质量）。这些工具简洁实用，是 Karpathy "用最少的代码解决问题"哲学的体现。</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="quiz">
+      <p class="quiz-question">LLM 训练的三个阶段是什么？</p>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="true">Pre-training → SFT → RLHF</button>
+        <button class="quiz-option" data-correct="false">训练 → 测试 → 部署</button>
+        <button class="quiz-option" data-correct="false">编码 → 解码 → 评估</button>
+        <button class="quiz-option" data-correct="false">数据准备 → 模型构建 → 推理生成</button>
+      </div>
+    </div>
+  </div>
+</section>

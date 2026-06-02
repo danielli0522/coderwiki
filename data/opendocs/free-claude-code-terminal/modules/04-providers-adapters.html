@@ -1,0 +1,166 @@
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">提供商与适配器</h1>
+      <p class="module-subtitle">Free Claude Code 支持 6 个后端提供商，每个都有独特的优势。适配器模式让它们看起来都一样。</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">六大提供商</h2>
+        <p>每个提供商在不同场景下各有优势。了解它们的特性，才能做出最优选择：</p>
+
+        <div class="icon-rows animate-in stagger-children">
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: #76B900; color: white;">N</div>
+            <div>
+              <strong>NVIDIA NIM</strong>
+              <p>免费 GPU 推理层。NVIDIA 提供免费试用的云端模型推理，适合体验各种开源模型，不需要自己的 GPU。</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-info); color: white;">OR</div>
+            <div>
+              <strong>OpenRouter</strong>
+              <p>统一接口聚合 100+ 模型。一个 API key 访问 Claude、GPT-4o、Llama、Mistral 等所有主流模型。按量计费。</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: #4D6BFE; color: white;">DS</div>
+            <div>
+              <strong>DeepSeek</strong>
+              <p>便宜且强大。DeepSeek-V3 编码能力接近 Claude Sonnet，价格仅为其十分之一。日常编码的性价比首选。</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-accent); color: white;">LM</div>
+            <div>
+              <strong>LM Studio</strong>
+              <p>本地 GUI 工具。可视化下载和管理开源模型，内置推理服务器。适合不想碰命令行的用户。</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-3); color: white;">ll</div>
+            <div>
+              <strong>llama.cpp</strong>
+              <p>C++ 推理引擎。极致性能优化，支持 CPU/GPU 混合推理。技术用户的首选，需要自己编译和配置。</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-5); color: white;">Ol</div>
+            <div>
+              <strong>Ollama</strong>
+              <p>本地部署最简方案。一条命令 <code>ollama run llama3</code> 就能跑模型。自动管理下载、量化和推理，开箱即用。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">适配器模式：统一接口的秘密</h2>
+        <p>这 6 个提供商的 API 格式各不相同。OpenRouter 用一种格式，DeepSeek 用另一种，Ollama 又不一样。Free Claude Code 怎么同时支持它们？</p>
+        <p>答案是<span class="term" data-definition="适配器模式（Adapter Pattern）是一种设计模式：定义统一接口，每个提供商写一个适配器把自己的 API 格式转换成统一格式。就像不同国家的电源插头都需要转换器才能插入同一个插座。">适配器模式</span>——每个提供商一个适配器，对上层暴露完全相同的接口：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">adapter.js</span>
+            <span class="code-line"><span class="code-comment">// 统一接口 —— 所有适配器都实现这两个方法</span></span>
+            <span class="code-line"><span class="code-keyword">class</span> <span class="code-function">BaseAdapter</span> {</span>
+            <span class="code-line">  <span class="code-keyword">async</span> <span class="code-function">sendRequest</span>(messages, model) { }</span>
+            <span class="code-line">  <span class="code-function">translateResponse</span>(rawResponse) { }</span>
+            <span class="code-line">}</span>
+            <span class="code-line"></span>
+            <span class="code-line"><span class="code-comment">// DeepSeek 适配器：把 Anthropic 格式转成 DeepSeek 格式</span></span>
+            <span class="code-line"><span class="code-keyword">class</span> <span class="code-function">DeepSeekAdapter</span> <span class="code-keyword">extends</span> BaseAdapter {</span>
+            <span class="code-line">  <span class="code-keyword">async</span> <span class="code-function">sendRequest</span>(messages, model) {</span>
+            <span class="code-line">    <span class="code-comment">// Anthropic → DeepSeek 格式转换</span></span>
+            <span class="code-line">    <span class="code-keyword">const</span> body = <span class="code-function">toOpenAIFormat</span>(messages, model);</span>
+            <span class="code-line">    <span class="code-keyword">return</span> fetch(<span class="code-string">"https://api.deepseek.com/v1/chat"</span>,</span>
+            <span class="code-line">      { method: <span class="code-string">"POST"</span>, body: JSON.<span class="code-function">stringify</span>(body) });</span>
+            <span class="code-line">  }</span>
+            <span class="code-line">}</span>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解释</span>
+            <div class="translation-lines">
+              <div class="tl"><strong>BaseAdapter</strong> 定义了统一接口：所有提供商都必须实现 <code>sendRequest</code> 和 <code>translateResponse</code> 两个方法。</div>
+              <div class="tl"><strong>DeepSeekAdapter</strong> 继承基类，在 <code>sendRequest</code> 里把 Anthropic 的消息格式转换成 DeepSeek（兼容 OpenAI）格式。</div>
+              <div class="tl"><strong>translateResponse</strong> 把 DeepSeek 返回的 OpenAI 格式响应翻译回 Anthropic 格式。</div>
+              <div class="tl">同样的模式，再写 <strong>OllamaAdapter</strong>、<strong>OpenRouterAdapter</strong>……每个适配器只关心格式转换，路由逻辑不用改。</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent animate-in">
+          <div class="callout-icon">🔌</div>
+          <div class="callout-content">
+            <strong class="callout-title">想加新提供商？只写一个适配器。</strong>
+            <p>适配器模式意味着添加新提供商不需要修改路由逻辑或 Claude Code 本身——只需要实现 <code>sendRequest</code> 和 <code>translateResponse</code>，注册到配置文件即可。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">提供商对比速查表</h2>
+        <p>选择提供商时需要考虑多个维度。以下是各提供商的关键差异：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🏠</div>
+            <h4 class="pattern-title">OpenRouter</h4>
+            <p class="pattern-desc">聚合 100+ 模型的统一入口。按 token 计费，支持 GPT-4、Claude、Gemini 等。适合想尝试多模型的用户。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🇨🇳</div>
+            <h4 class="pattern-title">DeepSeek</h4>
+            <p class="pattern-desc">中国厂商，DeepSeek-V3 性价比极高。API 兼容 OpenAI 格式，延迟低，适合中国用户。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🔥</div>
+            <h4 class="pattern-title">Groq</h4>
+            <p class="pattern-desc">LPU 推理芯片，速度极快（1000+ tok/s）。免费额度大。缺点是支持的模型较少。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🌐</div>
+            <h4 class="pattern-title">Ollama 本地</h4>
+            <p class="pattern-desc">完全本地运行，零 API 费用，数据不出本机。需要足够 GPU/内存。适合隐私敏感场景。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+
+        <div class="quiz-container animate-in" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="完全正确！适配器模式的核心就是隔离变化——每个提供商的 API 差异封装在各自的适配器里，上层代码（路由、代理）完全不需要改动。"
+               data-explanation-wrong="不是这个原因。所有提供商最终都通过代理返回 Anthropic 格式的响应给 Claude Code，差异在于到达代理之前的 API 格式各不相同。适配器封装了这些差异。">
+            <h3 class="quiz-question">为什么 Free Claude Code 使用适配器模式而不是为每个提供商写独立的服务？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>适配器隔离了不同提供商的 API 格式差异，添加新提供商只需写一个适配器，不改路由逻辑</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为所有提供商都用相同的 API 格式，不需要适配</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>适配器模式可以加速请求处理速度</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

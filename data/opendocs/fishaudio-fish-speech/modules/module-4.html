@@ -1,0 +1,247 @@
+
+<!-- ==================== MODULE 4: 音频编解码——VQ 码本世界 ==================== -->
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">音频编解码：VQ 码本世界</h1>
+      <p class="module-subtitle">声音如何被压缩成数字，又如何从数字还原成声音</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: 类比引入 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">比喻：调色板与画作</h2>
+
+        <p>想象一位画家有一套特殊的调色板。这个调色板不是无限的——它只有 160 种颜色，每种颜色有一个编号（0-159）。画家的画作（声音）需要被「翻译」成这些编号的组合。</p>
+
+        <p>这就是
+          <span class="term" data-definition="VQ 是 Vector Quantization（向量量化）的缩写。它把连续的数据（如声波）映射到有限的离散码本中。就像把无限多的颜色映射到 160 种标准色——虽然不完美，但足够实用。">向量量化（VQ）</span>
+          的核心思想。Fish Speech 用 4 层码本（4 个调色板叠加），每层 160 个「颜色」，来表示音频的方方面面：
+        </p>
+
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">码本 0</code>
+            <span class="badge-desc">基础音色——声音的「底色」，区分不同人的嗓音</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">码本 1</code>
+            <span class="badge-desc">音高变化——声音的「旋律」，语句中的抑扬顿挫</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">码本 2</code>
+            <span class="badge-desc">时长节奏——声音的「节拍」，决定每个音拉多长</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">码本 3</code>
+            <span class="badge-desc">细节修饰——声音的「质感」，呼吸声、唇齿音等微妙特征</span>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">!</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键洞察</strong>
+            <p>4 层码本形成了一种「残差编码」——每层编码上一层没能表达的信息。就像你先画大致轮廓（码本 0），再添加阴影（码本 1），然后是细节（码本 2），最后是高光（码本 3）。层层递进，越来越精细。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: 代码翻译 - VQManager -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码直译：VQ 编码与解码</h2>
+
+        <p>VQManager 是管理「编码→解码」全过程的管家。看看它如何把参考音频压缩成码本，又如何从码本还原声音：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">Python</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">VQManager</span>:</span>
+<span class="code-line">  <span class="code-keyword">def</span> <span class="code-function">encode_reference</span>(self, audio, enable_ref):</span>
+<span class="code-line">    audios = torch.<span class="code-function">from_numpy</span>(audio)</span>
+<span class="code-line">    audio_lengths = torch.<span class="code-function">tensor</span>([audios.shape[<span class="code-number">2</span>]])</span>
+<span class="code-line">    prompt_tokens = self.decoder_model.<span class="code-function">encode</span>(</span>
+<span class="code-line">      audios, audio_lengths)[<span class="code-number">0</span>][<span class="code-number">0</span>]</span>
+<span class="code-line">    <span class="code-keyword">return</span> prompt_tokens</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">def</span> <span class="code-function">decode_vq_tokens</span>(self, codes):</span>
+<span class="code-line">    <span class="code-keyword">return</span> self.decoder_model.<span class="code-function">from_indices</span>(</span>
+<span class="code-line">      codes[<span class="code-keyword">None</span>])[<span class="code-number">0</span>].<span class="code-function">squeeze</span>()</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">VQManager 类——音频编解码的「大管家」。</p>
+              <p class="tl">encode_reference：把参考音频压缩成码本。</p>
+              <p class="tl">把 NumPy 音频数据转成 PyTorch 张量。</p>
+              <p class="tl">记录音频长度信息。</p>
+              <p class="tl">调用 DAC 模型的 encode 方法——核心压缩！</p>
+              <p class="tl">取出第一个 batch 的第一个码本结果。</p>
+              <p class="tl">返回压缩后的码本 Token（4 层，每层是 0-159 的数字）。</p>
+              <p class="tl">空行分隔两个方法。</p>
+              <p class="tl">decode_vq_tokens：把码本还原成声音。</p>
+              <p class="tl">调用 from_indices——把码本数字映射回声波。</p>
+              <p class="tl">去掉 batch 维度，返回单条音频。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: 拖拽匹配 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">互动匹配：码本层次与功能</h2>
+
+        <p>把右侧的码本层次拖到对应的功能描述上：</p>
+
+        <div class="dnd-container">
+          <div class="dnd-chips">
+            <div class="dnd-chip" draggable="true" data-answer="codebook-0">码本 0（基础音色）</div>
+            <div class="dnd-chip" draggable="true" data-answer="codebook-1">码本 1（音高变化）</div>
+            <div class="dnd-chip" draggable="true" data-answer="codebook-2">码本 2（时长节奏）</div>
+            <div class="dnd-chip" draggable="true" data-answer="codebook-3">码本 3（细节修饰）</div>
+          </div>
+          <div class="dnd-zones">
+            <div class="dnd-zone" data-correct="codebook-3">
+              <p class="dnd-zone-label">呼吸声、唇齿音、气流声等微妙特征——「声音质感」</p>
+              <div class="dnd-zone-target">拖放到这里</div>
+            </div>
+            <div class="dnd-zone" data-correct="codebook-0">
+              <p class="dnd-zone-label">区分不同人的嗓音——张三和李四的「底色」不同</p>
+              <div class="dnd-zone-target">拖放到这里</div>
+            </div>
+            <div class="dnd-zone" data-correct="codebook-2">
+              <p class="dnd-zone-label">每个音节拉多长、停顿多短——「说话节奏」</p>
+              <div class="dnd-zone-target">拖放到这里</div>
+            </div>
+            <div class="dnd-zone" data-correct="codebook-1">
+              <p class="dnd-zone-label">语句中的抑扬顿挫——疑问句升调、陈述句降调</p>
+              <div class="dnd-zone-target">拖放到这里</div>
+            </div>
+          </div>
+          <button class="btn" onclick="checkDnD(this.closest('.dnd-container').id || '')">检查匹配</button>
+          <button class="btn" onclick="resetDnD(this.closest('.dnd-container').id || '')">重试</button>
+        </div>
+      </section>
+
+      <!-- Screen 4: DAC 架构讲解 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">DAC 编解码器：声音的压缩与还原</h2>
+
+        <p>
+          <span class="term" data-definition="DAC 是 Descript Audio Codec 的缩写，一种先进的音频压缩模型。它把原始声波压缩成离散的数字码本，保留了人类听觉最重要的特征，同时去掉了冗余信息。可以理解为一个「超级音频压缩器」。">DAC（Descript Audio Codec）</span>
+          是 Fish Speech 使用的音频编解码器。它的工作就像 JPEG 压缩图片——有损但足够好：
+        </p>
+
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <p>原始声波（连续信号）</p>
+          </div>
+          <div class="flow-arrow">-></div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <p>编码器提取特征</p>
+          </div>
+          <div class="flow-arrow">-></div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <p>RVQ 量化为 4 层码本</p>
+          </div>
+          <div class="flow-arrow">-></div>
+          <div class="flow-step">
+            <div class="flow-step-num">4</div>
+            <p>解码器还原声波</p>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">Python</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">decode_to_audio</span>(codes, codec):</span>
+<span class="code-line">  <span class="code-comment"># codes: (4, T) 4 层码本，每层 T 个时间步</span></span>
+<span class="code-line">  audio = codec.<span class="code-function">from_indices</span>(</span>
+<span class="code-line">    codes[<span class="code-keyword">None</span>])  <span class="code-comment"># 加 batch 维度</span></span>
+<span class="code-line">  <span class="code-keyword">return</span> audio[<span class="code-number">0</span>, <span class="code-number">0</span>]  <span class="code-comment"># 取出单声道</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">定义解码函数：从码本还原音频。</p>
+              <p class="tl">输入是 4 层码本，每层 T 个时间步的数字序列。</p>
+              <p class="tl">调用 codec 的 from_indices 方法开始还原。</p>
+              <p class="tl">加上 batch 维度（模型需要这种格式）。</p>
+              <p class="tl">取出第一条、第一个声道——返回纯净的单声道音频。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: 测验 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+
+        <div class="quiz-container" id="quiz-module4">
+
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">场景题</span>
+              <p>你想用 Fish Speech 克隆自己的声音。你提供了一段 5 秒的参考音频。VQManager 会怎么处理这段音频？</p>
+            </div>
+            <div class="quiz-question-block"
+                 data-correct="option-b"
+                 data-explanation-right="完全正确！encode_reference 方法会把你的 5 秒音频通过 DAC 编码器压缩成 4 层码本（4 个数字序列），每个时间步 4 个 0-159 的数字。这些数字完整记录了你的音色特征。"
+                 data-explanation-wrong="回顾 VQManager 的 encode_reference 方法：它调用 decoder_model.encode 把音频压缩成 prompt_tokens——一个 4 层的码本矩阵。这是「编码」过程，不是直接存储原始数据。">
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>直接存储原始音频的波形数据</span>
+                </button>
+                <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>通过 DAC 编码器压缩成 4 层码本（4 个数字序列）</span>
+                </button>
+                <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>提取 MFCC 特征向量作为声音指纹</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="没错！残差编码意味着每层码本编码上一层没能表达的信息。第一层记录基础音色，第二层在基础上补充音高变化，第三层再补充时长，第四层添加细节。层层递进。"
+               data-explanation-wrong="理解残差编码的关键：每层不是独立编码不同特征，而是在前一层的基础上补充缺失的细节。就像画画——先画轮廓，再加阴影，再添细节。">
+            <h3 class="quiz-question">「残差编码」是什么意思？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>每层码本独立编码不同的声音特征，互不影响</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>只保留最后一层码本，前面的都是冗余</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>每层编码上一层没能表达的剩余信息——层层递进</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重新作答</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

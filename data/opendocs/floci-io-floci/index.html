@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Understanding Floci — Your Local AWS Playground</title>
+
+  <!-- Google Fonts: Bricolage Grotesque · DM Sans · JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    :root {
+      --color-accent:       #2A7B9B;
+      --color-accent-hover: #1F6280;
+      --color-accent-light: #E4F2F7;
+      --color-accent-muted: #5A9DB8;
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">Understanding Floci</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <button class="nav-dot" data-target="module-1" data-tooltip="What Happens When You Start Floci" role="tab" aria-label="Module 1: What Happens When You Start Floci"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="The Three Neighborhoods" role="tab" aria-label="Module 2: The Three Neighborhoods"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="How Your Code Talks to Floci" role="tab" aria-label="Module 3: How Your Code Talks to Floci"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="The Real Stuff: Docker Containers" role="tab" aria-label="Module 4: The Real Stuff: Docker Containers"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="Storage &amp; Smart Tricks" role="tab" aria-label="Module 5: Storage and Smart Tricks"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh -->
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 1 — What Happens When You Type `docker compose up`
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-1" style="background: var(--color-bg);">
+  <div class="module-content">
+
+    <!-- ── HEADER ──────────────────────────────────────────────── -->
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h2 class="module-title">What Happens When You Type <code>docker compose up</code></h2>
+      <p class="module-subtitle">A rehearsal studio for musicians — you get a fully equipped stage with every instrument (all <span class="term" data-definition="Amazon Web Services — the world's largest cloud computing platform, providing on-demand servers, databases, storage, and more over the internet.">AWS</span> services) to practice on before the real concert (production AWS). No tickets needed, no security guards checking IDs.</p>
+    </header>
+
+    <!-- ── SCREEN 1: Meet Floci ─────────────────────────────────── -->
+    <div class="screen animate-in" id="s1-meet-floci">
+      <h3 class="screen-heading">Meet Floci</h3>
+
+      <p>
+        <span class="term" data-definition="A free, open-source local AWS emulator — software that runs on your machine and pretends to be AWS, so you can develop and test without an AWS account or internet connection.">Floci</span>
+        is a local <span class="term" data-definition="Software that imitates another system so you can develop and test against it locally, without needing the real service or an internet connection.">emulator</span> that runs all of AWS on your machine.
+        No <span class="term" data-definition="Amazon Web Services — the world's largest cloud computing platform, providing on-demand servers, databases, storage, and more over the internet.">AWS</span> account needed, no credit card, no internet required.
+      </p>
+      <p>
+        The name comes from <em>floccus</em> — the cloud formation that looks like popcorn. Light, fluffy, everywhere you need it. That's exactly what Floci is: your own personal cloud, wherever you are.
+      </p>
+
+      <!-- Quick-start step cards -->
+      <div class="step-cards stagger-children">
+        <div class="step-card animate-in">
+          <span class="step-num">1</span>
+          <div class="step-body">
+            <strong>Start the container</strong>
+            <p>Run <code>docker compose up</code> in your terminal. One command, zero configuration.</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <span class="step-num">2</span>
+          <div class="step-body">
+            <strong>Point your <span class="term" data-definition="Software Development Kit — a library that lets your code talk to a specific service. The AWS SDK lets your app call S3, DynamoDB, Lambda, etc. using normal function calls.">SDK</span> to localhost:4566</strong>
+            <p>That's the local <span class="term" data-definition="A numbered endpoint on your computer that programs use to communicate. Port 4566 is Floci's default — your AWS SDK sends requests there instead of the real AWS.">port</span> Floci listens on. Same API, same protocol, different address.</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <span class="step-num">3</span>
+          <div class="step-body">
+            <strong>Develop freely</strong>
+            <p>Create buckets, write items, invoke functions — everything works as if it were real AWS.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Code ↔ English translation block -->
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">docker-compose.yml</span>
+          <span class="code-line"><span class="code-keyword">services</span>:</span>
+          <span class="code-line">  <span class="code-function">floci</span>:</span>
+          <span class="code-line">    <span class="code-property">image</span>: <span class="code-string">floci/floci:latest</span></span>
+          <span class="code-line">    <span class="code-property">ports</span>:</span>
+          <span class="code-line">      - <span class="code-string">"4566:4566"</span></span>
+          <span class="code-line">    <span class="code-property">volumes</span>:</span>
+          <span class="code-line">      - <span class="code-string">./data:/app/data</span></span>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">In plain English</span>
+          <div class="translation-lines">
+            <div class="tl">Define a service called <strong>floci</strong></div>
+            <div class="tl">Pull the latest Floci image from <span class="term" data-definition="A lightweight, standalone package that contains everything needed to run a piece of software, including the code, libraries, and settings. Docker containers run identically on any machine.">Docker</span> Hub</div>
+            <div class="tl">Expose <span class="term" data-definition="A numbered endpoint on your computer that programs use to communicate. Port 4566 is Floci's default — your AWS SDK sends requests there instead of the real AWS.">port</span> 4566 so your code can reach Floci at localhost</div>
+            <div class="tl">Mount a local <span class="term" data-definition="A shared folder between your computer and a Docker container. Data written inside the container to /app/data appears on your machine at ./data, and survives container restarts.">volume</span> so your data survives restarts</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SCREEN 2: Why Floci Exists ───────────────────────────── -->
+    <div class="screen animate-in" id="s2-why-floci">
+      <h3 class="screen-heading">Why Floci Exists</h3>
+
+      <p>
+        LocalStack Community sunset in March 2026 — it now requires <span class="term" data-definition="A secret string that proves you are allowed to use a service. LocalStack now requires one, meaning you must create an account and manage credentials.">auth tokens</span>, and only receives frozen security updates.
+      </p>
+      <p>
+        Floci is the <strong>no-strings-attached</strong> alternative. Free, open-source, no account, no token, no limits.
+      </p>
+
+      <!-- Comparison pattern cards -->
+      <div class="pattern-cards stagger-children">
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-accent-light);">
+            <span style="color: var(--color-accent);">&#9889;</span>
+          </div>
+          <div class="pattern-title">Speed</div>
+          <p class="pattern-desc">~24 ms startup<br><span style="color: var(--color-text-muted); font-size: var(--text-xs);">vs 3.3 s for LocalStack</span></p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-success-light);">
+            <span style="color: var(--color-success);">&#128230;</span>
+          </div>
+          <div class="pattern-title">Memory</div>
+          <p class="pattern-desc">~13 MiB idle<br><span style="color: var(--color-text-muted); font-size: var(--text-xs);">vs 143 MiB for LocalStack</span></p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-info-light);">
+            <span style="color: var(--color-info);">&#128190;</span>
+          </div>
+          <div class="pattern-title">Size</div>
+          <p class="pattern-desc">~90 MB <span class="term" data-definition="A lightweight, standalone package that contains everything needed to run a piece of software, including the code, libraries, and settings. Docker containers run identically on any machine.">Docker</span> image<br><span style="color: var(--color-text-muted); font-size: var(--text-xs);">vs 1.0 GB for LocalStack</span></p>
+        </div>
+      </div>
+
+      <!-- Aha! callout -->
+      <div class="callout callout-accent animate-in">
+        <span class="callout-icon">&#128161;</span>
+        <div class="callout-content">
+          <span class="callout-title">Aha! Moment</span>
+          <p>
+            Floci is compiled to a <span class="term" data-definition="An executable file that runs directly on the operating system without needing a separate runtime or virtual machine. It starts instantly because there's no warmup phase.">native binary</span> using <span class="term" data-definition="GraalVM — a special Java tool that can compile Java code into a native binary ahead of time. The result starts in milliseconds instead of seconds, because there's no <span class="term" data-definition="Java Virtual Machine — the runtime that normally executes Java programs. It needs time to warm up and compile code as it runs, which is why traditional Java apps start slower.">JVM</span> warmup or runtime compilation.">GraalVM</span>.
+            That's why it starts in 24 ms — there's no <span class="term" data-definition="Java Virtual Machine — the runtime that normally executes Java programs. It needs time to warm up and compile code as it runs, which is why traditional Java apps start slower.">JVM</span> warmup, no runtime compilation.
+            It's like the difference between <strong>opening a book</strong> (native binary) vs <strong>assembling a book from loose pages every time</strong> (JVM).
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SCREEN 3: 47 Services, One Container ─────────────────── -->
+    <div class="screen animate-in" id="s3-47-services">
+      <h3 class="screen-heading">47 Services, One Container</h3>
+
+      <p>
+        Floci supports <strong>47 <span class="term" data-definition="Amazon Web Services — the world's largest cloud computing platform, providing on-demand servers, databases, storage, and more over the internet.">AWS</span> services</strong> in a single <span class="term" data-definition="A lightweight, standalone package that contains everything needed to run a piece of software, including the code, libraries, and settings. Docker containers run identically on any machine.">Docker container</span>.
+        Here are the six you'll use most often:
+      </p>
+
+      <div class="icon-rows stagger-children">
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-accent-light); color: var(--color-accent);">&#128193;</div>
+          <div>
+            <strong><span class="term" data-definition="Simple Storage Service — AWS's file storage. You upload files (called objects) to buckets, and retrieve them later via HTTP. Think of it as an infinite hard drive in the cloud.">S3</span></strong>
+            <p>File storage — upload and download files to buckets, like an infinite hard drive in the cloud.</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-success-light); color: var(--color-success);">&#128451;</div>
+          <div>
+            <strong><span class="term" data-definition="A fast, flexible NoSQL database from AWS. You store data as JSON-like items in tables, and can retrieve them in single-digit milliseconds. No schema required.">DynamoDB</span></strong>
+            <p>Database — store and query JSON-like data in tables, single-digit millisecond responses, no schema required.</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-info-light); color: var(--color-info);">&#9889;</div>
+          <div>
+            <strong><span class="term" data-definition="AWS's serverless compute service. You write a function, upload it, and AWS runs it automatically when triggered — you never manage a server. Pay only for the milliseconds your code runs.">Lambda</span></strong>
+            <p>Functions — run code on demand without managing servers. Upload your function, trigger it, get results.</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: #F3EEF8; color: var(--color-actor-3);">&#128233;</div>
+          <div>
+            <strong><span class="term" data-definition="Simple Queue Service — a managed message queue. One part of your app sends messages to the queue, another part reads and processes them. Decouples producers from consumers.">SQS</span></strong>
+            <p>Queues — send messages between parts of your app reliably. One service writes, another reads, no direct coupling.</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: #FDF3E7; color: var(--color-actor-4);">&#128274;</div>
+          <div>
+            <strong><span class="term" data-definition="Identity and Access Management — AWS's security service. It controls who (users, roles) can do what (actions) on which resources. Think of it as the bouncer at the door of every AWS service.">IAM</span></strong>
+            <p>Auth — control who can do what. Create users, roles, and policies to lock down access.</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: #E7F3ED; color: var(--color-actor-5);">&#128279;</div>
+          <div>
+            <strong>API Gateway</strong>
+            <p>Routing — give your Lambda functions HTTP endpoints. REST APIs, WebSocket connections, all managed for you.</p>
+          </div>
+        </div>
+      </div>
+
+      <p style="color: var(--color-text-muted); font-size: var(--text-sm);">
+        Plus 41 more: Step Functions, SES, SNS, Kinesis, EventBridge, CloudFormation, and many others — all running locally.
+      </p>
+    </div>
+
+    <!-- ── SCREEN 4: Quiz ────────────────────────────────────────── -->
+    <div class="screen animate-in" id="s4-quiz">
+      <h3 class="screen-heading">Check Your Understanding</h3>
+
+      <div class="quiz-container" id="quiz-m1">
+        <div class="quiz-question-block" data-correct="B" data-explanation-right="That's it — one line in docker-compose.yml, one endpoint in your SDK config, and you're running all of AWS locally." data-explanation-wrong="Not quite. The fastest path is to add Floci to your docker-compose and point your SDK to localhost:4566 — no account, no mocks, just real AWS protocol locally.">
+          <p class="quiz-question">
+            You want to test your app that uses <span class="term" data-definition="Simple Storage Service — AWS's file storage. You upload files (called objects) to buckets, and retrieve them later via HTTP. Think of it as an infinite hard drive in the cloud.">S3</span>, <span class="term" data-definition="A fast, flexible NoSQL database from AWS. You store data as JSON-like items in tables, and can retrieve them in single-digit milliseconds. No schema required.">DynamoDB</span>, and <span class="term" data-definition="AWS's serverless compute service. You write a function, upload it, and AWS runs it automatically when triggered — you never manage a server. Pay only for the milliseconds your code runs.">Lambda</span> before deploying to real AWS. What's the fastest way?
+          </p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="A" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              Create a free <span class="term" data-definition="Amazon Web Services — the world's largest cloud computing platform, providing on-demand servers, databases, storage, and more over the internet.">AWS</span> account and use the <span class="term" data-definition="The free usage level AWS offers to new accounts — limited amounts of each service per month. Exceeding it incurs real charges, and setting it up requires a credit card.">free tier</span>
+            </button>
+            <button class="quiz-option" data-value="B" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              Add <code>floci/floci:latest</code> to your docker-compose.yml and point your <span class="term" data-definition="Software Development Kit — a library that lets your code talk to a specific service. The AWS SDK lets your app call S3, DynamoDB, Lambda, etc. using normal function calls.">SDK</span> to localhost:4566
+            </button>
+            <button class="quiz-option" data-value="C" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              Write <span class="term" data-definition="Fake implementations of real services used in automated tests. They return canned responses, but don't actually behave like the real service — so bugs that only appear with real AWS behavior slip through.">mock</span> implementations of each service
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m1')">Check Answer</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m1')">Try Again</button>
+        </div>
+      </div>
+
+      <!-- Answer explanations (shown after quiz check) -->
+      <div class="callout callout-info animate-in" style="margin-top: var(--space-8);">
+        <span class="callout-icon">&#128218;</span>
+        <div class="callout-content">
+          <span class="callout-title">Why each answer matters</span>
+          <p>
+            <strong>Option A</strong> works, but requires a credit card, takes time to set up IAM users, and real AWS can charge you if you exceed <span class="term" data-definition="The free usage level AWS offers to new accounts — limited amounts of each service per month. Exceeding it incurs real charges, and setting it up requires a credit card.">free tier</span> limits.
+            <strong>Option C</strong> only simulates what you <em>think</em> the service does. Floci actually speaks the real <span class="term" data-definition="The exact format and rules AWS uses to communicate — HTTP methods, headers, authentication signatures, error codes. Floci implements the same protocol, so your code can't tell the difference.">AWS protocol</span>, so you catch real bugs.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+<!-- ───────────────────────────────────────────────────────────────
+     Module 2: The Three Neighborhoods
+     Floci's architecture has 3 zones — stateless, stateful, container
+     ─────────────────────────────────────────────────────────────── -->
+
+<section class="module" id="module-2" style="background:var(--color-bg-warm)">
+<div class="module-content">
+
+  <!-- ── MODULE HEADER ─────────────────────────────────────────── -->
+  <div class="module-header animate-in">
+    <span class="module-number">02</span>
+    <h2 class="module-title">The Three Neighborhoods</h2>
+    <p class="module-subtitle">Think of Floci as a university campus. There are lecture halls (stateless services that handle requests but don't remember you), a library (stateful services that store knowledge between visits), and a makerspace (container services that spin up real workshops when needed).</p>
+  </div>
+
+  <!-- ── SCREEN 1: The Campus Map ──────────────────────────────── -->
+  <div class="screen animate-in">
+    <h3 class="screen-heading">The Campus Map</h3>
+    <p>Floci organizes its 30+ emulated services into three distinct neighborhoods. Click any service below to learn what it does.</p>
+
+    <div class="arch-diagram">
+      <!-- Zone: Stateless Services -->
+      <div class="arch-zone">
+        <div class="arch-zone-label">Stateless Services</div>
+
+        <span class="arch-component" data-desc="SSM — Systems Manager. Manages instance state, run commands, and patch compliance. Stateless: each API call is independent.">&#x1F4CB; SSM</span>
+        <span class="arch-component" data-desc="SQS — Simple Queue Service. Decouples components with reliable message queues. Messages are stored briefly for delivery, but the service itself holds no long-term state.">&#x1F4EC; SQS</span>
+        <span class="arch-component" data-desc="SNS — Simple Notification Service. Publish-subscribe messaging. Sends notifications to subscribers instantly.">&#x1F514; SNS</span>
+        <span class="arch-component" data-desc="IAM — Identity and Access Management. Controls who can do what. Every request is validated independently — no sessions.">&#x1F511; IAM</span>
+        <span class="arch-component" data-desc="STS — Security Token Service. Issues temporary credentials. Stateless by design — each token is self-contained.">&#x1F510; STS</span>
+        <span class="arch-component" data-desc="KMS — Key Management Service. Creates and manages encryption keys. Each encrypt/decrypt call is stateless.">&#x1F5DD; KMS</span>
+        <span class="arch-component" data-desc="Secrets Manager — Stores and retrieves secrets (passwords, API keys). While secrets are persisted, each API call is stateless.">&#x1F512; Secrets Manager</span>
+        <span class="arch-component" data-desc="SES — Simple Email Service. Sends emails. Each send operation is independent — no server-side session state.">&#x1F4E7; SES</span>
+        <span class="arch-component" data-desc="Cognito — User authentication and identity pools. Each auth request is validated independently using JWT tokens.">&#x1F464; Cognito</span>
+        <span class="arch-component" data-desc="Kinesis — Real-time data streaming. In Floci's stateless zone because each put/get record operation is independent.">&#x1F30A; Kinesis</span>
+        <span class="arch-component" data-desc="EventBridge — Event bus that routes events between services. Routes events without maintaining state between invocations.">&#x1F4E1; EventBridge</span>
+        <span class="arch-component" data-desc="Step Functions — Coordinates multiple services into workflows. The orchestrator itself is stateless; state is stored in execution records.">&#x1F504; Step Functions</span>
+        <span class="arch-component" data-desc="CloudFormation — Infrastructure as Code. Provisions resources via templates. Each stack operation is independent.">&#x1F3D7; CloudFormation</span>
+        <span class="arch-component" data-desc="ACM — AWS Certificate Manager. Manages SSL/TLS certificates. Each certificate operation is a discrete API call.">&#x1F4DC; ACM</span>
+        <span class="arch-component" data-desc="API Gateway — Creates REST/HTTP APIs that route requests to backend services. Each request is routed independently.">&#x1F310; API Gateway</span>
+      </div>
+
+      <!-- Zone: Stateful Services -->
+      <div class="arch-zone">
+        <div class="arch-zone-label">Stateful Services</div>
+
+        <span class="arch-component" data-desc="S3 — Simple Storage Service. Object storage that persists files, images, and backups. Your data stays between requests. Supports versioning, multipart uploads, and pre-signed URLs.">&#x1F4C1; S3</span>
+        <span class="arch-component" data-desc="DynamoDB — NoSQL database. Fast key-value lookups, queries, and scans. Data is durable and persists across restarts. Supports indexes, TTL, and transactions.">&#x1F4CA; DynamoDB</span>
+        <span class="arch-component" data-desc="DynamoDB Streams — Change data capture. Watches for item-level changes in DynamoDB tables and triggers Lambda functions in response.">&#x1F4FC; DynamoDB Streams</span>
+      </div>
+
+      <!-- Zone: Container Services -->
+      <div class="arch-zone">
+        <div class="arch-zone-label">Container Services &#x1F433;</div>
+
+        <span class="arch-component" data-desc="Lambda — Serverless functions. Floci spins up real Docker containers to execute your function code. Supports Python, Node.js, Java, Go, .NET, and custom runtimes.">&#x26A1; Lambda</span>
+        <span class="arch-component" data-desc="ElastiCache — In-memory caching. Floci launches a real Redis or Memcached container to emulate caching behavior.">&#x1F4B0; ElastiCache</span>
+        <span class="arch-component" data-desc="RDS — Relational Database Service. Floci provisions a real database container (PostgreSQL, MySQL, etc.) for SQL operations.">&#x1F4BE; RDS</span>
+        <span class="arch-component" data-desc="MSK — Managed Streaming for Apache Kafka. Floci runs a real Kafka container for event streaming.">&#x1F50C; MSK</span>
+        <span class="arch-component" data-desc="ECS — Elastic Container Service. Orchestrates Docker containers for long-running services and tasks.">&#x1F6E2; ECS</span>
+        <span class="arch-component" data-desc="EC2 — Virtual machines. Floci emulates EC2 instance lifecycle — launch, describe, terminate — via container-based emulation.">&#x1F4BB; EC2</span>
+        <span class="arch-component" data-desc="EKS — Elastic Kubernetes Service. Managed Kubernetes clusters. Floci emulates the control plane for EKS API operations.">&#x1F433; EKS</span>
+        <span class="arch-component" data-desc="OpenSearch — Search and analytics engine. Floci provisions a real OpenSearch container for indexing and querying.">&#x1F50D; OpenSearch</span>
+        <span class="arch-component" data-desc="CodeBuild — Build and test service. Floci launches a real build container to compile code, run tests, and produce artifacts.">&#x1F528; CodeBuild</span>
+      </div>
+
+      <div class="arch-description">Click any service above to see what it does.</div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN 2: The Lecture Hall — Stateless Services ────────── -->
+  <div class="screen animate-in">
+    <h3 class="screen-heading">The Lecture Hall &mdash; <span class="term" data-definition="A stateless service handles each request independently, without remembering anything about previous requests. No sessions, no stored data between calls. The server treats every request as if it's the first time you've called it.">Stateless</span> Services</h3>
+    <p>These services handle requests but don't persist data between calls. Like a lecture hall — the professor answers your question, but doesn't write it down for next time.</p>
+
+    <div class="pattern-cards stagger-children">
+      <div class="pattern-card animate-in">
+        <div class="pattern-icon" style="background:var(--color-accent-light);">&#x1F4EC;</div>
+        <div class="pattern-title">SQS &amp; SNS</div>
+        <p class="pattern-desc">Message queues and <span class="term" data-definition="Pub/sub (publish/subscribe) is a messaging pattern where senders (publishers) send messages without knowing who will receive them. Subscribers express interest and receive relevant messages. Think of it like a campus mailroom — you drop a letter and the routing system delivers it.">pub/sub</span> notifications. SQS queues messages for reliable delivery; SNS broadcasts events to multiple subscribers. Like a campus mailroom — drop a letter, and it gets routed to the right mailbox.</p>
+      </div>
+      <div class="pattern-card animate-in">
+        <div class="pattern-icon" style="background:var(--color-info-light);">&#x1F511;</div>
+        <div class="pattern-title">IAM &amp; STS</div>
+        <p class="pattern-desc">Identity and access management. IAM defines who can do what (policies, roles, users). STS issues temporary credentials. Like student ID cards — each request proves who you are, independently of any previous request.</p>
+      </div>
+      <div class="pattern-card animate-in">
+        <div class="pattern-icon" style="background:var(--color-success-light);">&#x1F4E1;</div>
+        <div class="pattern-title">EventBridge &amp; Step Functions</div>
+        <p class="pattern-desc">Event routing and workflow orchestration. EventBridge connects events to targets (like a campus events board). Step Functions chains multiple service calls into coordinated workflows (like a graduation checklist).</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN 3: The Library — Stateful Services ─────────────── -->
+  <div class="screen animate-in">
+    <h3 class="screen-heading">The Library &mdash; <span class="term" data-definition="A stateful service remembers data between requests. It maintains state — files in S3 stay in S3, records in DynamoDB persist. Like a library that keeps its books on the shelves for your next visit.">Stateful</span> Services</h3>
+    <p>These services remember data between requests. Like a library — the books stay on the shelves even after you leave.</p>
+
+    <div class="icon-rows stagger-children">
+      <div class="icon-row animate-in">
+        <div class="icon-circle" style="background:var(--color-accent-light);">&#x1F4C1;</div>
+        <div>
+          <strong>S3 &mdash; <span class="term" data-definition="Object storage stores data as objects (files + metadata) in buckets. Unlike a file system, there are no folders — just flat keys. Perfect for files, images, backups, and static website hosting.">Object Storage</span></strong>
+          <p>Stores files, images, and backups as objects in buckets. Supports versioning (keep multiple versions of a file), multipart uploads (upload large files in chunks), and pre-signed URLs (temporary access links).</p>
+        </div>
+      </div>
+      <div class="icon-row animate-in">
+        <div class="icon-circle" style="background:var(--color-info-light);">&#x1F4CA;</div>
+        <div>
+          <strong>DynamoDB &mdash; <span class="term" data-definition="NoSQL databases store and retrieve data without requiring a fixed table schema or SQL. DynamoDB uses key-value pairs — give it a key (like user_id), and it instantly returns the value. Much faster than SQL for simple lookups.">NoSQL</span> Database</strong>
+          <p>Fast key-value lookups, queries, and scans. Supports secondary indexes (query by different attributes), TTL (automatically expire old items), and transactions (multi-item atomic operations).</p>
+        </div>
+      </div>
+      <div class="icon-row animate-in">
+        <div class="icon-circle" style="background:var(--color-success-light);">&#x1F4FC;</div>
+        <div>
+          <strong>DynamoDB Streams &mdash; <span class="term" data-definition="Change data capture (CDC) watches a database for any changes (inserts, updates, deletes) and emits events for each change. Like a librarian noting every time a book is borrowed or returned, so automated systems can react.">Change Data Capture</span></strong>
+          <p>Watches for item-level changes in DynamoDB tables and triggers Lambda functions in response. If a record is added, updated, or deleted — Streams catches it and kicks off the next step.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN 4: The Makerspace — Container Services ─────────── -->
+  <div class="screen animate-in">
+    <h3 class="screen-heading">The Makerspace &mdash; <span class="term" data-definition="A container is a lightweight, standalone package that includes everything needed to run a piece of software — code, runtime, libraries, and settings. Docker is the most popular tool for creating and running containers.">Container</span> Services &#x1F433;</h3>
+    <p>These services spin up real <span class="term" data-definition="Docker is a platform that packages applications into containers — standardized, portable units that run consistently on any machine. Floci uses Docker under the hood to emulate AWS services like Lambda, RDS, and ECS.">Docker</span> containers. When you invoke a Lambda function, Floci pulls a real container image from <span class="term" data-definition="ECR (Elastic Container Registry) is AWS's container image repository. Floci pulls official Lambda runtime images from public.ecr.aws — for example, public.ecr.aws/lambda/python:3.12 for Python functions.">ECR</span> and runs your code inside it.</p>
+
+    <div class="chat-window" id="chat-lambda">
+      <div class="chat-messages">
+        <!-- Message 1: Developer -->
+        <div class="chat-message" data-sender="developer" style="display:none;">
+          <div class="chat-avatar" style="background:var(--color-actor-1);">D</div>
+          <div class="chat-bubble">
+            <span class="chat-sender" style="color:var(--color-actor-1);">Developer</span>
+            <p>I need to test my Python Lambda function locally</p>
+          </div>
+        </div>
+
+        <!-- Message 2: HTTP Router -->
+        <div class="chat-message" data-sender="router" style="display:none;">
+          <div class="chat-avatar" style="background:var(--color-actor-2);">R</div>
+          <div class="chat-bubble">
+            <span class="chat-sender" style="color:var(--color-actor-2);">HTTP Router</span>
+            <p>Got it &mdash; Lambda service, spin up a Python 3.12 container</p>
+          </div>
+        </div>
+
+        <!-- Message 3: Lambda Service -->
+        <div class="chat-message" data-sender="lambda-svc" style="display:none;">
+          <div class="chat-avatar" style="background:var(--color-actor-3);">L</div>
+          <div class="chat-bubble">
+            <span class="chat-sender" style="color:var(--color-actor-3);">Lambda Service</span>
+            <p>Pulling <code style="font-family:var(--font-mono);font-size:0.85em;background:rgba(0,0,0,0.06);padding:2px 4px;border-radius:3px;">public.ecr.aws/lambda/python:3.12</code>... Container ready. Function deployed!</p>
+          </div>
+        </div>
+
+        <!-- Message 4: Developer -->
+        <div class="chat-message" data-sender="developer" style="display:none;">
+          <div class="chat-avatar" style="background:var(--color-actor-1);">D</div>
+          <div class="chat-bubble">
+            <span class="chat-sender" style="color:var(--color-actor-1);">Developer</span>
+            <p>Now <span class="term" data-definition="To invoke a Lambda function means to trigger its execution by sending an event (input data). The function runs, processes the event, and returns a result. In Floci, this happens inside a real Docker container.">invoke</span> it with a test event</p>
+          </div>
+        </div>
+
+        <!-- Message 5: Lambda Container -->
+        <div class="chat-message" data-sender="lambda-ctr" style="display:none;">
+          <div class="chat-avatar" style="background:var(--color-actor-4);">C</div>
+          <div class="chat-bubble">
+            <span class="chat-sender" style="color:var(--color-actor-4);">Lambda Container</span>
+            <p>Executing <span class="term" data-definition="The handler is the function in your code that processes Lambda events. It's the entry point — AWS (and Floci) calls this function with the event data, and it returns a response.">handler</span>... returned <code style="font-family:var(--font-mono);font-size:0.85em;background:rgba(0,0,0,0.06);padding:2px 4px;border-radius:3px;">{ statusCode: 200 }</code>. Done in 45ms.</p>
+          </div>
+        </div>
+
+        <!-- Message 6: Lambda Service -->
+        <div class="chat-message" data-sender="lambda-svc" style="display:none;">
+          <div class="chat-avatar" style="background:var(--color-actor-3);">L</div>
+          <div class="chat-bubble">
+            <span class="chat-sender" style="color:var(--color-actor-3);">Lambda Service</span>
+            <p>Keeping the container <span class="term" data-definition="A warm pool keeps containers running after their first invocation so subsequent calls are faster. The first call is a 'cold start' (pulling and starting the container). Keeping it warm eliminates that delay for the next invoke.">warm</span> for the next invoke &mdash; no <span class="term" data-definition="A cold start is the delay when a Lambda function is invoked for the first time (or after being idle). The container must be pulled, started, and the runtime initialized before your code can run. Subsequent calls on the same container are much faster.">cold start</span> next time</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-typing" style="display:none;">
+        <div class="chat-avatar" id="chat-lambda-typing-avatar" style="background:var(--color-actor-1);">D</div>
+        <div class="chat-typing-dots">
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+        </div>
+      </div>
+
+      <div class="chat-controls">
+        <button class="btn btn-primary chat-next-btn">Next Message</button>
+        <button class="btn chat-all-btn">Play All</button>
+        <button class="btn chat-reset-btn">Reset</button>
+        <span class="chat-progress">0 / 6 messages</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN 5: Quiz ─────────────────────────────────────────── -->
+  <div class="screen animate-in">
+    <h3 class="screen-heading">Check Your Understanding</h3>
+
+    <div class="quiz-container" id="quiz-m2">
+      <div class="quiz-question-block" data-correct="B" data-explanation-right="S3 stores files (images, backups, etc.) as objects — that's stateful storage. DynamoDB stores and queries metadata records — also stateful. Both persist data between requests, which is exactly what the Library (stateful) neighborhood does." data-explanationWrong="Think about which neighborhood persists data. Stateless services don't store anything. Container services spin up Docker. The stateful neighborhood (S3, DynamoDB) is the one that remembers data between requests.">
+        <div class="quiz-question">You're building a feature that needs to store uploaded images and query metadata about them. Which Floci 'neighborhood' handles each?</div>
+        <div class="quiz-options">
+          <button class="quiz-option" onclick="selectOption(this)" data-value="A">
+            <span class="quiz-option-radio"></span>
+            Both are handled by stateless services — they process the upload and query in a single request
+          </button>
+          <button class="quiz-option" onclick="selectOption(this)" data-value="B">
+            <span class="quiz-option-radio"></span>
+            Images go to S3 (stateful), metadata goes to DynamoDB (stateful) — both persist data
+          </button>
+          <button class="quiz-option" onclick="selectOption(this)" data-value="C">
+            <span class="quiz-option-radio"></span>
+            Images go to Lambda (container), metadata goes to SQS (stateless)
+          </button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <button class="quiz-check-btn" onclick="checkQuiz('quiz-m2')">Check Answer</button>
+      <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m2')">Try Again</button>
+    </div>
+  </div>
+
+</div>
+</section>
+<section class="module" id="module-3" style="background: var(--color-bg);">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">How Your Code Talks to Floci</h1>
+      <p class="module-subtitle">A universal translator at a diplomatic summit &mdash; your code speaks Python/Java/Node/Go, Floci speaks AWS protocol, and the <span class="term" data-definition="SDK (Software Development Kit): A library that provides pre-built functions so you don't have to write low-level protocol code yourself. The AWS SDK handles formatting, signing, and sending requests for you.">SDK</span> + router work together so both sides understand each other perfectly.</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: The Request Journey -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The Request Journey</h2>
+        <p>What happens when your code calls <span class="term" data-definition="DynamoDB: Amazon's managed NoSQL database service. It stores data as key-value items and is one of the most commonly used AWS services. Floci provides a fully compatible local version.">DynamoDB</span>? Follow the data packet through four actors to see the full path:</p>
+
+        <div class="flow-animation animate-in"
+             id="flow-request"
+             data-steps='[
+               {"highlight":"flow-actor-1","label":"Your code calls client.putItem(...)"},
+               {"highlight":"flow-actor-2","from":"actor-1","to":"actor-2","packet":true,"label":"The SDK formats the request using the AWS wire protocol and signs it with SigV4"},
+               {"highlight":"flow-actor-3","from":"actor-2","to":"actor-3","packet":true,"label":"Request arrives at localhost:4566 — Floci receives it"},
+               {"highlight":"flow-actor-3","from":"actor-3","to":"actor-4","packet":true,"label":"Router identifies the DynamoDB service and forwards the request"},
+               {"highlight":"flow-actor-4","label":"DynamoDB service stores the item and returns a confirmation"}
+             ]'>
+
+          <div class="flow-step-label">Click &quot;Next Step&quot; to begin</div>
+
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">💻</div>
+              <span>Your Code</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">📡</div>
+              <span>AWS SDK</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">🌐</div>
+              <span>Floci Router</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">🗄️</div>
+              <span>DynamoDB Service</span>
+            </div>
+          </div>
+
+          <div class="flow-packet"></div>
+
+          <div class="flow-controls">
+            <button class="btn btn-primary flow-next-btn">Next Step</button>
+            <button class="btn flow-reset-btn">Reset</button>
+            <span class="flow-progress">Step 0 / 5</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: The AWS Wire Protocol -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The AWS Wire Protocol</h2>
+        <p>
+          All AWS services speak the same &quot;language&quot; &mdash; they communicate using a standard <span class="term" data-definition="Wire protocol: The low-level format that computers use to exchange data over a network. AWS services use JSON or XML formatted messages sent over HTTPS, following a specific structure that every AWS SDK knows how to produce and parse.">wire protocol</span> (JSON or XML over HTTPS).
+          This means your SDK already knows exactly how to format requests. You just need to tell it <em>where</em> to send them.
+        </p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">Java</span>
+            <pre><code>
+<span class="code-line"><span class="code-function">DynamoDbClient</span> client = <span class="code-function">DynamoDbClient</span>.<span class="code-function">builder</span>()</span>
+<span class="code-line">    .<span class="code-function">endpointOverride</span>(</span>
+<span class="code-line">        <span class="code-function">URI</span>.<span class="code-function">create</span>(<span class="code-string">"http://localhost:4566"</span>))</span>
+<span class="code-line">    .<span class="code-function">region</span>(<span class="code-function">Region</span>.US_EAST_1)</span>
+<span class="code-line">    .<span class="code-function">credentialsProvider</span>(</span>
+<span class="code-line">        <span class="code-function">StaticCredentialsProvider</span>.<span class="code-function">create</span>(</span>
+<span class="code-line">            <span class="code-function">AwsBasicCredentials</span>.<span class="code-function">create</span>(</span>
+<span class="code-line">                <span class="code-string">"test"</span>, <span class="code-string">"test"</span>)))</span>
+<span class="code-line">    .<span class="code-function">build</span>();</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Create a DynamoDB client &mdash; your doorway to the database service.</p>
+              <p class="tl">Tell it to talk to <span class="term" data-definition="Endpoint: The URL address where a service listens for requests. Real AWS uses endpoints like dynamodb.us-east-1.amazonaws.com. Floci replaces this with localhost:4566.">Floci</span> instead of real AWS by overriding the <span class="term" data-definition="Endpoint: The URL address where a service listens for requests. Real AWS uses endpoints like dynamodb.us-east-1.amazonaws.com. Floci replaces this with localhost:4566.">endpoint</span>.</p>
+              <p class="tl">Pick any <span class="term" data-definition="Region: AWS data centers are organized into geographic regions (us-east-1, eu-west-1, etc.). Floci ignores the region value but your SDK requires one to be set.">region</span> &mdash; Floci does not care which one you choose.</p>
+              <p class="tl">Use dummy <span class="term" data-definition="Credentials: Authentication data that proves your identity to AWS. In production these are real access keys; with Floci, any value like 'test/test' works because local mode does not verify real identity.">credentials</span> &mdash; &quot;test/test&quot; works just fine.</p>
+              <p class="tl">Done! This client now sends every request to Floci instead of AWS.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Multi-Language Support -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Multi-Language Support</h2>
+        <p>Floci works with every major AWS <span class="term" data-definition="SDK (Software Development Kit): A library that provides pre-built functions so you don't have to write low-level protocol code yourself.">SDK</span>. Whatever language your project is built in, the integration pattern is the same: create a client, override the endpoint, done.</p>
+
+        <div class="pattern-cards stagger-children">
+          <div class="pattern-card animate-in" style="border-top-color: var(--color-actor-1);">
+            <div class="pattern-icon" style="background: var(--color-accent-light);">☕</div>
+            <h4 class="pattern-title">Java (AWS SDK v2)</h4>
+            <p class="pattern-desc">Best for <span class="term" data-definition="Enterprise: Large-scale business software typically built by big organizations, often running on Java and requiring robust, long-term supported libraries.">enterprise</span> apps, microservices on Spring Boot, and Android development. Non-blocking async support built in.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top-color: var(--color-actor-2);">
+            <div class="pattern-icon" style="background: var(--color-info-light);">🐍</div>
+            <h4 class="pattern-title">Python (boto3)</h4>
+            <p class="pattern-desc">Ideal for data science pipelines, Lambda functions, scripting, and ML workflows. The most popular SDK for <span class="term" data-definition="API (Application Programming Interface): A set of rules that allows different software programs to communicate with each other. AWS APIs define how you interact with each service.">AWS</span> automation.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top-color: var(--color-actor-3);">
+            <div class="pattern-icon" style="background: #EDE9F6;">🟢</div>
+            <h4 class="pattern-title">Node.js (AWS SDK v3)</h4>
+            <p class="pattern-desc">Perfect for web backends, server-side rendering, and serverless functions. Tree-shakeable modular imports keep bundle size small.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top-color: var(--color-actor-4);">
+            <div class="pattern-icon" style="background: #FDF5E0;">🔷</div>
+            <h4 class="pattern-title">Go (AWS SDK v2)</h4>
+            <p class="pattern-desc">Built for <span class="term" data-definition="Cloud-native: Software designed specifically to run in cloud environments, using containers, microservices, and elastic scaling. Go is popular for cloud-native services because of its performance and small binary size.">cloud-native</span> services, CLI tools, and infrastructure automation. Static binary compilation, zero runtime dependencies.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-info animate-in">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Good to know</strong>
+            <p>Floci also works with <span class="term" data-definition="AWS CLI: The official command-line tool for interacting with AWS services from your terminal. Floci supports it fully, so you can run 'aws dynamodb scan' locally.">AWS CLI</span>, <span class="term" data-definition="Terraform: An infrastructure-as-code tool by HashiCorp that lets you define cloud resources in configuration files instead of clicking through a console. Floci supports Terraform so you can test infrastructure changes locally.">Terraform</span>, <span class="term" data-definition="CDK (Cloud Development Kit): An AWS tool that lets you define infrastructure using real programming languages (TypeScript, Python, Java) instead of JSON/YAML templates.">CDK</span>, and <span class="term" data-definition="OpenTofu: An open-source fork of Terraform that maintains compatibility with Terraform configuration files but is governed by a community foundation.">OpenTofu</span>. If it speaks AWS protocol, Floci understands it.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Authentication — SigV4 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Authentication &mdash; SigV4</h2>
+        <p>
+          Floci validates request signatures using <span class="term" data-definition="SigV4 (Signature Version 4): The AWS protocol for authenticating API requests. It works by combining your access key with the request details (timestamp, body, headers) and computing a cryptographic signature. AWS uses this to verify the request has not been tampered with.">SigV4</span>, the same protocol as real AWS.
+          This means your authentication code works identically in development and production &mdash; no special cases, no conditional logic.
+        </p>
+
+        <div class="step-cards animate-in">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Your SDK signs every request automatically</strong>
+              <p>When you call any AWS <span class="term" data-definition="API (Application Programming Interface): A set of rules that allows different software programs to communicate with each other.">API</span> method, the SDK computes a SigV4 signature from your credentials, the current timestamp, and the request body. You never do this manually.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Floci checks the signature</strong>
+              <p>Not because Floci needs to verify your identity, but because your SDK will send it anyway. By validating the seal, Floci ensures your production auth code gets tested locally.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Any credentials work locally</strong>
+              <p>Use &quot;test&quot; / &quot;test&quot; or any string you like. Floci accepts all validly-signed requests, so you are not locked into managing real AWS keys during development.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent animate-in">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Aha!</strong>
+            <p>SigV4 is like a wax seal on a letter. AWS uses it to verify that the request actually came from you and was not tampered with. Floci checks the seal too &mdash; not because it needs to verify your identity, but because your SDK will send it anyway. This way, your production auth code gets tested locally.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Quiz: Debugging Locally with Floci</h2>
+
+        <div class="scenario-block animate-in">
+          <div class="scenario-context">
+            <span class="scenario-label">SCENARIO</span>
+            <p>You are debugging a production issue where your Lambda function fails to read from <span class="term" data-definition="DynamoDB: Amazon's managed NoSQL database service.">DynamoDB</span>. You want to reproduce it locally with Floci. What do you change in your code?</p>
+          </div>
+        </div>
+
+        <div class="quiz-container animate-in" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly! One config change and your production code works locally. Floci speaks the same AWS protocol, so you only need to redirect the endpoint URL and seed test data to reproduce the issue."
+               data-explanation-wrong="Not quite. The key insight is that Floci speaks the exact same AWS protocol as real AWS. You never need to rewrite your API calls or install a different SDK. You only change the endpoint URL.">
+            <h3 class="quiz-question">What is the minimal code change needed to reproduce the issue locally?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Rewrite all <span class="term" data-definition="DynamoDB: Amazon's managed NoSQL database service.">DynamoDB</span> calls to use a different <span class="term" data-definition="API (Application Programming Interface): A set of rules that allows different software programs to communicate with each other.">API</span></span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Set the <span class="term" data-definition="Endpoint: The URL address where a service listens for requests.">endpoint</span> URL to http://localhost:4566 and seed test data</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Replace the AWS <span class="term" data-definition="SDK (Software Development Kit): A library that provides pre-built functions so you don't have to write low-level protocol code yourself.">SDK</span> with a Floci-specific client library</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">Check Answer</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">The Real Stuff: <span class="term" data-definition="A container is a lightweight, standalone package that includes everything needed to run a piece of software — code, libraries, and settings. Docker is the most popular tool for creating and running containers.">Docker Containers</span></h1>
+      <p class="module-subtitle">A flight simulator with real engines — most things are simulated (the clouds, the weather), but the engines are real. If your plane flies in the simulator, it will fly in real life too.</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Why Real Containers Matter -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Why Real Containers Matter</h2>
+        <p>Most AWS emulators take a shortcut: they <span class="term" data-definition="A mock is a fake version of a service that pretends to work but doesn't actually do anything. It says 'your data was saved' even when nothing happened — like a restaurant where the kitchen is just a photo.">mock</span> everything. Ask them to save data? "Sure, saved!" — but nothing actually happened. Run a SQL query? "Here's a fake result!" — your typo goes undetected.</p>
+        <p>Floci takes a different approach. It simulates the AWS control plane (the APIs you call), but for the heavy lifting, it runs <strong>real engines</strong>:</p>
+
+        <div class="pattern-cards animate-in stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🗄️</div>
+            <h4 class="pattern-title">Real <span class="term" data-definition="PostgreSQL is a powerful, open-source relational database system. It stores structured data in tables and understands SQL — the language you use to query and modify that data.">PostgreSQL</span></h4>
+            <p class="pattern-desc">Spins up an actual postgres:16-alpine container. Your SQL queries execute against a real database engine — syntax errors, constraint violations, all genuine.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">⚡</div>
+            <h4 class="pattern-title">Real <span class="term" data-definition="Redis is an extremely fast in-memory data store, often used as a cache or message broker. ElastiCache is AWS's managed Redis service.">Redis</span></h4>
+            <p class="pattern-desc">Runs valkey/valkey:8 (Redis-compatible). Every SET, GET, and PUBSUB command works exactly as it would in production.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🐍</div>
+            <h4 class="pattern-title">Real Python / Node.js / Java</h4>
+            <p class="pattern-desc">Lambda functions execute in real <span class="term" data-definition="A runtime is the environment that actually executes your code. Python 3.12 runtime means your Python code runs inside a real Python 3.12 interpreter — not simulated.">runtimes</span> using official AWS <span class="term" data-definition="ECR (Elastic Container Registry) is AWS's repository for Docker container images. Think of it like an app store, but for containerized software packages.">ECR</span> images.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-accent animate-in">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Aha!</strong>
+            <p>The difference matters for debugging. If your <span class="term" data-definition="SQL (Structured Query Language) is the language used to communicate with relational databases. A SQL syntax error means you wrote the command incorrectly — like a grammar mistake the database can't understand.">SQL</span> query has a syntax error, a mock will never catch it. A real PostgreSQL container will tell you exactly what is wrong — the same error you would see in production.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: The Container Zoo -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The Container Zoo</h2>
+        <p>Here's every AWS service that Floci backs with a real Docker <span class="term" data-definition="A container image is a read-only template with instructions for creating a Docker container. It's like a recipe — the container is the actual dish you cook from it.">container image</span>. Each one is a real engine under the hood:</p>
+
+        <div class="icon-rows stagger-children">
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-1)">λ</div>
+            <div>
+              <strong>Lambda</strong>
+              <p>Uses AWS public ECR images for each <span class="term" data-definition="A runtime is the language environment your code runs in — Python, Node.js, Java, Go, etc. Lambda supports multiple runtimes, each with its own container image.">runtime</span> (Python, Node.js, Java, Go, etc.). Real execution environment — your code actually runs.</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🗄️</div>
+            <div>
+              <strong>RDS</strong>
+              <p>Spins up postgres:16-alpine or mysql:8.0. Real <span class="term" data-definition="SQL (Structured Query Language) is the standard language for interacting with relational databases. Real SQL means real errors, real constraints, real performance characteristics.">SQL</span> queries work — CREATE TABLE, INSERT, complex JOINs, everything.</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-4)">⚡</div>
+            <div>
+              <strong>ElastiCache</strong>
+              <p>Runs valkey/valkey:8 (Redis-compatible). Real <span class="term" data-definition="Redis is an in-memory data store used for caching, session management, and real-time messaging. Redis commands like SET, GET, LPUSH, PUBLISH are the language you use to interact with it.">Redis</span> commands — SET, GET, HSET, PUBSUB, streams, Lua scripting.</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-3)">📨</div>
+            <div>
+              <strong>MSK</strong>
+              <p>Uses redpandadata/redpanda. Real <span class="term" data-definition="Kafka is a distributed event streaming platform used for real-time data feeds. Producers write messages to topics, consumers read them. MSK is AWS's managed Kafka service.">Kafka</span> protocol — produce messages, consume topics, consumer groups all work.</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-5)">🖥️</div>
+            <div>
+              <strong>EC2</strong>
+              <p>Launches Docker containers as "instances". <span class="term" data-definition="SSH (Secure Shell) is a protocol for remotely accessing a machine's command line. It lets you log into a server and run commands as if you were sitting at its keyboard.">SSH</span>, <span class="term" data-definition="UserData is a script that runs automatically when an EC2 instance first boots. It's how you tell the machine 'when you start up, install these packages and run this config.'">UserData</span>, and <span class="term" data-definition="IMDS (Instance Metadata Service) is an API running inside every EC2 instance. Your code can query it to discover its own IP, region, instance type — like the machine reading its own ID card.">IMDS</span> all work inside the container.</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-1)">⎈</div>
+            <div>
+              <strong>ECS &amp; EKS</strong>
+              <p>Real <span class="term" data-definition="Orchestration is the automated management of containers — starting, stopping, scaling, and networking them. ECS and Kubernetes are both orchestration systems.">container orchestration</span>. EKS starts a <span class="term" data-definition="k3s is a lightweight Kubernetes distribution — it implements the full Kubernetes API but uses fewer resources. Think of it as Kubernetes on a diet.">k3s</span> <span class="term" data-definition="Kubernetes (K8s) is a container orchestration platform that manages clusters of containers at scale. It handles scheduling, scaling, networking, and self-healing — like an air traffic controller for your containers.">Kubernetes</span> cluster inside Docker. Deploy pods, services, ingress — all real.</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🔨</div>
+            <div>
+              <strong>CodeBuild</strong>
+              <p>Executes real <span class="term" data-definition="A buildspec is a YAML file that defines the phases of a build project — install dependencies, run pre-build commands, build, and post-build. It's the recipe for how your code gets compiled and packaged.">buildspec</span> phases in Docker containers. Install, pre_build, build, post_build — each phase runs for real.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Lambda — The Star of the Show -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Lambda — The Star of the Show</h2>
+        <p>Lambda has the most sophisticated <span class="term" data-definition="A container is a lightweight, standalone package that includes everything needed to run a piece of software. Docker is the most popular tool for creating and running containers.">container</span> management in Floci. Each runtime maps to a real AWS image:</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">Runtime</span>         <span class="code-operator">&rarr;</span> <span class="code-keyword">Docker Image</span></span>
+<span class="code-line"><span class="code-string">python3.12</span>      <span class="code-operator">&rarr;</span> public.ecr.aws/lambda/python:3.12</span>
+<span class="code-line"><span class="code-string">nodejs20.x</span>      <span class="code-operator">&rarr;</span> public.ecr.aws/lambda/nodejs:20.x</span>
+<span class="code-line"><span class="code-string">java21</span>          <span class="code-operator">&rarr;</span> public.ecr.aws/lambda/java:21</span>
+<span class="code-line"><span class="code-string">go1.x</span>           <span class="code-operator">&rarr;</span> public.ecr.aws/lambda/go:1</span>
+<span class="code-line"><span class="code-string">provided.al2023</span> <span class="code-operator">&rarr;</span> public.ecr.aws/lambda/provided:al2023</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Each Lambda runtime maps to a real AWS container image from ECR.</p>
+              <p class="tl">Python 3.12 uses the exact same image AWS runs in production.</p>
+              <p class="tl">Node.js 20 — same image, same Node version, same modules.</p>
+              <p class="tl">Java 21, Go 1.x — all production-grade runtime images.</p>
+              <p class="tl">Even custom runtimes (provided.al2023) use the real Amazon Linux 2023 base.</p>
+            </div>
+          </div>
+        </div>
+
+        <p>Your code runs in the <em>exact same environment</em> locally as it would in AWS. Same libraries, same file paths, same environment variables.</p>
+
+        <div class="badge-list animate-in stagger-children">
+          <div class="badge-item animate-in">
+            <span class="badge-code">Warm Pool</span>
+            <span class="badge-desc">Containers stay alive after first invoke — no <span class="term" data-definition="Cold start is the delay when a Lambda function is invoked for the first time (or after being idle). The container needs to be pulled and started — like a car engine that's been sitting overnight.">cold start</span> on subsequent calls</span>
+          </div>
+          <div class="badge-item animate-in">
+            <span class="badge-code">Function URLs</span>
+            <span class="badge-desc">Direct HTTP endpoints for Lambda functions — invoke via curl or browser</span>
+          </div>
+          <div class="badge-item animate-in">
+            <span class="badge-code">Event Source Mapping</span>
+            <span class="badge-desc">Lambda can be triggered by SQS, Kinesis, or DynamoDB Streams — real event-driven architecture</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: How Lambda Invokes Work -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">How Lambda Invokes Work</h2>
+        <p>Watch the full lifecycle of a Lambda invocation — from your API call to the container spinning up, your <span class="term" data-definition="A handler is the function inside your Lambda code that actually processes the event. It's the entry point — like the main() function in a regular program.">handler</span> executing, and the container staying warm:</p>
+
+        <div class="chat-window" id="chat-lambda-invoke">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="developer" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">D</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Developer</span>
+                <p>Invoke <code>my-function</code> with <span class="term" data-definition="A payload is the data you send to a Lambda function when you invoke it — the input your function will process. It's usually a JSON object.">payload</span> <code>{ name: 'Alice' }</code></p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="router" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">R</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">Router</span>
+                <p>Checking if a warm container exists for <code>my-function</code>...</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="lambda-svc" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">L</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">Lambda Service</span>
+                <p>No warm container. Pulling the <span class="term" data-definition="A runtime is the environment that executes your code. For Lambda, each language (Python, Node.js, etc.) has its own runtime packaged as a Docker image.">runtime</span> image from ECR... Starting container... Injecting your handler code.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="lambda-container" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">C</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">Lambda Container</span>
+                <p>Handler executed! Output: <code>{ greeting: 'Hello Alice' }</code></p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="lambda-svc" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">L</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">Lambda Service</span>
+                <p>Container is now <strong>warm</strong>. Next invoke will skip the pull step.</p>
+              </div>
+            </div>
+          </div>
+          <div class="chat-typing" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-2)">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">Next Message</button>
+            <button class="btn chat-all-btn">Play All</button>
+            <button class="btn chat-reset-btn">Replay</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Check Your Understanding</h2>
+
+        <div class="quiz-container animate-in" id="quiz-module4">
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">Scenario</span>
+              <p>You are testing a Lambda function that connects to an RDS <span class="term" data-definition="PostgreSQL is a powerful, open-source relational database system. It stores structured data in tables and understands SQL — the language you use to query and modify that data.">PostgreSQL</span> database. Your function fails with a <span class="term" data-definition="SQL (Structured Query Language) is the language used to communicate with relational databases. A SQL syntax error means you wrote the command incorrectly — like a grammar mistake the database can't understand.">SQL</span> syntax error. Where should you look to fix it?</p>
+            </div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly! Because Floci uses a real PostgreSQL container, SQL errors are real errors. Fix the query and it will work in both Floci and production."
+               data-explanation-wrong="Not quite. Floci runs a real PostgreSQL container — the SQL error is genuine, not a simulation artifact.">
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Check the Lambda <span class="term" data-definition="A runtime is the language environment your code runs in. The Lambda runtime configuration specifies which language and version to use.">runtime</span> configuration — maybe the container didn't start properly</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Fix the SQL query — Floci runs real PostgreSQL, so the error is genuine</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Switch to a <span class="term" data-definition="A mock is a fake version of a service that pretends to work but doesn't actually do anything. A mock database would accept any SQL without checking syntax.">mock</span> database for testing — it won't throw syntax errors</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">Check Answer</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 5 — Making It Last: Storage & Smart Tricks
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-5" style="background: var(--color-bg);">
+  <div class="module-content">
+
+    <!-- ── HEADER ──────────────────────────────────────────────── -->
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h2 class="module-title">Making It Last: Storage &amp; Smart Tricks</h2>
+      <p class="module-subtitle">A photographer's workflow — polaroids that fade by morning, prints stored in a box, digital photos that auto-sync, and film negatives developed immediately in a fireproof safe. Four ways to remember, each with a different trade-off.</p>
+    </header>
+
+    <!-- ── SCREEN 1: Four Ways to Remember ──────────────────────── -->
+    <div class="screen animate-in" id="s1-four-ways">
+      <h3 class="screen-heading">Four Ways to Remember</h3>
+
+      <p>
+        Floci has <strong>4 <span class="term" data-definition="How Floci stores your data — controlled by the FLOCI_STORAGE_MODE environment variable. Each mode trades off speed vs. durability differently.">storage modes</span></strong>,
+        controlled by the <code>FLOCI_STORAGE_MODE</code> <span class="term" data-definition="A configuration value set in your shell or docker-compose.yml that changes how a program behaves. Like a preference setting that programs read when they start.">env var</span>.
+        Each one balances speed and safety differently.
+      </p>
+
+      <!-- Pattern cards — 4 storage modes -->
+      <div class="pattern-cards stagger-children">
+
+        <div class="pattern-card animate-in" style="border-top-color: var(--color-actor-4);">
+          <div class="pattern-icon" style="background: #FDF3E7;">
+            <span style="color: var(--color-actor-4);">&#127912;</span>
+          </div>
+          <div class="pattern-title">Memory <span style="font-weight: 400; color: var(--color-text-muted); font-size: var(--text-xs);">(default)</span></div>
+          <p class="pattern-desc">
+            Entirely in <span class="term" data-definition="Random Access Memory — the fast, temporary storage your computer uses while running. Everything in RAM disappears when the program stops or the machine restarts.">RAM</span>. Data lost on stop. Like polaroids that fade by morning.
+          </p>
+          <p class="pattern-desc" style="margin-top: var(--space-2);"><strong>Best for:</strong> <span class="term" data-definition="A continuous integration pipeline — an automated system that runs your tests every time you push code. CI environments start fresh each run, so data persistence is unnecessary.">CI pipelines</span>, quick tests.</p>
+        </div>
+
+        <div class="pattern-card animate-in" style="border-top-color: var(--color-success);">
+          <div class="pattern-icon" style="background: var(--color-success-light);">
+            <span style="color: var(--color-success);">&#128230;</span>
+          </div>
+          <div class="pattern-title">Persistent</div>
+          <p class="pattern-desc">
+            Loaded at startup, flushed on <span class="term" data-definition="When a program stops cleanly (e.g., you press Ctrl+C or send a stop signal) rather than crashing. Floci uses this moment to save data to disk in persistent mode.">graceful shutdown</span>. Like prints stored in a box.
+          </p>
+          <p class="pattern-desc" style="margin-top: var(--space-2);"><strong>Best for:</strong> local dev with state preservation.</p>
+        </div>
+
+        <div class="pattern-card animate-in" style="border-top-color: var(--color-info);">
+          <div class="pattern-icon" style="background: var(--color-info-light);">
+            <span style="color: var(--color-info);">&#9729;&#65039;</span>
+          </div>
+          <div class="pattern-title">Hybrid</div>
+          <p class="pattern-desc">
+            In-memory speed + <span class="term" data-definition="Short for asynchronous — the operation happens in the background without blocking your code. Your request returns immediately while the save happens behind the scenes.">async</span> <span class="term" data-definition="Writing data from memory to permanent disk storage. Floci periodically flushes in-memory state to disk so data survives crashes.">flush</span> every 5s. Like digital photos that auto-sync.
+          </p>
+          <p class="pattern-desc" style="margin-top: var(--space-2);"><strong>Best for:</strong> best balance of speed and safety.</p>
+        </div>
+
+        <div class="pattern-card animate-in" style="border-top-color: var(--color-accent);">
+          <div class="pattern-icon" style="background: var(--color-accent-light);">
+            <span style="color: var(--color-accent);">&#128293;</span>
+          </div>
+          <div class="pattern-title">WAL</div>
+          <p class="pattern-desc">
+            <span class="term" data-definition="Write-Ahead Log — a technique where every change is written to a log file on disk BEFORE the operation is confirmed. If the program crashes, the log is replayed to restore the lost changes.">Write-Ahead Log</span> — every mutation logged to disk before responding. Like film negatives in a fireproof safe.
+          </p>
+          <p class="pattern-desc" style="margin-top: var(--space-2);"><strong>Best for:</strong> maximum <span class="term" data-definition="The guarantee that once data is saved, it will not be lost — even if the power goes out or the program crashes. Higher durability usually means slower writes.">durability</span>.</p>
+        </div>
+
+      </div>
+
+      <!-- Env var badge list -->
+      <div class="badge-list animate-in">
+        <div class="badge-item">
+          <code class="badge-code">FLOCI_STORAGE_MODE</code>
+          <span class="badge-desc">memory | persistent | hybrid | wal</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">FLOCI_STORAGE_PERSISTENT_PATH</code>
+          <span class="badge-desc">where data lives on disk (default: ./data)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SCREEN 2: Multi-Account Isolation ────────────────────── -->
+    <div class="screen animate-in" id="s2-isolation">
+      <h3 class="screen-heading">Multi-Account <span class="term" data-definition="Keeping things separate so they can't see or affect each other. Floci gives each AWS access key its own private namespace — resources from one account are invisible to another.">Isolation</span></h3>
+
+      <p>
+        If your <span class="term" data-definition="Amazon Web Services — the world's largest cloud computing platform, providing on-demand servers, databases, storage, and more over the internet.">AWS</span> access key ID is exactly 12 digits, Floci uses it as the account ID.
+        Resources from one account are <strong>invisible</strong> to another — full isolation, zero config.
+      </p>
+
+      <!-- Code ↔ English translation block -->
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">bash</span>
+          <span class="code-line"><span class="code-comment"># Account 1111 creates a queue</span></span>
+          <span class="code-line"><span class="code-property">AWS_ACCESS_KEY_ID</span>=<span class="code-string">111111111111</span> \</span>
+          <span class="code-line">  aws sqs create-queue \</span>
+          <span class="code-line">    --queue-name <span class="code-string">orders</span></span>
+          <span class="code-line"></span>
+          <span class="code-line"><span class="code-comment"># Account 2222 creates a queue</span></span>
+          <span class="code-line"><span class="code-property">AWS_ACCESS_KEY_ID</span>=<span class="code-string">222222222222</span> \</span>
+          <span class="code-line">  aws sqs create-queue \</span>
+          <span class="code-line">    --queue-name <span class="code-string">orders</span></span>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">In plain English</span>
+          <div class="translation-lines">
+            <div class="tl">Account 1111 creates a queue called <strong>orders</strong>.</div>
+            <div class="tl">Account 2222 creates a queue <em>also</em> called <strong>orders</strong>.</div>
+            <div class="tl">These are <strong>TWO SEPARATE queues</strong> — full isolation!</div>
+            <div class="tl">Each account sees only its own resources. Same names, different worlds.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent animate-in">
+        <span class="callout-icon">&#128161;</span>
+        <div class="callout-content">
+          <span class="callout-title">Why this matters</span>
+          <p>
+            You can run multiple test suites in parallel, each with its own account ID,
+            and they'll never interfere with each other. No need for separate containers or complex namespacing.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SCREEN 3: LocalStack Drop-In Replacement ─────────────── -->
+    <div class="screen animate-in" id="s3-drop-in">
+      <h3 class="screen-heading">LocalStack <span class="term" data-definition="A software that works identically to another one — you can swap it in without changing any code. Floci speaks the same AWS protocol as LocalStack, on the same port, with the same credentials.">Drop-In</span> Replacement</h3>
+
+      <p>
+        Already using LocalStack? Floci is a <strong>drop-in replacement</strong> — same port (4566),
+        same credentials, same SDK calls. Just swap the image name.
+      </p>
+
+      <!-- Env var translation badge list -->
+      <div class="badge-list animate-in">
+        <div class="badge-item">
+          <code class="badge-code">LOCALSTACK_HOST</code>
+          <span class="badge-desc" style="color: var(--color-text-muted);">&#8594;</span>
+          <code class="badge-code" style="background: var(--color-accent-light); color: var(--color-accent);">FLOCI_HOSTNAME</code>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">PERSISTENCE=1</code>
+          <span class="badge-desc" style="color: var(--color-text-muted);">&#8594;</span>
+          <code class="badge-code" style="background: var(--color-accent-light); color: var(--color-accent);">FLOCI_STORAGE_MODE=persistent</code>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">DEBUG=1</code>
+          <span class="badge-desc" style="color: var(--color-text-muted);">&#8594;</span>
+          <code class="badge-code" style="background: var(--color-accent-light); color: var(--color-accent);">QUARKUS_LOG_LEVEL=DEBUG</code>
+        </div>
+      </div>
+
+      <p>
+        Init scripts mounted at <code>/etc/localstack/init/</code> run unchanged —
+        your existing setup scripts keep working without modification.
+      </p>
+
+      <div class="callout callout-info animate-in">
+        <span class="callout-icon">&#128218;</span>
+        <div class="callout-content">
+          <span class="callout-title">Good to know</span>
+          <p>
+            The <code>-compat</code> image variant includes Python 3, AWS CLI, and boto3 pre-configured.
+            Use it if your init scripts call the AWS CLI.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SCREEN 4: Testcontainers ──────────────────────────────── -->
+    <div class="screen animate-in" id="s4-testcontainers">
+      <h3 class="screen-heading"><span class="term" data-definition="A testing library that automatically starts real services (databases, message queues, emulators) inside Docker containers for your tests. Each test gets its own fresh instance, isolated from everything else.">Testcontainers</span> — Testing Made Easy</h3>
+
+      <p>
+        Floci has <strong>first-class Testcontainers support</strong> in 4 languages.
+        Each test starts a fresh, isolated Floci instance — no shared state, no port conflicts.
+      </p>
+
+      <div class="icon-rows stagger-children">
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: #FDF3E7; color: var(--color-actor-4);">&#9749;</div>
+          <div>
+            <strong>Java</strong>
+            <p><code>io.floci:testcontainers-floci</code> — <span class="term" data-definition="The most popular testing framework for Java. It lets you write repeatable tests with annotations like @Test, assertions, and lifecycle management.">JUnit 5</span> + Spring Boot integration</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-success-light); color: var(--color-success);">&#128994;</div>
+          <div>
+            <strong>Node.js</strong>
+            <p><code>@floci/testcontainers</code> — <span class="term" data-definition="Popular JavaScript testing frameworks. Jest is batteries-included by Facebook; Vitest is a faster, Vite-native alternative. Both run tests in parallel and provide rich assertion libraries.">Jest/Vitest</span> integration</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-info-light); color: var(--color-info);">&#128013;</div>
+          <div>
+            <strong>Python</strong>
+            <p><code>testcontainers-floci</code> — <span class="term" data-definition="Python's most popular testing framework. Fixtures are reusable test setup objects (like a database connection) that pytest automatically creates and cleans up for each test.">pytest</span> fixture style</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: #E5DFD6; color: var(--color-text-muted);">&#128640;</div>
+          <div>
+            <strong>Go</strong>
+            <p>In progress — check the GitHub repo for the latest status.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SCREEN 5: The Big Picture ─────────────────────────────── -->
+    <div class="screen animate-in" id="s5-big-picture">
+      <h3 class="screen-heading">The Big Picture</h3>
+
+      <p>
+        Let's zoom out and see everything you've learned, organized as the architecture it really is:
+      </p>
+
+      <div class="file-tree animate-in" style="background: var(--color-surface); border-radius: var(--radius-md); padding: var(--space-6); box-shadow: var(--shadow-sm); border: 1px solid var(--color-border-light);">
+        <div class="ft-folder">
+          <span class="ft-name">floci/</span>
+          <div class="ft-children">
+            <div class="ft-file">
+              <span class="ft-name">HTTP Router</span>
+              <span class="ft-desc">(<span class="term" data-definition="Java API for RESTful Web Services — a standard Java framework for building HTTP APIs. Floci uses it to route incoming AWS API calls to the right handler.">JAX-RS</span> / <span class="term" data-definition="A high-performance, non-blocking networking toolkit for Java. Floci uses it alongside JAX-RS to handle many concurrent HTTP connections efficiently with minimal threads.">Vert.x</span>)</span>
+              <span class="ft-desc">— routes all incoming AWS API calls</span>
+            </div>
+            <div class="ft-file">
+              <span class="ft-name">Stateless Services</span>
+              <span class="ft-desc">— SSM, SQS, SNS, IAM, STS, KMS, EventBridge...</span>
+            </div>
+            <div class="ft-file">
+              <span class="ft-name">Stateful Services</span>
+              <span class="ft-desc">— S3, DynamoDB, DynamoDB Streams</span>
+            </div>
+            <div class="ft-file">
+              <span class="ft-name">Container Services</span>
+              <span class="ft-desc">— Lambda, RDS, ElastiCache, ECS, EC2, EKS...</span>
+            </div>
+            <div class="ft-file">
+              <span class="ft-name">Storage Backend</span>
+              <span class="ft-desc">— memory | persistent | hybrid | wal</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent animate-in">
+        <span class="callout-icon">&#128161;</span>
+        <div class="callout-content">
+          <span class="callout-title">Aha!</span>
+          <p>
+            Floci is written in Java and compiled to a <span class="term" data-definition="An executable file that runs directly on the operating system without needing a separate runtime or virtual machine. It starts instantly because there's no warmup phase.">native binary</span> using <span class="term" data-definition="GraalVM — a special Java tool that can compile Java code into a native binary ahead of time. The result starts in milliseconds instead of seconds, because there's no JVM warmup or runtime compilation.">GraalVM</span>.
+            This is why it starts in <strong>24ms</strong>, uses only <strong>13 MiB</strong> of memory,
+            and ships as a ~40 MB native executable.
+            No <span class="term" data-definition="Java Virtual Machine — the runtime that normally executes Java programs. It needs time to warm up and compile code as it runs, which is why traditional Java apps start slower.">JVM</span>,
+            no runtime overhead — just a lean, fast AWS emulator.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SCREEN 6: Final Quiz ──────────────────────────────────── -->
+    <div class="screen animate-in" id="s6-quiz">
+      <h3 class="screen-heading">Final Quiz</h3>
+
+      <div class="quiz-container animate-in" id="quiz-m5">
+        <div class="scenario-block">
+          <span class="scenario-label">Scenario</span>
+          <p class="scenario-context">
+            Your team runs integration tests in <span class="term" data-definition="A continuous integration pipeline — an automated system that runs your tests every time you push code. CI environments start fresh each run, so data persistence is unnecessary.">CI</span>.
+            Tests need a clean AWS environment each run, and they must finish fast.
+            Which storage mode and image tag should you use?
+          </p>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="B"
+             data-explanation-right="Perfect! Memory mode is fastest (no disk I/O), the standard image is smallest (~90 MB), and CI does not need persistence — each run starts fresh."
+             data-explanation-wrong="Not quite. Memory mode is the fastest because it has zero disk I/O overhead, and the standard (not compat) image is smallest. In CI, each test run gets a brand new instance — you don't need persistence at all.">
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="A" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              WAL mode + <code>latest-compat</code> image
+            </button>
+            <button class="quiz-option" data-value="B" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              Memory mode + <code>latest</code> (standard) image
+            </button>
+            <button class="quiz-option" data-value="C" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              Hybrid mode + <code>nightly</code> image
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m5')">Check Answer</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m5')">Try Again</button>
+        </div>
+      </div>
+
+      <!-- Answer explanations -->
+      <div class="callout callout-info animate-in" style="margin-top: var(--space-8);">
+        <span class="callout-icon">&#128218;</span>
+        <div class="callout-content">
+          <span class="callout-title">Why each answer matters</span>
+          <p>
+            <strong>Option A (WAL + compat)</strong> — <span class="term" data-definition="Write-Ahead Log — a technique where every change is written to a log file on disk BEFORE the operation is confirmed. If the program crashes, the log is replayed to restore the lost changes.">WAL</span> adds disk I/O overhead and the compat image is larger. You do not need persistence in CI — each test gets a fresh instance.
+          </p>
+          <p>
+            <strong>Option C (Hybrid + nightly)</strong> — Hybrid mode adds unnecessary overhead in CI. And nightly images may include unstable changes that break your tests unpredictably.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+  </main>
+
+</body>
+</html>

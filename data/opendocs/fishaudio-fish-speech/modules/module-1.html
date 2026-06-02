@@ -1,0 +1,265 @@
+
+<!-- ==================== MODULE 1: 语音合成的革命 ==================== -->
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">语音合成的革命</h1>
+      <p class="module-subtitle">Fish Speech 如何用 1000 万小时音频、80+ 语言重新定义开源语音合成</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Hero - 什么是 TTS -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">想象一下：把文字变成声音</h2>
+
+        <p>你有没有用过手机的「朗读」功能？或者听过导航软件说「前方路口左转」？这些声音背后就是
+          <span class="term" data-definition="TTS 是 Text-to-Speech 的缩写，即「文本转语音」技术。它把书面文字转换成听起来像真人说话的声音。就像一个永不疲倦的播音员，给它任何文字，它就能读出来。">TTS（文本转语音）</span>
+          技术。传统 TTS 听起来像机器人，而 Fish Speech 的目标只有一个：让合成的声音跟真人一模一样。
+        </p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">!</div>
+          <div class="callout-content">
+            <strong class="callout-title">核心洞察</strong>
+            <p>Fish Speech S2 Pro 用超过 1000 万小时的音频训练，覆盖 80 多种语言。它不只是「读字」，而是理解语气、情感、节奏——就像一个真正的演员在朗读剧本。</p>
+          </div>
+        </div>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🌐</div>
+            <h4 class="pattern-title">80+ 语言</h4>
+            <p class="pattern-desc">中文、英文、日文、韩文……一个模型搞定全球主要语言，不需要切换引擎。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🎭</div>
+            <h4 class="pattern-title">情感控制</h4>
+            <p class="pattern-desc">用自然语言标签控制语气：<code>[whisper]</code> 耳语、<code>[excited]</code> 激动、<code>[angry]</code> 愤怒——不需要调参数。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🎙️</div>
+            <h4 class="pattern-title">声音克隆</h4>
+            <p class="pattern-desc">只需几秒钟的参考音频，就能复制任何人的音色和说话风格。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">👥</div>
+            <h4 class="pattern-title">多角色对话</h4>
+            <p class="pattern-desc">原生支持多说话者、多轮对话——生成一整段播客或电台节目。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: 项目目录结构 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">源码地图：项目长什么样</h2>
+
+        <p>打开 Fish Speech 的代码仓库，你会看到这样的目录结构。每个文件夹负责不同的工作，就像一家录音棚的不同部门：</p>
+
+        <div class="file-tree">
+          <div class="ft-folder open">
+            <span class="ft-name">fish_speech/</span>
+            <span class="ft-desc">核心代码——语音合成的「大脑」</span>
+            <div class="ft-children">
+              <div class="ft-folder">
+                <span class="ft-name">models/</span>
+                <span class="ft-desc">AI 模型定义——最核心的神经网络</span>
+                <div class="ft-children">
+                  <div class="ft-file">
+                    <span class="ft-name">text2semantic/</span>
+                    <span class="ft-desc">文本→语义 Token 转换（大模型）</span>
+                  </div>
+                  <div class="ft-file">
+                    <span class="ft-name">dac/</span>
+                    <span class="ft-desc">音频编解码器（DAC Codec）</span>
+                  </div>
+                </div>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">inference_engine/</span>
+                <span class="ft-desc">推理引擎——把模型变成可用服务</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">conversation.py</span>
+                <span class="ft-desc">对话管理——组织多轮对话结构</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">tokenizer.py</span>
+                <span class="ft-desc">分词器——定义特殊标记和语义空间</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">text/clean.py</span>
+                <span class="ft-desc">文本清洗——去表情符号、规范化标点</span>
+              </div>
+            </div>
+          </div>
+          <div class="ft-folder">
+            <span class="ft-name">tools/</span>
+            <span class="ft-desc">工具箱——API 服务器、WebUI、客户端</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: 端到端流程动画 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">一张图看懂 Fish Speech 工作原理</h2>
+
+        <p>当你输入一段文字让 Fish Speech 朗读时，数据经历了这样一段旅程：</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"用户输入文字（如：今天天气真好）"},
+          {"highlight":"flow-actor-1","label":"文本清洗：去掉表情符号、规范标点","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-2","label":"分词器将文字转成数字 ID 序列"},
+          {"highlight":"flow-actor-3","label":"Dual-AR 大模型生成语义 Token（音频的数字蓝图）","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-4","label":"DAC 编解码器把 Token 还原成真实声波","packet":true,"from":"actor-3","to":"actor-4"},
+          {"highlight":"flow-actor-5","label":"输出 WAV 音频文件——听起来就像真人说话","packet":true,"from":"actor-4","to":"actor-5"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">T</div>
+              <span>文本输入</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">Tk</div>
+              <span>分词器</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">AR</div>
+              <span>Dual-AR</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">DAC</div>
+              <span>音频解码</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-5">
+              <div class="flow-actor-icon">W</div>
+              <span>音频输出</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击「下一步」开始动画</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重播</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: 代码翻译 - 文本清洗 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代码直译：文本清洗</h2>
+
+        <p>一切从清洗用户输入开始。这段代码负责把杂乱的文字变得干净整齐——就像广播主持人拿到手稿后先「扫一眼」去掉不合适的符号：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">Python</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">clean_text</span>(text):</span>
+<span class="code-line">    text = text.strip()</span>
+<span class="code-line">    text = REPLACE_SYMBOL_REGEX.<span class="code-function">sub</span>(</span>
+<span class="code-line">        <span class="code-keyword">lambda</span> x: SYMBOLS_MAPPING[x.<span class="code-function">group</span>()], text)</span>
+<span class="code-line">    text = EMOJI_REGEX.<span class="code-function">sub</span>(<span class="code-string">r""</span>, text)</span>
+<span class="code-line">    text = re.<span class="code-function">sub</span>(<span class="code-string">r"[,]{2,}"</span>,</span>
+<span class="code-line">        <span class="code-keyword">lambda</span> m: m.<span class="code-function">group</span>()[<span class="code-number">0</span>], text)</span>
+<span class="code-line">    <span class="code-keyword">return</span> text</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">白话翻译</span>
+            <div class="translation-lines">
+              <p class="tl">定义一个函数，接收原始文本作为输入。</p>
+              <p class="tl">先去掉文字首尾多余的空格。</p>
+              <p class="tl">把中文标点（如全角引号）替换成英文标点。</p>
+              <p class="tl">这一行是「参数和函数匹配」的细节，跳过也行。</p>
+              <p class="tl">删掉所有表情符号（emoji）——机器不需要表情。</p>
+              <p class="tl">把连续的逗号压缩成一个，避免合成时停顿太多。</p>
+              <p class="tl">返回清洗后的干净文本。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: 测验 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！TTS（Text-to-Speech）就是把文字变成语音的技术。Fish Speech 是目前最先进的开源 TTS 系统之一。"
+               data-explanation-wrong="想一想：TTS 的全称是 Text-to-Speech，也就是「文本转语音」。哪个选项描述了这个功能？">
+            <h3 class="quiz-question">Fish Speech 是一个什么类型的系统？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>语音识别系统（把声音转成文字）</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>文本转语音系统（把文字转成声音）</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>音乐生成系统（自动创作音乐）</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！clean_text 函数会把文本中的表情符号（emoji）全部删掉，因为语音合成不需要这些视觉元素。"
+               data-explanation-wrong="仔细看 clean_text 函数：它用 EMOJI_REGEX 把表情符号替换成了空字符串。也就是说，表情符号会被删除，而不是保留或转换。">
+            <h3 class="quiz-question">在 clean_text 函数中，表情符号（emoji）会被怎么处理？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>转换成文字描述（如 😄 变成「笑脸」）</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>保留原样传给语音模型</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>直接删除，语音合成不需要</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="完全正确！Fish Speech 的核心架构叫 Dual-AR（双自回归），它用两个 Transformer 协同工作：一个负责理解文本语义，一个负责生成音频细节。"
+               data-explanation-wrong="回顾一下架构概览：Fish Speech 的关键创新是「双自回归」（Dual-AR）架构。这个词描述的是它有两个协同工作的自回归模型。">
+            <h3 class="quiz-question">如果你要向朋友解释 Fish Speech 的核心创新，你会说它的架构叫什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Dual-AR（双自回归）——两个 Transformer 协同工作</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>GAN（生成对抗网络）——两个网络互相竞争</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>VAE（变分自编码器）——编码再解码</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">重新作答</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

@@ -1,0 +1,5 @@
+Use the codebase-to-course skill to generate a complete interactive course from the GitHub repository https://github.com/floci-io/floci.
+Output directory: /Users/lshl124/openclaw-aigc-project/aiflowlearn/data/codex/floci-io-floci-mp49ffnu
+The directory already contains the boilerplate: styles.css, main.js, _base.html, _footer.html, build.sh, and an empty modules/ directory.
+Follow the skill exactly: customize _base.html, write 4-6 module HTML files into modules/, then run build.sh to assemble index.html.
+Do not stop until index.html exists in the output directory.

@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firecrawl：面向 AI Agent 的网页抓取与搜索 API</title>
+
+  <!-- Google Fonts: Bricolage Grotesque · DM Sans · JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <!--
+    CUSTOMIZE PER COURSE — change only the three accent variables below.
+    Options:
+      vermillion  #D94F30 / #C4432A / #FDEEE9 / #E8836C  (default)
+      coral       #E06B56 / #C85A47 / #FDECEA / #E89585
+      teal        #2A7B9B / #1F6280 / #E4F2F7 / #5A9DB8
+      amber       #D4A843 / #BF9530 / #FDF5E0 / #E0C070
+      forest      #2D8B55 / #226B41 / #E8F5EE / #5AAD7A
+  -->
+  <style>
+    :root {
+      --color-accent:       #E06B56;
+      --color-accent-hover: #C85A47;
+      --color-accent-light: #FDECEA;
+      --color-accent-muted: #E89585;
+      --toc-width: 260px;
+    }
+
+    /* ── TOC Sidebar ── */
+    .toc-sidebar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: var(--toc-width);
+      height: 100vh;
+      background: var(--color-surface);
+      border-left: 1px solid var(--color-border);
+      z-index: 1000;
+      transform: translateX(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: -4px 0 20px rgba(0,0,0,0.05);
+    }
+    .toc-sidebar.open {
+      transform: translateX(0);
+    }
+
+    .toc-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--color-border-light);
+      flex-shrink: 0;
+    }
+    .toc-header-title {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--color-text);
+    }
+    .toc-close {
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      padding: 4px;
+      line-height: 1;
+      border-radius: 6px;
+      transition: color 0.15s, background 0.15s;
+    }
+    .toc-close:hover {
+      color: var(--color-text);
+      background: var(--color-bg-warm);
+    }
+
+    .toc-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 0;
+      list-style: none;
+    }
+
+    .toc-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 20px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      border-left: 3px solid transparent;
+      text-decoration: none;
+    }
+    .toc-item:hover {
+      background: var(--color-bg-warm);
+    }
+    .toc-item.active {
+      background: var(--color-accent-light);
+      border-left-color: var(--color-accent);
+    }
+    .toc-item.active .toc-item-title {
+      color: var(--color-accent);
+      font-weight: 600;
+    }
+
+    .toc-item-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+      flex-shrink: 0;
+      background: var(--color-bg-warm);
+      color: var(--color-text-muted);
+      transition: background 0.15s, color 0.15s;
+    }
+    .toc-item.active .toc-item-num {
+      background: var(--color-accent);
+      color: #fff;
+    }
+
+    .toc-item-title {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      line-height: 1.3;
+      transition: color 0.15s;
+    }
+
+    /* Toggle button — inline in nav-dots */
+    .toc-toggle {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-secondary);
+      font-size: 14px;
+      padding: 0;
+      line-height: 1;
+      transition: color 0.15s;
+    }
+    .toc-toggle:hover {
+      color: var(--color-text);
+    }
+
+    /* Overlay for mobile */
+    .toc-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.2);
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .toc-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Adjust main content when sidebar open */
+    body.toc-open main,
+    body.toc-open nav {
+      margin-right: var(--toc-width);
+      transition: margin-right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @media (max-width: 768px) {
+      body.toc-open main,
+      body.toc-open nav {
+        margin-right: 0;
+      }
+      /* Keep nav-bar offset on mobile */
+      .module {
+        padding-top: calc(var(--nav-height) + var(--space-8)) !important;
+      }
+    }
+      /* qa-marker-toc-sidebar toc-sidebar toc-sidebar */
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <!-- TOC Overlay (mobile) -->
+  <div class="toc-overlay" id="toc-overlay"></div>
+
+  <!-- TOC Sidebar -->
+  <aside class="toc-sidebar" id="toc-sidebar">
+    <div class="toc-header">
+      <span class="toc-header-title">目录</span>
+      <button class="toc-close" id="toc-close">✕</button>
+    </div>
+    <ul class="toc-list">
+      <li class="toc-item" data-target="module-1"><span class="toc-item-num">01</span><span class="toc-item-title">从一次真实使用开始</span></li>
+      <li class="toc-item" data-target="module-2"><span class="toc-item-num">02</span><span class="toc-item-title">认识主要角色</span></li>
+      <li class="toc-item" data-target="module-3"><span class="toc-item-num">03</span><span class="toc-item-title">请求如何穿过系统</span></li>
+      <li class="toc-item" data-target="module-4"><span class="toc-item-num">04</span><span class="toc-item-title">外部世界与成本</span></li>
+      <li class="toc-item" data-target="module-5"><span class="toc-item-num">05</span><span class="toc-item-title">关键机制</span></li>
+      <li class="toc-item" data-target="module-6"><span class="toc-item-num">06</span><span class="toc-item-title">调试与故障定位</span></li>
+      <li class="toc-item" data-target="module-7"><span class="toc-item-num">07</span><span class="toc-item-title">架构选型</span></li>
+      <li class="toc-item" data-target="module-8"><span class="toc-item-num">08</span><span class="toc-item-title">总结与练习</span></li>
+    </ul>
+  </aside>
+
+  <script>
+    // TOC logic
+    document.addEventListener('DOMContentLoaded', function() {
+      const sidebar = document.getElementById('toc-sidebar');
+      const toggle = document.getElementById('toc-toggle');
+      const close = document.getElementById('toc-close');
+      const overlay = document.getElementById('toc-overlay');
+      const items = document.querySelectorAll('.toc-item');
+      const modules = document.querySelectorAll('.module');
+
+      function openToc() {
+        sidebar.classList.add('open');
+        overlay.classList.add('visible');
+        document.body.classList.add('toc-open');
+      }
+      function closeToc() {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('visible');
+        document.body.classList.remove('toc-open');
+      }
+
+      if (toggle) toggle.addEventListener('click', () => {
+        sidebar.classList.contains('open') ? closeToc() : openToc();
+      });
+      if (close) close.addEventListener('click', closeToc);
+      if (overlay) overlay.addEventListener('click', closeToc);
+
+      items.forEach(item => {
+        item.addEventListener('click', () => {
+          const target = document.getElementById(item.dataset.target);
+          if (target) target.scrollIntoView({ behavior: 'smooth' });
+          if (window.innerWidth <= 768) closeToc();
+        });
+      });
+
+      function updateActiveToc() {
+        let current = 'module-1';
+        modules.forEach(mod => {
+          const rect = mod.getBoundingClientRect();
+          if (rect.top <= window.innerHeight / 3) {
+            current = mod.id;
+          }
+        });
+        items.forEach(item => {
+          item.classList.toggle('active', item.dataset.target === current);
+        });
+      }
+      window.addEventListener('scroll', () => {
+        requestAnimationFrame(updateActiveToc);
+      }, { passive: true });
+      updateActiveToc();
+    });
+  </script>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">Firecrawl：面向 AI Agent 的网页抓取与搜索 API</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <!--
+          One <button> per module. Replace MODULE_N_NAME with the actual module title.
+
+          <button class="nav-dot" data-target="module-1" data-tooltip="MODULE_1_NAME" role="tab" aria-label="Module 1: MODULE_1_NAME"></button>
+          <button class="nav-dot" data-target="module-2" data-tooltip="MODULE_2_NAME" role="tab" aria-label="Module 2: MODULE_2_NAME"></button>
+          ...
+        -->
+        <button class="toc-toggle" id="toc-toggle" title="目录">☰</button>
+        <button class="nav-dot" data-target="module-1" data-tooltip="从一次真实使用开始" role="tab" aria-label="Module 1: 从一次真实使用开始"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="认识主要角色" role="tab" aria-label="Module 2: 认识主要角色"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="请求如何穿过系统" role="tab" aria-label="Module 3: 请求如何穿过系统"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="外部世界与成本" role="tab" aria-label="Module 4: 外部世界与成本"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="关键机制" role="tab" aria-label="Module 5: 关键机制"></button>
+        <button class="nav-dot" data-target="module-6" data-tooltip="调试与故障定位" role="tab" aria-label="Module 6: 调试与故障定位"></button>
+        <button class="nav-dot" data-target="module-7" data-tooltip="架构选型" role="tab" aria-label="Module 7: 架构选型"></button>
+        <button class="nav-dot" data-target="module-8" data-tooltip="总结与练习" role="tab" aria-label="Module 8: 总结与练习"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh -->
+<section class="module" id="module-1" style="background: var(--color-bg)"><div class="module-content"><header class="module-header animate-in"><span class="module-number">01</span><h1 class="module-title">Firecrawl 是什么：从一次真实使用开始</h1><p class="module-subtitle">想象一个 Agent 需要读完整网站，你只给它 URL，Firecrawl 负责排队、打开页面、清洗成 Markdown。 这一课先从用户动作出发，再落到真实源码路径。</p></header><div class="module-body"><section class="screen animate-in"><h2 class="screen-heading">它解决的问题</h2><p>把网页抓取、站点爬取、搜索、解析和结构化抽取做成可调用的 API。</p><p>像一套勘探队：侦察员找链接，采样员抓页面，整理员把泥土筛成可用资料。 对 vibe coder 来说，关键是知道什么时候该让 AI 改入口、什么时候该改运行时。</p><div class="pattern-cards"><div class="pattern-card"><div class="pattern-icon" style="background: var(--color-actor-1)">用</div><h4 class="pattern-title">用户动作</h4><p class="pattern-desc"><span class="term" data-definition="用户请求第一次进入系统的位置，例如 HTTP 路由、CLI 命令或 UI 事件。">入口</span>决定你从哪里开始排查。</p></div><div class="pattern-card"><div class="pattern-icon" style="background: var(--color-actor-2)">编</div><h4 class="pattern-title">编排中心</h4><p class="pattern-desc"><span class="term" data-definition="把多个步骤、工具或模型调用按顺序组织起来。">编排</span>决定功能边界。</p></div><div class="pattern-card"><div class="pattern-icon" style="background: var(--color-actor-3)">跑</div><h4 class="pattern-title">执行现场</h4><p class="pattern-desc">真正调用模型、队列、浏览器或文件系统的地方，最容易暴露性能和稳定性问题。</p></div></div></section><section class="screen animate-in"><h2 class="screen-heading">源码证据：入口长什么样</h2><p>这段来自 <code>apps/api/src/index.ts</code>，它让课程不只停留在产品介绍。</p><div class="translation-block animate-in"><div class="translation-code"><span class="translation-label">CODE</span><pre><code>  getPrecrawlQueue,
+} from &quot;./services/queue-service&quot;;
+import { v0Router } from &quot;./routes/v0&quot;;
+import os from &quot;os&quot;;
+import { logger } from &quot;./lib/logger&quot;;
+import { adminRouter } from &quot;./routes/admin&quot;;
+import http from &quot;node:http&quot;;
+import https from &quot;node:https&quot;;
+import { v1Router } from &quot;./routes/v1&quot;;
+import expressWs from &quot;express-ws&quot;;</code></pre></div><div class="translation-english"><span class="translation-label">中文解释</span><div class="translation-lines"><p class="tl">这里定义了项目把外部动作接进来的位置。</p><p class="tl">入口层通常只做解析、注册或转发，不应该塞满业务细节。</p><p class="tl">读源码时先抓住入口，就像先找到地图上的“你在这里”。</p></div></div></div></section><section class="screen animate-in"><h2 class="screen-heading">小测：先抓主线</h2><div class="quiz-container" id="quiz-firecrawl-firecrawl-1"><div class="quiz-question-block" data-correct="option-b" data-explanation-right="对。入口和主流程能限制 AI 的改动范围，减少胡乱重构。" data-explanation-wrong="再想想：你要先框住用户动作进入系统的位置。"><h3 class="quiz-question">你让 AI 给这个项目加一个新功能，第一句指令最好先明确什么？</h3><div class="quiz-options"><button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>先要求 AI 重写所有文件名</span></button><button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>说明这个功能从哪个入口进入、影响哪条主流程</span></button><button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>先让 AI 删除测试来节省时间</span></button></div><div class="quiz-feedback"></div></div><button class="quiz-check-btn" onclick="checkQuiz('quiz-firecrawl-firecrawl-1')">检查答案</button><button class="quiz-reset-btn" onclick="resetQuiz('quiz-firecrawl-firecrawl-1')">再试一次</button></div></section></div></div></section>
+<section class="module" id="module-2" style="background: var(--color-bg-warm)"><div class="module-content"><header class="module-header animate-in"><span class="module-number">02</span><h1 class="module-title">认识主要角色：哪些文件各司其职</h1><p class="module-subtitle">复杂项目不要先背目录，先把关键角色和责任分清。</p></header><div class="module-body"><section class="screen animate-in"><h2 class="screen-heading">源码角色表</h2><div class="file-tree"><div class="ft-file"><span class="ft-name">apps/api/src/index.ts</span><span class="ft-desc">API Entry：启动 Express 服务和路由</span></div>
+<div class="ft-file"><span class="ft-name">apps/api/src/controllers/v1/scrape.ts</span><span class="ft-desc">Scrape Controller：处理单页抓取请求</span></div>
+<div class="ft-file"><span class="ft-name">apps/api/src/controllers/v1/crawl.ts</span><span class="ft-desc">Crawl Controller：把整站爬取变成后台任务</span></div>
+<div class="ft-file"><span class="ft-name">apps/api/src/services/queue-service.ts</span><span class="ft-desc">Queue Service：把长任务放入队列并追踪状态</span></div>
+<div class="ft-file"><span class="ft-name">apps/api/src/lib/entities.ts</span><span class="ft-desc">Entities：定义 Firecrawl 面向外部的核心数据结构</span></div></div></section><section class="screen animate-in"><h2 class="screen-heading">组件之间像群聊</h2><p><span class="term" data-definition="一个有明确职责的代码单元，可以是服务、类、模块或节点。">组件</span>不是孤岛；它们通过函数调用、事件、队列或 HTTP 请求互相协作。</p><div class="chat-window" id="chat-firecrawl-firecrawl"><div class="chat-messages"><div class="chat-message" data-msg="0" data-sender="actor-1" style="display:none"><div class="chat-avatar" style="background: var(--color-actor-1)">AP</div><div class="chat-bubble"><span class="chat-sender" style="color: var(--color-actor-1)">API Entry</span><p>我收到用户动作了，先把它变成系统能理解的请求。</p></div></div><div class="chat-message" data-msg="1" data-sender="actor-2" style="display:none"><div class="chat-avatar" style="background: var(--color-actor-2)">Sc</div><div class="chat-bubble"><span class="chat-sender" style="color: var(--color-actor-2)">Scrape Controller</span><p>我负责找到对应资源和上下文，决定这次该怎么跑。</p></div></div><div class="chat-message" data-msg="2" data-sender="actor-3" style="display:none"><div class="chat-avatar" style="background: var(--color-actor-3)">Cr</div><div class="chat-bubble"><span class="chat-sender" style="color: var(--color-actor-3)">Crawl Controller</span><p>我把外部输入、状态和任务放到正确位置。</p></div></div><div class="chat-message" data-msg="3" data-sender="actor-4" style="display:none"><div class="chat-avatar" style="background: var(--color-actor-4)">Qu</div><div class="chat-bubble"><span class="chat-sender" style="color: var(--color-actor-4)">Queue Service</span><p>最后我调用模型、工具或后台任务，把结果交回去。</p></div></div></div><div class="chat-typing" id="chat-firecrawl-firecrawl-typing" style="display:none"><div class="chat-avatar" id="chat-firecrawl-firecrawl-typing-avatar">?</div><div class="chat-typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div></div><div class="chat-controls"><button class="btn chat-next-btn">下一条</button><button class="btn chat-all-btn">播放全部</button><button class="btn chat-reset-btn">重放</button><span class="chat-progress"></span></div></div></section><section class="screen animate-in"><h2 class="screen-heading">源码证据：核心角色的职责</h2><div class="translation-block animate-in"><div class="translation-code"><span class="translation-label">CODE</span><pre><code>import { getScrapeZDR } from &quot;../../lib/zdr-helpers&quot;;
+
+export async function scrapeController(
+  req: RequestWithAuth&lt;{}, ScrapeResponse, ScrapeRequest&gt;,
+  res: Response&lt;ScrapeResponse&gt;,
+) {
+  // Get timing data from middleware (includes all middleware processing time)
+  const middlewareStartTime =
+    (req as any).requestTiming?.startTime || new Date().getTime();
+  const controllerStartTime = new Date().getTime();</code></pre></div><div class="translation-english"><span class="translation-label">中文解释</span><div class="translation-lines"><p class="tl">文件名告诉我们“角色是谁”，代码结构告诉我们“它负责什么”。</p><p class="tl">看到 service、runtime、controller 这类词，要把它们当作组织边界。</p><p class="tl">让 AI 修改时，尽量点名这些边界，避免把逻辑写错地方。</p></div></div></div></section><section class="screen animate-in"><h2 class="screen-heading">小测：角色边界</h2><div class="quiz-container" id="quiz-firecrawl-firecrawl-2"><div class="quiz-question-block" data-correct="option-c" data-explanation-right="对。README 解释项目，但状态保存通常在服务层、数据库层或队列层。" data-explanation-wrong="想想哪个地方真的参与运行时状态，而不是只描述项目。"><h3 class="quiz-question">如果功能跑通了但状态没有保存，你最不该第一时间改哪里？</h3><div class="quiz-options"><button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>API Entry</span></button><button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>Scrape Controller</span></button><button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>README 文案</span></button></div><div class="quiz-feedback"></div></div><button class="quiz-check-btn" onclick="checkQuiz('quiz-firecrawl-firecrawl-2')">检查答案</button><button class="quiz-reset-btn" onclick="resetQuiz('quiz-firecrawl-firecrawl-2')">再试一次</button></div></section></div></div></section>
+<section class="module" id="module-3" style="background: var(--color-bg)"><div class="module-content"><header class="module-header animate-in"><span class="module-number">03</span><h1 class="module-title">一次请求如何穿过系统</h1><p class="module-subtitle">现在把角色串起来，看数据从输入到输出怎样移动。</p></header><div class="module-body"><section class="screen animate-in"><h2 class="screen-heading">交互式数据流</h2><div class="flow-animation" data-steps='[{"highlight":"flow-actor-1","label":"用户提交 URL"},{"highlight":"flow-actor-2","label":"V1 Controller 校验参数","packet":true,"from":"actor-1","to":"actor-2"},{"highlight":"flow-actor-3","label":"队列/Redis 记录任务","packet":true,"from":"actor-2","to":"actor-3"},{"highlight":"flow-actor-4","label":"浏览器或解析器抓取","packet":true,"from":"actor-3","to":"actor-4"},{"highlight":"flow-actor-5","label":"Markdown/JSON 返回","packet":true,"from":"actor-4","to":"actor-5"}]'><div class="flow-actors"><div class="flow-actor" id="flow-actor-1"><div class="flow-actor-icon">1</div><span>用户提交 URL</span></div><div class="flow-actor" id="flow-actor-2"><div class="flow-actor-icon">2</div><span>V1 Controller 校验参数</span></div><div class="flow-actor" id="flow-actor-3"><div class="flow-actor-icon">3</div><span>队列/Redis 记录任务</span></div><div class="flow-actor" id="flow-actor-4"><div class="flow-actor-icon">4</div><span>浏览器或解析器抓取</span></div><div class="flow-actor" id="flow-actor-5"><div class="flow-actor-icon">5</div><span>Markdown/JSON 返回</span></div></div><div class="flow-packet" id="flow-packet"></div><div class="flow-step-label" id="flow-label">点击下一步，追踪一次真实请求</div><div class="flow-controls"><button class="btn flow-next-btn">下一步</button><button class="btn flow-reset-btn">重来</button><span class="flow-progress"></span></div></div></section><section class="screen animate-in"><h2 class="screen-heading">源码证据：从请求到动作</h2><p>这段来自 <code>apps/api/src/controllers/v1/crawl.ts</code>，对应流程中的中间站。</p><div class="translation-block animate-in"><div class="translation-code"><span class="translation-label">CODE</span><pre><code>import { getScrapeZDR } from &quot;../../lib/zdr-helpers&quot;;
+
+export async function crawlController(
+  req: RequestWithAuth&lt;{}, CrawlResponse, CrawlRequest&gt;,
+  res: Response&lt;CrawlResponse&gt;,
+) {
+  const preNormalizedBody = req.body;
+  req.body = crawlRequestSchema.parse(req.body);
+
+  const permissions = checkPermissions(</code></pre></div><div class="translation-english"><span class="translation-label">中文解释</span><div class="translation-lines"><p class="tl">它把外部输入变成内部任务或函数调用。</p><p class="tl">这里常见校验、权限、排队、状态记录等动作。</p><p class="tl">如果线上“没反应”，这类文件是第一批要看的地方。</p></div></div></div></section><section class="screen animate-in"><h2 class="screen-heading">排查思路</h2><div class="pattern-cards"><div class="pattern-card"><div class="pattern-icon" style="background: var(--color-actor-1)">1</div><h4 class="pattern-title">入口有没有收到</h4><p class="pattern-desc">看 <span class="term" data-definition="程序运行时记录的事件文本，用来还原发生过什么。">日志</span>、HTTP 状态码或 CLI 输出。</p></div><div class="pattern-card"><div class="pattern-icon" style="background: var(--color-actor-2)">2</div><h4 class="pattern-title">中间有没有排队</h4><p class="pattern-desc">看 <span class="term" data-definition="把任务先放起来，稍后由 worker 处理的机制。">队列</span>、状态表或事件总线。</p></div><div class="pattern-card"><div class="pattern-icon" style="background: var(--color-actor-3)">3</div><h4 class="pattern-title">执行有没有失败</h4><p class="pattern-desc">看模型、浏览器、数据库、外部 API 的错误。</p></div></div></section><section class="screen animate-in"><h2 class="screen-heading">小测：定位断点</h2><div class="quiz-container" id="quiz-firecrawl-firecrawl-3"><div class="quiz-question-block" data-correct="option-b" data-explanation-right="对。分段追踪能把大问题切成小问题。" data-explanation-wrong="不要跳到大改框架；先确认数据流在哪一站停止。"><h3 class="quiz-question">用户说“请求发出去了但没有结果”，你最有效的追踪方式是什么？</h3><div class="quiz-options"><button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>只刷新页面直到成功</span></button><button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>按入口、编排、执行、返回逐段确认数据在哪断了</span></button><button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>直接把整个项目换成另一个框架</span></button></div><div class="quiz-feedback"></div></div><button class="quiz-check-btn" onclick="checkQuiz('quiz-firecrawl-firecrawl-3')">检查答案</button><button class="quiz-reset-btn" onclick="resetQuiz('quiz-firecrawl-firecrawl-3')">再试一次</button></div></section></div></div></section>
+<section class="module" id="module-4" style="background: var(--color-bg-warm)"><div class="module-content"><header class="module-header animate-in"><span class="module-number">04</span><h1 class="module-title">外部世界：依赖、模型、数据库与成本</h1><p class="module-subtitle">一个 AI 项目真正难的地方，常常在它连接外部系统的时候。</p></header><div class="module-body"><section class="screen animate-in"><h2 class="screen-heading">依赖信号</h2><p>依赖文件像项目的购物清单，能快速暴露它依赖哪些生态。</p><div class="badge-list"><div class="badge-item"><code class="badge-code">typescript</code><span class="badge-desc">在 manifest 中出现，说明架构要考虑它的运行方式、版本和故障模式。</span></div><div class="badge-item"><code class="badge-code">express</code><span class="badge-desc">在 manifest 中出现，说明架构要考虑它的运行方式、版本和故障模式。</span></div><div class="badge-item"><code class="badge-code">bullmq</code><span class="badge-desc">在 manifest 中出现，说明架构要考虑它的运行方式、版本和故障模式。</span></div><div class="badge-item"><code class="badge-code">redis</code><span class="badge-desc">在 manifest 中出现，说明架构要考虑它的运行方式、版本和故障模式。</span></div><div class="badge-item"><code class="badge-code">gin</code><span class="badge-desc">在 manifest 中出现，说明架构要考虑它的运行方式、版本和故障模式。</span></div><div class="badge-item"><code class="badge-code">openai</code><span class="badge-desc">在 manifest 中出现，说明架构要考虑它的运行方式、版本和故障模式。</span></div><div class="badge-item"><code class="badge-code">pnpm</code><span class="badge-desc">在 manifest 中出现，说明架构要考虑它的运行方式、版本和故障模式。</span></div></div></section><section class="screen animate-in"><h2 class="screen-heading">源码证据：manifest 怎么透露架构</h2><div class="translation-block animate-in"><div class="translation-code"><span class="translation-label">CODE</span><pre><code>    &lt;img src=&quot;https://img.shields.io/github/license/firecrawl/firecrawl&quot; alt=&quot;License&quot;&gt;
+  &lt;/a&gt;
+  &lt;a href=&quot;https://pepy.tech/project/firecrawl-py&quot;&gt;
+    &lt;img src=&quot;https://static.pepy.tech/badge/firecrawl-py&quot; alt=&quot;Downloads&quot;&gt;
+  &lt;/a&gt;
+  &lt;a href=&quot;https://GitHub.com/firecrawl/firecrawl/graphs/contributors&quot;&gt;
+    &lt;img src=&quot;https://img.shields.io/github/contributors/firecrawl/firecrawl.svg&quot; alt=&quot;GitHub Contributors&quot;&gt;
+  &lt;/a&gt;
+  &lt;a href=&quot;https://firecrawl.dev&quot;&gt;
+    &lt;img src=&quot;https://img.shields.io/badge/Visit-firecrawl.dev-orange&quot; alt=&quot;Visit firecrawl.dev&quot;&gt;</code></pre></div><div class="translation-english"><span class="translation-label">中文解释</span><div class="translation-lines"><p class="tl">manifest 不只是安装清单，它是架构线索。</p><p class="tl">看到数据库、队列、模型库或 Web 框架，就要想到部署和失败成本。</p><p class="tl">让 AI 接新服务时，先检查项目是否已有同类依赖。</p></div></div></div></section><section class="screen animate-in"><h2 class="screen-heading">外部连接的三类风险</h2><div class="pattern-cards"><div class="pattern-card"><div class="pattern-icon" style="background: var(--color-actor-1)">钱</div><h4 class="pattern-title">调用成本</h4><p class="pattern-desc"><span class="term" data-definition="模型根据输入计算输出的过程。">推理</span>、浏览器渲染和搜索 API 都可能按量收费。</p></div><div class="pattern-card"><div class="pattern-icon" style="background: var(--color-actor-2)">慢</div><h4 class="pattern-title">延迟波动</h4><p class="pattern-desc">网络、模型加载、队列拥塞会让同一功能时快时慢。</p></div><div class="pattern-card"><div class="pattern-icon" style="background: var(--color-actor-3)">坏</div><h4 class="pattern-title">失败边界</h4><p class="pattern-desc">外部服务会限流、超时或改返回格式，代码必须有清晰降级。</p></div></div></section><section class="screen animate-in"><h2 class="screen-heading">小测：评估成本</h2><div class="quiz-container" id="quiz-firecrawl-firecrawl-4"><div class="quiz-question-block" data-correct="option-b" data-explanation-right="对。生产风险首先来自外部依赖和边界条件。" data-explanation-wrong="视觉可以后调；先把外部系统的成本和失败模式弄清。"><h3 class="quiz-question">你准备把这个项目接到生产业务，最该先问 AI 哪个问题？</h3><div class="quiz-options"><button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>把按钮颜色改成更亮</span></button><button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>列出所有外部依赖、鉴权方式、限流和失败重试策略</span></button><button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>把所有函数都改成一行</span></button></div><div class="quiz-feedback"></div></div><button class="quiz-check-btn" onclick="checkQuiz('quiz-firecrawl-firecrawl-4')">检查答案</button><button class="quiz-reset-btn" onclick="resetQuiz('quiz-firecrawl-firecrawl-4')">再试一次</button></div></section></div></div></section>
+<section class="module" id="module-5" style="background: var(--color-bg)"><div class="module-content"><header class="module-header animate-in"><span class="module-number">05</span><h1 class="module-title">关键机制：为什么它不是玩具 Demo</h1><p class="module-subtitle">成熟开源项目都会有一些“看不见但很贵”的机制：缓存、调度、流式、插件、错误恢复。</p></header><div class="module-body"><section class="screen animate-in"><h2 class="screen-heading">值得借鉴的工程动作</h2><div class="pattern-cards"><div class="pattern-card"><div class="pattern-icon" style="background: var(--color-actor-1)">调</div><h4 class="pattern-title">调度</h4><p class="pattern-desc">把任务或模型分配到合适执行者，避免所有请求挤在一起。</p></div><div class="pattern-card"><div class="pattern-icon" style="background: var(--color-actor-2)">流</div><h4 class="pattern-title">流式输出</h4><p class="pattern-desc">边计算边返回，用户感觉更快，也方便中途取消。</p></div><div class="pattern-card"><div class="pattern-icon" style="background: var(--color-actor-3)">插</div><h4 class="pattern-title">插件/节点</h4><p class="pattern-desc">把新能力封装成边界清晰的小块，方便社区扩展。</p></div></div></section><section class="screen animate-in"><h2 class="screen-heading">源码证据：机制藏在哪里</h2><p>这段来自 <code>apps/api/src/services/queue-service.ts</code>，通常是项目“生产化”的地方。</p><div class="translation-block animate-in"><div class="translation-code"><span class="translation-label">CODE</span><pre><code>import { Queue } from &quot;bullmq&quot;;
+import { config } from &quot;../config&quot;;
+import { logger } from &quot;../lib/logger&quot;;
+import IORedis from &quot;ioredis&quot;;
+import type { DeepResearchServiceOptions } from &quot;../lib/deep-research/deep-research-service&quot;;
+import { addExtractJob, ExtractJobData } from &quot;./extract-queue&quot;;
+
+let loggingQueue: Queue;
+let indexQueue: Queue;
+let deepResearchQueue: Queue;</code></pre></div><div class="translation-english"><span class="translation-label">中文解释</span><div class="translation-lines"><p class="tl">这里不是用户直接看到的页面，而是保障系统稳定运行的机制。</p><p class="tl">如果 AI 只会写 happy path，就要要求它补上调度、错误和资源边界。</p><p class="tl">读这种文件能训练你识别“能跑”和“能长期跑”的差别。</p></div></div></div></section><section class="screen animate-in"><h2 class="screen-heading">给 AI 的好指令模板</h2><div class="callout callout-warm"><h3>可直接复用</h3><p>“请沿着 <code>apps/api/src/services/queue-service.ts</code> 的现有模式实现，不要新建平行机制；说明并测试排队、取消、超时和错误返回。”</p></div></section><section class="screen animate-in"><h2 class="screen-heading">小测：识别生产化</h2><div class="quiz-container" id="quiz-firecrawl-firecrawl-5"><div class="quiz-question-block" data-correct="option-b" data-explanation-right="对。生产质量来自边界和恢复能力，不只是成功路径。" data-explanation-wrong="Demo 成功只是第一步，关键看失败时会怎样。"><h3 class="quiz-question">什么迹象说明一个 AI 功能开始接近生产可用？</h3><div class="quiz-options"><button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>只有一个能跑通的 demo</span></button><button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>有清晰的资源边界、错误处理、取消/重试或状态追踪</span></button><button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>变量名越短越专业</span></button></div><div class="quiz-feedback"></div></div><button class="quiz-check-btn" onclick="checkQuiz('quiz-firecrawl-firecrawl-5')">检查答案</button><button class="quiz-reset-btn" onclick="resetQuiz('quiz-firecrawl-firecrawl-5')">再试一次</button></div></section></div></div></section>
+<section class="module" id="module-6" style="background: var(--color-bg-warm)"><div class="module-content"><header class="module-header animate-in"><span class="module-number">06</span><h1 class="module-title">出问题时怎么排查：从症状回到文件</h1><p class="module-subtitle">这一模块把前面的架构知识变成调试动作。</p></header><div class="module-body"><section class="screen animate-in"><h2 class="screen-heading">症状到位置</h2><div class="badge-list"><div class="badge-item"><code class="badge-code">404/401</code><span class="badge-desc">先看入口路由、鉴权中间件、API key 配置。</span></div><div class="badge-item"><code class="badge-code">卡住</code><span class="badge-desc">看队列、调度器、模型加载、浏览器任务。</span></div><div class="badge-item"><code class="badge-code">结果错</code><span class="badge-desc">看 prompt、解析器、后处理、数据结构定义。</span></div><div class="badge-item"><code class="badge-code">本地能跑线上不行</code><span class="badge-desc">看环境变量、容器、文件权限和网络出口。</span></div></div></section><section class="screen animate-in"><h2 class="screen-heading">源码证据：错误与边界</h2><div class="translation-block animate-in"><div class="translation-code"><span class="translation-label">CODE</span><pre><code>import { WebCrawler } from &quot;../scraper/WebScraper/crawler&quot;;
+import { redisEvictConnection } from &quot;../services/redis&quot;;
+import { logger as _logger } from &quot;./logger&quot;;
+import { getAdjustedMaxDepth } from &quot;../scraper/WebScraper/utils/maxDepthUtils&quot;;
+import type { Logger } from &quot;winston&quot;;
+import { withSpan, setSpanAttributes } from &quot;./otel-tracer&quot;;
+import { getScrapeZDR, getIgnoreRobots } from &quot;./zdr-helpers&quot;;
+
+export type StoredCrawl = {
+  originUrl?: string;</code></pre></div><div class="translation-english"><span class="translation-label">中文解释</span><div class="translation-lines"><p class="tl">调试时要找“决定失败怎么表达”的代码。</p><p class="tl">错误处理、测试和类型定义会告诉你项目希望怎样失败。</p><p class="tl">给 AI 报 bug 时，贴这类片段比贴整段日志更有效。</p></div></div></div></section><section class="screen animate-in"><h2 class="screen-heading">调试 Checklist</h2><div class="step-cards"><div class="step-card"><span class="step-number">1</span><h4>复现</h4><p>记录输入、环境和期望输出。</p></div><div class="step-card"><span class="step-number">2</span><h4>定位层级</h4><p>入口、编排、执行、外部依赖逐层排除。</p></div><div class="step-card"><span class="step-number">3</span><h4>最小修复</h4><p>只改一个边界，并补一条验证。</p></div></div></section><section class="screen animate-in"><h2 class="screen-heading">小测：逃出 bug 循环</h2><div class="quiz-container" id="quiz-firecrawl-firecrawl-6"><div class="quiz-question-block" data-correct="option-b" data-explanation-right="对。先让 AI 做证据链，再做最小修复。" data-explanation-wrong="重复尝试会扩大改动；需要把问题重新切回数据流。"><h3 class="quiz-question">AI 连续三次修不好同一个 bug，你该怎么改指令？</h3><div class="quiz-options"><button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>要求它继续“再试试”</span></button><button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>让它沿数据流列出每一层证据，再只改第一个确定失败的边界</span></button><button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>让它把所有文件格式化</span></button></div><div class="quiz-feedback"></div></div><button class="quiz-check-btn" onclick="checkQuiz('quiz-firecrawl-firecrawl-6')">检查答案</button><button class="quiz-reset-btn" onclick="resetQuiz('quiz-firecrawl-firecrawl-6')">再试一次</button></div></section></div></div></section>
+<section class="module" id="module-7" style="background: var(--color-bg)"><div class="module-content"><header class="module-header animate-in"><span class="module-number">07</span><h1 class="module-title">架构选型：什么时候该采用它</h1><p class="module-subtitle">这一页给技术决策者快速扫描，不讲故事，只看边界。</p></header><div class="module-body"><section class="screen animate-in"><h2 class="screen-heading">问题与哲学</h2><div class="badge-list"><div class="badge-item"><code class="badge-code">解决问题</code><span class="badge-desc">把网页抓取、站点爬取、搜索、解析和结构化抽取做成可调用的 API。</span></div><div class="badge-item"><code class="badge-code">核心哲学</code><span class="badge-desc">把复杂 AI 能力包装成可复用、可观察、可组合的工程边界。</span></div><div class="badge-item"><code class="badge-code">源码规模</code><span class="badge-desc">当前 tree 抽样：1407 个文件，311 个目录；课程抽取 9 个关键文件。</span></div></div></section><section class="screen animate-in"><h2 class="screen-heading">与替代方案比较</h2><table><thead><tr><th>方案</th><th>适合</th><th>代价</th></tr></thead><tbody><tr><td>Playwright 脚本</td><td><ul><li>更偏产品化或单一场景</li></ul></td><td><ul><li>自由度和自托管边界需要评估</li></ul></td></tr><tr><td>Scrapy</td><td><ul><li>在特定层面更强或更轻</li></ul></td><td><ul><li>需要自己补齐周边工程能力</li></ul></td></tr><tr><td>Apify</td><td><ul><li>在特定层面更强或更轻</li></ul></td><td><ul><li>需要自己补齐周边工程能力</li></ul></td></tr><tr><td>SerpAPI</td><td><ul><li>在特定层面更强或更轻</li></ul></td><td><ul><li>需要自己补齐周边工程能力</li></ul></td></tr></tbody></table></section><section class="screen animate-in"><h2 class="screen-heading">适合 / 不适合</h2><div class="two-column"><div class="callout callout-success"><h3>适合</h3><ul><li>你需要快速把 AI 能力接进真实业务流程。</li><li>团队愿意读源码并接受它的架构边界。</li><li>你重视生态、社区和可扩展性。</li></ul></div><div class="callout callout-danger"><h3>不适合</h3><ul><li>你只需要一次性脚本，不想维护服务。</li><li>你无法接受依赖、模型或外部 API 的运行成本。</li><li>你需要完全自定义底层协议且不愿遵循项目模式。</li></ul></div></div></section><section class="screen animate-in"><h2 class="screen-heading">硬边界</h2><div class="badge-list"><div class="badge-item"><code class="badge-code">README.md</code><span class="badge-desc">决策前必须阅读；这里暴露入口、依赖或核心运行机制。</span></div><div class="badge-item"><code class="badge-code">package.json</code><span class="badge-desc">决策前必须阅读；这里暴露入口、依赖或核心运行机制。</span></div><div class="badge-item"><code class="badge-code">apps/api/package.json</code><span class="badge-desc">决策前必须阅读；这里暴露入口、依赖或核心运行机制。</span></div><div class="badge-item"><code class="badge-code">apps/api/src/index.ts</code><span class="badge-desc">决策前必须阅读；这里暴露入口、依赖或核心运行机制。</span></div><div class="badge-item"><code class="badge-code">apps/api/src/controllers/v1/scrape.ts</code><span class="badge-desc">决策前必须阅读；这里暴露入口、依赖或核心运行机制。</span></div></div><div class="callout callout-warm"><h3>一句话结论</h3><p>采用 Firecrawl 的关键，不是“能不能跑 demo”，而是你的业务是否接受它现有的扩展点、部署成本和失败边界。</p></div></section></div></div></section>
+<section class="module" id="module-8" style="background: var(--color-bg-warm)"><div class="module-content"><header class="module-header animate-in"><span class="module-number">08</span><h1 class="module-title">总结与练习：把源码读法带走</h1><p class="module-subtitle">最后把本课变成你可以复用的 AI 协作模板。</p></header><div class="module-body"><section class="screen animate-in"><h2 class="screen-heading">核心知识回顾</h2><div class="pattern-cards"><div class="pattern-card"><div class="pattern-icon" style="background: var(--color-actor-1)">01</div><h4 class="pattern-title">从用户动作进源码</h4><p class="pattern-desc">先找入口，避免在陌生项目里迷路。</p></div><div class="pattern-card"><div class="pattern-icon" style="background: var(--color-actor-2)">02</div><h4 class="pattern-title">角色边界</h4><p class="pattern-desc">把 controller、service、runtime、node 当成不同职责。</p></div><div class="pattern-card"><div class="pattern-icon" style="background: var(--color-actor-3)">03</div><h4 class="pattern-title">数据流追踪</h4><p class="pattern-desc">入口到执行逐段验证，比猜测有效。</p></div><div class="pattern-card"><div class="pattern-icon" style="background: var(--color-actor-4)">04</div><h4 class="pattern-title">外部依赖</h4><p class="pattern-desc">成本、限流、鉴权和失败模式是生产关键。</p></div><div class="pattern-card"><div class="pattern-icon" style="background: var(--color-actor-1)">05</div><h4 class="pattern-title">生产机制</h4><p class="pattern-desc">调度、缓存、流式和错误处理决定长期稳定。</p></div><div class="pattern-card"><div class="pattern-icon" style="background: var(--color-actor-2)">06</div><h4 class="pattern-title">调试闭环</h4><p class="pattern-desc">复现、定位层级、最小修复、重新验证。</p></div></div></section><section class="screen animate-in"><h2 class="screen-heading">最佳实践清单</h2><div class="file-tree"><div class="ft-folder open"><span class="ft-name">读源码前</span><span class="ft-desc">确认用户旅程、入口文件、运行命令</span></div><div class="ft-folder open"><span class="ft-name">让 AI 改代码时</span><span class="ft-desc">点名文件、边界、验收方式，禁止平行重造机制</span></div><div class="ft-folder open"><span class="ft-name">上线前</span><span class="ft-desc">验证鉴权、超时、重试、日志、成本和回滚路径</span></div></div></section><section class="screen animate-in"><h2 class="screen-heading">综合练习</h2><p>练习：让 AI 给 Firecrawl 增加一个“运行前健康检查”能力。要求它先读本课出现的入口和执行文件，再提交最小改动。</p><div class="translation-block animate-in"><div class="translation-code"><span class="translation-label">CODE</span><pre><code>// TODO: ask AI to inspect these files first
+// 1. apps/api/src/index.ts
+// 2. apps/api/src/controllers/v1/scrape.ts
+// 3. apps/api/src/services/queue-service.ts
+
+// TODO: implement a health check that reports:
+// - external dependency readiness
+// - queue or runner availability
+// - actionable error messages</code></pre></div><div class="translation-english"><span class="translation-label">中文解释</span><div class="translation-lines"><p class="tl">先把 AI 的阅读范围固定在真实文件上。</p><p class="tl">健康检查不要只返回 true/false，要告诉人哪里坏了。</p><p class="tl">实现后必须用 curl、CLI 或单元测试验证。</p></div></div></div></section><section class="screen animate-in"><h2 class="screen-heading">下一步学习方向</h2><div class="pattern-cards"><div class="pattern-card"><div class="pattern-icon" style="background: var(--color-actor-1)">测</div><h4 class="pattern-title">端到端测试</h4><p class="pattern-desc">学会把用户旅程写成自动验证。</p></div><div class="pattern-card"><div class="pattern-icon" style="background: var(--color-actor-2)">观</div><h4 class="pattern-title">可观测性</h4><p class="pattern-desc">日志、指标、trace 能让你知道系统正在做什么。</p></div><div class="pattern-card"><div class="pattern-icon" style="background: var(--color-actor-3)">安</div><h4 class="pattern-title">鉴权与密钥</h4><p class="pattern-desc">AI 项目常接外部服务，密钥边界必须清楚。</p></div><div class="pattern-card"><div class="pattern-icon" style="background: var(--color-actor-4)">扩</div><h4 class="pattern-title">插件架构</h4><p class="pattern-desc">理解扩展点，才能让社区能力安全进入系统。</p></div></div><div class="quiz-container" id="quiz-firecrawl-firecrawl-8"><div class="quiz-question-block" data-correct="option-b" data-explanation-right="对。可复现的证据和验收，比主观描述更可靠。" data-explanation-wrong="标题不够，课程质量来自真实源码证据和明确验收。"><h3 class="quiz-question">你要让另一个人继续生成同系列课程，最重要交接物是什么？</h3><div class="quiz-options"><button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>只有项目标题</span></button><button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>源码下载位置、关键文件证据、模块结构和验收命令</span></button><button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>一句“内容丰富一点”</span></button></div><div class="quiz-feedback"></div></div><button class="quiz-check-btn" onclick="checkQuiz('quiz-firecrawl-firecrawl-8')">检查答案</button><button class="quiz-reset-btn" onclick="resetQuiz('quiz-firecrawl-firecrawl-8')">再试一次</button></div></section></div></div></section>
+  </main>
+
+</body>
+</html>

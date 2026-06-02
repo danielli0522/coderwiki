@@ -1,0 +1,211 @@
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 1: React 是什么？
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">React 是什么？</h1>
+      <p class="module-subtitle">理解 React 的设计哲学、核心定位和为什么它改变了前端开发的格局</p>
+    </header>
+
+    <!-- ── Screen 1: React 的诞生与定位 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">React 的诞生与定位</h2>
+
+      <p>2013 年，Facebook（现 Meta）在 JSConf 上开源了一个名为 React 的 JavaScript 库。它的核心理念非常简单：<span class="term" data-definition="UI = f(state) 是 React 的核心理念。它将用户界面视为状态的函数映射：给定相同的状态，总是渲染出相同的 UI。这种声明式编程范式让开发者专注于「描述 UI 应该是什么样子」，而不是「如何一步步操作 DOM」。">UI = f(state)</span>——将用户界面视为状态的函数映射。</p>
+
+      <p>这个看似简单的理念，彻底改变了前端开发的范式。在 React 之前，开发者需要手动操作 DOM 来更新界面（命令式编程）；React 之后，开发者只需描述界面应该呈现什么样子，React 负责高效地更新 DOM（声明式编程）。</p>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">&#128161;</div>
+        <div class="callout-content">
+          <strong class="callout-title">为什么选择 React？</strong>
+          <p>React 并不是第一个前端框架，但它引入了三个革命性的概念：<strong>组件化</strong>（将 UI 拆分为独立、可复用的组件）、<strong>虚拟 DOM</strong>（通过 diff 算法最小化 DOM 操作）、<strong>单向数据流</strong>（数据从父组件流向子组件，可预测、可调试）。这三个概念至今仍是现代前端框架的设计基础。</p>
+        </div>
+      </div>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">&#128230;</div>
+          <h4 class="pattern-title">声明式编程</h4>
+          <p class="pattern-desc">你只需描述「UI 应该长什么样」，React 负责高效更新 DOM。当数据变化时，React 自动重新渲染组件，你不需要手动操作 DOM 节点。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">&#129513;</div>
+          <h4 class="pattern-title">组件化架构</h4>
+          <p class="pattern-desc">将复杂的 UI 拆分为独立、可复用的组件。每个组件管理自己的状态和渲染逻辑。组件可以嵌套组合，像乐高积木一样构建完整的界面。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">&#9889;</div>
+          <h4 class="pattern-title">虚拟 DOM</h4>
+          <p class="pattern-desc">React 在内存中维护一个虚拟 DOM 树。状态变化时，React 先在虚拟 DOM 上计算差异（diff），然后只更新真实 DOM 中变化的部分，避免昂贵的全量 DOM 操作。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+          <div class="pattern-icon" style="background: var(--color-actor-4)">&#127760;</div>
+          <h4 class="pattern-title">生态丰富</h4>
+          <p class="pattern-desc">React 拥有全球最大的前端生态系统：Next.js（全栈框架）、React Native（移动开发）、Redux/Zustand（状态管理）、React Router（路由）。一次学习，全栈受益。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 2: 第一个 React 组件 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">第一个 React 组件</h2>
+
+      <p>让我们从一个简单的 HelloMessage 组件开始，理解 React 组件的基本结构。</p>
+
+      <div class="code-translation">
+        <div class="translation-code">
+          <div class="translation-label">JSX</div>
+          <pre class="translation-lines"><code><span class="code-line"><span class="code-comment">// 最简单的 React 函数组件</span></span>
+<span class="code-line"><span class="code-keyword">function</span> <span class="code-comment">HelloMessage</span>({ name }) {</span>
+<span class="code-line">  <span class="code-keyword">return</span> (</span>
+<span class="code-line">    &lt;div className=<span class="code-string">"greeting"</span>&gt;</span>
+<span class="code-line">      &lt;h1&gt;Hello, {name}!&lt;/h1&gt;</span>
+<span class="code-line">      &lt;p&gt;Welcome to React&lt;/p&gt;</span>
+<span class="code-line">    &lt;/div&gt;</span>
+<span class="code-line">  );</span>
+<span class="code-line">}</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-comment">// 使用组件</span></span>
+<span class="code-line"><span class="code-keyword">const</span> root = ReactDOM.createRoot(</span>
+<span class="code-line">  document.getElementById(<span class="code-string">'root'</span>)</span>
+<span class="code-line">);</span>
+<span class="code-line">root.render(&lt;HelloMessage name=<span class="code-string">"Alice"</span> /&gt;);</span></code></pre>
+        </div>
+        <div class="translation-block animate-in">
+          <div class="translation-english">
+            <div class="translation-label">解读</div>
+            <p>React 组件的核心概念：</p>
+            <ul>
+              <li><strong>函数组件</strong>：一个返回 JSX 的普通 JavaScript 函数</li>
+              <li><strong>Props（{ name }）</strong>：组件的输入参数，父组件传入的数据</li>
+              <li><strong>JSX</strong>：JavaScript 的语法扩展，可以在 JS 中写类 HTML 结构</li>
+              <li><strong>className</strong>：React 中用 className 替代 class（class 是 JS 保留字）</li>
+              <li><strong>createRoot</strong>：React 18 的新 API，创建渲染根节点</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 3: React 渲染流程 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">React 渲染流程：从状态到界面</h2>
+
+      <p>理解 React 的渲染流程，是掌握 React 性能优化的基础。以下是 React 从状态变化到 DOM 更新的完整流程。</p>
+
+      <div class="flow-animation" data-steps='[
+        {"from": "状态变化", "to": "触发渲染", "label": "setState 或 props 变更", "packet": "TRIGGER"},
+        {"from": "触发渲染", "to": "虚拟DOM计算", "label": "调用组件函数生成新 VNode", "packet": "RENDER"},
+        {"from": "虚拟DOM计算", "to": "Diff算法", "label": "对比新旧虚拟 DOM 树", "packet": "DIFF"},
+        {"from": "Diff算法", "to": "最小更新", "label": "计算最小 DOM 操作集", "packet": "PATCH"},
+        {"from": "最小更新", "to": "真实DOM", "label": "批量执行 DOM 更新", "packet": "COMMIT"},
+        {"from": "真实DOM", "to": "useEffect", "label": "执行副作用回调", "packet": "EFFECT"}
+      ]'>
+        <div class="flow-actors">
+          <div class="flow-actor">
+            <div class="flow-actor-icon">&#128260;</div>
+            <span>状态变化</span>
+          </div>
+          <div class="flow-actor">
+            <div class="flow-actor-icon">&#9889;</div>
+            <span>触发渲染</span>
+          </div>
+          <div class="flow-actor">
+            <div class="flow-actor-icon">&#129513;</div>
+            <span>虚拟DOM计算</span>
+          </div>
+          <div class="flow-actor">
+            <div class="flow-actor-icon">&#128270;</div>
+            <span>Diff算法</span>
+          </div>
+          <div class="flow-actor">
+            <div class="flow-actor-icon">&#128295;</div>
+            <span>最小更新</span>
+          </div>
+          <div class="flow-actor">
+            <div class="flow-actor-icon">&#128187;</div>
+            <span>真实DOM</span>
+          </div>
+        </div>
+        <div class="flow-progress"></div>
+        <div class="flow-step-label"></div>
+        <div class="flow-controls">
+          <button class="btn flow-next-btn">下一步 &#8594;</button>
+          <button class="btn flow-reset-btn">重置</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 4: 课程路线图 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">课程路线图</h2>
+
+      <div class="file-tree animate-in">
+        <div class="ft-folder open">
+          <div class="ft-name">&#128193; 课程路线图</div>
+          <div class="ft-children">
+            <div class="ft-folder">
+              <div class="ft-name">&#128218; 模块 1：React 是什么（当前位置）</div>
+              <div class="ft-children">
+                <div class="ft-desc">设计哲学、第一个组件、渲染流程</div>
+              </div>
+            </div>
+            <div class="ft-folder">
+              <div class="ft-name">&#129504; 模块 2：核心概念</div>
+              <div class="ft-children">
+                <div class="ft-desc">组件、Props、State、Hooks、生命周期</div>
+              </div>
+            </div>
+            <div class="ft-folder">
+              <div class="ft-name">&#128736; 模块 3：实践应用</div>
+              <div class="ft-children">
+                <div class="ft-desc">状态管理、表单处理、API 集成、路由</div>
+              </div>
+            </div>
+            <div class="ft-folder">
+              <div class="ft-name">&#128640; 模块 4：进阶主题</div>
+              <div class="ft-children">
+                <div class="ft-desc">Context、性能优化、自定义 Hook、Server Components</div>
+              </div>
+            </div>
+            <div class="ft-folder">
+              <div class="ft-name">&#9989; 模块 5：总结与练习</div>
+              <div class="ft-children">
+                <div class="ft-desc">最佳实践、综合练习、React 生态</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="quiz-container">
+        <div class="quiz-question-block">
+          <p class="quiz-question">React 的核心理念 "UI = f(state)" 是什么意思？</p>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q1" class="quiz-option-radio" data-correct="false">
+              <span>UI 是一个函数，state 是函数名</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" class="quiz-option-radio" data-correct="true">
+              <span>用户界面是状态的函数映射——给定状态，渲染对应的 UI</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" class="quiz-option-radio" data-correct="false">
+              <span>状态是函数的输出</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" class="quiz-option-radio" data-correct="false">
+              <span>函数和状态是两个独立的概念</span>
+            </label>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</section>

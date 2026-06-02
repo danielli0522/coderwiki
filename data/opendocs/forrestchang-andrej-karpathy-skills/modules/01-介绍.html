@@ -1,0 +1,190 @@
+<section class="module" id="module-1">
+  <div class="module-content">
+    <h1>介绍：Andrej Karpathy 技能库</h1>
+    <p>本课程将带你深入了解 Andrej Karpathy 的编程技能和工程哲学。Karpathy 是前 Tesla AI 总监、OpenAI 联合创始人，他的"从零开始"教学风格影响了无数开发者。通过本课程，你将学习如何将这些技能应用于实际开发中。</p>
+
+    <section class="screen animate-in">
+      <h3>Andrej Karpathy 是谁？</h3>
+      <p>Andrej Karpathy 是深度学习领域最有影响力的教育者之一。他的核心贡献包括：在 Stanford 讲授 CS231n（计算机视觉课程）、担任 Tesla AI 总监领导 Autopilot 团队、创建 YouTube 频道分享"从零开始构建"系列教程。</p>
+      <div class="callout callout-accent">
+        <p><strong>Karpathy 的核心理念：</strong></p>
+        <ul>
+          <li><strong>从零开始构建</strong> — 不依赖高级框架，手动实现每一个组件，真正理解底层原理</li>
+          <li><strong>教学即学习</strong> — 通过教授他人来深化自己的理解（费曼学习法）</li>
+          <li><strong>简洁至上</strong> — 用最少的代码实现最核心的功能，拒绝不必要的复杂性</li>
+          <li><strong>工程实践导向</strong> — 理论结合实践，每个概念都配有可运行的代码</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>Karpathy 技能体系</h3>
+      <div class="pattern-cards">
+        <div class="pattern-card">
+          <h4>神经网络从零构建</h4>
+          <p>micrograd 项目：用 150 行 Python 实现自动微分引擎，理解反向传播的数学本质。</p>
+        </div>
+        <div class="pattern-card">
+          <h4>大语言模型构建</h4>
+          <p>makemore / nanoGPT：从字符级语言模型到 GPT 架构，逐步构建完整的语言模型。</p>
+        </div>
+        <div class="pattern-card">
+          <h4>视频处理工程</h4>
+          <p>video2x / vid2denseflow：视频超分辨率和光流估计的工程实现方法。</p>
+        </div>
+        <div class="pattern-card">
+          <h4>AI 工具开发</h4>
+          <p>pic2card / arxiv-sanity：实用的 AI 应用开发，涵盖图像处理和信息检索。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>micrograd：理解自动微分</h3>
+      <div class="code-translation">
+        <div class="code-block">
+          <pre><code># micrograd — Karpathy 的自动微分引擎
+# 完整实现不到 150 行代码
+
+class Value:
+    """存储标量值及其梯度"""
+    def __init__(self, data, _children=(), _op=''):
+        self.data = data
+        self.grad = 0.0
+        self._backward = lambda: None
+        self._prev = set(_children)
+        self._op = _op
+
+    def __add__(self, other):
+        other = other if isinstance(other, Value) else Value(other)
+        out = Value(self.data + other.data, (self, other), '+')
+
+        def _backward():
+            self.grad += 1.0 * out.grad
+            other.grad += 1.0 * out.grad
+        out._backward = _backward
+        return out
+
+    def __mul__(self, other):
+        other = other if isinstance(other, Value) else Value(other)
+        out = Value(self.data * other.data, (self, other), '*')
+
+        def _backward():
+            self.grad += other.data * out.grad
+            other.grad += self.data * out.grad
+        out._backward = _backward
+        return out
+
+    def relu(self):
+        out = Value(max(0, self.data), (self,), 'ReLU')
+
+        def _backward():
+            self.grad += (out.data > 0) * out.grad
+        out._backward = _backward
+        return out
+
+    def backward(self):
+        """反向传播：计算所有参数的梯度"""
+        topo = []
+        visited = set()
+
+        def build_topo(v):
+            if v not in visited:
+                visited.add(v)
+                for child in v._prev:
+                    build_topo(child)
+                topo.append(v)
+        build_topo(self)
+
+        self.grad = 1.0
+        for v in reversed(topo):
+            v._backward()
+
+    def __repr__(self):
+        return f"Value(data={self.data}, grad={self.grad})"
+
+# 使用示例：构建简单的计算图
+a = Value(2.0)
+b = Value(-3.0)
+c = Value(10.0)
+d = a * b + c       # d = 2 * (-3) + 10 = 4
+d.backward()
+print(f"a.grad = {a.grad}")  # -3.0 (dd/da = b)
+print(f"b.grad = {b.grad}")  # 2.0 (dd/db = a)
+print(f"c.grad = {c.grad}")  # 1.0 (dd/dc = 1)</code></pre>
+        </div>
+        <div class="translation">
+          <p>micrograd 是 Karpathy 教学方法的完美体现：用不到 150 行代码实现完整的自动微分引擎。核心思想是构建计算图（DAG），每个 Value 节点存储数据和梯度。<code>backward()</code> 通过拓扑排序实现反向传播。这个实现让你从根本上理解 PyTorch 的 autograd 是如何工作的。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>Karpathy 的学习方法论</h3>
+      <div class="callout callout-accent">
+        <p><strong>四步学习法：</strong></p>
+        <ol>
+          <li><strong>阅读论文</strong> — 原始论文是最权威的知识来源，不要只看博客摘要</li>
+          <li><strong>手动实现</strong> — 用纯 Python/NumPy 实现，不用框架，理解每一行</li>
+          <li><strong>可视化调试</strong> — 用 Jupyter Notebook 可视化中间结果，建立直觉</li>
+          <li><strong>教授他人</strong> — 写博客、录视频，用自己的话解释，发现理解盲区</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="screen animate-in">
+      <h3>Karpathy 的代表作品</h3>
+      <div class="code-translation">
+        <div class="code-block">
+          <pre><code># Karpathy 的 GitHub 开源项目（按学习难度排序）
+
+# 1. micrograd — 自动微分引擎（入门级）
+# github.com/karpathy/micrograd
+# 约 150 行 Python，理解反向传播
+# pip install micrograd
+
+# 2. nn-zero-to-hero — 神经网络零到英雄系列（初级）
+# YouTube 播放列表，从 micrograd 到 GPT
+# 包含 6 个独立项目，逐步进阶
+
+# 3. makemore — 字符级语言模型（中级）
+# github.com/karpathy/makemore
+# Bigram → MLP → RNN → WaveNet → Transformer 逐步构建
+
+# 4. nanoGPT — 最简 GPT 训练框架（中高级）
+# github.com/karpathy/nanoGPT
+# 可以在单 GPU 上训练 GPT-2 规模模型
+# 训练 Shakespeare 文本只需要几分钟
+
+# 5. minbpe — 最简 BPE tokenizer（中级）
+# github.com/karpathy/minbpe
+# 约 100 行代码实现 Byte Pair Encoding
+
+# 6. arxiv-sanity — 论文推荐系统（高级）
+# github.com/karpathy/arxiv-sanity-lite
+# 检索增强的论文推荐，完整的 Web 应用
+
+# 使用 nanoGPT 快速训练
+# git clone https://github.com/karpathy/nanoGPT
+# cd nanoGPT
+# python data/shakespeare_char/prepare.py
+# python train.py config/train_shakespeare_char.txt
+# python sample.py --out_dir=out-shakespeare-char</code></pre>
+        </div>
+        <div class="translation">
+          <p>Karpathy 的项目按难度递进：micrograd 是最简单的起点，理解自动微分；nn-zero-to-hero 系列覆盖完整知识体系；makemore 展示语言模型的演进；nanoGPT 是实战训练工具；minbte 深入 tokenizer。建议按照这个顺序学习，每个项目都有配套的 YouTube 视频讲解。</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="quiz">
+      <p class="quiz-question">Karpathy 的核心教学理念是什么？</p>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="true">从零开始构建，手动实现每个组件</button>
+        <button class="quiz-option" data-correct="true">教学即学习，通过教授他人深化理解</button>
+        <button class="quiz-option" data-correct="true">简洁至上，用最少代码实现核心功能</button>
+        <button class="quiz-option" data-correct="false">直接使用高级框架，不需要理解底层</button>
+      </div>
+    </div>
+  </div>
+</section>

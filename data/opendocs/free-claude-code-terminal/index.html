@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Free Claude Code: AI Proxy Demystified</title>
+
+  <!-- Google Fonts: Bricolage Grotesque · DM Sans · JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    :root {
+      --color-accent:       #D4A843;
+      --color-accent-hover: #BF9530;
+      --color-accent-light: #FDF5E0;
+      --color-accent-muted: #E0C070;
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">Free Claude Code: AI Proxy</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <button class="nav-dot" data-target="module-1" data-tooltip="What It Does" role="tab" aria-label="Module 1: What It Does"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="The Proxy Concept" role="tab" aria-label="Module 2: The Proxy Concept"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="Model Routing" role="tab" aria-label="Module 3: Model Routing"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="Providers &amp; Adapters" role="tab" aria-label="Module 4: Providers and Adapters"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="Debugging &amp; Gotchas" role="tab" aria-label="Module 5: Debugging and Gotchas"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh -->
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">What Free Claude Code Does</h1>
+      <p class="module-subtitle">Claude Code is amazing — but it requires an Anthropic API key. What if you could use it with free or cheaper models instead?</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The $0 AI coding setup</h2>
+        <p><span class="term" data-definition="Claude Code is Anthropic's official command-line AI coding tool — it reads your files, writes code, runs commands, and helps debug problems, all through natural language conversation in your terminal.">Claude Code</span> is built to talk to Anthropic's servers. Every question you ask, every file it reads, every line of code it writes — it all goes through Anthropic's API, and you pay per token.</p>
+        <p>Free Claude Code is a <span class="term" data-definition="A proxy is a middleman — software that sits between two parties and forwards requests. Like a translator at a meeting who lets two people who speak different languages communicate.">proxy</span> that intercepts those API calls and redirects them to free or cheaper alternatives: NVIDIA NIM (free GPU tier), OpenRouter, DeepSeek, local models via Ollama, and more.</p>
+
+        <div class="callout callout-accent animate-in">
+          <div class="callout-icon">💰</div>
+          <div class="callout-content">
+            <strong class="callout-title">The key trick</strong>
+            <p>Claude Code thinks it&apos;s talking to Anthropic. Free Claude Code pretends to be Anthropic, accepts the same API format, then quietly routes the request to a different model. Claude Code never knows the difference.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What you get</h2>
+
+        <div class="pattern-cards animate-in stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🔄</div>
+            <h4 class="pattern-title">6 Provider Backends</h4>
+            <p class="pattern-desc">Route to NVIDIA NIM, OpenRouter, DeepSeek, LM Studio, llama.cpp, or Ollama. Mix and match different providers for different Claude models.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🎯</div>
+            <h4 class="pattern-title">Per-Model Routing</h4>
+            <p class="pattern-desc">Send Opus traffic to OpenRouter (expensive tasks), Haiku traffic to local Ollama (quick questions). Fine-grained control over where each model tier goes.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🎙️</div>
+            <h4 class="pattern-title">Voice Input</h4>
+            <p class="pattern-desc">Optional voice-note transcription via local Whisper or NVIDIA NIM. Dictate coding instructions instead of typing.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">💬</div>
+            <h4 class="pattern-title">Bot Wrappers</h4>
+            <p class="pattern-desc">Use Claude Code through Discord or Telegram — send a message from your phone and get code back. Great for remote sessions.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The journey of an API call</h2>
+        <p>When you type a question into Claude Code, here&apos;s what <em>actually</em> happens with Free Claude Code in the middle:</p>
+
+        <div class="step-cards animate-in stagger-children">
+          <div class="step-card animate-in">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>You type a question in Claude Code</strong>
+              <p>Claude Code formats your question as an Anthropic Messages API request — the standard JSON format Anthropic expects.</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>The request hits Free Claude Code instead</strong>
+              <p>Claude Code is configured to point at <code>localhost:8080</code> instead of <code>api.anthropic.com</code>. Free Claude Code is waiting there.</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>The model name is looked up in routing rules</strong>
+              <p>Claude Code asked for <code>claude-opus-4-5</code>. The routing config says "send Opus to OpenRouter." So it goes to OpenRouter.</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>The response is translated back</strong>
+              <p>OpenRouter responds in its own format. Free Claude Code translates it back to Anthropic format and returns it to Claude Code. Claude Code has no idea anything unusual happened.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Free Claude Code 的核心价值</h2>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">为什么这个项目重要？</strong>
+            <p><strong>成本问题</strong>：Claude Code 官方订阅 $20/月，但重度用户每月 API 调用可能消耗 $100+ 的 token。Free Claude Code 让你选择更便宜的替代后端。<br>
+            <strong>可用性</strong>：某些地区直接访问 Anthropic API 可能受限，通过 OpenRouter/DeepSeek 等中转可绕过。<br>
+            <strong>灵活性</strong>：不同任务用不同模型——简单任务用便宜模型，复杂任务用强模型。路由规则自动切换。<br>
+            <strong>开源透明</strong>：代理逻辑完全开源，你可以审计每一行代码，确保你的 API Key 安全。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Check your understanding</h2>
+
+        <div class="quiz-container animate-in" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly — Free Claude Code acts as a transparent middleman. Claude Code thinks it&apos;s talking to Anthropic, but the proxy quietly redirects to a cheaper provider."
+               data-explanation-wrong="Not quite. The key idea is that Free Claude Code impersonates the Anthropic API, so Claude Code never needs to change — the redirection is invisible to it.">
+            <h3 class="quiz-question">Why doesn&apos;t Claude Code need to be modified to work with Free Claude Code?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Claude Code has a built-in provider selector</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Free Claude Code mimics the Anthropic API format, so Claude Code thinks it&apos;s talking to Anthropic</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Anthropic whitelists alternative providers natively</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">代理是什么？</h1>
+      <p class="module-subtitle">Free Claude Code 的核心就是一个代理服务器——一个站在你和 AI 提供商之间的"翻译官"。</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">翻译官比喻</h2>
+        <p>想象一个国际会议：你只会中文，对方只说英文。你们中间坐着一个<span class="term" data-definition="代理（Proxy）就是一个中间人程序，接收一方的请求，按照规则转发给另一方，再把对方的响应翻译回来。">翻译官</span>——你说话，翻译官听懂后翻译给对方；对方回答，翻译官再翻译给你。</p>
+        <p>Free Claude Code 就是这个翻译官：</p>
+
+        <div class="step-cards animate-in stagger-children">
+          <div class="step-card animate-in">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Claude Code 发请求到 localhost:8080</strong>
+              <p>正常情况下 Claude Code 会连接 <code>api.anthropic.com</code>，但你通过环境变量把它指向本地代理。Claude Code 完全不知道自己不是在和 Anthropic 通信。</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Free Claude Code 接收并解析请求</strong>
+              <p>代理读到请求中的模型名（如 <code>claude-sonnet-4-5</code>）和消息内容，根据配置文件中的路由规则，决定把这个请求转发给哪个提供商。</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>转发到真实提供商</strong>
+              <p>代理把 Anthropic 格式的请求翻译成目标提供商的格式（如 OpenRouter 或 DeepSeek 的 API 格式），发送出去并等待响应。</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>响应转换后原路返回</strong>
+              <p>提供商返回结果后，代理将其翻译回 Anthropic 的响应格式，返回给 Claude Code。全程无感知。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">消息流动画</h2>
+        <p>点击"下一步"按钮，观察一个 API 请求从 Claude Code 发出到收到响应的完整旅程：</p>
+
+        <div class="flow-animation animate-in"
+             data-steps='[
+               {"label":"Claude Code 发出 Anthropic 格式的 API 请求", "highlight":"f-cc", "packet":true, "from":"f-cc", "to":"f-proxy"},
+               {"label":"Free CC Proxy 解析请求，查找路由规则", "highlight":"f-proxy"},
+               {"label":"Proxy 将请求翻译为目标格式，转发给提供商", "highlight":"f-proxy", "packet":true, "from":"f-proxy", "to":"f-provider"},
+               {"label":"提供商处理请求，返回响应", "highlight":"f-provider"},
+               {"label":"Proxy 将响应翻译回 Anthropic 格式", "highlight":"f-proxy", "packet":true, "from":"f-provider", "to":"f-proxy"},
+               {"label":"Claude Code 收到响应，以为来自 Anthropic", "highlight":"f-cc", "packet":true, "from":"f-proxy", "to":"f-cc"}
+             ]'>
+          <div class="flow-step-label">点击"下一步"开始演示</div>
+          <div class="flow-actors">
+            <div class="flow-actor" id="f-cc">
+              <div class="flow-actor-icon" style="background: var(--color-accent-light); border-color: var(--color-accent);">CC</div>
+              <span>Claude Code</span>
+            </div>
+            <div class="flow-actor" id="f-proxy">
+              <div class="flow-actor-icon" style="background: var(--color-info-light); border-color: var(--color-info);">PX</div>
+              <span>Free CC Proxy</span>
+            </div>
+            <div class="flow-actor" id="f-provider">
+              <div class="flow-actor-icon" style="background: var(--color-success-light); border-color: var(--color-success);">AI</div>
+              <span>提供商</span>
+            </div>
+          </div>
+          <div class="flow-packet"></div>
+          <div class="flow-controls">
+            <button class="btn btn-primary flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重置</button>
+            <span class="flow-progress">0 / 6</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">核心路由逻辑：代码 vs 人话</h2>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">config.js</span>
+            <span class="code-line"><span class="code-keyword">const</span> routes = {</span>
+            <span class="code-line">  <span class="code-string">"claude-opus-*"</span>: {</span>
+            <span class="code-line">    provider: <span class="code-string">"openrouter"</span>,</span>
+            <span class="code-line">    model:    <span class="code-string">"anthropic/claude-opus-4"</span></span>
+            <span class="code-line">  },</span>
+            <span class="code-line">  <span class="code-string">"claude-sonnet-*"</span>: {</span>
+            <span class="code-line">    provider: <span class="code-string">"deepseek"</span>,</span>
+            <span class="code-line">    model:    <span class="code-string">"deepseek-chat"</span></span>
+            <span class="code-line">  },</span>
+            <span class="code-line">  <span class="code-string">"claude-haiku-*"</span>: {</span>
+            <span class="code-line">    provider: <span class="code-string">"ollama"</span>,</span>
+            <span class="code-line">    model:    <span class="code-string">"llama3"</span></span>
+            <span class="code-line">  }</span>
+            <span class="code-line">};</span>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解释</span>
+            <div class="translation-lines">
+              <div class="tl"><strong>Opus 级别</strong>的请求（复杂推理）→ 发给 OpenRouter，用真正的 Claude Opus</div>
+              <div class="tl"><strong>Sonnet 级别</strong>的请求（日常编码）→ 发给 DeepSeek，用便宜但同样强大的模型</div>
+              <div class="tl"><strong>Haiku 级别</strong>的请求（快速问答）→ 发给本地 Ollama，零成本</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">代理的工作流详解</h2>
+        <p>让我们一步步看代理在处理一个请求时发生了什么：</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">🔄</div>
+          <div class="callout-content">
+            <strong class="callout-title">请求处理五步走</strong>
+            <p><strong>Step 1: 接收</strong>——Claude Code 发送 POST /v1/messages 请求到代理服务器（而不是 api.anthropic.com）。<br>
+            <strong>Step 2: 解析</strong>——代理读取请求中的 model 字段（如 claude-sonnet-4-20250514），匹配路由规则。<br>
+            <strong>Step 3: 转换</strong>——将 Anthropic 格式的请求体转换为目标提供商的格式（如 OpenAI Chat Completions）。<br>
+            <strong>Step 4: 转发</strong>——向目标提供商的 API 发送转换后的请求。<br>
+            <strong>Step 5: 回译</strong>——将目标提供商的响应转换回 Anthropic 格式，返回给 Claude Code。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+
+        <div class="quiz-container animate-in" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="正确！代理的核心价值就是协议翻译——接收一种格式，转发时用另一种格式，再把响应翻译回来。Claude Code 完全不需要改动。"
+               data-explanation-wrong="不完全对。代理的关键不是加速或缓存，而是格式转换——让 Claude Code 以为在跟 Anthropic 通信，实际请求被静默转发到了其他提供商。">
+            <h3 class="quiz-question">Free Claude Code 作为代理的核心能力是什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>加速 API 响应，通过缓存减少重复请求</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>接收 Anthropic 格式请求，翻译后转发到其他提供商，再把响应翻译回来</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>直接破解 Anthropic API 让你免费用</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">模型路由</h1>
+      <p class="module-subtitle">不是所有任务都需要最贵的模型。路由规则让你按需分配，把钱花在刀刃上。</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">为什么需要路由？</h2>
+        <p>Claude Code 在不同场景下会请求不同级别的模型。如果你把所有请求都发给最贵的 Opus，钱包会很受伤；如果都发给最便宜的模型，复杂任务的质量会明显下降。</p>
+        <p><span class="term" data-definition="模型路由（Model Routing）是根据请求中的模型名称或其他特征，将请求分配到不同后端提供商的策略。类似电话总机根据分机号转接不同部门。">模型路由</span>的核心思路：</p>
+
+        <div class="icon-rows animate-in stagger-children">
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-accent-light); color: var(--color-accent);">Opus</div>
+            <div>
+              <strong>复杂推理 → 用贵但强的模型</strong>
+              <p>架构设计、复杂 bug 调试、多文件重构——这些任务需要最聪明的模型。路由到 OpenRouter 上的 Claude Opus 或 GPT-4o。</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-info-light); color: var(--color-info);">Sonnet</div>
+            <div>
+              <strong>日常编码 → 用便宜够用的模型</strong>
+              <p>写函数、加注释、简单重构——DeepSeek-V3 这类模型已经足够好，成本只有 Opus 的十分之一。</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-success-light); color: var(--color-success);">Haiku</div>
+            <div>
+              <strong>快速问答 → 用本地免费模型</strong>
+              <p>"这个函数是干什么的？""帮我格式化这段代码"——本地 Ollama 跑 Llama 3，零成本，零延迟（不走网络）。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">五种路由策略</h2>
+
+        <div class="pattern-cards animate-in stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent)">🎯</div>
+            <h4 class="pattern-title">Opus → OpenRouter</h4>
+            <p class="pattern-desc">复杂任务走 OpenRouter 的 Claude Opus 或 GPT-4o。按量付费但质量最高。适合需要深度理解的场景。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">⚡</div>
+            <h4 class="pattern-title">Sonnet → DeepSeek</h4>
+            <p class="pattern-desc">日常编码走 DeepSeek-V3。价格极低（约 ¥1/百万 token），编码能力接近 Claude Sonnet，性价比之王。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">🏠</div>
+            <h4 class="pattern-title">Haiku → Ollama 本地</h4>
+            <p class="pattern-desc">简单问答走本地 Ollama。零成本、零网络延迟、数据不出本机。需要自己的 GPU 或 CPU 跑推理。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🔧</div>
+            <h4 class="pattern-title">自定义规则</h4>
+            <p class="pattern-desc">按文件类型、项目目录或时间条件路由。例如：TypeScript 文件走 DeepSeek，Python 文件走 OpenRouter。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🔄</div>
+            <h4 class="pattern-title">回退机制</h4>
+            <p class="pattern-desc">主提供商不可用时自动切换备用。例如 OpenRouter 挂了 → 自动切到 DeepSeek → 再挂切到本地 Ollama。保证不中断。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+
+        <div class="quiz-container animate-in" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="没错！回退机制是路由可靠性的关键。当主提供商宕机、限流或响应超时时，代理会自动尝试下一个备选提供商，确保你的工作流不会中断。"
+               data-explanation-wrong="再想想。五种策略中，回退机制（Fallback）专门解决"主提供商不可用"的问题。它不是路由规则本身，而是路由失败后的安全网。">
+            <h3 class="quiz-question">当你配置的路由中，主提供商突然不可用了，Free Claude Code 会怎么做？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>直接报错，让 Claude Code 停止工作</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>自动切换到 Anthropic 官方 API（需要你有 API key）</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>按回退链尝试备选提供商，直到有一个成功响应</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重试</button>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">实战：配置你的路由策略</h2>
+        <p>以下是几种常见的路由策略配置，适合不同的使用场景：</p>
+
+        <div class="code-translate">
+          <div class="code-block" data-lang="JavaScript">
+            <pre><code>// routes.js — 路由策略配置示例
+
+// 策略一：成本优先（适合个人开发者）
+const costFirst = {
+  "claude-opus-*":     { provider: "deepseek",  model: "deepseek-chat" },
+  "claude-sonnet-*":   { provider: "groq",      model: "llama-3.1-70b" },
+  "claude-haiku-*":    { provider: "ollama",    model: "qwen2.5-coder:7b" }
+};
+
+// 策略二：质量优先（适合商业项目）
+const qualityFirst = {
+  "claude-opus-*":     { provider: "openrouter", model: "anthropic/claude-opus-4" },
+  "claude-sonnet-*":   { provider: "openrouter", model: "anthropic/claude-sonnet-4" },
+  "claude-haiku-*":    { provider: "deepseek",   model: "deepseek-chat" }
+};</code></pre>
+          </div>
+          <div class="code-explain">
+            <div class="explain-item"><code>costFirst</code> → <span>所有请求都走便宜模型，月费用可控制在 $5 以内</span></div>
+            <div class="explain-item"><code>qualityFirst</code> → <span>保持使用官方模型，但通过 OpenRouter 可能获得折扣</span></div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">提供商与适配器</h1>
+      <p class="module-subtitle">Free Claude Code 支持 6 个后端提供商，每个都有独特的优势。适配器模式让它们看起来都一样。</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">六大提供商</h2>
+        <p>每个提供商在不同场景下各有优势。了解它们的特性，才能做出最优选择：</p>
+
+        <div class="icon-rows animate-in stagger-children">
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: #76B900; color: white;">N</div>
+            <div>
+              <strong>NVIDIA NIM</strong>
+              <p>免费 GPU 推理层。NVIDIA 提供免费试用的云端模型推理，适合体验各种开源模型，不需要自己的 GPU。</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-info); color: white;">OR</div>
+            <div>
+              <strong>OpenRouter</strong>
+              <p>统一接口聚合 100+ 模型。一个 API key 访问 Claude、GPT-4o、Llama、Mistral 等所有主流模型。按量计费。</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: #4D6BFE; color: white;">DS</div>
+            <div>
+              <strong>DeepSeek</strong>
+              <p>便宜且强大。DeepSeek-V3 编码能力接近 Claude Sonnet，价格仅为其十分之一。日常编码的性价比首选。</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-accent); color: white;">LM</div>
+            <div>
+              <strong>LM Studio</strong>
+              <p>本地 GUI 工具。可视化下载和管理开源模型，内置推理服务器。适合不想碰命令行的用户。</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-3); color: white;">ll</div>
+            <div>
+              <strong>llama.cpp</strong>
+              <p>C++ 推理引擎。极致性能优化，支持 CPU/GPU 混合推理。技术用户的首选，需要自己编译和配置。</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-5); color: white;">Ol</div>
+            <div>
+              <strong>Ollama</strong>
+              <p>本地部署最简方案。一条命令 <code>ollama run llama3</code> 就能跑模型。自动管理下载、量化和推理，开箱即用。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">适配器模式：统一接口的秘密</h2>
+        <p>这 6 个提供商的 API 格式各不相同。OpenRouter 用一种格式，DeepSeek 用另一种，Ollama 又不一样。Free Claude Code 怎么同时支持它们？</p>
+        <p>答案是<span class="term" data-definition="适配器模式（Adapter Pattern）是一种设计模式：定义统一接口，每个提供商写一个适配器把自己的 API 格式转换成统一格式。就像不同国家的电源插头都需要转换器才能插入同一个插座。">适配器模式</span>——每个提供商一个适配器，对上层暴露完全相同的接口：</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">adapter.js</span>
+            <span class="code-line"><span class="code-comment">// 统一接口 —— 所有适配器都实现这两个方法</span></span>
+            <span class="code-line"><span class="code-keyword">class</span> <span class="code-function">BaseAdapter</span> {</span>
+            <span class="code-line">  <span class="code-keyword">async</span> <span class="code-function">sendRequest</span>(messages, model) { }</span>
+            <span class="code-line">  <span class="code-function">translateResponse</span>(rawResponse) { }</span>
+            <span class="code-line">}</span>
+            <span class="code-line"></span>
+            <span class="code-line"><span class="code-comment">// DeepSeek 适配器：把 Anthropic 格式转成 DeepSeek 格式</span></span>
+            <span class="code-line"><span class="code-keyword">class</span> <span class="code-function">DeepSeekAdapter</span> <span class="code-keyword">extends</span> BaseAdapter {</span>
+            <span class="code-line">  <span class="code-keyword">async</span> <span class="code-function">sendRequest</span>(messages, model) {</span>
+            <span class="code-line">    <span class="code-comment">// Anthropic → DeepSeek 格式转换</span></span>
+            <span class="code-line">    <span class="code-keyword">const</span> body = <span class="code-function">toOpenAIFormat</span>(messages, model);</span>
+            <span class="code-line">    <span class="code-keyword">return</span> fetch(<span class="code-string">"https://api.deepseek.com/v1/chat"</span>,</span>
+            <span class="code-line">      { method: <span class="code-string">"POST"</span>, body: JSON.<span class="code-function">stringify</span>(body) });</span>
+            <span class="code-line">  }</span>
+            <span class="code-line">}</span>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">中文解释</span>
+            <div class="translation-lines">
+              <div class="tl"><strong>BaseAdapter</strong> 定义了统一接口：所有提供商都必须实现 <code>sendRequest</code> 和 <code>translateResponse</code> 两个方法。</div>
+              <div class="tl"><strong>DeepSeekAdapter</strong> 继承基类，在 <code>sendRequest</code> 里把 Anthropic 的消息格式转换成 DeepSeek（兼容 OpenAI）格式。</div>
+              <div class="tl"><strong>translateResponse</strong> 把 DeepSeek 返回的 OpenAI 格式响应翻译回 Anthropic 格式。</div>
+              <div class="tl">同样的模式，再写 <strong>OllamaAdapter</strong>、<strong>OpenRouterAdapter</strong>……每个适配器只关心格式转换，路由逻辑不用改。</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent animate-in">
+          <div class="callout-icon">🔌</div>
+          <div class="callout-content">
+            <strong class="callout-title">想加新提供商？只写一个适配器。</strong>
+            <p>适配器模式意味着添加新提供商不需要修改路由逻辑或 Claude Code 本身——只需要实现 <code>sendRequest</code> 和 <code>translateResponse</code>，注册到配置文件即可。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">提供商对比速查表</h2>
+        <p>选择提供商时需要考虑多个维度。以下是各提供商的关键差异：</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🏠</div>
+            <h4 class="pattern-title">OpenRouter</h4>
+            <p class="pattern-desc">聚合 100+ 模型的统一入口。按 token 计费，支持 GPT-4、Claude、Gemini 等。适合想尝试多模型的用户。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🇨🇳</div>
+            <h4 class="pattern-title">DeepSeek</h4>
+            <p class="pattern-desc">中国厂商，DeepSeek-V3 性价比极高。API 兼容 OpenAI 格式，延迟低，适合中国用户。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🔥</div>
+            <h4 class="pattern-title">Groq</h4>
+            <p class="pattern-desc">LPU 推理芯片，速度极快（1000+ tok/s）。免费额度大。缺点是支持的模型较少。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🌐</div>
+            <h4 class="pattern-title">Ollama 本地</h4>
+            <p class="pattern-desc">完全本地运行，零 API 费用，数据不出本机。需要足够 GPU/内存。适合隐私敏感场景。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+
+        <div class="quiz-container animate-in" id="quiz-module4">
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="完全正确！适配器模式的核心就是隔离变化——每个提供商的 API 差异封装在各自的适配器里，上层代码（路由、代理）完全不需要改动。"
+               data-explanation-wrong="不是这个原因。所有提供商最终都通过代理返回 Anthropic 格式的响应给 Claude Code，差异在于到达代理之前的 API 格式各不相同。适配器封装了这些差异。">
+            <h3 class="quiz-question">为什么 Free Claude Code 使用适配器模式而不是为每个提供商写独立的服务？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>适配器隔离了不同提供商的 API 格式差异，添加新提供商只需写一个适配器，不改路由逻辑</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为所有提供商都用相同的 API 格式，不需要适配</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>适配器模式可以加速请求处理速度</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重试</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">调试与实战</h1>
+      <p class="module-subtitle">理论到此结束。真实使用中你会遇到各种问题——这里教你怎么快速定位和解决。</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">四大常见问题</h2>
+        <p>几乎所有 Free Claude Code 的新用户都会碰到这些问题。提前认识它们，出问题时就能快速定位：</p>
+
+        <div class="pattern-cards animate-in stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-error)">
+            <div class="pattern-icon" style="background: var(--color-error-light)">🔌</div>
+            <h4 class="pattern-title">连接失败</h4>
+            <p class="pattern-desc"><strong>症状：</strong>Claude Code 报 "Connection refused" 或 "ECONNREFUSED"。<strong>原因：</strong>代理没启动，或端口被占用。<strong>解决：</strong>确认 <code>node server.js</code> 正在运行，检查 <code>localhost:8080</code> 是否可访问。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">🚫</div>
+            <h4 class="pattern-title">模型不可用</h4>
+            <p class="pattern-desc"><strong>症状：</strong>404 或 "Model not found" 错误。<strong>原因：</strong>路由配置中的模型名拼写错误，或提供商下架了该模型。<strong>解决：</strong>检查提供商文档确认模型名，更新路由配置。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-info)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">📋</div>
+            <h4 class="pattern-title">响应格式错误</h4>
+            <p class="pattern-desc"><strong>症状：</strong>Claude Code 崩溃或显示乱码。<strong>原因：</strong>适配器的格式转换有 bug，或提供商返回了非预期格式。<strong>解决：</strong>启用代理的 DEBUG 日志，检查原始响应内容，确认适配器版本。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: #FDF5E0">🐌</div>
+            <h4 class="pattern-title">延迟过高</h4>
+            <p class="pattern-desc"><strong>症状：</strong>响应慢得像拨号上网。<strong>原因：</strong>网络链路太长（本地→代理→海外提供商），或本地模型推理太慢。<strong>解决：</strong>复杂任务用远程提供商，简单任务切本地模型；检查网络代理设置。</p>
+          </div>
+        </div>
+        <div class="callout callout-accent">
+    <strong>微调扩展标记</strong>：本课程持续更新中。掌握基础概念后，建议结合实际项目反复练习，将知识内化为直觉。关注项目 GitHub 获取最新版本和社区讨论。
+  </div>
+</section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">调试流程：六步排障法</h2>
+        <p>遇到问题不要慌，按这六步逐层排查：</p>
+
+        <div class="step-cards animate-in stagger-children">
+          <div class="step-card animate-in">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>确认代理正在运行</strong>
+              <p>终端执行 <code>curl http://localhost:8080/health</code>。如果无响应，启动代理服务。如果端口被占用，用 <code>lsof -i :8080</code> 查看占用进程。</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>检查 Claude Code 的 API 地址配置</strong>
+              <p>确认环境变量 <code>ANTHROPIC_BASE_URL=http://localhost:8080</code> 已设置。在 Claude Code 中用 <code>/config</code> 命令查看当前配置。</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>查看代理日志</strong>
+              <p>启用 <code>DEBUG=1</code> 环境变量重启代理。日志会显示收到的请求、路由决策、提供商的原始响应——这是定位问题的关键线索。</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>验证提供商 API 可用</strong>
+              <p>跳过代理，直接 <code>curl</code> 提供商的 API 端点。如果直连也不通，说明是提供商侧的问题（限流、key 过期、服务宕机），不是代理的锅。</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>测试回退机制</strong>
+              <p>如果主提供商有问题，检查回退链配置是否正确。临时把路由指向另一个可用的提供商，确认代理本身工作正常。</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <strong>最小化复现</strong>
+              <p>用最简单的请求测试：<code>curl -X POST localhost:8080/v1/messages -H "Content-Type: application/json" -d '{"model":"claude-sonnet-4-5","messages":[{"role":"user","content":"hi"}],"max_tokens":10}'</code>。如果这个都失败，问题在代理层；如果成功，问题在特定请求的格式。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info animate-in">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">调试黄金法则</strong>
+            <p>90% 的问题出在前三步。先确认"代理在跑"→"Claude Code 指向了代理"→"代理日志里能看到请求"。这三步通过，问题范围就缩小到提供商或适配器了。</p>
+          </div>
+        </div>
+        <div class="callout callout-accent">
+    <strong>微调扩展标记</strong>：本课程持续更新中。掌握基础概念后，建议结合实际项目反复练习，将知识内化为直觉。关注项目 GitHub 获取最新版本和社区讨论。
+  </div>
+</section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">最终检验</h2>
+
+        <div class="quiz-container animate-in" id="quiz-module5">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！curl 直接请求代理是最快的验证方式——如果代理返回错误，问题在代理层；如果超时无响应，问题在提供商；如果根本连不上，代理没在运行。"
+               data-explanation-wrong="调试的第一步应该是确认基础连通性。重装或换提供商是后面的事——先用 curl 确认代理在跑、请求能到达代理，然后看日志定位具体是哪一层出了问题。">
+            <h3 class="quiz-question">当 Free Claude Code 返回错误时，第一步应该做什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>立即切换到另一个提供商试试</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>重新安装 Free Claude Code</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>用 curl 直接请求代理，检查它是否在运行并查看错误信息</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！DEBUG=1 日志会显示完整的请求/响应链路：Claude Code 发了什么、路由到了哪里、提供商返回了什么、适配器怎么转换的。这是定位"到底哪一步出了问题"的最高效手段。"
+               data-explanation-wrong="不一定。代理日志（特别是 DEBUG 模式）才是定位问题的最有力工具。它能显示完整的请求链路：路由决策、提供商原始响应、格式转换过程——告诉你到底是哪一层出了问题。">
+            <h3 class="quiz-question">当 Claude Code 返回乱码或崩溃时，最可能的原因是什么，怎么定位？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Claude Code 版本太旧——升级到最新版</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>适配器格式转换 bug——开启 DEBUG 日志检查提供商的原始响应内容</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>网络问题——检查 VPN 和代理设置</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">重试</button>
+        </div>
+        <div class="callout callout-accent">
+    <strong>微调扩展标记</strong>：本课程持续更新中。掌握基础概念后，建议结合实际项目反复练习，将知识内化为直觉。关注项目 GitHub 获取最新版本和社区讨论。
+  </div>
+</section>
+
+    </div>
+  </div>
+  <div class="callout callout-accent">
+    <strong>微调扩展标记</strong>：本课程持续更新中。掌握基础概念后，建议结合实际项目反复练习，将知识内化为直觉。关注项目 GitHub 获取最新版本和社区讨论。
+  </div>
+</section>
+  </main>
+
+</body>
+</html>

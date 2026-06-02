@@ -1,0 +1,235 @@
+<!-- ───────────────────────────────────────────────────────────────
+     Module 2: The Three Neighborhoods
+     Floci's architecture has 3 zones — stateless, stateful, container
+     ─────────────────────────────────────────────────────────────── -->
+
+<section class="module" id="module-2" style="background:var(--color-bg-warm)">
+<div class="module-content">
+
+  <!-- ── MODULE HEADER ─────────────────────────────────────────── -->
+  <div class="module-header animate-in">
+    <span class="module-number">02</span>
+    <h2 class="module-title">The Three Neighborhoods</h2>
+    <p class="module-subtitle">Think of Floci as a university campus. There are lecture halls (stateless services that handle requests but don't remember you), a library (stateful services that store knowledge between visits), and a makerspace (container services that spin up real workshops when needed).</p>
+  </div>
+
+  <!-- ── SCREEN 1: The Campus Map ──────────────────────────────── -->
+  <div class="screen animate-in">
+    <h3 class="screen-heading">The Campus Map</h3>
+    <p>Floci organizes its 30+ emulated services into three distinct neighborhoods. Click any service below to learn what it does.</p>
+
+    <div class="arch-diagram">
+      <!-- Zone: Stateless Services -->
+      <div class="arch-zone">
+        <div class="arch-zone-label">Stateless Services</div>
+
+        <span class="arch-component" data-desc="SSM — Systems Manager. Manages instance state, run commands, and patch compliance. Stateless: each API call is independent.">&#x1F4CB; SSM</span>
+        <span class="arch-component" data-desc="SQS — Simple Queue Service. Decouples components with reliable message queues. Messages are stored briefly for delivery, but the service itself holds no long-term state.">&#x1F4EC; SQS</span>
+        <span class="arch-component" data-desc="SNS — Simple Notification Service. Publish-subscribe messaging. Sends notifications to subscribers instantly.">&#x1F514; SNS</span>
+        <span class="arch-component" data-desc="IAM — Identity and Access Management. Controls who can do what. Every request is validated independently — no sessions.">&#x1F511; IAM</span>
+        <span class="arch-component" data-desc="STS — Security Token Service. Issues temporary credentials. Stateless by design — each token is self-contained.">&#x1F510; STS</span>
+        <span class="arch-component" data-desc="KMS — Key Management Service. Creates and manages encryption keys. Each encrypt/decrypt call is stateless.">&#x1F5DD; KMS</span>
+        <span class="arch-component" data-desc="Secrets Manager — Stores and retrieves secrets (passwords, API keys). While secrets are persisted, each API call is stateless.">&#x1F512; Secrets Manager</span>
+        <span class="arch-component" data-desc="SES — Simple Email Service. Sends emails. Each send operation is independent — no server-side session state.">&#x1F4E7; SES</span>
+        <span class="arch-component" data-desc="Cognito — User authentication and identity pools. Each auth request is validated independently using JWT tokens.">&#x1F464; Cognito</span>
+        <span class="arch-component" data-desc="Kinesis — Real-time data streaming. In Floci's stateless zone because each put/get record operation is independent.">&#x1F30A; Kinesis</span>
+        <span class="arch-component" data-desc="EventBridge — Event bus that routes events between services. Routes events without maintaining state between invocations.">&#x1F4E1; EventBridge</span>
+        <span class="arch-component" data-desc="Step Functions — Coordinates multiple services into workflows. The orchestrator itself is stateless; state is stored in execution records.">&#x1F504; Step Functions</span>
+        <span class="arch-component" data-desc="CloudFormation — Infrastructure as Code. Provisions resources via templates. Each stack operation is independent.">&#x1F3D7; CloudFormation</span>
+        <span class="arch-component" data-desc="ACM — AWS Certificate Manager. Manages SSL/TLS certificates. Each certificate operation is a discrete API call.">&#x1F4DC; ACM</span>
+        <span class="arch-component" data-desc="API Gateway — Creates REST/HTTP APIs that route requests to backend services. Each request is routed independently.">&#x1F310; API Gateway</span>
+      </div>
+
+      <!-- Zone: Stateful Services -->
+      <div class="arch-zone">
+        <div class="arch-zone-label">Stateful Services</div>
+
+        <span class="arch-component" data-desc="S3 — Simple Storage Service. Object storage that persists files, images, and backups. Your data stays between requests. Supports versioning, multipart uploads, and pre-signed URLs.">&#x1F4C1; S3</span>
+        <span class="arch-component" data-desc="DynamoDB — NoSQL database. Fast key-value lookups, queries, and scans. Data is durable and persists across restarts. Supports indexes, TTL, and transactions.">&#x1F4CA; DynamoDB</span>
+        <span class="arch-component" data-desc="DynamoDB Streams — Change data capture. Watches for item-level changes in DynamoDB tables and triggers Lambda functions in response.">&#x1F4FC; DynamoDB Streams</span>
+      </div>
+
+      <!-- Zone: Container Services -->
+      <div class="arch-zone">
+        <div class="arch-zone-label">Container Services &#x1F433;</div>
+
+        <span class="arch-component" data-desc="Lambda — Serverless functions. Floci spins up real Docker containers to execute your function code. Supports Python, Node.js, Java, Go, .NET, and custom runtimes.">&#x26A1; Lambda</span>
+        <span class="arch-component" data-desc="ElastiCache — In-memory caching. Floci launches a real Redis or Memcached container to emulate caching behavior.">&#x1F4B0; ElastiCache</span>
+        <span class="arch-component" data-desc="RDS — Relational Database Service. Floci provisions a real database container (PostgreSQL, MySQL, etc.) for SQL operations.">&#x1F4BE; RDS</span>
+        <span class="arch-component" data-desc="MSK — Managed Streaming for Apache Kafka. Floci runs a real Kafka container for event streaming.">&#x1F50C; MSK</span>
+        <span class="arch-component" data-desc="ECS — Elastic Container Service. Orchestrates Docker containers for long-running services and tasks.">&#x1F6E2; ECS</span>
+        <span class="arch-component" data-desc="EC2 — Virtual machines. Floci emulates EC2 instance lifecycle — launch, describe, terminate — via container-based emulation.">&#x1F4BB; EC2</span>
+        <span class="arch-component" data-desc="EKS — Elastic Kubernetes Service. Managed Kubernetes clusters. Floci emulates the control plane for EKS API operations.">&#x1F433; EKS</span>
+        <span class="arch-component" data-desc="OpenSearch — Search and analytics engine. Floci provisions a real OpenSearch container for indexing and querying.">&#x1F50D; OpenSearch</span>
+        <span class="arch-component" data-desc="CodeBuild — Build and test service. Floci launches a real build container to compile code, run tests, and produce artifacts.">&#x1F528; CodeBuild</span>
+      </div>
+
+      <div class="arch-description">Click any service above to see what it does.</div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN 2: The Lecture Hall — Stateless Services ────────── -->
+  <div class="screen animate-in">
+    <h3 class="screen-heading">The Lecture Hall &mdash; <span class="term" data-definition="A stateless service handles each request independently, without remembering anything about previous requests. No sessions, no stored data between calls. The server treats every request as if it's the first time you've called it.">Stateless</span> Services</h3>
+    <p>These services handle requests but don't persist data between calls. Like a lecture hall — the professor answers your question, but doesn't write it down for next time.</p>
+
+    <div class="pattern-cards stagger-children">
+      <div class="pattern-card animate-in">
+        <div class="pattern-icon" style="background:var(--color-accent-light);">&#x1F4EC;</div>
+        <div class="pattern-title">SQS &amp; SNS</div>
+        <p class="pattern-desc">Message queues and <span class="term" data-definition="Pub/sub (publish/subscribe) is a messaging pattern where senders (publishers) send messages without knowing who will receive them. Subscribers express interest and receive relevant messages. Think of it like a campus mailroom — you drop a letter and the routing system delivers it.">pub/sub</span> notifications. SQS queues messages for reliable delivery; SNS broadcasts events to multiple subscribers. Like a campus mailroom — drop a letter, and it gets routed to the right mailbox.</p>
+      </div>
+      <div class="pattern-card animate-in">
+        <div class="pattern-icon" style="background:var(--color-info-light);">&#x1F511;</div>
+        <div class="pattern-title">IAM &amp; STS</div>
+        <p class="pattern-desc">Identity and access management. IAM defines who can do what (policies, roles, users). STS issues temporary credentials. Like student ID cards — each request proves who you are, independently of any previous request.</p>
+      </div>
+      <div class="pattern-card animate-in">
+        <div class="pattern-icon" style="background:var(--color-success-light);">&#x1F4E1;</div>
+        <div class="pattern-title">EventBridge &amp; Step Functions</div>
+        <p class="pattern-desc">Event routing and workflow orchestration. EventBridge connects events to targets (like a campus events board). Step Functions chains multiple service calls into coordinated workflows (like a graduation checklist).</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN 3: The Library — Stateful Services ─────────────── -->
+  <div class="screen animate-in">
+    <h3 class="screen-heading">The Library &mdash; <span class="term" data-definition="A stateful service remembers data between requests. It maintains state — files in S3 stay in S3, records in DynamoDB persist. Like a library that keeps its books on the shelves for your next visit.">Stateful</span> Services</h3>
+    <p>These services remember data between requests. Like a library — the books stay on the shelves even after you leave.</p>
+
+    <div class="icon-rows stagger-children">
+      <div class="icon-row animate-in">
+        <div class="icon-circle" style="background:var(--color-accent-light);">&#x1F4C1;</div>
+        <div>
+          <strong>S3 &mdash; <span class="term" data-definition="Object storage stores data as objects (files + metadata) in buckets. Unlike a file system, there are no folders — just flat keys. Perfect for files, images, backups, and static website hosting.">Object Storage</span></strong>
+          <p>Stores files, images, and backups as objects in buckets. Supports versioning (keep multiple versions of a file), multipart uploads (upload large files in chunks), and pre-signed URLs (temporary access links).</p>
+        </div>
+      </div>
+      <div class="icon-row animate-in">
+        <div class="icon-circle" style="background:var(--color-info-light);">&#x1F4CA;</div>
+        <div>
+          <strong>DynamoDB &mdash; <span class="term" data-definition="NoSQL databases store and retrieve data without requiring a fixed table schema or SQL. DynamoDB uses key-value pairs — give it a key (like user_id), and it instantly returns the value. Much faster than SQL for simple lookups.">NoSQL</span> Database</strong>
+          <p>Fast key-value lookups, queries, and scans. Supports secondary indexes (query by different attributes), TTL (automatically expire old items), and transactions (multi-item atomic operations).</p>
+        </div>
+      </div>
+      <div class="icon-row animate-in">
+        <div class="icon-circle" style="background:var(--color-success-light);">&#x1F4FC;</div>
+        <div>
+          <strong>DynamoDB Streams &mdash; <span class="term" data-definition="Change data capture (CDC) watches a database for any changes (inserts, updates, deletes) and emits events for each change. Like a librarian noting every time a book is borrowed or returned, so automated systems can react.">Change Data Capture</span></strong>
+          <p>Watches for item-level changes in DynamoDB tables and triggers Lambda functions in response. If a record is added, updated, or deleted — Streams catches it and kicks off the next step.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN 4: The Makerspace — Container Services ─────────── -->
+  <div class="screen animate-in">
+    <h3 class="screen-heading">The Makerspace &mdash; <span class="term" data-definition="A container is a lightweight, standalone package that includes everything needed to run a piece of software — code, runtime, libraries, and settings. Docker is the most popular tool for creating and running containers.">Container</span> Services &#x1F433;</h3>
+    <p>These services spin up real <span class="term" data-definition="Docker is a platform that packages applications into containers — standardized, portable units that run consistently on any machine. Floci uses Docker under the hood to emulate AWS services like Lambda, RDS, and ECS.">Docker</span> containers. When you invoke a Lambda function, Floci pulls a real container image from <span class="term" data-definition="ECR (Elastic Container Registry) is AWS's container image repository. Floci pulls official Lambda runtime images from public.ecr.aws — for example, public.ecr.aws/lambda/python:3.12 for Python functions.">ECR</span> and runs your code inside it.</p>
+
+    <div class="chat-window" id="chat-lambda">
+      <div class="chat-messages">
+        <!-- Message 1: Developer -->
+        <div class="chat-message" data-sender="developer" style="display:none;">
+          <div class="chat-avatar" style="background:var(--color-actor-1);">D</div>
+          <div class="chat-bubble">
+            <span class="chat-sender" style="color:var(--color-actor-1);">Developer</span>
+            <p>I need to test my Python Lambda function locally</p>
+          </div>
+        </div>
+
+        <!-- Message 2: HTTP Router -->
+        <div class="chat-message" data-sender="router" style="display:none;">
+          <div class="chat-avatar" style="background:var(--color-actor-2);">R</div>
+          <div class="chat-bubble">
+            <span class="chat-sender" style="color:var(--color-actor-2);">HTTP Router</span>
+            <p>Got it &mdash; Lambda service, spin up a Python 3.12 container</p>
+          </div>
+        </div>
+
+        <!-- Message 3: Lambda Service -->
+        <div class="chat-message" data-sender="lambda-svc" style="display:none;">
+          <div class="chat-avatar" style="background:var(--color-actor-3);">L</div>
+          <div class="chat-bubble">
+            <span class="chat-sender" style="color:var(--color-actor-3);">Lambda Service</span>
+            <p>Pulling <code style="font-family:var(--font-mono);font-size:0.85em;background:rgba(0,0,0,0.06);padding:2px 4px;border-radius:3px;">public.ecr.aws/lambda/python:3.12</code>... Container ready. Function deployed!</p>
+          </div>
+        </div>
+
+        <!-- Message 4: Developer -->
+        <div class="chat-message" data-sender="developer" style="display:none;">
+          <div class="chat-avatar" style="background:var(--color-actor-1);">D</div>
+          <div class="chat-bubble">
+            <span class="chat-sender" style="color:var(--color-actor-1);">Developer</span>
+            <p>Now <span class="term" data-definition="To invoke a Lambda function means to trigger its execution by sending an event (input data). The function runs, processes the event, and returns a result. In Floci, this happens inside a real Docker container.">invoke</span> it with a test event</p>
+          </div>
+        </div>
+
+        <!-- Message 5: Lambda Container -->
+        <div class="chat-message" data-sender="lambda-ctr" style="display:none;">
+          <div class="chat-avatar" style="background:var(--color-actor-4);">C</div>
+          <div class="chat-bubble">
+            <span class="chat-sender" style="color:var(--color-actor-4);">Lambda Container</span>
+            <p>Executing <span class="term" data-definition="The handler is the function in your code that processes Lambda events. It's the entry point — AWS (and Floci) calls this function with the event data, and it returns a response.">handler</span>... returned <code style="font-family:var(--font-mono);font-size:0.85em;background:rgba(0,0,0,0.06);padding:2px 4px;border-radius:3px;">{ statusCode: 200 }</code>. Done in 45ms.</p>
+          </div>
+        </div>
+
+        <!-- Message 6: Lambda Service -->
+        <div class="chat-message" data-sender="lambda-svc" style="display:none;">
+          <div class="chat-avatar" style="background:var(--color-actor-3);">L</div>
+          <div class="chat-bubble">
+            <span class="chat-sender" style="color:var(--color-actor-3);">Lambda Service</span>
+            <p>Keeping the container <span class="term" data-definition="A warm pool keeps containers running after their first invocation so subsequent calls are faster. The first call is a 'cold start' (pulling and starting the container). Keeping it warm eliminates that delay for the next invoke.">warm</span> for the next invoke &mdash; no <span class="term" data-definition="A cold start is the delay when a Lambda function is invoked for the first time (or after being idle). The container must be pulled, started, and the runtime initialized before your code can run. Subsequent calls on the same container are much faster.">cold start</span> next time</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-typing" style="display:none;">
+        <div class="chat-avatar" id="chat-lambda-typing-avatar" style="background:var(--color-actor-1);">D</div>
+        <div class="chat-typing-dots">
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+        </div>
+      </div>
+
+      <div class="chat-controls">
+        <button class="btn btn-primary chat-next-btn">Next Message</button>
+        <button class="btn chat-all-btn">Play All</button>
+        <button class="btn chat-reset-btn">Reset</button>
+        <span class="chat-progress">0 / 6 messages</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN 5: Quiz ─────────────────────────────────────────── -->
+  <div class="screen animate-in">
+    <h3 class="screen-heading">Check Your Understanding</h3>
+
+    <div class="quiz-container" id="quiz-m2">
+      <div class="quiz-question-block" data-correct="B" data-explanation-right="S3 stores files (images, backups, etc.) as objects — that's stateful storage. DynamoDB stores and queries metadata records — also stateful. Both persist data between requests, which is exactly what the Library (stateful) neighborhood does." data-explanationWrong="Think about which neighborhood persists data. Stateless services don't store anything. Container services spin up Docker. The stateful neighborhood (S3, DynamoDB) is the one that remembers data between requests.">
+        <div class="quiz-question">You're building a feature that needs to store uploaded images and query metadata about them. Which Floci 'neighborhood' handles each?</div>
+        <div class="quiz-options">
+          <button class="quiz-option" onclick="selectOption(this)" data-value="A">
+            <span class="quiz-option-radio"></span>
+            Both are handled by stateless services — they process the upload and query in a single request
+          </button>
+          <button class="quiz-option" onclick="selectOption(this)" data-value="B">
+            <span class="quiz-option-radio"></span>
+            Images go to S3 (stateful), metadata goes to DynamoDB (stateful) — both persist data
+          </button>
+          <button class="quiz-option" onclick="selectOption(this)" data-value="C">
+            <span class="quiz-option-radio"></span>
+            Images go to Lambda (container), metadata goes to SQS (stateless)
+          </button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <button class="quiz-check-btn" onclick="checkQuiz('quiz-m2')">Check Answer</button>
+      <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m2')">Try Again</button>
+    </div>
+  </div>
+
+</div>
+</section>

@@ -1,0 +1,357 @@
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 4: 交易引擎与数据中枢
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">交易引擎与数据中枢</h1>
+      <p class="module-subtitle">16+ 券商接入、Paper Trading 模拟引擎、100+ 数据连接器、SQLite 存储</p>
+    </header>
+
+    <!-- ── Screen 1: 交易引擎架构 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">交易引擎：一个 BrokerInterface，16+ 券商接入</h2>
+
+      <p>FinceptTerminal 的交易系统采用 <span class="term" data-definition="插件模式（Plugin Pattern）是一种设计模式——定义一个抽象接口（如 IBroker），然后为每个券商写一个具体的实现类（如 ZerodhaBroker、AlpacaBroker）。主系统只依赖抽象接口，不关心具体是哪个券商。新增券商只需写一个新类，不用改其他代码。">插件模式</span>——一个 <code>IBroker</code> 抽象接口，每个券商一个实现类。目前支持 16+ 个券商，覆盖印度、美国、欧洲市场。</p>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">🇮🇳</div>
+          <h4 class="pattern-title">印度券商 (10+)</h4>
+          <p class="pattern-desc">Zerodha、Angel One、Upstox、Fyers、Dhan、Groww、Kotak、IIFL、5paisa、AliceBlue、Shoonya、Motilal——覆盖印度主要券商。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">🇺🇸</div>
+          <h4 class="pattern-title">美国券商</h4>
+          <p class="pattern-desc">IBKR（盈透证券）、Alpaca、Tradier——支持美股交易。Alpaca 还提供原生 Paper Trading 环境。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">🇪🇺</div>
+          <h4 class="pattern-title">欧洲券商</h4>
+          <p class="pattern-desc">Saxo Bank（盛宝银行）——欧洲市场接入，支持多币种、多交易所。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+          <div class="pattern-icon" style="background: var(--color-actor-4)">₿</div>
+          <h4 class="pattern-title">加密货币</h4>
+          <p class="pattern-desc">Kraken（REST+WebSocket）、HyperLiquid（永续合约）——实时加密货币交易，WebSocket 推送毫秒级行情。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 2: 代码翻译 — BrokerInterface 接口 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">代码翻译：IBroker——所有券商的"合同"</h2>
+
+      <p>所有券商都必须实现 <code>IBroker</code> 接口——这是它们和交易引擎的"合同"。来看看这份合同规定了什么：</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-keyword">class</span> <span class="code-function">IBroker</span> {</span>
+<span class="code-line"><span class="code-keyword">public</span>:</span>
+<span class="code-line">  <span class="code-keyword">virtual</span> ~IBroker() = <span class="code-keyword">default</span>;</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">virtual</span> BrokerId <span class="code-function">id</span>()</span>
+<span class="code-line">    <span class="code-keyword">const</span> = <span class="code-number">0</span>;</span>
+<span class="code-line">  <span class="code-keyword">virtual</span> <span class="code-keyword">const</span> <span class="code-keyword">char</span>* <span class="code-function">name</span>()</span>
+<span class="code-line">    <span class="code-keyword">const</span> = <span class="code-number">0</span>;</span>
+<span class="code-line">  <span class="code-keyword">virtual</span> <span class="code-keyword">const</span> <span class="code-keyword">char</span>* <span class="code-function">base_url</span>()</span>
+<span class="code-line">    <span class="code-keyword">const</span> = <span class="code-number">0</span>;</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">virtual</span> BrokerProfile</span>
+<span class="code-line">    <span class="code-function">profile</span>() <span class="code-keyword">const</span> = <span class="code-number">0</span>;</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">virtual</span> <span class="code-keyword">void</span> <span class="code-function">placeOrder</span>(</span>
+<span class="code-line">    <span class="code-keyword">const</span> Order&amp;) = <span class="code-number">0</span>;</span>
+<span class="code-line">  <span class="code-keyword">virtual</span> <span class="code-keyword">void</span> <span class="code-function">cancelOrder</span>(</span>
+<span class="code-line">    <span class="code-keyword">const</span> QString&amp;) = <span class="code-number">0</span>;</span>
+<span class="code-line">  <span class="code-keyword">virtual</span> <span class="code-keyword">void</span> <span class="code-function">getPositions</span>()</span>
+<span class="code-line">    = <span class="code-number">0</span>;</span>
+<span class="code-line">};</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">IBroker 是抽象基类——不能直接实例化，只能被继承</p>
+            <p class="tl">虚析构函数——确保删除子类对象时正确清理资源</p>
+            <p class="tl">id() —— 返回券商唯一标识，如 "alpaca"、"zerodha"</p>
+            <p class="tl">name() —— 返回显示名称，如 "Alpaca"、"Zerodha"</p>
+            <p class="tl">base_url() —— 返回 API 基础 URL，如 "https://api.alpaca.markets"</p>
+            <p class="tl">profile() —— 返回券商配置（支持的市场、订单类型、凭据字段等）</p>
+            <p class="tl">placeOrder() —— 下单！传入 Order 对象（股票代码、方向、数量、价格）</p>
+            <p class="tl">cancelOrder() —— 取消指定订单</p>
+            <p class="tl">getPositions() —— 获取当前持仓列表</p>
+            <p class="tl">= 0 表示纯虚函数——子类必须实现所有这些方法</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 3: Paper Trading 模拟引擎 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">Paper Trading：零风险的"战场演习"</h2>
+
+      <p>不想用真金白银？<span class="term" data-definition="Paper Trading（模拟交易）是在真实市场数据上模拟买卖，但不使用真实资金。订单在本地撮合引擎中执行，模拟真实的滑点、手续费和资金变化。它让你在不冒任何风险的情况下测试策略。">Paper Trading</span> 引擎让你在真实市场数据上测试策略，零资金风险。</p>
+
+      <div class="chat-window" id="chat-module4">
+        <div class="chat-messages">
+          <div class="chat-message" data-msg="0" data-sender="user" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-4)">你</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-4)">用户</span>
+              <p>在交易界面选择 Paper Trading 模式，点击 "买入 AAPL 100 股 @ $198"</p>
+            </div>
+          </div>
+          <div class="chat-message" data-msg="1" data-sender="engine" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-1)">引</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-1)">PaperTrading 引擎</span>
+              <p>收到市价买单！获取当前真实市价 $198.45，计算模拟滑点（5bps）→ 成交价 $198.55</p>
+            </div>
+          </div>
+          <div class="chat-message" data-msg="2" data-sender="engine" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-1)">引</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-1)">PaperTrading 引擎</span>
+              <p>扣除手续费（taker 0.045%）：$19,855 + $8.93 = 总成本 $19,863.93。模拟延迟 200ms。</p>
+            </div>
+          </div>
+          <div class="chat-message" data-msg="3" data-sender="engine" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-1)">引</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-1)">PaperTrading 引擎</span>
+              <p>订单撮合成功！更新虚拟账户余额，记录到 SQLite，发射 orderFilled 信号。</p>
+            </div>
+          </div>
+          <div class="chat-message" data-msg="4" data-sender="screen" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-2)">屏</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-2)">交易界面</span>
+              <p>收到 orderFilled！更新持仓表格（AAPL: 100 股 @ $198.55）、账户余额、浮动盈亏。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-typing" id="chat-module4-typing" style="display:none">
+          <div class="chat-avatar" id="chat-module4-typing-avatar">?</div>
+          <div class="chat-typing-dots">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+          </div>
+        </div>
+
+        <div class="chat-controls">
+          <button class="btn chat-next-btn">下一条消息</button>
+          <button class="btn chat-all-btn">播放全部</button>
+          <button class="btn chat-reset-btn">重新播放</button>
+          <span class="chat-progress"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 4: 数据中枢 — 100+ 连接器 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">数据中枢：100+ 连接器如何喂饱金融终端</h2>
+
+      <p>金融终端的核心价值在于数据。FinceptTerminal 通过 100+ 个 Python 脚本连接全球数据源——每个脚本遵循统一的模式：<strong>CLI 参数 → JSON 输出</strong>。</p>
+
+      <div class="badge-list animate-in">
+        <div class="badge-item">
+          <code class="badge-code">yfinance_data.py</code>
+          <span class="badge-desc">雅虎财经——股票报价、历史数据、财务报表（最常用）</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">coingecko.py</code>
+          <span class="badge-desc">CoinGecko——加密货币实时价格、市值、交易量</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">fmp_extra_data.py</code>
+          <span class="badge-desc">Financial Modeling Prep——美股财务数据、DCF 模型输入</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">akshare_index.py</code>
+          <span class="badge-desc">AkShare——A 股指数、期货、宏观数据（中国数据首选）</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">glassnode_data.py</code>
+          <span class="badge-desc">Glassnode——区块链链上数据（活跃地址、交易所流入流出）</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">nber_data.py</code>
+          <span class="badge-desc">NBER——美国经济研究局经济周期数据（衰退/扩张时间线）</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">adb_data.py</code>
+          <span class="badge-desc">亚洲开发银行——亚太地区经济指标</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">intrinio_data.py</code>
+          <span class="badge-desc">Intrinio——美股历史 EOD 数据、技术指标</span>
+        </div>
+      </div>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">💡</div>
+        <div class="callout-content">
+          <strong class="callout-title">统一的数据管道</strong>
+          <p>所有 100+ 脚本遵循相同的契约：<code>python xxx_data.py command arg1 arg2</code> → JSON 输出到 stdout。C++ 的 PythonRunner 调用脚本、捕获 stdout、解析 JSON。新增数据源只需写一个新的 Python 脚本，C++ 代码零修改。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 5: 代码翻译 — 数据脚本模式 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">代码翻译：数据获取脚本的"模板"</h2>
+
+      <p>每个数据获取脚本都遵循同一个模式。以 <code>yfinance_data.py</code> 为例：</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-keyword">import</span> sys, json, yfinance</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">quote</span>(symbol):</span>
+<span class="code-line">  ticker = yfinance.<span class="code-function">Ticker</span>(symbol)</span>
+<span class="code-line">  info = ticker.<span class="code-function">info</span></span>
+<span class="code-line">  result = {</span>
+<span class="code-line">    <span class="code-string">"symbol"</span>: symbol,</span>
+<span class="code-line">    <span class="code-string">"price"</span>: info[<span class="code-string">"regularMarketPrice"</span>],</span>
+<span class="code-line">    <span class="code-string">"change"</span>: info[<span class="code-string">"regularMarketChangePercent"</span>],</span>
+<span class="code-line">    <span class="code-string">"volume"</span>: info[<span class="code-string">"regularMarketVolume"</span>]</span>
+<span class="code-line">  }</span>
+<span class="code-line">  <span class="code-keyword">return</span> result</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-keyword">if</span> __name__ == <span class="code-string">"__main__"</span>:</span>
+<span class="code-line">  cmd = sys.argv[<span class="code-number">1</span>]</span>
+<span class="code-line">  <span class="code-keyword">if</span> cmd == <span class="code-string">"quote"</span>:</span>
+<span class="code-line">    data = <span class="code-function">quote</span>(sys.argv[<span class="code-number">2</span>])</span>
+<span class="code-line">  <span class="code-function">print</span>(json.<span class="code-function">dumps</span>(data))</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">导入标准库和 yfinance（雅虎财经 Python 库）</p>
+            <p class="tl">定义 quote 函数——获取股票实时报价</p>
+            <p class="tl">创建 Ticker 对象——代表一只股票</p>
+            <p class="tl">获取股票信息字典</p>
+            <p class="tl">构造结果字典——只提取我们需要的字段</p>
+            <p class="tl">股票代码，如 "AAPL"</p>
+            <p class="tl">当前价格</p>
+            <p class="tl">涨跌幅百分比</p>
+            <p class="tl">成交量</p>
+            <p class="tl">返回结果字典</p>
+            <p class="tl">脚本入口——当从命令行运行时执行</p>
+            <p class="tl">读取第一个参数作为命令（如 "quote"）</p>
+            <p class="tl">如果是 "quote" 命令，调用 quote 函数</p>
+            <p class="tl">将结果序列化为 JSON 并打印到 stdout——C++ 端 PythonRunner 捕获这行输出</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 6: 存储层 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">存储层：13 个 Repository 和加密凭据存储</h2>
+
+      <p>FinceptTerminal 使用 <span class="term" data-definition="SQLite 是一个轻量级的嵌入式关系数据库——整个数据库就是一个文件，不需要单独的数据库服务器。Qt6 通过 QtSql 模块直接操作 SQLite，支持 SQL 查询、事务、WAL（Write-Ahead Logging）并发模式。">SQLite</span> 作为本地存储引擎，通过 13 个 Repository 类提供数据访问。</p>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">📋</div>
+          <h4 class="pattern-title">核心存储</h4>
+          <p class="pattern-desc">SettingsRepository（应用设置）、WatchlistRepository（自选股列表）、ChatRepository（聊天记录）——用户个性化数据的持久化。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">🔐</div>
+          <h4 class="pattern-title">加密存储</h4>
+          <p class="pattern-desc">SecureStorage 使用平台密钥链（macOS Keychain / Windows Credential Manager）或 AES 加密存储 API Key、券商凭据——绝不明文保存。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">💾</div>
+          <h4 class="pattern-title">缓存数据库</h4>
+          <p class="pattern-desc">CacheDatabase 使用 SQLite WAL 模式——多线程并发读写不阻塞。TTL（过期时间）自动清理旧数据，避免缓存无限膨胀。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 7: 测验 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">检验你的理解</h2>
+
+      <div class="quiz-container" id="quiz-module4">
+        <div class="quiz-question-block"
+             data-correct="option-c"
+             data-explanation-right="正确！新增券商只需继承 IBroker 接口，实现所有纯虚函数（id、name、placeOrder 等）。然后在 BrokerRegistry 中注册。主交易引擎代码完全不需要修改——这就是插件模式的力量。"
+             data-explanation-wrong="回忆一下 IBroker 接口的设计。新增券商需要修改交易引擎的核心代码吗？还是只需要添加一个新的实现类？">
+          <h3 class="quiz-question">如果你想给 FinceptTerminal 添加一个新的券商（如 Interactive Brokers），需要修改哪些代码？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>修改交易引擎核心代码和所有 Screen</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>重写整个 trading 模块</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>新增一个 IBroker 子类 + 在 BrokerRegistry 注册</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-b"
+             data-explanation-right="正确！所有 Python 数据脚本遵循统一契约：CLI 参数输入、JSON 输出到 stdout。C++ 的 PythonRunner 捕获 stdout，用 QJsonDocument 解析。这意味着新增数据源只需写 Python 脚本，C++ 代码零修改。"
+             data-explanation-wrong="想想 PythonRunner 和 Python 脚本之间的"合同"。Python 脚本用什么格式返回数据？C++ 怎么接收？">
+          <h3 class="quiz-question">100+ 个 Python 数据脚本和 C++ 之间的数据交换格式是什么？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>CSV 格式——Python 输出 CSV，C++ 解析</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>JSON 格式——Python 输出 JSON 到 stdout，C++ 解析</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>二进制协议——共享内存</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-a"
+             data-explanation-right="正确！Paper Trading 使用本地撮合引擎——在 C++ 进程内模拟订单匹配。它获取真实市场数据（来自 Hyperliquid/Kraken），但订单在本地执行，不发送到交易所。模拟 5bps 滑点和 200ms 延迟以接近真实体验。"
+             data-explanation-wrong="Paper Trading 和真实交易的区别是什么？提示：真实交易把订单发送到交易所，Paper Trading 呢？">
+          <h3 class="quiz-question">Paper Trading 模拟引擎的订单撮合（匹配）发生在哪里？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>本地——C++ 进程内的 OrderMatcher 模拟撮合</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>云端——发送到 Fincept 服务器的模拟环境</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>券商端——发送到券商的 Paper Trading API</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">重新作答</button>
+      </div>
+    </section>
+
+  </div>
+</section>

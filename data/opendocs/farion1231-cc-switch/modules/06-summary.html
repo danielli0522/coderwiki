@@ -1,0 +1,22 @@
+<section class="module" id="module-6" style="background: var(--color-bg-alt)"><div class="module-content"><header class="module-header animate-in"><span class="module-number">06</span><h1 class="module-title">总结与练习：用 cc-switch 训练架构判断</h1><p class="module-subtitle">把前面学到的入口、角色、数据流、接入和选型变成可复用检查表。</p></header><div class="module-body">
+    <section class="screen animate-in"><h2 class="screen-heading">核心知识回顾</h2><div class="pattern-cards"><div class="pattern-card"><h4 class="pattern-title">模块 1</h4><p class="pattern-desc">先从用户动作理解项目，不要一头扎进文件树。</p></div><div class="pattern-card"><h4 class="pattern-title">模块 2</h4><p class="pattern-desc">把系统拆成入口、编排、能力和状态四类角色。</p></div><div class="pattern-card"><h4 class="pattern-title">模块 3</h4><p class="pattern-desc">沿数据流定位问题，减少猜测式修 bug。</p></div><div class="pattern-card"><h4 class="pattern-title">模块 4-5</h4><p class="pattern-desc">接入前先定义契约、边界、观测和选型理由。</p></div></div></section>
+    <section class="screen animate-in"><h2 class="screen-heading">最佳实践清单</h2><div class="file-tree"><div class="tree-item">01. 先画输入到输出的数据流</div><div class="tree-item">02. 找到配置、密钥、缓存和状态目录</div><div class="tree-item">03. 给每个外部调用加超时和错误日志</div><div class="tree-item">04. 用适配层隔离第三方项目细节</div><div class="tree-item">05. 上线前跑真实路径，而不是只看 README</div></div></section>
+    <section class="screen animate-in"><h2 class="screen-heading">综合练习</h2><p>让 AI 帮你完成下面的 TODO：给 cc-switch 写一个最小接入适配层，要求记录输入、输出和错误。</p><div class="translation-block animate-in"><div class="translation-code"><span class="translation-label">CODE</span><pre><code>async function runWithTrace(input) {
+  // TODO: validate input
+  // TODO: call cc-switch
+  // TODO: log success or failure
+  // TODO: return product-friendly result
+}</code></pre></div><div class="translation-english"><span class="translation-label">中文解释</span><div class="translation-lines"><p class="tl">第一步让 AI 定义输入 schema。</p><p class="tl">第二步调用项目核心能力，不要把业务逻辑写进第三方代码。</p><p class="tl">第三步记录错误类型、耗时和重试次数。</p><p class="tl">第四步把返回值映射成你自己的产品格式。</p></div></div></div></section>
+    <section class="screen animate-in"><h2 class="screen-heading">最后测试</h2><div class="quiz-container" id="quiz-farion1231-cc-switch-6">
+    <div class="quiz-question-block" data-correct="option-b" data-explanation-right="答对了。给出目标、输入输出、应修改的层、验证命令，AI 才不容易乱跑。" data-explanation-wrong="再想想：这个项目的核心价值通常藏在输入、编排、模型调用、状态保存这几层之间。">
+      <h3 class="quiz-question">你让 AI 修改 cc-switch 相关代码前，最有价值的上下文是什么？</h3>
+      <div class="quiz-options">
+        <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>只发一句“帮我优化一下”</span></button>
+        <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>给出目标、边界、修改层和验证方式</span></button>
+        <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>让 AI 自己猜你的业务</span></button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+    <button class="quiz-check-btn" onclick="checkQuiz('quiz-farion1231-cc-switch-6')">检查答案</button>
+    <button class="quiz-reset-btn" onclick="resetQuiz('quiz-farion1231-cc-switch-6')">再试一次</button>
+  </div></section></div></div></section>

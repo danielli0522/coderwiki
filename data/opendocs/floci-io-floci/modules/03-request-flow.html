@@ -1,0 +1,212 @@
+<section class="module" id="module-3" style="background: var(--color-bg);">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">How Your Code Talks to Floci</h1>
+      <p class="module-subtitle">A universal translator at a diplomatic summit &mdash; your code speaks Python/Java/Node/Go, Floci speaks AWS protocol, and the <span class="term" data-definition="SDK (Software Development Kit): A library that provides pre-built functions so you don't have to write low-level protocol code yourself. The AWS SDK handles formatting, signing, and sending requests for you.">SDK</span> + router work together so both sides understand each other perfectly.</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: The Request Journey -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The Request Journey</h2>
+        <p>What happens when your code calls <span class="term" data-definition="DynamoDB: Amazon's managed NoSQL database service. It stores data as key-value items and is one of the most commonly used AWS services. Floci provides a fully compatible local version.">DynamoDB</span>? Follow the data packet through four actors to see the full path:</p>
+
+        <div class="flow-animation animate-in"
+             id="flow-request"
+             data-steps='[
+               {"highlight":"flow-actor-1","label":"Your code calls client.putItem(...)"},
+               {"highlight":"flow-actor-2","from":"actor-1","to":"actor-2","packet":true,"label":"The SDK formats the request using the AWS wire protocol and signs it with SigV4"},
+               {"highlight":"flow-actor-3","from":"actor-2","to":"actor-3","packet":true,"label":"Request arrives at localhost:4566 — Floci receives it"},
+               {"highlight":"flow-actor-3","from":"actor-3","to":"actor-4","packet":true,"label":"Router identifies the DynamoDB service and forwards the request"},
+               {"highlight":"flow-actor-4","label":"DynamoDB service stores the item and returns a confirmation"}
+             ]'>
+
+          <div class="flow-step-label">Click &quot;Next Step&quot; to begin</div>
+
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">💻</div>
+              <span>Your Code</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">📡</div>
+              <span>AWS SDK</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">🌐</div>
+              <span>Floci Router</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">🗄️</div>
+              <span>DynamoDB Service</span>
+            </div>
+          </div>
+
+          <div class="flow-packet"></div>
+
+          <div class="flow-controls">
+            <button class="btn btn-primary flow-next-btn">Next Step</button>
+            <button class="btn flow-reset-btn">Reset</button>
+            <span class="flow-progress">Step 0 / 5</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: The AWS Wire Protocol -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The AWS Wire Protocol</h2>
+        <p>
+          All AWS services speak the same &quot;language&quot; &mdash; they communicate using a standard <span class="term" data-definition="Wire protocol: The low-level format that computers use to exchange data over a network. AWS services use JSON or XML formatted messages sent over HTTPS, following a specific structure that every AWS SDK knows how to produce and parse.">wire protocol</span> (JSON or XML over HTTPS).
+          This means your SDK already knows exactly how to format requests. You just need to tell it <em>where</em> to send them.
+        </p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">Java</span>
+            <pre><code>
+<span class="code-line"><span class="code-function">DynamoDbClient</span> client = <span class="code-function">DynamoDbClient</span>.<span class="code-function">builder</span>()</span>
+<span class="code-line">    .<span class="code-function">endpointOverride</span>(</span>
+<span class="code-line">        <span class="code-function">URI</span>.<span class="code-function">create</span>(<span class="code-string">"http://localhost:4566"</span>))</span>
+<span class="code-line">    .<span class="code-function">region</span>(<span class="code-function">Region</span>.US_EAST_1)</span>
+<span class="code-line">    .<span class="code-function">credentialsProvider</span>(</span>
+<span class="code-line">        <span class="code-function">StaticCredentialsProvider</span>.<span class="code-function">create</span>(</span>
+<span class="code-line">            <span class="code-function">AwsBasicCredentials</span>.<span class="code-function">create</span>(</span>
+<span class="code-line">                <span class="code-string">"test"</span>, <span class="code-string">"test"</span>)))</span>
+<span class="code-line">    .<span class="code-function">build</span>();</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Create a DynamoDB client &mdash; your doorway to the database service.</p>
+              <p class="tl">Tell it to talk to <span class="term" data-definition="Endpoint: The URL address where a service listens for requests. Real AWS uses endpoints like dynamodb.us-east-1.amazonaws.com. Floci replaces this with localhost:4566.">Floci</span> instead of real AWS by overriding the <span class="term" data-definition="Endpoint: The URL address where a service listens for requests. Real AWS uses endpoints like dynamodb.us-east-1.amazonaws.com. Floci replaces this with localhost:4566.">endpoint</span>.</p>
+              <p class="tl">Pick any <span class="term" data-definition="Region: AWS data centers are organized into geographic regions (us-east-1, eu-west-1, etc.). Floci ignores the region value but your SDK requires one to be set.">region</span> &mdash; Floci does not care which one you choose.</p>
+              <p class="tl">Use dummy <span class="term" data-definition="Credentials: Authentication data that proves your identity to AWS. In production these are real access keys; with Floci, any value like 'test/test' works because local mode does not verify real identity.">credentials</span> &mdash; &quot;test/test&quot; works just fine.</p>
+              <p class="tl">Done! This client now sends every request to Floci instead of AWS.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Multi-Language Support -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Multi-Language Support</h2>
+        <p>Floci works with every major AWS <span class="term" data-definition="SDK (Software Development Kit): A library that provides pre-built functions so you don't have to write low-level protocol code yourself.">SDK</span>. Whatever language your project is built in, the integration pattern is the same: create a client, override the endpoint, done.</p>
+
+        <div class="pattern-cards stagger-children">
+          <div class="pattern-card animate-in" style="border-top-color: var(--color-actor-1);">
+            <div class="pattern-icon" style="background: var(--color-accent-light);">☕</div>
+            <h4 class="pattern-title">Java (AWS SDK v2)</h4>
+            <p class="pattern-desc">Best for <span class="term" data-definition="Enterprise: Large-scale business software typically built by big organizations, often running on Java and requiring robust, long-term supported libraries.">enterprise</span> apps, microservices on Spring Boot, and Android development. Non-blocking async support built in.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top-color: var(--color-actor-2);">
+            <div class="pattern-icon" style="background: var(--color-info-light);">🐍</div>
+            <h4 class="pattern-title">Python (boto3)</h4>
+            <p class="pattern-desc">Ideal for data science pipelines, Lambda functions, scripting, and ML workflows. The most popular SDK for <span class="term" data-definition="API (Application Programming Interface): A set of rules that allows different software programs to communicate with each other. AWS APIs define how you interact with each service.">AWS</span> automation.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top-color: var(--color-actor-3);">
+            <div class="pattern-icon" style="background: #EDE9F6;">🟢</div>
+            <h4 class="pattern-title">Node.js (AWS SDK v3)</h4>
+            <p class="pattern-desc">Perfect for web backends, server-side rendering, and serverless functions. Tree-shakeable modular imports keep bundle size small.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top-color: var(--color-actor-4);">
+            <div class="pattern-icon" style="background: #FDF5E0;">🔷</div>
+            <h4 class="pattern-title">Go (AWS SDK v2)</h4>
+            <p class="pattern-desc">Built for <span class="term" data-definition="Cloud-native: Software designed specifically to run in cloud environments, using containers, microservices, and elastic scaling. Go is popular for cloud-native services because of its performance and small binary size.">cloud-native</span> services, CLI tools, and infrastructure automation. Static binary compilation, zero runtime dependencies.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-info animate-in">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Good to know</strong>
+            <p>Floci also works with <span class="term" data-definition="AWS CLI: The official command-line tool for interacting with AWS services from your terminal. Floci supports it fully, so you can run 'aws dynamodb scan' locally.">AWS CLI</span>, <span class="term" data-definition="Terraform: An infrastructure-as-code tool by HashiCorp that lets you define cloud resources in configuration files instead of clicking through a console. Floci supports Terraform so you can test infrastructure changes locally.">Terraform</span>, <span class="term" data-definition="CDK (Cloud Development Kit): An AWS tool that lets you define infrastructure using real programming languages (TypeScript, Python, Java) instead of JSON/YAML templates.">CDK</span>, and <span class="term" data-definition="OpenTofu: An open-source fork of Terraform that maintains compatibility with Terraform configuration files but is governed by a community foundation.">OpenTofu</span>. If it speaks AWS protocol, Floci understands it.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Authentication — SigV4 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Authentication &mdash; SigV4</h2>
+        <p>
+          Floci validates request signatures using <span class="term" data-definition="SigV4 (Signature Version 4): The AWS protocol for authenticating API requests. It works by combining your access key with the request details (timestamp, body, headers) and computing a cryptographic signature. AWS uses this to verify the request has not been tampered with.">SigV4</span>, the same protocol as real AWS.
+          This means your authentication code works identically in development and production &mdash; no special cases, no conditional logic.
+        </p>
+
+        <div class="step-cards animate-in">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Your SDK signs every request automatically</strong>
+              <p>When you call any AWS <span class="term" data-definition="API (Application Programming Interface): A set of rules that allows different software programs to communicate with each other.">API</span> method, the SDK computes a SigV4 signature from your credentials, the current timestamp, and the request body. You never do this manually.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Floci checks the signature</strong>
+              <p>Not because Floci needs to verify your identity, but because your SDK will send it anyway. By validating the seal, Floci ensures your production auth code gets tested locally.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Any credentials work locally</strong>
+              <p>Use &quot;test&quot; / &quot;test&quot; or any string you like. Floci accepts all validly-signed requests, so you are not locked into managing real AWS keys during development.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent animate-in">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Aha!</strong>
+            <p>SigV4 is like a wax seal on a letter. AWS uses it to verify that the request actually came from you and was not tampered with. Floci checks the seal too &mdash; not because it needs to verify your identity, but because your SDK will send it anyway. This way, your production auth code gets tested locally.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Quiz: Debugging Locally with Floci</h2>
+
+        <div class="scenario-block animate-in">
+          <div class="scenario-context">
+            <span class="scenario-label">SCENARIO</span>
+            <p>You are debugging a production issue where your Lambda function fails to read from <span class="term" data-definition="DynamoDB: Amazon's managed NoSQL database service.">DynamoDB</span>. You want to reproduce it locally with Floci. What do you change in your code?</p>
+          </div>
+        </div>
+
+        <div class="quiz-container animate-in" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly! One config change and your production code works locally. Floci speaks the same AWS protocol, so you only need to redirect the endpoint URL and seed test data to reproduce the issue."
+               data-explanation-wrong="Not quite. The key insight is that Floci speaks the exact same AWS protocol as real AWS. You never need to rewrite your API calls or install a different SDK. You only change the endpoint URL.">
+            <h3 class="quiz-question">What is the minimal code change needed to reproduce the issue locally?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Rewrite all <span class="term" data-definition="DynamoDB: Amazon's managed NoSQL database service.">DynamoDB</span> calls to use a different <span class="term" data-definition="API (Application Programming Interface): A set of rules that allows different software programs to communicate with each other.">API</span></span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Set the <span class="term" data-definition="Endpoint: The URL address where a service listens for requests.">endpoint</span> URL to http://localhost:4566 and seed test data</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Replace the AWS <span class="term" data-definition="SDK (Software Development Kit): A library that provides pre-built functions so you don't have to write low-level protocol code yourself.">SDK</span> with a Floci-specific client library</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">Check Answer</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

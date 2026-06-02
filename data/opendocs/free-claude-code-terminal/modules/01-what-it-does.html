@@ -1,0 +1,136 @@
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">What Free Claude Code Does</h1>
+      <p class="module-subtitle">Claude Code is amazing — but it requires an Anthropic API key. What if you could use it with free or cheaper models instead?</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The $0 AI coding setup</h2>
+        <p><span class="term" data-definition="Claude Code is Anthropic's official command-line AI coding tool — it reads your files, writes code, runs commands, and helps debug problems, all through natural language conversation in your terminal.">Claude Code</span> is built to talk to Anthropic's servers. Every question you ask, every file it reads, every line of code it writes — it all goes through Anthropic's API, and you pay per token.</p>
+        <p>Free Claude Code is a <span class="term" data-definition="A proxy is a middleman — software that sits between two parties and forwards requests. Like a translator at a meeting who lets two people who speak different languages communicate.">proxy</span> that intercepts those API calls and redirects them to free or cheaper alternatives: NVIDIA NIM (free GPU tier), OpenRouter, DeepSeek, local models via Ollama, and more.</p>
+
+        <div class="callout callout-accent animate-in">
+          <div class="callout-icon">💰</div>
+          <div class="callout-content">
+            <strong class="callout-title">The key trick</strong>
+            <p>Claude Code thinks it&apos;s talking to Anthropic. Free Claude Code pretends to be Anthropic, accepts the same API format, then quietly routes the request to a different model. Claude Code never knows the difference.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What you get</h2>
+
+        <div class="pattern-cards animate-in stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🔄</div>
+            <h4 class="pattern-title">6 Provider Backends</h4>
+            <p class="pattern-desc">Route to NVIDIA NIM, OpenRouter, DeepSeek, LM Studio, llama.cpp, or Ollama. Mix and match different providers for different Claude models.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🎯</div>
+            <h4 class="pattern-title">Per-Model Routing</h4>
+            <p class="pattern-desc">Send Opus traffic to OpenRouter (expensive tasks), Haiku traffic to local Ollama (quick questions). Fine-grained control over where each model tier goes.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🎙️</div>
+            <h4 class="pattern-title">Voice Input</h4>
+            <p class="pattern-desc">Optional voice-note transcription via local Whisper or NVIDIA NIM. Dictate coding instructions instead of typing.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">💬</div>
+            <h4 class="pattern-title">Bot Wrappers</h4>
+            <p class="pattern-desc">Use Claude Code through Discord or Telegram — send a message from your phone and get code back. Great for remote sessions.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The journey of an API call</h2>
+        <p>When you type a question into Claude Code, here&apos;s what <em>actually</em> happens with Free Claude Code in the middle:</p>
+
+        <div class="step-cards animate-in stagger-children">
+          <div class="step-card animate-in">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>You type a question in Claude Code</strong>
+              <p>Claude Code formats your question as an Anthropic Messages API request — the standard JSON format Anthropic expects.</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>The request hits Free Claude Code instead</strong>
+              <p>Claude Code is configured to point at <code>localhost:8080</code> instead of <code>api.anthropic.com</code>. Free Claude Code is waiting there.</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>The model name is looked up in routing rules</strong>
+              <p>Claude Code asked for <code>claude-opus-4-5</code>. The routing config says "send Opus to OpenRouter." So it goes to OpenRouter.</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>The response is translated back</strong>
+              <p>OpenRouter responds in its own format. Free Claude Code translates it back to Anthropic format and returns it to Claude Code. Claude Code has no idea anything unusual happened.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Free Claude Code 的核心价值</h2>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">为什么这个项目重要？</strong>
+            <p><strong>成本问题</strong>：Claude Code 官方订阅 $20/月，但重度用户每月 API 调用可能消耗 $100+ 的 token。Free Claude Code 让你选择更便宜的替代后端。<br>
+            <strong>可用性</strong>：某些地区直接访问 Anthropic API 可能受限，通过 OpenRouter/DeepSeek 等中转可绕过。<br>
+            <strong>灵活性</strong>：不同任务用不同模型——简单任务用便宜模型，复杂任务用强模型。路由规则自动切换。<br>
+            <strong>开源透明</strong>：代理逻辑完全开源，你可以审计每一行代码，确保你的 API Key 安全。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Check your understanding</h2>
+
+        <div class="quiz-container animate-in" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly — Free Claude Code acts as a transparent middleman. Claude Code thinks it&apos;s talking to Anthropic, but the proxy quietly redirects to a cheaper provider."
+               data-explanation-wrong="Not quite. The key idea is that Free Claude Code impersonates the Anthropic API, so Claude Code never needs to change — the redirection is invisible to it.">
+            <h3 class="quiz-question">Why doesn&apos;t Claude Code need to be modified to work with Free Claude Code?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Claude Code has a built-in provider selector</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Free Claude Code mimics the Anthropic API format, so Claude Code thinks it&apos;s talking to Anthropic</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Anthropic whitelists alternative providers natively</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

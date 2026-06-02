@@ -1,0 +1,164 @@
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">调试与实战</h1>
+      <p class="module-subtitle">理论到此结束。真实使用中你会遇到各种问题——这里教你怎么快速定位和解决。</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">四大常见问题</h2>
+        <p>几乎所有 Free Claude Code 的新用户都会碰到这些问题。提前认识它们，出问题时就能快速定位：</p>
+
+        <div class="pattern-cards animate-in stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-error)">
+            <div class="pattern-icon" style="background: var(--color-error-light)">🔌</div>
+            <h4 class="pattern-title">连接失败</h4>
+            <p class="pattern-desc"><strong>症状：</strong>Claude Code 报 "Connection refused" 或 "ECONNREFUSED"。<strong>原因：</strong>代理没启动，或端口被占用。<strong>解决：</strong>确认 <code>node server.js</code> 正在运行，检查 <code>localhost:8080</code> 是否可访问。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent-light)">🚫</div>
+            <h4 class="pattern-title">模型不可用</h4>
+            <p class="pattern-desc"><strong>症状：</strong>404 或 "Model not found" 错误。<strong>原因：</strong>路由配置中的模型名拼写错误，或提供商下架了该模型。<strong>解决：</strong>检查提供商文档确认模型名，更新路由配置。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-info)">
+            <div class="pattern-icon" style="background: var(--color-info-light)">📋</div>
+            <h4 class="pattern-title">响应格式错误</h4>
+            <p class="pattern-desc"><strong>症状：</strong>Claude Code 崩溃或显示乱码。<strong>原因：</strong>适配器的格式转换有 bug，或提供商返回了非预期格式。<strong>解决：</strong>启用代理的 DEBUG 日志，检查原始响应内容，确认适配器版本。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: #FDF5E0">🐌</div>
+            <h4 class="pattern-title">延迟过高</h4>
+            <p class="pattern-desc"><strong>症状：</strong>响应慢得像拨号上网。<strong>原因：</strong>网络链路太长（本地→代理→海外提供商），或本地模型推理太慢。<strong>解决：</strong>复杂任务用远程提供商，简单任务切本地模型；检查网络代理设置。</p>
+          </div>
+        </div>
+        <div class="callout callout-accent">
+    <strong>微调扩展标记</strong>：本课程持续更新中。掌握基础概念后，建议结合实际项目反复练习，将知识内化为直觉。关注项目 GitHub 获取最新版本和社区讨论。
+  </div>
+</section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">调试流程：六步排障法</h2>
+        <p>遇到问题不要慌，按这六步逐层排查：</p>
+
+        <div class="step-cards animate-in stagger-children">
+          <div class="step-card animate-in">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>确认代理正在运行</strong>
+              <p>终端执行 <code>curl http://localhost:8080/health</code>。如果无响应，启动代理服务。如果端口被占用，用 <code>lsof -i :8080</code> 查看占用进程。</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>检查 Claude Code 的 API 地址配置</strong>
+              <p>确认环境变量 <code>ANTHROPIC_BASE_URL=http://localhost:8080</code> 已设置。在 Claude Code 中用 <code>/config</code> 命令查看当前配置。</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>查看代理日志</strong>
+              <p>启用 <code>DEBUG=1</code> 环境变量重启代理。日志会显示收到的请求、路由决策、提供商的原始响应——这是定位问题的关键线索。</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>验证提供商 API 可用</strong>
+              <p>跳过代理，直接 <code>curl</code> 提供商的 API 端点。如果直连也不通，说明是提供商侧的问题（限流、key 过期、服务宕机），不是代理的锅。</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>测试回退机制</strong>
+              <p>如果主提供商有问题，检查回退链配置是否正确。临时把路由指向另一个可用的提供商，确认代理本身工作正常。</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <strong>最小化复现</strong>
+              <p>用最简单的请求测试：<code>curl -X POST localhost:8080/v1/messages -H "Content-Type: application/json" -d '{"model":"claude-sonnet-4-5","messages":[{"role":"user","content":"hi"}],"max_tokens":10}'</code>。如果这个都失败，问题在代理层；如果成功，问题在特定请求的格式。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info animate-in">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">调试黄金法则</strong>
+            <p>90% 的问题出在前三步。先确认"代理在跑"→"Claude Code 指向了代理"→"代理日志里能看到请求"。这三步通过，问题范围就缩小到提供商或适配器了。</p>
+          </div>
+        </div>
+        <div class="callout callout-accent">
+    <strong>微调扩展标记</strong>：本课程持续更新中。掌握基础概念后，建议结合实际项目反复练习，将知识内化为直觉。关注项目 GitHub 获取最新版本和社区讨论。
+  </div>
+</section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">最终检验</h2>
+
+        <div class="quiz-container animate-in" id="quiz-module5">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="正确！curl 直接请求代理是最快的验证方式——如果代理返回错误，问题在代理层；如果超时无响应，问题在提供商；如果根本连不上，代理没在运行。"
+               data-explanation-wrong="调试的第一步应该是确认基础连通性。重装或换提供商是后面的事——先用 curl 确认代理在跑、请求能到达代理，然后看日志定位具体是哪一层出了问题。">
+            <h3 class="quiz-question">当 Free Claude Code 返回错误时，第一步应该做什么？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>立即切换到另一个提供商试试</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>重新安装 Free Claude Code</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>用 curl 直接请求代理，检查它是否在运行并查看错误信息</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！DEBUG=1 日志会显示完整的请求/响应链路：Claude Code 发了什么、路由到了哪里、提供商返回了什么、适配器怎么转换的。这是定位"到底哪一步出了问题"的最高效手段。"
+               data-explanation-wrong="不一定。代理日志（特别是 DEBUG 模式）才是定位问题的最有力工具。它能显示完整的请求链路：路由决策、提供商原始响应、格式转换过程——告诉你到底是哪一层出了问题。">
+            <h3 class="quiz-question">当 Claude Code 返回乱码或崩溃时，最可能的原因是什么，怎么定位？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Claude Code 版本太旧——升级到最新版</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>适配器格式转换 bug——开启 DEBUG 日志检查提供商的原始响应内容</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>网络问题——检查 VPN 和代理设置</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">重试</button>
+        </div>
+        <div class="callout callout-accent">
+    <strong>微调扩展标记</strong>：本课程持续更新中。掌握基础概念后，建议结合实际项目反复练习，将知识内化为直觉。关注项目 GitHub 获取最新版本和社区讨论。
+  </div>
+</section>
+
+    </div>
+  </div>
+  <div class="callout callout-accent">
+    <strong>微调扩展标记</strong>：本课程持续更新中。掌握基础概念后，建议结合实际项目反复练习，将知识内化为直觉。关注项目 GitHub 获取最新版本和社区讨论。
+  </div>
+</section>

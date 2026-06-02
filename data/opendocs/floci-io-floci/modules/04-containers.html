@@ -1,0 +1,249 @@
+<section class="module" id="module-4" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">The Real Stuff: <span class="term" data-definition="A container is a lightweight, standalone package that includes everything needed to run a piece of software — code, libraries, and settings. Docker is the most popular tool for creating and running containers.">Docker Containers</span></h1>
+      <p class="module-subtitle">A flight simulator with real engines — most things are simulated (the clouds, the weather), but the engines are real. If your plane flies in the simulator, it will fly in real life too.</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Why Real Containers Matter -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Why Real Containers Matter</h2>
+        <p>Most AWS emulators take a shortcut: they <span class="term" data-definition="A mock is a fake version of a service that pretends to work but doesn't actually do anything. It says 'your data was saved' even when nothing happened — like a restaurant where the kitchen is just a photo.">mock</span> everything. Ask them to save data? "Sure, saved!" — but nothing actually happened. Run a SQL query? "Here's a fake result!" — your typo goes undetected.</p>
+        <p>Floci takes a different approach. It simulates the AWS control plane (the APIs you call), but for the heavy lifting, it runs <strong>real engines</strong>:</p>
+
+        <div class="pattern-cards animate-in stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🗄️</div>
+            <h4 class="pattern-title">Real <span class="term" data-definition="PostgreSQL is a powerful, open-source relational database system. It stores structured data in tables and understands SQL — the language you use to query and modify that data.">PostgreSQL</span></h4>
+            <p class="pattern-desc">Spins up an actual postgres:16-alpine container. Your SQL queries execute against a real database engine — syntax errors, constraint violations, all genuine.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">⚡</div>
+            <h4 class="pattern-title">Real <span class="term" data-definition="Redis is an extremely fast in-memory data store, often used as a cache or message broker. ElastiCache is AWS's managed Redis service.">Redis</span></h4>
+            <p class="pattern-desc">Runs valkey/valkey:8 (Redis-compatible). Every SET, GET, and PUBSUB command works exactly as it would in production.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🐍</div>
+            <h4 class="pattern-title">Real Python / Node.js / Java</h4>
+            <p class="pattern-desc">Lambda functions execute in real <span class="term" data-definition="A runtime is the environment that actually executes your code. Python 3.12 runtime means your Python code runs inside a real Python 3.12 interpreter — not simulated.">runtimes</span> using official AWS <span class="term" data-definition="ECR (Elastic Container Registry) is AWS's repository for Docker container images. Think of it like an app store, but for containerized software packages.">ECR</span> images.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-accent animate-in">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Aha!</strong>
+            <p>The difference matters for debugging. If your <span class="term" data-definition="SQL (Structured Query Language) is the language used to communicate with relational databases. A SQL syntax error means you wrote the command incorrectly — like a grammar mistake the database can't understand.">SQL</span> query has a syntax error, a mock will never catch it. A real PostgreSQL container will tell you exactly what is wrong — the same error you would see in production.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: The Container Zoo -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The Container Zoo</h2>
+        <p>Here's every AWS service that Floci backs with a real Docker <span class="term" data-definition="A container image is a read-only template with instructions for creating a Docker container. It's like a recipe — the container is the actual dish you cook from it.">container image</span>. Each one is a real engine under the hood:</p>
+
+        <div class="icon-rows stagger-children">
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-1)">λ</div>
+            <div>
+              <strong>Lambda</strong>
+              <p>Uses AWS public ECR images for each <span class="term" data-definition="A runtime is the language environment your code runs in — Python, Node.js, Java, Go, etc. Lambda supports multiple runtimes, each with its own container image.">runtime</span> (Python, Node.js, Java, Go, etc.). Real execution environment — your code actually runs.</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🗄️</div>
+            <div>
+              <strong>RDS</strong>
+              <p>Spins up postgres:16-alpine or mysql:8.0. Real <span class="term" data-definition="SQL (Structured Query Language) is the standard language for interacting with relational databases. Real SQL means real errors, real constraints, real performance characteristics.">SQL</span> queries work — CREATE TABLE, INSERT, complex JOINs, everything.</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-4)">⚡</div>
+            <div>
+              <strong>ElastiCache</strong>
+              <p>Runs valkey/valkey:8 (Redis-compatible). Real <span class="term" data-definition="Redis is an in-memory data store used for caching, session management, and real-time messaging. Redis commands like SET, GET, LPUSH, PUBLISH are the language you use to interact with it.">Redis</span> commands — SET, GET, HSET, PUBSUB, streams, Lua scripting.</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-3)">📨</div>
+            <div>
+              <strong>MSK</strong>
+              <p>Uses redpandadata/redpanda. Real <span class="term" data-definition="Kafka is a distributed event streaming platform used for real-time data feeds. Producers write messages to topics, consumers read them. MSK is AWS's managed Kafka service.">Kafka</span> protocol — produce messages, consume topics, consumer groups all work.</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-5)">🖥️</div>
+            <div>
+              <strong>EC2</strong>
+              <p>Launches Docker containers as "instances". <span class="term" data-definition="SSH (Secure Shell) is a protocol for remotely accessing a machine's command line. It lets you log into a server and run commands as if you were sitting at its keyboard.">SSH</span>, <span class="term" data-definition="UserData is a script that runs automatically when an EC2 instance first boots. It's how you tell the machine 'when you start up, install these packages and run this config.'">UserData</span>, and <span class="term" data-definition="IMDS (Instance Metadata Service) is an API running inside every EC2 instance. Your code can query it to discover its own IP, region, instance type — like the machine reading its own ID card.">IMDS</span> all work inside the container.</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-1)">⎈</div>
+            <div>
+              <strong>ECS &amp; EKS</strong>
+              <p>Real <span class="term" data-definition="Orchestration is the automated management of containers — starting, stopping, scaling, and networking them. ECS and Kubernetes are both orchestration systems.">container orchestration</span>. EKS starts a <span class="term" data-definition="k3s is a lightweight Kubernetes distribution — it implements the full Kubernetes API but uses fewer resources. Think of it as Kubernetes on a diet.">k3s</span> <span class="term" data-definition="Kubernetes (K8s) is a container orchestration platform that manages clusters of containers at scale. It handles scheduling, scaling, networking, and self-healing — like an air traffic controller for your containers.">Kubernetes</span> cluster inside Docker. Deploy pods, services, ingress — all real.</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🔨</div>
+            <div>
+              <strong>CodeBuild</strong>
+              <p>Executes real <span class="term" data-definition="A buildspec is a YAML file that defines the phases of a build project — install dependencies, run pre-build commands, build, and post-build. It's the recipe for how your code gets compiled and packaged.">buildspec</span> phases in Docker containers. Install, pre_build, build, post_build — each phase runs for real.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Lambda — The Star of the Show -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Lambda — The Star of the Show</h2>
+        <p>Lambda has the most sophisticated <span class="term" data-definition="A container is a lightweight, standalone package that includes everything needed to run a piece of software. Docker is the most popular tool for creating and running containers.">container</span> management in Floci. Each runtime maps to a real AWS image:</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">Runtime</span>         <span class="code-operator">&rarr;</span> <span class="code-keyword">Docker Image</span></span>
+<span class="code-line"><span class="code-string">python3.12</span>      <span class="code-operator">&rarr;</span> public.ecr.aws/lambda/python:3.12</span>
+<span class="code-line"><span class="code-string">nodejs20.x</span>      <span class="code-operator">&rarr;</span> public.ecr.aws/lambda/nodejs:20.x</span>
+<span class="code-line"><span class="code-string">java21</span>          <span class="code-operator">&rarr;</span> public.ecr.aws/lambda/java:21</span>
+<span class="code-line"><span class="code-string">go1.x</span>           <span class="code-operator">&rarr;</span> public.ecr.aws/lambda/go:1</span>
+<span class="code-line"><span class="code-string">provided.al2023</span> <span class="code-operator">&rarr;</span> public.ecr.aws/lambda/provided:al2023</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Each Lambda runtime maps to a real AWS container image from ECR.</p>
+              <p class="tl">Python 3.12 uses the exact same image AWS runs in production.</p>
+              <p class="tl">Node.js 20 — same image, same Node version, same modules.</p>
+              <p class="tl">Java 21, Go 1.x — all production-grade runtime images.</p>
+              <p class="tl">Even custom runtimes (provided.al2023) use the real Amazon Linux 2023 base.</p>
+            </div>
+          </div>
+        </div>
+
+        <p>Your code runs in the <em>exact same environment</em> locally as it would in AWS. Same libraries, same file paths, same environment variables.</p>
+
+        <div class="badge-list animate-in stagger-children">
+          <div class="badge-item animate-in">
+            <span class="badge-code">Warm Pool</span>
+            <span class="badge-desc">Containers stay alive after first invoke — no <span class="term" data-definition="Cold start is the delay when a Lambda function is invoked for the first time (or after being idle). The container needs to be pulled and started — like a car engine that's been sitting overnight.">cold start</span> on subsequent calls</span>
+          </div>
+          <div class="badge-item animate-in">
+            <span class="badge-code">Function URLs</span>
+            <span class="badge-desc">Direct HTTP endpoints for Lambda functions — invoke via curl or browser</span>
+          </div>
+          <div class="badge-item animate-in">
+            <span class="badge-code">Event Source Mapping</span>
+            <span class="badge-desc">Lambda can be triggered by SQS, Kinesis, or DynamoDB Streams — real event-driven architecture</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: How Lambda Invokes Work -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">How Lambda Invokes Work</h2>
+        <p>Watch the full lifecycle of a Lambda invocation — from your API call to the container spinning up, your <span class="term" data-definition="A handler is the function inside your Lambda code that actually processes the event. It's the entry point — like the main() function in a regular program.">handler</span> executing, and the container staying warm:</p>
+
+        <div class="chat-window" id="chat-lambda-invoke">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="developer" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">D</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Developer</span>
+                <p>Invoke <code>my-function</code> with <span class="term" data-definition="A payload is the data you send to a Lambda function when you invoke it — the input your function will process. It's usually a JSON object.">payload</span> <code>{ name: 'Alice' }</code></p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="router" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">R</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">Router</span>
+                <p>Checking if a warm container exists for <code>my-function</code>...</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="lambda-svc" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">L</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">Lambda Service</span>
+                <p>No warm container. Pulling the <span class="term" data-definition="A runtime is the environment that executes your code. For Lambda, each language (Python, Node.js, etc.) has its own runtime packaged as a Docker image.">runtime</span> image from ECR... Starting container... Injecting your handler code.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="lambda-container" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">C</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">Lambda Container</span>
+                <p>Handler executed! Output: <code>{ greeting: 'Hello Alice' }</code></p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="lambda-svc" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">L</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">Lambda Service</span>
+                <p>Container is now <strong>warm</strong>. Next invoke will skip the pull step.</p>
+              </div>
+            </div>
+          </div>
+          <div class="chat-typing" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-2)">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">Next Message</button>
+            <button class="btn chat-all-btn">Play All</button>
+            <button class="btn chat-reset-btn">Replay</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Check Your Understanding</h2>
+
+        <div class="quiz-container animate-in" id="quiz-module4">
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">Scenario</span>
+              <p>You are testing a Lambda function that connects to an RDS <span class="term" data-definition="PostgreSQL is a powerful, open-source relational database system. It stores structured data in tables and understands SQL — the language you use to query and modify that data.">PostgreSQL</span> database. Your function fails with a <span class="term" data-definition="SQL (Structured Query Language) is the language used to communicate with relational databases. A SQL syntax error means you wrote the command incorrectly — like a grammar mistake the database can't understand.">SQL</span> syntax error. Where should you look to fix it?</p>
+            </div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly! Because Floci uses a real PostgreSQL container, SQL errors are real errors. Fix the query and it will work in both Floci and production."
+               data-explanation-wrong="Not quite. Floci runs a real PostgreSQL container — the SQL error is genuine, not a simulation artifact.">
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Check the Lambda <span class="term" data-definition="A runtime is the language environment your code runs in. The Lambda runtime configuration specifies which language and version to use.">runtime</span> configuration — maybe the container didn't start properly</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Fix the SQL query — Floci runs real PostgreSQL, so the error is genuine</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Switch to a <span class="term" data-definition="A mock is a fake version of a service that pretends to work but doesn't actually do anything. A mock database would accept any SQL without checking syntax.">mock</span> database for testing — it won't throw syntax errors</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">Check Answer</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

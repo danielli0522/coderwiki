@@ -1,0 +1,416 @@
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 5: MCP 工具集成与实战贡献
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-5" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">MCP 工具集成与实战贡献</h1>
+      <p class="module-subtitle">MCP 协议让 AI 操作终端、节点编辑器可视化工作流、如何贡献代码</p>
+    </header>
+
+    <!-- ── Screen 1: MCP 是什么 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">MCP：让 AI "操控" 金融终端</h2>
+
+      <p><span class="term" data-definition="MCP（Model Context Protocol，模型上下文协议）是 Anthropic 提出的标准协议，让 LLM 能通过工具调用（Tool Calls）操作外部应用。在 FinceptTerminal 中，MCP 让 AI 智能体能直接获取市场数据、下单、管理投资组合——不只是给建议，而是直接执行。">MCP（Model Context Protocol）</span> 是 FinceptTerminal 最强大的 AI 集成机制。它让 AI 不只是"建议你做什么"，而是直接操作终端——获取数据、分析图表、甚至下单。</p>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">💡</div>
+        <div class="callout-content">
+          <strong class="callout-title">MCP 的核心价值</strong>
+          <p>普通 AI 聊天：你问"苹果股票怎么样？" → AI 回复一段分析文字。<br>FinceptTerminal MCP：你问同样的问题 → AI 自动调用 MarketsTools 获取实时数据、调用 PortfolioTools 分析你的持仓、调用 NewsTools 抓取最新新闻——<strong>然后给出基于真实数据的分析</strong>。</p>
+        </div>
+      </div>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">📊</div>
+          <h4 class="pattern-title">MarketsTools</h4>
+          <p class="pattern-desc">AI 直接获取股票报价、历史数据、技术指标——不需要你手动搜索。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">📰</div>
+          <h4 class="pattern-title">NewsTools</h4>
+          <p class="pattern-desc">AI 抓取最新新闻、分析舆情、聚类相关报道——信息聚合零延迟。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">💼</div>
+          <h4 class="pattern-title">PortfolioTools</h4>
+          <p class="pattern-desc">AI 读取你的投资组合、计算风险指标、建议调仓——你的私人 AI 基金经理。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+          <div class="pattern-icon" style="background: var(--color-actor-4)">📝</div>
+          <h4 class="pattern-title">PaperTradingTools</h4>
+          <p class="pattern-desc">AI 在模拟环境中执行交易策略——自动买卖、跟踪绩效、回测验证。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+          <div class="pattern-icon" style="background: var(--color-actor-5)">🔍</div>
+          <h4 class="pattern-title">EdgarTools</h4>
+          <p class="pattern-desc">AI 直接读取 SEC 财报文件（10-K、10-Q）——自动分析公司财务健康度。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">📁</div>
+          <h4 class="pattern-title">20+ 更多工具</h4>
+          <p class="pattern-desc">DataHubTools、WatchlistTools、SettingsTools、PythonTools、ReportBuilderTools……覆盖终端所有功能。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 2: MCP 架构详解 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">MCP 架构：AI 请求如何变成终端操作</h2>
+
+      <p>当你对 AI 说"分析一下我的 AAPL 持仓"时，MCP 系统内部发生了什么？来看看数据流：</p>
+
+      <div class="flow-animation" data-steps='[
+        {"highlight":"flow-actor-1","label":"你输入：&quot;分析一下我的 AAPL 持仓&quot;"},
+        {"highlight":"flow-actor-1","label":"AI 模型解析意图，决定调用 portfolio_analyze 工具","packet":true,"from":"actor-1","to":"actor-2"},
+        {"highlight":"flow-actor-2","label":"ToolDispatcher 接收工具调用，路由到 PortfolioTools","packet":true,"from":"actor-2","to":"actor-3"},
+        {"highlight":"flow-actor-3","label":"PortfolioTools 执行 C++ 代码：读取 SQLite 持仓数据、计算 P&amp;L、VaR","packet":true,"from":"actor-3","to":"actor-4"},
+        {"highlight":"flow-actor-4","label":"SchemaValidator 验证返回数据格式，确保 AI 拿到结构化信息","packet":true,"from":"actor-4","to":"actor-2"},
+        {"highlight":"flow-actor-2","label":"AI 收到工具结果（持仓明细、风险指标），生成分析报告回复你"}
+      ]'>
+        <div class="flow-actors">
+          <div class="flow-actor" id="flow-actor-1">
+            <div class="flow-actor-icon">💬</div>
+            <span>AI + LLM</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-2">
+            <div class="flow-actor-icon">🔀</div>
+            <span>ToolDispatcher</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-3">
+            <div class="flow-actor-icon">🔧</div>
+            <span>MCP Tools</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-4">
+            <div class="flow-actor-icon">✅</div>
+            <span>SchemaValidator</span>
+          </div>
+        </div>
+
+        <div class="flow-packet" id="flow-packet"></div>
+        <div class="flow-step-label" id="flow-label">点击"下一步"开始旅程</div>
+
+        <div class="flow-controls">
+          <button class="btn flow-next-btn">下一步</button>
+          <button class="btn flow-reset-btn">重新开始</button>
+          <span class="flow-progress"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 3: 节点编辑器 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">节点编辑器：用可视化管道构建自动化工作流</h2>
+
+      <p>FinceptTerminal 有一个强大的 <span class="term" data-definition="节点编辑器（Node Editor）是一种可视化编程界面——你通过拖拽节点、连接数据流管道来构建自动化工作流，而不是写代码。每个节点代表一个操作（获取数据、计算指标、触发交易），连线代表数据流动方向。">节点编辑器</span>——让你通过拖拽连接数据管道，不需要写一行代码就能构建自动化工作流。</p>
+
+      <div class="arch-diagram">
+        <div class="arch-zone">
+          <h4 class="arch-zone-label">节点编辑器三大区域</h4>
+          <div class="arch-component" data-desc="Palette（调色板）——左侧面板，列出所有可用节点：数据源节点（Yahoo Finance、CoinGecko）、处理节点（移动平均、RSI 计算）、输出节点（图表、交易、通知）。拖拽到画布上使用。">
+            <div class="arch-icon">🎨</div>
+            <span>Palette 节点调色板</span>
+          </div>
+          <div class="arch-component" data-desc="Canvas（画布）——中央区域，节点在这里连接。数据从左侧节点流向右侧节点，形成处理管道。支持缩放、平移、撤销/重做。">
+            <div class="arch-icon">📐</div>
+            <span>Canvas 可视化画布</span>
+          </div>
+          <div class="arch-component" data-desc="Properties（属性面板）——右侧面板，显示选中节点的配置选项。比如选中"移动平均"节点后，可以设置窗口大小（20 日 MA / 50 日 MA）。">
+            <div class="arch-icon">⚙️</div>
+            <span>Properties 属性面板</span>
+          </div>
+        </div>
+        <div class="arch-zone">
+          <h4 class="arch-zone-label">示例工作流：市场数据 → 技术分析 → 交易信号</h4>
+          <div class="arch-component" data-desc="第一步：从 Yahoo Finance 获取 AAPL 的日线 OHLCV 数据。">
+            <div class="arch-icon">📥</div>
+            <span>数据获取节点</span>
+          </div>
+          <div class="arch-component" data-desc="第二步：计算 20 日移动平均线和 RSI 指标。">
+            <div class="arch-icon">📊</div>
+            <span>技术指标节点</span>
+          </div>
+          <div class="arch-component" data-desc="第三步：当价格上穿 MA20 且 RSI < 30 时，触发买入信号。">
+            <div class="arch-icon">🎯</div>
+            <span>条件判断节点</span>
+          </div>
+          <div class="arch-component" data-desc="第四步：将信号发送到 Paper Trading 引擎执行模拟交易。">
+            <div class="arch-icon">📤</div>
+            <span>交易执行节点</span>
+          </div>
+        </div>
+        <div class="arch-description">点击任意组件，了解它在节点编辑器中的作用</div>
+      </div>
+    </section>
+
+    <!-- ── Screen 4: 安全架构 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">安全架构：金融终端的"保险库"</h2>
+
+      <p>处理金融数据的终端必须把安全放在第一位。FinceptTerminal 从四个层面保护你的数据和资金：</p>
+
+      <div class="step-cards animate-in stagger-children">
+        <div class="step-card animate-in">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>传输安全</strong>
+            <p>所有 HTTPS 连接使用 Qt TLS 加密。WebSocket 行情推送同样走 WSS（加密 WebSocket）。零明文传输。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>凭据安全</strong>
+            <p>SecureStorage 使用平台原生密钥链（macOS Keychain / Windows Credential Manager）或 AES-256 加密存储 API Key。源码中零密钥。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>会话安全</strong>
+            <p>JWT 认证 + SessionGuard 自动登出（检测到 401 响应立即清除会话）。PIN 码保护（可选）。不活跃超时自动锁定。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>输入安全</strong>
+            <p>所有外部输入（API 响应、用户输入）在系统边界做净化（sanitization），防止注入攻击。SchemaValidator 确保 MCP 工具返回的数据格式正确。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 5: 如何贡献 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">如何为 FinceptTerminal 贡献代码</h2>
+
+      <p>FinceptTerminal 是开源项目（AGPL-3.0），欢迎社区贡献。根据你的技能和时间，有四条路径：</p>
+
+      <div class="step-cards animate-in stagger-children">
+        <div class="step-card animate-in">
+          <div class="step-num">A</div>
+          <div class="step-body">
+            <strong>简单（15 分钟）——改进文档</strong>
+            <p>修正 <code>docs/</code> 目录下任何 .md 文件中的错别字或不清楚的描述。这是最好的入门方式——熟悉项目结构。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">B</div>
+          <div class="step-body">
+            <strong>简单（30 分钟）——新增 Python 数据脚本</strong>
+            <p>按照 <code>scripts/yfinance_data.py</code> 的模式（CLI 参数 → JSON stdout），写一个新的免费 API 数据获取器。参考 <code>docs/PYTHON_CONTRIBUTOR_GUIDE.md</code>。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">C</div>
+          <div class="step-body">
+            <strong>中等（1-2 小时）——新增 Qt 屏幕</strong>
+            <p>在 <code>src/screens/</code> 下新建目录，创建 QWidget 子类，添加到 CMakeLists.txt，在 MainWindow 注册。参考 <code>src/screens/dashboard/</code> 作为模板。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">D</div>
+          <div class="step-body">
+            <strong>高级（2-4 小时）——新增券商集成</strong>
+            <p>继承 <code>IBroker</code> 接口，实现所有纯虚函数，在 BrokerRegistry 注册。参考 <code>src/trading/brokers/alpaca/</code> 作为模板。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">📖</div>
+        <div class="callout-content">
+          <strong class="callout-title">代码风格</strong>
+          <p>4 空格缩进、120 列宽限制。函数/变量用 <code>snake_case</code>，类型/类用 <code>PascalCase</code>。成员变量加后缀下划线（<code>data_</code>）。所有 QObject 子类必须包含 <code>Q_OBJECT</code> 宏。用新的指针到成员语法连接 signal/slot。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 6: 代码翻译 — 新增一个 MCP 工具 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">代码翻译：如何新增一个 MCP 工具</h2>
+
+      <p>新增 MCP 工具需要两个文件：一个 <code>.h</code> 头文件声明工具，一个 <code>.cpp</code> 文件实现工具逻辑。来看看 MarketsTools 的核心结构：</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-comment">// MarketsTools.h</span></span>
+<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">MarketsTools</span> : <span class="code-keyword">public</span> QObject {</span>
+<span class="code-line">  Q_OBJECT</span>
+<span class="code-line"><span class="code-keyword">public</span>:</span>
+<span class="code-line">  <span class="code-keyword">static</span> <span class="code-keyword">void</span> <span class="code-function">registerTools</span>(</span>
+<span class="code-line">    McpManager&amp; mgr) {</span>
+<span class="code-line"></span>
+<span class="code-line">    mgr.<span class="code-function">registerTool</span>(</span>
+<span class="code-line">      <span class="code-string">"market_quote"</span>,</span>
+<span class="code-line">      <span class="code-comment">// Schema: 参数定义</span></span>
+<span class="code-line">      {<span class="code-string">"symbol"</span>, <span class="code-string">"string"</span>,</span>
+<span class="code-line">       <span class="code-string">"Stock symbol"</span>},</span>
+<span class="code-line">      <span class="code-comment">// Handler: 执行逻辑</span></span>
+<span class="code-line">      [](QJsonObject args) {</span>
+<span class="code-line">        <span class="code-keyword">auto</span> s = <span class="code-function">service</span>();</span>
+<span class="code-line">        <span class="code-keyword">return</span> s.<span class="code-function">getQuote</span>(</span>
+<span class="code-line">          args[<span class="code-string">"symbol"</span>]</span>
+<span class="code-line">            .<span class="code-function">toString</span>());</span>
+<span class="code-line">      });</span>
+<span class="code-line">  }</span>
+<span class="code-line">};</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">MarketsTools 是一个 QObject 子类（Qt 对象系统要求）</p>
+            <p class="tl">Q_OBJECT 宏——启用 signal/slot 和元对象系统</p>
+            <p class="tl">静态方法 registerTools——在应用启动时调用，注册所有工具</p>
+            <p class="tl">接收 McpManager 引用——工具注册中心</p>
+            <p class="tl">注册一个名为 "market_quote" 的工具</p>
+            <p class="tl">工具参数定义（Schema）——告诉 AI 这个工具需要一个 string 类型的 symbol 参数</p>
+            <p class="tl">参数名 "symbol"</p>
+            <p class="tl">参数类型 "string"</p>
+            <p class="tl">参数描述 "Stock symbol"——AI 看到这个描述就知道该传什么</p>
+            <p class="tl">执行处理器（Handler）——当 AI 调用工具时执行的 Lambda 函数</p>
+            <p class="tl">获取 MarketDataService 实例</p>
+            <p class="tl">调用 getQuote 并传入 AI 提供的 symbol 参数</p>
+            <p class="tl">返回结果给 AI——AI 拿到报价数据后继续分析</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 7: 最终测验 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">最终检验：FinceptTerminal 全课程回顾</h2>
+
+      <div class="quiz-container" id="quiz-module5">
+        <div class="quiz-question-block"
+             data-correct="option-b"
+             data-explanation-right="正确！MCP 工具让 AI 从"被动建议"变成"主动执行"。AI 不只是告诉你'AAPL 看起来不错'——它自动调用 MarketsTools 获取实时数据、PortfolioTools 分析持仓、NewsTools 抓新闻，然后给出基于真实数据的分析。"
+             data-explanation-wrong="MCP 改变了 AI 和终端的关系。以前 AI 只能看不能动，MCP 让它能做什么？">
+          <h3 class="quiz-question">MCP 协议让 FinceptTerminal 的 AI 智能体和普通 AI 聊天的最大区别是什么？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>AI 可以用更多的模型（GPT-4、Claude 等）</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>AI 可以直接操作终端——获取数据、分析持仓、执行交易</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>AI 可以生成更长的分析报告</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-c"
+             data-explanation-right="正确！所有 API Key 和券商凭据通过 SecureStorage 加密存储——使用平台原生密钥链（macOS Keychain / Windows Credential Manager）或 AES-256 加密。源码中永远不会包含任何密钥。SessionGuard 还会在检测到 401 响应时自动登出。"
+             data-explanation-wrong="回忆一下安全架构部分。API Key 是怎么存储的？直接写在配置文件里？">
+          <h3 class="quiz-question">FinceptTerminal 如何保护你的 API Key 和券商凭据？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>保存在 .env 文件中，Git 忽略</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>保存在 SQLite 数据库中，明文存储</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>通过 SecureStorage 加密存储——平台密钥链或 AES-256</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-a"
+             data-explanation-right="正确！Screen/Service 分离是贯穿整个项目的铁律：Screen 只负责 UI 渲染和数据展示，Service 负责数据获取和业务逻辑。它们通过 Qt 信号/槽机制通信。这个模式保证了代码的可维护性和可测试性。"
+             data-explanation-wrong="回顾整个课程，从 Module 1 到 Module 5，什么模式是所有功能的基石？">
+          <h3 class="quiz-question">贯穿 FinceptTerminal 所有功能的核心设计模式是什么？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>Screen/Service 分离——UI 和数据严格解耦</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>MVC（Model-View-Controller）模式</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>微服务架构——每个功能是独立的服务</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">重新作答</button>
+      </div>
+    </section>
+
+    <!-- ── Screen 8: 课程总结 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">课程总结：你的 FinceptTerminal 知识地图</h2>
+
+      <p>恭喜你完成了 FinceptTerminal 的完整学习旅程！来回顾一下你掌握的核心知识：</p>
+
+      <div class="icon-rows animate-in">
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-accent-light); color: var(--color-accent);">01</div>
+          <div>
+            <strong>架构理解</strong>
+            <p>C++20 + Qt6 原生架构、Screen/Service 分离、信号/槽通信、Python Bridge 子进程桥接。</p>
+          </div>
+        </div>
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-info-light); color: var(--color-info);">02</div>
+          <div>
+            <strong>基础设施</strong>
+            <p>Result&lt;T&gt; 错误处理、EventBus 事件总线、Logger 日志、AppConfig 配置——四大工具让代码更安全。</p>
+          </div>
+        </div>
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-success-light); color: var(--color-success);">03</div>
+          <div>
+            <strong>AI 智能体</strong>
+            <p>37 个投资大师角色、Persona 系统定义、Alpha Arena 竞技场、QuantLib 18 个量化模块。</p>
+          </div>
+        </div>
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-error-light); color: var(--color-error);">04</div>
+          <div>
+            <strong>交易和数据</strong>
+            <p>IBroker 插件模式、16+ 券商、Paper Trading 模拟、100+ Python 数据连接器、SQLite 13 个 Repository。</p>
+          </div>
+        </div>
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-accent-light); color: var(--color-accent);">05</div>
+          <div>
+            <strong>MCP 和扩展</strong>
+            <p>MCP 协议让 AI 操作终端、节点编辑器可视化工作流、安全架构四层防护、社区贡献四条路径。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">🚀</div>
+        <div class="callout-content">
+          <strong class="callout-title">下一步行动</strong>
+          <p>代码在 GitHub：<code>https://github.com/Fincept-Corporation/FinceptTerminal</code>。从 Issue 列表中选一个新手友好（good first issue）的任务开始——15 分钟的文档改进就是最好的第一步。加入 Discord 社区获取帮助，或通过 GitHub Discussions 提问。</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</section>

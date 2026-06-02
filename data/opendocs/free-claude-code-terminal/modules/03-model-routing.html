@@ -1,0 +1,135 @@
+<section class="module" id="module-3" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">模型路由</h1>
+      <p class="module-subtitle">不是所有任务都需要最贵的模型。路由规则让你按需分配，把钱花在刀刃上。</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">为什么需要路由？</h2>
+        <p>Claude Code 在不同场景下会请求不同级别的模型。如果你把所有请求都发给最贵的 Opus，钱包会很受伤；如果都发给最便宜的模型，复杂任务的质量会明显下降。</p>
+        <p><span class="term" data-definition="模型路由（Model Routing）是根据请求中的模型名称或其他特征，将请求分配到不同后端提供商的策略。类似电话总机根据分机号转接不同部门。">模型路由</span>的核心思路：</p>
+
+        <div class="icon-rows animate-in stagger-children">
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-accent-light); color: var(--color-accent);">Opus</div>
+            <div>
+              <strong>复杂推理 → 用贵但强的模型</strong>
+              <p>架构设计、复杂 bug 调试、多文件重构——这些任务需要最聪明的模型。路由到 OpenRouter 上的 Claude Opus 或 GPT-4o。</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-info-light); color: var(--color-info);">Sonnet</div>
+            <div>
+              <strong>日常编码 → 用便宜够用的模型</strong>
+              <p>写函数、加注释、简单重构——DeepSeek-V3 这类模型已经足够好，成本只有 Opus 的十分之一。</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-success-light); color: var(--color-success);">Haiku</div>
+            <div>
+              <strong>快速问答 → 用本地免费模型</strong>
+              <p>"这个函数是干什么的？""帮我格式化这段代码"——本地 Ollama 跑 Llama 3，零成本，零延迟（不走网络）。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">五种路由策略</h2>
+
+        <div class="pattern-cards animate-in stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-accent)">
+            <div class="pattern-icon" style="background: var(--color-accent)">🎯</div>
+            <h4 class="pattern-title">Opus → OpenRouter</h4>
+            <p class="pattern-desc">复杂任务走 OpenRouter 的 Claude Opus 或 GPT-4o。按量付费但质量最高。适合需要深度理解的场景。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">⚡</div>
+            <h4 class="pattern-title">Sonnet → DeepSeek</h4>
+            <p class="pattern-desc">日常编码走 DeepSeek-V3。价格极低（约 ¥1/百万 token），编码能力接近 Claude Sonnet，性价比之王。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">🏠</div>
+            <h4 class="pattern-title">Haiku → Ollama 本地</h4>
+            <p class="pattern-desc">简单问答走本地 Ollama。零成本、零网络延迟、数据不出本机。需要自己的 GPU 或 CPU 跑推理。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🔧</div>
+            <h4 class="pattern-title">自定义规则</h4>
+            <p class="pattern-desc">按文件类型、项目目录或时间条件路由。例如：TypeScript 文件走 DeepSeek，Python 文件走 OpenRouter。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🔄</div>
+            <h4 class="pattern-title">回退机制</h4>
+            <p class="pattern-desc">主提供商不可用时自动切换备用。例如 OpenRouter 挂了 → 自动切到 DeepSeek → 再挂切到本地 Ollama。保证不中断。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验理解</h2>
+
+        <div class="quiz-container animate-in" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="没错！回退机制是路由可靠性的关键。当主提供商宕机、限流或响应超时时，代理会自动尝试下一个备选提供商，确保你的工作流不会中断。"
+               data-explanation-wrong="再想想。五种策略中，回退机制（Fallback）专门解决"主提供商不可用"的问题。它不是路由规则本身，而是路由失败后的安全网。">
+            <h3 class="quiz-question">当你配置的路由中，主提供商突然不可用了，Free Claude Code 会怎么做？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>直接报错，让 Claude Code 停止工作</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>自动切换到 Anthropic 官方 API（需要你有 API key）</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>按回退链尝试备选提供商，直到有一个成功响应</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重试</button>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">实战：配置你的路由策略</h2>
+        <p>以下是几种常见的路由策略配置，适合不同的使用场景：</p>
+
+        <div class="code-translate">
+          <div class="code-block" data-lang="JavaScript">
+            <pre><code>// routes.js — 路由策略配置示例
+
+// 策略一：成本优先（适合个人开发者）
+const costFirst = {
+  "claude-opus-*":     { provider: "deepseek",  model: "deepseek-chat" },
+  "claude-sonnet-*":   { provider: "groq",      model: "llama-3.1-70b" },
+  "claude-haiku-*":    { provider: "ollama",    model: "qwen2.5-coder:7b" }
+};
+
+// 策略二：质量优先（适合商业项目）
+const qualityFirst = {
+  "claude-opus-*":     { provider: "openrouter", model: "anthropic/claude-opus-4" },
+  "claude-sonnet-*":   { provider: "openrouter", model: "anthropic/claude-sonnet-4" },
+  "claude-haiku-*":    { provider: "deepseek",   model: "deepseek-chat" }
+};</code></pre>
+          </div>
+          <div class="code-explain">
+            <div class="explain-item"><code>costFirst</code> → <span>所有请求都走便宜模型，月费用可控制在 $5 以内</span></div>
+            <div class="explain-item"><code>qualityFirst</code> → <span>保持使用官方模型，但通过 OpenRouter 可能获得折扣</span></div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

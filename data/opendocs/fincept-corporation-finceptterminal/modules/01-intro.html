@@ -1,0 +1,375 @@
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODULE 1: 初识 FinceptTerminal
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">初识 FinceptTerminal</h1>
+      <p class="module-subtitle">开源金融智能终端——用 C++20 和 AI 重塑专业级金融分析</p>
+    </header>
+
+    <!-- ── Screen 1: FinceptTerminal 是什么？ ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">FinceptTerminal 是什么？</h2>
+
+      <p>想象 Bloomberg Terminal 的能力——实时行情、AI 分析、多资产交易、全球数据——但完全免费、开源，而且跑在你自己电脑上。这就是 <span class="term" data-definition="FinceptTerminal 是一个开源的 C++20 原生桌面金融分析平台，使用 Qt6 构建 UI，内嵌 Python 做分析，提供 100+ 数据源接入、37 个 AI 智能体、16+ 券商交易接口，替代年费 $20,000+ 的传统金融终端。">FinceptTerminal</span>。</p>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">💡</div>
+        <div class="callout-content">
+          <strong class="callout-title">核心理念</strong>
+          <p>传统专业金融终端年费 $20,000+，市场数据订阅同样 $20,000+/年。FinceptTerminal 的愿景是：<strong>100% 免费开源、接入 100+ 数据源、AI 驱动分析、C++ 原生性能</strong>——由社区共建，为社区服务。</p>
+        </div>
+      </div>
+
+      <div class="pattern-cards">
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+          <div class="pattern-icon" style="background: var(--color-actor-1)">📊</div>
+          <h4 class="pattern-title">多资产分析</h4>
+          <p class="pattern-desc">DCF 估值、投资组合优化、风险指标（VaR、Sharpe）、衍生品定价——覆盖股票、债券、衍生品、另类投资。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+          <div class="pattern-icon" style="background: var(--color-actor-2)">🤖</div>
+          <h4 class="pattern-title">37 个 AI 智能体</h4>
+          <p class="pattern-desc">巴菲特、格雷厄姆、林奇等投资大师风格智能体，经济分析、地缘政治框架——支持本地 LLM、多供应商。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+          <div class="pattern-icon" style="background: var(--color-actor-3)">🌐</div>
+          <h4 class="pattern-title">100+ 数据连接器</h4>
+          <p class="pattern-desc">从 Yahoo Finance 到 IMF、世界银行、各国政府 API——覆盖股票、加密、外汇、经济、新闻全品类。</p>
+        </div>
+        <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+          <div class="pattern-icon" style="background: var(--color-actor-4)">⚡</div>
+          <h4 class="pattern-title">原生性能</h4>
+          <p class="pattern-desc">C++20 + Qt6 单一二进制文件，无 Electron/JS 开销，无浏览器运行时——毫秒级响应，极致流畅。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 2: 技术栈全景 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">技术栈全景：为什么选 C++20 + Qt6？</h2>
+
+      <p>FinceptTerminal v4 是一个<strong>纯原生 C++20 桌面应用</strong>。不是 Electron、不是 Web 应用、不是 Python GUI——而是一个编译后的原生二进制文件。这个选择背后有深思熟虑的理由。</p>
+
+      <div class="arch-diagram">
+        <div class="arch-zone">
+          <h4 class="arch-zone-label">用户界面层</h4>
+          <div class="arch-component" data-desc="Qt6 Widgets 提供原生保留模式 GUI——窗口、按钮、表格都是操作系统原生渲染，不是 HTML 模拟。Obsidian 设计系统（深色专业主题）提供统一视觉体验。">
+            <div class="arch-icon">🎨</div>
+            <span>Qt6 Widgets + Obsidian 主题</span>
+          </div>
+          <div class="arch-component" data-desc="Qt6 Charts 提供专业金融图表——K 线图、折线图、面积图，无需第三方图表库依赖。">
+            <div class="arch-icon">📈</div>
+            <span>Qt6 Charts 金融图表</span>
+          </div>
+        </div>
+        <div class="arch-zone">
+          <h4 class="arch-zone-label">应用层</h4>
+          <div class="arch-component" data-desc="40+ 个 Screen 覆盖仪表盘、市场、新闻、加密交易、投资组合、节点编辑器等——每个 Screen 都是独立的 QWidget 子类。">
+            <div class="arch-icon">🖥️</div>
+            <span>40+ 终端屏幕</span>
+          </div>
+          <div class="arch-component" data-desc="市场数据服务、新闻聚合/聚类服务、交易引擎、MCP（模型上下文协议）AI 工具集成。">
+            <div class="arch-icon">⚙️</div>
+            <span>服务层 (Services)</span>
+          </div>
+        </div>
+        <div class="arch-zone">
+          <h4 class="arch-zone-label">基础设施层</h4>
+          <div class="arch-component" data-desc="HTTP 客户端基于 QNetworkAccessManager，内置 TLS 加密；WebSocket 用于实时行情推送（Kraken、HyperLiquid）。">
+            <div class="arch-icon">🌐</div>
+            <span>HTTP + WebSocket</span>
+          </div>
+          <div class="arch-component" data-desc="SQLite 本地数据库（通过 Qt Sql），提供数据缓存、设置存储、Watchlist 持久化，13 个 Repository 类。">
+            <div class="arch-icon">🗄️</div>
+            <span>SQLite 存储</span>
+          </div>
+          <div class="arch-component" data-desc="内嵌 Python 3.11 运行时，通过 QProcess 调用 100+ Python 脚本做数据分析，输出 JSON 回 C++ 解析。">
+            <div class="arch-icon">🐍</div>
+            <span>Python Bridge (100+ 脚本)</span>
+          </div>
+        </div>
+        <div class="arch-description">点击任意组件，了解它在架构中的作用</div>
+      </div>
+    </section>
+
+    <!-- ── Screen 3: 数据流动画 — 从用户点击到数据展示 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">数据的旅程：从点击"获取 AAPL 报价"到界面更新</h2>
+
+      <p>FinceptTerminal 遵循严格的 <span class="term" data-definition="Screen/Service 分离模式：Screen（屏幕）只负责渲染 UI，不直接调用 HTTP 或数据库；Service（服务）负责获取、缓存和处理数据。它们通过 Qt 的信号/槽（signals/slots）机制通信。">Screen/Service 分离</span> 模式。来看看数据如何在组件之间流转：</p>
+
+      <div class="flow-animation" data-steps='[
+        {"highlight":"flow-actor-1","label":"你在 Markets 屏幕点击 &quot;获取 AAPL 报价&quot;"},
+        {"highlight":"flow-actor-1","label":"MarketsScreen 发出 signal: requestQuote(&quot;AAPL&quot;)","packet":true,"from":"actor-1","to":"actor-2"},
+        {"highlight":"flow-actor-2","label":"MarketDataService 收到信号，决定走 HTTP API 还是 Python 脚本","packet":true,"from":"actor-2","to":"actor-3"},
+        {"highlight":"flow-actor-3","label":"HttpClient 发送 HTTPS 请求 / PythonRunner 执行 yfinance_data.py","packet":true,"from":"actor-3","to":"actor-4"},
+        {"highlight":"flow-actor-4","label":"SQLite 缓存结果（避免重复请求），Service 发出 dataReady 信号","packet":true,"from":"actor-4","to":"actor-2"},
+        {"highlight":"flow-actor-2","label":"MarketsScreen 的 slot 收到 dataReady，更新 UI 表格和图表"}
+      ]'>
+        <div class="flow-actors">
+          <div class="flow-actor" id="flow-actor-1">
+            <div class="flow-actor-icon">🖱️</div>
+            <span>Screen (UI)</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-2">
+            <div class="flow-actor-icon">⚙️</div>
+            <span>Service</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-3">
+            <div class="flow-actor-icon">🌐</div>
+            <span>HTTP/Python</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-4">
+            <div class="flow-actor-icon">🗄️</div>
+            <span>Cache/DB</span>
+          </div>
+        </div>
+
+        <div class="flow-packet" id="flow-packet"></div>
+        <div class="flow-step-label" id="flow-label">点击"下一步"开始旅程</div>
+
+        <div class="flow-controls">
+          <button class="btn flow-next-btn">下一步</button>
+          <button class="btn flow-reset-btn">重新开始</button>
+          <span class="flow-progress"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 4: 代码翻译 — 项目入口 main.cpp ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">代码翻译：读懂应用程序入口</h2>
+
+      <p>这是 <span class="term" data-definition="main.cpp 是 C++ 程序的入口点——操作系统从这里开始执行你的代码。在 Qt 应用中，它创建 QApplication（管理整个 GUI 事件循环）、设置主题、创建主窗口。">main.cpp</span> 的核心逻辑。左边是 C++ 原始代码，右边是逐行中文解释：</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-keyword">int</span> <span class="code-function">main</span>(<span class="code-keyword">int</span> argc, <span class="code-keyword">char</span>* argv[]) {</span>
+<span class="code-line">  QApplication app(argc, argv);</span>
+<span class="code-line"></span>
+<span class="code-line">  app.<span class="code-function">setApplicationName</span>(</span>
+<span class="code-line">    <span class="code-string">"FinceptTerminal"</span>);</span>
+<span class="code-line">  app.<span class="code-function">setStyle</span>(<span class="code-string">"Fusion"</span>);</span>
+<span class="code-line"></span>
+<span class="code-line">  Theme::<span class="code-function">applyObsidian</span>();</span>
+<span class="code-line"></span>
+<span class="code-line">  MainWindow window;</span>
+<span class="code-line">  window.<span class="code-function">show</span>();</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">return</span> app.<span class="code-function">exec</span>();</span>
+<span class="code-line">}</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">中文翻译</span>
+          <div class="translation-lines">
+            <p class="tl">程序入口——argc 是参数个数，argv 是参数数组</p>
+            <p class="tl">创建 QApplication——Qt 的"大管家"，管理整个 GUI 事件循环（鼠标点击、键盘输入、定时器等）</p>
+            <p class="tl">设置应用名称为 "FinceptTerminal"——显示在窗口标题栏和任务管理器中</p>
+            <p class="tl">使用 Fusion 风格——Qt 内置的跨平台统一风格，确保 Windows/Mac/Linux 外观一致</p>
+            <p class="tl">应用 Obsidian 主题——自定义的深色专业金融终端主题（颜色、字体、样式表）</p>
+            <p class="tl">创建 MainWindow——主窗口，包含导航栏、ScreenRouter（屏幕切换器）和状态栏</p>
+            <p class="tl">显示窗口——调用 show() 让窗口出现在屏幕上</p>
+            <p class="tl">启动事件循环——exec() 进入 Qt 事件循环，程序开始响应用户操作，直到窗口关闭</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">📖</div>
+        <div class="callout-content">
+          <strong class="callout-title">为什么用 C++20 而不是 Python/JS？</strong>
+          <p>金融终端需要同时处理实时行情推送（WebSocket）、复杂图表渲染、数据库查询和 Python 脚本调用。C++ 的零成本抽象让这些操作并行运行而不卡顿；Qt6 的信号/槽机制天然支持异步事件驱动。编译后的二进制启动不到 1 秒，内存占用远低于 Electron。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 5: 项目目录结构 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">项目目录结构</h2>
+
+      <p>FinceptTerminal 的代码库像一个组织严密的金融机构——每个部门（目录）都有明确的职责：</p>
+
+      <div class="file-tree animate-in">
+        <div class="ft-folder open">
+          <span class="ft-name">FinceptTerminal/</span>
+          <span class="ft-desc">项目根目录</span>
+          <div class="ft-children">
+            <div class="ft-folder open">
+              <span class="ft-name">fincept-qt/</span>
+              <span class="ft-desc">主应用程序——你工作的核心区域</span>
+              <div class="ft-children">
+                <div class="ft-folder">
+                  <span class="ft-name">src/app/</span>
+                  <span class="ft-desc">入口点、MainWindow、ScreenRouter</span>
+                </div>
+                <div class="ft-folder">
+                  <span class="ft-name">src/core/</span>
+                  <span class="ft-desc">共享基础设施——配置、事件总线、日志、Result&lt;T&gt;</span>
+                </div>
+                <div class="ft-folder">
+                  <span class="ft-name">src/ui/</span>
+                  <span class="ft-desc">可复用 Qt 组件——主题、卡片、搜索栏、图表工厂</span>
+                </div>
+                <div class="ft-folder">
+                  <span class="ft-name">src/network/</span>
+                  <span class="ft-desc">HTTP 客户端 + WebSocket 客户端</span>
+                </div>
+                <div class="ft-folder">
+                  <span class="ft-name">src/storage/</span>
+                  <span class="ft-desc">SQLite 数据库 + 13 个 Repository + 加密存储</span>
+                </div>
+                <div class="ft-folder">
+                  <span class="ft-name">src/trading/</span>
+                  <span class="ft-desc">交易引擎 + 16+ 券商集成</span>
+                </div>
+                <div class="ft-folder">
+                  <span class="ft-name">src/python/</span>
+                  <span class="ft-desc">Python 运行时桥接器</span>
+                </div>
+                <div class="ft-folder">
+                  <span class="ft-name">src/mcp/</span>
+                  <span class="ft-desc">MCP（模型上下文协议）工具集成</span>
+                </div>
+                <div class="ft-folder">
+                  <span class="ft-name">src/screens/</span>
+                  <span class="ft-desc">40+ 终端屏幕——每个功能页面的 UI</span>
+                </div>
+                <div class="ft-folder">
+                  <span class="ft-name">scripts/</span>
+                  <span class="ft-desc">100+ Python 数据获取和分析脚本</span>
+                </div>
+              </div>
+            </div>
+            <div class="ft-folder">
+              <span class="ft-name">docs/</span>
+              <span class="ft-desc">文档——架构、贡献指南、许可证</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 6: 快速构建 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">5 分钟从源码到运行</h2>
+
+      <p>FinceptTerminal 的构建系统使用 <span class="term" data-definition="CMake 是 C++ 的标准构建系统。它读取 CMakeLists.txt 配置文件，生成平台特定的构建文件（Makefile/Ninja/VS 项目），然后编译成可执行文件。CMake Presets 是预定义的构建配置，简化了跨平台构建。">CMake Presets</span>——三条命令就能从源码构建出可执行文件：</p>
+
+      <div class="step-cards animate-in stagger-children">
+        <div class="step-card animate-in">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>克隆仓库</strong>
+            <p><code>git clone https://github.com/Fincept-Corporation/FinceptTerminal.git</code></p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>配置 + 编译</strong>
+            <p><code>cmake --preset macos-release && cmake --build --preset macos-release</code></p>
+            <p style="font-size: var(--text-xs); color: var(--color-text-muted); margin-top: 4px;">macOS 用 macos-release，Linux 用 linux-release，Windows 用 win-release</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>运行</strong>
+            <p><code>./build/macos-release/FinceptTerminal.app/Contents/MacOS/FinceptTerminal</code></p>
+            <p style="font-size: var(--text-xs); color: var(--color-text-muted); margin-top: 4px;">点击 "Continue as Guest" 即可开始——无需注册</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-content">
+          <strong class="callout-title">版本锁定</strong>
+          <p>编译器版本是<strong>强制锁定</strong>的：CMake 3.27.7、Ninja 1.11.1、Qt 6.8.3、Python 3.11.9。CMake 会用 FATAL_ERROR 级别检查版本——不匹配就直接拒绝构建。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Screen 7: 测验 ── -->
+    <section class="screen animate-in">
+      <h2 class="screen-heading">检验你的理解</h2>
+
+      <div class="quiz-container" id="quiz-module1">
+        <div class="quiz-question-block"
+             data-correct="option-b"
+             data-explanation-right="正确！FinceptTerminal 使用 Screen/Service 分离模式——Screen 只负责 UI 渲染，Service 负责数据获取和处理，它们通过 Qt 信号/槽通信。这就像前端和后端分离的 Web 开发，但在同一个 C++ 进程内。"
+             data-explanation-wrong="想一想：如果你直接在 Screen 里写 HTTP 请求代码，当 API 变化时需要改多少个文件？分离的好处是职责清晰。">
+          <h3 class="quiz-question">FinceptTerminal 的 Screen（界面）可以直接调用 HTTP 接口获取数据吗？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>可以，Screen 里直接用 HttpClient</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>不可以，Screen 只负责 UI，数据由 Service 层获取</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>可以，但需要先调用 Python 脚本</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-c"
+             data-explanation-right="正确！内嵌 Python 通过 QProcess 调用——C++ 启动 Python 子进程执行脚本，Python 输出 JSON 到 stdout，C++ 解析 JSON 拿到结果。这不是嵌入解释器，而是子进程通信。"
+             data-explanation-wrong="回忆一下 Python Bridge 的架构。Python 脚本怎么把数据返回给 C++？提示：想想进程间通信。">
+          <h3 class="quiz-question">FinceptTerminal 内嵌 Python 的方式是什么？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>使用 pybind11 直接嵌入 Python 解释器</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>通过 gRPC 调用独立的 Python 服务</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>通过 QProcess 启动 Python 子进程，解析 stdout JSON</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-a"
+             data-explanation-right="正确！C++20 + Qt6 编译成原生二进制，启动快、内存低、无需浏览器或 Node.js 运行时。相比 Electron 应用（如 VS Code），资源占用降低 5-10 倍。"
+             data-explanation-wrong="想想 FinceptTerminal 为什么选择 C++ 而不是更"流行"的技术栈。关键在于性能和资源效率。">
+          <h3 class="quiz-question">相比 Electron/Web 技术栈，C++20 + Qt6 最大的优势是什么？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>原生性能——单一二进制，无运行时开销，低内存占用</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>开发效率更高——热重载、Chrome DevTools 调试</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>跨平台更容易——一套代码运行在所有平台</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">重新作答</button>
+      </div>
+    </section>
+
+  </div>
+</section>
