@@ -1,0 +1,315 @@
+<section class="module" id="module-1" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">Opening the Cookbook: Starting with an "Augmented LLM"</h1>
+      <p class="module-subtitle">What the Anthropic Cookbook teaches end-to-end · And the book's minimum viable unit — the Augmented LLM</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Welcome / Hook -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">First question: you open ChatGPT and ask "is it raining in Shanghai today?" — what happens?</h2>
+        <p>It says: "Sorry, I don't have the ability to access real-time data." At that moment, you've hit the boundary of a "bare <span class="term" data-definition="Large Language Model. Think of it as a 'text brain' trained on massive amounts of text — great at continuing conversations, but frozen at its training cutoff date. It can't browse the web, query databases, or remember what you said yesterday.">LLM</span>" — it's a talking brain trapped in a room with no windows, no phone, and no calendar.</p>
+        <p><strong>The entire Anthropic Cookbook teaches you how to give this brain windows, a phone, a calendar, and a capable assistant.</strong></p>
+        <div class="callout callout-accent">
+          <div class="callout-icon">🧗</div>
+          <div class="callout-content">
+            <strong class="callout-title">This lesson's metaphor: the outdoor rock climber and their kit</strong>
+            <p>A bare-handed climber can only tackle the simplest routes. Give them the four-piece kit — rope, protection cams, walkie-talkie, coach — and suddenly they can take on much harder walls. A plain LLM call is "bare-handed climbing"; the <em>Augmented LLM</em> this lesson teaches is "fully equipped climbing."</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: The four-piece kit -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The Augmented LLM's "Four-Piece Kit"</h2>
+        <p>In the paper <span class="term" data-definition="An engineering paper published by Anthropic in 2024 that introduces the 'Augmented LLM' as the minimum viable unit and presents 5 foundational orchestration patterns. The theoretical framework for the entire cookbook."><em>Building Effective Agents</em></span>, Anthropic engineers define the "augmented LLM" as the base unit — an LLM equipped with some subset of these four capabilities:</p>
+
+        <div class="pattern-cards stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🔍</div>
+            <h4 class="pattern-title">Retrieval</h4>
+            <p class="pattern-desc">Lets the LLM "look things up" in your own knowledge base — product docs, customer FAQs, internal wikis. The underlying mechanism is <span class="term" data-definition="Retrieval-Augmented Generation: first use keyword or vector search to find relevant document chunks, then feed those chunks into the prompt so the model can answer based on them. The most common paradigm in enterprise AI applications.">RAG</span>.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🛠️</div>
+            <h4 class="pattern-title">Tools</h4>
+            <p class="pattern-desc">Lets the LLM "ask someone else to do things" — check the weather, send emails, run a calculator. The LLM doesn't do the work itself; it outputs a "work ticket" that your program executes.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">💾</div>
+            <h4 class="pattern-title">Memory</h4>
+            <p class="pattern-desc">Lets the LLM "remember what you said yesterday" — conversation history, user preferences, long-term facts. Without it, every conversation is like meeting for the first time.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">📜</div>
+            <h4 class="pattern-title">System Prompt</h4>
+            <p class="pattern-desc">Gives the LLM a "job description" — who you are, what tone to use, which topics to avoid. Essentially "role-casts" a general-purpose trained model into your dedicated assistant.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Key Insight</strong>
+            <p>All the complex patterns that come later in the cookbook (chaining, routing, orchestrator, Agent SDK, SRE auto-remediation) are ultimately just <strong>different wiring patterns between multiple Augmented LLMs</strong>. Master this minimum viable unit first, and the entire book is just different combinations of the same LEGO brick.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Code translation - one-liner research agent -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">A real code snippet: 7 lines to build a web-surfing researcher</h2>
+        <p>This code comes from <code>claude_agent_sdk/00_The_one_liner_research_agent.ipynb</code> — the "Hello World" of the entire cookbook. It's the <strong>minimum viable Augmented LLM</strong>: an LLM + one tool (web search).</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE · Python</span>
+<pre><code><span class="code-line"><span class="code-keyword">from</span> claude_agent_sdk <span class="code-keyword">import</span> ClaudeAgentOptions, query</span>
+<span class="code-line"></span>
+<span class="code-line">messages = []</span>
+<span class="code-line"><span class="code-keyword">async for</span> msg <span class="code-keyword">in</span> <span class="code-function">query</span>(</span>
+<span class="code-line">    <span class="code-property">prompt</span>=<span class="code-string">"Research the latest trends in AI agents and give me a brief summary and relevant citations."</span>,</span>
+<span class="code-line">    <span class="code-property">options</span>=<span class="code-function">ClaudeAgentOptions</span>(<span class="code-property">model</span>=MODEL, <span class="code-property">allowed_tools</span>=[<span class="code-string">"WebSearch"</span>]),</span>
+<span class="code-line">):</span>
+<span class="code-line">    <span class="code-function">print_activity</span>(msg)</span>
+<span class="code-line">    messages.<span class="code-function">append</span>(msg)</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">Line-by-line explanation</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>Line 1:</strong> Import the "query" function and "options" tool from Anthropic's official SDK.</p>
+              <p class="tl"><strong>Line 3:</strong> Prepare an empty list — every message the agent sends us will be collected here.</p>
+              <p class="tl"><strong>Line 4:</strong> Start receiving asynchronously in a stream — like watching a live broadcast; every thought and action from the agent is visible immediately.</p>
+              <p class="tl"><strong>Line 5:</strong> Our "task order" — research the latest trends in AI agents, give me a summary and citations.</p>
+              <p class="tl"><strong>Line 6:</strong> Key configuration — which model to use, and <strong>only</strong> allow one tool: web search. This is the "Augmented LLM": one LLM + one tool.</p>
+              <p class="tl"><strong>Lines 8-9:</strong> Print and archive every thought, search, and response from the agent.</p>
+              <p class="tl"><strong>The entire snippet is 7 effective lines — a researcher that can browse the web.</strong> This is the cookbook's Hello World.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Group Chat — bare LLM vs augmented -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Watch a conversation: Bare LLM vs Augmented LLM</h2>
+        <p>Same user, same question, two conversations — the only difference is the equipment.</p>
+
+        <div class="chat-window" id="chat-module1">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="user" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">U</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">User</span>
+                <p>Is it raining in Shanghai today?</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="bare" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-text-muted)">L</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-text-muted)">Bare LLM</span>
+                <p>Sorry, I don't have the ability to access real-time weather data. I'd suggest checking a weather website.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="user" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">U</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">User</span>
+                <p>(Sighs, closes the app)</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="narrator" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-accent)">★</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-accent)">Narrator</span>
+                <p>— Now let's give the same LLM the "tools + memory" kit —</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="user" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">U</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">User</span>
+                <p>Is it raining in Shanghai today?</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="5" data-sender="claude" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">C</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Augmented LLM</span>
+                <p>Let me check... (calling WebSearch tool: Shanghai weather today)</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="6" data-sender="claude" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">C</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Augmented LLM</span>
+                <p>It's currently light rain in Shanghai, 18°C. I'd suggest bringing an umbrella — there are showers expected in the evening.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="7" data-sender="user" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">U</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">User</span>
+                <p>Great! By the way, make a note — I prefer cooler weather.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="8" data-sender="claude" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">C</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Augmented LLM</span>
+                <p>Saved to memory ✓ (user_preference: prefers_cold_weather=true). I'll remember this next time I recommend outfits.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-module1-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module1-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">Next</button>
+            <button class="btn chat-all-btn">Auto Play</button>
+            <button class="btn chat-reset-btn">Replay</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Cookbook map -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What's in this cookbook — a panoramic map</h2>
+        <p>The entire cookbook repo, reorganized by "teaching value," looks like this — the next 5 modules will walk you through the most important chapters along this map:</p>
+
+        <div class="file-tree">
+          <div class="ft-folder open">
+            <span class="ft-name">anthropic-cookbook/</span>
+            <span class="ft-desc">Cookbook root directory</span>
+            <div class="ft-children">
+              <div class="ft-folder">
+                <span class="ft-name">patterns/agents/</span>
+                <span class="ft-desc">5 foundational orchestration patterns (Modules 2 & 3)</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">tool_use/</span>
+                <span class="ft-desc">Letting the model take action — full function calling suite (Module 4)</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">claude_agent_sdk/</span>
+                <span class="ft-desc">7 notebooks from one-liner to SRE (Module 5)</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">capabilities/</span>
+                <span class="ft-desc">RAG / knowledge graphs / text-to-SQL / classification / summarization</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">skills/</span>
+                <span class="ft-desc">Claude Skills — reusable "ability packs" (touched on in Module 6)</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">multimodal/</span>
+                <span class="ft-desc">Vision / PDF / chart understanding</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">extended_thinking/</span>
+                <span class="ft-desc">Giving the model a "thinking budget" (Module 6)</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">misc/</span>
+                <span class="ft-desc">Practical recipes: prompt_caching / JSON mode / PDF upload, etc.</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">managed_agents/ · observability/ · finetuning/ · tool_evaluation/</span>
+                <span class="ft-desc">Advanced or domain-specific recipes (not covered in this course — you already have the key to explore on your own)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 6: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Quick quiz: Can you tell which LLM is fully equipped?</h2>
+
+        <div class="quiz-container" id="quiz-module1">
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="Correct! Pure text generation (writing poetry, editing copy) doesn't need external information. The Augmented four-piece kit is designed for tasks that 'need to look things up, need to do things, need to remember things' — giving a poetry task WebSearch would actually be wasteful."
+               data-explanation-wrong="Think again — does this task require the model to 'look up real-time data'? 'Call a calculator'? 'Remember your conversation from yesterday'?">
+            <h3 class="quiz-question">Q1. You want Claude to write a modern poem about autumn. What's the most reasonable approach?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Give it the WebSearch tool so it can first look up currently popular poetic forms.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Set up RAG connected to a Tang poetry database for retrieval augmentation.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Just use a bare LLM — the Augmented four-piece kit isn't needed; pure generation tasks don't use it.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly right. 'I don't have real-time data' is the model telling you it's missing the 'retrieval / tools' piece — give it WebSearch or a tool that can query your database and the problem is solved."
+               data-explanation-wrong="The model is telling you it lacks the ability to access the real world — adding 'memory' or 'switching to a bigger model' won't solve the root problem. What it needs is a 'hand' that can reach out and fetch information.">
+            <h3 class="quiz-question">Q2. Your AI assistant keeps saying "Sorry, I don't have real-time data / I don't know what time it is / I can't access your company's internal wiki." What should you add?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Add longer conversation memory.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Add tools or retrieval (so it can search the web / query internal wikis).</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Switch to a larger model (e.g., from Sonnet to Opus).</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="Correct. Having to reintroduce yourself at the start of every conversation means it lacks the 'memory' equipment across conversations. Add long-term memory / session storage, and next time it'll know 'oh, you're Daniel, you prefer tea over coffee.'"
+               data-explanation-wrong="Think again — the symptom 'has to reintroduce themselves every time' points to which missing piece of equipment? Is it tools? Retrieval? Or memory?">
+            <h3 class="quiz-question">Q3. Your company's customer service bot makes every user re-enter their name, order number, and product model at the start of each new conversation — even though the same user just provided all that last time. Which piece of equipment is most missing?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Memory — persisting user information across sessions.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Tools — connect more APIs.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>System prompt — rewrite the prompt so it doesn't forget.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

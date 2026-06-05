@@ -1,0 +1,296 @@
+<section class="module" id="module-6" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">06</span>
+      <h1 class="module-title">Advanced Boosters: Thinking · Caching · Skills</h1>
+      <p class="module-subtitle">Three training boosters — taking an agent from "functional" to "production-ready"</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Hook + runner metaphor -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The first 5 modules covered the skeleton of an agent — this module covers the training boosters</h2>
+        <p>By now you can understand most of the cookbook. But in practice, the same agent often gets stuck on three problems: <strong>reasoning too shallow / calls too expensive / skills too scattered</strong>. The three boosters in this module each tackle one of these symptoms.</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">🏃</div>
+          <div class="callout-content">
+            <strong class="callout-title">This lesson's metaphor: Three training boosters for a long-distance runner</strong>
+            <p><strong>Extended Thinking = pre-race breathing exercise</strong> — those 30 seconds of deep breathing before the start, warming up the brain before running.<br><strong>Prompt Caching = muscle memory from training</strong> — running the same route 100 times, your muscles react automatically without thinking about the motion.<br><strong>Skills = the coach's training plan package</strong> — a ready-made, directly applicable SOP ("16-week marathon prep plan").<br>Each booster corresponds to a type of "speedup": deeper thinking, faster repetition, broader skills. Any agent can equip any of them.</p>
+          </div>
+        </div>
+
+        <div class="pattern-cards stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🧠</div>
+            <h4 class="pattern-title">Extended Thinking</h4>
+            <p class="pattern-desc"><strong>What it fixes</strong>: Complex reasoning that can't be solved in one pass.<br><strong>How to enable</strong>: Add a thinking parameter to the API call.<br><strong>Best for</strong>: Math / multi-step planning / risk analysis.<br><strong>Note</strong>: Increases output token consumption.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">💾</div>
+            <h4 class="pattern-title">Prompt Caching</h4>
+            <p class="pattern-desc"><strong>What it fixes</strong>: Repeated spending on long prefixes.<br><strong>How to enable</strong>: Add a cache_control parameter to the API call.<br><strong>Best for</strong>: Fixed system prompts / repeated queries on long documents / tool lists.<br><strong>Effect</strong>: From the second call onward, input token cost drops to 1/10, latency cut in half.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">📦</div>
+            <h4 class="pattern-title">Skills</h4>
+            <p class="pattern-desc"><strong>What it fixes</strong>: Skills too scattered, hard to reuse.<br><strong>How to enable</strong>: Package "code + prompts + resources" into a Skill.<br><strong>Best for</strong>: Generating PPT / Excel / PDF and other specialized outputs.<br><strong>Significance</strong>: Skills can be reused across projects and clients.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Extended Thinking with chat -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Booster 1: Extended Thinking — giving the model an undisturbed scratchpad</h2>
+        <p>Extended Thinking doesn't make the model smarter — it <strong>gives it a separate scratch space</strong> where it writes its reasoning process in a thinking block, and only then delivers the conclusion. Complex reasoning tasks benefit directly.</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE · Python</span>
+<pre><code><span class="code-line">response = client.messages.<span class="code-function">create</span>(</span>
+<span class="code-line">    model=<span class="code-string">"claude-sonnet-4-6"</span>,</span>
+<span class="code-line">    max_tokens=4000,</span>
+<span class="code-line">    thinking={</span>
+<span class="code-line">        <span class="code-string">"type"</span>: <span class="code-string">"enabled"</span>,</span>
+<span class="code-line">        <span class="code-string">"budget_tokens"</span>: 2000</span>
+<span class="code-line">    },</span>
+<span class="code-line">    messages=[{</span>
+<span class="code-line">        <span class="code-string">"role"</span>: <span class="code-string">"user"</span>,</span>
+<span class="code-line">        <span class="code-string">"content"</span>: <span class="code-string">"Solve this puzzle: Three people check into a hotel..."</span></span>
+<span class="code-line">    }]</span>
+<span class="code-line">)</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">Line-by-line explanation</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>Lines 1-3:</strong> A standard API call — Sonnet model, max 4000 <span class="term" data-definition="The smallest unit of text that an LLM processes. An English word is typically 1-2 tokens, a Chinese character about 1-2 tokens. API billing is based on token count — so 'saving tokens' means 'saving money'.">token</span>s for the final output.</p>
+              <p class="tl"><strong>Lines 4-7 (the key switch):</strong> Enable extended thinking, and give it a <strong>"scratchpad budget"</strong> of 2000 tokens. The model writes its reasoning process into a separate thinking block, then writes the final answer.</p>
+              <p class="tl"><strong>Lines 8-11:</strong> Your actual question.</p>
+              <p class="tl"><strong>After the call returns</strong>, <code>response.content</code> will contain <strong>two types of blocks</strong>: thinking blocks (reasoning process) and text blocks (final answer).</p>
+              <p class="tl"><strong>Huge value for debugging agent behavior</strong> — you can see the model's "inner monologue" and immediately know where it went wrong, whether it's a poorly written prompt or biased model reasoning.</p>
+            </div>
+          </div>
+        </div>
+
+        <h3 style="margin-top: var(--space-12); font-family: var(--font-display); font-size: var(--text-xl);">Watch the model's "inner monologue" in action</h3>
+        <p>A classic example from the cookbook — the hotel bill paradox. Watch how Claude uses the thinking block to lay out its reasoning:</p>
+
+        <div class="chat-window" id="chat-module6">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="user" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">U</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">User</span>
+                <p>Three people check into a hotel and pay $30. The manager realizes it should only be $25, and tells the bellboy to return $5. The bellboy pockets $2 and gives $1 back to each person. Now each person paid $9, totaling $27, plus the bellboy's $2 = $29. Where did the missing $1 go?</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="thinking" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-text-muted)">💭</div>
+              <div class="chat-bubble" style="background: var(--color-bg-warm); border: 1px dashed var(--color-text-muted);">
+                <span class="chat-sender" style="color: var(--color-text-muted)">Claude · thinking (inner monologue)</span>
+                <p>Let me carefully break down the accounting. $30 total paid = $25 room + $3 returned + $2 bellboy pocketed = $30 ✓. Guests actually paid = $30 − $3 returned = $27. This $27 = $25 room + $2 bellboy pocketed ✓. So "$27 + $2 = $29" is the wrong way to add — the $2 is already inside the $27, it's being added again. This is mixing two different accounting categories: "what guests paid" and "what hotel + bellboy received"...</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="claude" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">C</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Claude · text (official answer)</span>
+                <p>This is a classic linguistic trap. The $27 paid by the guests already <strong>includes</strong> the $2 pocketed by the bellboy — the $2 should not be added again. The correct calculation: guests paid $27 = room $25 + bellboy $2. The $3 returned is on the other side of the ledger — so $30 = $27 (guests ultimately paid) + $3 (returned). There is no "missing $1".</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-module6-typing" style="display:none">
+            <div class="chat-avatar" id="chat-module6-typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">Next message</button>
+            <button class="btn chat-all-btn">Auto-play</button>
+            <button class="btn chat-reset-btn">Replay</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Prompt Caching -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Booster 2: Prompt Caching — one parameter saves 90% of input tokens</h2>
+        <p>Prompt Caching isn't a new model — it's an API flag that <strong>caches</strong> long, unchanged prefixes (a book, a codebase, a system prompt). On the second call with the same prefix, input token cost drops to 1/10 and latency is cut in half.</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE · Python</span>
+<pre><code><span class="code-line">write_response = client.messages.<span class="code-function">create</span>(</span>
+<span class="code-line">    model=MODEL_NAME,</span>
+<span class="code-line">    max_tokens=300,</span>
+<span class="code-line">    cache_control={<span class="code-string">"type"</span>: <span class="code-string">"ephemeral"</span>},  <span class="code-comment"># &lt;-- one-line change</span></span>
+<span class="code-line">    messages=[</span>
+<span class="code-line">        {</span>
+<span class="code-line">            <span class="code-string">"role"</span>: <span class="code-string">"user"</span>,</span>
+<span class="code-line">            <span class="code-string">"content"</span>: <span class="code-function">str</span>(TIMESTAMP)</span>
+<span class="code-line">            + <span class="code-string">"&lt;book&gt;"</span></span>
+<span class="code-line">            + book_content   <span class="code-comment"># All of "Pride and Prejudice" ~187k tokens</span></span>
+<span class="code-line">            + <span class="code-string">"&lt;/book&gt;"</span></span>
+<span class="code-line">            + <span class="code-string">"\n\nWhat is the title of this book? Only output the title."</span>,</span>
+<span class="code-line">        }</span>
+<span class="code-line">    ],</span>
+<span class="code-line">)</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">Line-by-line explanation</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>Line 4 (the key):</strong> Just this one line! <code>cache_control={"type": "ephemeral"}</code>. It means "I allow the system to cache the cacheable portion of this input." <span class="term" data-definition="Ephemeral means 'short-lived' in English. In prompt caching, this is a cache type — stored for a few minutes to a few hours (specific rules depend on Anthropic's current policy), and reused when subsequently matched. Enough to cover multi-turn calls within a session.">ephemeral</span> indicates short-term caching.</p>
+              <p class="tl"><strong>Lines 9-11:</strong> Stuffs the entire "Pride and Prejudice" (~187k tokens) into the prompt. Without caching, every question requires re-inputting those 187k tokens — the bill would explode.</p>
+              <p class="tl"><strong>Line 12:</strong> The actual question — only takes up a few dozen tokens.</p>
+              <p class="tl"><strong>First call</strong>: Cache is written, timing is similar to an uncached call (baseline).</p>
+              <p class="tl"><strong>Second call with the same prefix</strong>: The API reads directly from cache, <strong>input token cost drops to 1/10, latency drops by more than half</strong>.</p>
+              <p class="tl"><strong>Real production scenario</strong>: Your agent carries the same system prompt (several thousand tokens) and tool list every time? Turn on caching and save money immediately.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">📉</div>
+          <div class="callout-content">
+            <strong class="callout-title">Feel the numbers</strong>
+            <p>Suppose your agent system carries a 10,000-token system prompt, with 1 million calls per day.<br>
+            <strong>Without caching</strong>: Pay full price for 10,000 input tokens each time → burns through 10 billion input tokens per day.<br>
+            <strong>With caching</strong>: First write at full price, subsequent hits at 1/10 → burns about 1 billion input tokens per day. <strong>Bill drops 90% instantly</strong>. This is CTO-level vocabulary — when a product manager says "AI is too expensive," you can immediately ask "Have you enabled prompt caching?"</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Drag-and-drop matching -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Exercise: Drag scenarios to the matching booster</h2>
+        <p>Drag the "booster solutions" on the left to the corresponding "real-world scenarios" on the right.</p>
+
+        <div class="dnd-container" id="dnd-module6">
+          <div class="dnd-chips">
+            <div class="dnd-chip" draggable="true" data-answer="thinking">Extended Thinking</div>
+            <div class="dnd-chip" draggable="true" data-answer="caching">Prompt Caching</div>
+            <div class="dnd-chip" draggable="true" data-answer="both">Enable both</div>
+            <div class="dnd-chip" draggable="true" data-answer="none">Neither needed</div>
+          </div>
+          <div class="dnd-zones">
+            <div class="dnd-zone" data-correct="thinking">
+              <p class="dnd-zone-label">Complex math reasoning / multi-step planning tasks (can't get it right in one pass, needs deep thinking)</p>
+              <div class="dnd-zone-target">Drag the booster here</div>
+            </div>
+            <div class="dnd-zone" data-correct="caching">
+              <p class="dnd-zone-label">Customer service agent that pastes a 5,000-token product KB as system prompt at the start of every conversation</p>
+              <div class="dnd-zone-target">Drag the booster here</div>
+            </div>
+            <div class="dnd-zone" data-correct="both">
+              <p class="dnd-zone-label">RAG agent: long documents (cache-friendly) + complex multi-hop Q&A (reasoning-heavy)</p>
+              <div class="dnd-zone-target">Drag the booster here</div>
+            </div>
+            <div class="dnd-zone" data-correct="none">
+              <p class="dnd-zone-label">A super simple "what day is it today" one-shot Q&A</p>
+              <div class="dnd-zone-target">Drag the booster here</div>
+            </div>
+          </div>
+          <div style="display: flex; gap: var(--space-3); margin-top: var(--space-6); flex-wrap: wrap;">
+            <button class="btn" onclick="checkDnD('dnd-module6')">Check matches</button>
+            <button class="btn" onclick="resetDnD('dnd-module6')">Start over</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz + closing -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Quiz: Pick the right booster for real-world scenarios</h2>
+
+        <div class="quiz-container" id="quiz-module6">
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Correct! This is a textbook caching scenario — a long prefix (8,000 tokens) repeated every time, while the conversation itself is only a few hundred tokens. With cache_control enabled, input cost drops to 1/10 from the second call onward, instantly slashing the bill. Extended Thinking doesn't solve the 'repeated prefix' problem."
+               data-explanation-wrong="Think: where is the bill expensive? Too much input? Too much output? Or reasoning too complex? An 8,000-token system prompt repeated every time — which booster addresses that?">
+            <h3 class="quiz-question">Q1. Your agent has to paste an 8,000-token system prompt + tool description at the start of every conversation, while the conversation itself is only a few hundred tokens. The bill is expensive. What's the best move?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Enable Extended Thinking — let the model think clearly so it needs fewer calls.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Enable Prompt Caching — cache that 8,000-token prefix.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Switch to a cheaper Haiku model.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="Correct! 'Analyze Q3 financial reports and identify 5 potential risks' is a classic multi-step reasoning task — reading everything + reasoning + ranking in one pass often results in superficial answers. With a thinking budget, the model can break it down on its scratchpad, and quality improves significantly."
+               data-explanation-wrong="Caching solves 'repeated prefix spending', not 'insufficient reasoning depth'. Switching models might help, but thinking is the switch that directly addresses the symptom.">
+            <h3 class="quiz-question">Q2. Your agent is tasked with "analyzing Q3 financial reports to identify 5 potential risks." Responses are often superficial — only pointing out 1-2 obvious risks. Which switch should you try first?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Extended Thinking — give it scratchpad space for deep reasoning.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Prompt Caching — cache the financial report.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Switch to a larger Opus model.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="Correct! This is exactly what Skills are designed for — providing capabilities like 'making PPT / Excel / PDF' to Claude as reusable packages, and these capabilities can be reused across Claude.ai, the API, and various clients. Tool use could do it too, but you'd have to rewrite everything; Skills are pre-packaged capabilities from Anthropic."
+               data-explanation-wrong="Think: generating PPT is a core Skills scenario for 'specialized output generation'. Tool use could build it, but you'd have to write an entire PPT engine from scratch. Skills already have this packaged up.">
+            <h3 class="quiz-question">Q3. You want Claude to generate PowerPoint files directly in a web application. What's the best mechanism?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Use tool use to write your own generate_pptx tool.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Enable Extended Thinking so it "thinks before acting."</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Use Anthropic's Skills — making PPT/Excel/PDF is a standard Skills capability.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module6')">Check answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module6')">Try again</button>
+        </div>
+
+        <div class="callout callout-accent" style="margin-top: var(--space-12)">
+          <div class="callout-icon">🎯</div>
+          <div class="callout-content">
+            <strong class="callout-title">This course is over — but the Cookbook keeps updating</strong>
+            <p>The structure of the entire cookbook is actually quite simple — start with the Augmented LLM as the smallest unit (Module 1), learn three basic workflows (Module 2) and two advanced patterns (Module 3), master the "hands-on" mechanism (Module 4), then use the SDK to package everything into a production-grade agent (Module 5), and finally use three training boosters (Module 6) to push the agent to production-ready.<br><br>
+            <strong>When you go back to the cookbook repo, you're no longer looking at a random pile of notebooks — you can identify each notebook's coordinates on this map</strong>. See customer_service_agent → that's tool use in practice. See contextual-embeddings → that's a RAG optimization variant. See sub-agents → that's a concrete implementation of the orchestrator.<br><br>
+            As a vibe coder, you've gained not just knowledge — but the <strong>vocabulary</strong> to converse with engineers: you can say "this part is overkill with evaluator-optimizer, switch to a chain with spot-checks" or "this agent should put rules in CLAUDE.md instead of stuffing them into the prompt every time." That's the greatest value of this course.</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

@@ -1,0 +1,302 @@
+<section class="module" id="module-4" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">Tool Use: Making the Model Take Action</h1>
+      <p class="module-subtitle">Claude doesn't act on its own -- it outputs "work orders" for your program to execute. This is the only way an agent can truly change the outside world.</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Hook + chess metaphor -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Claude can't query databases or send emails -- but it can "ask someone else to do it"</h2>
+        <p>Up through the previous module, all workflows remained within "LLMs talking to each other." Claude can't see the time, query a database, or send an email on its own. But <strong>you can teach it to "ask someone else to do these things"</strong> -- that's the entire secret of tool use.</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">♟️</div>
+          <div class="callout-content">
+            <strong class="callout-title">This Lesson's Metaphor: Chess Master + Chess Clock</strong>
+            <p>The master (Claude) can only "think about chess" -- it can't leave the table to look up openings. You give it a few "tool cards" -- look up opening books, look up endgame tables, ask the engine for an evaluation. Each card clearly states <em>what this tool can do and what parameters it needs</em>. When it wants to use one, it presses the chess clock and states the tool name and parameters. <strong>It doesn't look things up itself -- it asks you to</strong> -- you pass the result back, and it thinks about the next move. The clock gets pressed several times throughout the game -- this is the <span class="term" data-definition="Agentic Loop. LLM call → tool execution → feed result back to LLM → LLM decides next step... cycling until the LLM says 'I'm done.' This is the underlying heartbeat of all agent systems.">agentic loop</span>.</p>
+          </div>
+        </div>
+
+        <div class="pattern-cards stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">📋</div>
+            <h4 class="pattern-title">Description Is Make-or-Break</h4>
+            <p class="pattern-desc">Claude looks at a tool's description to decide "when to use it / how to use it." If the instructions aren't clear, the tool gets used incorrectly.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">📐</div>
+            <h4 class="pattern-title">JSON Schema Is the Contract</h4>
+            <p class="pattern-desc">Use JSON Schema to describe the parameter shape -- required fields, types, examples. This is the format contract between Claude and your program.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">↩️</div>
+            <h4 class="pattern-title">tool_result Must Be Fed Back</h4>
+            <p class="pattern-desc">After a tool executes and returns a result, you must insert it back into the conversation history as a tool_result role and call Claude again -- otherwise Claude never learns the tool's result.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🛑</div>
+            <h4 class="pattern-title">max_iterations Is Your Lifeline</h4>
+            <p class="pattern-desc">The agent loop can run away -- add an upper limit. Also detect "is it repeatedly calling the same tool" -- this is often a sign of an infinite loop.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Tool definition translation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Step 1: Write a "Tool Specification"</h2>
+        <p>From <code>tool_use/calculator_tool.ipynb</code> -- equip Claude with a simple calculator:</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE · Python</span>
+<pre><code><span class="code-line">tools = [</span>
+<span class="code-line">    {</span>
+<span class="code-line">        <span class="code-property">"name"</span>: <span class="code-string">"calculator"</span>,</span>
+<span class="code-line">        <span class="code-property">"description"</span>: <span class="code-string">"A simple calculator that performs basic arithmetic operations."</span>,</span>
+<span class="code-line">        <span class="code-property">"input_schema"</span>: {</span>
+<span class="code-line">            <span class="code-property">"type"</span>: <span class="code-string">"object"</span>,</span>
+<span class="code-line">            <span class="code-property">"properties"</span>: {</span>
+<span class="code-line">                <span class="code-property">"expression"</span>: {</span>
+<span class="code-line">                    <span class="code-property">"type"</span>: <span class="code-string">"string"</span>,</span>
+<span class="code-line">                    <span class="code-property">"description"</span>: <span class="code-string">"The mathematical expression to evaluate (e.g., '2 + 3 * 4')."</span>,</span>
+<span class="code-line">                }</span>
+<span class="code-line">            },</span>
+<span class="code-line">            <span class="code-property">"required"</span>: [<span class="code-string">"expression"</span>],</span>
+<span class="code-line">        },</span>
+<span class="code-line">    }</span>
+<span class="code-line">]</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">Line-by-Line Explanation</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>Line 1:</strong> tools is a <em>list</em> -- meaning you can give Claude multiple cards at once.</p>
+              <p class="tl"><strong>"name": "calculator"</strong> -- the tool's "card name." Claude uses this name to invoke it.</p>
+              <p class="tl"><strong>"description" (critical):</strong> This is the <strong>most important line</strong> in tool use -- Claude reads this sentence to decide "should I use this tool." If the spec is unclear, Claude will use it wrong or skip it entirely. Write it as if instructing a smart but context-free intern.</p>
+              <p class="tl"><strong>"input_schema"</strong> -- uses <span class="term" data-definition="A standard for describing the 'shape' of data in JSON. For example, this field must be a string, that field is a number, and another is required. The LLM reads the JSON Schema to know 'what parameters I should fill in.' It's the contract between Claude and your program.">JSON Schema</span> to describe the parameter shape: it needs a string called expression.</p>
+              <p class="tl"><strong>"required": ["expression"]</strong> -- forces Claude to fill in this parameter, no skipping allowed.</p>
+              <p class="tl"><strong>One takeaway for vibe coders:</strong> a tool's description isn't written for programmers -- it's written for Claude.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Agentic loop with flow animation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Step 2: Run the Agentic Loop</h2>
+        <p>When Claude decides to use a tool, it <em>doesn't give a direct answer</em> -- instead it pauses and outputs a "work order," waiting for you to execute it. Then you feed the result back, and it continues. Watch this 7-step animation of the loop:</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"User asks: What is 17 times 23?"},
+          {"highlight":"flow-actor-2","label":"Claude receives the question + tool specifications","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-3","label":"Claude doesn't answer directly -- outputs a work order: calculator(expression=\"17*23\")","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-4","label":"Your program calls the real calculator function per the work order","packet":true,"from":"actor-3","to":"actor-4"},
+          {"highlight":"flow-actor-3","label":"Calculator returns \"391\" to your program","packet":true,"from":"actor-4","to":"actor-3"},
+          {"highlight":"flow-actor-2","label":"Your program inserts the result as tool_result into the conversation history","packet":true,"from":"actor-3","to":"actor-2"},
+          {"highlight":"flow-actor-1","label":"Claude sees the result, gives the final answer: 17 x 23 = 391","packet":true,"from":"actor-2","to":"actor-1"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">👤</div>
+              <span>User</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">🤖</div>
+              <span>Claude</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">⚙️</div>
+              <span>Your Program</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">🧮</div>
+              <span>Calculator</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">Click "Next Step" to begin</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">Next Step</button>
+            <button class="btn flow-reset-btn">Reset</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE · Python (simplified agentic loop)</span>
+<pre><code><span class="code-line">message = client.messages.<span class="code-function">create</span>(</span>
+<span class="code-line">    model=MODEL_NAME,</span>
+<span class="code-line">    messages=[{<span class="code-string">"role"</span>: <span class="code-string">"user"</span>, <span class="code-string">"content"</span>: user_message}],</span>
+<span class="code-line">    tools=tools,</span>
+<span class="code-line">)</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-keyword">if</span> message.stop_reason == <span class="code-string">"tool_use"</span>:</span>
+<span class="code-line">    tool_use = <span class="code-function">next</span>(b <span class="code-keyword">for</span> b <span class="code-keyword">in</span> message.content <span class="code-keyword">if</span> b.type == <span class="code-string">"tool_use"</span>)</span>
+<span class="code-line">    tool_result = <span class="code-function">process_tool_call</span>(tool_use.name, tool_use.input)</span>
+<span class="code-line"></span>
+<span class="code-line">    response = client.messages.<span class="code-function">create</span>(</span>
+<span class="code-line">        model=MODEL_NAME,</span>
+<span class="code-line">        messages=[</span>
+<span class="code-line">            {<span class="code-string">"role"</span>: <span class="code-string">"user"</span>, <span class="code-string">"content"</span>: user_message},</span>
+<span class="code-line">            {<span class="code-string">"role"</span>: <span class="code-string">"assistant"</span>, <span class="code-string">"content"</span>: message.content},</span>
+<span class="code-line">            {<span class="code-string">"role"</span>: <span class="code-string">"user"</span>, <span class="code-string">"content"</span>: [{</span>
+<span class="code-line">                <span class="code-string">"type"</span>: <span class="code-string">"tool_result"</span>,</span>
+<span class="code-line">                <span class="code-string">"tool_use_id"</span>: tool_use.id,</span>
+<span class="code-line">                <span class="code-string">"content"</span>: tool_result,</span>
+<span class="code-line">            }],</span>
+<span class="code-line">        }],</span>
+<span class="code-line">        tools=tools,</span>
+<span class="code-line">    )</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">Line-by-Line Explanation</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>Lines 1-5:</strong> First call to Claude, passing along the "tool specification list."</p>
+              <p class="tl"><strong>Line 7:</strong> Claude didn't answer directly -- <code>stop_reason == "tool_use"</code> means it wants to use a tool. It pauses and waits for you to execute.</p>
+              <p class="tl"><strong>Line 8:</strong> Extract "the tool-use block" from Claude's response -- get the tool name and parameters.</p>
+              <p class="tl"><strong>Line 9 (the real work):</strong> Your program executes using the tool name and parameters Claude provided -- and gets the result.</p>
+              <p class="tl"><strong>Lines 11-22 (critical):</strong> Second call to Claude -- insert the tool result back into the conversation history using the special <code>tool_result</code> role. This step is key -- you must preserve the full conversation context so Claude knows "the result from the tool I asked for has come back."</p>
+              <p class="tl"><strong>In real scenarios this process may loop multiple times -- until stop_reason != "tool_use", the loop isn't done.</strong></p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Spot the bug -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Spot the Bug: Find the Wrong Line</h2>
+        <p>Below is an <em>incorrect</em> agentic loop. Claude called a tool but the agent never gives a final response -- find the critical bug line:</p>
+
+        <div class="bug-challenge">
+          <div class="bug-code">
+            <div class="bug-line" data-line="1" onclick="checkBugLine(this, false)">
+              <span class="line-num">1</span>
+              <code>message = client.messages.create(model=MODEL, messages=msgs, tools=tools)</code>
+            </div>
+            <div class="bug-line" data-line="2" onclick="checkBugLine(this, false)">
+              <span class="line-num">2</span>
+              <code>if message.stop_reason == "tool_use":</code>
+            </div>
+            <div class="bug-line" data-line="3" onclick="checkBugLine(this, false)">
+              <span class="line-num">3</span>
+              <code>&nbsp;&nbsp;&nbsp;&nbsp;tool_use = next(b for b in message.content if b.type == "tool_use")</code>
+            </div>
+            <div class="bug-line" data-line="4" onclick="checkBugLine(this, false)">
+              <span class="line-num">4</span>
+              <code>&nbsp;&nbsp;&nbsp;&nbsp;tool_result = process_tool_call(tool_use.name, tool_use.input)</code>
+            </div>
+            <div class="bug-line bug-target" data-line="5" onclick="checkBugLine(this, true)">
+              <span class="line-num">5</span>
+              <code>&nbsp;&nbsp;&nbsp;&nbsp;print(tool_result)&nbsp;&nbsp;# Got the result, just print it and we're done</code>
+            </div>
+            <div class="bug-line" data-line="6" onclick="checkBugLine(this, false)">
+              <span class="line-num">6</span>
+              <code>&nbsp;&nbsp;&nbsp;&nbsp;return tool_result</code>
+            </div>
+          </div>
+          <div class="bug-feedback" id="bug-feedback"></div>
+        </div>
+
+        <div class="callout callout-warning" style="margin-top: var(--space-8)">
+          <div class="callout-icon">🐛</div>
+          <div class="callout-content">
+            <strong class="callout-title">This is the most common root cause of bugs when vibe coders use Cursor / Claude Code</strong>
+            <p>"I told the AI to call a tool, it seems to have called it, but the final response still doesn't use the tool's result" -- 99% of the time it's this bug: missing the second <code>messages.create</code> that feeds the <code>tool_result</code> back to Claude. <strong>Printing the tool result is not the answer -- you must insert the result back into the conversation history and call Claude again to get a final response.</strong></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Quiz: Debugging Agents in Real Scenarios</h2>
+
+        <div class="quiz-container" id="quiz-module4">
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Correct! The description is the only basis Claude uses to decide 'whether to use it / when to use it.' If you write 'sends an email' without explaining 'what scenarios call for it, how to fill in parameters, whether there are side effects,' Claude will often skip it and make up content instead. The fix: write the description so clearly that a 'smart but context-free intern' could understand it."
+               data-explanation-wrong="Think about how Claude decides 'which tool to use' -- it doesn't look at the tool's code implementation, it looks at the description line.">
+            <h3 class="quiz-question">Q1. You gave Claude a send_email tool, but it never uses it -- instead it often makes up email content on its own. What's the most likely cause?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>The JSON Schema is wrong -- parameter types don't match.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>The tool's description is too vague -- Claude doesn't know when to use it.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>The model version is too old -- you need to switch to the latest Sonnet.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="Correct! Two things you must do: 1) Add a maximum iteration count (usually 10-15) as a hard brake; 2) Detect 'repeatedly calling the same tool' -- this often means Claude got the result but didn't digest it properly and fell into a loop. Just making the model smarter doesn't fix the root cause."
+               data-explanation-wrong="Think again: your agent ran 30 times without finishing -- this is a mechanism problem, not a model intelligence problem. What you need is a <em>mechanism-level</em> brake.">
+            <h3 class="quiz-question">Q2. Your agent has run 30+ tool calls and still hasn't finished -- your bill is through the roof. What two things should you add first?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Switch the model from Haiku to Opus so it gets it right the first time.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Add "please finish quickly" to the prompt.</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Add a max_iterations upper limit + detect repeated tool calls → trigger exit when detected.</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="Correct! After receiving an error result, Claude typically self-corrects -- it might switch tools (e.g., call get_customer_info first to find the correct order number) or ask the user for clarification. This is where tool use is stronger than chains -- the agent can <em>dynamically adjust its strategy</em> based on results, rather than rigidly executing."
+               data-explanation-wrong="Think: after receiving the 'order not found' tool result, Claude has 3 choices -- keep making things up, give up, or self-correct. Which kind of agent is the most useful?">
+            <h3 class="quiz-question">Q3. A user asks "What's the status of order ABC123?" Claude calls get_order_details(order_id="ABC123"), but ABC123 doesn't exist. What's the most reasonable action Claude would take next?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Continue making up a plausible-looking order detail for the user.</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Throw an error and exit, telling the user "system failure."</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Call another tool to investigate (e.g., use get_customer_info to find all of the user's orders first), or ask the user "Did you maybe mistype the order number?"</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">Try Again</button>
+        </div>
+
+        <div class="callout callout-accent" style="margin-top: var(--space-8)">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Aha! The model talks, you act</strong>
+            <p>Tool use is the only way Claude can <strong>truly change the outside world</strong>. Writing text is not the same as sending an email -- only when you actually call email-sending code inside process_tool_call does the email get sent. <strong>You're the one who acts -- Claude just talks.</strong> Once you understand this, you understand why the core of every agent framework is the "tool loop," not the "model itself."</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

@@ -1,0 +1,194 @@
+<section class="module" id="module-1" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">What Is This?</h1>
+      <p class="module-subtitle">A plugin system that lets AI handle tasks for financial professionals</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Hook — What problem does this solve? -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Imagine This Scenario</h2>
+        <p>You are an analyst at an investment bank. At 9 AM you receive a task: perform a <span class="term" data-definition="Comparable company analysis (Comps) is the most fundamental valuation method in investment banking — find several similar public companies, compare their financial metrics and valuation multiples, and use them to price the target company. It is like checking recent sale prices of similar apartments in the same neighborhood before buying a home.">comparable company analysis</span> on a company, due by 2 PM.</p>
+        <p>Traditional process: Open the Bloomberg terminal → manually copy data → build an Excel spreadsheet → calculate multiples → make a PPT → double-check everything. At least 4 hours.</p>
+        <p>With this project, you just type <code>/comps target company name</code>, and the AI handles the entire process automatically.</p>
+      </section>
+
+      <!-- Screen 2: What is this project? -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Anthropic Financial Services Plugins</h2>
+        <p>This is a collection of <span class="term" data-definition="A plugin is an installable extension pack that adds new capabilities to an AI assistant. Just like installing apps on a phone — install a translation plugin and the AI can translate; install a finance plugin and the AI can build valuation models.">plugins</span> officially open-sourced by Anthropic, designed specifically for the financial industry. It enables Claude to work like a financial analyst — building valuation models, writing research reports, conducting <span class="term" data-definition="Due diligence (DD) is a comprehensive pre-investment review, similar to a home inspection before buying a house: checking financials, legal matters, the team, and technology to confirm there are no hidden risks.">due diligence</span>, reconciling accounts, and more.</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🏦</div>
+            <h4 class="pattern-title">Investment Banking</h4>
+            <p class="pattern-desc">Pitch decks, CIMs, M&A models, buyer lists</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">📊</div>
+            <h4 class="pattern-title">Equity Research</h4>
+            <p class="pattern-desc">Earnings analysis, research report writing, model updates</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🔍</div>
+            <h4 class="pattern-title">Private Equity</h4>
+            <p class="pattern-desc">Deal screening, due diligence checklists, IC memos</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">💰</div>
+            <h4 class="pattern-title">Wealth Management</h4>
+            <p class="pattern-desc">Client reporting, portfolio rebalancing, tax-loss harvesting</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Two deployment paths -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Two Ways to Use It, One Codebase</h2>
+        <p>The cleverest design in this project: everything is <strong>written once, usable both ways</strong>.</p>
+
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">A</div>
+            <p><strong>Cowork Plugin</strong><br/>Install directly in the Claude chat interface, as easy as adding a browser extension</p>
+          </div>
+          <div class="flow-arrow">⇔</div>
+          <div class="flow-step">
+            <div class="flow-step-num">B</div>
+            <p><strong><span class="term" data-definition="A Managed Agent is a deployment method provided by Anthropic: the AI does not run in the chat interface but executes tasks automatically in the background, like an intern who does not need supervision.">Managed Agent</span></strong><br/>Deploy via API to an enterprise backend, ideal for large-scale automation</p>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Key Design Philosophy</strong>
+            <p>The same <span class="term" data-definition="A system prompt is a role description you give to an AI, telling it 'who you are, how to work, and what rules to follow.' It is like an employee handbook given to a new hire.">system prompt</span>, the same set of skill files — whether for personal use or enterprise deployment, the AI behaves identically. This 'one source, two packages' pattern is known in software engineering as 'Single Source of Truth.'</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Code ↔ English — The README structure -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Check Out the Directory Structure</h2>
+        <p>The file organization of the entire project looks like this:</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">Directory Structure</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">plugins/</span></span>
+<span class="code-line">  <span class="code-function">agent-plugins/</span>    <span class="code-comment"># 10 named Agents</span></span>
+<span class="code-line">  <span class="code-function">vertical-plugins/</span> <span class="code-comment"># 7 industry skill packs</span></span>
+<span class="code-line">  <span class="code-function">partner-built/</span>    <span class="code-comment"># Partner plugins (LSEG, S&amp;P)</span></span>
+<span class="code-line"><span class="code-keyword">managed-agent-cookbooks/</span>  <span class="code-comment"># API deployment templates</span></span>
+<span class="code-line"><span class="code-keyword">scripts/</span>          <span class="code-comment"># Deployment &amp; validation scripts</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">Plain English</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>plugins/</strong> — All installable plugins live here</p>
+              <p class="tl"><strong>agent-plugins/</strong> — Complete 'AI employees,' each responsible for one business line</p>
+              <p class="tl"><strong>vertical-plugins/</strong> — 'Skill manuals' broken down by industry</p>
+              <p class="tl"><strong>partner-built/</strong> — Integration plugins written by data providers themselves</p>
+              <p class="tl"><strong>cookbooks/</strong> — Configuration files for deploying Agents to enterprise backends</p>
+              <p class="tl"><strong>scripts/</strong> — Automated deployment and code quality check tools</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: The agents table as visual cards -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">10 'AI Employees,' Each Running One Business Line</h2>
+        <p>Each Agent is like a specially trained financial analyst, responsible for only one type of workflow:</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <h4 class="pattern-title">🎯 Pitch Agent</h4>
+            <p class="pattern-desc">Comps → LBO → branded pitch deck, end to end</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <h4 class="pattern-title">📈 Market Researcher</h4>
+            <p class="pattern-desc">Industry overviews, competitive landscapes, peer comparisons</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <h4 class="pattern-title">📋 GL Reconciler</h4>
+            <p class="pattern-desc">Automated reconciliation, finding discrepancies, root cause analysis</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-4)">
+            <h4 class="pattern-title">🔍 KYC Screener</h4>
+            <p class="pattern-desc">Parse onboarding documents, run rule engines, flag red flags</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-5)">
+            <h4 class="pattern-title">📉 Earnings Reviewer</h4>
+            <p class="pattern-desc">Earnings reports + call transcripts → model updates → research draft</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <h4 class="pattern-title">🗓️ Meeting Prep</h4>
+            <p class="pattern-desc">Briefing package before client meetings</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 6: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Test Your Understanding</h2>
+
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Correct! The core design of this project is 'one set of skill files, two deployment methods' — individual users use Cowork, enterprises use the Managed Agent API."
+               data-explanation-wrong="Think again — this project is not a SaaS platform, nor a Python library. It is a set of installable AI plugins with two usage modes.">
+            <h3 class="quiz-question">If you want to use these financial AI Agents at scale within your company, which approach would you choose?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Manually install each plugin in the Claude web interface</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Deploy via the Managed Agent API to an enterprise backend</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Copy the code to company servers and run it manually</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="Exactly! These Agents are all 'analytical assistants' — they generate drafts and models for human review. They do not make investment decisions or execute trades on their own. This is a fundamental safety principle for using AI in the financial industry."
+               data-explanation-wrong="Note the disclaimer in the README: these Agents do not make investment decisions, do not execute trades, and do not post to ledgers. They only generate drafts for human review and sign-off.">
+            <h3 class="quiz-question">What can the output of these AI Agents be directly used for?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Send investment recommendations directly to clients</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Automatically execute trading orders</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Generate analytical drafts for human review</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
